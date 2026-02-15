@@ -1,1 +1,141 @@
+# AllN1 Psych — Cursor Rules
+# This file is read by Cursor before every prompt. It is the source of truth.
 
+## WHAT YOU ARE BUILDING
+AllN1 Psych — an Emotional Intelligence Operating System. A mobile app that teaches humans about their emotions, listens without judgment via AI, and quietly connects people who love each other through a "temperature" system.
+
+This is NOT a therapy app. NOT a meditation app. NOT a mood tracker. It is a personal life companion and the life manual nobody ever gave you. It helps people who will NEVER do therapy — which is most humans.
+
+## TECH STACK (Do not deviate)
+- Expo SDK 54 + React Native + TypeScript
+- Expo Router (file-based navigation)
+- Supabase (Postgres + Auth + Realtime + Storage)
+- React Query (@tanstack/react-query) for data fetching
+- Zustand for local state management
+- Expo AV for voice recording
+- Voice transcription via Whisper API or Deepgram
+- AI conversations via OpenAI or Claude API
+- Expo Notifications for push notifications
+
+## APP STRUCTURE (5 Bottom Tabs)
+1. **Home** — Dashboard: current mood, temperature gauge, daily intention, quick action buttons ("Talk to me", "Check in", "Practice"), recent conversation summaries, circle status
+2. **Talk** — Voice-first AI companion: large centered microphone button, conversation bubbles below, text input toggle at bottom. This is the CORE screen.
+3. **Learn** — Emotional education modules: age-adaptive content, progress tracking, daily lesson queue, "recommended for you" based on conversations
+4. **Circle** — Temperature system: your circle members with their temperatures, your own temperature (editable), nudge history, invite/manage members, relationship settings
+5. **Me** — Profile & journal: private journal entries, weekly/monthly AI insights, settings, role play history, achievements, crisis resources always accessible
+
+## FILE STRUCTURE
+```
+app/
+  (tabs)/
+    index.tsx          # Home dashboard
+    talk.tsx           # AI companion (voice-first)
+    learn.tsx          # Education modules
+    circle.tsx         # Temperature & connections
+    me.tsx             # Profile, journal, settings
+    _layout.tsx        # Tab navigator
+  (modals)/
+    onboarding.tsx     # First-time setup flow
+    role-play.tsx      # Role play session
+    mood-checkin.tsx   # Quick mood popup
+    crisis.tsx         # Crisis resources
+    invite-circle.tsx  # Circle invitation flow
+    _layout.tsx
+  _layout.tsx          # Root layout
+src/
+  components/
+    ui/                # Reusable UI (buttons, cards, inputs)
+    talk/              # Talk screen components (mic button, bubbles, waveform)
+    circle/            # Temperature gauge, circle cards, nudge cards
+    learn/             # Lesson cards, module cards, progress bars
+    home/              # Dashboard cards, quick actions
+  services/
+    ai.ts              # AI conversation service (OpenAI/Claude API)
+    voice.ts           # Voice recording, transcription, TTS
+    temperature.ts     # Temperature calculation logic
+    notifications.ts   # Push notification service
+  hooks/
+    useConversation.ts
+    useMoodCheckin.ts
+    useTemperature.ts
+    useCircle.ts
+    useEducation.ts
+    useVoice.ts
+  providers/
+    AuthProvider.tsx
+    QueryProvider.tsx
+    ThemeProvider.tsx
+  lib/
+    supabase.ts        # Supabase client
+    constants.ts       # App config, colors, theme
+    types.ts           # TypeScript types
+docs/
+  supabase-schema.sql  # Database schema
+  temperature-algorithm.md
+```
+
+## DESIGN SYSTEM
+- **Primary Background:** Deep Dark #0F0B1E (feels safe, like nighttime)
+- **Surface:** #1A1528 (cards, inputs)
+- **Accent:** Calm Lavender #7C4DFF
+- **Accent Light:** #B388FF
+- **Success/Green Temp:** #66BB6A
+- **Warning/Yellow Temp:** #FDD835
+- **Orange Temp:** #FFA726
+- **Red/Crisis Temp:** #EF5350
+- **Text Primary:** #F5F5F7
+- **Text Secondary:** #9E9E9E
+- **Typography:** System fonts (San Francisco on iOS, Roboto on Android) for maximum readability and trust. Do NOT use fancy display fonts — this app is about clarity and safety.
+- **Border Radius:** 16px for cards, 24px for buttons, 50% for avatars
+- **Spacing:** 8px base unit
+- **Tone:** Warm, safe, non-clinical. This should feel like a cozy room, not a doctor's office.
+
+## VOICE-FIRST PRINCIPLES
+- The Talk screen mic button should be LARGE and centered — it's the primary interaction
+- When recording, show a waveform animation
+- AI responds with text bubbles AND voice (TTS)
+- Text input is always available as a toggle, never hidden
+- Voice is the DEFAULT, text is the backup
+
+## AI COMPANION BEHAVIOR
+- Adapts communication style to user's age and developmental level
+- Remembers all past conversations (send relevant history as context)
+- Validates emotions first, advises second
+- Asks permission before giving advice: "Want my thoughts, or do you just need me to listen?"
+- Uses the user's love language for encouragement
+- NEVER judges, minimizes, or dismisses
+- References past conversations: "Last time you felt this way was..."
+- For kids (8-12): simple language, metaphors, stories
+- For teens (13-17): respectful, not condescending, acknowledges their world
+- For adults (18+): deeper analysis, self-reflection tools
+- For older adults (60+): companionship-focused, warm
+
+## TEMPERATURE SYSTEM
+- Calculated from: mood check-ins, conversation sentiment, usage patterns, user-reported events
+- Shared as simple color: Green (doing well), Yellow (could use love), Orange (hard time), Red (struggling)
+- Circle members get gentle nudges: "Your [relationship] could use a check-in" — NEVER specifics
+- User ALWAYS controls sharing (opt-in, can pause anytime without notifying)
+- Works for ANY relationship: parent-child, sibling, friend, spouse, mentor, adult child-aging parent
+
+## SAFETY PROTOCOL
+- Monitor for crisis keywords/patterns
+- If detected, gently ask: "Are you having thoughts of hurting yourself?"
+- Provide 988 Lifeline, Crisis Text Line (741741), 911
+- NEVER diagnose, prescribe, or replace professional help
+- Always include disclaimer: "I'm an AI companion, not a licensed therapist"
+
+## CRITICAL RULES
+- NEVER use business/corporate language or components
+- NEVER make it feel clinical or medical
+- ALWAYS prioritize privacy — conversations are sacred
+- ALWAYS make voice the primary interaction
+- ALWAYS adapt to user's age/developmental level
+- Onboarding must feel like a genuine conversation, not a form
+- Free tier must be genuinely useful (not a crippled teaser)
+- This app saves lives. Build it like it matters. Because it does.
+
+## BRAND
+- App Name: AllN1 Psych
+- Part of AllN1 Network LLC (Houston, TX)
+- Parent site: alln1network.com
+- Tagline: "You Are Not Alone."
