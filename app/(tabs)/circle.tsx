@@ -45,6 +45,7 @@ export default function CircleScreen() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedNudgeId, setExpandedNudgeId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const onRefresh = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
@@ -78,41 +79,76 @@ export default function CircleScreen() {
   };
 
   const handleSendText = (m: CircleMember) => {
-    if (!m.contactMethod) {
-      Alert.alert(
-        `Add ${m.name}'s number`,
-        `Add ${m.name}'s phone number to send a text. You can update their contact in your circle settings.`,
-        [{ text: 'OK' }]
+    if (Platform.OS === 'ios') {
+      Alert.prompt(
+        `Send text to ${m.name}`,
+        'Enter their phone number',
+        (phone) => {
+          if (phone?.trim()) Linking.openURL(`sms:${phone.trim().replace(/\D/g, '')}`);
+        }
       );
-      return;
-    }
-    if (m.contactMethod.includes('@')) {
-      Linking.openURL(`mailto:${m.contactMethod}`);
     } else {
-      Linking.openURL(`sms:${m.contactMethod.replace(/\D/g, '')}`);
+      if (m.contactMethod && !m.contactMethod.includes('@')) {
+        Linking.openURL(`sms:${m.contactMethod.replace(/\D/g, '')}`);
+      } else {
+        Alert.alert(
+          `Send text to ${m.name}`,
+          'Enter their phone number in your circle, or open your messages app.',
+          [
+            { text: 'Open messages', onPress: () => Linking.openURL('sms:') },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+      }
     }
   };
 
   const handleCall = (m: CircleMember) => {
-    if (!m.contactMethod) {
-      Alert.alert(
-        `Add ${m.name}'s number`,
-        `Add ${m.name}'s phone number to call them. You can update their contact in your circle settings.`,
-        [{ text: 'OK' }]
+    if (Platform.OS === 'ios') {
+      Alert.prompt(
+        `Call ${m.name}`,
+        'Enter their phone number',
+        (phone) => {
+          if (phone?.trim()) Linking.openURL(`tel:${phone.trim().replace(/\D/g, '')}`);
+        }
       );
-      return;
+    } else {
+      if (m.contactMethod && !m.contactMethod.includes('@')) {
+        Linking.openURL(`tel:${m.contactMethod.replace(/\D/g, '')}`);
+      } else {
+        Alert.alert(
+          `Call ${m.name}`,
+          'Add their phone number in your circle, or open your dialer.',
+          [
+            { text: 'Open dialer', onPress: () => Linking.openURL('tel:') },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+      }
     }
-    Linking.openURL(`tel:${m.contactMethod.replace(/\D/g, '')}`);
+  };
+
+  const handleReachedOut = (m: CircleMember) => {
+    const n = nudges.find((x) => x.memberName === m.name);
+    if (n) markNudgeActedOn(n.id);
+    setToast('Reached out recorded');
+    setTimeout(() => setToast(null), 2000);
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}
-    >
-      {/* Demo badge – dev only */}
+    <>
+      {toast ? (
+        <View style={[styles.toast, { top: insets.top + 10 }]} pointerEvents="none">
+          <Text style={styles.toastText}>{toast}</Text>
+        </View>
+      ) : null}
+      <ScrollView
+        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}
+      >
+        {/* Demo badge – dev only */}
       {__DEV__ && isDemoData && (
         <View style={styles.demoBadge}>
           <Text style={styles.demoBadgeText}>Demo data</Text>
@@ -195,13 +231,7 @@ export default function CircleScreen() {
                           <Ionicons name="call-outline" size={18} color={COLORS.accent} />
                           <Text style={styles.actionBtnText}>Call</Text>
                         </Pressable>
-                        <Pressable
-                          style={styles.actionBtn}
-                          onPress={() => {
-                            const n = nudges.find((x) => x.memberName === m.name);
-                            if (n) markNudgeActedOn(n.id);
-                          }}
-                        >
+                        <Pressable style={styles.actionBtn} onPress={() => handleReachedOut(m)}>
                           <Ionicons name="checkmark-circle-outline" size={18} color={COLORS.accent} />
                           <Text style={styles.actionBtnText}>I reached out</Text>
                         </Pressable>
@@ -264,7 +294,11 @@ export default function CircleScreen() {
                           </Pressable>
                           <Pressable
                             style={styles.actionBtn}
-                            onPress={() => markNudgeActedOn(n.id)}
+                            onPress={() => {
+                              markNudgeActedOn(n.id);
+                              setToast('Reached out recorded');
+                              setTimeout(() => setToast(null), 2000);
+                            }}
                           >
                             <Text style={styles.actionBtnText}>I reached out</Text>
                           </Pressable>
@@ -279,10 +313,26 @@ export default function CircleScreen() {
         </View>
       )}
     </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
+  toast: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    zIndex: 999,
+    backgroundColor: COLORS.surface,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: BORDER_RADIUS.input,
+    alignItems: 'center',
+  },
+  toastText: {
+    fontSize: 14,
+    color: COLORS.text,
+  },
   container: { flex: 1, backgroundColor: COLORS.background },
   content: { paddingHorizontal: 24, paddingBottom: 40 },
   demoBadge: {

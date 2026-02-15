@@ -341,6 +341,8 @@ export default function RolePlayScreen() {
 
   if (currentSession?.phase === 'practice') {
     const session = currentSession;
+    const userMessageCount = session.messages.filter((m) => m.role === 'user').length;
+    const canEndSession = userMessageCount >= 2;
     const summary = session.scenario.length > 40 ? session.scenario.slice(0, 37) + '...' : session.scenario;
     return (
       <KeyboardAvoidingView
@@ -352,8 +354,17 @@ export default function RolePlayScreen() {
           <View style={styles.headerLeft}>
             <Text style={styles.headerTitle} numberOfLines={1}>Practicing: {summary}</Text>
           </View>
-          <Pressable onPress={handleEndSession} style={styles.endButton}>
-            <Text style={styles.endButtonText}>End Session</Text>
+          <Pressable
+            onPress={() => {
+              if (!canEndSession) {
+                Alert.alert('Start the conversation first', 'Type or tap the mic to practice.');
+                return;
+              }
+              handleEndSession();
+            }}
+            style={[styles.endButton, !canEndSession && styles.endButtonDisabled]}
+          >
+            <Text style={[styles.endButtonText, !canEndSession && styles.endButtonTextDisabled]}>End Session</Text>
           </Pressable>
         </View>
         <ScrollView
@@ -525,10 +536,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
   },
+  endButtonDisabled: {
+    opacity: 0.5,
+  },
   endButtonText: {
     fontSize: 15,
     color: ROLE_PLAY_ACCENT,
     fontWeight: '600',
+  },
+  endButtonTextDisabled: {
+    color: COLORS.textMuted,
   },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingVertical: 16, paddingBottom: 24 },

@@ -346,9 +346,14 @@ export default function MeScreen() {
                       <Pressable
                         style={styles.practiceAgainButton}
                         onPress={() => {
-                          router.push(
-                            `/(modals)/role-play?scenario=${encodeURIComponent(session.scenario)}&character=${encodeURIComponent(session.character)}&difficulty=${encodeURIComponent(session.difficulty)}`
-                          );
+                          router.push({
+                            pathname: '/(modals)/role-play',
+                            params: {
+                              scenario: session.scenario,
+                              character: session.character,
+                              difficulty: session.difficulty,
+                            },
+                          });
                         }}
                       >
                         <Text style={styles.practiceAgainButtonText}>Practice Again</Text>
