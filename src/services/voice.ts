@@ -1,15 +1,19 @@
 /**
  * Voice recording and transcription.
  * Uses expo-av for recording, OpenAI Whisper API for transcription.
+ * Recording format: HIGH_QUALITY preset outputs m4a (Whisper-compatible).
  */
 
 import { Audio } from 'expo-av';
+import { getOpenAIKey } from './ai';
 
 let recording: Audio.Recording | null = null;
 
 export async function startRecording(): Promise<void> {
+  console.log('[Voice] startRecording: before');
   try {
     const { status } = await Audio.requestPermissionsAsync();
+    console.log('[Voice] requestPermissionsAsync result:', status);
     if (status !== 'granted') {
       throw new Error('Microphone permission not granted');
     }
@@ -26,13 +30,16 @@ export async function startRecording(): Promise<void> {
       Audio.RecordingOptionsPresets.HIGH_QUALITY
     );
     recording = newRecording;
+    console.log('[Voice] startRecording: after (recording started)');
   } catch (err) {
     recording = null;
+    console.log('[Voice] startRecording: error', err);
     throw err;
   }
 }
 
 export async function stopRecording(): Promise<string> {
+  console.log('[Voice] stopRecording: before');
   if (!recording) {
     throw new Error('No active recording');
   }
@@ -44,16 +51,18 @@ export async function stopRecording(): Promise<string> {
   if (!uri) {
     throw new Error('Failed to get recording URI');
   }
+  console.log('[Voice] stopRecording: after, audio URI:', uri);
   return uri;
 }
 
 export async function transcribeAudio(audioUri: string): Promise<string> {
-  const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+  console.log('[Voice] transcribeAudio: before, uri:', audioUri);
+  const apiKey = await getOpenAIKey();
   if (!apiKey?.trim()) {
     throw new Error('OpenAI API key not configured');
   }
 
-  // React Native FormData: append file via { uri, type, name }
+  // React Native FormData: append file via { uri, type, name }. HIGH_QUALITY preset = m4a.
   const formData = new FormData();
   formData.append('file', {
     uri: audioUri,
@@ -66,20 +75,23 @@ export async function transcribeAudio(audioUri: string): Promise<string> {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
-      // Let browser set Content-Type for FormData with file
     },
     body: formData,
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err || `Whisper API error: ${res.status}`);
+    const body = await res.text();
+    console.error('[Voice] Whisper API error:', res.status, body);
+    throw new Error(body || `Whisper API error: ${res.status}`);
   }
 
   const data = (await res.json()) as { text?: string };
-  return (data.text ?? '').trim();
+  const text = (data.text ?? '').trim();
+  console.log('[Voice] transcribeAudio: after, text length:', text.length);
+  return text;
 }
 
 export function hasVoiceSupport(): boolean {
-  return Boolean(process.env.EXPO_PUBLIC_OPENAI_API_KEY?.trim());
+  // UI uses hasOpenAIKey() for API key check; this is a quick env check for capability.
+  return true;
 }

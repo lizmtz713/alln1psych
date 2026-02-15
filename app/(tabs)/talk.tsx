@@ -9,7 +9,9 @@ import {
   Animated,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
+import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
@@ -161,50 +163,79 @@ export default function TalkScreen() {
     }
   };
 
-  const handlePressIn = async () => {
+  const handleMicPress = async () => {
     if (!hasApiKey) return;
     if (!Voice.hasVoiceSupport()) return;
+
+    if (isRecording) {
+      // Tap to stop: stop recording, then transcribe and send
+      console.log('[Talk] before stopRecording');
+      try {
+        const uri = await Voice.stopRecording();
+        console.log('[Talk] after stopRecording, uri:', uri);
+        setRecording(false);
+        setProcessing(true);
+        console.log('[Talk] before transcribeAudio');
+        const text = await Voice.transcribeAudio(uri);
+        console.log('[Talk] after transcribeAudio');
+        setProcessing(false);
+        if (!text.trim()) {
+          addMessage({
+            role: 'assistant',
+            content: "I didn't catch that. Want to try again or type it out?",
+            isVoice: false,
+          });
+          return;
+        }
+        addMessage({ role: 'user', content: text, isVoice: true });
+        setAiTyping(true);
+        const apiMessages = messages
+          .concat([{ id: '', role: 'user' as const, content: text, timestamp: new Date(), isVoice: true }])
+          .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+        const response = await sendMessage(apiMessages, buildUserContext());
+        addMessage({ role: 'assistant', content: response, isVoice: false });
+      } catch (e) {
+        console.log('[Talk] voice error (stop/transcribe/send):', e);
+        setRecording(false);
+        setProcessing(false);
+        addMessage({
+          role: 'assistant',
+          content: "Voice didn't work this time. Try typing, or check that your API key is set.",
+          isVoice: false,
+        });
+      } finally {
+        setAiTyping(false);
+      }
+      return;
+    }
+
+    // Tap to start: request permission first, then start recording
+    console.log('[Talk] before requestPermissionsAsync');
+    const { status } = await Audio.requestPermissionsAsync();
+    console.log('[Talk] requestPermissionsAsync result:', status);
+    if (status !== 'granted') {
+      Alert.alert(
+        'Microphone access needed',
+        'Go to Settings > AllN1 Psych to enable it.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    console.log('[Talk] before startRecording');
     try {
       setRecording(true);
       await Voice.startRecording();
-    } catch {
+      console.log('[Talk] after startRecording');
+    } catch (e) {
+      console.log('[Talk] startRecording error:', e);
       setRecording(false);
-    }
-  };
-
-  const handlePressOut = async () => {
-    if (!isRecording) return;
-    try {
-      const uri = await Voice.stopRecording();
-      setRecording(false);
-      setProcessing(true);
-      const text = await Voice.transcribeAudio(uri);
-      setProcessing(false);
-      if (!text.trim()) {
-        addMessage({
-          role: 'assistant',
-          content: "I didn't catch that. Want to try again or type it out?",
-          isVoice: false,
-        });
-        return;
+      if (e instanceof Error && e.message === 'Microphone permission not granted') {
+        Alert.alert(
+          'Microphone access needed',
+          'Go to Settings > AllN1 Psych to enable it.',
+          [{ text: 'OK' }]
+        );
       }
-      addMessage({ role: 'user', content: text, isVoice: true });
-      setAiTyping(true);
-      const apiMessages = messages
-        .concat([{ id: '', role: 'user' as const, content: text, timestamp: new Date(), isVoice: true }])
-        .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
-      const response = await sendMessage(apiMessages, buildUserContext());
-      addMessage({ role: 'assistant', content: response, isVoice: false });
-    } catch {
-      setRecording(false);
-      setProcessing(false);
-      addMessage({
-        role: 'assistant',
-        content: "Voice didn't work this time. Try typing, or check that your API key is set.",
-        isVoice: false,
-      });
-    } finally {
-      setAiTyping(false);
     }
   };
 
@@ -315,8 +346,7 @@ export default function TalkScreen() {
                 ]}
               >
                 <Pressable
-                  onPressIn={handlePressIn}
-                  onPressOut={handlePressOut}
+                  onPress={handleMicPress}
                   style={[
                     styles.micButton,
                     isRecording && styles.micButtonRecording,
@@ -331,10 +361,10 @@ export default function TalkScreen() {
                 </Pressable>
               </Animated.View>
             </View>
-            {isRecording && <Text style={styles.listeningText}>Listening...</Text>}
+            {isRecording && <Text style={styles.listeningText}>Recording... Tap again to stop.</Text>}
             {isProcessing && !isRecording && <Text style={styles.listeningText}>Processing...</Text>}
             {!isRecording && !isProcessing && (
-              <Text style={styles.hint}>Tap to talk. I'm listening.</Text>
+              <Text style={styles.hint}>Tap to start, tap again to stop.</Text>
             )}
             {!hasApiKey && (
               <Text style={styles.voiceFallback}>Voice requires an API key. Type instead for now.</Text>
