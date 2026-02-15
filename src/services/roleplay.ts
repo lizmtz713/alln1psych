@@ -3,6 +3,7 @@
  */
 
 import { getOpenAIKey } from './ai';
+import { useUsageStore } from '../stores/usageStore';
 
 export interface RolePlayMessage {
   role: 'user' | 'assistant';
@@ -103,6 +104,7 @@ export async function sendRolePlayMessage(
   const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
   const content = data.choices?.[0]?.message?.content?.trim();
   if (!content) throw new Error('Empty response from OpenAI');
+  useUsageStore.getState().incrementGPT();
   return content;
 }
 
@@ -142,5 +144,6 @@ export async function getDebrief(
   const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
   const content = data.choices?.[0]?.message?.content?.trim();
   if (!content) throw new Error('Empty debrief from OpenAI');
+  useUsageStore.getState().incrementGPT();
   return content;
 }

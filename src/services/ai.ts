@@ -4,6 +4,7 @@
  */
 
 import * as SecureStore from 'expo-secure-store';
+import { useUsageStore } from '../stores/usageStore';
 
 const API_KEY_STORAGE = 'openai_api_key';
 
@@ -213,6 +214,7 @@ export async function sendMessage(
   const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
   const content = data.choices?.[0]?.message?.content?.trim();
   if (!content) throw new Error('Empty response from OpenAI');
+  useUsageStore.getState().incrementGPT();
   return content;
 }
 
@@ -254,6 +256,7 @@ export async function sendMessageWithSystemPrompt(
   const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
   const content = data.choices?.[0]?.message?.content?.trim();
   if (!content) throw new Error('Empty response from OpenAI');
+  useUsageStore.getState().incrementGPT();
   return content;
 }
 
@@ -331,6 +334,7 @@ Respond ONLY with valid JSON.`;
   if (!parsed.title || !parsed.summary || !Array.isArray(parsed.emotions) || !Array.isArray(parsed.triggers)) {
     throw new Error('Invalid summary shape from OpenAI');
   }
+  useUsageStore.getState().incrementGPT();
   return {
     title: parsed.title,
     summary: parsed.summary,

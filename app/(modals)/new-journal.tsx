@@ -46,7 +46,7 @@ export default function NewJournalScreen() {
         const uri = await Voice.stopRecording();
         setIsRecording(false);
         setIsProcessingVoice(true);
-        const text = await Voice.transcribeAudio(uri);
+        const text = await Voice.transcribeWithWhisper(uri);
         setIsProcessingVoice(false);
         if (text.trim()) setContent((c) => (c ? c + '\n\n' + text.trim() : text.trim()));
       } catch (e) {

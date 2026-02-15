@@ -26,6 +26,7 @@ import { hasOpenAIKey, sendMessage, generateConversationSummary, type UserContex
 import * as Voice from '../../src/services/voice';
 import type { CommunicationPreference } from '../../src/stores/userStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
+import { useUsageStore } from '../../src/stores/usageStore';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { CrisisOverlay } from '../../src/components/CrisisOverlay';
@@ -148,6 +149,9 @@ export default function TalkScreen() {
   const apiKeySavedAt = useSettingsStore((s) => s.apiKeySavedAt);
 
   const [textInput, setTextInput] = useState('');
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const [useWhisperFallback, setUseWhisperFallback] = useState(false);
+  const lastOnDeviceResultRef = useRef('');
   const [hasApiKey, setHasApiKey] = useState(false);
   const [convToast, setConvToast] = useState(false);
   const [showFollowUpBanner, setShowFollowUpBanner] = useState(false);
@@ -370,27 +374,28 @@ export default function TalkScreen() {
     if (!Voice.hasVoiceSupport()) return;
 
     if (isRecording) {
-      // Tap to stop: stop recording, then transcribe and send
-      if (__DEV__) console.log('[Talk] before stopRecording');
-      try {
-        const uri = await Voice.stopRecording();
-        if (__DEV__) console.log('[Talk] after stopRecording, uri:', uri);
-        setRecording(false);
-        setProcessing(true);
-        if (__DEV__) console.log('[Talk] before transcribeAudio');
-        const text = await Voice.transcribeAudio(uri);
-        if (__DEV__) console.log('[Talk] after transcribeAudio');
-        setProcessing(false);
-        if (!text.trim()) {
-          addMessage({
-            role: 'assistant',
-            content: "I didn't catch that. Want to try again or type it out?",
-            isVoice: false,
-          });
-          return;
-        }
-        addMessage({ role: 'user', content: text, isVoice: true });
-        if (CRISIS_PATTERN.test(text)) setShowCrisisOverlay(true);
+      // Tap to stop
+      if (useWhisperFallback) {
+        // Stop recording and transcribe with Whisper
+        if (__DEV__) console.log('[Talk] stopRecording (Whisper fallback)');
+        try {
+          const uri = await Voice.stopRecording();
+          setRecording(false);
+          setUseWhisperFallback(false);
+          setProcessing(true);
+          const text = await Voice.transcribeWithWhisper(uri);
+          useUsageStore.getState().incrementWhisperFallback();
+          setProcessing(false);
+          if (!text.trim()) {
+            addMessage({
+              role: 'assistant',
+              content: "I didn't catch that. Want to try again or type it out?",
+              isVoice: false,
+            });
+            return;
+          }
+          addMessage({ role: 'user', content: text, isVoice: true });
+          if (CRISIS_PATTERN.test(text)) setShowCrisisOverlay(true);
         setAiTyping(true);
         const apiMessages = messages
           .concat([{ id: '', role: 'user' as const, content: text, timestamp: new Date(), isVoice: true }])
@@ -398,24 +403,49 @@ export default function TalkScreen() {
         const response = await sendMessage(apiMessages, buildUserContext());
         addMessage({ role: 'assistant', content: response, isVoice: false });
       } catch (e) {
-        if (__DEV__) console.log('[Talk] voice error (stop/transcribe/send):', e);
-        setRecording(false);
-        setProcessing(false);
-        addMessage({
-          role: 'assistant',
-          content: "Voice didn't work this time. Try typing, or check that your API key is set.",
-          isVoice: false,
-        });
-      } finally {
-        setAiTyping(false);
+        if (__DEV__) console.log('[Talk] Whisper fallback error:', e);
+          setRecording(false);
+          setProcessing(false);
+          setUseWhisperFallback(false);
+          addMessage({
+            role: 'assistant',
+            content: "Voice didn't work this time. Try typing, or check that your API key is set.",
+            isVoice: false,
+          });
+        } finally {
+          setAiTyping(false);
+        }
+        return;
       }
+
+      // Stop on-device listening; final result may arrive in onSpeechResults after stop
+      try {
+        await Voice.stopOnDeviceListening();
+      } catch (_) {}
+      setRecording(false);
+      setLiveTranscript('');
+      const resultRef = lastOnDeviceResultRef;
+      const fallbackText = liveTranscript;
+      setTimeout(() => {
+        const text = (resultRef.current || fallbackText).trim();
+        resultRef.current = '';
+        if (text) {
+          setTextInput(text);
+          setInputMode('text');
+          setTimeout(() => textInputRef.current?.focus(), 200);
+        } else {
+          addMessage({
+            role: 'assistant',
+            content: "I didn't catch that. Want to try again or type it out?",
+            isVoice: false,
+          });
+        }
+      }, 100);
       return;
     }
 
-    // Tap to start: request permission first, then start recording
-    if (__DEV__) console.log('[Talk] before requestPermissionsAsync');
+    // Tap to start: on-device first, fallback to record + Whisper on error
     const { status } = await Audio.requestPermissionsAsync();
-    if (__DEV__) console.log('[Talk] requestPermissionsAsync result:', status);
     if (status !== 'granted') {
       Alert.alert(
         'Microphone access needed',
@@ -424,21 +454,38 @@ export default function TalkScreen() {
       );
       return;
     }
-    if (__DEV__) console.log('[Talk] before startRecording');
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setLiveTranscript('');
+    lastOnDeviceResultRef.current = '';
+    setUseWhisperFallback(false);
+    setRecording(true);
+
     try {
-      setRecording(true);
-      await Voice.startRecording();
-      if (__DEV__) console.log('[Talk] after startRecording');
-    } catch (e) {
-      if (__DEV__) console.log('[Talk] startRecording error:', e);
-      setRecording(false);
-      if (e instanceof Error && e.message === 'Microphone permission not granted') {
-        Alert.alert(
-          'Microphone access needed',
-          'Go to Settings > AllN1 Psych to enable it.',
-          [{ text: 'OK' }]
-        );
+      await Voice.startOnDeviceListening({
+        onPartial: (t) => setLiveTranscript(t),
+        onResult: (t) => { lastOnDeviceResultRef.current = t; },
+        onError: () => {
+          if (__DEV__) console.log('[Talk] On-device failed, falling back to Whisper');
+          Voice.cancelOnDeviceListening();
+          setLiveTranscript('');
+          setUseWhisperFallback(true);
+          Voice.startRecording().catch(() => setRecording(false));
+        },
+      });
+    } catch (_) {
+      if (__DEV__) console.log('[Talk] startOnDeviceListening failed, falling back to Whisper');
+      setUseWhisperFallback(true);
+      try {
+        await Voice.startRecording();
+      } catch (e) {
+        setRecording(false);
+        if (e instanceof Error && e.message === 'Microphone permission not granted') {
+          Alert.alert(
+            'Microphone access needed',
+            'Go to Settings > AllN1 Psych to enable it.',
+            [{ text: 'OK' }]
+          );
+        }
       }
     }
   };
@@ -684,7 +731,18 @@ export default function TalkScreen() {
                 </Pressable>
               </Animated.View>
             </View>
-            {isRecording && <Text style={styles.listeningText}>Recording... Tap again to stop.</Text>}
+            {isRecording && (
+              <Text style={styles.listeningText}>
+                {useWhisperFallback ? 'Recording... Tap again to stop.' : 'Listening... Tap again when done.'}
+              </Text>
+            )}
+            {isRecording && !useWhisperFallback && (
+              <View style={styles.liveTranscriptContainer}>
+                <Text style={styles.liveTranscriptText} numberOfLines={3}>
+                  {liveTranscript || 'Listening...'}
+                </Text>
+              </View>
+            )}
             {isProcessing && !isRecording && <Text style={styles.listeningText}>Processing...</Text>}
             {!isRecording && !isProcessing && (
               <Text style={styles.hint}>Tap to start, tap again to stop.</Text>
@@ -935,6 +993,21 @@ const styles = StyleSheet.create({
     color: COLORS.recording,
     textAlign: 'center',
     marginBottom: 4,
+  },
+  liveTranscriptContainer: {
+    marginHorizontal: 24,
+    marginBottom: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.input,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  liveTranscriptText: {
+    fontSize: 15,
+    color: COLORS.textMuted,
+    lineHeight: 22,
   },
   hint: {
     fontSize: 15,

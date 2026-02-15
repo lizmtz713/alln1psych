@@ -65,6 +65,13 @@ module.exports = {
             'AllN1 Psych needs microphone access so you can talk to your AI companion.',
         },
       ],
+      [
+        '@react-native-voice/voice',
+        {
+          microphonePermission: 'AllN1 Psych uses the microphone so you can speak to your AI companion.',
+          speechRecognitionPermission: 'AllN1 Psych uses speech recognition to transcribe what you say.',
+        },
+      ],
     ],
   },
 };

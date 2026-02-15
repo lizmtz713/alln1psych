@@ -23,6 +23,7 @@ import { useCircleStore } from '../../src/stores/circleStore';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
 import { sendMessageWithSystemPrompt, hasOpenAIKey, type Message } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
+import { useUsageStore } from '../../src/stores/usageStore';
 import { useJournalStore } from '../../src/stores/journalStore';
 import { scheduleCheckInReminder } from '../../src/services/notifications';
 
@@ -128,6 +129,9 @@ export default function HelpSomeoneScreen() {
   const [hasApiKey, setHasApiKey] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const [useWhisperFallback, setUseWhisperFallback] = useState(false);
+  const lastOnDeviceResultRef = useRef('');
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [reminderDays, setReminderDays] = useState<1 | 2 | 3 | null>(null);
 
@@ -224,17 +228,35 @@ export default function HelpSomeoneScreen() {
     if (!hasApiKey) return;
     if (!Voice.hasVoiceSupport()) return;
     if (isRecording) {
-      try {
-        const uri = await Voice.stopRecording();
-        setIsRecording(false);
-        setIsProcessingVoice(true);
-        const text = await Voice.transcribeAudio(uri);
-        setIsProcessingVoice(false);
-        if (text.trim()) sendUserMessage(text);
-      } catch {
-        setIsRecording(false);
-        setIsProcessingVoice(false);
+      if (useWhisperFallback) {
+        try {
+          const uri = await Voice.stopRecording();
+          setIsRecording(false);
+          setUseWhisperFallback(false);
+          setIsProcessingVoice(true);
+          const text = await Voice.transcribeWithWhisper(uri);
+          useUsageStore.getState().incrementWhisperFallback();
+          setIsProcessingVoice(false);
+          if (text.trim()) sendUserMessage(text);
+        } catch {
+          setIsRecording(false);
+          setIsProcessingVoice(false);
+          setUseWhisperFallback(false);
+        }
+        return;
       }
+      try {
+        await Voice.stopOnDeviceListening();
+      } catch (_) {}
+      setIsRecording(false);
+      setLiveTranscript('');
+      const resultRef = lastOnDeviceResultRef;
+      const fallbackText = liveTranscript;
+      setTimeout(() => {
+        const text = (resultRef.current || fallbackText).trim();
+        resultRef.current = '';
+        if (text.trim()) sendUserMessage(text);
+      }, 100);
       return;
     }
     const { status } = await Audio.requestPermissionsAsync();
@@ -243,11 +265,28 @@ export default function HelpSomeoneScreen() {
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setLiveTranscript('');
+    lastOnDeviceResultRef.current = '';
+    setUseWhisperFallback(false);
     setIsRecording(true);
     try {
-      await Voice.startRecording();
-    } catch {
-      setIsRecording(false);
+      await Voice.startOnDeviceListening({
+        onPartial: (t) => setLiveTranscript(t),
+        onResult: (t) => { lastOnDeviceResultRef.current = t; },
+        onError: () => {
+          Voice.cancelOnDeviceListening();
+          setLiveTranscript('');
+          setUseWhisperFallback(true);
+          Voice.startRecording().catch(() => setIsRecording(false));
+        },
+      });
+    } catch (_) {
+      setUseWhisperFallback(true);
+      try {
+        await Voice.startRecording();
+      } catch {
+        setIsRecording(false);
+      }
     }
   };
 
@@ -528,6 +567,22 @@ Keep it practical and warm. No extra preamble.`;
               )}
             </Pressable>
           </View>
+          {(isRecording || isProcessingVoice) && (
+            <Text style={styles.voiceHint}>
+              {isRecording
+                ? useWhisperFallback
+                  ? 'Recording... Tap mic to stop.'
+                  : 'Listening... Tap mic when done.'
+                : 'Processing...'}
+            </Text>
+          )}
+          {isRecording && !useWhisperFallback && (
+            <View style={styles.liveTranscriptContainer}>
+              <Text style={styles.liveTranscriptText} numberOfLines={2}>
+                {liveTranscript || 'Listening...'}
+              </Text>
+            </View>
+          )}
           <View style={styles.endRow}>
             {canEndSession ? (
               <Pressable style={styles.endButton} onPress={endSessionAndSummarize}>
@@ -682,6 +737,27 @@ const styles = StyleSheet.create({
   sendBtnPressed: { opacity: 0.8 },
   micBtn: { padding: 10 },
   micBtnActive: { opacity: 0.8 },
+  voiceHint: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+  },
+  liveTranscriptContainer: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.input,
+    minHeight: 40,
+    justifyContent: 'center',
+  },
+  liveTranscriptText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    lineHeight: 20,
+  },
   endRow: { paddingHorizontal: 24, paddingVertical: 12, alignItems: 'center' },
   endButton: {
     paddingVertical: 12,
