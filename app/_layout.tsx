@@ -12,8 +12,10 @@ export default function RootLayout() {
           headerShown: false,
           contentStyle: { backgroundColor: COLORS.background },
         }}
-      >
+        >
+        <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(modals)" options={{ presentation: 'fullScreenModal' }} />
       </Stack>
     </SafeAreaProvider>
   );
