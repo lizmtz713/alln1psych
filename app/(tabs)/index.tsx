@@ -16,6 +16,49 @@ import { useDailyContentStore } from '../../src/stores/dailyContentStore';
 import { generateDailyContent } from '../../src/services/personalization';
 import { Ionicons } from '@expo/vector-icons';
 
+type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
+
+const ALL_ACTIVITIES: ActivitySuggestion[] = [
+  { id: 'breathing', emoji: '🌬️', title: 'Breathe with me', sub: 'Box breathing — 4 in, 4 hold, 4 out. Calms your nervous system.' },
+  { id: 'gratitude-jar', emoji: '✨', title: 'Gratitude Jar', sub: "Add moments you're grateful for. Shake the jar to revisit one." },
+  { id: 'emotion-match', emoji: '🃏', title: 'What Would You Feel?', sub: 'Match scenarios to emotions. No wrong answers.' },
+  { id: 'comm-builder', emoji: '💬', title: 'Say What You Feel', sub: "Build an 'I feel' statement for a hard conversation." },
+  { id: 'body-scan', emoji: '🧍', title: 'Body Check', sub: 'Tap where you feel tension. Connect body and emotions.' },
+  { id: 'mood-patterns', emoji: '📊', title: 'Your Patterns', sub: 'See your mood calendar and AI insights.' },
+  { id: 'stress-thermo', emoji: '🌡️', title: 'Stress Check', sub: 'Rate your stress and get support that fits.' },
+  { id: 'thought-challenger', emoji: '💭', title: 'Thought Challenger', sub: 'Challenge a tough thought with Psych.' },
+  { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Explorer', sub: 'Name your feelings with precision.' },
+];
+
+function getSuggestedActivities(
+  recentMoods: string[],
+  hour: number,
+  _completedActivityIds: string[] = []
+): ActivitySuggestion[] {
+  const seed = new Date().getDate() + hour;
+  const lastMood = recentMoods[0];
+  const isRedOrange = lastMood === 'red' || lastMood === 'orange';
+  const isGreen = lastMood === 'green';
+  let pool: ActivitySuggestion[];
+  if (isRedOrange) {
+    pool = ALL_ACTIVITIES.filter((a) => a.id === 'stress-thermo' || a.id === 'thought-challenger');
+  } else if (isGreen) {
+    pool = ALL_ACTIVITIES.filter((a) => a.id === 'emotion-match' || a.id === 'gratitude-jar');
+  } else if (hour >= 5 && hour < 11) {
+    pool = ALL_ACTIVITIES.filter((a) => a.id === 'breathing' || a.id === 'gratitude-jar');
+  } else if (hour >= 11 && hour < 17) {
+    pool = ALL_ACTIVITIES.filter((a) => a.id === 'emotion-match' || a.id === 'comm-builder');
+  } else if (hour >= 17 && hour < 21) {
+    pool = ALL_ACTIVITIES.filter((a) => a.id === 'body-scan' || a.id === 'mood-patterns');
+  } else {
+    pool = ALL_ACTIVITIES.filter((a) => a.id === 'breathing' || a.id === 'gratitude-jar');
+  }
+  const first = pool[seed % pool.length];
+  const rest = pool.filter((a) => a.id !== first.id);
+  const second = rest.length > 0 ? rest[seed % rest.length] : ALL_ACTIVITIES[(seed + 1) % ALL_ACTIVITIES.length];
+  return [first, second];
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -226,51 +269,30 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* Try an activity — rotate by time of day and mood */}
+      {/* Try this — 2 suggestions by time and mood */}
       <Animated.View style={[styles.card, slideY(card3)]}>
         <Text style={styles.cardSectionTitle}>Try this</Text>
         {(() => {
           const hour = new Date().getHours();
-          const morning = hour >= 5 && hour < 12;
-          const daySeed = new Date().getDate() + hour;
-          const allActivities = [
-            { id: 'breathing', emoji: '🌬️', title: 'Breathe with me', sub: 'Box breathing — 4 in, 4 hold, 4 out. Calms your nervous system.' },
-            { id: 'gratitude-jar', emoji: '✨', title: 'Gratitude Jar', sub: "Add moments you're grateful for. Shake the jar to revisit one." },
-            { id: 'thought-challenger', emoji: '💭', title: 'Thought Challenger', sub: 'Challenge a tough thought with Psych.' },
-            { id: 'body-scan', emoji: '🧍', title: 'Body Check', sub: 'Tap where you feel tension. Connect body and emotions.' },
-            { id: 'emotion-match', emoji: '🃏', title: 'What Would You Feel?', sub: 'Match scenarios to emotions. No wrong answers.' },
-            { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Explorer', sub: 'Name your feelings with precision. Tap the wheel and explore.' },
-          ];
-          let id = allActivities[0].id;
-          let config = allActivities[0];
-          if (myTemperature === 'orange' || myTemperature === 'red') {
-            const pool = allActivities.filter((a) => a.id === 'thought-challenger' || a.id === 'body-scan');
-            config = pool[daySeed % pool.length];
-            id = config.id;
-          } else if (myTemperature === 'green') {
-            const pool = allActivities.filter((a) => a.id === 'emotion-match' || a.id === 'gratitude-jar');
-            config = pool[daySeed % pool.length];
-            id = config.id;
-          } else if (morning) {
-            const pool = allActivities.filter((a) => a.id === 'breathing' || a.id === 'gratitude-jar');
-            config = pool[daySeed % pool.length];
-            id = config.id;
-          } else {
-            config = allActivities[daySeed % allActivities.length];
-            id = config.id;
-          }
+          const recentMoods = moodTrend.map((t) => t.mood);
+          const suggestions = getSuggestedActivities(recentMoods, hour);
           return (
-            <Pressable
-              style={({ pressed }) => [styles.practiceCard, pressed && { opacity: 0.9 }]}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push(`/(modals)/activity?id=${id}`);
-              }}
-            >
-              <Text style={styles.practiceEmoji}>{config.emoji}</Text>
-              <Text style={styles.practiceTitle}>{config.title}</Text>
-              <Text style={styles.practiceSub}>{config.sub}</Text>
-            </Pressable>
+            <View style={styles.tryThisRow}>
+              {suggestions.map((config) => (
+                <Pressable
+                  key={config.id}
+                  style={({ pressed }) => [styles.practiceCard, styles.practiceCardHalf, pressed && { opacity: 0.9 }]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push(`/(modals)/activity?id=${config.id}`);
+                  }}
+                >
+                  <Text style={styles.practiceEmoji}>{config.emoji}</Text>
+                  <Text style={styles.practiceTitle} numberOfLines={2}>{config.title}</Text>
+                  <Text style={styles.practiceSub} numberOfLines={2}>{config.sub}</Text>
+                </Pressable>
+              ))}
+            </View>
           );
         })()}
       </Animated.View>
@@ -462,6 +484,8 @@ const styles = StyleSheet.create({
   quickActionPressed: { opacity: 0.9 },
   quickActionText: { fontSize: 13, color: COLORS.text, marginTop: 8, textAlign: 'center' },
   practiceCard: {},
+  practiceCardHalf: { flex: 1, minWidth: 0 },
+  tryThisRow: { flexDirection: 'row', gap: 12 },
   practiceEmoji: { fontSize: 28, marginBottom: 8 },
   practiceTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text, marginBottom: 4 },
   practiceSub: { fontSize: 15, color: COLORS.textMuted },

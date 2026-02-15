@@ -15,6 +15,8 @@ import {
   ActivityIndicator,
   Animated,
   Alert,
+  Linking,
+  Share,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,6 +30,10 @@ import { useJournalStore } from '../../src/stores/journalStore';
 import { useGratitudeStore } from '../../src/stores/gratitudeStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { getOpenAIKey } from '../../src/services/ai';
+import { useCircleStore } from '../../src/stores/circleStore';
+import type { Temperature } from '../../src/stores/circleStore';
+import { useConversationStore } from '../../src/stores/conversationStore';
+import { useEducationStore } from '../../src/stores/educationStore';
 
 type BreathPhase = 'inhale' | 'hold' | 'exhale';
 const BOX_BREATH = { inhale: 4, hold: 4, exhale: 4, holdAfter: 4 };
@@ -170,6 +176,77 @@ export default function ActivityScreen() {
   const [showGratitudeAdd, setShowGratitudeAdd] = useState(false);
   const [shakeEntry, setShakeEntry] = useState<typeof gratitudeEntries[0] | null>(null);
   const jarDotsAnim = useRef(new Animated.Value(0)).current;
+
+  // Stress Thermometer
+  const [stressLevel, setStressLevel] = useState<number>(5);
+  const [stressNote, setStressNote] = useState('');
+  const [stressSubmitted, setStressSubmitted] = useState(false);
+  const addMoodCheckin = useCircleStore((s) => s.addMoodCheckin);
+  const emergencyContacts = useUserStore((s) => s.emergencyContacts);
+
+  // Communication Builder
+  const [cbStep, setCbStep] = useState(1);
+  const [cbWhen, setCbWhen] = useState('');
+  const [cbEmotion, setCbEmotion] = useState('');
+  const [cbCustomEmotion, setCbCustomEmotion] = useState('');
+  const [cbBecause, setCbBecause] = useState('');
+  const [cbNeed, setCbNeed] = useState('');
+  const [cbBuilt, setCbBuilt] = useState(false);
+  const [cbPolish, setCbPolish] = useState<{ polished: string; deliveryTip: string; ifDefensive: string } | null>(null);
+  const [cbPolishLoading, setCbPolishLoading] = useState(false);
+
+  // Mood Patterns
+  const [mpMonth, setMpMonth] = useState(() => new Date());
+  const [mpSelectedDay, setMpSelectedDay] = useState<Date | null>(null);
+  const [mpInsights, setMpInsights] = useState<{ pattern: string; positive: string; suggestion: string } | null>(null);
+  const [mpInsightsLoading, setMpInsightsLoading] = useState(false);
+  const moodHistory = useCircleStore((s) => s.moodHistory);
+  const convMessages = useConversationStore((s) => s.messages);
+  const completedLessons = useEducationStore((s) => s.completedLessons);
+
+  // Fetch mood-patterns AI insights when viewing that activity
+  useEffect(() => {
+    if (activity?.id !== 'mood-patterns') return;
+    let cancelled = false;
+    const run = async () => {
+      setMpInsightsLoading(true);
+      try {
+        const last30 = useCircleStore.getState().moodHistory.filter((e) => {
+          const t = new Date(e.timestamp).getTime();
+          return t >= Date.now() - 30 * 86400000;
+        }).map((e) => ({ date: new Date(e.timestamp).toLocaleDateString(), mood: e.mood, note: e.note }));
+        const apiKey = await getOpenAIKey();
+        if (cancelled || !apiKey || last30.length === 0) {
+          if (!cancelled) setMpInsights(null);
+          return;
+        }
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [{
+              role: 'system',
+              content: `Analyze this user's mood data for the last 30 days. Data: ${JSON.stringify(last30)}. Provide 3 insights as JSON: { "pattern": "...", "positive": "...", "suggestion": "..." }. Be encouraging.`,
+            }, { role: 'user', content: 'Analyze.' }],
+            max_tokens: 350,
+            temperature: 0.6,
+          }),
+        });
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        const text = data.choices?.[0]?.message?.content?.trim() ?? '';
+        const parsed = JSON.parse(text) as { pattern: string; positive: string; suggestion: string };
+        if (!cancelled) setMpInsights(parsed);
+      } catch {
+        if (!cancelled) setMpInsights(null);
+      } finally {
+        if (!cancelled) setMpInsightsLoading(false);
+      }
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [activity?.id, mpMonth.getFullYear(), mpMonth.getMonth()]);
 
   useEffect(() => {
     if (!running || activity?.id !== 'breathing') return;
@@ -1023,6 +1100,430 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
     );
   }
 
+  // ----- STRESS THERMOMETER -----
+  if (activity.id === 'stress-thermo') {
+    const thermoHeight = 280;
+    const stressToTemp = (n: number): Temperature => (n <= 3 ? 'green' : n <= 6 ? 'yellow' : n <= 8 ? 'orange' : 'red');
+    const fillPct = stressLevel / 10;
+    const onLevelSelect = (n: number) => {
+      setStressLevel(n);
+      if (n <= 3) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      else if (n <= 6) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      else if (n <= 8) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      else Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    };
+    const onSaveCheckin = () => {
+      addMoodCheckin(stressToTemp(stressLevel), stressNote.trim() || undefined);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert('Saved', 'Check-in saved to your mood history.');
+      setStressSubmitted(true);
+    };
+    const zone = stressLevel <= 3 ? 'cool' : stressLevel <= 6 ? 'warm' : stressLevel <= 8 ? 'hot' : 'boiling';
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>How stressed are you?</Text>
+        <View style={[styles.thermoWrap, { height: thermoHeight }]}>
+          <View style={styles.thermoTrack} />
+          <Animated.View
+            style={[
+              styles.thermoFill,
+              {
+                height: `${fillPct * 100}%`,
+                backgroundColor: stressLevel <= 3 ? COLORS.temperature.green : stressLevel <= 6 ? COLORS.temperature.yellow : stressLevel <= 8 ? COLORS.temperature.orange : COLORS.temperature.red,
+              },
+            ]}
+          />
+          <View style={styles.thermoNumbers}>
+            {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map((n) => (
+              <Pressable key={n} style={styles.thermoNumBtn} onPress={() => onLevelSelect(n)}>
+                <Text style={[styles.thermoNumText, stressLevel === n && styles.thermoNumTextSelected]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+        {zone === 'cool' && (
+          <>
+            <View style={styles.card}>
+              <Text style={styles.detailText}>You're in a good place right now. 💚</Text>
+              <Text style={styles.detailLabel}>What's helping you stay balanced?</Text>
+              <TextInput style={styles.thoughtInput} placeholder="Optional..." placeholderTextColor={COLORS.textMuted} value={stressNote} onChangeText={setStressNote} />
+            </View>
+            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={onSaveCheckin}>
+              <Text style={styles.startBtnText}>Save check-in</Text>
+            </Pressable>
+          </>
+        )}
+        {zone === 'warm' && (
+          <>
+            <View style={styles.card}>
+              <Text style={styles.detailText}>Things are getting warm. Let's cool down a bit. 💛</Text>
+              <Text style={styles.detailLabel}>Try this:</Text>
+              <Pressable style={styles.thermoActionBtn} onPress={() => { router.back(); router.push('/(modals)/activity?id=breathing'); }}>
+                <Text style={styles.thermoActionText}>🌬️ Breathe</Text>
+              </Pressable>
+              <Pressable style={styles.thermoActionBtn} onPress={() => { router.back(); router.push('/(modals)/new-journal'); }}>
+                <Text style={styles.thermoActionText}>✍️ Write it out</Text>
+              </Pressable>
+              <Pressable style={styles.thermoActionBtn} onPress={() => { router.back(); router.push('/(tabs)/talk'); }}>
+                <Text style={styles.thermoActionText}>💬 Talk to Psych</Text>
+              </Pressable>
+              <Text style={[styles.detailLabel, { marginTop: 12 }]}>What's raising your temperature?</Text>
+              <TextInput style={styles.thoughtInput} placeholder="Optional..." placeholderTextColor={COLORS.textMuted} value={stressNote} onChangeText={setStressNote} />
+            </View>
+            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={onSaveCheckin}>
+              <Text style={styles.startBtnText}>Save check-in</Text>
+            </Pressable>
+          </>
+        )}
+        {zone === 'hot' && (
+          <>
+            <View style={styles.card}>
+              <Text style={styles.detailText}>Running hot. You don't have to handle this alone. 🧡</Text>
+              <Text style={styles.detailLabel}>Let's try something right now:</Text>
+              <Pressable style={styles.thermoActionBtn} onPress={() => { router.back(); router.push('/(modals)/activity?id=breathing'); }}>
+                <Text style={styles.thermoActionText}>🌬️ Emergency breathe</Text>
+              </Pressable>
+              <Pressable style={styles.thermoActionBtn} onPress={() => { router.back(); router.push('/(tabs)/talk'); }}>
+                <Text style={styles.thermoActionText}>💬 Talk to Psych now</Text>
+              </Pressable>
+              <Pressable style={styles.thermoActionBtn} onPress={() => emergencyContacts[0] && Linking.openURL(`tel:${emergencyContacts[0].phone.replace(/\D/g, '')}`)}>
+                <Text style={styles.thermoActionText}>👤 Call someone</Text>
+              </Pressable>
+              <Text style={[styles.detailLabel, { marginTop: 12 }]}>What's going on?</Text>
+              <TextInput style={styles.thoughtInput} placeholder="Optional..." placeholderTextColor={COLORS.textMuted} value={stressNote} onChangeText={setStressNote} />
+            </View>
+            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={onSaveCheckin}>
+              <Text style={styles.startBtnText}>Save check-in</Text>
+            </Pressable>
+          </>
+        )}
+        {zone === 'boiling' && (
+          <>
+            <View style={styles.card}>
+              <Text style={styles.detailText}>This feels overwhelming. I'm here. ❤️</Text>
+              <Text style={styles.detailText}>You are safe. Let's get you support.</Text>
+              <Pressable style={[styles.thermoActionBtn, { backgroundColor: COLORS.temperature.red }]} onPress={() => Linking.openURL('tel:988')}>
+                <Text style={styles.thermoActionText}>📞 Call 988 (Crisis Lifeline)</Text>
+              </Pressable>
+              <Pressable style={[styles.thermoActionBtn, { backgroundColor: COLORS.temperature.orange }]} onPress={() => Linking.openURL('sms:741741')}>
+                <Text style={styles.thermoActionText}>💬 Text HOME to 741741</Text>
+              </Pressable>
+              {emergencyContacts.slice(0, 3).map((c, i) => (
+                <Pressable key={i} style={styles.thermoActionBtn} onPress={() => Linking.openURL(`tel:${c.phone.replace(/\D/g, '')}`)}>
+                  <Text style={styles.thermoActionText}>👤 Call {c.name}</Text>
+                </Pressable>
+              ))}
+              <Pressable style={[styles.thermoActionBtn, { borderColor: COLORS.temperature.red, borderWidth: 2 }]} onPress={() => Linking.openURL('tel:911')}>
+                <Text style={styles.thermoActionText}>🚨 Call 911</Text>
+              </Pressable>
+              <Pressable style={styles.thermoActionBtn} onPress={() => { router.back(); router.push('/(tabs)/talk'); }}>
+                <Text style={styles.thermoActionText}>I want to talk to Psych</Text>
+              </Pressable>
+              <Text style={[styles.detailLabel, { marginTop: 12 }]}>What's going on?</Text>
+              <TextInput style={styles.thoughtInput} placeholder="Optional..." placeholderTextColor={COLORS.textMuted} value={stressNote} onChangeText={setStressNote} />
+            </View>
+            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={onSaveCheckin}>
+              <Text style={styles.startBtnText}>Save check-in</Text>
+            </Pressable>
+          </>
+        )}
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  // ----- COMMUNICATION BUILDER -----
+  const COMM_EMOTIONS = ['Hurt', 'Frustrated', 'Disrespected', 'Anxious', 'Lonely', 'Angry', 'Unappreciated', 'Overwhelmed', 'Sad', 'Invisible'];
+  if (activity.id === 'comm-builder') {
+    const buildStatement = () => {
+      const when = cbWhen.trim();
+      const emotion = cbEmotion || cbCustomEmotion.trim() || 'upset';
+      const because = cbBecause.trim();
+      const need = cbNeed.trim();
+      setCbBuilt(true);
+      setCbPolish(null);
+    };
+    const fullStatement = `When ${cbWhen.trim() || '...'}, I feel ${cbEmotion || cbCustomEmotion.trim() || '...'}, because ${cbBecause.trim() || '...'}. What I need is ${cbNeed.trim() || '...'}.`;
+    const polishStatement = async () => {
+      setCbPolishLoading(true);
+      try {
+        const apiKey = await getOpenAIKey();
+        if (!apiKey) throw new Error('API key not set');
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              {
+                role: 'system',
+                content: `The user built this "I feel" statement: ${fullStatement}\nHelp them refine it. Offer:\n1. A polished version that sounds natural (not clinical)\n2. One tip for delivering it well\n3. What to do if the other person gets defensive\nRespond as JSON only, no markdown: { "polished": "...", "deliveryTip": "...", "ifDefensive": "..." }`,
+              },
+              { role: 'user', content: 'Polish my statement.' },
+            ],
+            max_tokens: 350,
+            temperature: 0.6,
+          }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        const text = data.choices?.[0]?.message?.content?.trim() ?? '';
+        const parsed = JSON.parse(text) as { polished: string; deliveryTip: string; ifDefensive: string };
+        setCbPolish(parsed);
+      } catch (e) {
+        Alert.alert('Error', 'Could not connect. Check API key in Settings.');
+      } finally {
+        setCbPolishLoading(false);
+      }
+    };
+    const shareStatement = () => {
+      Share.share({ message: fullStatement, title: 'I feel statement' });
+    };
+    const resetBuilder = () => {
+      setCbStep(1);
+      setCbWhen('');
+      setCbEmotion('');
+      setCbCustomEmotion('');
+      setCbBecause('');
+      setCbNeed('');
+      setCbBuilt(false);
+      setCbPolish(null);
+    };
+    if (!cbBuilt) {
+      return (
+        <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+          <Pressable style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          </Pressable>
+          <Text style={styles.title}>Say What You Feel</Text>
+          <Text style={styles.sub}>Let's build a sentence you can use in a real conversation. We'll do it step by step.</Text>
+          <View style={styles.cbDots}>
+            {[1, 2, 3, 4].map((i) => (
+              <View key={i} style={[styles.cbDot, i === cbStep && styles.cbDotActive]} />
+            ))}
+          </View>
+          {cbStep === 1 && (
+            <>
+              <Text style={styles.detailLabel}>When...</Text>
+              <Text style={styles.sub}>Describe the situation. What happened?</Text>
+              <TextInput style={styles.thoughtInput} placeholder="e.g., 'When you cancel our plans last minute...'" placeholderTextColor={COLORS.textMuted} value={cbWhen} onChangeText={setCbWhen} />
+            </>
+          )}
+          {cbStep === 2 && (
+            <>
+              <Text style={styles.detailLabel}>I feel...</Text>
+              <Text style={styles.sub}>What emotion comes up?</Text>
+              <View style={styles.chipRow}>
+                {COMM_EMOTIONS.map((e) => (
+                  <Pressable key={e} style={[styles.bodyZoneBtn, cbEmotion === e && styles.bodyZoneBtnSelected]} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setCbEmotion(e); }}>
+                    <Text style={styles.bodyZoneLabel}>{e}</Text>
+                  </Pressable>
+                ))}
+              </View>
+              <TextInput style={styles.thoughtInput} placeholder="Or type your own emotion" placeholderTextColor={COLORS.textMuted} value={cbCustomEmotion} onChangeText={setCbCustomEmotion} />
+            </>
+          )}
+          {cbStep === 3 && (
+            <>
+              <Text style={styles.detailLabel}>Because...</Text>
+              <Text style={styles.sub}>Why does it affect you? What does it mean to you?</Text>
+              <TextInput style={styles.thoughtInput} placeholder="e.g., '...because it makes me feel like I'm not a priority'" placeholderTextColor={COLORS.textMuted} value={cbBecause} onChangeText={setCbBecause} />
+            </>
+          )}
+          {cbStep === 4 && (
+            <>
+              <Text style={styles.detailLabel}>What I need is...</Text>
+              <Text style={styles.sub}>What would help? What are you asking for?</Text>
+              <TextInput style={styles.thoughtInput} placeholder="e.g., '...for you to let me know earlier so I can make other plans'" placeholderTextColor={COLORS.textMuted} value={cbNeed} onChangeText={setCbNeed} />
+            </>
+          )}
+          <Pressable
+            style={({ pressed }) => [styles.startBtn, pressed && styles.pressed, cbStep === 1 && !cbWhen.trim() && styles.disabled]}
+            onPress={() => {
+              if (cbStep < 4) {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setCbStep(cbStep + 1);
+              } else buildStatement();
+            }}
+            disabled={cbStep === 1 && !cbWhen.trim()}
+          >
+            <Text style={styles.startBtnText}>{cbStep === 4 ? 'Build my statement' : 'Next'}</Text>
+          </Pressable>
+          <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+            <Text style={styles.doneBtnText}>Done</Text>
+          </Pressable>
+        </ScrollView>
+      );
+    }
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>Say What You Feel</Text>
+        <View style={[styles.card, styles.cbStatementCard]}>
+          <Text style={styles.cbStatementText}>{fullStatement}</Text>
+        </View>
+        <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={polishStatement} disabled={cbPolishLoading}>
+          <Text style={styles.startBtnText}>{cbPolishLoading ? 'Polishing...' : '✨ Help me polish this'}</Text>
+        </Pressable>
+        {cbPolish && (
+          <View style={styles.card}>
+            <Text style={styles.detailLabel}>Polished</Text>
+            <Text style={styles.detailText}>{cbPolish.polished}</Text>
+            <Text style={styles.detailLabel}>Delivery tip</Text>
+            <Text style={styles.detailText}>{cbPolish.deliveryTip}</Text>
+            <Text style={styles.detailLabel}>If they get defensive</Text>
+            <Text style={styles.detailText}>{cbPolish.ifDefensive}</Text>
+          </View>
+        )}
+        <Pressable style={styles.thermoActionBtn} onPress={shareStatement}>
+          <Text style={styles.thermoActionText}>📋 Share statement</Text>
+        </Pressable>
+        <Pressable style={styles.thermoActionBtn} onPress={() => { router.back(); router.push({ pathname: '/(modals)/role-play', params: { scenario: fullStatement, character: 'The person' } }); }}>
+          <Text style={styles.thermoActionText}>🎭 Practice saying it</Text>
+        </Pressable>
+        <Pressable style={styles.thermoActionBtn} onPress={() => { addJournalEntry(fullStatement); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); Alert.alert('Saved', 'Added to journal.'); }}>
+          <Text style={styles.thermoActionText}>📓 Save to journal</Text>
+        </Pressable>
+        <Pressable style={styles.tcSmallBtn} onPress={resetBuilder}>
+          <Text style={styles.tcSmallBtnText}>Build another</Text>
+        </Pressable>
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  // ----- MOOD PATTERNS -----
+  if (activity.id === 'mood-patterns') {
+    const getMoodForDate = (d: Date) => {
+      const key = d.toDateString();
+      const entry = moodHistory.find((e) => new Date(e.timestamp).toDateString() === key);
+      return entry?.mood ?? null;
+    };
+    const getConversationsForDate = (d: Date) => {
+      const key = d.toDateString();
+      return convMessages.filter((m) => m.role === 'user' && new Date(m.timestamp).toDateString() === key).length;
+    };
+    const monthStart = new Date(mpMonth.getFullYear(), mpMonth.getMonth(), 1);
+    const monthEnd = new Date(mpMonth.getFullYear(), mpMonth.getMonth() + 1, 0);
+    const startPad = monthStart.getDay();
+    const daysInMonth = monthEnd.getDate();
+    const totalCells = startPad + daysInMonth;
+    const rows = Math.ceil(totalCells / 7);
+    const dayCells: (number | null)[] = [];
+    for (let i = 0; i < startPad; i++) dayCells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) dayCells.push(d);
+    while (dayCells.length < rows * 7) dayCells.push(null);
+    const thisMonthMoods = moodHistory.filter((e) => {
+      const t = new Date(e.timestamp);
+      return t.getMonth() === mpMonth.getMonth() && t.getFullYear() === mpMonth.getFullYear();
+    });
+    const mostCommon = (() => {
+      const counts: Record<string, number> = {};
+      thisMonthMoods.forEach((e) => { counts[e.mood] = (counts[e.mood] || 0) + 1; });
+      let max = 0, mood: string | null = null;
+      Object.entries(counts).forEach(([m, c]) => { if (c > max) { max = c; mood = m; } });
+      return mood;
+    })();
+    const streakThisMonth = (() => {
+      let s = 0;
+      const today = new Date().toDateString();
+      const sorted = [...thisMonthMoods].map((e) => new Date(e.timestamp).toDateString()).filter((d, i, arr) => arr.indexOf(d) === i).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+      if (sorted[0] !== today) return 0;
+      let prev = today;
+      for (const d of sorted) {
+        if (prev === d) { s++; prev = new Date(new Date(d).getTime() - 86400000).toDateString(); }
+        else break;
+      }
+      return s;
+    })();
+    const selectedEntry = mpSelectedDay ? moodHistory.find((e) => new Date(e.timestamp).toDateString() === mpSelectedDay.toDateString()) : null;
+    const convCount = mpSelectedDay ? getConversationsForDate(mpSelectedDay) : 0;
+    const moodColors: Record<string, string> = { green: COLORS.temperature.green, yellow: COLORS.temperature.yellow, orange: COLORS.temperature.orange, red: COLORS.temperature.red };
+    const todayStr = new Date().toDateString();
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>Your Patterns</Text>
+        <Text style={styles.sub}>This month: {thisMonthMoods.length} check-ins{mostCommon ? `, most common mood: ${mostCommon}` : ''}{streakThisMonth > 0 ? `, longest streak: ${streakThisMonth} days` : ''}</Text>
+        <View style={styles.mpMonthNav}>
+          <Pressable onPress={() => setMpMonth(new Date(mpMonth.getFullYear(), mpMonth.getMonth() - 1))}>
+            <Ionicons name="chevron-back" size={24} color={COLORS.text} />
+          </Pressable>
+          <Text style={styles.mpMonthTitle}>{mpMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</Text>
+          <Pressable onPress={() => setMpMonth(new Date(mpMonth.getFullYear(), mpMonth.getMonth() + 1))}>
+            <Ionicons name="chevron-forward" size={24} color={COLORS.text} />
+          </Pressable>
+        </View>
+        <View style={styles.mpWeekRow}>
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+            <Text key={i} style={styles.mpWeekLabel}>{d}</Text>
+          ))}
+        </View>
+        <View style={styles.mpGrid}>
+          {dayCells.map((d, i) => {
+            if (d === null) return <View key={i} style={styles.mpCellEmpty} />;
+            const date = new Date(mpMonth.getFullYear(), mpMonth.getMonth(), d);
+            const mood = getMoodForDate(date);
+            const isToday = date.toDateString() === todayStr;
+            return (
+              <Pressable
+                key={i}
+                style={[styles.mpCell, mood && { backgroundColor: moodColors[mood] }, isToday && styles.mpCellToday]}
+                onPress={() => setMpSelectedDay(mpSelectedDay?.getTime() === date.getTime() ? null : date)}
+              >
+                <Text style={[styles.mpCellText, mood && { color: '#fff' }]}>{d}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        {mpSelectedDay && (
+          <View style={styles.card}>
+            <Text style={styles.detailLabel}>{mpSelectedDay.toLocaleDateString()}</Text>
+            {selectedEntry ? (
+              <>
+                <Text style={styles.detailText}>Mood: {selectedEntry.label}</Text>
+                {selectedEntry.note && <Text style={styles.detailText}>{selectedEntry.note}</Text>}
+                <Text style={styles.detailText}>Conversations that day: {convCount}</Text>
+                <Text style={styles.detailText}>This was a {selectedEntry.mood} day.</Text>
+              </>
+            ) : (
+              <Text style={styles.detailText}>No check-in this day.</Text>
+            )}
+          </View>
+        )}
+        <Text style={[styles.detailLabel, { marginTop: 16 }]}>Insights</Text>
+        {mpInsightsLoading ? (
+          <ActivityIndicator size="small" color={COLORS.accent} style={{ marginVertical: 12 }} />
+        ) : mpInsights ? (
+          <View style={styles.card}>
+            <Text style={styles.detailLabel}>📊 Pattern</Text>
+            <Text style={styles.detailText}>{mpInsights.pattern}</Text>
+            <Text style={styles.detailLabel}>⭐ Bright Spot</Text>
+            <Text style={styles.detailText}>{mpInsights.positive}</Text>
+            <Text style={styles.detailLabel}>💡 Suggestion</Text>
+            <Text style={styles.detailText}>{mpInsights.suggestion}</Text>
+          </View>
+        ) : (
+          <Text style={styles.sub}>Start checking in daily to see your patterns here.</Text>
+        )}
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
   // ----- PLACEHOLDER -----
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -1151,4 +1652,27 @@ const styles = StyleSheet.create({
   gratitudeJarCount: { fontSize: 14, color: COLORS.textMuted, marginBottom: 16, textAlign: 'center' },
   gratitudeEntryRow: { flexDirection: 'column', gap: 4 },
   secondaryText: { fontSize: 13, color: COLORS.textSecondary },
+  thermoWrap: { width: 56, alignSelf: 'center', marginVertical: 16, position: 'relative' },
+  thermoTrack: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: COLORS.surface, borderRadius: 28 },
+  thermoFill: { position: 'absolute', left: 4, right: 4, bottom: 0, borderRadius: 24 },
+  thermoNumbers: { position: 'absolute', right: -32, top: 0, bottom: 0, justifyContent: 'space-between' },
+  thermoNumBtn: { padding: 4 },
+  thermoNumText: { fontSize: 14, color: COLORS.textMuted },
+  thermoNumTextSelected: { color: COLORS.text, fontWeight: '700' },
+  thermoActionBtn: { paddingVertical: 14, paddingHorizontal: 16, backgroundColor: COLORS.inputSurface, borderRadius: BORDER_RADIUS.input, marginBottom: 8 },
+  thermoActionText: { fontSize: 16, color: COLORS.text, fontWeight: '500' },
+  cbDots: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+  cbDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.surface },
+  cbDotActive: { backgroundColor: COLORS.accent },
+  cbStatementCard: { borderWidth: 2, borderColor: COLORS.accent },
+  cbStatementText: { fontSize: 17, color: COLORS.text, lineHeight: 26, fontWeight: '500' },
+  mpMonthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  mpMonthTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text },
+  mpWeekRow: { flexDirection: 'row', marginBottom: 6 },
+  mpWeekLabel: { flex: 1, textAlign: 'center', fontSize: 12, color: COLORS.textMuted },
+  mpGrid: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 },
+  mpCellEmpty: { width: '14.28%', aspectRatio: 1, padding: 2 },
+  mpCell: { width: '14.28%', aspectRatio: 1, padding: 2 },
+  mpCellToday: { borderWidth: 2, borderColor: COLORS.accent, borderRadius: 6 },
+  mpCellText: { fontSize: 12, color: COLORS.textMuted, textAlign: 'center' },
 });
