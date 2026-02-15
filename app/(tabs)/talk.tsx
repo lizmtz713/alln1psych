@@ -274,15 +274,15 @@ export default function TalkScreen() {
 
     if (isRecording) {
       // Tap to stop: stop recording, then transcribe and send
-      console.log('[Talk] before stopRecording');
+      if (__DEV__) console.log('[Talk] before stopRecording');
       try {
         const uri = await Voice.stopRecording();
-        console.log('[Talk] after stopRecording, uri:', uri);
+        if (__DEV__) console.log('[Talk] after stopRecording, uri:', uri);
         setRecording(false);
         setProcessing(true);
-        console.log('[Talk] before transcribeAudio');
+        if (__DEV__) console.log('[Talk] before transcribeAudio');
         const text = await Voice.transcribeAudio(uri);
-        console.log('[Talk] after transcribeAudio');
+        if (__DEV__) console.log('[Talk] after transcribeAudio');
         setProcessing(false);
         if (!text.trim()) {
           addMessage({
@@ -300,7 +300,7 @@ export default function TalkScreen() {
         const response = await sendMessage(apiMessages, buildUserContext());
         addMessage({ role: 'assistant', content: response, isVoice: false });
       } catch (e) {
-        console.log('[Talk] voice error (stop/transcribe/send):', e);
+        if (__DEV__) console.log('[Talk] voice error (stop/transcribe/send):', e);
         setRecording(false);
         setProcessing(false);
         addMessage({
@@ -315,9 +315,9 @@ export default function TalkScreen() {
     }
 
     // Tap to start: request permission first, then start recording
-    console.log('[Talk] before requestPermissionsAsync');
+    if (__DEV__) console.log('[Talk] before requestPermissionsAsync');
     const { status } = await Audio.requestPermissionsAsync();
-    console.log('[Talk] requestPermissionsAsync result:', status);
+    if (__DEV__) console.log('[Talk] requestPermissionsAsync result:', status);
     if (status !== 'granted') {
       Alert.alert(
         'Microphone access needed',
@@ -326,14 +326,14 @@ export default function TalkScreen() {
       );
       return;
     }
-    console.log('[Talk] before startRecording');
+    if (__DEV__) console.log('[Talk] before startRecording');
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       setRecording(true);
       await Voice.startRecording();
-      console.log('[Talk] after startRecording');
+      if (__DEV__) console.log('[Talk] after startRecording');
     } catch (e) {
-      console.log('[Talk] startRecording error:', e);
+      if (__DEV__) console.log('[Talk] startRecording error:', e);
       setRecording(false);
       if (e instanceof Error && e.message === 'Microphone permission not granted') {
         Alert.alert(

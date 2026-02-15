@@ -95,8 +95,8 @@ export default function CircleScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}
     >
-      {/* Demo badge */}
-      {isDemoData && (
+      {/* Demo badge – dev only */}
+      {__DEV__ && isDemoData && (
         <View style={styles.demoBadge}>
           <Text style={styles.demoBadgeText}>Demo data</Text>
         </View>

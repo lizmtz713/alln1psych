@@ -414,10 +414,12 @@ export default function MeScreen() {
             <Text style={styles.settingLabel}>Dark mode</Text>
             <Text style={styles.settingMuted}>Always on for now</Text>
           </View>
+          {__DEV__ && (
           <Pressable style={styles.settingRow} onPress={handleResetOnboarding}>
             <Text style={styles.settingLabel}>Reset onboarding</Text>
             <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
           </Pressable>
+          )}
           <Pressable style={styles.settingRow} onPress={handleClearAllData}>
             <Text style={[styles.settingLabel, styles.settingDanger]}>Clear all data</Text>
             <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />

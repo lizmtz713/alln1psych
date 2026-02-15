@@ -10,10 +10,10 @@ import { getOpenAIKey } from './ai';
 let recording: Audio.Recording | null = null;
 
 export async function startRecording(): Promise<void> {
-  console.log('[Voice] startRecording: before');
+  if (__DEV__) console.log('[Voice] startRecording: before');
   try {
     const { status } = await Audio.requestPermissionsAsync();
-    console.log('[Voice] requestPermissionsAsync result:', status);
+    if (__DEV__) console.log('[Voice] requestPermissionsAsync result:', status);
     if (status !== 'granted') {
       throw new Error('Microphone permission not granted');
     }
@@ -30,16 +30,16 @@ export async function startRecording(): Promise<void> {
       Audio.RecordingOptionsPresets.HIGH_QUALITY
     );
     recording = newRecording;
-    console.log('[Voice] startRecording: after (recording started)');
+    if (__DEV__) console.log('[Voice] startRecording: after (recording started)');
   } catch (err) {
     recording = null;
-    console.log('[Voice] startRecording: error', err);
+    if (__DEV__) console.log('[Voice] startRecording: error', err);
     throw err;
   }
 }
 
 export async function stopRecording(): Promise<string> {
-  console.log('[Voice] stopRecording: before');
+  if (__DEV__) console.log('[Voice] stopRecording: before');
   if (!recording) {
     throw new Error('No active recording');
   }
@@ -51,12 +51,12 @@ export async function stopRecording(): Promise<string> {
   if (!uri) {
     throw new Error('Failed to get recording URI');
   }
-  console.log('[Voice] stopRecording: after, audio URI:', uri);
+  if (__DEV__) console.log('[Voice] stopRecording: after, audio URI:', uri);
   return uri;
 }
 
 export async function transcribeAudio(audioUri: string): Promise<string> {
-  console.log('[Voice] transcribeAudio: before, uri:', audioUri);
+  if (__DEV__) console.log('[Voice] transcribeAudio: before, uri:', audioUri);
   const apiKey = await getOpenAIKey();
   if (!apiKey?.trim()) {
     throw new Error('OpenAI API key not configured');
@@ -81,13 +81,13 @@ export async function transcribeAudio(audioUri: string): Promise<string> {
 
   if (!res.ok) {
     const body = await res.text();
-    console.error('[Voice] Whisper API error:', res.status, body);
+    if (__DEV__) console.error('[Voice] Whisper API error:', res.status, body);
     throw new Error(body || `Whisper API error: ${res.status}`);
   }
 
   const data = (await res.json()) as { text?: string };
   const text = (data.text ?? '').trim();
-  console.log('[Voice] transcribeAudio: after, text length:', text.length);
+  if (__DEV__) console.log('[Voice] transcribeAudio: after, text length:', text.length);
   return text;
 }
 
