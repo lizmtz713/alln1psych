@@ -33,6 +33,13 @@ import { useEducationStore } from '../../src/stores/educationStore';
 import { useConversationStore } from '../../src/stores/conversationStore';
 import { useRolePlayStore } from '../../src/stores/rolePlayStore';
 import { useHelpSomeoneStore } from '../../src/stores/helpSomeoneStore';
+import { useConversationSummaryStore, type ConversationSummary } from '../../src/stores/conversationSummaryStore';
+import { getRelevantResources } from '../../src/lib/culturalResources';
+import {
+  CULTURAL_BACKGROUND_OPTIONS,
+  ENVIRONMENT_UPBRINGING_OPTIONS,
+  CULTURAL_VALUES_OPTIONS,
+} from '../../src/lib/culturalOptions';
 import { AchievementBadge } from '../../src/components/AchievementBadge';
 import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
 import type { EmergencyContact } from '../../src/stores/userStore';
@@ -66,7 +73,15 @@ export default function MeScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
   const user = useUserStore();
-  const { setSensitiveTopics, setEmergencyContacts } = useUserStore();
+  const {
+    setSensitiveTopics,
+    setEmergencyContacts,
+    setCulturalBackground,
+    setEnvironmentUpbringing,
+    setCulturalValues,
+    culturalBackgroundOther,
+    setCulturalBackgroundOther,
+  } = useUserStore();
   const entries = useJournalStore((s) => s.entries);
   const getRecentEntries = useJournalStore((s) => s.getRecentEntries);
   const getAchievements = useInsightsStore((s) => s.getAchievements);
@@ -82,14 +97,23 @@ export default function MeScreen() {
   useConversationStore((s) => s.messages.length);
   const pastRolePlays = useRolePlayStore((s) => s.pastSessions);
   const helpSomeoneSessions = useHelpSomeoneStore((s) => s.sessions);
+  const culturalBackground = useUserStore((s) => s.culturalBackground) ?? [];
+  const sensitiveTopics = useUserStore((s) => s.sensitiveTopics) ?? [];
+  const showLGBTQCrisis = sensitiveTopics.includes('gender-identity-dysphoria') || sensitiveTopics.includes('coming-out');
+  const crisisResources = getRelevantResources(culturalBackground);
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
   const [expandedPracticeId, setExpandedPracticeId] = useState<string | null>(null);
   const [expandedHelpSessionId, setExpandedHelpSessionId] = useState<string | null>(null);
+  const [expandedSummaryId, setExpandedSummaryId] = useState<string | null>(null);
+  const [conversationSearch, setConversationSearch] = useState('');
+  const [conversationEmotionFilter, setConversationEmotionFilter] = useState<string | null>(null);
+  const summaries = useConversationSummaryStore((s) => s.getSummaries());
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const [hasStoredKey, setHasStoredKey] = useState(false);
   const [toast, setToast] = useState<{ title: string; emoji: string } | null>(null);
   const [showSensitiveModal, setShowSensitiveModal] = useState(false);
+  const [showCulturalModal, setShowCulturalModal] = useState(false);
   const [editingContacts, setEditingContacts] = useState<EmergencyContact[]>([]);
   const [contactsEditing, setContactsEditing] = useState(false);
   const prevUnlockedIds = useRef<Set<string>>(new Set());
@@ -129,6 +153,52 @@ export default function MeScreen() {
   const conversationCount = getConversationCountThisWeek();
   const lessonsCount = getLessonsCompletedThisWeek();
   const mostCommonMood = getMostCommonMoodThisWeek();
+
+  const filteredSummaries = (() => {
+    let list = summaries;
+    const q = conversationSearch.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (s) =>
+          s.title.toLowerCase().includes(q) || s.summary.toLowerCase().includes(q)
+      );
+    }
+    if (conversationEmotionFilter) {
+      list = list.filter((s) =>
+        s.emotions.some((e) => e.toLowerCase() === conversationEmotionFilter.toLowerCase())
+      );
+    }
+    return list;
+  })();
+
+  const allEmotions = Array.from(
+    new Set(summaries.flatMap((s) => s.emotions).filter(Boolean).map((e) => e.trim()))
+  ).slice(0, 12);
+
+  function groupSummariesByDate(list: ConversationSummary[]): { label: string; items: ConversationSummary[] }[] {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const yesterdayStart = todayStart - 24 * 60 * 60 * 1000;
+    const weekStart = todayStart - 7 * 24 * 60 * 60 * 1000;
+    const groups: { label: string; items: ConversationSummary[] }[] = [];
+    const today: ConversationSummary[] = [];
+    const yesterday: ConversationSummary[] = [];
+    const thisWeek: ConversationSummary[] = [];
+    const older: ConversationSummary[] = [];
+    list.forEach((s) => {
+      const t = new Date(s.createdAt).getTime();
+      if (t >= todayStart) today.push(s);
+      else if (t >= yesterdayStart) yesterday.push(s);
+      else if (t >= weekStart) thisWeek.push(s);
+      else older.push(s);
+    });
+    if (today.length) groups.push({ label: 'Today', items: today });
+    if (yesterday.length) groups.push({ label: 'Yesterday', items: yesterday });
+    if (thisWeek.length) groups.push({ label: 'This Week', items: thisWeek });
+    if (older.length) groups.push({ label: 'Earlier', items: older });
+    return groups;
+  }
+  const summaryGroups = groupSummariesByDate(filteredSummaries);
 
   useEffect(() => {
     getOpenAIKey().then((k) => setHasStoredKey(Boolean(k)));
@@ -180,6 +250,7 @@ export default function MeScreen() {
                   onPress: () => {
                     useJournalStore.setState({ entries: [] });
                     useConversationStore.getState().clearMessages();
+                    useConversationSummaryStore.getState().clearSummaries();
                     useCircleStore.getState().clearDemoData();
                     useCircleStore.setState({ moodHistory: [] });
                     useEducationStore.setState({
@@ -290,6 +361,111 @@ export default function MeScreen() {
               );
             })}
           </View>
+        )}
+      </View>
+
+      {/* Conversation History */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>📝 Conversation History</Text>
+        <TextInput
+          style={styles.conversationSearchInput}
+          placeholder="Search your conversations"
+          placeholderTextColor={COLORS.textMuted}
+          value={conversationSearch}
+          onChangeText={setConversationSearch}
+        />
+        {allEmotions.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.emotionFilterScroll}
+            style={styles.emotionFilterScrollView}
+          >
+            <Pressable
+              style={[styles.emotionChip, !conversationEmotionFilter && styles.emotionChipSelected]}
+              onPress={() => setConversationEmotionFilter(null)}
+            >
+              <Text style={[styles.emotionChipText, !conversationEmotionFilter && styles.emotionChipTextSelected]}>
+                All
+              </Text>
+            </Pressable>
+            {allEmotions.map((em) => (
+              <Pressable
+                key={em}
+                style={[styles.emotionChip, conversationEmotionFilter === em.toLowerCase() && styles.emotionChipSelected]}
+                onPress={() => setConversationEmotionFilter(conversationEmotionFilter === em.toLowerCase() ? null : em.toLowerCase())}
+              >
+                <Text
+                  style={[
+                    styles.emotionChipText,
+                    conversationEmotionFilter === em.toLowerCase() && styles.emotionChipTextSelected,
+                  ]}
+                >
+                  {em}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        )}
+        {summaryGroups.length === 0 ? (
+          <Text style={styles.emptyText}>
+            After you talk with Psych, short summaries will appear here. Have 3+ messages and leave the Talk tab or tap "End conversation" to save.
+          </Text>
+        ) : (
+          summaryGroups.map((group) => (
+            <View key={group.label} style={styles.summaryGroup}>
+              <Text style={styles.summaryGroupLabel}>{group.label}</Text>
+              {group.items.map((s) => {
+                const expanded = expandedSummaryId === s.id;
+                const timeStr = new Date(s.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                return (
+                  <View key={s.id} style={styles.summaryCard}>
+                    <Pressable onPress={() => setExpandedSummaryId(expanded ? null : s.id)}>
+                      <Text style={styles.summaryTitle}>«{s.title}» — {timeStr}</Text>
+                      <Text style={styles.summaryPreview} numberOfLines={2}>{s.summary}</Text>
+                    </Pressable>
+                    {expanded && (
+                      <View style={styles.summaryExpanded}>
+                        <Text style={styles.summaryFullText}>{s.summary}</Text>
+                        {s.emotions.length > 0 && (
+                          <View style={styles.summaryChipsRow}>
+                            <Text style={styles.summaryChipsLabel}>Emotions: </Text>
+                            {s.emotions.map((e, i) => (
+                              <View key={i} style={styles.summaryChip}>
+                                <Text style={styles.summaryChipText}>{e}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+                        {s.triggers.length > 0 && (
+                          <View style={styles.summaryChipsRow}>
+                            <Text style={styles.summaryChipsLabel}>Triggers: </Text>
+                            {s.triggers.map((t, i) => (
+                              <View key={i} style={styles.summaryChip}>
+                                <Text style={styles.summaryChipText}>{t}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+                        {s.insights ? (
+                          <View style={styles.insightBlock}>
+                            <Text style={styles.insightBlockLabel}>Insight</Text>
+                            <Text style={styles.insightBlockText}>{s.insights}</Text>
+                          </View>
+                        ) : null}
+                        {s.followUp ? (
+                          <View style={styles.insightBlock}>
+                            <Text style={styles.insightBlockLabel}>Follow-up</Text>
+                            <Text style={styles.insightBlockText}>{s.followUp}</Text>
+                          </View>
+                        ) : null}
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+          ))
         )}
       </View>
 
@@ -503,6 +679,15 @@ export default function MeScreen() {
             </Text>
             <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
           </Pressable>
+          <Pressable style={styles.settingRow} onPress={() => setShowCulturalModal(true)}>
+            <Text style={styles.settingLabel}>Cultural context</Text>
+            <Text style={styles.settingMuted}>
+              {((user.culturalBackground?.length ?? 0) + (user.environmentUpbringing?.length ?? 0) + (user.culturalValues?.length ?? 0)) > 0
+                ? 'Set'
+                : 'Not set'}
+            </Text>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+          </Pressable>
         </View>
 
         <View style={styles.settingsCard}>
@@ -590,6 +775,74 @@ export default function MeScreen() {
           </Pressable>
         </Modal>
 
+        <Modal visible={showCulturalModal} transparent animationType="fade">
+          <Pressable style={styles.modalOverlay} onPress={() => setShowCulturalModal(false)}>
+            <Pressable style={styles.sensitiveModalCard} onPress={() => {}}>
+              <Text style={styles.sensitiveModalTitle}>Cultural context</Text>
+              <Text style={styles.settingHint}>This helps Psych understand your world better. You can change this anytime.</Text>
+              <ScrollView style={styles.sensitiveChipScroll}>
+                <Text style={styles.smallLabel}>Which of these feel like part of your identity?</Text>
+                <View style={styles.chipRow}>
+                  {CULTURAL_BACKGROUND_OPTIONS.map((opt) => {
+                    const isSelected = (user.culturalBackground ?? []).includes(opt);
+                    const toggle = () => {
+                      if (isSelected) setCulturalBackground((user.culturalBackground ?? []).filter((c) => c !== opt));
+                      else setCulturalBackground([...(user.culturalBackground ?? []), opt]);
+                    };
+                    return (
+                      <Pressable key={opt} style={[styles.chip, isSelected && styles.chipSelected]} onPress={toggle}>
+                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={styles.smallLabel}>What shaped how you grew up?</Text>
+                <View style={styles.chipRow}>
+                  {ENVIRONMENT_UPBRINGING_OPTIONS.map((opt) => {
+                    const isSelected = (user.environmentUpbringing ?? []).includes(opt);
+                    const toggle = () => {
+                      if (isSelected) setEnvironmentUpbringing((user.environmentUpbringing ?? []).filter((e) => e !== opt));
+                      else setEnvironmentUpbringing([...(user.environmentUpbringing ?? []), opt]);
+                    };
+                    return (
+                      <Pressable key={opt} style={[styles.chip, isSelected && styles.chipSelected]} onPress={toggle}>
+                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={styles.smallLabel}>Which of these matter in your world?</Text>
+                <View style={styles.chipRow}>
+                  {CULTURAL_VALUES_OPTIONS.map((opt) => {
+                    const isSelected = (user.culturalValues ?? []).includes(opt);
+                    const toggle = () => {
+                      if (isSelected) setCulturalValues((user.culturalValues ?? []).filter((v) => v !== opt));
+                      else setCulturalValues([...(user.culturalValues ?? []), opt]);
+                    };
+                    return (
+                      <Pressable key={opt} style={[styles.chip, isSelected && styles.chipSelected]} onPress={toggle}>
+                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                {(user.culturalBackground ?? []).includes('Other') && (
+                  <TextInput
+                    style={[styles.input, styles.inputMargin]}
+                    placeholder="Describe (e.g. Southeast Asian, biracial...)"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={culturalBackgroundOther ?? ''}
+                    onChangeText={setCulturalBackgroundOther}
+                  />
+                )}
+              </ScrollView>
+              <Pressable style={styles.primaryButton} onPress={() => setShowCulturalModal(false)}>
+                <Text style={styles.primaryButtonText}>Done</Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
+
         <View style={styles.settingsCard}>
           <Text style={styles.settingLabel}>API Keys</Text>
           <Text style={styles.settingHint}>Get your API key at platform.openai.com/api-keys</Text>
@@ -647,24 +900,33 @@ export default function MeScreen() {
         </View>
       </View>
 
-      {/* Crisis resources */}
+      {/* Crisis resources — culturally relevant */}
       <View style={styles.crisis}>
         <Text style={styles.crisisTitle}>Need help now?</Text>
-        <Pressable onPress={() => Linking.openURL('tel:988')}>
-          <Text style={styles.crisisLink}>988 Suicide & Crisis Lifeline</Text>
-        </Pressable>
-        <Pressable onPress={() => Linking.openURL('sms:741741?body=HOME')}>
-          <Text style={styles.crisisLink}>Crisis Text Line — text HOME to 741741</Text>
-        </Pressable>
-        <Pressable onPress={() => Linking.openURL('tel:8775658860')}>
-          <Text style={styles.crisisLink}>🏳️‍⚧️ Trans Lifeline: 877-565-8860 — by and for trans people</Text>
-        </Pressable>
-        <Pressable onPress={() => Linking.openURL('tel:8664887386')}>
-          <Text style={styles.crisisLink}>🏳️‍🌈 Trevor Project: 866-488-7386 — LGBTQ+ youth crisis support</Text>
-        </Pressable>
-        <Pressable onPress={() => Linking.openURL('sms:678678')}>
-          <Text style={styles.crisisLink}>💬 Trevor Text: text START to 678-678 — LGBTQ+ text support</Text>
-        </Pressable>
+        {showLGBTQCrisis && (
+          <>
+            <Pressable onPress={() => Linking.openURL('tel:8775658860')}>
+              <Text style={styles.crisisLink}>🏳️‍⚧️ Trans Lifeline: 877-565-8860 — by and for trans people</Text>
+            </Pressable>
+            <Pressable onPress={() => Linking.openURL('tel:8664887386')}>
+              <Text style={styles.crisisLink}>🏳️‍🌈 Trevor Project: 866-488-7386 — LGBTQ+ youth crisis support</Text>
+            </Pressable>
+            <Pressable onPress={() => Linking.openURL('sms:678678')}>
+              <Text style={styles.crisisLink}>💬 Trevor Text: text START to 678-678 — LGBTQ+ text support</Text>
+            </Pressable>
+          </>
+        )}
+        {crisisResources.map((r, i) => (
+          <Pressable
+            key={`${r.name}-${i}`}
+            onPress={() => {
+              if (r.number) Linking.openURL(r.number === '741741' ? 'sms:741741?body=HOME' : 'tel:' + r.number.replace(/\D/g, ''));
+              else if (r.url) Linking.openURL(r.url);
+            }}
+          >
+            <Text style={styles.crisisLink}>{r.name} — {r.subtitle}</Text>
+          </Pressable>
+        ))}
       </View>
     </ScrollView>
     </>
@@ -770,6 +1032,99 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.textMuted,
     lineHeight: 22,
+  },
+  conversationSearchInput: {
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.input,
+    padding: 12,
+    fontSize: 15,
+    color: COLORS.text,
+    marginBottom: 10,
+  },
+  emotionFilterScrollView: { marginBottom: 12, maxHeight: 40 },
+  emotionFilterScroll: { gap: 8, paddingRight: 16 },
+  emotionChip: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    backgroundColor: COLORS.surface,
+    marginRight: 8,
+  },
+  emotionChipSelected: { backgroundColor: COLORS.accent },
+  emotionChipText: { fontSize: 13, color: COLORS.textMuted },
+  emotionChipTextSelected: { color: COLORS.text, fontWeight: '600' },
+  summaryGroup: { marginBottom: 16 },
+  summaryGroupLabel: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginBottom: 8,
+    fontWeight: '600',
+  },
+  summaryCard: {
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 14,
+    marginBottom: 10,
+  },
+  summaryTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  summaryPreview: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    lineHeight: 20,
+  },
+  summaryExpanded: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.surface,
+  },
+  summaryFullText: {
+    fontSize: 14,
+    color: COLORS.text,
+    lineHeight: 22,
+    marginBottom: 10,
+  },
+  summaryChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 6,
+  },
+  summaryChipsLabel: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    width: '100%',
+    marginBottom: 2,
+  },
+  summaryChip: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    backgroundColor: COLORS.surface,
+  },
+  summaryChipText: { fontSize: 13, color: COLORS.text },
+  insightBlock: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.input,
+  },
+  insightBlockLabel: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+  insightBlockText: {
+    fontSize: 14,
+    color: COLORS.text,
+    lineHeight: 20,
   },
   entryList: { gap: 10 },
   entryCard: {
@@ -920,6 +1275,13 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     marginBottom: 8,
   },
+  smallLabel: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  inputMargin: { marginTop: 12, marginBottom: 4 },
   apiKeyRow: {
     flexDirection: 'row',
     alignItems: 'center',

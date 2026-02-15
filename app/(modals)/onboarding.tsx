@@ -34,8 +34,13 @@ import {
   scheduleEveningReflection,
 } from '../../src/services/notifications';
 import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
+import {
+  CULTURAL_BACKGROUND_OPTIONS,
+  ENVIRONMENT_UPBRINGING_OPTIONS,
+  CULTURAL_VALUES_OPTIONS,
+} from '../../src/lib/culturalOptions';
 
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 const LEARNING_STYLE_OPTIONS: { value: LearningStyle; label: string; emoji: string }[] = [
   { value: 'reading', label: 'Reading — I like to read and reflect', emoji: '📖' },
@@ -97,6 +102,9 @@ export default function OnboardingScreen() {
     circleInvite,
     sensitiveTopics,
     learningStyle,
+    culturalBackground,
+    environmentUpbringing,
+    culturalValues,
     setName,
     setPronouns,
     setCustomPronouns,
@@ -106,6 +114,11 @@ export default function OnboardingScreen() {
     setCircleInvite,
     setSensitiveTopics,
     setLearningStyle,
+    setCulturalBackground,
+    setEnvironmentUpbringing,
+    setCulturalValues,
+    culturalBackgroundOther,
+    setCulturalBackgroundOther,
     completeOnboarding,
   } = useUserStore();
 
@@ -205,10 +218,12 @@ export default function OnboardingScreen() {
       case 6:
         return true; // sensitive topics — optional
       case 7:
-        return true; // learning style — optional
+        return true; // cultural context — optional
       case 8:
-        return wantsToInvite !== null && (wantsToInvite === false || inviteName.trim().length > 0);
+        return true; // learning style — optional
       case 9:
+        return wantsToInvite !== null && (wantsToInvite === false || inviteName.trim().length > 0);
+      case 10:
         return true;
       default:
         return false;
@@ -510,8 +525,79 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 7 — Learning Style (optional) */}
+            {/* STEP 7 — Cultural context (optional) */}
             {step === 7 && (
+              <View style={styles.step}>
+                <Pressable style={styles.skipButton} onPress={goNext}>
+                  <Text style={styles.skipText}>Skip</Text>
+                </Pressable>
+                <Text style={styles.question}>Where are you coming from?</Text>
+                <Text style={styles.explain}>
+                  This helps Psych understand your world — not just your words.
+                </Text>
+                <Text style={styles.smallLabel}>Which of these feel like part of your identity?</Text>
+                <View style={styles.chipRow}>
+                  {CULTURAL_BACKGROUND_OPTIONS.map((opt) => {
+                    const isSelected = culturalBackground.includes(opt);
+                    const toggle = () => {
+                      if (isSelected) setCulturalBackground(culturalBackground.filter((c) => c !== opt));
+                      else setCulturalBackground([...culturalBackground, opt]);
+                    };
+                    return (
+                      <Pressable key={opt} style={[styles.chip, isSelected && styles.chipSelected]} onPress={toggle}>
+                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={styles.smallLabel}>What shaped how you grew up?</Text>
+                <View style={styles.chipRow}>
+                  {ENVIRONMENT_UPBRINGING_OPTIONS.map((opt) => {
+                    const isSelected = environmentUpbringing.includes(opt);
+                    const toggle = () => {
+                      if (isSelected) setEnvironmentUpbringing(environmentUpbringing.filter((e) => e !== opt));
+                      else setEnvironmentUpbringing([...environmentUpbringing, opt]);
+                    };
+                    return (
+                      <Pressable key={opt} style={[styles.chip, isSelected && styles.chipSelected]} onPress={toggle}>
+                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={styles.smallLabel}>Which of these matter in your world?</Text>
+                <View style={styles.chipRow}>
+                  {CULTURAL_VALUES_OPTIONS.map((opt) => {
+                    const isSelected = culturalValues.includes(opt);
+                    const toggle = () => {
+                      if (isSelected) setCulturalValues(culturalValues.filter((v) => v !== opt));
+                      else setCulturalValues([...culturalValues, opt]);
+                    };
+                    return (
+                      <Pressable key={opt} style={[styles.chip, isSelected && styles.chipSelected]} onPress={toggle}>
+                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                {culturalBackground.includes('Other') && (
+                  <TextInput
+                    style={[styles.input, styles.inputMargin]}
+                    placeholder="Describe (e.g. Southeast Asian, biracial...)"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={culturalBackgroundOther}
+                    onChangeText={setCulturalBackgroundOther}
+                  />
+                )}
+                <Text style={styles.pronounHint}>You can change this anytime in settings.</Text>
+                <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]} onPress={goNext}>
+                  <Text style={styles.primaryButtonText}>Continue</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {/* STEP 8 — Learning Style (optional) */}
+            {step === 8 && (
               <View style={styles.step}>
                 <Text style={styles.question}>How do you learn best?</Text>
                 <Text style={styles.explain}>Optional — we'll tailor your manual and activities.</Text>
@@ -532,8 +618,8 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 8 — First Connection */}
-            {step === 8 && (
+            {/* STEP 9 — First Connection */}
+            {step === 9 && (
               <View style={styles.step}>
                 <Text style={styles.question}>
                   Would you like to connect someone who cares about you?
@@ -629,8 +715,8 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 9 — Promise (last step: open notification modal directly) */}
-            {step === 9 && (
+            {/* STEP 10 — Promise (last step: open notification modal directly) */}
+            {step === 10 && (
               <View style={styles.step}>
                 <Text style={styles.question}>Here's my promise to you:</Text>
                 <View style={styles.promiseList}>

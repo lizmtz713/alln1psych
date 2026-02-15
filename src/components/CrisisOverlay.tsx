@@ -1,5 +1,5 @@
 /**
- * Full-screen crisis overlay — 988, 741741, emergency contacts, 911.
+ * Full-screen crisis overlay — 988, 741741, culturally relevant resources, emergency contacts, 911.
  * Calm, safe design. "I want to keep talking to Psych" dismisses.
  */
 
@@ -7,63 +7,28 @@ import { View, Text, StyleSheet, Pressable, Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, BORDER_RADIUS } from '../lib/constants';
 import { useUserStore } from '../stores/userStore';
+import { getRelevantResources } from '../lib/culturalResources';
 
 interface CrisisOverlayProps {
   onDismiss: () => void;
 }
 
 const LGBTQ_RESOURCES = [
-  {
-    emoji: '🏳️‍⚧️',
-    title: 'Trans Lifeline: 877-565-8860',
-    sub: 'By and for trans people',
-    onPress: () => Linking.openURL('tel:8775658860'),
-    style: 'trans' as const,
-  },
-  {
-    emoji: '🏳️‍🌈',
-    title: 'Trevor Project: 866-488-7386',
-    sub: 'LGBTQ+ youth crisis support',
-    onPress: () => Linking.openURL('tel:8664887386'),
-    style: 'rainbow' as const,
-  },
-  {
-    emoji: '💬',
-    title: 'Trevor Text: Text START to 678-678',
-    sub: 'LGBTQ+ text support',
-    onPress: () => Linking.openURL('sms:678678'),
-    style: 'rainbow' as const,
-  },
+  { emoji: '🏳️‍⚧️', title: 'Trans Lifeline: 877-565-8860', sub: 'By and for trans people', onPress: () => Linking.openURL('tel:8775658860'), style: 'trans' as const },
+  { emoji: '🏳️‍🌈', title: 'Trevor Project: 866-488-7386', sub: 'LGBTQ+ youth crisis support', onPress: () => Linking.openURL('tel:8664887386'), style: 'rainbow' as const },
+  { emoji: '💬', title: 'Trevor Text: Text START to 678-678', sub: 'LGBTQ+ text support', onPress: () => Linking.openURL('sms:678678'), style: 'rainbow' as const },
 ];
 
 export function CrisisOverlay({ onDismiss }: CrisisOverlayProps) {
   const insets = useSafeAreaInsets();
   const emergencyContacts = useUserStore((s) => s.emergencyContacts);
   const sensitiveTopics = useUserStore((s) => s.sensitiveTopics);
+  const culturalBackground = useUserStore((s) => s.culturalBackground) ?? [];
   const showLGBTQFirst =
     sensitiveTopics?.includes('gender-identity-dysphoria') ||
     sensitiveTopics?.includes('coming-out');
 
-  const standardButtons = (
-    <>
-      <Pressable
-        style={({ pressed }) => [styles.button, styles.buttonPrimary, pressed && styles.pressed]}
-        onPress={() => Linking.openURL('tel:988')}
-      >
-        <Text style={styles.buttonEmoji}>🆘</Text>
-        <Text style={styles.buttonText}>Call 988</Text>
-        <Text style={styles.buttonSub}>Suicide & Crisis Lifeline</Text>
-      </Pressable>
-      <Pressable
-        style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-        onPress={() => Linking.openURL('sms:741741')}
-      >
-        <Text style={styles.buttonEmoji}>📱</Text>
-        <Text style={styles.buttonText}>Text HOME to 741741</Text>
-        <Text style={styles.buttonSub}>Crisis Text Line</Text>
-      </Pressable>
-    </>
-  );
+  const relevantResources = getRelevantResources(culturalBackground);
 
   const lgbtqButtons = (
     <>
@@ -91,17 +56,26 @@ export function CrisisOverlay({ onDismiss }: CrisisOverlayProps) {
       <Text style={styles.title}>You are not alone.</Text>
       <Text style={styles.sub}>Reach out anytime. These are here for you.</Text>
 
-      {showLGBTQFirst ? (
-        <>
-          {lgbtqButtons}
-          {standardButtons}
-        </>
-      ) : (
-        <>
-          {standardButtons}
-          {lgbtqButtons}
-        </>
-      )}
+      {showLGBTQFirst && lgbtqButtons}
+
+      {relevantResources.map((r, i) => (
+        <Pressable
+          key={`${r.name}-${i}`}
+          style={({ pressed }) => [
+            styles.button,
+            r.number === '988' && styles.buttonPrimary,
+            pressed && styles.pressed,
+          ]}
+          onPress={() => {
+            if (r.number) Linking.openURL('tel:' + r.number.replace(/\D/g, ''));
+            else if (r.url) Linking.openURL(r.url);
+          }}
+        >
+          <Text style={styles.buttonEmoji}>{r.number ? '🆘' : '🔗'}</Text>
+          <Text style={styles.buttonText}>{r.name}</Text>
+          <Text style={styles.buttonSub}>{r.subtitle}</Text>
+        </Pressable>
+      ))}
 
       {emergencyContacts.slice(0, 3).map((c, i) => (
         <Pressable
@@ -128,6 +102,7 @@ export function CrisisOverlay({ onDismiss }: CrisisOverlayProps) {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   overlay: {

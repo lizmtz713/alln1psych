@@ -11,6 +11,7 @@ import { useInsightsStore } from '../../src/stores/insightsStore';
 import { useEngagementStore } from '../../src/stores/engagementStore';
 import { useEducationStore, userAgeToContentAge } from '../../src/stores/educationStore';
 import { useConversationStore } from '../../src/stores/conversationStore';
+import { useConversationSummaryStore } from '../../src/stores/conversationSummaryStore';
 import { useJournalStore } from '../../src/stores/journalStore';
 import { useDailyContentStore } from '../../src/stores/dailyContentStore';
 import { generateDailyContent } from '../../src/services/personalization';
@@ -77,10 +78,20 @@ export default function HomeScreen() {
   const { getTodayChallenge, isTodayChallengeDone, completeTodayChallenge } = useEngagementStore();
   const { content: dailyContent, isLoading: dailyContentLoading, setContent: setDailyContent, setLoading: setDailyContentLoading, isStale } = useDailyContentStore();
   const moodTrend = useInsightsStore((s) => s.getWeeklyMoodTrend)();
+  const summaryCount = useConversationSummaryStore((s) => s.getSummaries().length);
+  const getLastSummary = useConversationSummaryStore((s) => s.getLastSummary);
+  const getRecentTriggers = useConversationSummaryStore((s) => s.getRecentTriggers);
+  const getEmotionalPatterns = useConversationSummaryStore((s) => s.getEmotionalPatterns);
 
   useEffect(() => {
     if (!dailyContent || isStale()) {
       setDailyContentLoading(true);
+      const lastSummary = getLastSummary();
+      const recentTriggers = getRecentTriggers(14);
+      const patterns = getEmotionalPatterns();
+      const lastConversationSummary = lastSummary
+        ? `${lastSummary.title}: ${lastSummary.summary}${lastSummary.insights ? ` Insight: ${lastSummary.insights}` : ''}`
+        : undefined;
       generateDailyContent({
         name: user.name || 'there',
         ageGroup: user.ageGroup ?? 'unknown',
@@ -88,7 +99,10 @@ export default function HomeScreen() {
         streak,
         lessonsCompleted: useEducationStore.getState().completedLessons,
         loveLanguage: user.loveLanguage ?? undefined,
-        sensitiveTopics: user.sensitiveTopics?.length ? user.sensitiveTopics : undefined,
+        lastConversationSummary,
+        triggers: recentTriggers.length > 0 ? recentTriggers : undefined,
+        recentEmotions: patterns.topEmotions.slice(0, 6).map((e) => e.emotion),
+        emotionalTrend: patterns.trend,
       })
         .then((c) => {
           setDailyContent(c);
@@ -105,7 +119,7 @@ export default function HomeScreen() {
         })
         .finally(() => setDailyContentLoading(false));
     }
-  }, [isStale(), user.name, user.ageGroup, streak]);
+  }, [isStale(), user.name, user.ageGroup, streak, summaryCount]);
 
   const greetingLine = dailyContent?.greeting ?? `Good morning, ${user.name || 'you'} 💜`;
   const affirmation = dailyContent?.affirmation ?? "You're doing better than you think.";

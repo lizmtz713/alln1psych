@@ -37,6 +37,8 @@ const QUICK_STARTS = [
   { scenario: 'Practice saying no', character: 'The person asking', emoji: '✋' },
   { scenario: 'Come out to someone', character: 'Family member or friend', emoji: '🏳️‍🌈' },
   { scenario: 'Correct someone about my pronouns', character: 'Coworker or acquaintance', emoji: '✊' },
+  { scenario: "I want to tell my family I'm seeing a therapist/using a mental health app", character: 'Traditional family member', emoji: '🏠' },
+  { scenario: "I need to set a boundary but I don't want to disrespect my family", character: 'Parent or elder', emoji: '🛡️' },
 ];
 
 function formatTime(date: Date): string {

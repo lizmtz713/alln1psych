@@ -13,6 +13,10 @@ export interface DailyContentContext {
   lessonsCompleted: string[];
   loveLanguage?: string;
   triggers?: string[];
+  /** Top emotions from recent conversation summaries */
+  recentEmotions?: string[];
+  /** improving | stable | struggling from conversation summaries */
+  emotionalTrend?: string;
 }
 
 export interface DailyContent {
@@ -49,6 +53,8 @@ LOVE LANGUAGE: ${userContext.loveLanguage || 'Unknown'}
 LESSONS COMPLETED: ${userContext.lessonsCompleted.join(', ') || 'None yet'}
 LAST CONVERSATION: ${userContext.lastConversationSummary || 'No conversations yet'}
 KNOWN TRIGGERS: ${userContext.triggers?.join(', ') || 'None shared yet'}
+RECENT EMOTIONS (from conversations): ${userContext.recentEmotions?.join(', ') || 'None yet'}
+EMOTIONAL TREND: ${userContext.emotionalTrend ?? 'unknown'}
 
 Generate a JSON response with:
 1. "greeting" - A warm, time-appropriate greeting that references something specific from their recent activity (1 sentence)

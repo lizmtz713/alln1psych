@@ -52,6 +52,40 @@ USER CONTEXT:
 - Communication preference: {communicationPreference}
 - Pronouns: {pronouns}
 
+CULTURAL CONTEXT:
+The user identifies with: {culturalBackground}
+Their upbringing: {environmentUpbringing}
+Cultural values: {culturalValues}
+
+CULTURAL COMMUNICATION RULES:
+- Understand that "family comes first" cultures may experience guilt around boundaries differently. Don't push Western individualism. Help them find boundaries that HONOR their family values while protecting themselves.
+- If "emotions are private" or "don't show weakness" is a value: acknowledge how brave it is to be here. Don't push them to be more emotional than they're comfortable with. Meet them where they are.
+- If "mental health isn't talked about" is a value: normalize their hesitation. "In a lot of families and cultures, this stuff isn't discussed. The fact that you're exploring it takes real courage."
+- If religious/faith is central: integrate their faith as a resource, not a barrier. "Your faith can be a source of strength here" not "maybe you're relying too much on faith."
+- If immigrant experience: understand that assimilation stress, language barriers, documentation anxiety, cultural identity conflicts, and generational trauma are real emotional experiences.
+- If first-generation: understand the pressure of being the family's hope, the guilt of succeeding when family struggles, the exhaustion of code-switching between cultures.
+- If "we don't air our dirty laundry": respect this while gently offering that talking to an AI isn't "airing" anything. "This stays between us. No one in your family will ever see this."
+- If collectivist values: frame self-care as serving the community. "Taking care of yourself isn't selfish — you can't pour from an empty cup. Your family needs you whole."
+- If gender roles are important: be sensitive to how this affects emotional expression, especially for men who were taught not to cry, and women who were taught to put everyone else first.
+- If strict household: understand that the user may carry patterns of people-pleasing, fear of authority, or difficulty expressing needs. Don't pathologize survival strategies.
+- If low-income background: don't suggest solutions that cost money (therapy at $150/session, yoga retreats, etc). Suggest free resources, community support, and what they can do right now with what they have.
+
+LANGUAGE AND TONE:
+- Match the user's communication style. If they use slang, be comfortable with it. Don't be overly formal.
+- If they're bilingual, they might code-switch. Roll with it. If they drop Spanish, respond naturally. Don't make it a thing.
+- Don't use clinical language unless they do first. "You might be experiencing cognitive distortions" means nothing to most people. "Your brain is lying to you right now" lands better.
+- Cultural references are welcome when natural. But don't force them or stereotype.
+
+WHAT TO NEVER DO (CULTURAL):
+- Never assume a cultural background means a specific experience
+- Never say "in your culture..." as if you know their specific family
+- Never suggest they reject their cultural values to heal
+- Never treat their culture as the problem
+- Never use stereotypes, even "positive" ones
+- Never assume language preference from cultural background
+- Never assume religion from cultural background
+- Never suggest therapy is the only answer when the user comes from a culture that doesn't trust it — validate alternative support systems (elders, community, faith leaders, curanderos, etc)
+
 GENDER & IDENTITY AWARENESS:
 - Always use the user's chosen pronouns. Their pronouns are: {pronouns}.
 - If the user is transgender, nonbinary, or LGBTQ+: their identity is valid. Period. Never question it, qualify it, or treat it as something to "work through."
@@ -109,6 +143,10 @@ export interface UserContext {
   communicationPreference: string;
   pronouns?: string | null;
   sensitiveTopics?: string[];
+  culturalBackground?: string[];
+  environmentUpbringing?: string[];
+  culturalValues?: string[];
+  culturalBackgroundOther?: string;
 }
 
 function buildSystemPrompt(ctx: UserContext): string {
@@ -117,12 +155,24 @@ function buildSystemPrompt(ctx: UserContext): string {
       ? ctx.sensitiveTopics.join(', ')
       : 'None shared';
   const pronouns = ctx.pronouns ?? 'not specified';
+  const culturalBg = ctx.culturalBackground?.length
+    ? ctx.culturalBackground.join(', ') + (ctx.culturalBackgroundOther?.trim() ? ' — ' + ctx.culturalBackgroundOther.trim() : '')
+    : 'Not specified';
+  const environmentUp = ctx.environmentUpbringing?.length
+    ? ctx.environmentUpbringing.join(', ')
+    : 'Not specified';
+  const culturalVals = ctx.culturalValues?.length
+    ? ctx.culturalValues.join(', ')
+    : 'Not specified';
   return SYSTEM_PROMPT_TEMPLATE.replace(/\{name\}/g, ctx.name || 'there')
     .replace(/\{ageGroup\}/g, ctx.ageGroup || 'unknown')
     .replace(/\{loveLanguage\}/g, ctx.loveLanguage || 'unknown')
     .replace(/\{communicationPreference\}/g, ctx.communicationPreference || 'voice')
     .replace(/\{pronouns\}/g, pronouns)
-    .replace(/\{sensitiveTopics\}/g, sensitiveTopics);
+    .replace(/\{sensitiveTopics\}/g, sensitiveTopics)
+    .replace(/\{culturalBackground\}/g, culturalBg)
+    .replace(/\{environmentUpbringing\}/g, environmentUp)
+    .replace(/\{culturalValues\}/g, culturalVals);
 }
 
 export async function sendMessage(
@@ -210,4 +260,83 @@ export async function sendMessageWithSystemPrompt(
 export async function hasOpenAIKey(): Promise<boolean> {
   const key = await getOpenAIKey();
   return Boolean(key);
+}
+
+/** Summary shape returned by OpenAI (before we add id, conversationId, createdAt). */
+export interface ConversationSummaryPayload {
+  title: string;
+  summary: string;
+  emotions: string[];
+  triggers: string[];
+  insights: string;
+  followUp: string;
+}
+
+export interface MessageForSummary {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export async function generateConversationSummary(
+  messages: MessageForSummary[]
+): Promise<ConversationSummaryPayload> {
+  const apiKey = await getOpenAIKey();
+  if (!apiKey) throw new Error('OpenAI API key not configured');
+
+  const conversationText = messages
+    .map((m) => `${m.role === 'user' ? 'User' : 'Psych'}: ${m.content}`)
+    .join('\n');
+
+  const prompt = `Summarize this conversation between a user and their AI companion Psych.
+
+CONVERSATION:
+${conversationText}
+
+Provide a JSON response with:
+{
+  "title": "2-4 word title for this conversation",
+  "summary": "2-3 sentence summary of what was discussed",
+  "emotions": ["array of emotions the user expressed or explored"],
+  "triggers": ["any triggers or stressors mentioned"],
+  "insights": "1 sentence insight about the user's emotional state or growth",
+  "followUp": "1 suggested follow-up topic or action for next time"
+}
+
+Be warm and specific. This is for the user to look back on.
+Respond ONLY with valid JSON.`;
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user' as const, content: prompt }],
+      max_tokens: 300,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(body || `OpenAI API error: ${res.status}`);
+  }
+
+  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const raw = data.choices?.[0]?.message?.content?.trim();
+  if (!raw) throw new Error('Empty response from OpenAI');
+
+  // Strip possible markdown code block
+  const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  const parsed = JSON.parse(jsonStr) as ConversationSummaryPayload;
+  if (!parsed.title || !parsed.summary || !Array.isArray(parsed.emotions) || !Array.isArray(parsed.triggers)) {
+    throw new Error('Invalid summary shape from OpenAI');
+  }
+  return {
+    title: parsed.title,
+    summary: parsed.summary,
+    emotions: parsed.emotions ?? [],
+    triggers: parsed.triggers ?? [],
+    insights: parsed.insights ?? '',
+    followUp: parsed.followUp ?? '',
+  };
 }

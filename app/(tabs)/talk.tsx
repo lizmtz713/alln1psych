@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  AppState,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +21,8 @@ import {
   useConversationStore,
   type ConversationMessage,
 } from '../../src/stores/conversationStore';
-import { hasOpenAIKey, sendMessage, type UserContext } from '../../src/services/ai';
+import { useConversationSummaryStore } from '../../src/stores/conversationSummaryStore';
+import { hasOpenAIKey, sendMessage, generateConversationSummary, type UserContext } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
 import type { CommunicationPreference } from '../../src/stores/userStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
@@ -86,6 +88,10 @@ function buildUserContext(): UserContext {
     sensitiveTopics,
     pronouns,
     customPronouns,
+    culturalBackground,
+    environmentUpbringing,
+    culturalValues,
+    culturalBackgroundOther,
   } = useUserStore.getState();
   const pronounsDisplay =
     pronouns === 'other'
@@ -98,6 +104,10 @@ function buildUserContext(): UserContext {
     communicationPreference: communicationPreference ?? 'voice',
     pronouns: pronounsDisplay,
     sensitiveTopics: sensitiveTopics?.length ? sensitiveTopics : undefined,
+    culturalBackground: culturalBackground?.length ? culturalBackground : undefined,
+    environmentUpbringing: environmentUpbringing?.length ? environmentUpbringing : undefined,
+    culturalValues: culturalValues?.length ? culturalValues : undefined,
+    culturalBackgroundOther: culturalBackgroundOther?.trim() || undefined,
   };
 }
 
@@ -139,10 +149,69 @@ export default function TalkScreen() {
 
   const [textInput, setTextInput] = useState('');
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [convToast, setConvToast] = useState(false);
+  const [showFollowUpBanner, setShowFollowUpBanner] = useState(false);
+  const [followUpDismissed, setFollowUpDismissed] = useState(false);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const addSummary = useConversationSummaryStore((s) => s.addSummary);
+  const getLastSummary = useConversationSummaryStore((s) => s.getLastSummary);
+  const clearMessages = useConversationStore((s) => s.clearMessages);
+
+  const runSaveConversation = (showToast: boolean) => {
+    const state = useConversationStore.getState();
+    if (state.messages.length < 3) return;
+    const snapshot = state.messages.map((m) => ({ role: m.role, content: m.content }));
+    clearMessages();
+    generateConversationSummary(snapshot)
+      .then((payload) => {
+        addSummary({
+          title: payload.title,
+          summary: payload.summary,
+          emotions: payload.emotions,
+          triggers: payload.triggers,
+          insights: payload.insights,
+          followUp: payload.followUp,
+          messageCount: snapshot.length,
+        });
+        if (showToast) {
+          setConvToast(true);
+          setTimeout(() => setConvToast(false), 2500);
+        }
+      })
+      .catch(() => {});
+  };
 
   useEffect(() => {
     hasOpenAIKey().then(setHasApiKey);
   }, [apiKeySavedAt]);
+
+  // Show follow-up banner when opening Talk if last summary had a followUp
+  useEffect(() => {
+    if (messages.length > 1 || followUpDismissed) return;
+    const last = getLastSummary();
+    if (last?.followUp?.trim()) setShowFollowUpBanner(true);
+  }, [messages.length, followUpDismissed, getLastSummary]);
+
+  // 2 min inactivity: save and show toast
+  useEffect(() => {
+    if (messages.length < 3) return;
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => {
+      idleTimerRef.current = null;
+      runSaveConversation(true);
+    }, 2 * 60 * 1000);
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, [messages.length, messages.map((m) => m.id).join(',')]);
+
+  // App background: save (no toast)
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'background') runSaveConversation(false);
+    });
+    return () => sub.remove();
+  }, []);
 
   useEffect(() => {
     if (params.prompt) {
@@ -396,7 +465,68 @@ export default function TalkScreen() {
       {/* Status area */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Your Space</Text>
+        {messages.length >= 3 && (
+          <Pressable
+            style={styles.endConvButton}
+            onPress={() => runSaveConversation(true)}
+          >
+            <Text style={styles.endConvButtonText}>End conversation</Text>
+          </Pressable>
+        )}
       </View>
+
+      {/* Follow-up from last time */}
+      {showFollowUpBanner && getLastSummary()?.followUp && (
+        <View style={styles.followUpBanner}>
+          <Text style={styles.followUpText}>
+            Last time we talked about «{getLastSummary()?.title}». Want to continue?
+          </Text>
+          <View style={styles.followUpRow}>
+            <Pressable
+              style={styles.followUpButton}
+              onPress={async () => {
+                const followUp = getLastSummary()?.followUp ?? '';
+                const content = `I'd like to pick up where we left off. Last time we talked about: ${followUp}. Can we continue?`;
+                setShowFollowUpBanner(false);
+                setFollowUpDismissed(true);
+                addMessage({ role: 'user', content, isVoice: false });
+                if (!hasApiKey) return;
+                setAiTyping(true);
+                try {
+                  const apiMessages = messages
+                    .concat([{ id: '', role: 'user' as const, content, timestamp: new Date(), isVoice: false }])
+                    .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+                  const response = await sendMessage(apiMessages, buildUserContext());
+                  addMessage({ role: 'assistant', content: response, isVoice: false });
+                } catch {
+                  addMessage({
+                    role: 'assistant',
+                    content: "Something went wrong. I'm still here — try again in a moment.",
+                    isVoice: false,
+                  });
+                } finally {
+                  setAiTyping(false);
+                }
+              }}
+            >
+              <Text style={styles.followUpButtonText}>Yes, let's continue</Text>
+            </Pressable>
+            <Pressable
+              style={styles.followUpDismiss}
+              onPress={() => { setShowFollowUpBanner(false); setFollowUpDismissed(true); }}
+            >
+              <Text style={styles.followUpDismissText}>Start fresh</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
+      {/* Conversation saved toast */}
+      {convToast && (
+        <View style={[styles.convToast, { top: insets.top + 12 }]} pointerEvents="none">
+          <Text style={styles.convToastText}>Conversation saved ✨</Text>
+        </View>
+      )}
 
       {/* No API key banner */}
       {!hasApiKey && (
@@ -579,12 +709,79 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 24,
     paddingVertical: 12,
   },
   headerTitle: {
     fontSize: 15,
     color: COLORS.textMuted,
+  },
+  endConvButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.input,
+  },
+  endConvButtonText: {
+    fontSize: 13,
+    color: COLORS.accent,
+  },
+  followUpBanner: {
+    marginHorizontal: 20,
+    marginBottom: 12,
+    padding: 14,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.card,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.accent,
+  },
+  followUpText: {
+    fontSize: 14,
+    color: COLORS.text,
+    marginBottom: 10,
+    lineHeight: 20,
+  },
+  followUpRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  followUpButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: COLORS.accent,
+    borderRadius: BORDER_RADIUS.input,
+  },
+  followUpButtonText: {
+    fontSize: 14,
+    color: COLORS.text,
+    fontWeight: '600',
+  },
+  followUpDismiss: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  followUpDismissText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+  },
+  convToast: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.card,
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  convToastText: {
+    fontSize: 15,
+    color: COLORS.text,
   },
   banner: {
     backgroundColor: COLORS.surface,
