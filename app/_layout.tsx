@@ -16,6 +16,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(modals)" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="lesson" />
       </Stack>
     </SafeAreaProvider>
   );
