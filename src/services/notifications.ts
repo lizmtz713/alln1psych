@@ -109,3 +109,22 @@ export async function sendLocalNudge(memberName: string, message: string): Promi
     trigger: null,
   });
 }
+
+/** One-time reminder to check in with someone (e.g. 1–3 days from now). */
+export async function scheduleCheckInReminder(
+  personName: string,
+  daysFromNow: 1 | 2 | 3
+): Promise<string | null> {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  d.setHours(10, 0, 0, 0);
+  const id = await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'Check in with ' + personName + ' 🤝',
+      body: 'You set a reminder to follow up. How are they doing?',
+      data: { type: 'help-someone-reminder', personName },
+    },
+    trigger: { date: d, type: 'date' as const },
+  });
+  return id;
+}

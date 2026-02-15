@@ -297,6 +297,21 @@ export default function HomeScreen() {
         })()}
       </Animated.View>
 
+      {/* Help Someone card */}
+      <Animated.View style={[styles.card, slideY(card3)]}>
+        <Pressable
+          style={({ pressed }) => [pressed && { opacity: 0.9 }]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/help-someone');
+          }}
+        >
+          <Text style={styles.practiceEmoji}>🤝</Text>
+          <Text style={styles.practiceTitle}>Help Someone</Text>
+          <Text style={styles.practiceSub}>Worried about someone? Get coaching on what to say.</Text>
+        </Pressable>
+      </Animated.View>
+
       {/* Quick actions */}
       <Animated.View style={[styles.quickActions, slideY(card3)]}>
         <Pressable

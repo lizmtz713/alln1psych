@@ -16,6 +16,7 @@ export default function ModalsLayout() {
       <Stack.Screen name="new-journal" options={{ presentation: 'modal' }} />
       <Stack.Screen name="role-play" options={{ presentation: 'modal' }} />
       <Stack.Screen name="activity" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="help-someone" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

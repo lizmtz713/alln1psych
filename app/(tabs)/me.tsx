@@ -32,6 +32,7 @@ import { useCircleStore } from '../../src/stores/circleStore';
 import { useEducationStore } from '../../src/stores/educationStore';
 import { useConversationStore } from '../../src/stores/conversationStore';
 import { useRolePlayStore } from '../../src/stores/rolePlayStore';
+import { useHelpSomeoneStore } from '../../src/stores/helpSomeoneStore';
 import { AchievementBadge } from '../../src/components/AchievementBadge';
 import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
 import type { EmergencyContact } from '../../src/stores/userStore';
@@ -80,8 +81,10 @@ export default function MeScreen() {
   useEducationStore((s) => s.completedLessons.length);
   useConversationStore((s) => s.messages.length);
   const pastRolePlays = useRolePlayStore((s) => s.pastSessions);
+  const helpSomeoneSessions = useHelpSomeoneStore((s) => s.sessions);
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
   const [expandedPracticeId, setExpandedPracticeId] = useState<string | null>(null);
+  const [expandedHelpSessionId, setExpandedHelpSessionId] = useState<string | null>(null);
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const [hasStoredKey, setHasStoredKey] = useState(false);
@@ -365,6 +368,58 @@ export default function MeScreen() {
                       >
                         <Text style={styles.practiceAgainButtonText}>Practice Again</Text>
                       </Pressable>
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        )}
+      </View>
+
+      {/* Help Someone History */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Help Someone History</Text>
+        {helpSomeoneSessions.length === 0 ? (
+          <Text style={styles.emptyText}>
+            When you use "Help Someone" from Home or Circle, your coaching sessions and action plans will appear here.
+          </Text>
+        ) : (
+          <View style={styles.entryList}>
+            {helpSomeoneSessions.map((session) => {
+              const expanded = expandedHelpSessionId === session.id;
+              return (
+                <View key={session.id} style={styles.entryCard}>
+                  <Pressable onPress={() => setExpandedHelpSessionId(expanded ? null : session.id)}>
+                    <Text style={styles.entryPreview} numberOfLines={2}>
+                      {session.personName} · {session.relationship}
+                    </Text>
+                    <Text style={styles.entryDate}>
+                      {new Date(session.createdAt).toLocaleDateString([], { dateStyle: 'medium' })}
+                    </Text>
+                    {session.situation ? (
+                      <Text style={styles.helpSomeoneSituation} numberOfLines={1}>{session.situation}</Text>
+                    ) : null}
+                  </Pressable>
+                  {expanded && (
+                    <View style={styles.practiceExpanded}>
+                      {session.actionPlan && (
+                        <View style={styles.debriefBlock}>
+                          <Text style={styles.debriefLabel}>Action plan</Text>
+                          <Text style={styles.debriefText}>{session.actionPlan}</Text>
+                        </View>
+                      )}
+                      {session.messages.length > 0 && (
+                        <>
+                          <Text style={styles.debriefLabel}>Conversation</Text>
+                          {session.messages.map((m, i) => (
+                            <View key={i} style={styles.practiceBubbleWrap}>
+                              <Text style={styles.practiceBubbleLabel}>{m.role === 'user' ? 'You' : 'Psych'}</Text>
+                              <Text style={styles.practiceBubbleText}>{m.content}</Text>
+                            </View>
+                          ))}
+                        </>
+                      )}
                     </View>
                   )}
                 </View>
@@ -731,6 +786,11 @@ const styles = StyleSheet.create({
   entryDate: {
     fontSize: 12,
     color: COLORS.textMuted,
+  },
+  helpSomeoneSituation: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginTop: 2,
   },
   entryMood: { fontSize: 16 },
   entryPreview: {

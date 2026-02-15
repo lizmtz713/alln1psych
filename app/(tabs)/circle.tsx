@@ -236,6 +236,20 @@ export default function CircleScreen() {
                           <Text style={styles.actionBtnText}>I reached out</Text>
                         </Pressable>
                       </View>
+                      {(m.temperature === 'orange' || m.temperature === 'red') && (
+                        <Pressable
+                          style={styles.helpSomeoneBtn}
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push({
+                              pathname: '/(modals)/help-someone',
+                              params: { name: m.name, relationship: m.relationship.charAt(0).toUpperCase() + m.relationship.slice(1) },
+                            });
+                          }}
+                        >
+                          <Text style={styles.helpSomeoneBtnText}>Need help talking to {m.name}?</Text>
+                        </Pressable>
+                      )}
                     </View>
                   )}
                 </View>
@@ -478,6 +492,19 @@ const styles = StyleSheet.create({
   actionBtnText: {
     fontSize: 14,
     color: COLORS.accent,
+  },
+  helpSomeoneBtn: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.input,
+    alignSelf: 'flex-start',
+  },
+  helpSomeoneBtnText: {
+    fontSize: 14,
+    color: COLORS.accent,
+    fontWeight: '500',
   },
   nudgeList: { gap: 10 },
   nudgeCard: {

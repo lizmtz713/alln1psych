@@ -166,6 +166,47 @@ export async function sendMessage(
   return content;
 }
 
+/** Send a message with a custom system prompt (e.g. Help Someone coaching mode). */
+export async function sendMessageWithSystemPrompt(
+  messages: Message[],
+  systemPrompt: string
+): Promise<string> {
+  const apiKey = await getOpenAIKey();
+  if (!apiKey) {
+    throw new Error('OpenAI API key not configured');
+  }
+
+  const apiMessages: Array<{ role: string; content: string }> = [
+    { role: 'system', content: systemPrompt },
+    ...messages.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: apiMessages,
+      max_tokens: 600,
+      temperature: 0.8,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    console.error('AI API Error:', res.status, body);
+    throw new Error(body || `OpenAI API error: ${res.status}`);
+  }
+
+  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const content = data.choices?.[0]?.message?.content?.trim();
+  if (!content) throw new Error('Empty response from OpenAI');
+  return content;
+}
+
 export async function hasOpenAIKey(): Promise<boolean> {
   const key = await getOpenAIKey();
   return Boolean(key);
