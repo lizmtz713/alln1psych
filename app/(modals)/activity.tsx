@@ -594,9 +594,9 @@ export default function ActivityScreen() {
           <ActivityIndicator size="large" color={COLORS.accent} style={{ marginVertical: 24 }} />
         ) : r && (
           <View style={styles.card}>
-            {r.distortion && (
+            {r.distortion && (<>
               <Text style={styles.detailLabel}>That sounds like...</Text>
-              <Text style={styles.detailText}>{r.distortion}</Text>
+              <Text style={styles.detailText}>{r.distortion}</Text></>
             )}
             <Text style={styles.tcMessage}>{r.message}</Text>
             {r.step === 1 && (
