@@ -1,7 +1,6 @@
 /**
  * Expo app config for AllN1 Psych.
  * Production-ready for EAS Build / TestFlight.
- * Set EAS_PROJECT_ID in env or replace in extra.eas.projectId.
  */
 module.exports = {
   expo: {
@@ -45,12 +44,13 @@ module.exports = {
     },
     extra: {
       eas: {
-        projectId: process.env.EAS_PROJECT_ID || 'your-eas-project-id',
+        projectId: 'b2be53d8-2212-4f77-99b6-e2a829b7dc5b',
       },
     },
     plugins: [
       'expo-router',
       'expo-secure-store',
+      'expo-font',
       [
         'expo-notifications',
         {

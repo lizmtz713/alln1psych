@@ -457,13 +457,12 @@ export default function MeScreen() {
   );
 }
 
-function AchievementBadge({
-  achievement,
-  index,
-}: {
+interface AchievementBadgeProps {
   achievement: { id: string; title: string; emoji: string; unlocked: boolean };
   index: number;
-}) {
+}
+
+function AchievementBadge({ achievement, index }: AchievementBadgeProps) {
   const scale = useRef(new Animated.Value(achievement.unlocked ? 1 : 0.9)).current;
   const hasAnimated = useRef(false);
   useEffect(() => {
