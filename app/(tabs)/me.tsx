@@ -14,6 +14,7 @@ import {
   UIManager,
   Animated,
   RefreshControl,
+  Modal,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -32,6 +33,8 @@ import { useEducationStore } from '../../src/stores/educationStore';
 import { useConversationStore } from '../../src/stores/conversationStore';
 import { useRolePlayStore } from '../../src/stores/rolePlayStore';
 import { AchievementBadge } from '../../src/components/AchievementBadge';
+import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
+import type { EmergencyContact } from '../../src/stores/userStore';
 
 const AGE_LABELS: Record<string, string> = {
   'under13': 'Under 13',
@@ -62,6 +65,7 @@ export default function MeScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
   const user = useUserStore();
+  const { setSensitiveTopics, setEmergencyContacts } = useUserStore();
   const entries = useJournalStore((s) => s.entries);
   const getRecentEntries = useJournalStore((s) => s.getRecentEntries);
   const getAchievements = useInsightsStore((s) => s.getAchievements);
@@ -82,6 +86,9 @@ export default function MeScreen() {
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const [hasStoredKey, setHasStoredKey] = useState(false);
   const [toast, setToast] = useState<{ title: string; emoji: string } | null>(null);
+  const [showSensitiveModal, setShowSensitiveModal] = useState(false);
+  const [editingContacts, setEditingContacts] = useState<EmergencyContact[]>([]);
+  const [contactsEditing, setContactsEditing] = useState(false);
   const prevUnlockedIds = useRef<Set<string>>(new Set());
 
   const recentEntries = getRecentEntries(20);
@@ -434,7 +441,99 @@ export default function MeScreen() {
               thumbColor={COLORS.text}
             />
           </View>
+          <Pressable style={styles.settingRow} onPress={() => setShowSensitiveModal(true)}>
+            <Text style={styles.settingLabel}>Sensitive topics</Text>
+            <Text style={styles.settingMuted}>
+              {user.sensitiveTopics?.length ? `${user.sensitiveTopics.length} selected` : 'None'}
+            </Text>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+          </Pressable>
         </View>
+
+        <View style={styles.settingsCard}>
+          <Text style={styles.settingLabel}>Emergency contacts</Text>
+          <Text style={styles.settingHint}>Add up to 3 people Psych can help you reach in a crisis.</Text>
+          {[0, 1, 2].map((i) => {
+            const contacts = contactsEditing ? editingContacts : user.emergencyContacts;
+            const c = contacts[i] ?? { name: '', phone: '' };
+            return (
+              <View key={i} style={styles.emergencyRow}>
+                <TextInput
+                  style={[styles.input, styles.emergencyInput]}
+                  placeholder="Name"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={contactsEditing ? editingContacts[i]?.name ?? '' : c.name}
+                  onChangeText={(t) => {
+                    const base = contactsEditing ? [...editingContacts] : [...user.emergencyContacts];
+                    while (base.length < 3) base.push({ name: '', phone: '' });
+                    base[i] = { ...(base[i] ?? { name: '', phone: '' }), name: t };
+                    setEditingContacts(base);
+                    setContactsEditing(true);
+                  }}
+                />
+                <TextInput
+                  style={[styles.input, styles.emergencyInput]}
+                  placeholder="Phone"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={contactsEditing ? editingContacts[i]?.phone ?? '' : c.phone}
+                  keyboardType="phone-pad"
+                  onChangeText={(t) => {
+                    const base = contactsEditing ? [...editingContacts] : [...user.emergencyContacts];
+                    while (base.length < 3) base.push({ name: '', phone: '' });
+                    base[i] = { ...(base[i] ?? { name: '', phone: '' }), phone: t };
+                    setEditingContacts(base);
+                    setContactsEditing(true);
+                  }}
+                />
+              </View>
+            );
+          })}
+          {contactsEditing && (
+            <Pressable
+              style={styles.saveKeyButton}
+              onPress={() => {
+                const base = editingContacts.length ? editingContacts : user.emergencyContacts;
+                const kept = base.filter((c) => c.name.trim() || c.phone.trim());
+                setEmergencyContacts(kept.map((c) => ({ name: c.name.trim(), phone: c.phone.trim().replace(/\D/g, '') })));
+                setContactsEditing(false);
+                setEditingContacts([]);
+              }}
+            >
+              <Text style={styles.saveKeyButtonText}>Save contacts</Text>
+            </Pressable>
+          )}
+        </View>
+
+        <Modal visible={showSensitiveModal} transparent animationType="fade">
+          <Pressable style={styles.modalOverlay} onPress={() => setShowSensitiveModal(false)}>
+            <Pressable style={styles.sensitiveModalCard} onPress={() => {}}>
+              <Text style={styles.sensitiveModalTitle}>Sensitive topics</Text>
+              <Text style={styles.settingHint}>This helps Psych communicate with extra care. Optional — skip any you're not ready to share.</Text>
+              <ScrollView style={styles.sensitiveChipScroll}>
+                <View style={styles.chipRow}>
+                  {SENSITIVE_TOPIC_OPTIONS.map((opt) => {
+                    const isNone = opt.value === 'none';
+                    const isSelected = isNone ? !user.sensitiveTopics?.length : user.sensitiveTopics?.includes(opt.value);
+                    const toggle = () => {
+                      if (isNone) setSensitiveTopics([]);
+                      else if (user.sensitiveTopics?.includes(opt.value))
+                        setSensitiveTopics(user.sensitiveTopics.filter((t) => t !== opt.value));
+                      else setSensitiveTopics([...(user.sensitiveTopics || []).filter((t) => t !== 'none'), opt.value]);
+                    };
+                    return (
+                      <Pressable key={opt.value} style={[styles.chip, isSelected && styles.chipSelected]} onPress={toggle}>
+                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt.label}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+              <Pressable style={styles.primaryButton} onPress={() => setShowSensitiveModal(false)}>
+                <Text style={styles.primaryButtonText}>Done</Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
 
         <View style={styles.settingsCard}>
           <Text style={styles.settingLabel}>API Keys</Text>
@@ -778,6 +877,76 @@ const styles = StyleSheet.create({
   },
   saveKeyButtonText: {
     fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  input: {
+    backgroundColor: COLORS.background,
+    borderRadius: BORDER_RADIUS.input,
+    padding: 12,
+    fontSize: 15,
+    color: COLORS.text,
+  },
+  emergencyRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 10,
+  },
+  emergencyInput: {
+    flex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  sensitiveModalCard: {
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  sensitiveModalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  sensitiveChipScroll: {
+    maxHeight: 320,
+    marginVertical: 16,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: COLORS.surface,
+  },
+  chipSelected: {
+    backgroundColor: COLORS.accent,
+  },
+  chipText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+  },
+  chipTextSelected: {
+    color: COLORS.text,
+    fontWeight: '500',
+  },
+  primaryButton: {
+    backgroundColor: COLORS.accent,
+    paddingVertical: 14,
+    borderRadius: BORDER_RADIUS.input,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    fontSize: 16,
     fontWeight: '600',
     color: COLORS.text,
   },

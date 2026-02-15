@@ -12,54 +12,9 @@ import { useEngagementStore } from '../../src/stores/engagementStore';
 import { useEducationStore, userAgeToContentAge } from '../../src/stores/educationStore';
 import { useConversationStore } from '../../src/stores/conversationStore';
 import { useJournalStore } from '../../src/stores/journalStore';
+import { useDailyContentStore } from '../../src/stores/dailyContentStore';
+import { generateDailyContent } from '../../src/services/personalization';
 import { Ionicons } from '@expo/vector-icons';
-
-const AFFIRMATIONS = [
-  "You're doing better than you think.",
-  "It's okay to take things one step at a time.",
-  "Your feelings are valid, all of them.",
-  "You showed up today. That matters.",
-  "Be gentle with yourself — you're doing your best.",
-  "Growth isn't always visible, but it's always happening.",
-  "You are worthy of the love you give to others.",
-  "Today is a new page. Write it however you want.",
-  "The fact that you're here says something beautiful about you.",
-  "Small steps still move you forward.",
-  "You don't have to have it all figured out.",
-  "Breathe. You're exactly where you need to be.",
-  "Your story isn't over. Keep going.",
-  "It's okay to rest. Rest is productive too.",
-  "You are more resilient than you know.",
-  "Let go of what you can't control.",
-  "You deserve the same compassion you give others.",
-  "Every emotion is temporary. This too shall pass.",
-  "You are not your worst day.",
-  "Progress, not perfection.",
-  "You are enough, exactly as you are.",
-  "Tomorrow is a fresh start.",
-  "Your mental health matters as much as your physical health.",
-  "It takes courage to feel. You are brave.",
-  "You are not alone in this.",
-  "One day at a time. One moment at a time.",
-  "You are allowed to set boundaries.",
-  "Your peace is worth protecting.",
-  "You've survived 100% of your worst days.",
-  "Be proud of how far you've come.",
-];
-
-function getGreeting(name: string): { line: string; emoji: string } {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return { line: `Good morning, ${name || 'you'}`, emoji: '🌅' };
-  if (hour >= 12 && hour < 17) return { line: `Good afternoon, ${name || 'you'}`, emoji: '☀️' };
-  if (hour >= 17 && hour < 21) return { line: `Good evening, ${name || 'you'}`, emoji: '🌙' };
-  return { line: `It's late, ${name || 'you'}`, emoji: '💜' };
-}
-
-function getTodayAffirmation(): string {
-  const start = new Date(new Date().getFullYear(), 0, 0).getTime();
-  const dayOfYear = Math.floor((Date.now() - start) / 86400000);
-  return AFFIRMATIONS[dayOfYear % AFFIRMATIONS.length];
-}
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -74,15 +29,47 @@ export default function HomeScreen() {
   const getWeeklySummary = useInsightsStore((s) => s.getWeeklySummary);
   const getNextLesson = useEducationStore((s) => s.getNextLesson);
   const streak = getEngagementStreak();
-  const psychSays = getPsychSays(streak);
   const weeklySummary = getWeeklySummary();
   const nextLesson = getNextLesson(userAgeToContentAge(user.ageGroup));
   const { getTodayChallenge, isTodayChallengeDone, completeTodayChallenge } = useEngagementStore();
+  const { content: dailyContent, isLoading: dailyContentLoading, setContent: setDailyContent, setLoading: setDailyContentLoading, isStale } = useDailyContentStore();
+  const moodTrend = useInsightsStore((s) => s.getWeeklyMoodTrend)();
 
-  const greeting = getGreeting(user.name || '');
-  const affirmation = getTodayAffirmation();
+  useEffect(() => {
+    if (!dailyContent || isStale()) {
+      setDailyContentLoading(true);
+      generateDailyContent({
+        name: user.name || 'there',
+        ageGroup: user.ageGroup ?? 'unknown',
+        recentMoods: moodTrend.map((t) => t.mood),
+        streak,
+        lessonsCompleted: useEducationStore.getState().completedLessons,
+        loveLanguage: user.loveLanguage ?? undefined,
+        sensitiveTopics: user.sensitiveTopics?.length ? user.sensitiveTopics : undefined,
+      })
+        .then((c) => {
+          setDailyContent(c);
+        })
+        .catch(() => {
+          const hour = new Date().getHours();
+          const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 21 ? 'Good evening' : "It's late";
+          setDailyContent({
+            greeting: `${timeGreeting}, ${user.name || 'you'} 💜`,
+            affirmation: "You're doing better than you think.",
+            insight: 'Check in with yourself today. Your feelings matter.',
+            challengeSuggestion: 'Take 5 deep breaths right now.',
+          });
+        })
+        .finally(() => setDailyContentLoading(false));
+    }
+  }, [isStale(), user.name, user.ageGroup, streak]);
+
+  const greetingLine = dailyContent?.greeting ?? `Good morning, ${user.name || 'you'} 💜`;
+  const affirmation = dailyContent?.affirmation ?? "You're doing better than you think.";
+  const psychSays = dailyContent?.insight ?? getPsychSays(streak);
   const todayChallenge = getTodayChallenge();
   const challengeDone = isTodayChallengeDone();
+  const challengeText = dailyContent?.challengeSuggestion ?? todayChallenge.text;
 
   const card0 = useRef(new Animated.Value(0)).current;
   const card1 = useRef(new Animated.Value(0)).current;
@@ -133,10 +120,16 @@ export default function HomeScreen() {
     >
       {/* 1. Greeting + daily affirmation */}
       <Animated.View style={[styles.greetingBlock, slideY(card0)]}>
-        <Text style={styles.greeting}>
-          {greeting.line} {greeting.emoji}
-        </Text>
-        <Text style={styles.affirmation}>{affirmation}</Text>
+        {dailyContentLoading ? (
+          <View style={styles.shimmer}>
+            <Text style={styles.greeting}>Loading your space...</Text>
+          </View>
+        ) : (
+          <>
+            <Text style={styles.greeting}>{greetingLine}</Text>
+            <Text style={styles.affirmation}>{affirmation}</Text>
+          </>
+        )}
       </Animated.View>
 
       {/* 2. Temperature gauge + Check in */}
@@ -173,7 +166,7 @@ export default function HomeScreen() {
       <Animated.View style={[styles.card, slideY(card1)]}>
         <Text style={styles.cardSectionTitle}>Today's challenge</Text>
         <Text style={styles.challengeEmoji}>{todayChallenge.emoji}</Text>
-        <Text style={styles.challengeText}>{todayChallenge.text}</Text>
+        <Text style={styles.challengeText}>{challengeText}</Text>
         {challengeDone ? (
           <View style={styles.challengeDoneWrap}>
             <Ionicons name="checkmark-circle" size={22} color={COLORS.temperature.green} />
@@ -233,7 +226,23 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* 8. Quick actions */}
+      {/* Try an activity */}
+      <Animated.View style={[styles.card, slideY(card3)]}>
+        <Text style={styles.cardSectionTitle}>Try this</Text>
+        <Pressable
+          style={({ pressed }) => [styles.practiceCard, pressed && { opacity: 0.9 }]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/activity?id=breathing');
+          }}
+        >
+          <Text style={styles.practiceEmoji}>🌬️</Text>
+          <Text style={styles.practiceTitle}>Breathe with me</Text>
+          <Text style={styles.practiceSub}>Box breathing — 4 in, 4 hold, 4 out. Calms your nervous system.</Text>
+        </Pressable>
+      </Animated.View>
+
+      {/* Quick actions */}
       <Animated.View style={[styles.quickActions, slideY(card3)]}>
         <Pressable
           style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
@@ -295,6 +304,9 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 24, paddingBottom: 40 },
   greetingBlock: {
     marginBottom: 20,
+  },
+  shimmer: {
+    minHeight: 60,
   },
   greeting: {
     fontSize: 24,

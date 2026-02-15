@@ -26,6 +26,7 @@ import type { CommunicationPreference } from '../../src/stores/userStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { CrisisOverlay } from '../../src/components/CrisisOverlay';
 
 const MIC_BUTTON_SIZE = 80;
 const MIC_BUTTON_SIZE_SMALL = 48;
@@ -76,17 +77,20 @@ function AnimatedMessageRow({
   );
 }
 
-function buildUserContext(): { name: string; ageGroup: string; loveLanguage: string; communicationPreference: string } {
-  const { name, ageGroup, loveLanguage, communicationPreference } = useUserStore.getState();
+function buildUserContext(): { name: string; ageGroup: string; loveLanguage: string; communicationPreference: string; sensitiveTopics?: string[] } {
+  const { name, ageGroup, loveLanguage, communicationPreference, sensitiveTopics } = useUserStore.getState();
   return {
     name: name || 'there',
     ageGroup: ageGroup ?? 'unknown',
     loveLanguage: loveLanguage ?? 'unknown',
     communicationPreference: communicationPreference ?? 'voice',
+    sensitiveTopics: sensitiveTopics?.length ? sensitiveTopics : undefined,
   };
 }
 
 const ANXIETY_PATTERN = /I need to tell|I'm scared to ask|I don't know how to say|scared to tell|nervous to ask|practice (how|what) to say|want to practice/i;
+
+const CRISIS_PATTERN = /want to die|kill myself|end (my )?life|hurt myself|suicide|can't do this anymore|what'?s the point|nobody would care|end it all|don'?t want to (be here|live)/i;
 
 export default function TalkScreen() {
   const insets = useSafeAreaInsets();
@@ -102,6 +106,7 @@ export default function TalkScreen() {
   const dot2 = useRef(new Animated.Value(0)).current;
 
   const user = useUserStore();
+  const [showCrisisOverlay, setShowCrisisOverlay] = useState(false);
   const {
     messages,
     isRecording,
@@ -240,6 +245,7 @@ export default function TalkScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setTextInput('');
     addMessage({ role: 'user', content, isVoice: false });
+    if (CRISIS_PATTERN.test(content)) setShowCrisisOverlay(true);
 
     if (!hasApiKey) {
       addMessage({
@@ -293,6 +299,7 @@ export default function TalkScreen() {
           return;
         }
         addMessage({ role: 'user', content: text, isVoice: true });
+        if (CRISIS_PATTERN.test(text)) setShowCrisisOverlay(true);
         setAiTyping(true);
         const apiMessages = messages
           .concat([{ id: '', role: 'user' as const, content: text, timestamp: new Date(), isVoice: true }])
@@ -359,6 +366,11 @@ export default function TalkScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={0}
     >
+      {showCrisisOverlay && (
+        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+          <CrisisOverlay onDismiss={() => setShowCrisisOverlay(false)} />
+        </View>
+      )}
       {/* Status area */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Your Space</Text>

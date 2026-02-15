@@ -23,6 +23,7 @@ import {
   type CommunicationPreference,
   type LoveLanguage,
   type CircleInvite,
+  type LearningStyle,
 } from '../../src/stores/userStore';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { completeOnboarding as completeOnboardingDb } from '../../src/services/database';
@@ -32,8 +33,16 @@ import {
   scheduleDailyCheckin,
   scheduleEveningReflection,
 } from '../../src/services/notifications';
+import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 9;
+
+const LEARNING_STYLE_OPTIONS: { value: LearningStyle; label: string; emoji: string }[] = [
+  { value: 'reading', label: 'Reading — I like to read and reflect', emoji: '📖' },
+  { value: 'listening', label: 'Listening — I learn by hearing', emoji: '🎧' },
+  { value: 'doing', label: 'Doing — I learn by trying things', emoji: '🎮' },
+  { value: 'talking', label: 'Talking — I learn by discussing', emoji: '💬' },
+];
 
 const PRONOUN_OPTIONS: { value: Pronouns; label: string }[] = [
   { value: 'she/her', label: 'she/her' },
@@ -82,12 +91,16 @@ export default function OnboardingScreen() {
     communicationPreference,
     loveLanguage,
     circleInvite,
+    sensitiveTopics,
+    learningStyle,
     setName,
     setPronouns,
     setAgeGroup,
     setCommunicationPreference,
     setLoveLanguage,
     setCircleInvite,
+    setSensitiveTopics,
+    setLearningStyle,
     completeOnboarding,
   } = useUserStore();
 
@@ -185,8 +198,12 @@ export default function OnboardingScreen() {
       case 5:
         return loveLanguage !== null;
       case 6:
-        return wantsToInvite !== null && (wantsToInvite === false || inviteName.trim().length > 0);
+        return true; // sensitive topics — optional
       case 7:
+        return true; // learning style — optional
+      case 8:
+        return wantsToInvite !== null && (wantsToInvite === false || inviteName.trim().length > 0);
+      case 9:
         return true;
       default:
         return false;
@@ -442,8 +459,64 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 6 — First Connection */}
+            {/* STEP 6 — Sensitive Topics (optional) */}
             {step === 6 && (
+              <View style={styles.step}>
+                <Text style={styles.question}>Is there anything Psych should be extra gentle about?</Text>
+                <Text style={styles.explain}>
+                  This is optional. Skip anything you're not ready to share. It helps Psych use trauma-informed language and never push you.
+                </Text>
+                <View style={styles.chipRow}>
+                  {SENSITIVE_TOPIC_OPTIONS.map((opt) => {
+                    const isNone = opt.value === 'none';
+                    const isSelected = isNone ? sensitiveTopics.length === 0 : sensitiveTopics.includes(opt.value);
+                    const toggle = () => {
+                      if (isNone) setSensitiveTopics([]);
+                      else if (sensitiveTopics.includes(opt.value))
+                        setSensitiveTopics(sensitiveTopics.filter((t) => t !== opt.value));
+                      else setSensitiveTopics([...sensitiveTopics.filter((t) => t !== 'none'), opt.value]);
+                    };
+                    return (
+                      <Pressable
+                        key={opt.value}
+                        style={[styles.chip, isSelected && styles.chipSelected]}
+                        onPress={toggle}
+                      >
+                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt.label}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]} onPress={goNext}>
+                  <Text style={styles.primaryButtonText}>Continue</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {/* STEP 7 — Learning Style (optional) */}
+            {step === 7 && (
+              <View style={styles.step}>
+                <Text style={styles.question}>How do you learn best?</Text>
+                <Text style={styles.explain}>Optional — we'll tailor your manual and activities.</Text>
+                <View style={styles.loveCardList}>
+                  {LEARNING_STYLE_OPTIONS.map((opt) => (
+                    <Pressable
+                      key={opt.value}
+                      style={[styles.loveCard, learningStyle === opt.value && styles.loveCardSelected]}
+                      onPress={() => handleChoiceThenNext(() => setLearningStyle(opt.value))}
+                    >
+                      <Text style={styles.loveCardLabel}>{opt.emoji} {opt.label}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+                <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]} onPress={goNext}>
+                  <Text style={styles.primaryButtonText}>Continue</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {/* STEP 8 — First Connection */}
+            {step === 8 && (
               <View style={styles.step}>
                 <Text style={styles.question}>
                   Would you like to connect someone who cares about you?
@@ -539,8 +612,8 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 7 — Promise (last step: open notification modal directly; never advance to step 8) */}
-            {step === 7 && (
+            {/* STEP 9 — Promise (last step: open notification modal directly) */}
+            {step === 9 && (
               <View style={styles.step}>
                 <Text style={styles.question}>Here's my promise to you:</Text>
                 <View style={styles.promiseList}>

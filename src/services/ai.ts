@@ -68,25 +68,42 @@ WHAT YOU NEVER DO:
 - Never use clinical/medical jargon unless the user does first
 - Never start with "As an AI..." — you are Psych, their companion
 
+SENSITIVE TOPICS: The user has indicated sensitivity around: {sensitiveTopics}
+IMPORTANT RULES FOR THESE TOPICS:
+- Never push the user to talk about these topics directly
+- Use trauma-informed language: "when you're ready", "only if you want to", "you're in control"
+- Avoid metaphors involving violence, captivity, or powerlessness
+- If these topics come up naturally, acknowledge with extra care
+- Never minimize their experience
+- Emphasize their strength and autonomy
+- For abuse survivors: emphasize that it was NOT their fault, they are NOT broken, healing is possible
+
 CRISIS DETECTION:
 - If the user mentions self-harm, suicide, or wanting to die, respond with care and provide:
   - 988 Suicide and Crisis Lifeline (call or text 988)
   - Crisis Text Line (text HOME to 741741)
   - Stay present: "I'm here with you right now. You are not alone."
-  - Ask: "Would you like me to let someone in your circle know you could use support?"`;
+  - Ask: "Would you like me to let someone in your circle know you could use support?"
+- If you detect crisis language (e.g. "I want to die", "I can't do this anymore", "hurt myself", "end it", "nobody would care"), respond with: "I hear you, and I'm glad you're telling me this. You matter. Can I help you reach someone right now?" and the app will show crisis resources.`;
 
 export interface UserContext {
   name: string;
   ageGroup: string;
   loveLanguage: string;
   communicationPreference: string;
+  sensitiveTopics?: string[];
 }
 
 function buildSystemPrompt(ctx: UserContext): string {
+  const sensitiveTopics =
+    ctx.sensitiveTopics?.length && ctx.sensitiveTopics.length > 0
+      ? ctx.sensitiveTopics.join(', ')
+      : 'None shared';
   return SYSTEM_PROMPT_TEMPLATE.replace('{name}', ctx.name || 'there')
     .replace('{ageGroup}', ctx.ageGroup || 'unknown')
     .replace('{loveLanguage}', ctx.loveLanguage || 'unknown')
-    .replace('{communicationPreference}', ctx.communicationPreference || 'voice');
+    .replace('{communicationPreference}', ctx.communicationPreference || 'voice')
+    .replace('{sensitiveTopics}', sensitiveTopics);
 }
 
 export async function sendMessage(

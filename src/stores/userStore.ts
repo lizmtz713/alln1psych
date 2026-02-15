@@ -18,11 +18,18 @@ export type LoveLanguage =
   | 'gifts'
   | 'unknown';
 
+export type LearningStyle = 'reading' | 'listening' | 'doing' | 'talking';
+
 export type Pronouns = 'she/her' | 'he/him' | 'they/them' | 'other';
 
 export interface CircleInvite {
   name: string;
   relationship: 'parent' | 'sibling' | 'friend' | 'partner' | 'other';
+}
+
+export interface EmergencyContact {
+  name: string;
+  phone: string;
 }
 
 interface UserState {
@@ -33,6 +40,12 @@ interface UserState {
   loveLanguage: LoveLanguage | null;
   circleInvite: CircleInvite | null;
   onboardingCompleted: boolean;
+  /** Topics the user wants Psych to be extra gentle about (trauma-informed) */
+  sensitiveTopics: string[];
+  /** How the user learns best — affects lesson/activity presentation */
+  learningStyle: LearningStyle | null;
+  /** Up to 3 contacts for crisis (name + phone) */
+  emergencyContacts: EmergencyContact[];
 
   setName: (name: string) => void;
   setPronouns: (pronouns: Pronouns | null) => void;
@@ -40,6 +53,9 @@ interface UserState {
   setCommunicationPreference: (pref: CommunicationPreference | null) => void;
   setLoveLanguage: (lang: LoveLanguage | null) => void;
   setCircleInvite: (invite: CircleInvite | null) => void;
+  setSensitiveTopics: (topics: string[]) => void;
+  setLearningStyle: (style: LearningStyle | null) => void;
+  setEmergencyContacts: (contacts: EmergencyContact[]) => void;
   completeOnboarding: () => void;
   resetOnboarding: () => void;
 }
@@ -52,6 +68,9 @@ const initialState = {
   loveLanguage: null as LoveLanguage | null,
   circleInvite: null as CircleInvite | null,
   onboardingCompleted: false,
+  sensitiveTopics: [] as string[],
+  learningStyle: null as LearningStyle | null,
+  emergencyContacts: [] as EmergencyContact[],
 };
 
 export const useUserStore = create<UserState>((set) => ({
@@ -63,6 +82,9 @@ export const useUserStore = create<UserState>((set) => ({
   setCommunicationPreference: (communicationPreference) => set({ communicationPreference }),
   setLoveLanguage: (loveLanguage) => set({ loveLanguage }),
   setCircleInvite: (circleInvite) => set({ circleInvite }),
+  setSensitiveTopics: (sensitiveTopics) => set({ sensitiveTopics }),
+  setLearningStyle: (learningStyle) => set({ learningStyle }),
+  setEmergencyContacts: (emergencyContacts) => set({ emergencyContacts }),
   completeOnboarding: () => set({ onboardingCompleted: true }),
   resetOnboarding: () => set(initialState),
 }));
