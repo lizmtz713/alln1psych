@@ -9,7 +9,9 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  RefreshControl,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -41,6 +43,12 @@ export default function CircleScreen() {
   const router = useRouter();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [expandedNudgeId, setExpandedNudgeId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 600);
+  };
 
   const {
     members,
@@ -85,6 +93,7 @@ export default function CircleScreen() {
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}
     >
       {/* Demo badge */}
       {isDemoData && (
@@ -145,7 +154,7 @@ export default function CircleScreen() {
                       </Text>
                     </View>
                     <View style={styles.memberGauge}>
-                      <TemperatureGauge temperature={m.temperature} size="sm" />
+                      <TemperatureGauge temperature={m.temperature} size="sm" pulse />
                       <Text style={styles.memberLabel}>{m.temperatureLabel}</Text>
                     </View>
                     <Ionicons

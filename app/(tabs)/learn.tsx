@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +21,41 @@ export default function LearnScreen() {
   const nextLesson = getNextLesson(contentAge);
   const nextModule = nextLesson ? getModuleByLessonId(nextLesson.id) : null;
   const recommendedModules = MODULES.filter((m) => m.recommendedFor.includes(contentAge));
+  const progressAnims = useRef<Record<string, Animated.Value>>({}).current;
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const s = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, { toValue: 1, duration: 2500, useNativeDriver: true }),
+        Animated.timing(shimmerAnim, { toValue: 0, duration: 2500, useNativeDriver: true }),
+      ])
+    );
+    s.start();
+    return () => s.stop();
+  }, []);
+
+  useEffect(() => {
+    const all = [...recommendedModules, ...MODULES];
+    all.forEach((mod) => {
+      const progress = getModuleProgress(mod.id);
+      const total = mod.lessons.length;
+      if (progress > 0 && total > 0) {
+        const anim = getProgressAnim(mod.id);
+        anim.setValue(0);
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: false,
+        }).start();
+      }
+    });
+  }, []);
+
+  const getProgressAnim = (id: string) => {
+    if (!progressAnims[id]) progressAnims[id] = new Animated.Value(0);
+    return progressAnims[id];
+  };
 
   const handleOpenLesson = (lessonId: string) => {
     router.push(`/lesson/${lessonId}` as const);
@@ -34,7 +70,17 @@ export default function LearnScreen() {
       {/* Daily lesson */}
       <Text style={styles.sectionLabel}>Today's Lesson</Text>
       {nextLesson && nextModule ? (
-        <View style={styles.dailyCard}>
+        <Animated.View
+          style={[
+            styles.dailyCard,
+            {
+              opacity: shimmerAnim.interpolate({
+                inputRange: [0, 0.5, 1],
+                outputRange: [1, 0.92, 1],
+              }),
+            },
+          ]}
+        >
           <Text style={styles.dailyTitle}>{nextLesson.title}</Text>
           <Text style={styles.dailyPreview} numberOfLines={2}>
             {nextModule.description}
@@ -46,7 +92,7 @@ export default function LearnScreen() {
           >
             <Text style={styles.startButtonText}>Start</Text>
           </Pressable>
-        </View>
+        </Animated.View>
       ) : (
         <View style={styles.dailyCard}>
           <Text style={styles.dailyTitle}>You're all caught up</Text>
@@ -83,10 +129,15 @@ export default function LearnScreen() {
               <Text style={styles.moduleMeta}>{total} lessons</Text>
               {progress > 0 && (
                 <View style={styles.progressBarBg}>
-                  <View
+                  <Animated.View
                     style={[
                       styles.progressBarFill,
-                      { width: `${(progress / total) * 100}%` },
+                      {
+                        width: getProgressAnim(mod.id).interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0%', `${(progress / total) * 100}%`],
+                        }) as unknown as string,
+                      },
                     ]}
                   />
                 </View>
@@ -119,10 +170,15 @@ export default function LearnScreen() {
                   <Text style={styles.moduleCount}>{total} lessons</Text>
                   {progress > 0 && (
                     <View style={styles.progressBarBg}>
-                      <View
+                      <Animated.View
                         style={[
                           styles.progressBarFill,
-                          { width: `${(progress / total) * 100}%` },
+                          {
+                            width: getProgressAnim(mod.id).interpolate({
+                              inputRange: [0, 1],
+                              outputRange: ['0%', `${(progress / total) * 100}%`],
+                            }) as unknown as string,
+                          },
                         ]}
                       />
                     </View>
@@ -195,6 +251,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.inputSurface,
     borderRadius: BORDER_RADIUS.card,
     padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
   },
   moduleEmoji: {
     fontSize: 28,
@@ -229,6 +290,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.inputSurface,
     borderRadius: BORDER_RADIUS.card,
     padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
   },
   moduleEmojiLarge: {
     fontSize: 32,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,13 @@ import {
   TextInput,
   ScrollView,
   Linking,
+  Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
-import { useCircleStore, TEMPERATURE_LABELS, type Temperature } from '../../src/stores/circleStore';
+import { useCircleStore, type Temperature } from '../../src/stores/circleStore';
 
 const OPTIONS: { temp: Temperature; emoji: string; label: string }[] = [
   { temp: 'green', emoji: '😊', label: "I'm good" },
@@ -35,17 +37,36 @@ export default function MoodCheckinScreen() {
   const [note, setNote] = useState('');
   const [showNote, setShowNote] = useState(false);
   const [saved, setSaved] = useState(false);
+  const affirmationOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (saved) {
+      Animated.timing(affirmationOpacity, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [saved]);
 
   const handleSave = () => {
     if (!selected) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     addMoodCheckin(selected, note.trim() || undefined);
     setSaved(true);
+  };
+
+  const handleCardPress = (temp: Temperature) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelected(temp);
   };
 
   if (saved && selected) {
     return (
       <View style={[styles.container, { paddingTop: insets.top + 24, paddingBottom: insets.bottom }]}>
-        <Text style={styles.affirmation}>{AFFIRMATIONS[selected]}</Text>
+        <Animated.Text style={[styles.affirmation, { opacity: affirmationOpacity }]}>
+          {AFFIRMATIONS[selected]}
+        </Animated.Text>
         {selected === 'red' && (
           <View style={styles.crisisBox}>
             <Text style={styles.crisisTitle}>If you need to talk to someone now:</Text>
@@ -75,13 +96,14 @@ export default function MoodCheckinScreen() {
         {OPTIONS.map((opt) => (
           <Pressable
             key={opt.temp}
-            style={[
+            style={({ pressed }) => [
               styles.card,
               selected === opt.temp && styles.cardSelected,
               { borderColor: COLORS.temperature[opt.temp] },
               selected === opt.temp && { borderWidth: 3 },
+              pressed && { transform: [{ scale: 0.97 }] },
             ]}
-            onPress={() => setSelected(opt.temp)}
+            onPress={() => handleCardPress(opt.temp)}
           >
             <Text style={styles.emoji}>{opt.emoji}</Text>
             <Text style={styles.cardLabel}>{opt.label}</Text>

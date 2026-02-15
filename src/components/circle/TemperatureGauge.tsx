@@ -18,26 +18,60 @@ interface TemperatureGaugeProps {
   temperature: Temperature;
   size?: Size;
   label?: string;
+  /** When true, show a subtle pulse (e.g. for member dots on Circle) */
+  pulse?: boolean;
 }
 
-export function TemperatureGauge({ temperature, size = 'md', label }: TemperatureGaugeProps) {
+export function TemperatureGauge({ temperature, size = 'md', label, pulse = false }: TemperatureGaugeProps) {
   const color = TEMP_COLORS[temperature];
   const dim = SIZES[size];
   const strokeWidth = size === 'lg' ? 12 : size === 'md' ? 6 : 4;
-  const radius = (dim - strokeWidth) / 2;
-  const colorAnim = useRef(new Animated.Value(1)).current;
+  const glowAnim = useRef(new Animated.Value(0.35)).current;
+  const pulseScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.timing(colorAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  }, [temperature]);
+    const glow = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 0.55,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0.35,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+      ])
+    );
+    glow.start();
+    return () => glow.stop();
+  }, []);
+
+  useEffect(() => {
+    if (!pulse) {
+      pulseScale.setValue(1);
+      return;
+    }
+    const p = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseScale, { toValue: 1.08, duration: 1200, useNativeDriver: true }),
+        Animated.timing(pulseScale, { toValue: 1, duration: 1200, useNativeDriver: true }),
+      ])
+    );
+    p.start();
+    return () => p.stop();
+  }, [pulse]);
 
   return (
-    <View style={[styles.wrap, { width: dim, height: dim }]}>
-      <View
+    <Animated.View
+      style={[
+        styles.wrap,
+        { width: dim, height: dim },
+        pulse && { transform: [{ scale: pulseScale }] },
+      ]}
+    >
+      <Animated.View
         style={[
           styles.ring,
           {
@@ -47,6 +81,10 @@ export function TemperatureGauge({ temperature, size = 'md', label }: Temperatur
             borderWidth: strokeWidth,
             borderColor: color,
             shadowColor: color,
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: glowAnim,
+            shadowRadius: size === 'lg' ? 12 : 8,
+            elevation: 4,
           },
         ]}
       />
@@ -62,7 +100,7 @@ export function TemperatureGauge({ temperature, size = 'md', label }: Temperatur
           {label}
         </Text>
       )}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -73,10 +111,6 @@ const styles = StyleSheet.create({
   },
   ring: {
     position: 'absolute',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 4,
   },
   label: {
     marginTop: 6,

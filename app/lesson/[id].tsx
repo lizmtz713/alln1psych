@@ -17,6 +17,7 @@ import {
   useEducationStore,
   userAgeToContentAge,
 } from '../../src/stores/educationStore';
+import * as Haptics from 'expo-haptics';
 import {
   getLessonById,
   getModuleByLessonId,
@@ -78,6 +79,7 @@ export default function LessonScreen() {
   const lessonIndex = module.lessons.findIndex((l) => l.id === lesson.id) + 1;
 
   const handleComplete = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     saveReflection(lesson.id, reflectionText);
     completeLesson(lesson.id);
     router.back();

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,10 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Animated,
+  RefreshControl,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -76,9 +79,34 @@ export default function MeScreen() {
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const [hasStoredKey, setHasStoredKey] = useState(false);
+  const [toast, setToast] = useState<{ title: string; emoji: string } | null>(null);
+  const prevUnlockedIds = useRef<Set<string>>(new Set());
 
   const recentEntries = getRecentEntries(20);
   const achievements = getAchievements();
+  const unlockedIds = new Set(achievements.filter((a) => a.unlocked).map((a) => a.id));
+
+  useEffect(() => {
+    const nextIds = new Set(achievements.filter((a) => a.unlocked).map((a) => a.id));
+    const prev = prevUnlockedIds.current;
+    const newlyUnlocked = achievements.find((a) => a.unlocked && !prev.has(a.id));
+    if (newlyUnlocked) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setToast({ title: newlyUnlocked.title, emoji: newlyUnlocked.emoji });
+      const t = setTimeout(() => setToast(null), 3000);
+      prevUnlockedIds.current = nextIds;
+      return () => clearTimeout(t);
+    }
+    prevUnlockedIds.current = nextIds;
+  }, [achievements]);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setRefreshing(true);
+    await new Promise((r) => setTimeout(r, 600));
+    setRefreshing(false);
+  };
   const moodTrend = getWeeklyMoodTrend();
   const streak = getCheckInStreak();
   const conversationCount = getConversationCountThisWeek();
@@ -174,10 +202,17 @@ export default function MeScreen() {
   };
 
   return (
+    <>
+    {toast && (
+      <View style={styles.toast} pointerEvents="none">
+        <Text style={styles.toastText}>{toast.emoji} Achievement unlocked: {toast.title}!</Text>
+      </View>
+    )}
     <ScrollView
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}
     >
       {/* Profile header */}
       <View style={styles.profile}>
@@ -297,17 +332,8 @@ export default function MeScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Milestones</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.achievementScroll}>
-          {achievements.map((a) => (
-            <View
-              key={a.id}
-              style={[styles.achievementBadge, !a.unlocked && styles.achievementLocked]}
-            >
-              <Text style={styles.achievementEmoji}>{a.emoji}</Text>
-              <Text style={[styles.achievementTitle, !a.unlocked && styles.achievementTitleLocked]} numberOfLines={1}>
-                {a.title}
-              </Text>
-              {!a.unlocked && <Ionicons name="lock-closed" size={14} color={COLORS.textMuted} style={styles.achievementLock} />}
-            </View>
+          {achievements.map((a, i) => (
+            <AchievementBadge key={a.id} achievement={a} index={i} />
           ))}
         </ScrollView>
       </View>
@@ -429,9 +455,62 @@ export default function MeScreen() {
   );
 }
 
+function AchievementBadge({
+  achievement,
+  index,
+}: {
+  achievement: { id: string; title: string; emoji: string; unlocked: boolean };
+  index: number;
+}) {
+  const scale = useRef(new Animated.Value(achievement.unlocked ? 1 : 0.9)).current;
+  const hasAnimated = useRef(false);
+  useEffect(() => {
+    if (achievement.unlocked && !hasAnimated.current) {
+      hasAnimated.current = true;
+      Animated.sequence([
+        Animated.spring(scale, { toValue: 1.1, useNativeDriver: true, speed: 12, bounciness: 8 }),
+        Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 12, bounciness: 6 }),
+      ]).start();
+    }
+  }, [achievement.unlocked]);
+  return (
+    <Animated.View
+      style={[styles.achievementBadge, !achievement.unlocked && styles.achievementLocked, { transform: [{ scale }] }]}
+    >
+      <Text style={styles.achievementEmoji}>{achievement.emoji}</Text>
+      <Text style={[styles.achievementTitle, !achievement.unlocked && styles.achievementTitleLocked]} numberOfLines={1}>
+        {achievement.title}
+      </Text>
+      {!achievement.unlocked && <Ionicons name="lock-closed" size={14} color={COLORS.textMuted} style={styles.achievementLock} />}
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   content: { paddingHorizontal: 24, paddingBottom: 48 },
+  toast: {
+    position: 'absolute',
+    top: 56,
+    left: 20,
+    right: 20,
+    zIndex: 1000,
+    backgroundColor: COLORS.surface,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderRadius: BORDER_RADIUS.card,
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    alignItems: 'center',
+  },
+  toastText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
   profile: {
     paddingVertical: 24,
   },

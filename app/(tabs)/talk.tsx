@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import * as Voice from '../../src/services/voice';
 import type { CommunicationPreference } from '../../src/stores/userStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 
 const MIC_BUTTON_SIZE = 80;
 const MIC_BUTTON_SIZE_SMALL = 48;
@@ -41,6 +42,38 @@ function getFirstGreeting(name: string, communicationPreference: CommunicationPr
 
 function formatTime(date: Date): string {
   return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+function AnimatedMessageRow({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style: (string | object)[];
+}) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(10)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 280,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+  return (
+    <Animated.View
+      style={[style, { opacity, transform: [{ translateY }] }]}
+    >
+      {children}
+    </Animated.View>
+  );
 }
 
 function buildUserContext(): { name: string; ageGroup: string; loveLanguage: string; communicationPreference: string } {
@@ -62,6 +95,11 @@ export default function TalkScreen() {
   const textInputRef = useRef<TextInput>(null);
   const breatheAnim = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const ringScale = useRef(new Animated.Value(1)).current;
+  const spinAnim = useRef(new Animated.Value(0)).current;
+  const dot0 = useRef(new Animated.Value(0)).current;
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
 
   const user = useUserStore();
   const {
@@ -104,39 +142,102 @@ export default function TalkScreen() {
     return () => clearTimeout(t);
   }, [messages.length, isAiTyping]);
 
-  // Idle mic breathing animation
+  // Idle mic breathing: 1.0 → 1.05 → 1.0, 3s loop
   useEffect(() => {
     if (isRecording || isProcessing) return;
     const anim = Animated.loop(
       Animated.sequence([
-        Animated.timing(breatheAnim, { toValue: 1.04, duration: 1200, useNativeDriver: true }),
-        Animated.timing(breatheAnim, { toValue: 1, duration: 1200, useNativeDriver: true }),
+        Animated.timing(breatheAnim, { toValue: 1.05, duration: 1500, useNativeDriver: true }),
+        Animated.timing(breatheAnim, { toValue: 1, duration: 1500, useNativeDriver: true }),
       ])
     );
     anim.start();
     return () => anim.stop();
   }, [isRecording, isProcessing]);
 
-  // Recording pulse (red)
+  // Recording pulse + expanding ring
   useEffect(() => {
     if (!isRecording) {
       pulseAnim.setValue(1);
+      ringScale.setValue(1);
       return;
     }
-    const anim = Animated.loop(
+    const pulse = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.08, duration: 600, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1.12, duration: 600, useNativeDriver: true }),
         Animated.timing(pulseAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
       ])
     );
+    const ring = Animated.loop(
+      Animated.sequence([
+        Animated.timing(ringScale, { toValue: 1.4, duration: 800, useNativeDriver: true }),
+        Animated.timing(ringScale, { toValue: 1, duration: 0, useNativeDriver: true }),
+      ])
+    );
+    pulse.start();
+    ring.start();
+    return () => {
+      pulse.stop();
+      ring.stop();
+    };
+  }, [isRecording]);
+
+  // Processing: spin
+  useEffect(() => {
+    if (!isProcessing) {
+      spinAnim.setValue(0);
+      return;
+    }
+    const anim = Animated.loop(
+      Animated.timing(spinAnim, {
+        toValue: 1,
+        duration: 1200,
+        useNativeDriver: true,
+      })
+    );
     anim.start();
     return () => anim.stop();
-  }, [isRecording]);
+  }, [isProcessing]);
+
+  const spinInterpolate = spinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  // Typing dots: staggered bounce (iMessage-like)
+  useEffect(() => {
+    if (!isAiTyping) {
+      dot0.setValue(0);
+      dot1.setValue(0);
+      dot2.setValue(0);
+      return;
+    }
+    const bounce = (val: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(val, { toValue: 1, duration: 200, useNativeDriver: true }),
+          Animated.timing(val, { toValue: 0, duration: 200, useNativeDriver: true }),
+        ]),
+        { iterations: -1 }
+      );
+    const a0 = bounce(dot0, 0);
+    const a1 = bounce(dot1, 120);
+    const a2 = bounce(dot2, 240);
+    a0.start();
+    a1.start();
+    a2.start();
+    return () => {
+      a0.stop();
+      a1.stop();
+      a2.stop();
+    };
+  }, [isAiTyping]);
 
   const handleSendText = async () => {
     const content = textInput.trim();
     if (!content) return;
-
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setTextInput('');
     addMessage({ role: 'user', content, isVoice: false });
 
@@ -226,6 +327,7 @@ export default function TalkScreen() {
       return;
     }
     console.log('[Talk] before startRecording');
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       setRecording(true);
       await Voice.startRecording();
@@ -280,7 +382,7 @@ export default function TalkScreen() {
         showsVerticalScrollIndicator={false}
       >
         {displayMessages.map((msg) => (
-          <View
+          <AnimatedMessageRow
             key={msg.id}
             style={[styles.messageRow, msg.role === 'user' ? styles.messageRowUser : styles.messageRowAi]}
           >
@@ -296,7 +398,7 @@ export default function TalkScreen() {
               </Text>
               <Text style={styles.timestamp}>{formatTime(msg.timestamp)}</Text>
             </View>
-          </View>
+          </AnimatedMessageRow>
         ))}
         {isAiTyping && (
           <View style={[styles.messageRow, styles.messageRowAi]}>
@@ -306,8 +408,23 @@ export default function TalkScreen() {
             </View>
             <View style={[styles.bubble, styles.bubbleAi, styles.typingBubble]}>
               <View style={styles.typingDots}>
-                {[0, 1, 2].map((i) => (
-                  <View key={i} style={styles.typingDot} />
+                {[dot0, dot1, dot2].map((d, i) => (
+                  <Animated.View
+                    key={i}
+                    style={[
+                      styles.typingDot,
+                      {
+                        transform: [
+                          {
+                            translateY: d.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0, -5],
+                            }),
+                          },
+                        ],
+                      },
+                    ]}
+                  />
                 ))}
               </View>
             </View>
@@ -366,10 +483,27 @@ export default function TalkScreen() {
                 style={[
                   styles.micWrap,
                   {
-                    transform: [{ scale: isRecording ? pulseAnim : breatheAnim }],
+                    transform: [
+                      { scale: isRecording ? pulseAnim : breatheAnim },
+                      isProcessing ? { rotate: spinInterpolate } : { rotate: '0deg' },
+                    ],
                   },
                 ]}
               >
+                {isRecording && (
+                  <Animated.View
+                    style={[
+                      styles.micRing,
+                      {
+                        transform: [{ scale: ringScale }],
+                        opacity: ringScale.interpolate({
+                          inputRange: [1, 1.4],
+                          outputRange: [0.5, 0],
+                        }),
+                      },
+                    ]}
+                  />
+                )}
                 <Pressable
                   onPress={handleMicPress}
                   style={[
@@ -540,6 +674,16 @@ const styles = StyleSheet.create({
   micWrap: {
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+  },
+  micRing: {
+    position: 'absolute',
+    width: MIC_BUTTON_SIZE,
+    height: MIC_BUTTON_SIZE,
+    borderRadius: MIC_BUTTON_SIZE / 2,
+    borderWidth: 3,
+    borderColor: COLORS.recording,
+    backgroundColor: 'transparent',
   },
   micButton: {
     width: MIC_BUTTON_SIZE,

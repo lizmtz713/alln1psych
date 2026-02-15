@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import * as Haptics from 'expo-haptics';
 import {
   useUserStore,
   type Pronouns,
@@ -72,6 +73,7 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideX = useRef(new Animated.Value(0)).current;
 
   const { user } = useAuth();
   const {
@@ -99,14 +101,22 @@ export default function OnboardingScreen() {
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const setNotificationsCheckIn = useSettingsStore((s) => s.setNotificationsCheckIn);
 
-  const triggerTransition = (direction: 'in' | 'out', onDone?: () => void) => {
-    Animated.timing(fadeAnim, {
-      toValue: direction === 'out' ? 0 : 1,
-      duration: 180,
+  const triggerTransition = (direction: 'next' | 'prev', onDone?: () => void) => {
+    const toValue = direction === 'next' ? -60 : 60;
+    Animated.spring(slideX, {
+      toValue,
       useNativeDriver: true,
+      speed: 18,
+      bounciness: 12,
     }).start(() => {
+      slideX.setValue(direction === 'next' ? 60 : -60);
       onDone?.();
-      if (direction === 'in') fadeAnim.setValue(1);
+      Animated.spring(slideX, {
+        toValue: 0,
+        useNativeDriver: true,
+        speed: 18,
+        bounciness: 12,
+      }).start();
     });
   };
 
@@ -131,11 +141,7 @@ export default function OnboardingScreen() {
 
   const goNext = async () => {
     if (step < TOTAL_STEPS) {
-      triggerTransition('out', () => {
-        setStep((s) => s + 1);
-        fadeAnim.setValue(0);
-        triggerTransition('in');
-      });
+      triggerTransition('next', () => setStep((s) => s + 1));
     } else {
       setShowNotificationPrompt(true);
     }
@@ -232,7 +238,9 @@ export default function OnboardingScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View style={[styles.stepContent, { opacity: fadeAnim }]}>
+          <Animated.View
+            style={[styles.stepContent, { transform: [{ translateX: slideX }] }]}
+          >
             {/* STEP 1 — Welcome */}
             {step === 1 && (
               <View style={styles.step}>
@@ -242,7 +250,10 @@ export default function OnboardingScreen() {
                 </Text>
                 <Pressable
                   style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
-                  onPress={goNext}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    goNext();
+                  }}
                 >
                   <Text style={styles.primaryButtonText}>Let's get to know each other</Text>
                 </Pressable>

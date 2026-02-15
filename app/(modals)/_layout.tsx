@@ -5,11 +5,12 @@ export default function ModalsLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animation: 'fade',
-        gestureEnabled: false,
+        animation: 'slide_from_bottom',
+        gestureEnabled: true,
+        animationTypeForReplace: 'push',
       }}
     >
-      <Stack.Screen name="onboarding" />
+      <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
       <Stack.Screen name="mood-checkin" options={{ presentation: 'modal' }} />
       <Stack.Screen name="invite-circle" options={{ presentation: 'modal' }} />
       <Stack.Screen name="new-journal" options={{ presentation: 'modal' }} />

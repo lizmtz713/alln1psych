@@ -1,6 +1,8 @@
-import { StyleSheet, Text, View, Pressable, ScrollView } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { StyleSheet, Text, View, Pressable, ScrollView, Animated, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
 import { useCircleStore } from '../../src/stores/circleStore';
@@ -9,6 +11,33 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { myTemperature, myTemperatureLabel, members } = useCircleStore();
+  const card0 = useRef(new Animated.Value(0)).current;
+  const card1 = useRef(new Animated.Value(0)).current;
+  const card2 = useRef(new Animated.Value(0)).current;
+  const card3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const anim = (v: Animated.Value, delay: number) =>
+      Animated.timing(v, {
+        toValue: 1,
+        duration: 400,
+        delay,
+        useNativeDriver: true,
+      });
+    Animated.parallel([
+      anim(card0, 0),
+      anim(card1, 100),
+      anim(card2, 200),
+      anim(card3, 300),
+    ]).start();
+  }, []);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 600);
+  };
 
   const needsCheckIn = members.filter(
     (m) => m.temperature === 'orange' || m.temperature === 'red'
@@ -20,13 +49,23 @@ export default function HomeScreen() {
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}
     >
       <Text style={styles.welcome}>Welcome to your space.</Text>
       <Text style={styles.sub}>Everything here is just for you.</Text>
 
       {/* Temperature summary card */}
-      <View style={styles.card}>
-        <View style={styles.cardRow}>
+      <Animated.View
+        style={[
+          styles.card,
+          styles.tempCard,
+          {
+            opacity: card0,
+            transform: [{ translateY: card0.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
+          },
+        ]}
+      >
+        <View style={[styles.cardRow]}>
           <TemperatureGauge temperature={myTemperature} size="md" />
           <View style={styles.cardTextWrap}>
             <Text style={styles.cardTitle}>You're feeling</Text>
@@ -34,15 +73,18 @@ export default function HomeScreen() {
           </View>
         </View>
         <Pressable
-          style={styles.checkInButton}
-          onPress={() => router.push('/(modals)/mood-checkin')}
+          style={({ pressed }) => [styles.checkInButton, pressed && { transform: [{ scale: 0.96 }] }]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/mood-checkin');
+          }}
         >
           <Text style={styles.checkInButtonText}>Check in</Text>
         </Pressable>
-      </View>
+      </Animated.View>
 
       {/* Circle preview */}
-      <View style={styles.section}>
+      <Animated.View style={[styles.section, { opacity: card1, transform: [{ translateY: card1.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }]}>
         <Text style={styles.sectionTitle}>Your circle</Text>
         {members.length === 0 ? (
           <Text style={styles.muted}>No one in your circle yet.</Text>
@@ -52,31 +94,39 @@ export default function HomeScreen() {
               {members.length} {members.length === 1 ? 'person' : 'people'} in your circle
             </Text>
             {firstAlert && (
-              <View style={styles.alert}>
+              <Animated.View style={[styles.alert, styles.alertGlow]}>
                 <Text style={styles.alertText}>
                   {firstAlert.name} could use a check-in
                 </Text>
                 <Pressable
-                  style={styles.alertButton}
-                  onPress={() => router.push('/(tabs)/circle')}
+                  style={({ pressed }) => [styles.alertButton, pressed && { opacity: 0.9 }]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push('/(tabs)/circle');
+                  }}
                 >
                   <Text style={styles.alertButtonText}>See Circle</Text>
                 </Pressable>
-              </View>
+              </Animated.View>
             )}
           </>
         )}
-      </View>
+      </Animated.View>
 
       {/* Practice a conversation */}
+      <Animated.View style={{ opacity: card2, transform: [{ translateY: card2.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }}>
       <Pressable
-        style={styles.practiceCard}
-        onPress={() => router.push('/(modals)/role-play')}
+        style={({ pressed }) => [styles.practiceCard, pressed && { transform: [{ scale: 0.98 }] }]}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.push('/(modals)/role-play');
+        }}
       >
         <Text style={styles.practiceEmoji}>🎭</Text>
         <Text style={styles.practiceTitle}>Practice a conversation</Text>
         <Text style={styles.practiceSub}>Rehearse tough talks with AI before the real thing.</Text>
       </Pressable>
+      </Animated.View>
 
       <Text style={styles.prompt}>How are you feeling today?</Text>
     </ScrollView>
@@ -102,6 +152,9 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.card,
     padding: 20,
     marginBottom: 24,
+  },
+  tempCard: {
+    overflow: 'hidden',
   },
   cardRow: {
     flexDirection: 'row',
@@ -148,6 +201,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  alertGlow: {
+    shadowColor: COLORS.temperature.orange,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
   },
   alertText: {
     fontSize: 15,
