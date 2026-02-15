@@ -7,6 +7,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarShowLabel: true,
         tabBarStyle: {
           backgroundColor: COLORS.surface,
           borderTopColor: COLORS.surface,
@@ -20,7 +21,11 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused === true ? 'home' : 'home-outline'}
+              size={typeof size === 'number' ? size : 24}
+              color={color}
+            />
           ),
         }}
       />
@@ -29,7 +34,11 @@ export default function TabLayout() {
         options={{
           title: 'Talk',
           tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={focused ? 'mic' : 'mic-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused === true ? 'mic' : 'mic-outline'}
+              size={typeof size === 'number' ? size : 24}
+              color={color}
+            />
           ),
         }}
       />
@@ -38,7 +47,11 @@ export default function TabLayout() {
         options={{
           title: 'Learn',
           tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={focused ? 'book' : 'book-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused === true ? 'book' : 'book-outline'}
+              size={typeof size === 'number' ? size : 24}
+              color={color}
+            />
           ),
         }}
       />
@@ -47,7 +60,11 @@ export default function TabLayout() {
         options={{
           title: 'Circle',
           tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused === true ? 'heart' : 'heart-outline'}
+              size={typeof size === 'number' ? size : 24}
+              color={color}
+            />
           ),
         }}
       />
@@ -56,7 +73,11 @@ export default function TabLayout() {
         options={{
           title: 'Me',
           tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />
+            <Ionicons
+              name={focused === true ? 'person' : 'person-outline'}
+              size={typeof size === 'number' ? size : 24}
+              color={color}
+            />
           ),
         }}
       />
