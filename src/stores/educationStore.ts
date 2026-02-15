@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type { Lesson } from '../data/educationContent';
 import { MODULES } from '../data/educationContent';
+import { useAuthStore } from './authStore';
+import * as database from '../services/database';
 
 export type ContentAgeGroup =
   | 'under13'
@@ -38,7 +40,7 @@ interface EducationState {
   reflections: Record<string, string>;
   streakDays: number;
   lastLessonDate: Date | null;
-  completeLesson: (lessonId: string) => void;
+  completeLesson: (lessonId: string, reflection?: string) => void;
   saveReflection: (lessonId: string, text: string) => void;
   setLessonProgress: (lessonId: string, percent: number) => void;
   getModuleProgress: (moduleId: string) => number;
@@ -53,8 +55,10 @@ export const useEducationStore = create<EducationState>((set, get) => ({
   streakDays: 0,
   lastLessonDate: null,
 
-  completeLesson: (lessonId) => {
+  completeLesson: (lessonId, reflection) => {
     const now = new Date();
+    const userId = useAuthStore.getState().userId;
+    if (userId) database.completeLesson(userId, lessonId, reflection).catch(() => {});
     set((state) => {
       const already = state.completedLessons.includes(lessonId);
       if (already) return state;

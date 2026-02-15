@@ -1,1 +1,34 @@
-{"expo":{"name":"alln1-psych","slug":"alln1-psych","version":"1.0.0","orientation":"portrait","icon":"./assets/icon.png","userInterfaceStyle":"dark","newArchEnabled":true,"splash":{"image":"./assets/splash-icon.png","resizeMode":"contain","backgroundColor":"#0F0B1E"},"ios":{"supportsTablet":true},"android":{"adaptiveIcon":{"foregroundImage":"./assets/adaptive-icon.png","backgroundColor":"#0F0B1E"},"edgeToEdgeEnabled":true,"predictiveBackGestureEnabled":false},"web":{"favicon":"./assets/favicon.png"},"scheme":"alln1-psych"}}
+{
+  "expo": {
+    "name": "alln1-psych",
+    "slug": "alln1-psych",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F0B1E"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F0B1E"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "alln1-psych",
+    "plugins": [
+      "expo-web-browser"
+    ]
+  }
+}

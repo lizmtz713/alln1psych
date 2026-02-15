@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { useAuthStore } from './authStore';
+import * as database from '../services/database';
 
 export type JournalMood = 'green' | 'yellow' | 'orange' | 'red';
 
@@ -30,25 +32,38 @@ export const useJournalStore = create<JournalState>((set, get) => ({
 
   addEntry: (content, options = {}) => {
     const { mood, source = 'manual', conversationId } = options;
-    set((state) => ({
-      entries: [
-        {
-          id: genId(),
-          content: content.trim(),
-          mood,
-          source,
-          conversationId,
-          createdAt: new Date(),
-        },
-        ...state.entries,
-      ],
-    }));
+    const userId = useAuthStore.getState().userId;
+    const trimmed = content.trim();
+    const createdAt = new Date();
+
+    const addLocal = (id: string) =>
+      set((state) => ({
+        entries: [
+          { id, content: trimmed, mood, source, conversationId, createdAt },
+          ...state.entries,
+        ],
+      }));
+
+    if (userId) {
+      database
+        .addJournalEntry(userId, trimmed, { mood, source, conversation_id: conversationId })
+        .then((res) => {
+          if ('id' in res) addLocal(res.id);
+          else addLocal(genId());
+        })
+        .catch(() => addLocal(genId()));
+    } else {
+      addLocal(genId());
+    }
   },
 
-  deleteEntry: (id) =>
+  deleteEntry: (id) => {
+    const userId = useAuthStore.getState().userId;
+    if (userId) database.deleteJournalEntry(id).catch(() => {});
     set((state) => ({
       entries: state.entries.filter((e) => e.id !== id),
-    })),
+    }));
+  },
 
   getRecentEntries: (count) => {
     return get().entries.slice(0, count);

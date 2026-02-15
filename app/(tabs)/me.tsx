@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { useAuth } from '../../src/providers/AuthProvider';
 import { useUserStore } from '../../src/stores/userStore';
 import { useJournalStore } from '../../src/stores/journalStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
@@ -53,6 +54,7 @@ const APP_VERSION = '1.0.0';
 export default function MeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { signOut } = useAuth();
   const user = useUserStore();
   const entries = useJournalStore((s) => s.entries);
   const getRecentEntries = useJournalStore((s) => s.getRecentEntries);
@@ -362,6 +364,16 @@ export default function MeScreen() {
           <Pressable style={styles.settingRow} onPress={handleClearAllData}>
             <Text style={[styles.settingLabel, styles.settingDanger]}>Clear all data</Text>
             <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+          </Pressable>
+          <Pressable
+            style={styles.settingRow}
+            onPress={async () => {
+              await signOut();
+              router.replace('/(auth)/sign-in');
+            }}
+          >
+            <Text style={styles.settingLabel}>Sign out</Text>
+            <Ionicons name="log-out-outline" size={18} color={COLORS.textMuted} />
           </Pressable>
           <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
             <View>

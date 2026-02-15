@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { useAuthStore } from './authStore';
+import * as database from '../services/database';
 
 export type Temperature = 'green' | 'yellow' | 'orange' | 'red';
 
@@ -129,23 +131,41 @@ export const useCircleStore = create<CircleState>((set) => ({
     },
   ],
 
-  addMember: (member) =>
-    set((state) => ({
-      members: [
-        ...state.members,
-        {
-          ...member,
-          id: genId(),
-          temperature: 'green',
-          temperatureLabel: TEMPERATURE_LABELS.green,
-          lastUpdated: new Date(),
-          addedAt: new Date(),
-        },
-      ],
-    })),
+  addMember: (member) => {
+    const userId = useAuthStore.getState().userId;
+    const now = new Date();
+    const newMember = {
+      ...member,
+      id: genId(),
+      temperature: 'green' as Temperature,
+      temperatureLabel: TEMPERATURE_LABELS.green,
+      lastUpdated: now,
+      addedAt: now,
+    };
+    set((state) => ({ members: [...state.members, newMember] }));
+    if (userId) {
+      database
+        .addCircleMember(userId, {
+          member_name: member.name,
+          relationship: member.relationship,
+          contact_method: member.contactMethod,
+          sharing_level: member.sharingLevel,
+        })
+        .then((res) => {
+          if ('id' in res) {
+            set((state) => ({
+              members: state.members.map((m) => (m.id === newMember.id ? { ...m, id: res.id } : m)),
+            }));
+          }
+        })
+        .catch(() => {});
+    }
+  },
 
-  removeMember: (id) =>
-    set((state) => ({ members: state.members.filter((m) => m.id !== id) })),
+  removeMember: (id) => {
+    useAuthStore.getState().userId && database.removeCircleMember(id).catch(() => {});
+    set((state) => ({ members: state.members.filter((m) => m.id !== id) }));
+  },
 
   updateMemberTemperature: (id, temperature) =>
     set((state) => ({
@@ -169,23 +189,27 @@ export const useCircleStore = create<CircleState>((set) => ({
       myTemperatureUpdatedAt: new Date(),
     }),
 
-  addMoodCheckin: (mood, note) =>
+  addMoodCheckin: (mood, note) => {
+    const userId = useAuthStore.getState().userId;
+    const label = TEMPERATURE_LABELS[mood];
+    const entry = {
+      id: genId(),
+      mood,
+      label,
+      note,
+      timestamp: new Date(),
+    };
     set((state) => ({
-      moodHistory: [
-        {
-          id: genId(),
-          mood,
-          label: TEMPERATURE_LABELS[mood],
-          note,
-          timestamp: new Date(),
-        },
-        ...state.moodHistory,
-      ],
+      moodHistory: [entry, ...state.moodHistory],
       myTemperature: mood,
-      myTemperatureLabel: TEMPERATURE_LABELS[mood],
+      myTemperatureLabel: label,
       myTemperatureNote: note ?? '',
       myTemperatureUpdatedAt: new Date(),
-    })),
+    }));
+    if (userId) {
+      database.addMoodCheckin(userId, mood, label, note).catch(() => {});
+    }
+  },
 
   addNudge: (memberName, message) =>
     set((state) => ({

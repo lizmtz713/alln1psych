@@ -22,6 +22,8 @@ import {
   type LoveLanguage,
   type CircleInvite,
 } from '../../src/stores/userStore';
+import { useAuth } from '../../src/providers/AuthProvider';
+import { completeOnboarding as completeOnboardingDb } from '../../src/services/database';
 
 const TOTAL_STEPS = 7;
 
@@ -64,6 +66,7 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState(1);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
+  const { user } = useAuth();
   const {
     name,
     pronouns,
@@ -98,7 +101,7 @@ export default function OnboardingScreen() {
     });
   };
 
-  const goNext = () => {
+  const goNext = async () => {
     if (step < TOTAL_STEPS) {
       triggerTransition('out', () => {
         setStep((s) => s + 1);
@@ -110,6 +113,15 @@ export default function OnboardingScreen() {
         setCircleInvite({ name: inviteName.trim(), relationship: inviteRelationship });
       } else {
         setCircleInvite(null);
+      }
+      if (user?.id) {
+        await completeOnboardingDb(user.id, {
+          name: name.trim(),
+          pronouns: pronouns ?? undefined,
+          age_group: ageGroup,
+          communication_preference: communicationPreference,
+          love_language: loveLanguage,
+        });
       }
       completeOnboarding();
       router.replace('/(tabs)');
