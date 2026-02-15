@@ -7,6 +7,10 @@ import {
   Pressable,
   TextInput,
   Linking,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -59,6 +63,7 @@ export default function LessonScreen() {
   const contentAge = userAgeToContentAge(ageGroup);
   const { completeLesson, saveReflection, reflections, isLessonCompleted } = useEducationStore();
   const [reflectionText, setReflectionText] = useState(reflections[id ?? ''] ?? '');
+  const scrollRef = React.useRef<ScrollView>(null);
 
   const lesson = id ? getLessonById(id) : null;
   const module = lesson ? getModuleByLessonId(lesson.id) : null;
@@ -86,7 +91,11 @@ export default function LessonScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <KeyboardAvoidingView
+      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={100}
+    >
       <View style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
@@ -96,11 +105,14 @@ export default function LessonScreen() {
         </Text>
       </View>
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          ref={scrollRef}
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
         <Text style={styles.title}>{lesson.title}</Text>
         <View style={styles.durationBadge}>
           <Text style={styles.durationText}>{lesson.duration} min read</Text>
@@ -125,6 +137,9 @@ export default function LessonScreen() {
               value={reflectionText}
               onChangeText={setReflectionText}
               multiline
+              returnKeyType="done"
+              onSubmitEditing={() => Keyboard.dismiss()}
+              onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300)}
             />
           </View>
         )}
@@ -135,8 +150,9 @@ export default function LessonScreen() {
         >
           <Text style={styles.completeButtonText}>{completed ? 'Done' : 'Complete'}</Text>
         </Pressable>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 

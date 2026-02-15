@@ -9,14 +9,18 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { Audio } from 'expo-av';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { useRolePlayStore, type RolePlayDifficulty } from '../../src/stores/rolePlayStore';
 import { sendRolePlayMessage, getDebrief } from '../../src/services/roleplay';
 import { hasOpenAIKey } from '../../src/services/ai';
+import * as Voice from '../../src/services/voice';
 
 const ROLE_PLAY_ACCENT = COLORS.rolePlayAccent;
 
@@ -40,7 +44,12 @@ function formatTime(date: Date): string {
 export default function RolePlayScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { sessionId, scenario: scenarioParam } = useLocalSearchParams<{ sessionId?: string; scenario?: string }>();
+  const { sessionId, scenario: scenarioParam, character: characterParam, difficulty: difficultyParam } = useLocalSearchParams<{
+    sessionId?: string;
+    scenario?: string;
+    character?: string;
+    difficulty?: string;
+  }>();
   const scrollRef = useRef<ScrollView>(null);
 
   const {
@@ -63,6 +72,8 @@ export default function RolePlayScreen() {
   const [error, setError] = useState<string | null>(null);
   const [hasApiKey, setHasApiKey] = useState(false);
   const [viewingPastId, setViewingPastId] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessingVoice, setIsProcessingVoice] = useState(false);
 
   useEffect(() => {
     hasOpenAIKey().then(setHasApiKey);
@@ -75,6 +86,14 @@ export default function RolePlayScreen() {
   useEffect(() => {
     if (scenarioParam) setScenario(scenarioParam);
   }, [scenarioParam]);
+  useEffect(() => {
+    if (characterParam) setCharacter(characterParam);
+  }, [characterParam]);
+  useEffect(() => {
+    if (difficultyParam && (difficultyParam === 'supportive' || difficultyParam === 'neutral' || difficultyParam === 'challenging')) {
+      setDifficulty(difficultyParam);
+    }
+  }, [difficultyParam]);
 
   useEffect(() => {
     if (currentSession?.messages.length) {
@@ -131,8 +150,66 @@ export default function RolePlayScreen() {
     }
   };
 
+  const handleMicPress = async () => {
+    if (!currentSession || currentSession.phase !== 'practice' || !hasApiKey || !Voice.hasVoiceSupport()) return;
+    if (isRecording) {
+      try {
+        const uri = await Voice.stopRecording();
+        setIsRecording(false);
+        setIsProcessingVoice(true);
+        setError(null);
+        const text = await Voice.transcribeAudio(uri);
+        setIsProcessingVoice(false);
+        if (!text.trim()) {
+          setError("I didn't catch that. Try again or type.");
+          return;
+        }
+        addMessage('user', text);
+        setIsLoading(true);
+        const nextMessages = [
+          ...currentSession.messages,
+          { role: 'user' as const, content: text, timestamp: new Date() },
+        ].map((m) => ({ role: m.role, content: m.content }));
+        const reply = await sendRolePlayMessage(
+          nextMessages,
+          currentSession.scenario,
+          currentSession.character,
+          currentSession.difficulty
+        );
+        addMessage('assistant', reply);
+      } catch (e) {
+        setIsRecording(false);
+        setIsProcessingVoice(false);
+        setError(e instanceof Error ? e.message : 'Voice failed. Try typing.');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+    const { status } = await Audio.requestPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Microphone access needed', 'Go to Settings to enable it.', [{ text: 'OK' }]);
+      return;
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      setIsRecording(true);
+      await Voice.startRecording();
+    } catch (e) {
+      setIsRecording(false);
+      if (e instanceof Error && e.message === 'Microphone permission not granted') {
+        Alert.alert('Microphone access needed', 'Go to Settings to enable it.', [{ text: 'OK' }]);
+      }
+    }
+  };
+
   const handleEndSession = async () => {
     if (!currentSession) return;
+    const userMessageCount = currentSession.messages.filter((m) => m.role === 'user').length;
+    if (userMessageCount < 2) {
+      setError("You haven't said anything yet. Start typing or tap the mic to practice.");
+      return;
+    }
     if (!hasApiKey) {
       setDebrief("Add your API key in Settings to get personalized debriefs. You did great practicing — that's what matters.");
       setPhase('debrief');
@@ -309,9 +386,14 @@ export default function RolePlayScreen() {
           )}
         </ScrollView>
         {error ? <Text style={styles.errorLine}>{error}</Text> : null}
+        {(isRecording || isProcessingVoice) && (
+          <Text style={styles.recordingHint}>
+            {isRecording ? 'Recording... Tap mic to stop.' : 'Processing...'}
+          </Text>
+        )}
         <View style={styles.inputRow}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.inputInRow]}
             placeholder="Type your response..."
             placeholderTextColor={COLORS.textMuted}
             value={input}
@@ -320,7 +402,7 @@ export default function RolePlayScreen() {
             returnKeyType="send"
             multiline
             maxLength={1000}
-            editable={!isLoading}
+            editable={!isLoading && !isRecording && !isProcessingVoice}
           />
           <Pressable
             style={[styles.sendBtn, (!input.trim() || isLoading) && styles.sendBtnDisabled]}
@@ -329,6 +411,15 @@ export default function RolePlayScreen() {
           >
             <Ionicons name="arrow-up" size={22} color={COLORS.text} />
           </Pressable>
+          {hasApiKey && Voice.hasVoiceSupport() && (
+            <Pressable
+              style={[styles.micBtn, isRecording && styles.micBtnRecording]}
+              onPress={handleMicPress}
+              disabled={isLoading || isProcessingVoice}
+            >
+              <Ionicons name="mic" size={24} color={COLORS.text} />
+            </Pressable>
+          )}
         </View>
       </KeyboardAvoidingView>
     );
@@ -462,6 +553,11 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: 20,
   },
+  inputInRow: {
+    flex: 1,
+    minHeight: 44,
+    marginBottom: 0,
+  },
   inputLarge: {
     minHeight: 100,
     paddingTop: 14,
@@ -577,8 +673,10 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingHorizontal: 16,
     paddingVertical: 12,
+    paddingBottom: 24,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: COLORS.surface,
+    backgroundColor: COLORS.inputSurface,
   },
   sendBtn: {
     width: 44,
@@ -589,6 +687,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sendBtnDisabled: { opacity: 0.5 },
+  recordingHint: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    paddingHorizontal: 16,
+    paddingBottom: 4,
+  },
+  micBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  micBtnRecording: {
+    backgroundColor: COLORS.recording,
+  },
   errorLine: {
     fontSize: 14,
     color: COLORS.recording,

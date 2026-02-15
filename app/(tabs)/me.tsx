@@ -77,6 +77,7 @@ export default function MeScreen() {
   useConversationStore((s) => s.messages.length);
   const pastRolePlays = useRolePlayStore((s) => s.pastSessions);
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
+  const [expandedPracticeId, setExpandedPracticeId] = useState<string | null>(null);
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const [hasStoredKey, setHasStoredKey] = useState(false);
@@ -94,12 +95,17 @@ export default function MeScreen() {
     if (newlyUnlocked) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setToast({ title: newlyUnlocked.title, emoji: newlyUnlocked.emoji });
-      const t = setTimeout(() => setToast(null), 3000);
       prevUnlockedIds.current = nextIds;
-      return () => clearTimeout(t);
     }
     prevUnlockedIds.current = nextIds;
   }, [achievements]);
+
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = async () => {
@@ -205,7 +211,7 @@ export default function MeScreen() {
   return (
     <>
     {toast && (
-      <View style={styles.toast} pointerEvents="none">
+      <View style={[styles.toast, { top: insets.top + 10 }]} pointerEvents="none">
         <Text style={styles.toastText}>{toast.emoji} Achievement unlocked: {toast.title}!</Text>
       </View>
     )}
@@ -313,18 +319,45 @@ export default function MeScreen() {
           </Text>
         ) : (
           <View style={styles.entryList}>
-            {[...pastRolePlays].reverse().map((session) => (
-              <Pressable
-                key={session.id}
-                style={styles.entryCard}
-                onPress={() => router.push(`/(modals)/role-play?sessionId=${encodeURIComponent(session.id)}`)}
-              >
-                <Text style={styles.entryPreview} numberOfLines={2}>{session.scenario}</Text>
-                <Text style={styles.entryDate}>
-                  {new Date(session.createdAt).toLocaleDateString([], { dateStyle: 'medium' })}
-                </Text>
-              </Pressable>
-            ))}
+            {[...pastRolePlays].reverse().map((session) => {
+              const expanded = expandedPracticeId === session.id;
+              return (
+                <View key={session.id} style={styles.entryCard}>
+                  <Pressable onPress={() => setExpandedPracticeId(expanded ? null : session.id)}>
+                    <Text style={styles.entryPreview} numberOfLines={2}>{session.scenario}</Text>
+                    <Text style={styles.entryDate}>
+                      {new Date(session.createdAt).toLocaleDateString([], { dateStyle: 'medium' })}
+                    </Text>
+                  </Pressable>
+                  {expanded && (
+                    <View style={styles.practiceExpanded}>
+                      {session.messages.map((m, i) => (
+                        <View key={i} style={styles.practiceBubbleWrap}>
+                          <Text style={styles.practiceBubbleLabel}>{m.role === 'user' ? 'You' : session.character}</Text>
+                          <Text style={styles.practiceBubbleText}>{m.content}</Text>
+                        </View>
+                      ))}
+                      {session.debrief && (
+                        <View style={styles.debriefBlock}>
+                          <Text style={styles.debriefLabel}>Debrief</Text>
+                          <Text style={styles.debriefText}>{session.debrief}</Text>
+                        </View>
+                      )}
+                      <Pressable
+                        style={styles.practiceAgainButton}
+                        onPress={() => {
+                          router.push(
+                            `/(modals)/role-play?scenario=${encodeURIComponent(session.scenario)}&character=${encodeURIComponent(session.character)}&difficulty=${encodeURIComponent(session.difficulty)}`
+                          );
+                        }}
+                      >
+                        <Text style={styles.practiceAgainButtonText}>Practice Again</Text>
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+              );
+            })}
           </View>
         )}
       </View>
@@ -334,7 +367,18 @@ export default function MeScreen() {
         <Text style={styles.sectionTitle}>Milestones</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.achievementScroll}>
           {achievements.map((a, i) => (
-            <AchievementBadge key={a.id} achievement={a} index={i} />
+            <Pressable
+              key={a.id}
+              onPress={() =>
+                Alert.alert(
+                  `${a.emoji} ${a.title}`,
+                  a.description + (a.unlocked ? '\n\n✓ Earned!' : '\n\nKeep going to unlock.'),
+                  [{ text: 'OK' }]
+                )
+              }
+            >
+              <AchievementBadge achievement={a} index={i} />
+            </Pressable>
           ))}
         </ScrollView>
       </View>
@@ -464,10 +508,9 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 24, paddingBottom: 48 },
   toast: {
     position: 'absolute',
-    top: 56,
     left: 20,
     right: 20,
-    zIndex: 1000,
+    zIndex: 999,
     backgroundColor: COLORS.surface,
     paddingVertical: 14,
     paddingHorizontal: 18,
@@ -581,6 +624,55 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.text,
     lineHeight: 22,
+  },
+  practiceExpanded: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.surface,
+  },
+  practiceBubbleWrap: { marginBottom: 10 },
+  practiceBubbleLabel: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginBottom: 2,
+  },
+  practiceBubbleText: {
+    fontSize: 15,
+    color: COLORS.text,
+    lineHeight: 21,
+  },
+  debriefBlock: {
+    marginTop: 12,
+    marginBottom: 12,
+    padding: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.input,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.rolePlayAccent,
+  },
+  debriefLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.rolePlayAccent,
+    marginBottom: 6,
+  },
+  debriefText: {
+    fontSize: 15,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  practiceAgainButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    backgroundColor: COLORS.accent,
+    borderRadius: BORDER_RADIUS.input,
+  },
+  practiceAgainButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
   },
   insightPlaceholder: {
     fontSize: 15,

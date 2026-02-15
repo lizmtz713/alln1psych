@@ -6,15 +6,90 @@ import * as Haptics from 'expo-haptics';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
 import { useCircleStore } from '../../src/stores/circleStore';
+import { useUserStore } from '../../src/stores/userStore';
+import { useInsightsStore } from '../../src/stores/insightsStore';
+import { useEngagementStore } from '../../src/stores/engagementStore';
+import { useEducationStore, userAgeToContentAge } from '../../src/stores/educationStore';
+import { useConversationStore } from '../../src/stores/conversationStore';
+import { useJournalStore } from '../../src/stores/journalStore';
+import { Ionicons } from '@expo/vector-icons';
+
+const AFFIRMATIONS = [
+  "You're doing better than you think.",
+  "It's okay to take things one step at a time.",
+  "Your feelings are valid, all of them.",
+  "You showed up today. That matters.",
+  "Be gentle with yourself — you're doing your best.",
+  "Growth isn't always visible, but it's always happening.",
+  "You are worthy of the love you give to others.",
+  "Today is a new page. Write it however you want.",
+  "The fact that you're here says something beautiful about you.",
+  "Small steps still move you forward.",
+  "You don't have to have it all figured out.",
+  "Breathe. You're exactly where you need to be.",
+  "Your story isn't over. Keep going.",
+  "It's okay to rest. Rest is productive too.",
+  "You are more resilient than you know.",
+  "Let go of what you can't control.",
+  "You deserve the same compassion you give others.",
+  "Every emotion is temporary. This too shall pass.",
+  "You are not your worst day.",
+  "Progress, not perfection.",
+  "You are enough, exactly as you are.",
+  "Tomorrow is a fresh start.",
+  "Your mental health matters as much as your physical health.",
+  "It takes courage to feel. You are brave.",
+  "You are not alone in this.",
+  "One day at a time. One moment at a time.",
+  "You are allowed to set boundaries.",
+  "Your peace is worth protecting.",
+  "You've survived 100% of your worst days.",
+  "Be proud of how far you've come.",
+];
+
+function getGreeting(name: string): { line: string; emoji: string } {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return { line: `Good morning, ${name || 'you'}`, emoji: '🌅' };
+  if (hour >= 12 && hour < 17) return { line: `Good afternoon, ${name || 'you'}`, emoji: '☀️' };
+  if (hour >= 17 && hour < 21) return { line: `Good evening, ${name || 'you'}`, emoji: '🌙' };
+  return { line: `It's late, ${name || 'you'}`, emoji: '💜' };
+}
+
+function getTodayAffirmation(): string {
+  const start = new Date(new Date().getFullYear(), 0, 0).getTime();
+  const dayOfYear = Math.floor((Date.now() - start) / 86400000);
+  return AFFIRMATIONS[dayOfYear % AFFIRMATIONS.length];
+}
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { myTemperature, myTemperatureLabel, members } = useCircleStore();
+  const user = useUserStore();
+  useConversationStore((s) => s.messages.length);
+  useJournalStore((s) => s.entries.length);
+  useEducationStore((s) => ({ lastLessonDate: s.lastLessonDate, completedLessons: s.completedLessons }));
+  const getEngagementStreak = useInsightsStore((s) => s.getEngagementStreak);
+  const getPsychSays = useInsightsStore((s) => s.getPsychSays);
+  const getWeeklySummary = useInsightsStore((s) => s.getWeeklySummary);
+  const getNextLesson = useEducationStore((s) => s.getNextLesson);
+  const streak = getEngagementStreak();
+  const psychSays = getPsychSays(streak);
+  const weeklySummary = getWeeklySummary();
+  const nextLesson = getNextLesson(userAgeToContentAge(user.ageGroup));
+  const { getTodayChallenge, isTodayChallengeDone, completeTodayChallenge } = useEngagementStore();
+
+  const greeting = getGreeting(user.name || '');
+  const affirmation = getTodayAffirmation();
+  const todayChallenge = getTodayChallenge();
+  const challengeDone = isTodayChallengeDone();
+
   const card0 = useRef(new Animated.Value(0)).current;
   const card1 = useRef(new Animated.Value(0)).current;
   const card2 = useRef(new Animated.Value(0)).current;
   const card3 = useRef(new Animated.Value(0)).current;
+  const card4 = useRef(new Animated.Value(0)).current;
+  const card5 = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const anim = (v: Animated.Value, delay: number) =>
@@ -26,9 +101,11 @@ export default function HomeScreen() {
       });
     Animated.parallel([
       anim(card0, 0),
-      anim(card1, 100),
-      anim(card2, 200),
-      anim(card3, 300),
+      anim(card1, 80),
+      anim(card2, 160),
+      anim(card3, 240),
+      anim(card4, 320),
+      anim(card5, 400),
     ]).start();
   }, []);
 
@@ -39,10 +116,13 @@ export default function HomeScreen() {
     setTimeout(() => setRefreshing(false), 600);
   };
 
-  const needsCheckIn = members.filter(
-    (m) => m.temperature === 'orange' || m.temperature === 'red'
-  );
+  const needsCheckIn = members.filter((m) => m.temperature === 'orange' || m.temperature === 'red');
   const firstAlert = needsCheckIn[0];
+
+  const slideY = (v: Animated.Value) => ({
+    opacity: v,
+    transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
+  });
 
   return (
     <ScrollView
@@ -51,21 +131,17 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}
     >
-      <Text style={styles.welcome}>Welcome to your space.</Text>
-      <Text style={styles.sub}>Everything here is just for you.</Text>
+      {/* 1. Greeting + daily affirmation */}
+      <Animated.View style={[styles.greetingBlock, slideY(card0)]}>
+        <Text style={styles.greeting}>
+          {greeting.line} {greeting.emoji}
+        </Text>
+        <Text style={styles.affirmation}>{affirmation}</Text>
+      </Animated.View>
 
-      {/* Temperature summary card */}
-      <Animated.View
-        style={[
-          styles.card,
-          styles.tempCard,
-          {
-            opacity: card0,
-            transform: [{ translateY: card0.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
-          },
-        ]}
-      >
-        <View style={[styles.cardRow]}>
+      {/* 2. Temperature gauge + Check in */}
+      <Animated.View style={[styles.card, styles.tempCard, slideY(card0)]}>
+        <View style={styles.cardRow}>
           <TemperatureGauge temperature={myTemperature} size="md" />
           <View style={styles.cardTextWrap}>
             <Text style={styles.cardTitle}>You're feeling</Text>
@@ -83,50 +159,131 @@ export default function HomeScreen() {
         </Pressable>
       </Animated.View>
 
-      {/* Circle preview */}
-      <Animated.View style={[styles.section, { opacity: card1, transform: [{ translateY: card1.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }]}>
-        <Text style={styles.sectionTitle}>Your circle</Text>
-        {members.length === 0 ? (
-          <Text style={styles.muted}>No one in your circle yet.</Text>
+      {/* 3. Streak counter */}
+      {streak > 0 && (
+        <Animated.View style={[styles.streakRow, slideY(card1)]}>
+          <Text style={styles.streakEmoji}>🔥</Text>
+          <Text style={styles.streakText}>
+            {streak}-day streak
+          </Text>
+        </Animated.View>
+      )}
+
+      {/* 4. Today's Challenge */}
+      <Animated.View style={[styles.card, slideY(card1)]}>
+        <Text style={styles.cardSectionTitle}>Today's challenge</Text>
+        <Text style={styles.challengeEmoji}>{todayChallenge.emoji}</Text>
+        <Text style={styles.challengeText}>{todayChallenge.text}</Text>
+        {challengeDone ? (
+          <View style={styles.challengeDoneWrap}>
+            <Ionicons name="checkmark-circle" size={22} color={COLORS.temperature.green} />
+            <Text style={styles.challengeDoneText}>Done</Text>
+          </View>
         ) : (
-          <>
-            <Text style={styles.muted}>
-              {members.length} {members.length === 1 ? 'person' : 'people'} in your circle
-            </Text>
-            {firstAlert && (
-              <Animated.View style={[styles.alert, styles.alertGlow]}>
-                <Text style={styles.alertText}>
-                  {firstAlert.name} could use a check-in
-                </Text>
-                <Pressable
-                  style={({ pressed }) => [styles.alertButton, pressed && { opacity: 0.9 }]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push('/(tabs)/circle');
-                  }}
-                >
-                  <Text style={styles.alertButtonText}>See Circle</Text>
-                </Pressable>
-              </Animated.View>
-            )}
-          </>
+          <Pressable
+            style={({ pressed }) => [styles.challengeDoneButton, pressed && { opacity: 0.9 }]}
+            onPress={() => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              completeTodayChallenge();
+            }}
+          >
+            <Text style={styles.challengeDoneButtonText}>Done ✓</Text>
+          </Pressable>
         )}
       </Animated.View>
 
-      {/* Practice a conversation */}
-      <Animated.View style={{ opacity: card2, transform: [{ translateY: card2.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }}>
-      <Pressable
-        style={({ pressed }) => [styles.practiceCard, pressed && { transform: [{ scale: 0.98 }] }]}
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          router.push('/(modals)/role-play');
-        }}
-      >
-        <Text style={styles.practiceEmoji}>🎭</Text>
-        <Text style={styles.practiceTitle}>Practice a conversation</Text>
-        <Text style={styles.practiceSub}>Rehearse tough talks with AI before the real thing.</Text>
-      </Pressable>
+      {/* 5. Psych Says */}
+      <Animated.View style={[styles.card, styles.psychCard, slideY(card2)]}>
+        <Text style={styles.psychLabel}>Psych says...</Text>
+        <Text style={styles.psychText}>{psychSays}</Text>
       </Animated.View>
+
+      {/* 6. Weekly Summary (Sundays only) */}
+      {weeklySummary && (
+        <Animated.View style={[styles.card, styles.weeklyCard, slideY(card2)]}>
+          <Text style={styles.cardSectionTitle}>Your week in review</Text>
+          <Text style={styles.weeklyLine}>{weeklySummary.line}</Text>
+          <Text style={styles.weeklyMeta}>
+            Most common mood: {weeklySummary.mostCommonMood} · {weeklySummary.lessonsCount} lessons · {weeklySummary.conversationDays} conversation(s)
+          </Text>
+        </Animated.View>
+      )}
+
+      {/* 7. Circle alerts */}
+      {members.length > 0 && (
+        <Animated.View style={[styles.section, slideY(card3)]}>
+          <Text style={styles.sectionTitle}>Your circle</Text>
+          <Text style={styles.muted}>
+            {members.length} {members.length === 1 ? 'person' : 'people'} in your circle
+          </Text>
+          {firstAlert && (
+            <View style={[styles.alert, styles.alertGlow]}>
+              <Text style={styles.alertText}>{firstAlert.name} could use a check-in</Text>
+              <Pressable
+                style={({ pressed }) => [styles.alertButton, pressed && { opacity: 0.9 }]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push('/(tabs)/circle');
+                }}
+              >
+                <Text style={styles.alertButtonText}>See Circle</Text>
+              </Pressable>
+            </View>
+          )}
+        </Animated.View>
+      )}
+
+      {/* 8. Quick actions */}
+      <Animated.View style={[styles.quickActions, slideY(card3)]}>
+        <Pressable
+          style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(tabs)/talk');
+          }}
+        >
+          <Ionicons name="chatbubble-ellipses" size={24} color={COLORS.accent} />
+          <Text style={styles.quickActionText}>Talk to Psych</Text>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/new-journal');
+          }}
+        >
+          <Ionicons name="journal" size={24} color={COLORS.accent} />
+          <Text style={styles.quickActionText}>Write in Journal</Text>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/role-play');
+          }}
+        >
+          <Ionicons name="people" size={24} color={COLORS.accent} />
+          <Text style={styles.quickActionText}>Practice a conversation</Text>
+        </Pressable>
+      </Animated.View>
+
+      {/* 9. Today's Lesson */}
+      {nextLesson && (
+        <Animated.View style={[styles.card, styles.practiceCard, slideY(card4)]}>
+          <Text style={styles.cardSectionTitle}>Today's lesson</Text>
+          <Pressable
+            style={({ pressed }) => [pressed && { opacity: 0.9 }]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push(`/lesson/${nextLesson.id}`);
+            }}
+          >
+            <Text style={styles.practiceEmoji}>📖</Text>
+            <Text style={styles.practiceTitle}>{nextLesson.title}</Text>
+            <Text style={styles.practiceSub}>{nextLesson.duration} min</Text>
+          </Pressable>
+        </Animated.View>
+      )}
 
       <Text style={styles.prompt}>How are you feeling today?</Text>
     </ScrollView>
@@ -136,63 +293,94 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   content: { paddingHorizontal: 24, paddingBottom: 40 },
-  welcome: {
+  greetingBlock: {
+    marginBottom: 20,
+  },
+  greeting: {
     fontSize: 24,
     fontWeight: '600',
     color: COLORS.text,
     marginBottom: 8,
   },
-  sub: {
-    fontSize: 17,
+  affirmation: {
+    fontSize: 18,
     color: COLORS.textMuted,
-    marginBottom: 24,
+    lineHeight: 26,
+    fontStyle: 'italic',
   },
   card: {
     backgroundColor: COLORS.inputSurface,
     borderRadius: BORDER_RADIUS.card,
     padding: 20,
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  tempCard: {
-    overflow: 'hidden',
-  },
+  tempCard: { overflow: 'hidden' },
   cardRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
   },
   cardTextWrap: { marginLeft: 16 },
-  cardTitle: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-  },
-  cardLabel: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
+  cardTitle: { fontSize: 14, color: COLORS.textMuted },
+  cardLabel: { fontSize: 18, fontWeight: '600', color: COLORS.text },
   checkInButton: {
     backgroundColor: COLORS.accent,
     paddingVertical: 12,
     borderRadius: BORDER_RADIUS.input,
     alignItems: 'center',
   },
-  checkInButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
+  checkInButtonText: { fontSize: 16, fontWeight: '600', color: COLORS.text },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
   },
-  section: { marginBottom: 24 },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 8,
-  },
-  muted: {
-    fontSize: 15,
+  streakEmoji: { fontSize: 22 },
+  streakText: { fontSize: 17, fontWeight: '600', color: COLORS.text },
+  cardSectionTitle: {
+    fontSize: 14,
     color: COLORS.textMuted,
+    marginBottom: 10,
   },
+  challengeEmoji: { fontSize: 28, marginBottom: 6 },
+  challengeText: {
+    fontSize: 16,
+    color: COLORS.text,
+    marginBottom: 14,
+    lineHeight: 22,
+  },
+  challengeDoneButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    backgroundColor: COLORS.accent,
+    borderRadius: BORDER_RADIUS.input,
+  },
+  challengeDoneButtonText: { fontSize: 15, fontWeight: '600', color: COLORS.text },
+  challengeDoneWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  challengeDoneText: { fontSize: 15, color: COLORS.temperature.green, fontWeight: '500' },
+  psychCard: { borderLeftWidth: 4, borderLeftColor: COLORS.accent },
+  psychLabel: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginBottom: 6,
+  },
+  psychText: {
+    fontSize: 16,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  weeklyCard: {},
+  weeklyLine: { fontSize: 16, color: COLORS.text, marginBottom: 8, fontWeight: '500' },
+  weeklyMeta: { fontSize: 14, color: COLORS.textMuted },
+  section: { marginBottom: 24 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text, marginBottom: 8 },
+  muted: { fontSize: 15, color: COLORS.textMuted },
   alert: {
     marginTop: 12,
     backgroundColor: COLORS.surface,
@@ -209,39 +397,28 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
-  alertText: {
-    fontSize: 15,
-    color: COLORS.text,
-    flex: 1,
-  },
-  alertButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-  },
-  alertButtonText: {
-    fontSize: 15,
-    color: COLORS.accent,
-    fontWeight: '500',
-  },
-  practiceCard: {
-    backgroundColor: COLORS.inputSurface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 20,
+  alertText: { fontSize: 15, color: COLORS.text, flex: 1 },
+  alertButton: { paddingVertical: 8, paddingHorizontal: 14 },
+  alertButtonText: { fontSize: 15, color: COLORS.accent, fontWeight: '500' },
+  quickActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
     marginBottom: 24,
   },
+  quickAction: {
+    flex: 1,
+    minWidth: '28%',
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 16,
+    alignItems: 'center',
+  },
+  quickActionPressed: { opacity: 0.9 },
+  quickActionText: { fontSize: 13, color: COLORS.text, marginTop: 8, textAlign: 'center' },
+  practiceCard: {},
   practiceEmoji: { fontSize: 28, marginBottom: 8 },
-  practiceTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  practiceSub: {
-    fontSize: 15,
-    color: COLORS.textMuted,
-  },
-  prompt: {
-    fontSize: 17,
-    color: COLORS.accent,
-  },
+  practiceTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text, marginBottom: 4 },
+  practiceSub: { fontSize: 15, color: COLORS.textMuted },
+  prompt: { fontSize: 17, color: COLORS.accent },
 });

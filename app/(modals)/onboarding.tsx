@@ -6,10 +6,10 @@ import {
   Pressable,
   TextInput,
   ScrollView,
-  Animated,
   KeyboardAvoidingView,
   Platform,
   Modal,
+  Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -72,8 +72,7 @@ export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const slideX = useRef(new Animated.Value(0)).current;
+  const [justSelected, setJustSelected] = useState(false);
 
   const { user } = useAuth();
   const {
@@ -100,25 +99,7 @@ export default function OnboardingScreen() {
   const [nameInputFocused, setNameInputFocused] = useState(false);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const setNotificationsCheckIn = useSettingsStore((s) => s.setNotificationsCheckIn);
-
-  const triggerTransition = (direction: 'next' | 'prev', onDone?: () => void) => {
-    const toValue = direction === 'next' ? -60 : 60;
-    Animated.spring(slideX, {
-      toValue,
-      useNativeDriver: true,
-      speed: 18,
-      bounciness: 12,
-    }).start(() => {
-      slideX.setValue(direction === 'next' ? 60 : -60);
-      onDone?.();
-      Animated.spring(slideX, {
-        toValue: 0,
-        useNativeDriver: true,
-        speed: 18,
-        bounciness: 12,
-      }).start();
-    });
-  };
+  const stepOpacity = useRef(new Animated.Value(1)).current;
 
   const finishOnboarding = async () => {
     if (wantsToInvite === true && inviteName.trim()) {
@@ -139,12 +120,42 @@ export default function OnboardingScreen() {
     router.replace('/(tabs)');
   };
 
-  const goNext = async () => {
-    if (step < TOTAL_STEPS) {
-      triggerTransition('next', () => setStep((s) => s + 1));
-    } else {
+  const runFadeThen = (next: () => void) => {
+    Animated.timing(stepOpacity, {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start(() => {
+      next();
+      stepOpacity.setValue(0);
+      Animated.timing(stepOpacity, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
+  const goNext = () => {
+    if (step >= TOTAL_STEPS) {
       setShowNotificationPrompt(true);
+      return;
     }
+    runFadeThen(() => setStep((s) => s + 1));
+  };
+
+  const goBack = () => {
+    if (step <= 1) return;
+    runFadeThen(() => setStep((s) => s - 1));
+  };
+
+  const handleChoiceThenNext = (setValue: () => void) => {
+    setValue();
+    setJustSelected(true);
+    setTimeout(() => {
+      setJustSelected(false);
+      goNext();
+    }, 800);
   };
 
   const handleNotificationPromptYes = async () => {
@@ -217,8 +228,14 @@ export default function OnboardingScreen() {
         </View>
       </Modal>
 
-      {/* Progress dots + step label */}
+      {/* Back + Progress dots + step label */}
       <View style={styles.progressWrap}>
+        {step > 1 ? (
+          <Pressable onPress={goBack} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.accent} />
+            <Text style={styles.backButtonText}>Back</Text>
+          </Pressable>
+        ) : null}
         <View style={styles.dotsRow}>
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
             <View key={i} style={[styles.dot, i + 1 === step && styles.dotActive]} />
@@ -238,9 +255,7 @@ export default function OnboardingScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View
-            style={[styles.stepContent, { transform: [{ translateX: slideX }] }]}
-          >
+          <Animated.View style={[styles.stepContent, { opacity: stepOpacity }]}>
             {/* STEP 1 — Welcome */}
             {step === 1 && (
               <View style={styles.step}>
@@ -326,7 +341,7 @@ export default function OnboardingScreen() {
                         styles.ageCard,
                         ageGroup === opt.value && styles.ageCardSelected,
                       ]}
-                      onPress={() => setAgeGroup(opt.value)}
+                      onPress={() => handleChoiceThenNext(() => setAgeGroup(opt.value))}
                     >
                       <Text style={styles.ageEmoji}>{opt.emoji}</Text>
                       <Text
@@ -340,17 +355,6 @@ export default function OnboardingScreen() {
                     </Pressable>
                   ))}
                 </View>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.primaryButton,
-                    pressed && styles.primaryButtonPressed,
-                    !canProceed() && styles.primaryButtonDisabled,
-                  ]}
-                  onPress={goNext}
-                  disabled={!canProceed()}
-                >
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                </Pressable>
               </View>
             )}
 
@@ -363,7 +367,7 @@ export default function OnboardingScreen() {
                     styles.commCard,
                     communicationPreference === 'voice' && styles.commCardSelected,
                   ]}
-                  onPress={() => setCommunicationPreference('voice')}
+                  onPress={() => handleChoiceThenNext(() => setCommunicationPreference('voice'))}
                 >
                   <Ionicons
                     name="mic"
@@ -384,10 +388,10 @@ export default function OnboardingScreen() {
                     styles.commCard,
                     communicationPreference === 'text' && styles.commCardSelected,
                   ]}
-                  onPress={() => setCommunicationPreference('text')}
+                  onPress={() => handleChoiceThenNext(() => setCommunicationPreference('text'))}
                 >
                   <Ionicons
-                    name="keyboard-outline"
+                    name="keypad-outline"
                     size={40}
                     color={communicationPreference === 'text' ? COLORS.accent : COLORS.textMuted}
                   />
@@ -401,17 +405,6 @@ export default function OnboardingScreen() {
                   </Text>
                 </Pressable>
                 <Text style={styles.note}>You can always switch anytime.</Text>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.primaryButton,
-                    pressed && styles.primaryButtonPressed,
-                    !canProceed() && styles.primaryButtonDisabled,
-                  ]}
-                  onPress={goNext}
-                  disabled={!canProceed()}
-                >
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                </Pressable>
               </View>
             )}
 
@@ -427,7 +420,7 @@ export default function OnboardingScreen() {
                         styles.loveCard,
                         loveLanguage === opt.value && styles.loveCardSelected,
                       ]}
-                      onPress={() => setLoveLanguage(opt.value)}
+                      onPress={() => handleChoiceThenNext(() => setLoveLanguage(opt.value))}
                     >
                       <Text
                         style={[
@@ -446,17 +439,6 @@ export default function OnboardingScreen() {
                 <Text style={styles.loveLanguageNote}>
                   No worries — I'll learn what makes you feel cared for as we talk.
                 </Text>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.primaryButton,
-                    pressed && styles.primaryButtonPressed,
-                    !canProceed() && styles.primaryButtonDisabled,
-                  ]}
-                  onPress={goNext}
-                  disabled={!canProceed()}
-                >
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                </Pressable>
               </View>
             )}
 
@@ -492,7 +474,10 @@ export default function OnboardingScreen() {
                       styles.optionCard,
                       wantsToInvite === false && styles.optionCardSelected,
                     ]}
-                    onPress={() => setWantsToInvite(false)}
+                    onPress={() => handleChoiceThenNext(() => {
+                      setWantsToInvite(false);
+                      setCircleInvite(null);
+                    })}
                   >
                     <Text
                       style={[
@@ -554,7 +539,7 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 7 — Promise */}
+            {/* STEP 7 — Promise (last step: open notification modal directly; never advance to step 8) */}
             {step === 7 && (
               <View style={styles.step}>
                 <Text style={styles.question}>Here's my promise to you:</Text>
@@ -568,7 +553,7 @@ export default function OnboardingScreen() {
                 </View>
                 <Pressable
                   style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
-                  onPress={goNext}
+                  onPress={() => setShowNotificationPrompt(true)}
                 >
                   <Text style={styles.primaryButtonText}>I'm ready</Text>
                 </Pressable>
@@ -589,6 +574,21 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   progressWrap: {
     paddingVertical: 12,
+    paddingHorizontal: 8,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    marginBottom: 8,
+    gap: 4,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: COLORS.accent,
+    fontWeight: '500',
   },
   dotsRow: {
     flexDirection: 'row',

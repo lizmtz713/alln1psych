@@ -10,6 +10,7 @@ import {
   Platform,
   UIManager,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -77,15 +78,31 @@ export default function CircleScreen() {
   };
 
   const handleSendText = (m: CircleMember) => {
-    if (m.contactMethod && m.contactMethod.includes('@')) {
+    if (!m.contactMethod) {
+      Alert.alert(
+        `Add ${m.name}'s number`,
+        `Add ${m.name}'s phone number to send a text. You can update their contact in your circle settings.`,
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    if (m.contactMethod.includes('@')) {
       Linking.openURL(`mailto:${m.contactMethod}`);
-    } else if (m.contactMethod) {
+    } else {
       Linking.openURL(`sms:${m.contactMethod.replace(/\D/g, '')}`);
     }
   };
 
   const handleCall = (m: CircleMember) => {
-    if (m.contactMethod) Linking.openURL(`tel:${m.contactMethod.replace(/\D/g, '')}`);
+    if (!m.contactMethod) {
+      Alert.alert(
+        `Add ${m.name}'s number`,
+        `Add ${m.name}'s phone number to call them. You can update their contact in your circle settings.`,
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    Linking.openURL(`tel:${m.contactMethod.replace(/\D/g, '')}`);
   };
 
   return (
