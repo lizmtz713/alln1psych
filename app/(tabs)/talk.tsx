@@ -24,7 +24,7 @@ import { hasOpenAIKey, sendMessage } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
 import type { CommunicationPreference } from '../../src/stores/userStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { CrisisOverlay } from '../../src/components/CrisisOverlay';
 
@@ -95,6 +95,7 @@ const CRISIS_PATTERN = /want to die|kill myself|end (my )?life|hurt myself|suici
 export default function TalkScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const params = useLocalSearchParams<{ prompt?: string }>();
   const scrollRef = useRef<ScrollView>(null);
   const textInputRef = useRef<TextInput>(null);
   const breatheAnim = useRef(new Animated.Value(1)).current;
@@ -129,6 +130,14 @@ export default function TalkScreen() {
   useEffect(() => {
     hasOpenAIKey().then(setHasApiKey);
   }, [apiKeySavedAt]);
+
+  useEffect(() => {
+    if (params.prompt) {
+      setTextInput(params.prompt);
+      setInputMode('text');
+      setTimeout(() => textInputRef.current?.focus(), 300);
+    }
+  }, [params.prompt]);
 
   // Seed first greeting once
   useEffect(() => {

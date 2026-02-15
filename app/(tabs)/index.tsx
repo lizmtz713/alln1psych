@@ -226,20 +226,34 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* Try an activity */}
+      {/* Try an activity — rotate by time of day */}
       <Animated.View style={[styles.card, slideY(card3)]}>
         <Text style={styles.cardSectionTitle}>Try this</Text>
-        <Pressable
-          style={({ pressed }) => [styles.practiceCard, pressed && { opacity: 0.9 }]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/activity?id=breathing');
-          }}
-        >
-          <Text style={styles.practiceEmoji}>🌬️</Text>
-          <Text style={styles.practiceTitle}>Breathe with me</Text>
-          <Text style={styles.practiceSub}>Box breathing — 4 in, 4 hold, 4 out. Calms your nervous system.</Text>
-        </Pressable>
+        {(() => {
+          const hour = new Date().getHours();
+          const morning = hour >= 5 && hour < 12;
+          const afternoon = hour >= 12 && hour < 17;
+          const evening = hour >= 17;
+          const id = morning ? 'breathing' : afternoon ? 'emotion-wheel' : 'body-scan';
+          const config = id === 'breathing'
+            ? { emoji: '🌬️', title: 'Breathe with me', sub: 'Box breathing — 4 in, 4 hold, 4 out. Calms your nervous system.' }
+            : id === 'emotion-wheel'
+            ? { emoji: '🎯', title: 'Emotion Explorer', sub: 'Name your feelings with precision. Tap the wheel and explore.' }
+            : { emoji: '🧍', title: 'Body Check', sub: 'Tap where you feel tension. Connect body and emotions.' };
+          return (
+            <Pressable
+              style={({ pressed }) => [styles.practiceCard, pressed && { opacity: 0.9 }]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(`/(modals)/activity?id=${id}`);
+              }}
+            >
+              <Text style={styles.practiceEmoji}>{config.emoji}</Text>
+              <Text style={styles.practiceTitle}>{config.title}</Text>
+              <Text style={styles.practiceSub}>{config.sub}</Text>
+            </Pressable>
+          );
+        })()}
       </Animated.View>
 
       {/* Quick actions */}
