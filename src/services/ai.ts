@@ -119,8 +119,9 @@ export async function sendMessage(
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err || `OpenAI API error: ${res.status}`);
+    const body = await res.text();
+    console.error('AI API Error:', res.status, body);
+    throw new Error(body || `OpenAI API error: ${res.status}`);
   }
 
   const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
