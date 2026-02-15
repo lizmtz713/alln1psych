@@ -28,6 +28,7 @@ interface EngagementState {
   completeTodayChallenge: () => void;
   isTodayChallengeDone: () => boolean;
   getTodayChallenge: () => { text: string; emoji: string };
+  reset: () => void;
 }
 
 export const useEngagementStore = create<EngagementState>((set, get) => ({
@@ -49,6 +50,7 @@ export const useEngagementStore = create<EngagementState>((set, get) => ({
     const idx = dayOfYear() % DAILY_CHALLENGES.length;
     return DAILY_CHALLENGES[idx];
   },
+  reset: () => set({ completedChallengeDates: {} }),
 }));
 
 export { DAILY_CHALLENGES };

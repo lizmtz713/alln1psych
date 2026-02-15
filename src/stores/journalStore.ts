@@ -25,6 +25,7 @@ interface JournalState {
   ) => void;
   deleteEntry: (id: string) => void;
   getRecentEntries: (count: number) => JournalEntry[];
+  reset: () => void;
 }
 
 export const useJournalStore = create<JournalState>((set, get) => ({
@@ -68,4 +69,5 @@ export const useJournalStore = create<JournalState>((set, get) => ({
   getRecentEntries: (count) => {
     return get().entries.slice(0, count);
   },
+  reset: () => set({ entries: [] }),
 }));

@@ -10,6 +10,7 @@ import {
   Platform,
   Modal,
   Animated,
+  Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -727,6 +728,15 @@ export default function OnboardingScreen() {
                     You are not alone.
                   </Text>
                 </View>
+                <Text style={styles.disclaimerText}>
+                  AllN1 Psych is an emotional wellness tool, not a medical device. It does not diagnose, treat, or cure any mental health condition. If you are in crisis, please contact 988 (Suicide & Crisis Lifeline), text HOME to 741741, or call 911. By using this app, you agree to our{' '}
+                  <Text style={styles.disclaimerLink} onPress={() => Linking.openURL('https://alln1network.com/terms')}>Terms of Service</Text>
+                  {' '}and{' '}
+                  <Text style={styles.disclaimerLink} onPress={() => Linking.openURL('https://alln1network.com/privacy')}>Privacy Policy</Text>.
+                </Text>
+                <Text style={styles.dataRetentionText}>
+                  Your conversations and data are stored securely and encrypted. Only you can access your personal data. We never sell individual data. You can export or delete your data anytime from Settings.
+                </Text>
                 <Pressable
                   style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
                   onPress={() => setShowNotificationPrompt(true)}
@@ -1058,5 +1068,22 @@ const styles = StyleSheet.create({
     color: COLORS.accentMuted,
     marginTop: 8,
     marginBottom: 0,
+  },
+  disclaimerText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    lineHeight: 18,
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  disclaimerLink: {
+    color: COLORS.accent,
+    textDecorationLine: 'underline',
+  },
+  dataRetentionText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    lineHeight: 18,
+    marginBottom: 24,
   },
 });

@@ -113,6 +113,7 @@ interface CircleState {
   markNudgeRead: (id: string) => void;
   markNudgeActedOn: (id: string) => void;
   clearDemoData: () => void;
+  reset: () => void;
 }
 
 export const useCircleStore = create<CircleState>((set) => ({
@@ -245,6 +246,16 @@ export const useCircleStore = create<CircleState>((set) => ({
     set({
       members: [],
       nudges: [],
+      myTemperature: 'green',
+      myTemperatureLabel: TEMPERATURE_LABELS.green,
+      myTemperatureNote: '',
+      myTemperatureUpdatedAt: null,
+    }),
+  reset: () =>
+    set({
+      members: [],
+      nudges: [],
+      moodHistory: [],
       myTemperature: 'green',
       myTemperatureLabel: TEMPERATURE_LABELS.green,
       myTemperatureNote: '',

@@ -66,6 +66,7 @@ interface InsightsState {
   getMostCommonMoodThisWeek: () => string | null;
   getPsychSays: (engagementStreak: number) => string;
   getWeeklySummary: () => { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null;
+  reset: () => void;
 }
 
 const oneWeekAgo = () => {
@@ -202,6 +203,7 @@ export const useInsightsStore = create<InsightsState>(() => ({
     else line = 'You showed up ' + checkInDays + ' day(s) this week. Something to build on.';
     return { mostCommonMood: moodLabel, checkInDays, lessonsCount, conversationDays: convCount, line };
   },
+  reset: () => {},
 }));
 
 // Re-export for components that need to read achievements reactively

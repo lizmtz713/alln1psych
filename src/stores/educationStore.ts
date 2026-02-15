@@ -46,6 +46,7 @@ interface EducationState {
   getModuleProgress: (moduleId: string) => number;
   isLessonCompleted: (lessonId: string) => boolean;
   getNextLesson: (contentAgeGroup: ContentAgeGroup) => Lesson | null;
+  reset: () => void;
 }
 
 export const useEducationStore = create<EducationState>((set, get) => ({
@@ -109,4 +110,12 @@ export const useEducationStore = create<EducationState>((set, get) => ({
     }
     return null;
   },
+  reset: () =>
+    set({
+      completedLessons: [],
+      lessonProgress: {},
+      reflections: {},
+      streakDays: 0,
+      lastLessonDate: null,
+    }),
 }));

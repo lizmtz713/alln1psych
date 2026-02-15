@@ -392,3 +392,28 @@ export async function completeLesson(
   );
   return { error: error ? new Error(error.message) : null };
 }
+
+/** Delete all user data from Supabase (for account deletion). Call in order due to FKs. */
+export async function deleteUserData(userId: string): Promise<{ error: Error | null }> {
+  try {
+    const { data: convIds } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('user_id', userId);
+    const ids = (convIds ?? []).map((c: { id: string }) => c.id);
+    if (ids.length > 0) {
+      await supabase.from('messages').delete().in('conversation_id', ids);
+    }
+    await supabase.from('conversations').delete().eq('user_id', userId);
+    await supabase.from('journal_entries').delete().eq('user_id', userId);
+    await supabase.from('mood_checkins').delete().eq('user_id', userId);
+    await supabase.from('temperature').delete().eq('user_id', userId);
+    await supabase.from('circles').delete().eq('user_id', userId);
+    await supabase.from('nudges').delete().eq('recipient_user_id', userId);
+    await supabase.from('education_progress').delete().eq('user_id', userId);
+    await supabase.from('profiles').delete().eq('id', userId);
+    return { error: null };
+  } catch (e) {
+    return { error: e instanceof Error ? e : new Error(String(e)) };
+  }
+}

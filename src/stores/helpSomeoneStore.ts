@@ -28,6 +28,7 @@ interface HelpSomeoneState {
   setReminderSet: (value: boolean) => void;
   getSessionById: (id: string) => HelpSession | undefined;
   clearCurrentSession: () => void;
+  reset: () => void;
 }
 
 export const useHelpSomeoneStore = create<HelpSomeoneState>((set, get) => ({
@@ -88,4 +89,5 @@ export const useHelpSomeoneStore = create<HelpSomeoneState>((set, get) => ({
   },
 
   clearCurrentSession: () => set({ currentSession: null }),
+  reset: () => set({ sessions: [], currentSession: null }),
 }));

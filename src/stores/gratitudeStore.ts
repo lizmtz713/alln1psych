@@ -13,6 +13,7 @@ interface GratitudeState {
   removeEntry: (id: string) => void;
   getEntries: () => GratitudeEntry[];
   clearAll: () => void;
+  reset: () => void;
 }
 
 function genId(): string {
@@ -39,4 +40,5 @@ export const useGratitudeStore = create<GratitudeState>((set, get) => ({
   getEntries: () => get().entries,
 
   clearAll: () => set({ entries: [] }),
+  reset: () => set({ entries: [] }),
 }));

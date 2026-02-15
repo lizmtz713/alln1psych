@@ -8,9 +8,11 @@ import { create } from 'zustand';
 interface AuthStoreState {
   userId: string | null;
   setUserId: (id: string | null) => void;
+  reset: () => void;
 }
 
 export const useAuthStore = create<AuthStoreState>((set) => ({
   userId: null,
   setUserId: (userId) => set({ userId }),
+  reset: () => set({ userId: null }),
 }));

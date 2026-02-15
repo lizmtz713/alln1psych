@@ -99,6 +99,7 @@ interface UserState {
   setCulturalBackgroundOther: (v: string) => void;
   completeOnboarding: () => void;
   resetOnboarding: () => void;
+  reset: () => void;
 }
 
 const initialState = {
@@ -150,4 +151,5 @@ export const useUserStore = create<UserState>((set) => ({
     })),
   completeOnboarding: () => set({ onboardingCompleted: true }),
   resetOnboarding: () => set(initialState),
+  reset: () => set(initialState),
 }));

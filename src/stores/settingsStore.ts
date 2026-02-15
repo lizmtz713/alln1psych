@@ -11,6 +11,7 @@ interface SettingsState {
   setNotificationsCircleNudges: (v: boolean) => void;
   setVoicePreference: (v: 'voice' | 'text') => void;
   setCircleSharingPaused: (v: boolean) => void;
+  reset: () => void;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -25,4 +26,12 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   setNotificationsCircleNudges: (notificationsCircleNudges) => set({ notificationsCircleNudges }),
   setVoicePreference: (voicePreference) => set({ voicePreference }),
   setCircleSharingPaused: (circleSharingPaused) => set({ circleSharingPaused }),
+  reset: () =>
+    set({
+      apiKeySavedAt: 0,
+      notificationsCheckIn: true,
+      notificationsCircleNudges: true,
+      voicePreference: 'voice',
+      circleSharingPaused: false,
+    }),
 }));

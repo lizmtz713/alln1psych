@@ -36,6 +36,7 @@ export default function SignUpScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ageConfirm, setAgeConfirm] = useState(false);
 
   const handleSignUp = async () => {
     const n = name.trim();
@@ -52,6 +53,10 @@ export default function SignUpScreen() {
     }
     if (p !== c) {
       setError('Passwords don\'t match.');
+      return;
+    }
+    if (!ageConfirm) {
+      setError('Please confirm you are 13 or older.');
       return;
     }
     setError(null);
@@ -131,9 +136,22 @@ export default function SignUpScreen() {
         />
 
         <Pressable
-          style={[styles.button, loading && styles.buttonDisabled]}
+          style={styles.ageRow}
+          onPress={() => setAgeConfirm(!ageConfirm)}
+        >
+          <View style={[styles.checkbox, ageConfirm && styles.checkboxChecked]}>
+            {ageConfirm ? <Ionicons name="checkmark" size={16} color={COLORS.text} /> : null}
+          </View>
+          <Text style={styles.ageLabel}>I confirm I am 13 years of age or older</Text>
+        </Pressable>
+        {!ageConfirm && (
+          <Text style={styles.ageHint}>AllN1 Psych is available for users 13 and older. We're working on a family plan for younger users.</Text>
+        )}
+
+        <Pressable
+          style={[styles.button, (loading || !ageConfirm) && styles.buttonDisabled]}
           onPress={handleSignUp}
-          disabled={loading}
+          disabled={loading || !ageConfirm}
         >
           {loading ? (
             <ActivityIndicator color={COLORS.text} />
@@ -203,6 +221,36 @@ const styles = StyleSheet.create({
   },
   passwordInput: {
     paddingRight: 48,
+  },
+  ageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: COLORS.textMuted,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+  ageLabel: {
+    fontSize: 15,
+    color: COLORS.text,
+    flex: 1,
+  },
+  ageHint: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginBottom: 16,
+    lineHeight: 20,
   },
   eye: {
     position: 'absolute',

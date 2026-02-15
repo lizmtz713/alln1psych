@@ -34,6 +34,10 @@ import { useConversationStore } from '../../src/stores/conversationStore';
 import { useRolePlayStore } from '../../src/stores/rolePlayStore';
 import { useHelpSomeoneStore } from '../../src/stores/helpSomeoneStore';
 import { useConversationSummaryStore, type ConversationSummary } from '../../src/stores/conversationSummaryStore';
+import { useEngagementStore } from '../../src/stores/engagementStore';
+import { useDailyContentStore } from '../../src/stores/dailyContentStore';
+import { useAuthStore } from '../../src/stores/authStore';
+import { useGratitudeStore } from '../../src/stores/gratitudeStore';
 import { getRelevantResources } from '../../src/lib/culturalResources';
 import {
   CULTURAL_BACKGROUND_OPTIONS,
@@ -43,6 +47,16 @@ import {
 import { AchievementBadge } from '../../src/components/AchievementBadge';
 import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
 import type { EmergencyContact } from '../../src/stores/userStore';
+import { supabase } from '../../src/lib/supabase';
+import { deleteUserData } from '../../src/services/database';
+import {
+  buildExportData,
+  shareExportFile,
+  buildTherapistSummary,
+  type ExportRange,
+} from '../../src/services/exportData';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 const AGE_LABELS: Record<string, string> = {
   'under13': 'Under 13',
@@ -116,7 +130,16 @@ export default function MeScreen() {
   const [showCulturalModal, setShowCulturalModal] = useState(false);
   const [editingContacts, setEditingContacts] = useState<EmergencyContact[]>([]);
   const [contactsEditing, setContactsEditing] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const prevUnlockedIds = useRef<Set<string>>(new Set());
+
+  const LEGAL_DISCLAIMER =
+    'AllN1 Psych is an emotional wellness tool, not a medical device. It does not diagnose, treat, or cure any mental health condition. If you are in crisis, please contact 988 (Suicide & Crisis Lifeline), text HOME to 741741, or call 911. By using this app, you agree to our Terms of Service and Privacy Policy.';
+  const DATA_RETENTION_NOTICE =
+    'Your conversations and data are stored securely and encrypted. Only you can access your personal data. We never sell individual data. You can export or delete your data anytime from Settings.';
+  const TERMS_URL = 'https://alln1network.com/terms';
+  const PRIVACY_URL = 'https://alln1network.com/privacy';
 
   const recentEntries = getRecentEntries(20);
   const achievements = getAchievements();
@@ -266,6 +289,84 @@ export default function MeScreen() {
         },
       ]
     );
+  };
+
+  const handleDeleteAccountPress = () => {
+    Alert.alert(
+      'Delete your account?',
+      'This will permanently delete ALL your data including conversations, journal entries, mood history, circle connections, and your profile. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'I understand, continue',
+          style: 'destructive',
+          onPress: () => {
+            setDeleteConfirmText('');
+            setShowDeleteConfirmModal(true);
+          },
+        },
+      ]
+    );
+  };
+
+  const handleDeleteAccountConfirm = async () => {
+    if (deleteConfirmText !== 'DELETE') return;
+    setShowDeleteConfirmModal(false);
+    setDeleteConfirmText('');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id;
+      if (userId) {
+        const { error } = await deleteUserData(userId);
+        if (error) throw error;
+      }
+      useUserStore.getState().reset();
+      useConversationStore.getState().reset();
+      useCircleStore.getState().reset();
+      useEducationStore.getState().reset();
+      useJournalStore.getState().reset();
+      useInsightsStore.getState().reset();
+      useConversationSummaryStore.getState().reset();
+      useRolePlayStore.getState().reset();
+      useSettingsStore.getState().reset();
+      useEngagementStore.getState().reset();
+      useDailyContentStore.getState().reset();
+      useAuthStore.getState().reset();
+      useGratitudeStore.getState().reset();
+      useHelpSomeoneStore.getState().reset();
+      await supabase.auth.signOut();
+      router.replace('/(auth)/sign-in');
+      Alert.alert('Account deleted', 'All your data has been permanently removed.');
+    } catch {
+      Alert.alert('Error', 'Something went wrong. Please try again or contact support.');
+    }
+  };
+
+  const handleExportData = async (range: ExportRange) => {
+    try {
+      const data = buildExportData(range);
+      const label = range === '7' ? '7days' : range === '30' ? '30days' : 'all';
+      await shareExportFile(data, `alln1-psych-export-${label}.json`);
+    } catch (e) {
+      Alert.alert('Export failed', e instanceof Error ? e.message : 'Could not export. Try again.');
+    }
+  };
+
+  const handleShareWithTherapist = async () => {
+    try {
+      const data = buildExportData('all');
+      const text = buildTherapistSummary(data);
+      const path = `${FileSystem.documentDirectory}alln1-psych-therapist-summary.txt`;
+      await FileSystem.writeAsStringAsync(path, text, { encoding: FileSystem.EncodingType.UTF8 });
+      const canShare = await Sharing.isAvailableAsync();
+      if (!canShare) throw new Error('Sharing is not available');
+      await Sharing.shareAsync(path, {
+        mimeType: 'text/plain',
+        dialogTitle: 'Share with my therapist',
+      });
+    } catch (e) {
+      Alert.alert('Share failed', e instanceof Error ? e.message : 'Could not create summary.');
+    }
   };
 
   const toggleEntry = (id: string) => {
@@ -891,14 +992,94 @@ export default function MeScreen() {
             <Text style={styles.settingLabel}>Sign out</Text>
             <Ionicons name="log-out-outline" size={18} color={COLORS.textMuted} />
           </Pressable>
+        </View>
+
+        <View style={styles.settingsCard}>
+          <Text style={styles.settingLabel}>Your Data</Text>
+          <Text style={styles.settingHint}>{DATA_RETENTION_NOTICE}</Text>
+        </View>
+
+        <View style={styles.settingsCard}>
+          <Pressable
+            style={styles.settingRow}
+            onPress={() =>
+              Alert.alert('Export My Data', 'Choose date range', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Last 7 days', onPress: () => handleExportData('7') },
+                { text: 'Last 30 days', onPress: () => handleExportData('30') },
+                { text: 'All time', onPress: () => handleExportData('all') },
+                {
+                  text: 'Share with my therapist',
+                  onPress: () => handleShareWithTherapist(),
+                },
+              ])
+            }
+          >
+            <Text style={styles.settingLabel}>Export My Data</Text>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+          </Pressable>
+        </View>
+
+        <View style={styles.settingsCard}>
+          <Text style={styles.sectionTitle}>Legal</Text>
+          <Pressable style={styles.settingRow} onPress={() => Linking.openURL(TERMS_URL)}>
+            <Text style={styles.settingLabel}>Terms of Service</Text>
+            <Ionicons name="open-outline" size={18} color={COLORS.textMuted} />
+          </Pressable>
+          <Pressable style={styles.settingRow} onPress={() => Linking.openURL(PRIVACY_URL)}>
+            <Text style={styles.settingLabel}>Privacy Policy</Text>
+            <Ionicons name="open-outline" size={18} color={COLORS.textMuted} />
+          </Pressable>
+          <Pressable
+            style={styles.settingRow}
+            onPress={() => Alert.alert('Disclaimer', LEGAL_DISCLAIMER, [{ text: 'OK' }])}
+          >
+            <Text style={styles.settingLabel}>Disclaimer</Text>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+          </Pressable>
           <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
-            <View>
-              <Text style={styles.settingLabel}>About</Text>
-              <Text style={styles.settingMuted}>AllN1 Psych · AllN1 Network LLC · v{APP_VERSION}</Text>
-            </View>
+            <Text style={styles.settingMuted}>AllN1 Psych v{APP_VERSION}</Text>
           </View>
         </View>
+
+        <View style={styles.settingsCard}>
+          <Pressable style={styles.settingRow} onPress={handleDeleteAccountPress}>
+            <Text style={[styles.settingLabel, styles.settingDanger]}>Delete My Account</Text>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.recording} />
+          </Pressable>
+        </View>
       </View>
+
+      {/* Delete account confirmation modal — Type DELETE */}
+      <Modal visible={showDeleteConfirmModal} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setShowDeleteConfirmModal(false)}>
+          <Pressable style={styles.deleteConfirmCard} onPress={() => {}}>
+            <Text style={styles.deleteConfirmTitle}>Are you absolutely sure?</Text>
+            <Text style={styles.settingHint}>Type DELETE to confirm.</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="DELETE"
+              placeholderTextColor={COLORS.textMuted}
+              value={deleteConfirmText}
+              onChangeText={setDeleteConfirmText}
+              autoCapitalize="characters"
+              autoCorrect={false}
+            />
+            <View style={styles.deleteConfirmButtons}>
+              <Pressable style={styles.deleteConfirmCancel} onPress={() => { setShowDeleteConfirmModal(false); setDeleteConfirmText(''); }}>
+                <Text style={styles.settingLabel}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.deleteConfirmButton, deleteConfirmText !== 'DELETE' && styles.deleteConfirmButtonDisabled]}
+                onPress={handleDeleteAccountConfirm}
+                disabled={deleteConfirmText !== 'DELETE'}
+              >
+                <Text style={styles.deleteConfirmButtonText}>Delete my account</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Crisis resources — culturally relevant */}
       <View style={styles.crisis}>
@@ -1331,6 +1512,44 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     padding: 24,
+  },
+  deleteConfirmCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 24,
+    maxWidth: 400,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  deleteConfirmTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  deleteConfirmButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    marginTop: 16,
+  },
+  deleteConfirmCancel: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  deleteConfirmButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: COLORS.recording,
+    borderRadius: BORDER_RADIUS.input,
+  },
+  deleteConfirmButtonDisabled: {
+    opacity: 0.5,
+  },
+  deleteConfirmButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
   },
   sensitiveModalCard: {
     backgroundColor: COLORS.inputSurface,

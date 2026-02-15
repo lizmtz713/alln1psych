@@ -27,6 +27,7 @@ interface ConversationSummaryStore {
     trend: 'improving' | 'stable' | 'struggling';
   };
   getLastSummary: () => ConversationSummary | undefined;
+  reset: () => void;
 }
 
 function generateId(): string {
@@ -58,6 +59,7 @@ export const useConversationSummaryStore = create<ConversationSummaryStore>((set
   },
 
   clearSummaries: () => set({ summaries: [] }),
+  reset: () => set({ summaries: [] }),
 
   getSummaries: () => get().summaries,
 

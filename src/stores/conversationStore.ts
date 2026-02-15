@@ -23,6 +23,7 @@ interface ConversationState {
   toggleInputMode: () => void;
   setInitialGreetingAdded: (val: boolean) => void;
   clearMessages: () => void;
+  reset: () => void;
 }
 
 function generateId(): string {
@@ -60,4 +61,13 @@ export const useConversationStore = create<ConversationState>((set) => ({
   setInitialGreetingAdded: (initialGreetingAdded) => set({ initialGreetingAdded }),
 
   clearMessages: () => set({ messages: [], initialGreetingAdded: false }),
+  reset: () =>
+    set({
+      messages: [],
+      initialGreetingAdded: false,
+      isRecording: false,
+      isProcessing: false,
+      isAiTyping: false,
+      inputMode: 'voice',
+    }),
 }));

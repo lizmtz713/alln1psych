@@ -8,6 +8,7 @@ interface DailyContentState {
   setContent: (content: DailyContent) => void;
   setLoading: (loading: boolean) => void;
   isStale: () => boolean;
+  reset: () => void;
 }
 
 function todayKey(): string {
@@ -21,4 +22,5 @@ export const useDailyContentStore = create<DailyContentState>((set, get) => ({
   setContent: (content) => set({ content, date: todayKey() }),
   setLoading: (isLoading) => set({ isLoading }),
   isStale: () => get().date !== todayKey(),
+  reset: () => set({ content: null, date: '' }),
 }));

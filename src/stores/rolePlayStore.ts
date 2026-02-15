@@ -33,6 +33,7 @@ interface RolePlayState {
   endSession: () => void;
   clearCurrentSession: () => void;
   getSessionById: (id: string) => RolePlaySession | undefined;
+  reset: () => void;
 }
 
 export const useRolePlayStore = create<RolePlayState>((set, get) => ({
@@ -104,4 +105,5 @@ export const useRolePlayStore = create<RolePlayState>((set, get) => ({
     if (currentSession?.id === id) return currentSession;
     return pastSessions.find((s) => s.id === id);
   },
+  reset: () => set({ currentSession: null, pastSessions: [] }),
 }));
