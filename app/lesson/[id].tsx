@@ -27,6 +27,12 @@ import {
   getModuleByLessonId,
   getContentForAge,
 } from '../../src/data/educationContent';
+import {
+  getManualLessonById,
+  getManualModuleByLessonId,
+  getManualSectionByLessonId,
+  contentAgeToManualAge,
+} from '../../src/data/manualContent';
 
 function renderBody(text: string): React.ReactNode[] {
   const lines = text.split(/\n\n+/);
@@ -65,12 +71,24 @@ export default function LessonScreen() {
   const [reflectionText, setReflectionText] = useState(reflections[id ?? ''] ?? '');
   const scrollRef = React.useRef<ScrollView>(null);
 
-  const lesson = id ? getLessonById(id) : null;
-  const module = lesson ? getModuleByLessonId(lesson.id) : null;
-  const content = lesson ? getContentForAge(lesson, contentAge) : null;
+  const legacyLesson = id ? getLessonById(id) : null;
+  const manualLesson = id ? getManualLessonById(id) : null;
+  const isManual = !!manualLesson;
+
+  const legacyModule = legacyLesson ? getModuleByLessonId(legacyLesson.id) : null;
+  const manualModule = manualLesson ? getManualModuleByLessonId(manualLesson.id) : null;
+  const manualSection = manualLesson ? getManualSectionByLessonId(manualLesson.id) : null;
+
+  const legacyContent = legacyLesson ? getContentForAge(legacyLesson, contentAge) : null;
+  const manualAge = contentAgeToManualAge(contentAge);
+  const manualContent = manualLesson ? manualLesson.content[manualAge] : null;
+
+  const lesson = legacyLesson ?? manualLesson;
+  const module = legacyModule ?? manualModule;
+  const content = legacyContent ?? manualContent;
   const completed = id ? isLessonCompleted(id) : false;
 
-  if (!lesson || !content || !module) {
+  if (!lesson || !content) {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
@@ -81,7 +99,14 @@ export default function LessonScreen() {
     );
   }
 
-  const lessonIndex = module.lessons.findIndex((l) => l.id === lesson.id) + 1;
+  const lessonIndex = module
+    ? module.lessons.findIndex((l: { id: string }) => l.id === lesson.id) + 1
+    : 1;
+  const headerLabel = module
+    ? `${module.emoji} ${module.title}${lessonIndex ? ` · Lesson ${lessonIndex}` : ''}`
+    : manualSection
+      ? `${manualSection.emoji} ${manualSection.title}`
+      : 'Manual';
 
   const handleComplete = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -90,6 +115,66 @@ export default function LessonScreen() {
     router.back();
   };
 
+  // Manual lesson layout (introduction, keyConcepts, reflectionPrompt)
+  if (isManual && manualContent && 'introduction' in manualContent) {
+    const mc = manualContent as { introduction: string; keyConcepts: { title: string; explanation: string }[]; reflectionPrompt: string };
+    return (
+      <KeyboardAvoidingView
+        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={100}
+      >
+        <View style={styles.header}>
+          <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          </Pressable>
+          <Text style={styles.moduleLabel}>{headerLabel}</Text>
+        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            ref={scrollRef}
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text style={styles.title}>{lesson.emoji} {lesson.title}</Text>
+            <View style={styles.body}>
+              {renderBody(mc.introduction)}
+            </View>
+            {mc.keyConcepts.map((kc, i) => (
+              <View key={i} style={styles.card}>
+                <Text style={styles.cardTitle}>{kc.title}</Text>
+                <Text style={styles.cardBody}>{kc.explanation}</Text>
+              </View>
+            ))}
+            <View style={styles.reflection}>
+              <Text style={styles.reflectionQuestion}>{mc.reflectionPrompt}</Text>
+              <TextInput
+                style={styles.reflectionInput}
+                placeholder="Your thoughts (optional)"
+                placeholderTextColor={COLORS.textMuted}
+                value={reflectionText}
+                onChangeText={setReflectionText}
+                multiline
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+                onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300)}
+              />
+            </View>
+            <Pressable
+              style={({ pressed }) => [styles.completeButton, pressed && styles.completeButtonPressed]}
+              onPress={handleComplete}
+            >
+              <Text style={styles.completeButtonText}>{completed ? 'Done' : 'Complete'}</Text>
+            </Pressable>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  // Legacy lesson layout (body, exercise, reflection)
   return (
     <KeyboardAvoidingView
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
@@ -100,9 +185,7 @@ export default function LessonScreen() {
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
         </Pressable>
-        <Text style={styles.moduleLabel}>
-          {module.emoji} {module.title} · Lesson {lessonIndex}
-        </Text>
+        <Text style={styles.moduleLabel}>{headerLabel}</Text>
       </View>
 
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -115,21 +198,21 @@ export default function LessonScreen() {
         >
         <Text style={styles.title}>{lesson.title}</Text>
         <View style={styles.durationBadge}>
-          <Text style={styles.durationText}>{lesson.duration} min read</Text>
+          <Text style={styles.durationText}>{(lesson as { duration?: number }).duration ?? 5} min read</Text>
         </View>
 
-        <View style={styles.body}>{renderBody(content.body)}</View>
+        <View style={styles.body}>{renderBody((content as { body: string }).body)}</View>
 
-        {content.exercise && (
+        {(content as { exercise?: string }).exercise && (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Try it</Text>
-            <Text style={styles.cardBody}>{content.exercise}</Text>
+            <Text style={styles.cardBody}>{(content as { exercise: string }).exercise}</Text>
           </View>
         )}
 
-        {content.reflection && (
+        {(content as { reflection?: string }).reflection && (
           <View style={styles.reflection}>
-            <Text style={styles.reflectionQuestion}>{content.reflection}</Text>
+            <Text style={styles.reflectionQuestion}>{(content as { reflection: string }).reflection}</Text>
             <TextInput
               style={styles.reflectionInput}
               placeholder="Your thoughts (optional)"
