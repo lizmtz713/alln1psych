@@ -620,9 +620,9 @@ const section2Module3: ManualModule = {
           reflectionPrompt: "What's a thought you have on repeat? Is it a fact or a feeling? What's one other way to look at it?",
         },
         senior: {
-          introduction: "After decades of life, thought patterns can feel fixed — "I've always thought this way." But the link between thoughts and feelings remains. Noticing distorted thinking (catastrophizing about health, mind reading with family, all-or-nothing about the past) and gently reframing doesn't erase real problems. It gives you more room to respond instead of react.",
+          introduction: `After decades of life, thought patterns can feel fixed — "I've always thought this way." But the link between thoughts and feelings remains. Noticing distorted thinking (catastrophizing about health, mind reading with family, all-or-nothing about the past) and gently reframing doesn't erase real problems. It gives you more room to respond instead of react.`,
           keyConcepts: [
-            { title: 'All-or-nothing thinking', explanation: '"I was a bad parent" or "My life was wasted" leaves no room for the complexity of a long life. Most stories have both good and hard; holding both is more accurate than one extreme.' },
+            { title: 'All-or-nothing thinking', explanation: `"I was a bad parent" or "My life was wasted" leaves no room for the complexity of a long life. Most stories have both good and hard; holding both is more accurate than one extreme.` },
             { title: 'Catastrophizing', explanation: 'Worry about health, loss, or the future can spiral. Asking "What do I know for sure right now?" and "What would I tell a friend in this situation?" can slow the spiral.' },
             { title: 'Mind reading', explanation: 'Assuming adult children are too busy to care, or that someone is judging you — without checking — adds pain that might not be necessary. When possible, ask.' },
             { title: 'Emotional reasoning and the reframe', explanation: 'Feeling useless doesn\'t make it true. Feeling like a burden doesn\'t make it true. Reframing is asking for another angle: "What would someone who loves me say?"' },
@@ -701,7 +701,7 @@ const section2Module5: ManualModule = {
           reflectionPrompt: "What transition are you in right now? What part of your old self are you holding onto — and what might happen if you loosened your grip a little?",
         },
         adult: {
-          introduction: "Major life transitions — job change, relationship shift, becoming a parent, losing a parent, moving, illness, empty nest — disrupt our sense of who we are and how life works. The transition period is often painful and confusing. Understanding that grief, identity shift, and the "in-between" are normal can reduce the additional suffering of feeling like you're failing at change.",
+          introduction: `Major life transitions — job change, relationship shift, becoming a parent, losing a parent, moving, illness, empty nest — disrupt our sense of who we are and how life works. The transition period is often painful and confusing. Understanding that grief, identity shift, and the "in-between" are normal can reduce the additional suffering of feeling like you're failing at change.`,
           keyConcepts: [
             { title: 'Grief isn\'t just death', explanation: 'You can grieve a job, a relationship, health, a role you no longer have, or the life you thought you\'d have. Grief is the emotional response to loss of any kind.' },
             { title: 'Identity shifts', explanation: 'Who you are is partly defined by your roles and relationships. When those change, your identity can feel wobbly. That\'s not a breakdown — it\'s the psyche reorganizing.' },
@@ -759,7 +759,7 @@ const section3Module1: ManualModule = {
           reflectionPrompt: "What do you avoid because of anxiety? What would you do if the anxiety wasn't there?",
         },
         senior: {
-          introduction: "Anxiety in later life can center on health, loss, finances, or dependence. It's not "just worry" — it's the same overactive alarm system, sometimes triggered by real concerns and sometimes by the brain's habit of scanning for threat. Understanding that anxiety is the alarm, not the reality of danger, and that avoidance fuels it, can help you take small steps toward more peace.",
+          introduction: `Anxiety in later life can center on health, loss, finances, or dependence. It's not "just worry" — it's the same overactive alarm system, sometimes triggered by real concerns and sometimes by the brain's habit of scanning for threat. Understanding that anxiety is the alarm, not the reality of danger, and that avoidance fuels it, can help you take small steps toward more peace.`,
           keyConcepts: [
             { title: 'Generalized anxiety', explanation: 'Worry that won\'t turn off about health, family, or the future is common in later life. It doesn\'t mean you\'re weak. It means the alarm is set high. Reducing caffeine, improving sleep, and talking to someone can help.' },
             { title: 'Social anxiety', explanation: 'Withdrawal from social situations due to fear of judgment or burdening others can increase isolation. Small steps back into connection — one person, one activity — can dial down the alarm.' },
@@ -796,7 +796,7 @@ const section3Module1: ManualModule = {
           reflectionPrompt: "If you're feeling low: what's one tiny thing that might bring a moment of okay-ness today?",
         },
         senior: {
-          introduction: "Depression in later life can be mistaken for "just getting old" or "having a reason to be sad." But depression is not a normal part of aging. It's the engine stalling — energy, interest, and hope running low. It's treatable. And it's not your fault. Small steps and professional support can make a real difference.",
+          introduction: `Depression in later life can be mistaken for "just getting old" or "having a reason to be sad." But depression is not a normal part of aging. It's the engine stalling — energy, interest, and hope running low. It's treatable. And it's not your fault. Small steps and professional support can make a real difference.`,
           keyConcepts: [
             { title: 'Depression isn\'t laziness', explanation: 'When you\'re depressed, even basic tasks feel overwhelming. That\'s the condition, not a character flaw. Family and doctors sometimes miss depression in older adults; it\'s worth naming and seeking help.' },
             { title: 'Anhedonia', explanation: 'Losing interest in things that used to matter — hobbies, visits, food — is a symptom. It can improve with treatment, connection, and gradual re-engagement. You\'re not "done" with life; the system is underpowered.' },
@@ -824,7 +824,7 @@ const section3Module1: ManualModule = {
           reflectionPrompt: "Think of the last time you were angry. What was underneath the anger? Hurt? Fear? Feeling disrespected?",
         },
         adult: {
-          introduction: "Anger is one of the most common "overheat" signals. It's often a secondary emotion — a protective cover for hurt, fear, or shame. Understanding that anger is information (something matters to you, a boundary was crossed) and that there's a difference between feeling it and acting on it can transform your relationships and your relationship with yourself.",
+          introduction: `Anger is one of the most common "overheat" signals. It's often a secondary emotion — a protective cover for hurt, fear, or shame. Understanding that anger is information (something matters to you, a boundary was crossed) and that there's a difference between feeling it and acting on it can transform your relationships and your relationship with yourself.`,
           keyConcepts: [
             { title: 'Anger as a cover for hurt, fear, shame', explanation: 'In therapy, anger is often called a "secondary emotion." Primary emotions — hurt, fear, shame — feel more vulnerable, so the brain serves up anger as protection. Getting curious about what\'s underneath reduces reactive outbursts.' },
             { title: 'Healthy vs destructive expression', explanation: 'Healthy expression: "I feel angry when X happens. I need Y." Destructive expression: attacking, blaming, or acting in ways that harm. The feeling is valid; the expression can be chosen.' },
@@ -879,7 +879,7 @@ const section3Module2: ManualModule = {
           reflectionPrompt: "Have you ever been scared by your own thoughts? You're not alone — and having them doesn't mean anything about who you are.",
         },
         senior: {
-          introduction: "Intrusive thoughts can happen at any age. Sometimes in later life they might center on harm, illness, or loss. They can feel especially alarming if you believe "I should have more control by now." But intrusive thoughts are not a sign of weakness or danger. They're brain noise. Understanding that — and that you don't have to act on or believe them — can reduce the distress they cause.",
+          introduction: `Intrusive thoughts can happen at any age. Sometimes in later life they might center on harm, illness, or loss. They can feel especially alarming if you believe "I should have more control by now." But intrusive thoughts are not a sign of weakness or danger. They're brain noise. Understanding that — and that you don't have to act on or believe them — can reduce the distress they cause.`,
           keyConcepts: [
             { title: 'Everyone has them', explanation: 'Intrusive thoughts are a common human experience. They don\'t indicate that you\'re "losing it" or that you\'re a bad person. They\'re unwelcome mental events, not commands.' },
             { title: 'Having the thought ≠ wanting to act', explanation: 'Thinking something doesn\'t mean wanting it. Many people have fleeting thoughts that horrify them. What matters is that you don\'t act on them — and most people never do.' },
@@ -996,7 +996,7 @@ const section3Module5: ManualModule = {
       emoji: '🩺',
       content: {
         teen: {
-          introduction: "Sometimes what you're going through is too big for an app, a book, or even a good friend. That doesn't mean you've failed. It means you need a professional — someone trained to help with the stuff that's stuck. Therapy isn't for "crazy people." It's for anyone who wants support figuring out their mind and their life. And if you're LGBTQ+, you deserve a therapist who gets that.",
+          introduction: `Sometimes what you're going through is too big for an app, a book, or even a good friend. That doesn't mean you've failed. It means you need a professional — someone trained to help with the stuff that's stuck. Therapy isn't for "crazy people." It's for anyone who wants support figuring out their mind and their life. And if you're LGBTQ+, you deserve a therapist who gets that.`,
           keyConcepts: [
             { title: 'Therapy isn\'t failure', explanation: 'Going to therapy doesn\'t mean you\'re broken. It means you\'re taking your mental health seriously. Athletes have coaches; musicians have teachers. Brains can use guides too.' },
             { title: 'Types of therapy (simple)', explanation: 'CBT helps you change unhelpful thoughts and behaviors. DBT adds skills for emotion regulation and relationships. EMDR helps process trauma. Different tools for different needs.' },
@@ -1016,7 +1016,7 @@ const section3Module5: ManualModule = {
           reflectionPrompt: "Is there something you've been handling alone that might benefit from professional support?",
         },
         senior: {
-          introduction: "In later life, the idea of therapy can feel foreign — "we didn't do that in my day." But therapy isn't just for young people or "serious" cases. It's for anyone who wants support with loss, transition, depression, anxiety, or the weight of a long life. Medication can also be a tool, not a crutch. And if you're LGBTQ+, you deserve a therapist who affirms who you are. Your identity is not something to fix.",
+          introduction: `In later life, the idea of therapy can feel foreign — "we didn't do that in my day." But therapy isn't just for young people or "serious" cases. It's for anyone who wants support with loss, transition, depression, anxiety, or the weight of a long life. Medication can also be a tool, not a crutch. And if you're LGBTQ+, you deserve a therapist who affirms who you are. Your identity is not something to fix.`,
           keyConcepts: [
             { title: 'Therapy isn\'t failure', explanation: 'Seeking therapy at any age is a sign of strength. It\'s never too late to get support for grief, depression, anxiety, or the challenges of aging. Many therapists work specifically with older adults.' },
             { title: 'Types of therapy', explanation: 'CBT, supportive therapy, grief counseling, and others can help. Your doctor or a local mental health agency can point you to someone. You can ask what approach they use.' },
@@ -1043,7 +1043,7 @@ const section4Module1: ManualModule = {
       emoji: '🧠',
       content: {
         teen: {
-          introduction: "Emotional intelligence (EQ) isn't about being nice or never getting mad. It's about knowing your own emotions, managing them, reading other people's emotions, and handling relationships well. Some of the most "successful" people in life aren't the smartest in the book sense — they're the ones who get emotions, in themselves and others. You can build EQ. It's a skill.",
+          introduction: `Emotional intelligence (EQ) isn't about being nice or never getting mad. It's about knowing your own emotions, managing them, reading other people's emotions, and handling relationships well. Some of the most "successful" people in life aren't the smartest in the book sense — they're the ones who get emotions, in themselves and others. You can build EQ. It's a skill.`,
           keyConcepts: [
             { title: 'Self-awareness', explanation: 'Knowing what you feel and why. Noticing your moods, your triggers, and how you show up in different situations. It\'s the foundation of everything else.' },
             { title: 'Self-regulation', explanation: 'Managing your emotions instead of being run by them. Pausing before reacting, choosing how to express yourself, and not letting every feeling dictate your behavior.' },
