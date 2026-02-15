@@ -11,6 +11,7 @@ export const COLORS = {
   textMuted: '#A0A0A8',
   accent: '#7C4DFF',
   accentMuted: '#9D7AFF',
+  recording: '#EF5350',
 } as const;
 
 export const BORDER_RADIUS = {
