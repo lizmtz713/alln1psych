@@ -14,6 +14,7 @@ export interface DbProfile {
   communication_preference: string | null;
   love_language: string | null;
   onboarding_completed: boolean;
+  push_token: string | null;
   created_at: string;
   updated_at: string;
 }

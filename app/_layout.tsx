@@ -4,12 +4,14 @@ import { StatusBar } from 'expo-status-bar';
 import { COLORS } from '../src/lib/constants';
 import { AuthProvider } from '../src/providers/AuthProvider';
 import { AuthSync } from '../src/providers/AuthSync';
+import { NotificationsSetup } from '../src/providers/NotificationsSetup';
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
         <AuthSync>
+          <NotificationsSetup>
           <StatusBar style="light" />
           <Stack
           screenOptions={{
@@ -23,6 +25,7 @@ export default function RootLayout() {
           <Stack.Screen name="(modals)" options={{ presentation: 'fullScreenModal' }} />
           <Stack.Screen name="lesson" />
           </Stack>
+          </NotificationsSetup>
         </AuthSync>
       </AuthProvider>
     </SafeAreaProvider>

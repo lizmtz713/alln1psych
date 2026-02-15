@@ -9,6 +9,7 @@ import {
   Animated,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,6 +25,12 @@ import {
 } from '../../src/stores/userStore';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { completeOnboarding as completeOnboardingDb } from '../../src/services/database';
+import { useSettingsStore } from '../../src/stores/settingsStore';
+import {
+  registerForPushNotifications,
+  scheduleDailyCheckin,
+  scheduleEveningReflection,
+} from '../../src/services/notifications';
 
 const TOTAL_STEPS = 7;
 
@@ -89,6 +96,8 @@ export default function OnboardingScreen() {
   );
   const [wantsToInvite, setWantsToInvite] = useState<boolean | null>(null);
   const [nameInputFocused, setNameInputFocused] = useState(false);
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
+  const setNotificationsCheckIn = useSettingsStore((s) => s.setNotificationsCheckIn);
 
   const triggerTransition = (direction: 'in' | 'out', onDone?: () => void) => {
     Animated.timing(fadeAnim, {
@@ -101,6 +110,25 @@ export default function OnboardingScreen() {
     });
   };
 
+  const finishOnboarding = async () => {
+    if (wantsToInvite === true && inviteName.trim()) {
+      setCircleInvite({ name: inviteName.trim(), relationship: inviteRelationship });
+    } else {
+      setCircleInvite(null);
+    }
+    if (user?.id) {
+      await completeOnboardingDb(user.id, {
+        name: name.trim(),
+        pronouns: pronouns ?? undefined,
+        age_group: ageGroup,
+        communication_preference: communicationPreference,
+        love_language: loveLanguage,
+      });
+    }
+    completeOnboarding();
+    router.replace('/(tabs)');
+  };
+
   const goNext = async () => {
     if (step < TOTAL_STEPS) {
       triggerTransition('out', () => {
@@ -109,23 +137,22 @@ export default function OnboardingScreen() {
         triggerTransition('in');
       });
     } else {
-      if (wantsToInvite === true && inviteName.trim()) {
-        setCircleInvite({ name: inviteName.trim(), relationship: inviteRelationship });
-      } else {
-        setCircleInvite(null);
-      }
-      if (user?.id) {
-        await completeOnboardingDb(user.id, {
-          name: name.trim(),
-          pronouns: pronouns ?? undefined,
-          age_group: ageGroup,
-          communication_preference: communicationPreference,
-          love_language: loveLanguage,
-        });
-      }
-      completeOnboarding();
-      router.replace('/(tabs)');
+      setShowNotificationPrompt(true);
     }
+  };
+
+  const handleNotificationPromptYes = async () => {
+    setShowNotificationPrompt(false);
+    await registerForPushNotifications();
+    setNotificationsCheckIn(true);
+    await scheduleDailyCheckin(9, 0).catch(() => {});
+    await scheduleEveningReflection(21, 0).catch(() => {});
+    await finishOnboarding();
+  };
+
+  const handleNotificationPromptLater = async () => {
+    setShowNotificationPrompt(false);
+    await finishOnboarding();
   };
 
   const canProceed = () => {
@@ -157,6 +184,33 @@ export default function OnboardingScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <Modal
+        visible={showNotificationPrompt}
+        transparent
+        animationType="fade"
+        onRequestClose={handleNotificationPromptLater}
+      >
+        <View style={styles.notificationPromptOverlay}>
+          <View style={styles.notificationPromptCard}>
+            <Text style={styles.notificationPromptTitle}>
+              Can Psych send you a daily check-in reminder?
+            </Text>
+            <Text style={styles.notificationPromptSub}>
+              It's a gentle nudge to check in with yourself.
+            </Text>
+            <Pressable
+              style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
+              onPress={handleNotificationPromptYes}
+            >
+              <Text style={styles.primaryButtonText}>Yes, remind me</Text>
+            </Pressable>
+            <Pressable style={styles.skipButton} onPress={handleNotificationPromptLater}>
+              <Text style={styles.skipText}>Maybe later</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
       {/* Progress dots + step label */}
       <View style={styles.progressWrap}>
         <View style={styles.dotsRow}>
@@ -768,6 +822,33 @@ const styles = StyleSheet.create({
   skipText: {
     fontSize: 15,
     color: COLORS.textMuted,
+  },
+  notificationPromptOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  notificationPromptCard: {
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 28,
+    width: '100%',
+    maxWidth: 340,
+  },
+  notificationPromptTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: COLORS.text,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  notificationPromptSub: {
+    fontSize: 16,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   promiseList: {
     marginBottom: 40,

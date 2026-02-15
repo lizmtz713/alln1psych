@@ -10,6 +10,7 @@ create table public.profiles (
   communication_preference text check (communication_preference in ('voice', 'text')) default 'voice',
   love_language text,
   onboarding_completed boolean default false,
+  push_token text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -164,6 +165,9 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Optional: if profiles already exists without push_token, run:
+-- alter table public.profiles add column if not exists push_token text;
 
 -- INDEXES for performance
 create index idx_conversations_user_id on public.conversations(user_id);

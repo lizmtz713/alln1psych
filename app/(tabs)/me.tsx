@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { useUserStore } from '../../src/stores/userStore';
+import { registerForPushNotifications } from '../../src/services/notifications';
 import { useJournalStore } from '../../src/stores/journalStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
@@ -292,7 +293,10 @@ export default function MeScreen() {
             <Text style={styles.settingLabel}>Daily check-in reminders</Text>
             <Switch
               value={settings.notificationsCheckIn}
-              onValueChange={settings.setNotificationsCheckIn}
+              onValueChange={async (v) => {
+                if (v) await registerForPushNotifications();
+                settings.setNotificationsCheckIn(v);
+              }}
               trackColor={{ false: COLORS.surface, true: COLORS.accentMuted }}
               thumbColor={COLORS.text}
             />

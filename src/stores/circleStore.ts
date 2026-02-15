@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { useAuthStore } from './authStore';
+import { useSettingsStore } from './settingsStore';
 import * as database from '../services/database';
+import { sendLocalNudge } from '../services/notifications';
 
 export type Temperature = 'green' | 'yellow' | 'orange' | 'red';
 
@@ -167,9 +169,10 @@ export const useCircleStore = create<CircleState>((set) => ({
     set((state) => ({ members: state.members.filter((m) => m.id !== id) }));
   },
 
-  updateMemberTemperature: (id, temperature) =>
-    set((state) => ({
-      members: state.members.map((m) =>
+  updateMemberTemperature: (id, temperature) => {
+    set((state) => {
+      const member = state.members.find((m) => m.id === id);
+      const next = state.members.map((m) =>
         m.id === id
           ? {
               ...m,
@@ -178,8 +181,17 @@ export const useCircleStore = create<CircleState>((set) => ({
               lastUpdated: new Date(),
             }
           : m
-      ),
-    })),
+      );
+      if (
+        member &&
+        (temperature === 'orange' || temperature === 'red') &&
+        useSettingsStore.getState().notificationsCircleNudges
+      ) {
+        sendLocalNudge(member.name, `${member.name} could use a check-in.`).catch(() => {});
+      }
+      return { members: next };
+    });
+  },
 
   updateMyTemperature: (temp, note) =>
     set({
