@@ -59,5 +59,5 @@ export const useConversationStore = create<ConversationState>((set) => ({
 
   setInitialGreetingAdded: (initialGreetingAdded) => set({ initialGreetingAdded }),
 
-  clearMessages: () => set({ messages: [] }),
+  clearMessages: () => set({ messages: [], initialGreetingAdded: false }),
 }));

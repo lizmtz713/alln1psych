@@ -18,10 +18,10 @@ import {
   useConversationStore,
   type ConversationMessage,
 } from '../../src/stores/conversationStore';
-import { hasOpenAIKey } from '../../src/services/ai';
-import { sendMessage } from '../../src/services/ai';
+import { hasOpenAIKey, sendMessage } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
 import type { CommunicationPreference } from '../../src/stores/userStore';
+import { useSettingsStore } from '../../src/stores/settingsStore';
 
 const MIC_BUTTON_SIZE = 80;
 const MIC_BUTTON_SIZE_SMALL = 48;
@@ -72,9 +72,14 @@ export default function TalkScreen() {
     setInputMode,
     setInitialGreetingAdded,
   } = useConversationStore();
+  const apiKeySavedAt = useSettingsStore((s) => s.apiKeySavedAt);
 
   const [textInput, setTextInput] = useState('');
-  const hasApiKey = hasOpenAIKey();
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  useEffect(() => {
+    hasOpenAIKey().then(setHasApiKey);
+  }, [apiKeySavedAt]);
 
   // Seed first greeting once
   useEffect(() => {
@@ -292,7 +297,7 @@ export default function TalkScreen() {
               <Ionicons name="arrow-up" size={24} color={COLORS.text} />
             </Pressable>
             <Pressable
-              style={[styles.micButtonSmall, hasApiKey && Voice.hasVoiceSupport() && styles.micButtonSmallActive]}
+              style={[styles.micButtonSmall, hasApiKey && styles.micButtonSmallActive]}
               onPress={() => setInputMode('voice')}
             >
               <Ionicons name="mic-outline" size={24} color={COLORS.text} />

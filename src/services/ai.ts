@@ -1,7 +1,30 @@
 /**
  * AI conversation service — OpenAI API.
- * Uses EXPO_PUBLIC_OPENAI_API_KEY. Swap to Claude later if needed.
+ * Reads API key from expo-secure-store first, then EXPO_PUBLIC_OPENAI_API_KEY env.
  */
+
+import * as SecureStore from 'expo-secure-store';
+
+const API_KEY_STORAGE = 'openai_api_key';
+
+export async function getOpenAIKey(): Promise<string | null> {
+  try {
+    const fromStore = await SecureStore.getItemAsync(API_KEY_STORAGE);
+    if (fromStore?.trim()) return fromStore.trim();
+  } catch {
+    // ignore
+  }
+  const fromEnv = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+  return fromEnv?.trim() ?? null;
+}
+
+export async function setOpenAIKey(key: string | null): Promise<void> {
+  if (key?.trim()) {
+    await SecureStore.setItemAsync(API_KEY_STORAGE, key.trim());
+  } else {
+    await SecureStore.deleteItemAsync(API_KEY_STORAGE);
+  }
+}
 
 export interface Message {
   role: 'system' | 'user' | 'assistant';
@@ -70,8 +93,8 @@ export async function sendMessage(
   messages: Message[],
   userContext: UserContext
 ): Promise<string> {
-  const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
-  if (!apiKey?.trim()) {
+  const apiKey = await getOpenAIKey();
+  if (!apiKey) {
     throw new Error('OpenAI API key not configured');
   }
 
@@ -106,7 +129,7 @@ export async function sendMessage(
   return content;
 }
 
-export function hasOpenAIKey(): boolean {
-  const key = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
-  return Boolean(key?.trim());
+export async function hasOpenAIKey(): Promise<boolean> {
+  const key = await getOpenAIKey();
+  return Boolean(key);
 }
