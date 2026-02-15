@@ -226,20 +226,39 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* Try an activity — rotate by time of day */}
+      {/* Try an activity — rotate by time of day and mood */}
       <Animated.View style={[styles.card, slideY(card3)]}>
         <Text style={styles.cardSectionTitle}>Try this</Text>
         {(() => {
           const hour = new Date().getHours();
           const morning = hour >= 5 && hour < 12;
-          const afternoon = hour >= 12 && hour < 17;
-          const evening = hour >= 17;
-          const id = morning ? 'breathing' : afternoon ? 'emotion-wheel' : 'body-scan';
-          const config = id === 'breathing'
-            ? { emoji: '🌬️', title: 'Breathe with me', sub: 'Box breathing — 4 in, 4 hold, 4 out. Calms your nervous system.' }
-            : id === 'emotion-wheel'
-            ? { emoji: '🎯', title: 'Emotion Explorer', sub: 'Name your feelings with precision. Tap the wheel and explore.' }
-            : { emoji: '🧍', title: 'Body Check', sub: 'Tap where you feel tension. Connect body and emotions.' };
+          const daySeed = new Date().getDate() + hour;
+          const allActivities = [
+            { id: 'breathing', emoji: '🌬️', title: 'Breathe with me', sub: 'Box breathing — 4 in, 4 hold, 4 out. Calms your nervous system.' },
+            { id: 'gratitude-jar', emoji: '✨', title: 'Gratitude Jar', sub: "Add moments you're grateful for. Shake the jar to revisit one." },
+            { id: 'thought-challenger', emoji: '💭', title: 'Thought Challenger', sub: 'Challenge a tough thought with Psych.' },
+            { id: 'body-scan', emoji: '🧍', title: 'Body Check', sub: 'Tap where you feel tension. Connect body and emotions.' },
+            { id: 'emotion-match', emoji: '🃏', title: 'What Would You Feel?', sub: 'Match scenarios to emotions. No wrong answers.' },
+            { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Explorer', sub: 'Name your feelings with precision. Tap the wheel and explore.' },
+          ];
+          let id = allActivities[0].id;
+          let config = allActivities[0];
+          if (myTemperature === 'orange' || myTemperature === 'red') {
+            const pool = allActivities.filter((a) => a.id === 'thought-challenger' || a.id === 'body-scan');
+            config = pool[daySeed % pool.length];
+            id = config.id;
+          } else if (myTemperature === 'green') {
+            const pool = allActivities.filter((a) => a.id === 'emotion-match' || a.id === 'gratitude-jar');
+            config = pool[daySeed % pool.length];
+            id = config.id;
+          } else if (morning) {
+            const pool = allActivities.filter((a) => a.id === 'breathing' || a.id === 'gratitude-jar');
+            config = pool[daySeed % pool.length];
+            id = config.id;
+          } else {
+            config = allActivities[daySeed % allActivities.length];
+            id = config.id;
+          }
           return (
             <Pressable
               style={({ pressed }) => [styles.practiceCard, pressed && { opacity: 0.9 }]}

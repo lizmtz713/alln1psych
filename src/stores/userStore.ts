@@ -20,7 +20,14 @@ export type LoveLanguage =
 
 export type LearningStyle = 'reading' | 'listening' | 'doing' | 'talking';
 
-export type Pronouns = 'she/her' | 'he/him' | 'they/them' | 'other';
+export type Pronouns =
+  | 'she/her'
+  | 'he/him'
+  | 'they/them'
+  | 'he/they'
+  | 'she/they'
+  | 'any'
+  | 'other';
 
 export interface CircleInvite {
   name: string;
@@ -30,6 +37,21 @@ export interface CircleInvite {
 export interface EmergencyContact {
   name: string;
   phone: string;
+}
+
+/** Saved from Trigger Map activity — so AI can reference known triggers in conversation */
+export interface TriggerMapEntry {
+  id: string;
+  situation: string;
+  emotions: string[];
+  bodyZones: string[];
+  reaction: string;
+  otherReaction?: string;
+  validation?: string;
+  pattern?: string;
+  alternative?: string;
+  encouragement?: string;
+  createdAt: string;
 }
 
 interface UserState {
@@ -46,9 +68,15 @@ interface UserState {
   learningStyle: LearningStyle | null;
   /** Up to 3 contacts for crisis (name + phone) */
   emergencyContacts: EmergencyContact[];
+  /** When pronouns === 'other', user-typed pronouns (e.g. "ze/zir") */
+  customPronouns: string;
+  /** Saved trigger maps from the Trigger Map activity */
+  triggerMaps: TriggerMapEntry[];
 
   setName: (name: string) => void;
+  addTriggerMap: (entry: Omit<TriggerMapEntry, 'id' | 'createdAt'>) => void;
   setPronouns: (pronouns: Pronouns | null) => void;
+  setCustomPronouns: (value: string) => void;
   setAgeGroup: (ageGroup: AgeGroup | null) => void;
   setCommunicationPreference: (pref: CommunicationPreference | null) => void;
   setLoveLanguage: (lang: LoveLanguage | null) => void;
@@ -71,6 +99,8 @@ const initialState = {
   sensitiveTopics: [] as string[],
   learningStyle: null as LearningStyle | null,
   emergencyContacts: [] as EmergencyContact[],
+  customPronouns: '',
+  triggerMaps: [] as TriggerMapEntry[],
 };
 
 export const useUserStore = create<UserState>((set) => ({
@@ -85,6 +115,18 @@ export const useUserStore = create<UserState>((set) => ({
   setSensitiveTopics: (sensitiveTopics) => set({ sensitiveTopics }),
   setLearningStyle: (learningStyle) => set({ learningStyle }),
   setEmergencyContacts: (emergencyContacts) => set({ emergencyContacts }),
+  setCustomPronouns: (customPronouns) => set({ customPronouns }),
+  addTriggerMap: (entry) =>
+    set((state) => ({
+      triggerMaps: [
+        {
+          ...entry,
+          id: `tm-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          createdAt: new Date().toISOString(),
+        },
+        ...state.triggerMaps,
+      ],
+    })),
   completeOnboarding: () => set({ onboardingCompleted: true }),
   resetOnboarding: () => set(initialState),
 }));

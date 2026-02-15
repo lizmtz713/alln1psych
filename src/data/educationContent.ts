@@ -57,7 +57,7 @@ Think of a friend who stubbed their toe. They might yell or cry. You wouldn't sa
 
 Here's the thing: emotions aren't good or bad. They're data. Sadness isn't "wrong." Anger isn't "bad." They're telling you something about what you care about and what you need. Society often tells teens to suppress emotions or dismiss them as "hormones." But your feelings are real and valid. They're not less important because you're young.
 
-When you can name what you're feeling — "I'm anxious," "I'm disappointed," "I'm actually really hurt" — you're already one step ahead. You're not being controlled by the feeling; you're noticing it. That's the first step to understanding yourself.`,
+When you can name what you're feeling — "I'm anxious," "I'm disappointed," "I'm actually really hurt" — you're already one step ahead. You're not being controlled by the feeling; you're noticing it. That's the first step to understanding yourself. Sometimes your emotional "check engine light" isn't about a situation — it's about how the world treats your identity. If you're LGBTQ+, trans, or part of any marginalized group, some of your stress comes from the world, not from you. That means: you're not broken. The system around you needs work.`,
         exercise: `When a strong emotion hits today, pause. Say to yourself: "I'm feeling _____. It's okay." Notice where in your body you feel it.`,
         reflection: `What emotion do you feel most often that you wish people understood better?`,
       },
@@ -65,7 +65,9 @@ When you can name what you're feeling — "I'm anxious," "I'm disappointed," "I'
         ageGroup: 'adult',
         body: `Emotions are your nervous system's way of processing the world. When something happens — a win at work, a conflict with a partner, a memory, a headline — your brain doesn't just think about it; it responds. Your heart rate shifts. Your stomach tightens or relaxes. That's emotion. It's physiological before it's even a word.
 
-We're often taught to treat emotions as problems to fix or hide. "Don't be so sensitive." "Just get over it." But emotions aren't bugs; they're features. They evolved to keep us connected, safe, and motivated. Anger signals a boundary was crossed. Sadness signals loss. Anxiety signals uncertainty. They're not good or bad — they're information. When you can name what you're feeling without judging it, you're not at the mercy of it. You're in relationship with it. And that changes everything.`,
+We're often taught to treat emotions as problems to fix or hide. "Don't be so sensitive." "Just get over it." But emotions aren't bugs; they're features. They evolved to keep us connected, safe, and motivated. Anger signals a boundary was crossed. Sadness signals loss. Anxiety signals uncertainty. They're not good or bad — they're information. When you can name what you're feeling without judging it, you're not at the mercy of it. You're in relationship with it. And that changes everything.
+
+Sometimes your emotional "check engine light" isn't about a situation — it's about how the world treats your identity. If you're LGBTQ+, trans, or part of any marginalized group, some of your stress comes from the world, not from you. That's important to know because it means: you're not broken. The system around you needs work.`,
         exercise: `Next time you feel a strong emotion, pause. Name it. Then notice: Where do I feel this in my body? What might it be telling me?`,
         reflection: `Which emotion do you find hardest to allow in yourself? Why do you think that is?`,
       },
@@ -255,7 +257,9 @@ That means less interrupting, less "Oh, that's like when I…," less advice unle
         ageGroup: 'adult',
         body: `Hard conversations are the ones we avoid: setting a boundary, saying we're hurt, asking for what we need, ending something. The trick is to go in with clarity. What do I want to say? What do I want them to understand? What do I need from them (or from myself)?
 
-You can script a few lines. "I need to tell you something that's hard for me." "When you did X, I felt Y. I'm not saying you're bad — I'm saying I need this to change." "I'd like to hear your side after I've said this." You don't have to be perfect. You can say "I'm nervous to bring this up." Timing matters: when you're both calm, when you have time, when you're not in public. And remember: their reaction isn't your job. Your job is to be clear and honest.`,
+You can script a few lines. "I need to tell you something that's hard for me." "When you did X, I felt Y. I'm not saying you're bad — I'm saying I need this to change." "I'd like to hear your side after I've said this." You don't have to be perfect. You can say "I'm nervous to bring this up." Timing matters: when you're both calm, when you have time, when you're not in public. And remember: their reaction isn't your job. Your job is to be clear and honest.
+
+Finding your people — people who see you and accept ALL of you — isn't a luxury. It's maintenance. If your current circle doesn't affirm who you are, it's okay to find people who do.`,
         exercise: `Write three sentences you could use in a hard conversation you've been avoiding. You don't have to send them yet.`,
         reflection: `What's one conversation you've been putting off? What's the smallest first step?`,
       },
@@ -356,6 +360,21 @@ Good enough means: I did what I could with the time and energy I had. It doesn't
 You can regret something and still choose to learn, make amends if needed, and stop replaying the tape on loop. The person you were then didn't have the clarity you have now. You're allowed to grow. You're allowed to put down the weight. It doesn't mean what you did was okay. It means you don't have to carry the sentence forever.`,
         exercise: `Write one sentence: "I forgive myself for _____." You don't have to believe it fully yet. Just write it.`,
         reflection: `What's one thing you've been holding against yourself that you're ready to soften toward?`,
+      },
+    ],
+  },
+  {
+    id: 'compassion-when-to-see-mechanic',
+    title: 'When to See the Mechanic',
+    duration: 5,
+    content: [
+      {
+        ageGroup: 'adult',
+        body: `Sometimes you need more than self-care and good habits — you need a professional. That's not failure. It's like taking your car to a mechanic when the check engine light won't turn off. A therapist can help you work through patterns, trauma, or stuck places in a way that friends and apps can't.
+
+If you're looking for a therapist, it's okay to ask: "Are you experienced with LGBTQ+ clients?" or "Are you affirming of trans identities?" A good mechanic knows your specific make and model. You deserve that. Gender-affirming care is valid healthcare, not something to debate. Your identity is not a diagnosis.`,
+        exercise: `If you've ever thought about therapy, write one question you'd want to ask a potential therapist before starting.`,
+        reflection: `What would make you feel safe and heard in a therapy room?`,
       },
     ],
   },

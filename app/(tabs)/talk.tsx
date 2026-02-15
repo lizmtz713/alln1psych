@@ -20,7 +20,7 @@ import {
   useConversationStore,
   type ConversationMessage,
 } from '../../src/stores/conversationStore';
-import { hasOpenAIKey, sendMessage } from '../../src/services/ai';
+import { hasOpenAIKey, sendMessage, type UserContext } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
 import type { CommunicationPreference } from '../../src/stores/userStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
@@ -77,13 +77,26 @@ function AnimatedMessageRow({
   );
 }
 
-function buildUserContext(): { name: string; ageGroup: string; loveLanguage: string; communicationPreference: string; sensitiveTopics?: string[] } {
-  const { name, ageGroup, loveLanguage, communicationPreference, sensitiveTopics } = useUserStore.getState();
+function buildUserContext(): UserContext {
+  const {
+    name,
+    ageGroup,
+    loveLanguage,
+    communicationPreference,
+    sensitiveTopics,
+    pronouns,
+    customPronouns,
+  } = useUserStore.getState();
+  const pronounsDisplay =
+    pronouns === 'other'
+      ? (customPronouns?.trim() || 'not specified')
+      : (pronouns ?? 'not specified');
   return {
     name: name || 'there',
     ageGroup: ageGroup ?? 'unknown',
     loveLanguage: loveLanguage ?? 'unknown',
     communicationPreference: communicationPreference ?? 'voice',
+    pronouns: pronounsDisplay,
     sensitiveTopics: sensitiveTopics?.length ? sensitiveTopics : undefined,
   };
 }

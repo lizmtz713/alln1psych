@@ -12,15 +12,40 @@ interface CrisisOverlayProps {
   onDismiss: () => void;
 }
 
+const LGBTQ_RESOURCES = [
+  {
+    emoji: '🏳️‍⚧️',
+    title: 'Trans Lifeline: 877-565-8860',
+    sub: 'By and for trans people',
+    onPress: () => Linking.openURL('tel:8775658860'),
+    style: 'trans' as const,
+  },
+  {
+    emoji: '🏳️‍🌈',
+    title: 'Trevor Project: 866-488-7386',
+    sub: 'LGBTQ+ youth crisis support',
+    onPress: () => Linking.openURL('tel:8664887386'),
+    style: 'rainbow' as const,
+  },
+  {
+    emoji: '💬',
+    title: 'Trevor Text: Text START to 678-678',
+    sub: 'LGBTQ+ text support',
+    onPress: () => Linking.openURL('sms:678678'),
+    style: 'rainbow' as const,
+  },
+];
+
 export function CrisisOverlay({ onDismiss }: CrisisOverlayProps) {
   const insets = useSafeAreaInsets();
   const emergencyContacts = useUserStore((s) => s.emergencyContacts);
+  const sensitiveTopics = useUserStore((s) => s.sensitiveTopics);
+  const showLGBTQFirst =
+    sensitiveTopics?.includes('gender-identity-dysphoria') ||
+    sensitiveTopics?.includes('coming-out');
 
-  return (
-    <View style={[styles.overlay, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
-      <Text style={styles.title}>You are not alone.</Text>
-      <Text style={styles.sub}>Reach out anytime. These are here for you.</Text>
-
+  const standardButtons = (
+    <>
       <Pressable
         style={({ pressed }) => [styles.button, styles.buttonPrimary, pressed && styles.pressed]}
         onPress={() => Linking.openURL('tel:988')}
@@ -29,7 +54,6 @@ export function CrisisOverlay({ onDismiss }: CrisisOverlayProps) {
         <Text style={styles.buttonText}>Call 988</Text>
         <Text style={styles.buttonSub}>Suicide & Crisis Lifeline</Text>
       </Pressable>
-
       <Pressable
         style={({ pressed }) => [styles.button, pressed && styles.pressed]}
         onPress={() => Linking.openURL('sms:741741')}
@@ -38,6 +62,46 @@ export function CrisisOverlay({ onDismiss }: CrisisOverlayProps) {
         <Text style={styles.buttonText}>Text HOME to 741741</Text>
         <Text style={styles.buttonSub}>Crisis Text Line</Text>
       </Pressable>
+    </>
+  );
+
+  const lgbtqButtons = (
+    <>
+      {LGBTQ_RESOURCES.map((r, i) => (
+        <Pressable
+          key={i}
+          style={({ pressed }) => [
+            styles.button,
+            r.style === 'trans' && styles.buttonTrans,
+            r.style === 'rainbow' && styles.buttonRainbow,
+            pressed && styles.pressed,
+          ]}
+          onPress={r.onPress}
+        >
+          <Text style={styles.buttonEmoji}>{r.emoji}</Text>
+          <Text style={styles.buttonText}>{r.title}</Text>
+          <Text style={styles.buttonSub}>{r.sub}</Text>
+        </Pressable>
+      ))}
+    </>
+  );
+
+  return (
+    <View style={[styles.overlay, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <Text style={styles.title}>You are not alone.</Text>
+      <Text style={styles.sub}>Reach out anytime. These are here for you.</Text>
+
+      {showLGBTQFirst ? (
+        <>
+          {lgbtqButtons}
+          {standardButtons}
+        </>
+      ) : (
+        <>
+          {standardButtons}
+          {lgbtqButtons}
+        </>
+      )}
 
       {emergencyContacts.slice(0, 3).map((c, i) => (
         <Pressable
@@ -97,6 +161,14 @@ const styles = StyleSheet.create({
   },
   buttonPrimary: {
     backgroundColor: COLORS.accent,
+  },
+  buttonTrans: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#5BCEFA',
+  },
+  buttonRainbow: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#FF9B54',
   },
   button911: {
     borderWidth: 2,

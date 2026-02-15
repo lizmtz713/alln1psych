@@ -25,6 +25,8 @@ import { getActivityById } from '../../src/lib/activities';
 import { EMOTION_WHEEL_PRIMARY } from '../../src/data/emotionWheel';
 import { BODY_ZONES } from '../../src/data/bodyScan';
 import { useJournalStore } from '../../src/stores/journalStore';
+import { useGratitudeStore } from '../../src/stores/gratitudeStore';
+import { useUserStore } from '../../src/stores/userStore';
 import { getOpenAIKey } from '../../src/services/ai';
 
 type BreathPhase = 'inhale' | 'hold' | 'exhale';
@@ -66,6 +68,50 @@ async function fetchThoughtChallengerStep(
   return parsed;
 }
 
+// ----- Emotion Match scenarios (20 total, show 10 per session) -----
+const EMOTION_MATCH_SCENARIOS: { situation: string; options: string[]; common: string }[] = [
+  { situation: 'Your best friend cancels plans last minute — again.', options: ['Disappointed', 'Angry', 'Relieved', 'Hurt'], common: 'Disappointed' },
+  { situation: 'You get unexpected praise from your boss in front of the team.', options: ['Proud', 'Embarrassed', 'Anxious', 'Happy'], common: 'Proud' },
+  { situation: 'Someone cuts you off in traffic and honks.', options: ['Angry', 'Startled', 'Anxious', 'Indifferent'], common: 'Angry' },
+  { situation: 'You see old photos of yourself from a happier time.', options: ['Nostalgic', 'Sad', 'Grateful', 'Hopeful'], common: 'Nostalgic' },
+  { situation: 'A family member gives you unsolicited advice about your life.', options: ['Frustrated', 'Grateful', 'Defensive', 'Annoyed'], common: 'Annoyed' },
+  { situation: 'You overhear someone talking about you.', options: ['Anxious', 'Angry', 'Curious', 'Hurt'], common: 'Anxious' },
+  { situation: "Your partner says 'we need to talk.'", options: ['Anxious', 'Curious', 'Defensive', 'Calm'], common: 'Anxious' },
+  { situation: "You accomplish something you've been working on for months.", options: ['Proud', 'Relieved', 'Excited', 'Emotional'], common: 'Proud' },
+  { situation: 'A stranger is rude to you for no reason.', options: ['Confused', 'Angry', 'Hurt', 'Amused'], common: 'Confused' },
+  { situation: "You wake up and realize it's a day with no obligations.", options: ['Relieved', 'Happy', 'Anxious', 'Bored'], common: 'Relieved' },
+  { situation: "Someone you admire says they're proud of you.", options: ['Happy', 'Emotional', 'Uncomfortable', 'Motivated'], common: 'Happy' },
+  { situation: 'You make a mistake at work that others notice.', options: ['Embarrassed', 'Anxious', 'Angry at yourself', 'Afraid'], common: 'Embarrassed' },
+  { situation: 'Your child or younger sibling says they want to be like you.', options: ['Proud', 'Emotional', 'Pressured', 'Happy'], common: 'Emotional' },
+  { situation: "You're alone on a Friday night while everyone else seems busy.", options: ['Lonely', 'Peaceful', 'Left out', 'Content'], common: 'Lonely' },
+  { situation: 'Someone apologizes to you after a long time.', options: ['Relieved', 'Angry', 'Emotional', 'Indifferent'], common: 'Relieved' },
+  { situation: 'You have to say no to something you actually want to do.', options: ['Frustrated', 'Proud', 'Guilty', 'Sad'], common: 'Guilty' },
+  { situation: "You're asked to speak in front of a group.", options: ['Anxious', 'Excited', 'Terrified', 'Confident'], common: 'Anxious' },
+  { situation: "Your phone dies and you can't contact anyone.", options: ['Anxious', 'Panicked', 'Relieved', 'Frustrated'], common: 'Anxious' },
+  { situation: 'You find out a friend has been going through something hard alone.', options: ['Guilty', 'Sad', 'Worried', 'Helpless'], common: 'Sad' },
+  { situation: 'Someone remembers a small detail about you that you mentioned once.', options: ['Touched', 'Surprised', 'Happy', 'Suspicious'], common: 'Touched' },
+];
+
+function shuffle<T>(arr: T[]): T[] {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+const EMOTION_EMOJIS: Record<string, string> = {
+  Disappointed: '😔', Angry: '😤', Relieved: '😌', Hurt: '💔', Proud: '😊', Embarrassed: '😳',
+  Anxious: '😰', Happy: '😄', Startled: '😲', Indifferent: '😐', Nostalgic: '🥹', Sad: '😢',
+  Grateful: '🙏', Hopeful: '🌟', Frustrated: '😣', Defensive: '🛡️', Annoyed: '😒',
+  Curious: '🤔', Calm: '😌', Excited: '🤩', Emotional: '🥲', Confused: '😕', Amused: '😏',
+  Bored: '😑', Uncomfortable: '😬', Motivated: '💪', 'Angry at yourself': '😞', Afraid: '😨',
+  Pressured: '😓', Lonely: '😔', Peaceful: '☮️', 'Left out': '👤', Content: '😊', Guilty: '😣',
+  Panicked: '😱', Terrified: '😨', Confident: '😎', Worried: '😟', Helpless: '🆘', Touched: '💜',
+  Surprised: '😮', Suspicious: '🤨',
+};
+
 export default function ActivityScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -97,6 +143,33 @@ export default function ActivityScreen() {
   const [tcLoading, setTcLoading] = useState(false);
   const [originalThought, setOriginalThought] = useState('');
   const [tcReply, setTcReply] = useState('');
+
+  // Emotion Match
+  const [emSessionScenarios, setEmSessionScenarios] = useState<typeof EMOTION_MATCH_SCENARIOS>([]);
+  const [emIndex, setEmIndex] = useState(0);
+  const [emSelected, setEmSelected] = useState<string | null>(null);
+  const [emShowFeedback, setEmShowFeedback] = useState(false);
+  const [emCompleted, setEmCompleted] = useState(false);
+  const emScaleAnims = useRef<Record<string, Animated.Value>>({}).current;
+
+  // Trigger Map
+  const [tmStep, setTmStep] = useState(1);
+  const [tmSituation, setTmSituation] = useState('');
+  const [tmEmotions, setTmEmotions] = useState<string[]>([]);
+  const [tmBodyZones, setTmBodyZones] = useState<string[]>([]);
+  const [tmReaction, setTmReaction] = useState('');
+  const [tmOtherReaction, setTmOtherReaction] = useState('');
+  const [tmAiResult, setTmAiResult] = useState<{ validation: string; pattern: string; alternative: string; encouragement: string } | null>(null);
+  const [tmLoading, setTmLoading] = useState(false);
+  const addTriggerMap = useUserStore((s) => s.addTriggerMap);
+
+  // Gratitude Jar
+  const { entries: gratitudeEntries, addEntry: addGratitudeEntry, removeEntry: removeGratitudeEntry } = useGratitudeStore();
+  const [gratitudeInput, setGratitudeInput] = useState('');
+  const [gratitudeWhy, setGratitudeWhy] = useState('');
+  const [showGratitudeAdd, setShowGratitudeAdd] = useState(false);
+  const [shakeEntry, setShakeEntry] = useState<typeof gratitudeEntries[0] | null>(null);
+  const jarDotsAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (!running || activity?.id !== 'breathing') return;
@@ -500,6 +573,456 @@ export default function ActivityScreen() {
     );
   }
 
+  // ----- EMOTION MATCH -----
+  if (activity.id === 'emotion-match') {
+    const startSession = () => {
+      const ten = shuffle(EMOTION_MATCH_SCENARIOS).slice(0, 10);
+      setEmSessionScenarios(ten);
+      setEmIndex(0);
+      setEmSelected(null);
+      setEmShowFeedback(false);
+      setEmCompleted(false);
+    };
+    const scenario = emSessionScenarios[emIndex];
+    const emotionsChosen = emSessionScenarios.slice(0, emIndex).length + (emShowFeedback ? 1 : 0);
+
+    if (emSessionScenarios.length === 0) {
+      return (
+        <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+          <Pressable style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          </Pressable>
+          <Text style={styles.title}>What Would You Feel?</Text>
+          <Text style={styles.sub}>Tap an emotion for each scenario. No wrong answers — just you.</Text>
+          <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={startSession}>
+            <Text style={styles.startBtnText}>Start</Text>
+          </Pressable>
+          <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+            <Text style={styles.doneBtnText}>Done</Text>
+          </Pressable>
+        </ScrollView>
+      );
+    }
+
+    if (emCompleted) {
+      const uniqueEmotions = new Set<string>();
+      emSessionScenarios.forEach((s) => s.options.forEach((o) => uniqueEmotions.add(o)));
+      return (
+        <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+          <Pressable style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          </Pressable>
+          <Text style={styles.title}>What Would You Feel?</Text>
+          <Text style={[styles.detailText, { textAlign: 'center', marginBottom: 24 }]}>
+            You explored 10 scenarios and identified many different emotions. Nice emotional range! ✨
+          </Text>
+          <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={startSession}>
+            <Text style={styles.startBtnText}>Play again</Text>
+          </Pressable>
+          <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+            <Text style={styles.doneBtnText}>Done</Text>
+          </Pressable>
+        </ScrollView>
+      );
+    }
+
+    const alternative = scenario?.options.find((o) => o !== scenario.common && o !== emSelected) ?? scenario?.options[1];
+
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>What Would You Feel?</Text>
+        <Text style={styles.emProgress}>{emIndex + 1} of 10</Text>
+        <View style={[styles.card, styles.emScenarioCard]}>
+          <Text style={styles.emScenarioText}>{scenario?.situation}</Text>
+        </View>
+        {!emShowFeedback ? (
+          <View style={styles.emGrid}>
+            {scenario?.options.map((opt) => (
+              <Pressable
+                key={opt}
+                style={[
+                  styles.emEmotionCard,
+                  emSelected === opt && styles.emEmotionCardSelected,
+                ]}
+                onPress={() => {
+                  if (emSelected) return;
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setEmSelected(opt);
+                  setEmShowFeedback(true);
+                }}
+              >
+                <Text style={styles.emEmotionEmoji}>{EMOTION_EMOJIS[opt] ?? '💭'}</Text>
+                <Text style={styles.emEmotionLabel}>{opt}</Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <>
+            <View style={styles.card}>
+              <Text style={styles.detailText}>
+                You chose {emSelected}. That's completely valid.
+              </Text>
+              <Text style={[styles.detailText, { marginTop: 12 }]}>
+                Many people feel {scenario?.common} in this situation. Others feel {alternative}. There's no wrong answer — emotions are personal.
+              </Text>
+            </View>
+            <Pressable
+              style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                if (emIndex >= 9) setEmCompleted(true);
+                else {
+                  setEmIndex(emIndex + 1);
+                  setEmSelected(null);
+                  setEmShowFeedback(false);
+                }
+              }}
+            >
+              <Text style={styles.startBtnText}>{emIndex >= 9 ? 'See summary' : 'Next scenario'}</Text>
+            </Pressable>
+          </>
+        )}
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  // ----- TRIGGER MAP -----
+  const TRIGGER_EMOTIONS = ['Angry', 'Sad', 'Scared', 'Overwhelmed', 'Hurt', 'Frustrated', 'Anxious', 'Ashamed', 'Jealous', 'Panicked'];
+  const TRIGGER_BODY_ZONES = ['Head', 'Chest', 'Stomach', 'Shoulders', 'Jaw', 'Hands', 'Whole body'];
+  const TRIGGER_REACTIONS = ['Shut down', 'Lashed out', 'Cried', 'Froze', 'Left the situation', 'Pretended I was fine', 'Talked to someone', 'Other'];
+
+  if (activity.id === 'trigger-map') {
+    const sendForAnalysis = async () => {
+      setTmLoading(true);
+      try {
+        const apiKey = await getOpenAIKey();
+        if (!apiKey) throw new Error('OpenAI API key not configured');
+        const body = `Situation: ${tmSituation}\nEmotions: ${tmEmotions.join(', ')}\nBody: ${tmBodyZones.join(', ')}\nReaction: ${tmReaction}${tmOtherReaction ? ` (${tmOtherReaction})` : ''}`;
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              {
+                role: 'system',
+                content: `The user just completed a trigger mapping exercise. Based on their responses, provide:
+1. A gentle validation of their experience (1 sentence)
+2. What pattern you notice (1-2 sentences)
+3. One alternative response they could try next time (2 sentences)
+4. An encouraging close (1 sentence)
+Be warm and specific. Reference their actual words.
+Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alternative": "...", "encouragement": "..." }`,
+              },
+              { role: 'user', content: body },
+            ],
+            max_tokens: 400,
+            temperature: 0.7,
+          }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        const text = data.choices?.[0]?.message?.content?.trim() ?? '';
+        const parsed = JSON.parse(text) as { validation: string; pattern: string; alternative: string; encouragement: string };
+        setTmAiResult(parsed);
+        setTmStep(5);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch (e) {
+        Alert.alert('Error', 'Could not connect. Check your API key in Settings.');
+      } finally {
+        setTmLoading(false);
+      }
+    };
+
+    const resetTriggerMap = () => {
+      setTmStep(1);
+      setTmSituation('');
+      setTmEmotions([]);
+      setTmBodyZones([]);
+      setTmReaction('');
+      setTmOtherReaction('');
+      setTmAiResult(null);
+    };
+
+    const saveTrigger = () => {
+      addTriggerMap({
+        situation: tmSituation,
+        emotions: tmEmotions,
+        bodyZones: tmBodyZones,
+        reaction: tmReaction,
+        otherReaction: tmOtherReaction || undefined,
+        validation: tmAiResult?.validation,
+        pattern: tmAiResult?.pattern,
+        alternative: tmAiResult?.alternative,
+        encouragement: tmAiResult?.encouragement,
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert('Saved', 'Trigger saved. Psych can reference it in conversation.');
+      resetTriggerMap();
+    };
+
+    const canNext = () => {
+      if (tmStep === 1) return tmSituation.trim().length > 0;
+      if (tmStep === 2) return tmEmotions.length > 0;
+      if (tmStep === 3) return tmBodyZones.length > 0;
+      if (tmStep === 4) return tmReaction.length > 0 && (tmReaction !== 'Other' || tmOtherReaction.trim().length > 0);
+      return true;
+    };
+
+    const toggle = (arr: string[], item: string, setter: (a: string[]) => void) => {
+      if (arr.includes(item)) setter(arr.filter((x) => x !== item));
+      else setter([...arr, item]);
+    };
+
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>{activity.emoji} {activity.title}</Text>
+        {tmStep === 1 && (
+          <Text style={[styles.detailText, { marginBottom: 16 }]}>
+            A trigger is something that sets off a strong emotional reaction. Let's figure out yours so you can spot them coming.
+          </Text>
+        )}
+        <Text style={styles.emProgress}>{tmStep} of 5</Text>
+        {tmStep === 1 && (
+          <>
+            <Text style={styles.sub}>What was the situation?</Text>
+            <TextInput
+              style={[styles.thoughtInput, { minHeight: 100 }]}
+              placeholder="Describe what happened..."
+              placeholderTextColor={COLORS.textMuted}
+              value={tmSituation}
+              onChangeText={setTmSituation}
+              multiline
+            />
+          </>
+        )}
+        {tmStep === 2 && (
+          <>
+            <Text style={styles.sub}>What emotion(s) came up?</Text>
+            <View style={styles.chipRow}>
+              {TRIGGER_EMOTIONS.map((e) => (
+                <Pressable
+                  key={e}
+                  style={[styles.bodyZoneBtn, tmEmotions.includes(e) && styles.bodyZoneBtnSelected]}
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); toggle(tmEmotions, e, setTmEmotions); }}
+                >
+                  <Text style={styles.bodyZoneLabel}>{e}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
+        {tmStep === 3 && (
+          <>
+            <Text style={styles.sub}>Where did it show up in your body?</Text>
+            <View style={styles.chipRow}>
+              {TRIGGER_BODY_ZONES.map((z) => (
+                <Pressable
+                  key={z}
+                  style={[styles.bodyZoneBtn, tmBodyZones.includes(z) && styles.bodyZoneBtnSelected]}
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); toggle(tmBodyZones, z, setTmBodyZones); }}
+                >
+                  <Text style={styles.bodyZoneLabel}>{z}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
+        {tmStep === 4 && (
+          <>
+            <Text style={styles.sub}>How did you react? No judgment — just awareness.</Text>
+            <View style={styles.chipRow}>
+              {TRIGGER_REACTIONS.map((r) => (
+                <Pressable
+                  key={r}
+                  style={[styles.bodyZoneBtn, tmReaction === r && styles.bodyZoneBtnSelected]}
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setTmReaction(r); }}
+                >
+                  <Text style={styles.bodyZoneLabel}>{r}</Text>
+                </Pressable>
+              ))}
+            </View>
+            {tmReaction === 'Other' && (
+              <TextInput
+                style={styles.thoughtInput}
+                placeholder="Describe..."
+                placeholderTextColor={COLORS.textMuted}
+                value={tmOtherReaction}
+                onChangeText={setTmOtherReaction}
+              />
+            )}
+          </>
+        )}
+        {tmStep === 5 && (
+          <>
+            {tmLoading ? (
+              <ActivityIndicator size="large" color={COLORS.accent} style={{ marginVertical: 24 }} />
+            ) : tmAiResult && (
+              <View style={styles.card}>
+                <Text style={styles.detailLabel}>Validation</Text>
+                <Text style={styles.detailText}>{tmAiResult.validation}</Text>
+                <Text style={styles.detailLabel}>Pattern</Text>
+                <Text style={styles.detailText}>{tmAiResult.pattern}</Text>
+                <Text style={styles.detailLabel}>Alternative</Text>
+                <Text style={styles.detailText}>{tmAiResult.alternative}</Text>
+                <Text style={styles.detailLabel}>Encouragement</Text>
+                <Text style={styles.detailText}>{tmAiResult.encouragement}</Text>
+                <Pressable style={[styles.startBtn, { marginTop: 16 }]} onPress={saveTrigger}>
+                  <Text style={styles.startBtnText}>Save to my triggers</Text>
+                </Pressable>
+                <Pressable style={styles.tcSmallBtn} onPress={resetTriggerMap}>
+                  <Text style={styles.tcSmallBtnText}>Map another trigger</Text>
+                </Pressable>
+              </View>
+            )}
+          </>
+        )}
+        {tmStep < 5 && (
+          <Pressable
+            style={({ pressed }) => [styles.startBtn, pressed && styles.pressed, !canNext() && styles.disabled]}
+            onPress={() => {
+              if (!canNext()) return;
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              if (tmStep === 4) sendForAnalysis();
+              else setTmStep(tmStep + 1);
+            }}
+            disabled={!canNext()}
+          >
+            <Text style={styles.startBtnText}>{tmStep === 4 ? 'Get my analysis' : 'Next'}</Text>
+          </Pressable>
+        )}
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  // ----- GRATITUDE JAR -----
+  const GRATITUDE_COLORS = ['#9D7AFF', '#FFD700', '#FF9B54', '#98D8AA', '#87CEEB'];
+  if (activity.id === 'gratitude-jar') {
+    const handleAddGratitude = () => {
+      const t = gratitudeInput.trim();
+      if (!t) return;
+      addGratitudeEntry(t, gratitudeWhy.trim() || undefined);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setGratitudeInput('');
+      setGratitudeWhy('');
+      setShowGratitudeAdd(false);
+    };
+    const handleShake = () => {
+      if (gratitudeEntries.length === 0) return;
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const random = gratitudeEntries[Math.floor(Math.random() * gratitudeEntries.length)];
+      setShakeEntry(random);
+      Animated.sequence([
+        Animated.timing(jarDotsAnim, { toValue: 1, duration: 250, useNativeDriver: true }),
+        Animated.timing(jarDotsAnim, { toValue: 0, duration: 250, useNativeDriver: true }),
+      ]).start();
+    };
+    const jarHeight = 160;
+    const dotCount = Math.min(gratitudeEntries.length * 2, 60);
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>{activity.emoji} Your Gratitude Jar</Text>
+        <View style={[styles.gratitudeJar, { height: jarHeight }]}>
+          {Array.from({ length: dotCount }).map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.gratitudeDot,
+                {
+                  backgroundColor: GRATITUDE_COLORS[i % GRATITUDE_COLORS.length],
+                  left: `${(i * 17) % 85}%`,
+                  top: `${(i * 23) % 75}%`,
+                  width: 10,
+                  height: 10,
+                  borderRadius: 5,
+                },
+              ]}
+            />
+          ))}
+        </View>
+        <Text style={styles.gratitudeJarCount}>{gratitudeEntries.length} moments of gratitude</Text>
+        <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={() => setShowGratitudeAdd(true)}>
+          <Text style={styles.startBtnText}>Add to jar ✨</Text>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.clearBtn, pressed && styles.pressed]}
+          onPress={handleShake}
+          disabled={gratitudeEntries.length === 0}
+        >
+          <Text style={styles.clearBtnText}>Shake jar</Text>
+        </Pressable>
+        {showGratitudeAdd && (
+          <View style={styles.card}>
+            <Text style={styles.detailLabel}>What's one thing you're grateful for right now?</Text>
+            <TextInput
+              style={styles.thoughtInput}
+              placeholder="e.g. A warm coffee this morning"
+              placeholderTextColor={COLORS.textMuted}
+              value={gratitudeInput}
+              onChangeText={setGratitudeInput}
+            />
+            <Text style={[styles.detailLabel, { marginTop: 8 }]}>Why does this matter to you? (optional)</Text>
+            <TextInput
+              style={[styles.thoughtInput, { minHeight: 60 }]}
+              placeholder="Optional..."
+              placeholderTextColor={COLORS.textMuted}
+              value={gratitudeWhy}
+              onChangeText={setGratitudeWhy}
+            />
+            <Pressable style={[styles.startBtn, { marginTop: 12 }]} onPress={handleAddGratitude} disabled={!gratitudeInput.trim()}>
+              <Text style={styles.startBtnText}>Add ✨</Text>
+            </Pressable>
+            <Pressable style={styles.tcSmallBtn} onPress={() => { setShowGratitudeAdd(false); setGratitudeInput(''); setGratitudeWhy(''); }}>
+              <Text style={styles.tcSmallBtnText}>Cancel</Text>
+            </Pressable>
+          </View>
+        )}
+        {shakeEntry && (
+          <View style={[styles.card, { marginTop: 16 }]}>
+            <Text style={styles.detailLabel}>On {new Date(shakeEntry.createdAt).toLocaleDateString()}, you were grateful for:</Text>
+            <Text style={styles.detailText}>{shakeEntry.text}</Text>
+            {shakeEntry.why && <Text style={[styles.detailText, { marginTop: 8 }]}>{shakeEntry.why}</Text>}
+            <Pressable style={styles.tcSmallBtn} onPress={handleShake}>
+              <Text style={styles.tcSmallBtnText}>Shake again</Text>
+            </Pressable>
+            <Pressable style={styles.tcSmallBtn} onPress={() => setShakeEntry(null)}>
+              <Text style={styles.tcSmallBtnText}>Close</Text>
+            </Pressable>
+          </View>
+        )}
+        <Text style={[styles.detailLabel, { marginTop: 16 }]}>Recent entries</Text>
+        {gratitudeEntries.slice(0, 15).map((e) => (
+          <View key={e.id} style={[styles.card, styles.gratitudeEntryRow]}>
+            <Text style={styles.detailText}>{e.text}</Text>
+            <Text style={styles.secondaryText}>{new Date(e.createdAt).toLocaleDateString()}</Text>
+            <Pressable style={styles.tcSmallBtn} onPress={() => { removeGratitudeEntry(e.id); }}>
+              <Text style={[styles.tcSmallBtnText, { color: COLORS.temperature.red }]}>Delete</Text>
+            </Pressable>
+          </View>
+        ))}
+        {gratitudeEntries.length === 0 && <Text style={styles.sub}>Add something you're grateful for to start filling your jar.</Text>}
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
   // ----- PLACEHOLDER -----
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -601,4 +1124,31 @@ const styles = StyleSheet.create({
   bodyScanActions: { flexDirection: 'row', gap: 12, marginTop: 16 },
   clearBtn: { flex: 1, paddingVertical: 14, borderRadius: BORDER_RADIUS.input, alignItems: 'center', backgroundColor: COLORS.surface },
   clearBtnText: { fontSize: 16, color: COLORS.textMuted },
+  emProgress: { fontSize: 14, color: COLORS.textMuted, marginBottom: 12 },
+  emScenarioCard: { alignItems: 'center', justifyContent: 'center', minHeight: 80 },
+  emScenarioText: { fontSize: 18, fontWeight: '600', color: COLORS.text, textAlign: 'center', lineHeight: 26 },
+  emGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24 },
+  emEmotionCard: {
+    width: '47%',
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  emEmotionCardSelected: { borderColor: COLORS.accent },
+  emEmotionEmoji: { fontSize: 28, marginBottom: 6 },
+  emEmotionLabel: { fontSize: 15, fontWeight: '600', color: COLORS.text },
+  gratitudeJar: {
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    marginBottom: 8,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  gratitudeDot: { position: 'absolute' },
+  gratitudeJarCount: { fontSize: 14, color: COLORS.textMuted, marginBottom: 16, textAlign: 'center' },
+  gratitudeEntryRow: { flexDirection: 'column', gap: 4 },
+  secondaryText: { fontSize: 13, color: COLORS.textSecondary },
 });

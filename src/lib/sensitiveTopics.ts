@@ -8,6 +8,10 @@ export const SENSITIVE_TOPIC_OPTIONS: { value: string; label: string }[] = [
   { value: 'addiction', label: 'Addiction' },
   { value: 'disordered-eating', label: 'Disordered eating' },
   { value: 'self-harm-history', label: 'Self-harm history' },
+  { value: 'gender-identity-dysphoria', label: 'Gender identity / dysphoria' },
+  { value: 'coming-out', label: 'Coming out' },
+  { value: 'family-rejection', label: 'Family rejection' },
+  { value: 'identity-discrimination', label: 'Identity-based discrimination' },
   { value: 'prefer-not-to-say', label: 'Prefer not to say' },
   { value: 'none', label: 'None of these' },
 ];

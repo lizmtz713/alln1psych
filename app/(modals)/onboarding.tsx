@@ -48,6 +48,9 @@ const PRONOUN_OPTIONS: { value: Pronouns; label: string }[] = [
   { value: 'she/her', label: 'she/her' },
   { value: 'he/him', label: 'he/him' },
   { value: 'they/them', label: 'they/them' },
+  { value: 'he/they', label: 'he/they' },
+  { value: 'she/they', label: 'she/they' },
+  { value: 'any', label: 'any pronouns' },
   { value: 'other', label: 'other' },
 ];
 
@@ -87,6 +90,7 @@ export default function OnboardingScreen() {
   const {
     name,
     pronouns,
+    customPronouns,
     ageGroup,
     communicationPreference,
     loveLanguage,
@@ -95,6 +99,7 @@ export default function OnboardingScreen() {
     learningStyle,
     setName,
     setPronouns,
+    setCustomPronouns,
     setAgeGroup,
     setCommunicationPreference,
     setLoveLanguage,
@@ -332,6 +337,18 @@ export default function OnboardingScreen() {
                     </Pressable>
                   ))}
                 </View>
+                {pronouns === 'other' && (
+                  <TextInput
+                    style={[styles.input, styles.inputMargin]}
+                    placeholder="Type your pronouns (e.g. ze/zir)"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={customPronouns}
+                    onChangeText={setCustomPronouns}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                )}
+                <Text style={styles.pronounHint}>You can change this anytime in settings.</Text>
                 <Pressable
                   style={({ pressed }) => [
                     styles.primaryButton,
@@ -744,6 +761,12 @@ const styles = StyleSheet.create({
   },
   inputFocused: {
     borderColor: COLORS.accent,
+  },
+  inputMargin: { marginTop: 12, marginBottom: 4 },
+  pronounHint: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginBottom: 16,
   },
   chipRow: {
     flexDirection: 'row',

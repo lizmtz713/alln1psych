@@ -601,6 +601,15 @@ export default function MeScreen() {
         <Pressable onPress={() => Linking.openURL('sms:741741?body=HOME')}>
           <Text style={styles.crisisLink}>Crisis Text Line — text HOME to 741741</Text>
         </Pressable>
+        <Pressable onPress={() => Linking.openURL('tel:8775658860')}>
+          <Text style={styles.crisisLink}>🏳️‍⚧️ Trans Lifeline: 877-565-8860 — by and for trans people</Text>
+        </Pressable>
+        <Pressable onPress={() => Linking.openURL('tel:8664887386')}>
+          <Text style={styles.crisisLink}>🏳️‍🌈 Trevor Project: 866-488-7386 — LGBTQ+ youth crisis support</Text>
+        </Pressable>
+        <Pressable onPress={() => Linking.openURL('sms:678678')}>
+          <Text style={styles.crisisLink}>💬 Trevor Text: text START to 678-678 — LGBTQ+ text support</Text>
+        </Pressable>
       </View>
     </ScrollView>
     </>

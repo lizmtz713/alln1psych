@@ -35,6 +35,8 @@ const QUICK_STARTS = [
   { scenario: 'Set a boundary with someone', character: 'The person', emoji: '🚧' },
   { scenario: 'Have a hard talk with family', character: 'Family member', emoji: '👨\u200d👩\u200d👧' },
   { scenario: 'Practice saying no', character: 'The person asking', emoji: '✋' },
+  { scenario: 'Come out to someone', character: 'Family member or friend', emoji: '🏳️‍🌈' },
+  { scenario: 'Correct someone about my pronouns', character: 'Coworker or acquaintance', emoji: '✊' },
 ];
 
 function formatTime(date: Date): string {
