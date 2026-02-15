@@ -27,6 +27,7 @@ import { getOpenAIKey, setOpenAIKey } from '../../src/services/ai';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useEducationStore } from '../../src/stores/educationStore';
 import { useConversationStore } from '../../src/stores/conversationStore';
+import { useRolePlayStore } from '../../src/stores/rolePlayStore';
 
 const AGE_LABELS: Record<string, string> = {
   'under13': 'Under 13',
@@ -70,6 +71,7 @@ export default function MeScreen() {
   useCircleStore((s) => s.moodHistory.length);
   useEducationStore((s) => s.completedLessons.length);
   useConversationStore((s) => s.messages.length);
+  const pastRolePlays = useRolePlayStore((s) => s.pastSessions);
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null);
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
@@ -262,6 +264,31 @@ export default function MeScreen() {
             )}
             <Text style={styles.insightText}>Conversations with Psych: {conversationCount}</Text>
             <Text style={styles.insightText}>Lessons completed: {lessonsCount}</Text>
+          </View>
+        )}
+      </View>
+
+      {/* Practice History */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Practice History</Text>
+        {pastRolePlays.length === 0 ? (
+          <Text style={styles.emptyText}>
+            Practice difficult conversations here. Start from Home — "Practice a conversation."
+          </Text>
+        ) : (
+          <View style={styles.entryList}>
+            {[...pastRolePlays].reverse().map((session) => (
+              <Pressable
+                key={session.id}
+                style={styles.entryCard}
+                onPress={() => router.push(`/(modals)/role-play?sessionId=${encodeURIComponent(session.id)}`)}
+              >
+                <Text style={styles.entryPreview} numberOfLines={2}>{session.scenario}</Text>
+                <Text style={styles.entryDate}>
+                  {new Date(session.createdAt).toLocaleDateString([], { dateStyle: 'medium' })}
+                </Text>
+              </Pressable>
+            ))}
           </View>
         )}
       </View>

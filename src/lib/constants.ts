@@ -18,6 +18,8 @@ export const COLORS = {
     orange: '#FFA726',
     red: '#EF5350',
   },
+  /** Role play / Practice Life — warm gold to distinguish from main Talk accent */
+  rolePlayAccent: '#FFB74D',
 } as const;
 
 export const BORDER_RADIUS = {

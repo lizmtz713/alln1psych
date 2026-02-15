@@ -68,6 +68,16 @@ export default function HomeScreen() {
         )}
       </View>
 
+      {/* Practice a conversation */}
+      <Pressable
+        style={styles.practiceCard}
+        onPress={() => router.push('/(modals)/role-play')}
+      >
+        <Text style={styles.practiceEmoji}>🎭</Text>
+        <Text style={styles.practiceTitle}>Practice a conversation</Text>
+        <Text style={styles.practiceSub}>Rehearse tough talks with AI before the real thing.</Text>
+      </Pressable>
+
       <Text style={styles.prompt}>How are you feeling today?</Text>
     </ScrollView>
   );
@@ -152,6 +162,23 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.accent,
     fontWeight: '500',
+  },
+  practiceCard: {
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 20,
+    marginBottom: 24,
+  },
+  practiceEmoji: { fontSize: 28, marginBottom: 8 },
+  practiceTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  practiceSub: {
+    fontSize: 15,
+    color: COLORS.textMuted,
   },
   prompt: {
     fontSize: 17,

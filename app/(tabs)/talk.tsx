@@ -24,6 +24,7 @@ import { hasOpenAIKey, sendMessage } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
 import type { CommunicationPreference } from '../../src/stores/userStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
+import { useRouter } from 'expo-router';
 
 const MIC_BUTTON_SIZE = 80;
 const MIC_BUTTON_SIZE_SMALL = 48;
@@ -52,8 +53,11 @@ function buildUserContext(): { name: string; ageGroup: string; loveLanguage: str
   };
 }
 
+const ANXIETY_PATTERN = /I need to tell|I'm scared to ask|I don't know how to say|scared to tell|nervous to ask|practice (how|what) to say|want to practice/i;
+
 export default function TalkScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
   const textInputRef = useRef<TextInput>(null);
   const breatheAnim = useRef(new Animated.Value(1)).current;
@@ -240,6 +244,12 @@ export default function TalkScreen() {
   };
 
   const displayMessages: ConversationMessage[] = messages;
+  const lastUserMessage = messages.filter((m) => m.role === 'user').pop();
+  const showPracticeSuggestion =
+    lastUserMessage &&
+    ANXIETY_PATTERN.test(lastUserMessage.content) &&
+    messages.length >= 2 &&
+    !isAiTyping;
 
   return (
     <KeyboardAvoidingView
@@ -302,6 +312,21 @@ export default function TalkScreen() {
               </View>
             </View>
           </View>
+        )}
+        {showPracticeSuggestion && (
+          <Pressable
+            style={styles.practiceSuggestion}
+            onPress={() =>
+              router.push(
+                `/(modals)/role-play?scenario=${encodeURIComponent(lastUserMessage!.content.slice(0, 300))}`
+              )
+            }
+          >
+            <Text style={styles.practiceSuggestionText}>
+              Would you like to practice that conversation first? I can play the other person so you can try different approaches.
+            </Text>
+            <Text style={styles.practiceSuggestionLink}>Practice this conversation →</Text>
+          </Pressable>
         )}
       </ScrollView>
 
@@ -480,6 +505,26 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: COLORS.textMuted,
     opacity: 0.8,
+  },
+  practiceSuggestion: {
+    marginTop: 16,
+    marginHorizontal: 4,
+    padding: 14,
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.rolePlayAccent,
+  },
+  practiceSuggestionText: {
+    fontSize: 15,
+    color: COLORS.text,
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+  practiceSuggestionLink: {
+    fontSize: 15,
+    color: COLORS.rolePlayAccent,
+    fontWeight: '600',
   },
   bottom: {
     paddingHorizontal: 24,
