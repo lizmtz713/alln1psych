@@ -12,6 +12,12 @@ export const COLORS = {
   accent: '#7C4DFF',
   accentMuted: '#9D7AFF',
   recording: '#EF5350',
+  temperature: {
+    green: '#66BB6A',
+    yellow: '#FDD835',
+    orange: '#FFA726',
+    red: '#EF5350',
+  },
 } as const;
 
 export const BORDER_RADIUS = {
