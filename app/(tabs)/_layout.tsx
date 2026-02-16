@@ -1,19 +1,21 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../src/lib/constants';
+import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 
 export default function TabLayout() {
   return (
+    <ErrorBoundary>
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
         tabBarStyle: {
-          backgroundColor: COLORS.surface,
-          borderTopColor: COLORS.surface,
+          backgroundColor: COLORS?.surface ?? '#1a1a2e',
+          borderTopColor: COLORS?.surface ?? '#1a1a2e',
         },
-        tabBarActiveTintColor: COLORS.accent,
-        tabBarInactiveTintColor: COLORS.textMuted,
+        tabBarActiveTintColor: COLORS?.accent ?? '#a78bfa',
+        tabBarInactiveTintColor: COLORS?.textMuted ?? '#888',
       }}
     >
       <Tabs.Screen
@@ -82,5 +84,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </ErrorBoundary>
   );
 }

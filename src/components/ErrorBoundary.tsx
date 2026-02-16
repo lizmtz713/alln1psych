@@ -1,5 +1,5 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { COLORS, BORDER_RADIUS } from '../lib/constants';
 
 interface Props {
@@ -19,6 +19,8 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    const fullMessage = (error?.message ?? 'Unknown error') + '\n\nComponent Stack:\n' + (errorInfo?.componentStack ?? 'none');
+    this.setState({ errorMessage: fullMessage });
     if (__DEV__) {
       console.error('[ErrorBoundary]', error, errorInfo.componentStack);
     }
@@ -34,7 +36,9 @@ export class ErrorBoundary extends Component<Props, State> {
         <View style={styles.container}>
           <Text style={styles.title}>Something didn't load right.</Text>
           <Text style={[styles.subtitle, { marginBottom: 8 }]}>Give it another try.</Text>
-          <Text style={styles.errorMessage}>{this.state.errorMessage}</Text>
+          <ScrollView style={styles.errorScroll} contentContainerStyle={styles.errorScrollContent}>
+            <Text selectable style={styles.errorMessageStack}>{this.state.errorMessage}</Text>
+          </ScrollView>
           <Pressable
             style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
             onPress={this.retry}
@@ -90,5 +94,16 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 24,
     paddingHorizontal: 20,
+  },
+  errorScroll: { maxHeight: 200, width: '100%' },
+  errorScrollContent: { paddingHorizontal: 16 },
+  errorMessageStack: {
+    color: '#ff6b6b',
+    fontSize: 10,
+    textAlign: 'left',
+    marginTop: 8,
+    marginBottom: 24,
+    paddingHorizontal: 16,
+    fontFamily: 'monospace',
   },
 });
