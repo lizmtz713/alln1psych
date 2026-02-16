@@ -72,7 +72,6 @@ export default function HomeScreen() {
   const user = useUserStore();
   useConversationStore((s) => (s.messages ?? []).length);
   useJournalStore((s) => (s.entries ?? []).length);
-  useEducationStore((s) => ({ lastLessonDate: s.lastLessonDate, completedLessons: s.completedLessons ?? [] }));
   const getEngagementStreak = useInsightsStore((s) => s.getEngagementStreak);
   const getPsychSays = useInsightsStore((s) => s.getPsychSays);
   const getWeeklySummary = useInsightsStore((s) => s.getWeeklySummary);
@@ -125,6 +124,10 @@ export default function HomeScreen() {
     );
   }
 
+  const todayDateKey = new Date().toDateString();
+  const userName = user?.name ?? '';
+  const userAgeGroup = user?.ageGroup ?? '';
+
   useEffect(() => {
     try {
       const isStaleResult = typeof isStale === 'function' ? isStale() : false;
@@ -138,6 +141,8 @@ export default function HomeScreen() {
           : undefined;
         const educationState = typeof useEducationStore?.getState === 'function' ? useEducationStore.getState() : null;
         const lessonsCompleted = (educationState?.completedLessons ?? []) as string[];
+        const moodTrendSnapshot = typeof getWeeklyMoodTrend === 'function' ? (getWeeklyMoodTrend() ?? []) : [];
+        const streakSnapshot = typeof getEngagementStreak === 'function' ? getEngagementStreak() : 0;
         if (typeof generateDailyContent !== 'function') {
           if (typeof setDailyContentLoading === 'function') setDailyContentLoading(false);
           return;
@@ -145,8 +150,8 @@ export default function HomeScreen() {
         generateDailyContent({
           name: user?.name ?? 'there',
           ageGroup: user?.ageGroup ?? 'unknown',
-          recentMoods: Array.isArray(moodTrend) ? moodTrend.map((t) => (t && typeof t === 'object' && 'mood' in t ? t.mood : '')) : [],
-          streak: typeof streak === 'number' ? streak : 0,
+          recentMoods: Array.isArray(moodTrendSnapshot) ? moodTrendSnapshot.map((t) => (t && typeof t === 'object' && 'mood' in t ? t.mood : '')) : [],
+          streak: typeof streakSnapshot === 'number' ? streakSnapshot : 0,
           lessonsCompleted,
           loveLanguage: user?.loveLanguage ?? undefined,
           lastConversationSummary,
@@ -173,7 +178,7 @@ export default function HomeScreen() {
       console.error('[Home] daily content effect', err);
       if (typeof setDailyContentLoading === 'function') setDailyContentLoading(false);
     }
-  }, [typeof isStale === 'function' ? isStale() : false, user?.name, user?.ageGroup, streak, summaryCount]);
+  }, [todayDateKey, summaryCount, userName, userAgeGroup, streak]);
 
   const card0 = useRef(new Animated.Value(0)).current;
   const card1 = useRef(new Animated.Value(0)).current;
