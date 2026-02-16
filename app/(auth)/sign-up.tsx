@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,15 +9,26 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { GoogleSignInButton } from '../../src/components/GoogleSignInButton';
+import { supabase } from '../../src/lib/supabase';
+import { useUserStore } from '../../src/stores/userStore';
 
 const HAS_GOOGLE = Boolean(process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim());
+
+async function routeAfterSignIn(userId: string): Promise<'/(tabs)' | '/(modals)/onboarding' | '/'> {
+  const { data: profile } = await supabase.from('profiles').select('onboarding_completed, name, age_group').eq('id', userId).single();
+  if (profile?.onboarding_completed) return '/(tabs)';
+  if (profile && (profile.name || profile.age_group)) return '/(modals)/onboarding';
+  return '/';
+}
 
 function humanError(message: string): string {
   if (message.includes('already registered') || message.includes('already exists')) return 'That email is already taken.';
@@ -37,6 +48,55 @@ export default function SignUpScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ageConfirm, setAgeConfirm] = useState(false);
+  const [appleAuthAvailable, setAppleAuthAvailable] = useState(false);
+
+  useEffect(() => {
+    AppleAuthentication.isAvailableAsync().then(setAppleAuthAvailable);
+  }, []);
+
+  const handleAppleSignIn = async () => {
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      if (!credential.identityToken) {
+        Alert.alert('Sign in failed', 'No identity token received.');
+        return;
+      }
+
+      const { data, error: signInError } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: credential.identityToken,
+      });
+
+      if (signInError) {
+        Alert.alert('Sign in failed', signInError.message);
+        return;
+      }
+
+      if (credential.fullName?.givenName) {
+        const fullName = [credential.fullName.givenName, credential.fullName.familyName]
+          .filter(Boolean)
+          .join(' ');
+        useUserStore.getState().setName(fullName);
+      }
+
+      const route = data?.user?.id ? await routeAfterSignIn(data.user.id) : '/';
+      if (route === '/(tabs)' || route === '/(modals)/onboarding') {
+        router.replace(route as any);
+      } else {
+        router.replace('/');
+      }
+    } catch (e: any) {
+      if (e.code === 'ERR_REQUEST_CANCELED') return;
+      console.error('Apple Sign In error:', e);
+      Alert.alert('Sign in failed', 'Something went wrong. Please try again.');
+    }
+  };
 
   const handleSignUp = async () => {
     const n = name.trim();
@@ -84,6 +144,23 @@ export default function SignUpScreen() {
         <Text style={styles.subheader}>Your private place to reflect and grow.</Text>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        {appleAuthAvailable && (
+          <>
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+              cornerRadius={12}
+              style={styles.appleButton}
+              onPress={handleAppleSignIn}
+            />
+            <View style={styles.dividerWrap}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+          </>
+        )}
 
         <TextInput
           style={styles.input}
@@ -301,5 +378,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.accent,
     fontWeight: '600',
+  },
+  appleButton: {
+    width: '100%',
+    height: 50,
+    marginBottom: 20,
   },
 });

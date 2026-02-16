@@ -22,6 +22,7 @@ module.exports = {
       supportsTablet: false,
       bundleIdentifier: 'com.alln1network.psych',
       buildNumber: '1',
+      usesAppleSignIn: true,
       infoPlist: {
         NSMicrophoneUsageDescription:
           'AllN1 Psych uses your microphone so you can talk to your AI companion by voice.',
@@ -52,6 +53,7 @@ module.exports = {
       'expo-router',
       'expo-secure-store',
       'expo-font',
+      'expo-apple-authentication',
       [
         'expo-notifications',
         {
