@@ -225,21 +225,38 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}
     >
-      {/* 1. Greeting + daily affirmation */}
+      {/* 1. Greeting only */}
       <Animated.View style={[styles.greetingBlock, slideY(card0)]}>
         {dailyContentLoading ? (
           <View style={styles.shimmer}>
             <Text style={styles.greeting}>Loading your space...</Text>
           </View>
         ) : (
-          <>
-            <Text style={styles.greeting}>{greetingLine}</Text>
-            <Text style={styles.affirmation}>{affirmation}</Text>
-          </>
+          <Text style={styles.greeting}>{greetingLine}</Text>
         )}
       </Animated.View>
 
-      {/* 2. Temperature gauge + Check in */}
+      {/* 2. How are you feeling? — tappable, opens mood check-in */}
+      <Animated.View style={[styles.card, styles.feelingCard, slideY(card0)]}>
+        <Pressable
+          style={({ pressed }) => [styles.feelingCardInner, pressed && { opacity: 0.9 }]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/mood-checkin');
+          }}
+        >
+          <Text style={styles.feelingQuestion}>How are you feeling?</Text>
+          <View style={styles.feelingFaces}>
+            <Text style={styles.feelingFace}>😊</Text>
+            <Text style={styles.feelingFace}>😐</Text>
+            <Text style={styles.feelingFace}>😟</Text>
+            <Text style={styles.feelingFace}>😢</Text>
+          </View>
+          <Text style={styles.feelingHint}>Tap to check in</Text>
+        </Pressable>
+      </Animated.View>
+
+      {/* 3. Temperature display (current mood after check-in) */}
       <Animated.View style={[styles.card, styles.tempCard, slideY(card0)]}>
         <View style={styles.cardRow}>
           <TemperatureGauge temperature={myTemperature} size="md" />
@@ -248,137 +265,18 @@ export default function HomeScreen() {
             <Text style={styles.cardLabel}>{myTemperatureLabel}</Text>
           </View>
         </View>
-        <Pressable
-          style={({ pressed }) => [styles.checkInButton, pressed && { transform: [{ scale: 0.96 }] }]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/mood-checkin');
-          }}
-        >
-          <Text style={styles.checkInButtonText}>Check in</Text>
-        </Pressable>
       </Animated.View>
 
-      {/* 3. Streak counter */}
+      {/* 4. Streak counter */}
       {streak > 0 && (
         <Animated.View style={[styles.streakRow, slideY(card1)]}>
           <Text style={styles.streakEmoji}>🔥</Text>
-          <Text style={styles.streakText}>
-            {streak}-day streak
-          </Text>
+          <Text style={styles.streakText}>{streak}-day streak</Text>
         </Animated.View>
       )}
 
-      {/* 4. Today's Challenge */}
-      <Animated.View style={[styles.card, slideY(card1)]}>
-        <Text style={styles.cardSectionTitle}>Today's challenge</Text>
-        <Text style={styles.challengeEmoji}>{todayChallenge?.emoji ?? '🌬️'}</Text>
-        <Text style={styles.challengeText}>{challengeText}</Text>
-        {challengeDone ? (
-          <View style={styles.challengeDoneWrap}>
-            <Ionicons name="checkmark-circle" size={22} color={COLORS.temperature.green} />
-            <Text style={styles.challengeDoneText}>Done</Text>
-          </View>
-        ) : (
-          <Pressable
-            style={({ pressed }) => [styles.challengeDoneButton, pressed && { opacity: 0.9 }]}
-            onPress={() => {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              if (typeof completeTodayChallenge === 'function') completeTodayChallenge();
-            }}
-          >
-            <Text style={styles.challengeDoneButtonText}>Done ✓</Text>
-          </Pressable>
-        )}
-      </Animated.View>
-
-      {/* 5. Psych Says */}
-      <Animated.View style={[styles.card, styles.psychCard, slideY(card2)]}>
-        <Text style={styles.psychLabel}>Psych says...</Text>
-        <Text style={styles.psychText}>{psychSays}</Text>
-      </Animated.View>
-
-      {/* 6. Weekly Summary (Sundays only) */}
-      {weeklySummary && (
-        <Animated.View style={[styles.card, styles.weeklyCard, slideY(card2)]}>
-          <Text style={styles.cardSectionTitle}>Your week in review</Text>
-          <Text style={styles.weeklyLine}>{weeklySummary.line}</Text>
-          <Text style={styles.weeklyMeta}>
-            Most common mood: {weeklySummary.mostCommonMood} · {weeklySummary.lessonsCount} lessons · {weeklySummary.conversationDays} conversation(s)
-          </Text>
-        </Animated.View>
-      )}
-
-      {/* 7. Circle alerts */}
-      {Array.isArray(members) && members.length > 0 && (
-        <Animated.View style={[styles.section, slideY(card3)]}>
-          <Text style={styles.sectionTitle}>Your circle</Text>
-          <Text style={styles.muted}>
-            {members.length} {members.length === 1 ? 'person' : 'people'} in your circle
-          </Text>
-          {firstAlert && (
-            <View style={[styles.alert, styles.alertGlow]}>
-              <Text style={styles.alertText}>{firstAlert.name} could use a check-in</Text>
-              <Pressable
-                style={({ pressed }) => [styles.alertButton, pressed && { opacity: 0.9 }]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push('/(tabs)/circle');
-                }}
-              >
-                <Text style={styles.alertButtonText}>See Circle</Text>
-              </Pressable>
-            </View>
-          )}
-        </Animated.View>
-      )}
-
-      {/* Try this — 2 suggestions by time and mood */}
-      <Animated.View style={[styles.card, slideY(card3)]}>
-        <Text style={styles.cardSectionTitle}>Try this</Text>
-        {(() => {
-          const hour = new Date().getHours();
-          const recentMoods = Array.isArray(moodTrend) ? moodTrend.map((t) => (t && typeof t === 'object' && 'mood' in t ? t.mood : '')) : [];
-          const suggestions = typeof getSuggestedActivities === 'function' ? getSuggestedActivities(recentMoods, hour) : [];
-          const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
-          return (
-            <View style={styles.tryThisRow}>
-              {safeSuggestions.map((config) => (
-                <Pressable
-                  key={config.id}
-                  style={({ pressed }) => [styles.practiceCard, styles.practiceCardHalf, pressed && { opacity: 0.9 }]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push(`/(modals)/activity?id=${config.id}`);
-                  }}
-                >
-                  <Text style={styles.practiceEmoji}>{config.emoji}</Text>
-                  <Text style={styles.practiceTitle} numberOfLines={2}>{config.title}</Text>
-                  <Text style={styles.practiceSub} numberOfLines={2}>{config.sub}</Text>
-                </Pressable>
-              ))}
-            </View>
-          );
-        })()}
-      </Animated.View>
-
-      {/* Help Someone card */}
-      <Animated.View style={[styles.card, slideY(card3)]}>
-        <Pressable
-          style={({ pressed }) => [pressed && { opacity: 0.9 }]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/help-someone');
-          }}
-        >
-          <Text style={styles.practiceEmoji}>🤝</Text>
-          <Text style={styles.practiceTitle}>Help Someone</Text>
-          <Text style={styles.practiceSub}>Worried about someone? Get coaching on what to say.</Text>
-        </Pressable>
-      </Animated.View>
-
-      {/* Quick actions */}
-      <Animated.View style={[styles.quickActions, slideY(card3)]}>
+      {/* 5. Quick Actions — three buttons */}
+      <Animated.View style={[styles.quickActions, slideY(card1)]}>
         <Pressable
           style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
           onPress={() => {
@@ -407,29 +305,97 @@ export default function HomeScreen() {
           }}
         >
           <Ionicons name="people" size={24} color={COLORS.accent} />
-          <Text style={styles.quickActionText}>Practice a conversation</Text>
+          <Text style={styles.quickActionText}>Practice</Text>
         </Pressable>
       </Animated.View>
 
-      {/* 9. Today's Lesson */}
-      {nextLesson && (
-        <Animated.View style={[styles.card, styles.practiceCard, slideY(card4)]}>
-          <Text style={styles.cardSectionTitle}>Today's lesson</Text>
-          <Pressable
-            style={({ pressed }) => [pressed && { opacity: 0.9 }]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push(`/lesson/${nextLesson.id}`);
-            }}
-          >
-            <Text style={styles.practiceEmoji}>📖</Text>
-            <Text style={styles.practiceTitle}>{nextLesson.title}</Text>
-            <Text style={styles.practiceSub}>{nextLesson.duration} min</Text>
-          </Pressable>
+      {/* 6. Daily affirmation card */}
+      <Animated.View style={[styles.card, styles.affirmationCard, slideY(card2)]}>
+        <Text style={styles.affirmation}>{affirmation}</Text>
+      </Animated.View>
+
+      {/* 7. Try this — 2 activity cards */}
+      <Animated.View style={[styles.card, slideY(card2)]}>
+        <Text style={styles.cardSectionTitle}>Try this</Text>
+        {(() => {
+          const hour = new Date().getHours();
+          const recentMoods = Array.isArray(moodTrend) ? moodTrend.map((t) => (t && typeof t === 'object' && 'mood' in t ? t.mood : '')) : [];
+          const suggestions = typeof getSuggestedActivities === 'function' ? getSuggestedActivities(recentMoods, hour) : [];
+          const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+          return (
+            <View style={styles.tryThisRow}>
+              {safeSuggestions.map((config) => (
+                <Pressable
+                  key={config.id}
+                  style={({ pressed }) => [styles.practiceCard, styles.practiceCardHalf, pressed && { opacity: 0.9 }]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push(`/(modals)/activity?id=${config.id}`);
+                  }}
+                >
+                  <Text style={styles.practiceEmoji}>{config.emoji}</Text>
+                  <Text style={styles.practiceTitle} numberOfLines={2}>{config.title}</Text>
+                  <Text style={styles.practiceSub} numberOfLines={2}>{config.sub}</Text>
+                </Pressable>
+              ))}
+            </View>
+          );
+        })()}
+      </Animated.View>
+
+      {/* 8. Psych Says */}
+      <Animated.View style={[styles.card, styles.psychCard, slideY(card2)]}>
+        <Text style={styles.psychLabel}>Psych says...</Text>
+        <Text style={styles.psychText}>{psychSays}</Text>
+      </Animated.View>
+
+      {/* 9. Help Someone card */}
+      <Animated.View style={[styles.card, slideY(card3)]}>
+        <Pressable
+          style={({ pressed }) => [pressed && { opacity: 0.9 }]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/help-someone');
+          }}
+        >
+          <Text style={styles.practiceEmoji}>🤝</Text>
+          <Text style={styles.practiceTitle}>Help Someone</Text>
+          <Text style={styles.practiceSub}>Worried about someone? Get coaching on what to say.</Text>
+        </Pressable>
+      </Animated.View>
+
+      {/* 10. Circle alerts (if any orange/red) */}
+      {Array.isArray(members) && members.length > 0 && (firstAlert != null) && (
+        <Animated.View style={[styles.section, slideY(card3)]}>
+          <Text style={styles.sectionTitle}>Your circle</Text>
+          <Text style={styles.muted}>
+            {members.length} {members.length === 1 ? 'person' : 'people'} in your circle
+          </Text>
+          <View style={[styles.alert, styles.alertGlow]}>
+            <Text style={styles.alertText}>{firstAlert.name} could use a check-in</Text>
+            <Pressable
+              style={({ pressed }) => [styles.alertButton, pressed && { opacity: 0.9 }]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/(tabs)/circle');
+              }}
+            >
+              <Text style={styles.alertButtonText}>See Circle</Text>
+            </Pressable>
+          </View>
         </Animated.View>
       )}
 
-      <Text style={styles.prompt}>How are you feeling today?</Text>
+      {/* 11. Weekly summary (Sundays only) */}
+      {weeklySummary && (
+        <Animated.View style={[styles.card, styles.weeklyCard, slideY(card3)]}>
+          <Text style={styles.cardSectionTitle}>Your week in review</Text>
+          <Text style={styles.weeklyLine}>{weeklySummary.line}</Text>
+          <Text style={styles.weeklyMeta}>
+            Most common mood: {weeklySummary.mostCommonMood} · {weeklySummary.lessonsCount} lessons · {weeklySummary.conversationDays} conversation(s)
+          </Text>
+        </Animated.View>
+      )}
     </ScrollView>
     </ErrorBoundary>
   );
@@ -448,7 +414,31 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '600',
     color: COLORS.text,
+  },
+  feelingCard: {
+    borderWidth: 2,
+    borderColor: COLORS.accent,
+  },
+  feelingCardInner: { alignItems: 'center' },
+  feelingQuestion: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 12,
+  },
+  feelingFaces: {
+    flexDirection: 'row',
+    gap: 16,
     marginBottom: 8,
+  },
+  feelingFace: { fontSize: 28 },
+  feelingHint: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+  },
+  affirmationCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.accent,
   },
   affirmation: {
     fontSize: 18,

@@ -13,6 +13,19 @@ import {
   type ManualSection,
 } from '../../src/data/manualContent';
 
+const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string }[] = [
+  { id: 'breathing', emoji: '🫁', title: 'Breathe', sub: 'Breathing exercise' },
+  { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Wheel', sub: 'Explore your feelings' },
+  { id: 'body-scan', emoji: '🧍', title: 'Body Scan', sub: 'Where do you feel it' },
+  { id: 'thought-challenger', emoji: '🧠', title: 'Thought Challenger', sub: 'Reframe negative thoughts' },
+  { id: 'emotion-match', emoji: '🎮', title: 'Emotion Match', sub: 'What would you feel' },
+  { id: 'trigger-map', emoji: '🗺️', title: 'Trigger Map', sub: 'Map your patterns' },
+  { id: 'gratitude-jar', emoji: '✨', title: 'Gratitude Jar', sub: 'Collect good moments' },
+  { id: 'stress-thermo', emoji: '🌡️', title: 'Stress Check', sub: 'How stressed are you' },
+  { id: 'comm-builder', emoji: '💬', title: 'Communication Builder', sub: 'Say what you feel' },
+  { id: 'mood-patterns', emoji: '📊', title: 'Mood Patterns', sub: 'See your trends' },
+];
+
 function getSectionProgress(section: ManualSection, isLessonCompleted: (id: string) => boolean): { completed: number; total: number } {
   let total = 0;
   let completed = 0;
@@ -45,6 +58,11 @@ export default function LearnScreen() {
     setExpandedSectionId((prev) => (prev === sectionId ? null : sectionId));
   };
 
+  const openActivity = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/(modals)/activity?id=${id}`);
+  };
+
   return (
     <ErrorBoundary>
     <ScrollView
@@ -52,6 +70,22 @@ export default function LearnScreen() {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
+      {/* Your Toolkit — 10 activities at top */}
+      <Text style={styles.sectionLabel}>Your Toolkit 🧰</Text>
+      <View style={styles.toolkitGrid}>
+        {TOOLKIT_ACTIVITIES.map((a) => (
+          <Pressable
+            key={a.id}
+            style={({ pressed }) => [styles.toolkitCard, pressed && styles.pressed]}
+            onPress={() => openActivity(a.id)}
+          >
+            <Text style={styles.toolkitEmoji}>{a.emoji}</Text>
+            <Text style={styles.toolkitTitle} numberOfLines={2}>{a.title}</Text>
+            <Text style={styles.toolkitSub} numberOfLines={2}>{a.sub}</Text>
+          </Pressable>
+        ))}
+      </View>
+
       {/* Overall progress */}
       <View style={styles.progressBarWrap}>
         <Text style={styles.progressLabel}>
@@ -138,6 +172,31 @@ export default function LearnScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   content: { paddingHorizontal: 24, paddingBottom: 40 },
+  toolkitGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 24,
+  },
+  toolkitCard: {
+    width: '47%',
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: COLORS.accent,
+  },
+  toolkitEmoji: { fontSize: 26, marginBottom: 6 },
+  toolkitTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  toolkitSub: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+  },
   progressBarWrap: { marginBottom: 24 },
   progressLabel: {
     fontSize: 14,

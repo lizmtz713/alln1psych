@@ -516,6 +516,10 @@ export default function RolePlayScreen() {
       contentContainerStyle={styles.setupContent}
       keyboardShouldPersistTaps="handled"
     >
+      <Pressable onPress={() => router.back()} style={styles.cancelRow}>
+        <Ionicons name="arrow-back" size={24} color="#fff" />
+        <Text style={styles.cancelText}>Cancel</Text>
+      </Pressable>
       <Text style={styles.setupTitle}>Practice a conversation</Text>
 
       <Text style={styles.setupLabel}>What do you want to practice?</Text>
@@ -718,6 +722,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.background,
   },
+  cancelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  cancelText: { fontSize: 16, color: '#fff', fontWeight: '500' },
   cancelLink: {
     alignSelf: 'center',
   },

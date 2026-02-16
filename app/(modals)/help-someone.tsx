@@ -381,6 +381,11 @@ Keep it practical and warm. No extra preamble.`;
     router.back();
   };
 
+  const cancelAndBack = () => {
+    useHelpSomeoneStore.getState().clearCurrentSession();
+    router.back();
+  };
+
   return (
     <KeyboardAvoidingView
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
@@ -406,6 +411,10 @@ Keep it practical and warm. No extra preamble.`;
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <Pressable onPress={cancelAndBack} style={styles.cancelRow}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+            <Text style={styles.cancelText}>Cancel</Text>
+          </Pressable>
           <Text style={styles.question}>Who are you worried about?</Text>
           {members.length > 0 && (
             <View style={styles.chipRow}>
@@ -474,6 +483,10 @@ Keep it practical and warm. No extra preamble.`;
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <Pressable onPress={cancelAndBack} style={styles.cancelRow}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+            <Text style={styles.cancelText}>Cancel</Text>
+          </Pressable>
           <Text style={styles.question}>What's going on with them?</Text>
           <Text style={styles.hint}>Tell me as much or as little as you know.</Text>
           <TextInput
@@ -658,6 +671,13 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.surface,
   },
   closeBtn: { padding: 8, marginRight: 8 },
+  cancelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  cancelText: { fontSize: 16, color: COLORS.text, fontWeight: '500' },
   headerTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text, flex: 1 },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 24, paddingBottom: 24 },

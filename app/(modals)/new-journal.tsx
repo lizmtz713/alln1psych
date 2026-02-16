@@ -91,9 +91,13 @@ export default function NewJournalScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 }]}
       keyboardShouldPersistTaps="handled"
     >
+      <Pressable onPress={() => router.back()} style={styles.cancelRow}>
+        <Ionicons name="arrow-back" size={24} color="#fff" />
+        <Text style={styles.cancelText}>Cancel</Text>
+      </Pressable>
       <Text style={styles.title}>What's on your mind?</Text>
       {(isRecording || isProcessingVoice) && (
         <Text style={styles.recordingLabel}>
@@ -150,6 +154,13 @@ export default function NewJournalScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   content: { paddingHorizontal: 24 },
+  cancelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 20,
+  },
+  cancelText: { fontSize: 16, color: '#fff', fontWeight: '500' },
   title: {
     fontSize: 22,
     fontWeight: '600',
