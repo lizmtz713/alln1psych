@@ -1,0 +1,787 @@
+import { useState, useRef, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import { Audio } from 'expo-av';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { useRolePlayStore, type RolePlayDifficulty } from '../../src/stores/rolePlayStore';
+import { sendRolePlayMessage, getDebrief } from '../../src/services/roleplay';
+import { hasOpenAIKey } from '../../src/services/ai';
+import * as Voice from '../../src/services/voice';
+
+const ROLE_PLAY_ACCENT = COLORS.rolePlayAccent;
+
+const DIFFICULTY_OPTIONS: { value: RolePlayDifficulty; label: string }[] = [
+  { value: 'supportive', label: 'Supportive' },
+  { value: 'neutral', label: 'Neutral' },
+  { value: 'challenging', label: 'Challenging' },
+];
+
+const QUICK_STARTS = [
+  { scenario: 'Asking my boss for a raise', character: 'My boss', emoji: '💼' },
+  { scenario: 'Set a boundary with someone', character: 'The person', emoji: '🚧' },
+  { scenario: 'Have a hard talk with family', character: 'Family member', emoji: '👨\u200d👩\u200d👧' },
+  { scenario: 'Practice saying no', character: 'The person asking', emoji: '✋' },
+  { scenario: 'Come out to someone', character: 'Family member or friend', emoji: '🏳️‍🌈' },
+  { scenario: 'Correct someone about my pronouns', character: 'Coworker or acquaintance', emoji: '✊' },
+];
+
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+export default function RolePlayScreen() {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const { sessionId, scenario: scenarioParam, character: characterParam, difficulty: difficultyParam } = useLocalSearchParams<{
+    sessionId?: string;
+    scenario?: string;
+    character?: string;
+    difficulty?: string;
+  }>();
+  const scrollRef = useRef<ScrollView>(null);
+
+  const {
+    currentSession,
+    pastSessions,
+    startSession,
+    addMessage,
+    setDebrief,
+    setPhase,
+    endSession,
+    clearCurrentSession,
+    getSessionById,
+  } = useRolePlayStore();
+
+  const [scenario, setScenario] = useState('');
+  const [character, setCharacter] = useState('');
+  const [difficulty, setDifficulty] = useState<RolePlayDifficulty>('neutral');
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [viewingPastId, setViewingPastId] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessingVoice, setIsProcessingVoice] = useState(false);
+
+  useEffect(() => {
+    hasOpenAIKey().then(setHasApiKey);
+  }, []);
+
+  useEffect(() => {
+    if (sessionId) setViewingPastId(sessionId);
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (scenarioParam) setScenario(scenarioParam);
+  }, [scenarioParam]);
+  useEffect(() => {
+    if (characterParam) setCharacter(characterParam);
+  }, [characterParam]);
+  useEffect(() => {
+    if (difficultyParam && (difficultyParam === 'supportive' || difficultyParam === 'neutral' || difficultyParam === 'challenging')) {
+      setDifficulty(difficultyParam);
+    }
+  }, [difficultyParam]);
+
+  useEffect(() => {
+    if (currentSession?.messages.length) {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }
+  }, [currentSession?.messages.length]);
+
+  const applyQuickStart = (s: string, c: string) => {
+    setScenario(s);
+    setCharacter(c);
+  };
+
+  const handleStartPractice = () => {
+    if (!scenario.trim()) {
+      setError('Describe what you want to practice.');
+      return;
+    }
+    setError(null);
+    startSession(scenario.trim(), character.trim(), difficulty);
+  };
+
+  const handleSend = async () => {
+    const text = input.trim();
+    if (!text || !currentSession || currentSession.phase !== 'practice') return;
+    if (!hasApiKey) {
+      setError('Add your OpenAI API key in Settings to use role play.');
+      return;
+    }
+    setInput('');
+    addMessage('user', text);
+    setIsLoading(true);
+    setError(null);
+    try {
+      const nextMessages = [
+        ...currentSession.messages,
+        { role: 'user' as const, content: text, timestamp: new Date() },
+      ].map((m) => ({ role: m.role, content: m.content }));
+      const reply = await sendRolePlayMessage(
+        nextMessages,
+        currentSession.scenario,
+        currentSession.character,
+        currentSession.difficulty
+      );
+      addMessage('assistant', reply);
+
+      const exchangeCount = nextMessages.length + 1;
+      if (exchangeCount >= 10 && reply.toLowerCase().includes('debrief')) {
+        // AI offered debrief — could auto-transition; for now user can End Session
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMicPress = async () => {
+    if (!currentSession || currentSession.phase !== 'practice' || !hasApiKey || !Voice.hasVoiceSupport()) return;
+    if (isRecording) {
+      try {
+        const uri = await Voice.stopRecording();
+        setIsRecording(false);
+        setIsProcessingVoice(true);
+        setError(null);
+        const text = await Voice.transcribeAudio(uri);
+        setIsProcessingVoice(false);
+        if (!text.trim()) {
+          setError("I didn't catch that. Try again or type.");
+          return;
+        }
+        addMessage('user', text);
+        setIsLoading(true);
+        const nextMessages = [
+          ...currentSession.messages,
+          { role: 'user' as const, content: text, timestamp: new Date() },
+        ].map((m) => ({ role: m.role, content: m.content }));
+        const reply = await sendRolePlayMessage(
+          nextMessages,
+          currentSession.scenario,
+          currentSession.character,
+          currentSession.difficulty
+        );
+        addMessage('assistant', reply);
+      } catch (e) {
+        setIsRecording(false);
+        setIsProcessingVoice(false);
+        setError(e instanceof Error ? e.message : 'Voice failed. Try typing.');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+    const { status } = await Audio.requestPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Microphone access needed', 'Go to Settings to enable it.', [{ text: 'OK' }]);
+      return;
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      setIsRecording(true);
+      await Voice.startRecording();
+    } catch (e) {
+      setIsRecording(false);
+      if (e instanceof Error && e.message === 'Microphone permission not granted') {
+        Alert.alert('Microphone access needed', 'Go to Settings to enable it.', [{ text: 'OK' }]);
+      }
+    }
+  };
+
+  const handleEndSession = async () => {
+    if (!currentSession) return;
+    const userMessageCount = currentSession.messages.filter((m) => m.role === 'user').length;
+    if (userMessageCount < 2) {
+      setError("You haven't said anything yet. Start typing or tap the mic to practice.");
+      return;
+    }
+    if (!hasApiKey) {
+      setDebrief("Add your API key in Settings to get personalized debriefs. You did great practicing — that's what matters.");
+      setPhase('debrief');
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      const transcriptText = await getDebrief(
+        currentSession.messages,
+        currentSession.scenario,
+        currentSession.character,
+        currentSession.difficulty
+      );
+      setDebrief(transcriptText);
+      setPhase('debrief');
+    } catch (e) {
+      setDebrief(
+        "I couldn't generate a debrief right now, but practicing was still valuable. You showed up — that's what counts."
+      );
+      setPhase('debrief');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePracticeAgain = () => {
+    if (!currentSession) return;
+    startSession(currentSession.scenario, currentSession.character, currentSession.difficulty);
+  };
+
+  const handleNewScenario = () => {
+    endSession();
+    clearCurrentSession();
+    setScenario('');
+    setCharacter('');
+    setDifficulty('neutral');
+    setViewingPastId(null);
+  };
+
+  const handleDone = () => {
+    endSession();
+    clearCurrentSession();
+    setScenario('');
+    setCharacter('');
+    setViewingPastId(null);
+    router.back();
+  };
+
+  const viewingPast = viewingPastId ? getSessionById(viewingPastId) : null;
+
+  if (viewingPast) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.headerBack}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          </Pressable>
+          <Text style={styles.headerTitle} numberOfLines={1}>{viewingPast.scenario}</Text>
+        </View>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+          <Text style={styles.viewDate}>
+            {new Date(viewingPast.createdAt).toLocaleDateString([], { dateStyle: 'medium' })}
+          </Text>
+          {viewingPast.messages.map((m, i) => (
+            <View
+              key={i}
+              style={[styles.bubbleWrap, m.role === 'user' ? styles.bubbleWrapUser : styles.bubbleWrapAi]}
+            >
+              <Text style={styles.bubbleLabel}>
+                {m.role === 'user' ? 'You' : viewingPast.character}
+              </Text>
+              <View style={[styles.bubble, m.role === 'user' ? styles.bubbleUser : styles.bubbleAi]}>
+                <Text style={styles.bubbleText}>{m.content}</Text>
+              </View>
+            </View>
+          ))}
+          {viewingPast.debrief && (
+            <View style={styles.debriefBlock}>
+              <Text style={styles.debriefLabel}>Debrief</Text>
+              <Text style={styles.debriefText}>{viewingPast.debrief}</Text>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  if (currentSession?.phase === 'debrief') {
+    const session = currentSession;
+    return (
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Debrief</Text>
+        </View>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+          {session.debrief && (
+            <View style={styles.debriefBlock}>
+              <Text style={styles.debriefText}>{session.debrief}</Text>
+            </View>
+          )}
+          <Text style={styles.transcriptLabel}>Conversation</Text>
+          {session.messages.map((m, i) => (
+            <View
+              key={i}
+              style={[styles.bubbleWrap, m.role === 'user' ? styles.bubbleWrapUser : styles.bubbleWrapAi]}
+            >
+              <Text style={styles.bubbleLabel}>{m.role === 'user' ? 'You' : session.character}</Text>
+              <View style={[styles.bubble, m.role === 'user' ? styles.bubbleUser : styles.bubbleAi]}>
+                <Text style={styles.bubbleText}>{m.content}</Text>
+              </View>
+            </View>
+          ))}
+          <View style={styles.debriefActions}>
+            <Pressable style={[styles.btn, styles.btnSecondary]} onPress={handlePracticeAgain}>
+              <Text style={styles.btnTextSecondary}>Practice Again</Text>
+            </Pressable>
+            <Pressable style={[styles.btn, styles.btnSecondary]} onPress={handleNewScenario}>
+              <Text style={styles.btnTextSecondary}>New Scenario</Text>
+            </Pressable>
+            <Pressable style={[styles.btn, styles.btnPrimary]} onPress={handleDone}>
+              <Text style={styles.btnTextPrimary}>Done</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  if (currentSession?.phase === 'practice') {
+    const session = currentSession;
+    const userMessageCount = session.messages.filter((m) => m.role === 'user').length;
+    const canEndSession = userMessageCount >= 2;
+    const summary = session.scenario.length > 40 ? session.scenario.slice(0, 37) + '...' : session.scenario;
+    return (
+      <KeyboardAvoidingView
+        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={0}
+      >
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerTitle} numberOfLines={1}>Practicing: {summary}</Text>
+          </View>
+          <Pressable
+            onPress={() => {
+              if (!canEndSession) {
+                Alert.alert('Start the conversation first', 'Type or tap the mic to practice.');
+                return;
+              }
+              handleEndSession();
+            }}
+            style={[styles.endButton, !canEndSession && styles.endButtonDisabled]}
+          >
+            <Text style={[styles.endButtonText, !canEndSession && styles.endButtonTextDisabled]}>End Session</Text>
+          </Pressable>
+        </View>
+        <ScrollView
+          ref={scrollRef}
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {session.messages.map((m, i) => (
+            <View
+              key={i}
+              style={[styles.bubbleWrap, m.role === 'user' ? styles.bubbleWrapUser : styles.bubbleWrapAi]}
+            >
+              <Text style={styles.bubbleLabel}>
+                {m.role === 'user' ? 'You' : session.character}
+              </Text>
+              <View style={[styles.bubble, m.role === 'user' ? styles.bubbleUser : styles.bubbleAi]}>
+                <Text style={styles.bubbleText}>{m.content}</Text>
+                <Text style={styles.timestamp}>{formatTime(m.timestamp)}</Text>
+              </View>
+            </View>
+          ))}
+          {isLoading && (
+            <View style={[styles.bubbleWrap, styles.bubbleWrapAi]}>
+              <Text style={styles.bubbleLabel}>{session.character}</Text>
+              <View style={[styles.bubble, styles.bubbleAi]}>
+                <ActivityIndicator size="small" color={ROLE_PLAY_ACCENT} />
+              </View>
+            </View>
+          )}
+        </ScrollView>
+        {error ? <Text style={styles.errorLine}>{error}</Text> : null}
+        {(isRecording || isProcessingVoice) && (
+          <Text style={styles.recordingHint}>
+            {isRecording ? 'Recording... Tap mic to stop.' : 'Processing...'}
+          </Text>
+        )}
+        <View style={styles.inputRow}>
+          <TextInput
+            style={[styles.input, styles.inputInRow]}
+            placeholder="Type your response..."
+            placeholderTextColor={COLORS.textMuted}
+            value={input}
+            onChangeText={setInput}
+            onSubmitEditing={handleSend}
+            returnKeyType="send"
+            multiline
+            maxLength={1000}
+            editable={!isLoading && !isRecording && !isProcessingVoice}
+          />
+          <Pressable
+            style={[styles.sendBtn, (!input.trim() || isLoading) && styles.sendBtnDisabled]}
+            onPress={handleSend}
+            disabled={!input.trim() || isLoading}
+          >
+            <Ionicons name="arrow-up" size={22} color={COLORS.text} />
+          </Pressable>
+          {hasApiKey && Voice.hasVoiceSupport() && (
+            <Pressable
+              style={[styles.micBtn, isRecording && styles.micBtnRecording]}
+              onPress={handleMicPress}
+              disabled={isLoading || isProcessingVoice}
+            >
+              <Ionicons name="mic" size={24} color={COLORS.text} />
+            </Pressable>
+          )}
+        </View>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+      contentContainerStyle={styles.setupContent}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Text style={styles.setupTitle}>Practice a conversation</Text>
+
+      <Text style={styles.setupLabel}>What do you want to practice?</Text>
+      <TextInput
+        style={[styles.input, styles.inputLarge]}
+        placeholder="e.g., Asking my boss for a raise, telling my friend I'm hurt, setting a boundary with my mom..."
+        placeholderTextColor={COLORS.textMuted}
+        value={scenario}
+        onChangeText={(t) => { setScenario(t); setError(null); }}
+        multiline
+        textAlignVertical="top"
+      />
+
+      <Text style={styles.setupLabel}>Who should I play?</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="e.g., My boss, my mom, my best friend..."
+        placeholderTextColor={COLORS.textMuted}
+        value={character}
+        onChangeText={setCharacter}
+      />
+
+      <Text style={styles.setupLabel}>How should they respond?</Text>
+      <View style={styles.chipRow}>
+        {DIFFICULTY_OPTIONS.map((opt) => (
+          <Pressable
+            key={opt.value}
+            style={[styles.chip, difficulty === opt.value && styles.chipSelected]}
+            onPress={() => setDifficulty(opt.value)}
+          >
+            <Text style={[styles.chipText, difficulty === opt.value && styles.chipTextSelected]}>
+              {opt.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Text style={styles.quickLabel}>Quick start</Text>
+      <View style={styles.quickRow}>
+        {QUICK_STARTS.map((q, i) => (
+          <Pressable
+            key={i}
+            style={styles.quickCard}
+            onPress={() => applyQuickStart(q.scenario, q.character)}
+          >
+            <Text style={styles.quickEmoji}>{q.emoji}</Text>
+            <Text style={styles.quickText} numberOfLines={2}>{q.scenario}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {error ? <Text style={styles.errorLine}>{error}</Text> : null}
+      {!hasApiKey && (
+        <Text style={styles.apiHint}>Add your OpenAI API key in Settings to use role play.</Text>
+      )}
+
+      <Pressable
+        style={[styles.startButton, (!scenario.trim() || !hasApiKey) && styles.startButtonDisabled]}
+        onPress={handleStartPractice}
+        disabled={!scenario.trim() || !hasApiKey}
+      >
+        <Text style={styles.startButtonText}>Start Practice</Text>
+      </Pressable>
+
+      <Pressable onPress={() => router.back()} style={styles.cancelLink}>
+        <Text style={styles.cancelLinkText}>Cancel</Text>
+      </Pressable>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.background },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.surface,
+  },
+  headerBack: { padding: 8 },
+  headerLeft: { flex: 1 },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+    flex: 1,
+  },
+  endButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+  },
+  endButtonDisabled: {
+    opacity: 0.5,
+  },
+  endButtonText: {
+    fontSize: 15,
+    color: ROLE_PLAY_ACCENT,
+    fontWeight: '600',
+  },
+  endButtonTextDisabled: {
+    color: COLORS.textMuted,
+  },
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 20, paddingVertical: 16, paddingBottom: 24 },
+  setupContent: { paddingHorizontal: 24, paddingVertical: 24, paddingBottom: 40 },
+  setupTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 24,
+  },
+  setupLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.input,
+    padding: 14,
+    fontSize: 16,
+    color: COLORS.text,
+    marginBottom: 20,
+  },
+  inputInRow: {
+    flex: 1,
+    minHeight: 44,
+    marginBottom: 0,
+  },
+  inputLarge: {
+    minHeight: 100,
+    paddingTop: 14,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 24,
+  },
+  chip: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: BORDER_RADIUS.input,
+    backgroundColor: COLORS.surface,
+  },
+  chipSelected: {
+    backgroundColor: ROLE_PLAY_ACCENT,
+  },
+  chipText: {
+    fontSize: 15,
+    color: COLORS.textMuted,
+  },
+  chipTextSelected: {
+    color: COLORS.background,
+    fontWeight: '600',
+  },
+  quickLabel: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginBottom: 10,
+  },
+  quickRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 28,
+  },
+  quickCard: {
+    width: '48%',
+    minWidth: 140,
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.input,
+    padding: 14,
+  },
+  quickEmoji: { fontSize: 24, marginBottom: 6 },
+  quickText: {
+    fontSize: 14,
+    color: COLORS.text,
+    lineHeight: 20,
+  },
+  apiHint: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginBottom: 16,
+  },
+  startButton: {
+    backgroundColor: ROLE_PLAY_ACCENT,
+    paddingVertical: 16,
+    borderRadius: BORDER_RADIUS.input,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  startButtonDisabled: { opacity: 0.5 },
+  startButtonText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: COLORS.background,
+  },
+  cancelLink: {
+    alignSelf: 'center',
+  },
+  cancelLinkText: {
+    fontSize: 15,
+    color: COLORS.textMuted,
+  },
+  bubbleWrap: { marginBottom: 14 },
+  bubbleWrapUser: { alignItems: 'flex-end' },
+  bubbleWrapAi: { alignItems: 'flex-start' },
+  bubbleLabel: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginBottom: 4,
+  },
+  bubble: {
+    maxWidth: '85%',
+    padding: 14,
+    borderRadius: BORDER_RADIUS.card,
+  },
+  bubbleUser: {
+    backgroundColor: ROLE_PLAY_ACCENT,
+    alignSelf: 'flex-end',
+  },
+  bubbleAi: {
+    backgroundColor: COLORS.inputSurface,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: COLORS.surface,
+  },
+  bubbleText: {
+    fontSize: 16,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  timestamp: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginTop: 6,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: 24,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.surface,
+    backgroundColor: COLORS.inputSurface,
+  },
+  sendBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: ROLE_PLAY_ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendBtnDisabled: { opacity: 0.5 },
+  recordingHint: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    paddingHorizontal: 16,
+    paddingBottom: 4,
+  },
+  micBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  micBtnRecording: {
+    backgroundColor: COLORS.recording,
+  },
+  errorLine: {
+    fontSize: 14,
+    color: COLORS.recording,
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  debriefBlock: {
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 18,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: ROLE_PLAY_ACCENT,
+  },
+  debriefLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: ROLE_PLAY_ACCENT,
+    marginBottom: 8,
+  },
+  debriefText: {
+    fontSize: 15,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  transcriptLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    marginBottom: 12,
+  },
+  debriefActions: {
+    marginTop: 28,
+    gap: 12,
+  },
+  btn: {
+    paddingVertical: 14,
+    borderRadius: BORDER_RADIUS.input,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  btnPrimary: {
+    backgroundColor: ROLE_PLAY_ACCENT,
+  },
+  btnSecondary: {
+    backgroundColor: COLORS.inputSurface,
+  },
+  btnTextPrimary: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.background,
+  },
+  btnTextSecondary: {
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  viewDate: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginBottom: 16,
+  },
+});
