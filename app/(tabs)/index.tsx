@@ -8,7 +8,14 @@ import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
+import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
+import {
+  GAUGE_CONFIG,
+  getOverallStatusLabel,
+  getGaugeStatusLabel,
+  getGaugeColor,
+} from '../../src/utils/gaugeHelpers';
 import { useEngagementStore } from '../../src/stores/engagementStore';
 import { useEducationStore, userAgeToContentAge } from '../../src/stores/educationStore';
 import { useConversationStore } from '../../src/stores/conversationStore';
@@ -62,6 +69,39 @@ function getSuggestedActivities(
   return [first, second];
 }
 
+const COCKPIT_BG = '#09090F';
+const CARD_BG = '#111118';
+const CARD_BORDER = 'rgba(255,255,255,0.06)';
+const TEXT_PRIMARY = '#F0F0F5';
+const TEXT_SECONDARY = '#8888A0';
+const TEXT_MUTED = '#55556A';
+const ACCENT = '#7C4DFF';
+
+function GaugeTile({ gaugeId, onPress }: { gaugeId: GaugeKey; onPress: () => void }) {
+  const gauge = useCockpitStore((s) => s[gaugeId]);
+  const getStoreGaugeColor = useCockpitStore((s) => s.getGaugeColor);
+  const config = GAUGE_CONFIG[gaugeId];
+  const value = gauge?.value ?? -1;
+  const color = getStoreGaugeColor(gaugeId);
+  const status = getGaugeStatusLabel(value);
+
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.gaugeTile, pressed && styles.gaugeTilePressed]}
+      onPress={onPress}
+    >
+      <View style={[styles.gaugeTileRing, { borderColor: color }]}>
+        <Text style={styles.gaugeTileValue} numberOfLines={1}>
+          {value >= 0 ? value : '—'}
+        </Text>
+      </View>
+      <Text style={styles.gaugeTileLabel}>{config?.label ?? gaugeId}</Text>
+      <Text style={styles.gaugeTileSub}>{config?.subtitle ?? ''}</Text>
+      <Text style={[styles.gaugeTileStatus, value < 0 && styles.gaugeTileStatusDim]}>{status}</Text>
+    </Pressable>
+  );
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -83,6 +123,37 @@ export default function HomeScreen() {
   const getLastSummary = useConversationSummaryStore((s) => s.getLastSummary);
   const getRecentTriggers = useConversationSummaryStore((s) => s.getRecentTriggers);
   const getEmotionalPatterns = useConversationSummaryStore((s) => s.getEmotionalPatterns);
+
+  const gaugeValues = useCockpitStore((s) => ({
+    body: s.body.value,
+    state: s.state.value,
+    emotion: s.emotion.value,
+    connection: s.connection.value,
+    direction: s.direction.value,
+    alignment: s.alignment.value,
+  }));
+  const runDailyDecayIfNeeded = useCockpitStore((s) => s.runDailyDecayIfNeeded);
+  const getOverallRegulation = useCockpitStore((s) => s.getOverallRegulation);
+  const crossSystemInsight = useCockpitStore((s) => s.crossSystemInsight);
+
+  const [insightFetched, setInsightFetched] = useState(false);
+
+  useEffect(() => {
+    runDailyDecayIfNeeded();
+  }, [runDailyDecayIfNeeded]);
+
+  const activeGaugeCount = Object.values(gaugeValues).filter((v) => v >= 0).length;
+  useEffect(() => {
+    if (activeGaugeCount >= 3 && !insightFetched) {
+      useCockpitStore.getState().fetchCrossSystemInsight();
+      setInsightFetched(true);
+    }
+  }, [activeGaugeCount, insightFetched]);
+
+  const overall = getOverallRegulation();
+  const overallLabel = getOverallStatusLabel(overall);
+  const showInsight = Boolean(crossSystemInsight && activeGaugeCount >= 3);
+  const ringColor = overall < 0 ? TEXT_MUTED : getGaugeColor(overall);
 
   let streak: number = 0;
   let weeklySummary: { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null = null;
@@ -209,6 +280,7 @@ export default function HomeScreen() {
   const onRefresh = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
+    runDailyDecayIfNeeded();
     setTimeout(() => setRefreshing(false), 600);
   };
 
@@ -232,11 +304,49 @@ export default function HomeScreen() {
             <Text style={styles.greeting}>Loading your space...</Text>
           </View>
         ) : (
-          <Text style={styles.greeting}>{greetingLine}</Text>
+          <>
+            <Text style={styles.greeting}>{greetingLine}</Text>
+            <Text style={styles.statusSubtitle}>{overallLabel}</Text>
+          </>
         )}
       </Animated.View>
 
-      {/* 2. How are you feeling? — tappable, opens mood check-in */}
+      {/* 2. Cockpit — central ring + 6 gauges + AI insight */}
+      <Pressable
+        style={styles.centralRingWrap}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.push('/(modals)/cockpit-checkin');
+        }}
+      >
+        <Animated.View style={[styles.centralRing, { borderColor: ringColor }]}>
+          <Text style={styles.centralRingValue} numberOfLines={1}>
+            {overall >= 0 ? overall : '—'}
+          </Text>
+        </Animated.View>
+        {overall < 0 && <Text style={styles.centralRingHint}>Tap to run diagnostics</Text>}
+      </Pressable>
+
+      <View style={styles.gaugeGrid}>
+        {(['body', 'state', 'emotion', 'connection', 'direction', 'alignment'] as GaugeKey[]).map((id) => (
+          <GaugeTile
+            key={id}
+            gaugeId={id}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push({ pathname: '/(modals)/gauge-detail', params: { gauge: id } });
+            }}
+          />
+        ))}
+      </View>
+
+      {showInsight && (
+        <View style={styles.insightCard}>
+          <Text style={styles.insightText}>{crossSystemInsight}</Text>
+        </View>
+      )}
+
+      {/* 3. How are you feeling? — tappable, opens mood check-in */}
       <Animated.View style={[styles.card, styles.feelingCard, slideY(card0)]}>
         <Pressable
           style={({ pressed }) => [styles.feelingCardInner, pressed && { opacity: 0.9 }]}
@@ -415,6 +525,63 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
   },
+  statusSubtitle: { fontSize: 15, color: TEXT_SECONDARY, marginTop: 4 },
+  centralRingWrap: { alignItems: 'center', marginBottom: 24 },
+  centralRing: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: CARD_BG,
+  },
+  centralRingValue: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: TEXT_PRIMARY,
+    fontVariant: ['tabular-nums'],
+  },
+  centralRingHint: { fontSize: 13, color: TEXT_MUTED, marginTop: 8 },
+  gaugeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
+  gaugeTile: {
+    width: '31%',
+    minWidth: 100,
+    backgroundColor: CARD_BG,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  gaugeTilePressed: { backgroundColor: '#16161F' },
+  gaugeTileRing: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  gaugeTileValue: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: TEXT_PRIMARY,
+    fontVariant: ['tabular-nums'],
+  },
+  gaugeTileLabel: { fontSize: 13, fontWeight: '600', color: TEXT_PRIMARY },
+  gaugeTileSub: { fontSize: 10, color: TEXT_MUTED, marginTop: 2 },
+  gaugeTileStatus: { fontSize: 11, color: TEXT_SECONDARY, marginTop: 4 },
+  gaugeTileStatusDim: { color: TEXT_MUTED },
+  insightCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: ACCENT,
+  },
+  insightText: { fontSize: 15, color: TEXT_PRIMARY, lineHeight: 22 },
   feelingCard: {
     borderWidth: 2,
     borderColor: COLORS.accent,
