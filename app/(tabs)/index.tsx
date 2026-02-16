@@ -124,33 +124,36 @@ export default function HomeScreen() {
   const getRecentTriggers = useConversationSummaryStore((s) => s.getRecentTriggers);
   const getEmotionalPatterns = useConversationSummaryStore((s) => s.getEmotionalPatterns);
 
-  const gaugeValues = useCockpitStore((s) => ({
-    body: s.body.value,
-    state: s.state.value,
-    emotion: s.emotion.value,
-    connection: s.connection.value,
-    direction: s.direction.value,
-    alignment: s.alignment.value,
-  }));
-  const runDailyDecayIfNeeded = useCockpitStore((s) => s.runDailyDecayIfNeeded);
-  const getOverallRegulation = useCockpitStore((s) => s.getOverallRegulation);
+  const bodyVal = useCockpitStore((s) => s.body.value);
+  const stateVal = useCockpitStore((s) => s.state.value);
+  const emotionVal = useCockpitStore((s) => s.emotion.value);
+  const connectionVal = useCockpitStore((s) => s.connection.value);
+  const directionVal = useCockpitStore((s) => s.direction.value);
+  const alignmentVal = useCockpitStore((s) => s.alignment.value);
   const crossSystemInsight = useCockpitStore((s) => s.crossSystemInsight);
+
+  const activeGaugeCount = [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal].filter((v) => v >= 0).length;
+  const overall =
+    activeGaugeCount === 0
+      ? -1
+      : Math.round(
+          [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal]
+            .filter((v) => v >= 0)
+            .reduce((sum, v) => sum + v, 0) / activeGaugeCount
+        );
 
   const [insightFetched, setInsightFetched] = useState(false);
 
   useEffect(() => {
-    runDailyDecayIfNeeded();
-  }, [runDailyDecayIfNeeded]);
+    useCockpitStore.getState().runDailyDecayIfNeeded();
+  }, []);
 
-  const activeGaugeCount = Object.values(gaugeValues).filter((v) => v >= 0).length;
   useEffect(() => {
     if (activeGaugeCount >= 3 && !insightFetched) {
       useCockpitStore.getState().fetchCrossSystemInsight();
       setInsightFetched(true);
     }
   }, [activeGaugeCount, insightFetched]);
-
-  const overall = getOverallRegulation();
   const overallLabel = getOverallStatusLabel(overall);
   const showInsight = Boolean(crossSystemInsight && activeGaugeCount >= 3);
   const ringColor = overall < 0 ? TEXT_MUTED : getGaugeColor(overall);
