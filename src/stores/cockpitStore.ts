@@ -33,6 +33,7 @@ interface CockpitState {
   getCrossSystemInsight: () => string | null;
   /** Async: fetches AI insight (or fallback), stores in crossSystemInsight. Call when 3+ gauges active. */
   fetchCrossSystemInsight: () => Promise<void>;
+  addLessonBonus: () => void;
   runDailyDecayIfNeeded: () => void;
   setLastCheckInDate: (date: string) => void;
   reset: () => void;
@@ -199,6 +200,18 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
   },
 
   setLastCheckInDate: (date) => set({ lastCheckInDate: date }),
+
+  /** Add a small bonus (+5) to all gauges that are already set. Call after completing a lesson. */
+  addLessonBonus: () => {
+    set((s) => ({
+      body: s.body.value >= 0 ? { ...s.body, value: clamp(s.body.value + 5) } : s.body,
+      state: s.state.value >= 0 ? { ...s.state, value: clamp(s.state.value + 5) } : s.state,
+      emotion: s.emotion.value >= 0 ? { ...s.emotion, value: clamp(s.emotion.value + 5) } : s.emotion,
+      connection: s.connection.value >= 0 ? { ...s.connection, value: clamp(s.connection.value + 5) } : s.connection,
+      direction: s.direction.value >= 0 ? { ...s.direction, value: clamp(s.direction.value + 5) } : s.direction,
+      alignment: s.alignment.value >= 0 ? { ...s.alignment, value: clamp(s.alignment.value + 5) } : s.alignment,
+    }));
+  },
 
   runDailyDecayIfNeeded: () => {
     const today = new Date().toDateString();

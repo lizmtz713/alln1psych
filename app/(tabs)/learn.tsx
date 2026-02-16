@@ -20,16 +20,16 @@ import {
 } from '../../src/data/discoveries';
 
 const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string }[] = [
-  { id: 'breathing', emoji: '🫁', title: 'Breathe', sub: 'Breathing exercise' },
-  { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Wheel', sub: 'Explore your feelings' },
-  { id: 'body-scan', emoji: '🧍', title: 'Body Scan', sub: 'Where do you feel it' },
-  { id: 'thought-challenger', emoji: '🧠', title: 'Thought Challenger', sub: 'Reframe negative thoughts' },
-  { id: 'emotion-match', emoji: '🎮', title: 'Emotion Match', sub: 'What would you feel' },
-  { id: 'trigger-map', emoji: '🗺️', title: 'Trigger Map', sub: 'Map your patterns' },
-  { id: 'gratitude-jar', emoji: '✨', title: 'Gratitude Jar', sub: 'Collect good moments' },
-  { id: 'stress-thermo', emoji: '🌡️', title: 'Stress Check', sub: 'How stressed are you' },
-  { id: 'comm-builder', emoji: '💬', title: 'Communication Builder', sub: 'Say what you feel' },
-  { id: 'mood-patterns', emoji: '📊', title: 'Mood Patterns', sub: 'See your trends' },
+  { id: 'breathing', emoji: '🫁', title: 'Breathing Reset', sub: 'Regulate your nervous system in 2 minutes' },
+  { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Decoder', sub: "Identify what you're actually feeling" },
+  { id: 'body-scan', emoji: '🧍', title: 'Body Awareness', sub: 'Map where stress lives in your body' },
+  { id: 'thought-challenger', emoji: '🧠', title: 'Thought Analysis', sub: 'Test your assumptions against reality' },
+  { id: 'emotion-match', emoji: '🎮', title: 'Pattern Recognition', sub: 'Connect emotions to their real sources' },
+  { id: 'trigger-map', emoji: '🗺️', title: 'Trigger Analysis', sub: 'Trace reactions back to their roots' },
+  { id: 'gratitude-jar', emoji: '✨', title: 'Gratitude Practice', sub: "Rewire your brain toward what's working" },
+  { id: 'stress-thermo', emoji: '🌡️', title: 'Stress Assessment', sub: 'Measure your current activation level' },
+  { id: 'comm-builder', emoji: '💬', title: 'Communication Lab', sub: 'Build scripts for difficult conversations' },
+  { id: 'mood-patterns', emoji: '📊', title: 'Mood Intelligence', sub: 'Spot trends in your emotional data' },
 ];
 
 function getSectionProgress(section: ManualSection, isLessonCompleted: (id: string) => boolean): { completed: number; total: number } {
@@ -44,24 +44,22 @@ function getSectionProgress(section: ManualSection, isLessonCompleted: (id: stri
   return { completed, total };
 }
 
-function firstLine(content: string, maxLen: number = 100): string {
-  const trimmed = content.trim();
-  if (trimmed.length <= maxLen) return trimmed;
-  const slice = trimmed.slice(0, maxLen);
-  const lastSpace = slice.lastIndexOf(' ');
-  return (lastSpace > maxLen * 0.6 ? slice.slice(0, lastSpace) : slice) + '…';
-}
-
 function DiscoveryCard({
   discovery,
   expanded,
+  showLearnMore,
   onToggleExpand,
+  onToggleLearnMore,
   onDismiss,
+  onAskPsych,
 }: {
   discovery: Discovery;
   expanded: boolean;
+  showLearnMore: boolean;
   onToggleExpand: () => void;
+  onToggleLearnMore: () => void;
   onDismiss: () => void;
+  onAskPsych?: () => void;
 }) {
   const translateX = useState(() => new Animated.Value(0))[0];
   const panResponder = useMemo(
@@ -96,11 +94,23 @@ function DiscoveryCard({
         <Text style={styles.discoveryCategoryTag}>{getCategoryTag(discovery.category)}</Text>
         <Text style={styles.discoveryEmoji}>{discovery.emoji}</Text>
         <Text style={styles.discoveryTitle}>{discovery.title}</Text>
-        <Text style={styles.discoveryContent} numberOfLines={expanded ? undefined : 2}>
-          {expanded ? discovery.content : firstLine(discovery.content)}
+        <Text style={styles.discoveryContent}>
+          {discovery.content}
         </Text>
-        {!expanded && (
-          <Text style={styles.discoveryTapHint}>Tap to read more</Text>
+        {discovery.expanded && (
+          <>
+            <Pressable style={styles.learnMoreToggle} onPress={(e) => { e.stopPropagation(); onToggleLearnMore(); }}>
+              <Text style={styles.learnMoreToggleText}>{showLearnMore ? 'Hide' : 'Learn more'}</Text>
+            </Pressable>
+            {showLearnMore && (
+              <Text style={styles.discoveryExpanded}>{discovery.expanded}</Text>
+            )}
+          </>
+        )}
+        {onAskPsych && (
+          <Pressable style={styles.askPsychBtn} onPress={(e) => { e.stopPropagation(); onAskPsych(); }}>
+            <Text style={styles.askPsychBtnText}>Ask Psych about this</Text>
+          </Pressable>
         )}
       </Pressable>
     </Animated.View>
@@ -116,6 +126,7 @@ export default function LearnScreen() {
   const initialDiscoveries = useMemo(() => getDiscoveriesForDay(), []);
   const [visibleDiscoveries, setVisibleDiscoveries] = useState<Discovery[]>(initialDiscoveries);
   const [expandedDiscoveryId, setExpandedDiscoveryId] = useState<string | null>(null);
+  const [learnMoreDiscoveryId, setLearnMoreDiscoveryId] = useState<string | null>(null);
 
   const shownDiscoveryIds = useMemo(() => new Set(visibleDiscoveries.map((d) => d.id)), [visibleDiscoveries]);
 
@@ -157,59 +168,7 @@ export default function LearnScreen() {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      {/* Your Toolkit — 10 activities at top */}
-      <Text style={styles.sectionLabel}>Your Toolkit 🧰</Text>
-      <View style={styles.toolkitGrid}>
-        {TOOLKIT_ACTIVITIES.map((a) => (
-          <Pressable
-            key={a.id}
-            style={({ pressed }) => [styles.toolkitCard, pressed && styles.pressed]}
-            onPress={() => openActivity(a.id)}
-          >
-            <Text style={styles.toolkitEmoji}>{a.emoji}</Text>
-            <Text style={styles.toolkitTitle} numberOfLines={2}>{a.title}</Text>
-            <Text style={styles.toolkitSub} numberOfLines={2}>{a.sub}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* Discovery — bite-sized cards */}
-      <Text style={styles.sectionLabel}>Discovery 🔮</Text>
-      <Text style={styles.discoverySubtitle}>The things nobody taught you in school</Text>
-      <View style={styles.discoveryCardList}>
-        {visibleDiscoveries.map((d) => (
-          <DiscoveryCard
-            key={d.id}
-            discovery={d}
-            expanded={expandedDiscoveryId === d.id}
-            onToggleExpand={() => setExpandedDiscoveryId((cur) => (cur === d.id ? null : d.id))}
-            onDismiss={() => handleDismissDiscovery(d.id)}
-          />
-        ))}
-      </View>
-      <Pressable
-        style={({ pressed }) => [styles.showMoreBtn, pressed && styles.pressed]}
-        onPress={handleShowMoreDiscoveries}
-      >
-        <Text style={styles.showMoreBtnText}>Show me more</Text>
-      </Pressable>
-
-      {/* Overall progress */}
-      <View style={styles.progressBarWrap}>
-        <Text style={styles.progressLabel}>
-          {completedManualCount} of {totalManualLessons} lessons completed
-        </Text>
-        <View style={styles.progressBarBg}>
-          <View
-            style={[
-              styles.progressBarFill,
-              { width: `${totalManualLessons ? (completedManualCount / totalManualLessons) * 100 : 0}%` },
-            ]}
-          />
-        </View>
-      </View>
-
-      {/* Section cards */}
+      {/* 1. Human Manual — FIRST */}
       <Text style={styles.sectionLabel}>The Human Owner's Manual</Text>
       {MANUAL_SECTIONS.map((section) => {
         const { completed, total } = getSectionProgress(section, isLessonCompleted);
@@ -231,7 +190,7 @@ export default function LearnScreen() {
               <Ionicons
                 name={isExpanded ? 'chevron-up' : 'chevron-down'}
                 size={24}
-                color={COLORS.textMuted}
+                color={TEXT_MUTED}
               />
             </Pressable>
 
@@ -261,7 +220,7 @@ export default function LearnScreen() {
                           <Text style={[styles.lessonTitle, done && styles.lessonTitleDone]} numberOfLines={2}>
                             {lesson.title}
                           </Text>
-                          <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+                          <Ionicons name="chevron-forward" size={18} color={TEXT_MUTED} />
                         </Pressable>
                       );
                     })}
@@ -272,13 +231,73 @@ export default function LearnScreen() {
           </View>
         );
       })}
+
+      {/* Overall progress */}
+      <View style={styles.progressBarWrap}>
+        <Text style={styles.progressLabel}>
+          {completedManualCount} of {totalManualLessons} lessons completed
+        </Text>
+        <View style={styles.progressBarBg}>
+          <View
+            style={[
+              styles.progressBarFill,
+              { width: `${totalManualLessons ? (completedManualCount / totalManualLessons) * 100 : 0}%` },
+            ]}
+          />
+        </View>
+      </View>
+
+      {/* 2. Discovery — SECOND */}
+      <Text style={styles.sectionLabel}>Discovery 🔮</Text>
+      <Text style={styles.discoverySubtitle}>The things nobody taught you in school</Text>
+      <View style={styles.discoveryCardList}>
+        {visibleDiscoveries.map((d) => (
+          <DiscoveryCard
+            key={d.id}
+            discovery={d}
+            expanded={expandedDiscoveryId === d.id}
+            showLearnMore={learnMoreDiscoveryId === d.id}
+            onToggleExpand={() => setExpandedDiscoveryId((cur) => (cur === d.id ? null : d.id))}
+            onToggleLearnMore={() => setLearnMoreDiscoveryId((cur) => (cur === d.id ? null : d.id))}
+            onDismiss={() => handleDismissDiscovery(d.id)}
+          />
+        ))}
+      </View>
+      <Pressable
+        style={({ pressed }) => [styles.showMoreBtn, pressed && styles.pressed]}
+        onPress={handleShowMoreDiscoveries}
+      >
+        <Text style={styles.showMoreBtnText}>Show me more</Text>
+      </Pressable>
+
+      {/* 3. Your Toolkit — THIRD at bottom */}
+      <Text style={styles.sectionLabel}>Your Toolkit 🧰</Text>
+      <View style={styles.toolkitGrid}>
+        {TOOLKIT_ACTIVITIES.map((a) => (
+          <Pressable
+            key={a.id}
+            style={({ pressed }) => [styles.toolkitCard, pressed && styles.pressed]}
+            onPress={() => openActivity(a.id)}
+          >
+            <Text style={styles.toolkitEmoji}>{a.emoji}</Text>
+            <Text style={styles.toolkitTitle} numberOfLines={2}>{a.title}</Text>
+            <Text style={styles.toolkitSub} numberOfLines={2}>{a.sub}</Text>
+          </Pressable>
+        ))}
+      </View>
     </ScrollView>
     </ErrorBoundary>
   );
 }
 
+const COCKPIT_BG = '#09090F';
+const CARD_BG = '#111118';
+const TEXT_PRIMARY = '#F0F0F5';
+const TEXT_MUTED = '#8888A0';
+const ACCENT = '#7C4DFF';
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: { flex: 1, backgroundColor: COCKPIT_BG },
   content: { paddingHorizontal: 24, paddingBottom: 40 },
   toolkitGrid: {
     flexDirection: 'row',
@@ -288,37 +307,37 @@ const styles = StyleSheet.create({
   },
   toolkitCard: {
     width: '47%',
-    backgroundColor: COLORS.inputSurface,
+    backgroundColor: CARD_BG,
     borderRadius: BORDER_RADIUS.card,
     padding: 16,
-    borderWidth: 2,
-    borderColor: COLORS.accent,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   toolkitEmoji: { fontSize: 26, marginBottom: 6 },
   toolkitTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: COLORS.text,
+    color: TEXT_PRIMARY,
     marginBottom: 4,
   },
   toolkitSub: {
     fontSize: 13,
-    color: COLORS.textMuted,
+    color: TEXT_MUTED,
   },
   discoverySubtitle: {
     fontSize: 14,
-    color: COLORS.textMuted,
+    color: TEXT_MUTED,
     marginTop: -8,
     marginBottom: 16,
   },
   discoveryCardList: { marginBottom: 12 },
   discoveryCardWrap: { marginBottom: 12 },
   discoveryCard: {
-    backgroundColor: COLORS.inputSurface,
+    backgroundColor: CARD_BG,
     borderRadius: BORDER_RADIUS.card,
     padding: 16,
     borderWidth: 1,
-    borderColor: COLORS.surface,
+    borderColor: 'rgba(255,255,255,0.06)',
     overflow: 'hidden',
   },
   discoveryCategoryTag: {
@@ -326,27 +345,44 @@ const styles = StyleSheet.create({
     top: 12,
     right: 12,
     fontSize: 11,
-    color: COLORS.textMuted,
+    color: TEXT_MUTED,
     fontWeight: '600',
   },
   discoveryEmoji: { fontSize: 28, marginBottom: 8 },
   discoveryTitle: {
     fontSize: 17,
     fontWeight: '600',
-    color: COLORS.text,
+    color: TEXT_PRIMARY,
     marginBottom: 8,
     paddingRight: 80,
   },
   discoveryContent: {
     fontSize: 15,
-    color: COLORS.text,
+    color: TEXT_PRIMARY,
     lineHeight: 22,
   },
   discoveryTapHint: {
     fontSize: 13,
-    color: COLORS.accent,
+    color: ACCENT,
     marginTop: 8,
   },
+  learnMoreToggle: { marginTop: 10 },
+  learnMoreToggleText: { fontSize: 14, color: ACCENT, fontWeight: '500' },
+  discoveryExpanded: {
+    fontSize: 14,
+    color: TEXT_MUTED,
+    lineHeight: 22,
+    marginTop: 10,
+  },
+  askPsychBtn: {
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.input,
+    alignSelf: 'flex-start',
+  },
+  askPsychBtnText: { fontSize: 13, color: ACCENT },
   showMoreBtn: {
     alignSelf: 'center',
     paddingVertical: 12,
@@ -355,34 +391,34 @@ const styles = StyleSheet.create({
   },
   showMoreBtnText: {
     fontSize: 15,
-    color: COLORS.accent,
+    color: ACCENT,
     fontWeight: '600',
   },
   progressBarWrap: { marginBottom: 24 },
   progressLabel: {
     fontSize: 14,
-    color: COLORS.textMuted,
+    color: TEXT_MUTED,
     marginBottom: 8,
   },
   progressBarBg: {
     height: 8,
-    backgroundColor: COLORS.surface,
+    backgroundColor: CARD_BG,
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: COLORS.accent,
+    backgroundColor: ACCENT,
     borderRadius: 4,
   },
   sectionLabel: {
     fontSize: 18,
     fontWeight: '600',
-    color: COLORS.text,
+    color: TEXT_PRIMARY,
     marginBottom: 16,
   },
   sectionCard: {
-    backgroundColor: COLORS.inputSurface,
+    backgroundColor: CARD_BG,
     borderRadius: BORDER_RADIUS.card,
     marginBottom: 12,
     borderLeftWidth: 4,
@@ -398,21 +434,21 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: COLORS.text,
+    color: TEXT_PRIMARY,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: COLORS.textMuted,
+    color: TEXT_MUTED,
     marginTop: 2,
   },
   sectionProgress: {
     fontSize: 13,
-    color: COLORS.textMuted,
+    color: TEXT_MUTED,
     marginTop: 4,
   },
   modulesWrap: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: COLORS.surface,
+    borderTopColor: 'rgba(255,255,255,0.06)',
     paddingHorizontal: 16,
     paddingBottom: 16,
     paddingTop: 8,
@@ -421,7 +457,7 @@ const styles = StyleSheet.create({
   moduleTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: COLORS.text,
+    color: TEXT_PRIMARY,
     marginBottom: 8,
   },
   lessonRow: {
@@ -440,21 +476,21 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   lessonCheckDone: {
-    backgroundColor: COLORS.accent,
+    backgroundColor: ACCENT,
   },
   lessonCheckEmpty: {
     width: 18,
     height: 18,
     borderRadius: 9,
     borderWidth: 2,
-    borderColor: COLORS.textMuted,
+    borderColor: TEXT_MUTED,
   },
   lessonEmoji: { fontSize: 18, marginRight: 8 },
   lessonTitle: {
     flex: 1,
     fontSize: 15,
-    color: COLORS.text,
+    color: TEXT_PRIMARY,
   },
-  lessonTitleDone: { color: COLORS.textMuted },
+  lessonTitleDone: { color: TEXT_MUTED },
   pressed: { opacity: 0.9 },
 });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -34,26 +34,23 @@ export default function NewJournalScreen() {
   const [saved, setSaved] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const lastResultRef = useRef('');
 
   const handleMicPress = async () => {
-    const hasKey = await hasOpenAIKey();
-    if (!hasKey || !Voice.hasVoiceSupport()) {
-      Alert.alert('Voice not available', 'Add your OpenAI API key in Settings to use voice.');
+    if (!Voice.hasVoiceSupport()) {
+      Alert.alert('Voice not available', 'Voice input is not supported on this device.');
       return;
     }
     if (isRecording) {
       try {
-        const uri = await Voice.stopRecording();
-        setIsRecording(false);
-        setIsProcessingVoice(true);
-        const text = await Voice.transcribeWithWhisper(uri);
-        setIsProcessingVoice(false);
-        if (text.trim()) setContent((c) => (c ? c + '\n\n' + text.trim() : text.trim()));
-      } catch (e) {
-        setIsRecording(false);
-        setIsProcessingVoice(false);
-        Alert.alert('Voice failed', 'Try again or type instead.');
-      }
+        await Voice.stopOnDeviceListening();
+      } catch (_) {}
+      setIsRecording(false);
+      const text = (lastResultRef.current || liveTranscript).trim();
+      lastResultRef.current = '';
+      setLiveTranscript('');
+      if (text) setContent((c) => (c ? c + '\n\n' + text : text));
       return;
     }
     const { status } = await Audio.requestPermissionsAsync();
@@ -62,10 +59,20 @@ export default function NewJournalScreen() {
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setLiveTranscript('');
+    lastResultRef.current = '';
+    setIsRecording(true);
     try {
-      setIsRecording(true);
-      await Voice.startRecording();
-    } catch (e) {
+      await Voice.startOnDeviceListening({
+        onPartial: (t) => setLiveTranscript(t),
+        onResult: (t) => { lastResultRef.current = t; },
+        onError: () => {
+          Voice.cancelOnDeviceListening();
+          setLiveTranscript('');
+          setIsRecording(false);
+        },
+      });
+    } catch (_) {
       setIsRecording(false);
     }
   };
@@ -101,9 +108,12 @@ export default function NewJournalScreen() {
       <Text style={styles.title}>What's on your mind?</Text>
       {(isRecording || isProcessingVoice) && (
         <Text style={styles.recordingLabel}>
-          {isRecording ? 'Recording... Tap mic to stop.' : 'Processing...'}
+          {isRecording ? 'Listening... Tap mic when done.' : 'Processing...'}
         </Text>
       )}
+      {isRecording && liveTranscript ? (
+        <Text style={styles.liveTranscript} numberOfLines={2}>{liveTranscript}</Text>
+      ) : null}
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
@@ -185,6 +195,10 @@ const styles = StyleSheet.create({
   recordingLabel: {
     fontSize: 14,
     color: COLORS.recording,
+  },
+  liveTranscript: {
+    fontSize: 14,
+    color: COLORS.textMuted,
     marginBottom: 8,
   },
   micButton: {

@@ -4,6 +4,7 @@ export interface Discovery {
   emoji: string;
   title: string;
   content: string;
+  expanded?: string;
   source?: string;
 }
 
@@ -15,6 +16,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '🏛️',
     title: 'The Stoics Had CBT First',
     content: "2,000 years before therapists invented Cognitive Behavioral Therapy, Marcus Aurelius wrote: 'You have power over your mind, not outside events.' The Thought Challenger activity? The Stoics were doing it in 170 AD.",
+    expanded: "Modern CBT asks you to identify the thought, test the evidence, and reframe. Marcus Aurelius did exactly this in his private journal, the Meditations. He wrote to himself: 'Choose not to be harmed—and you won\'t feel harmed.' That's cognitive reframing. The Stoics also practiced negative visualization: imagining loss to reduce anxiety. Today we call it exposure. The overlap isn't coincidence—Beck and Ellis studied the Stoics when building CBT.",
   },
   {
     id: 'buddhism-dashboard',
@@ -22,6 +24,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '🧘',
     title: "Buddhism's Dashboard",
     content: "Buddhist monks have been practicing emotional observation for 2,500 years. They called it mindfulness. Your Emotion Wheel? Same idea: name it, watch it, let it pass.",
+    expanded: "The Buddha taught that suffering comes from clinging. By watching emotions without grabbing or pushing them away, we see them change on their own. Neuroscience now shows that naming an emotion (affect labeling) reduces amygdala activation. So when you use the Emotion Decoder to name what you feel, you're doing what contemplatives have done for millennia—with a modern label.",
   },
   {
     id: 'rumi-breakdowns',
@@ -29,6 +32,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '✨',
     title: 'Rumi on Breakdowns',
     content: "The 13th-century poet Rumi wrote: 'The wound is the place where the light enters you.' Modern psychology calls this post-traumatic growth. Ancient poets knew it first.",
+    expanded: "Post-traumatic growth (PTG) is the finding that some people report better relationships, new priorities, and deeper meaning after trauma. Rumi wasn't dismissing pain—he was pointing to what can grow through it. Your hardest moments can become the places where you learn the most about yourself and others.",
   },
   {
     id: 'know-thyself',
@@ -36,6 +40,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '🏺',
     title: 'Know Thyself',
     content: "The ancient Greeks carved 'Know Thyself' above the Oracle at Delphi. It was considered the most important thing a human could do. This entire app is built on that one idea.",
+    expanded: "Knowing yourself isn't one moment—it's a practice. It means noticing your patterns, your triggers, how your body feels when you're stressed, and what actually helps. Every check-in, every gauge, every conversation with Psych is a small step toward that Delphic ideal.",
   },
   {
     id: 'ubuntu',
@@ -43,6 +48,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '🤝',
     title: 'Ubuntu',
     content: "In Southern African philosophy, 'Ubuntu' means 'I am because we are.' Your Circle feature — sharing how you feel with the people who matter — is Ubuntu in your pocket.",
+    expanded: "Ubuntu doesn't mean losing yourself in the group. It means your humanity is tied to theirs. When you share your temperature with your circle, you're saying: I'm part of us. When you notice someone else's and reach out, you're living Ubuntu. Connection isn't extra—it's how we stay human.",
   },
   {
     id: 'tao-doing-nothing',
@@ -50,6 +56,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '☯️',
     title: 'The Tao of Doing Nothing',
     content: "Lao Tzu taught that sometimes the wisest action is no action. When Psych goes quiet and lets you sit with a feeling instead of fixing it — that's 2,500-year-old wisdom.",
+    expanded: "Wu wei isn't laziness—it's not forcing. In therapy we call it holding space. Sometimes the best thing to do is listen, breathe, and let the feeling be there. Your nervous system needs that pause. The Tao Te Ching says the soft overcomes the hard. Letting yourself feel without immediately fixing is a kind of strength.",
   },
   {
     id: 'indigenous-body-wisdom',
@@ -57,6 +64,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '🌿',
     title: 'Indigenous Body Wisdom',
     content: "Indigenous healing traditions have always known the body stores emotion. Western science 'discovered' this in the 1990s. Your Body Scan activity connects to knowledge that's thousands of years old.",
+    expanded: "Somatic therapies and trauma research now confirm that the body keeps the score. Tension in the shoulders, gut feelings, shallow breath—these are data. Indigenous practices have long used body awareness, ceremony, and community to process emotion. Your Body Awareness activity is one way to reconnect with that wisdom.",
   },
   {
     id: 'seneca-anger',
@@ -64,6 +72,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '📜',
     title: 'Seneca on Anger',
     content: "The Stoic philosopher Seneca wrote an entire book on anger in 41 AD. His advice? Delay your response. That's the same 6-second rule modern neuroscience recommends.",
+    expanded: "Seneca said the best response to anger is to not respond at all—at first. Wait. Let the wave pass. Neuroscience shows that the amygdala surge in anger drops after about six seconds if you don't feed it. So when you feel rage rising, the ancient and modern advice is the same: pause. Then choose.",
   },
   {
     id: 'kintsugi',
@@ -71,6 +80,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '🍶',
     title: 'The Japanese Art of Kintsugi',
     content: "Kintsugi is the practice of repairing broken pottery with gold. The cracks become the most beautiful part. Your scars and struggles aren't flaws — they're where the gold is.",
+    expanded: "Kintsugi doesn't hide the break—it highlights it. In the same way, your story isn't about erasing hard times. It's about how you've been shaped by them. The places you've healed, the lessons you've learned, the empathy you have because you've been there—that's the gold in your cracks.",
   },
   {
     id: 'aristotle-golden-mean',
@@ -78,6 +88,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '⚖️',
     title: "Aristotle's Golden Mean",
     content: "Aristotle taught that every emotion has a healthy middle ground. Not too much anger, not too little. Not too much fear, not too little. Emotional intelligence isn't about eliminating feelings — it's about balance.",
+    expanded: "The mean isn't bland neutrality. Courage is the mean between recklessness and cowardice—it's still strong. So with emotions: the goal isn't to feel nothing, but to feel in proportion. Your gauges help you see when a system is in the red (too much) or underused (too little). Balance is the aim.",
   },
   {
     id: 'confucius-relationship',
@@ -85,6 +96,7 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '📿',
     title: 'Confucius on Repair',
     content: "Confucius said: 'When you have faults, do not fear to abandon them.' He wasn't talking about people — he meant the habits and thoughts that keep you stuck. Letting go of old patterns is 2,500-year-old advice.",
+    expanded: "Confucius was big on self-correction. He didn't mean perfection—he meant willingness to change when you see you're wrong. That applies to thought patterns too. The thought that 'I always mess up' or 'they never listen' can be abandoned when you see it's not fully true. Letting go of those stories is ancient wisdom.",
   },
   {
     id: 'socrates-unexamined',
@@ -725,15 +737,14 @@ function getDayOfYear(): number {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
-/** Returns 3 discoveries for today. Uses (dayOfYear * 3) % total so each day gets a different window of 3; no repeat within a month. */
+/** Returns 2 discoveries for today. Uses (dayOfYear * 2) % total for daily rotation. */
 export function getDiscoveriesForDay(): Discovery[] {
   const day = getDayOfYear();
   const n = DISCOVERIES.length;
-  const base = (day * 3) % n;
+  const base = (day * 2) % n;
   return [
     DISCOVERIES[base],
     DISCOVERIES[(base + 1) % n],
-    DISCOVERIES[(base + 2) % n],
   ];
 }
 

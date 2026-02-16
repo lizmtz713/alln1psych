@@ -21,6 +21,8 @@ import {
   useEducationStore,
   userAgeToContentAge,
 } from '../../src/stores/educationStore';
+import { useJournalStore } from '../../src/stores/journalStore';
+import { useCockpitStore } from '../../src/stores/cockpitStore';
 import * as Haptics from 'expo-haptics';
 import {
   getLessonById,
@@ -68,7 +70,9 @@ export default function LessonScreen() {
   const ageGroup = useUserStore((s) => s.ageGroup);
   const contentAge = userAgeToContentAge(ageGroup);
   const { completeLesson, saveReflection, reflections, isLessonCompleted } = useEducationStore();
+  const addJournalEntry = useJournalStore((s) => s.addEntry);
   const [reflectionText, setReflectionText] = useState(reflections[id ?? ''] ?? '');
+  const [justCompleted, setJustCompleted] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
 
   const legacyLesson = id ? getLessonById(id) : null;
@@ -111,8 +115,13 @@ export default function LessonScreen() {
   const handleComplete = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     saveReflection(lesson.id, reflectionText);
-    completeLesson(lesson.id);
-    router.back();
+    completeLesson(lesson.id, reflectionText);
+    if (reflectionText.trim()) {
+      addJournalEntry(reflectionText.trim(), { source: 'manual' });
+    }
+    useCockpitStore.getState().addLessonBonus();
+    setJustCompleted(true);
+    setTimeout(() => router.back(), 1600);
   };
 
   // Manual lesson layout (introduction, keyConcepts, reflectionPrompt)
@@ -162,12 +171,18 @@ export default function LessonScreen() {
                 onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300)}
               />
             </View>
-            <Pressable
-              style={({ pressed }) => [styles.completeButton, pressed && styles.completeButtonPressed]}
-              onPress={handleComplete}
-            >
-              <Text style={styles.completeButtonText}>{completed ? 'Done' : 'Complete'}</Text>
-            </Pressable>
+            {justCompleted ? (
+              <View style={styles.completeSuccess}>
+                <Text style={styles.completeSuccessText}>Lesson complete ✓</Text>
+              </View>
+            ) : (
+              <Pressable
+                style={({ pressed }) => [styles.completeButton, pressed && styles.completeButtonPressed]}
+                onPress={handleComplete}
+              >
+                <Text style={styles.completeButtonText}>{completed ? 'Done' : 'Complete'}</Text>
+              </Pressable>
+            )}
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
@@ -227,12 +242,18 @@ export default function LessonScreen() {
           </View>
         )}
 
-        <Pressable
-          style={({ pressed }) => [styles.completeButton, pressed && styles.completeButtonPressed]}
-          onPress={handleComplete}
-        >
-          <Text style={styles.completeButtonText}>{completed ? 'Done' : 'Complete'}</Text>
-        </Pressable>
+        {justCompleted ? (
+          <View style={styles.completeSuccess}>
+            <Text style={styles.completeSuccessText}>Lesson complete ✓</Text>
+          </View>
+        ) : (
+          <Pressable
+            style={({ pressed }) => [styles.completeButton, pressed && styles.completeButtonPressed]}
+            onPress={handleComplete}
+          >
+            <Text style={styles.completeButtonText}>{completed ? 'Done' : 'Complete'}</Text>
+          </Pressable>
+        )}
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -336,6 +357,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.text,
     minHeight: 80,
+  },
+  completeSuccess: {
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  completeSuccessText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.accent,
   },
   completeButton: {
     backgroundColor: COLORS.accent,

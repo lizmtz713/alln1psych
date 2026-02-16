@@ -792,7 +792,7 @@ export default function TalkScreen() {
               <Text style={styles.voiceFallback}>Voice requires an API key. Type instead for now.</Text>
             )}
             <Pressable style={styles.keyboardToggle} onPress={() => { setInputMode('text'); textInputRef.current?.focus(); }}>
-              <Ionicons name="keyboard-outline" size={22} color={COLORS.textMuted} />
+              <Ionicons name="keypad-outline" size={22} color={COLORS.textMuted} />
               <Text style={styles.keyboardToggleText}>Type instead</Text>
             </Pressable>
           </>
