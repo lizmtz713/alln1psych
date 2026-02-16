@@ -1,0 +1,86 @@
+/**
+ * AI-generated daily content for Home tab (greeting, affirmation, insight, challenge).
+ */
+
+import { getOpenAIKey } from './ai';
+
+export interface DailyContentContext {
+  name: string;
+  ageGroup: string;
+  recentMoods: string[];
+  streak: number;
+  lastConversationSummary?: string;
+  lessonsCompleted: string[];
+  loveLanguage?: string;
+  triggers?: string[];
+}
+
+export interface DailyContent {
+  greeting: string;
+  affirmation: string;
+  insight: string;
+  challengeSuggestion: string;
+}
+
+function getStaticDefaults(name: string): DailyContent {
+  const hour = new Date().getHours();
+  const timeGreeting =
+    hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 21 ? 'Good evening' : "It's late";
+  return {
+    greeting: `${timeGreeting}, ${name || 'you'} 💜`,
+    affirmation: "You're doing better than you think.",
+    insight: 'Check in with yourself today. Your feelings matter.',
+    challengeSuggestion: 'Take 5 deep breaths right now.',
+  };
+}
+
+export async function generateDailyContent(userContext: DailyContentContext): Promise<DailyContent> {
+  const apiKey = await getOpenAIKey();
+  if (!apiKey) {
+    return getStaticDefaults(userContext.name);
+  }
+
+  const prompt = `You are Psych, an emotional intelligence companion. Based on this user's recent history, generate personalized daily content.
+
+USER: ${userContext.name}, age group: ${userContext.ageGroup}
+RECENT MOODS (last 7 days): ${userContext.recentMoods.join(', ') || 'No check-ins yet'}
+STREAK: ${userContext.streak} days
+LOVE LANGUAGE: ${userContext.loveLanguage || 'Unknown'}
+LESSONS COMPLETED: ${userContext.lessonsCompleted.join(', ') || 'None yet'}
+LAST CONVERSATION: ${userContext.lastConversationSummary || 'No conversations yet'}
+KNOWN TRIGGERS: ${userContext.triggers?.join(', ') || 'None shared yet'}
+
+Generate a JSON response with:
+1. "greeting" - A warm, time-appropriate greeting that references something specific from their recent activity (1 sentence)
+2. "affirmation" - A personalized affirmation based on what they're going through (1 sentence)
+3. "insight" - One insight about their emotional patterns based on their mood history (2 sentences max)
+4. "challengeSuggestion" - A personalized micro-challenge for today based on what they need (1 sentence)
+
+Be warm, specific, and personal. Don't be generic. Reference their actual data.
+Respond ONLY with valid JSON, no markdown.`;
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 300,
+        temperature: 0.8,
+      }),
+    });
+
+    const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    const text = data.choices?.[0]?.message?.content?.trim();
+    if (text) {
+      const parsed = JSON.parse(text) as DailyContent;
+      if (parsed.greeting && parsed.affirmation && parsed.insight && parsed.challengeSuggestion) {
+        return parsed;
+      }
+    }
+  } catch {
+    // fall through to defaults
+  }
+  return getStaticDefaults(userContext.name);
+}

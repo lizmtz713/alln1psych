@@ -1,0 +1,21 @@
+import { Stack } from 'expo-router';
+
+export default function ModalsLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_bottom',
+        gestureEnabled: true,
+        animationTypeForReplace: 'push',
+      }}
+    >
+      <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+      <Stack.Screen name="mood-checkin" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="invite-circle" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="new-journal" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="role-play" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="activity" options={{ presentation: 'modal' }} />
+    </Stack>
+  );
+}
