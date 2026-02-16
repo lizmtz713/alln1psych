@@ -1,9 +1,9 @@
 /**
- * Voice: on-device speech recognition (primary) and Whisper API (fallback).
- * Recording (expo-av) is used only when on-device recognition fails.
+ * Voice: on-device speech recognition (primary), Whisper API (fallback), OpenAI TTS for AI responses.
  */
 
 import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 import { getOpenAIKey } from './ai';
 
 let Voice: any = null;
@@ -151,6 +151,53 @@ export async function transcribeWithWhisper(audioUri: string): Promise<string> {
 }
 
 export function hasVoiceSupport(): boolean {
-  // UI uses hasOpenAIKey() for API key check; this is a quick env check for capability.
   return true;
+}
+
+/** Play AI response using OpenAI TTS (Psych's voice). */
+export async function speakWithOpenAI(text: string): Promise<void> {
+  try {
+    const apiKey = await getOpenAIKey();
+    if (!apiKey?.trim()) return;
+
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'tts-1',
+        input: text.slice(0, 4096),
+        voice: 'nova',
+        response_format: 'mp3',
+      }),
+    });
+
+    if (!response.ok) return;
+
+    const blob = await response.blob();
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const dataUrl = reader.result?.toString?.();
+      const base64 = dataUrl?.split(',')[1];
+      if (!base64) return;
+
+      const fileUri = FileSystem.documentDirectory + 'psych-voice.mp3';
+      await FileSystem.writeAsStringAsync(fileUri, base64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const { sound } = await Audio.Sound.createAsync({ uri: fileUri });
+      await sound.playAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && (status as { didJustFinish?: boolean }).didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    };
+    reader.readAsDataURL(blob);
+  } catch (e) {
+    if (__DEV__) console.warn('TTS failed, text-only fallback:', e);
+  }
 }

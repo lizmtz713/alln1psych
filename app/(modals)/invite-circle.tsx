@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { useCircleStore, type RelationshipType } from '../../src/stores/circleStore';
 
@@ -42,6 +43,13 @@ export default function InviteCircleScreen() {
       contentContainerStyle={[styles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}
       keyboardShouldPersistTaps="handled"
     >
+      <Pressable
+        style={({ pressed }) => [styles.cancelRow, pressed && { opacity: 0.8 }]}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="arrow-back" size={24} color={COLORS.accent} />
+        <Text style={styles.cancelText}>Cancel</Text>
+      </Pressable>
       <Text style={styles.title}>Who would you like to add?</Text>
       <TextInput
         style={styles.input}
@@ -112,6 +120,17 @@ export default function InviteCircleScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   content: { paddingHorizontal: 24 },
+  cancelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 20,
+  },
+  cancelText: {
+    fontSize: 17,
+    color: COLORS.accent,
+    fontWeight: '500',
+  },
   title: {
     fontSize: 22,
     fontWeight: '600',

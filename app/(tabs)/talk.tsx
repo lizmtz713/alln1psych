@@ -359,6 +359,10 @@ export default function TalkScreen() {
         .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
       const response = await sendMessage(apiMessages, buildUserContext());
       addMessage({ role: 'assistant', content: response, isVoice: false });
+      if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
+        Voice.speakWithOpenAI(response).catch(() => {});
+        useUsageStore.getState().incrementTTS();
+      }
     } catch (e) {
       addMessage({
         role: 'assistant',
@@ -403,6 +407,10 @@ export default function TalkScreen() {
           .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
         const response = await sendMessage(apiMessages, buildUserContext());
         addMessage({ role: 'assistant', content: response, isVoice: false });
+        if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
+          Voice.speakWithOpenAI(response).catch(() => {});
+          useUsageStore.getState().incrementTTS();
+        }
       } catch (e) {
         if (__DEV__) console.log('[Talk] Whisper fallback error:', e);
           setRecording(false);
@@ -547,6 +555,10 @@ export default function TalkScreen() {
                     .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
                   const response = await sendMessage(apiMessages, buildUserContext());
                   addMessage({ role: 'assistant', content: response, isVoice: false });
+                  if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
+                    Voice.speakWithOpenAI(response).catch(() => {});
+                    useUsageStore.getState().incrementTTS();
+                  }
                 } catch {
                   addMessage({
                     role: 'assistant',

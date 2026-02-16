@@ -23,6 +23,7 @@ import { useCircleStore } from '../../src/stores/circleStore';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
 import { sendMessageWithSystemPrompt, hasOpenAIKey, type Message } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
+import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useUsageStore } from '../../src/stores/usageStore';
 import { useJournalStore } from '../../src/stores/journalStore';
 import { scheduleCheckInReminder } from '../../src/services/notifications';
@@ -189,6 +190,10 @@ export default function HelpSomeoneScreen() {
       .then((reply) => {
         addMessageToCurrent('user', seedContent);
         addMessageToCurrent('assistant', reply);
+        if (useSettingsStore.getState().aiVoiceEnabled && reply?.trim()) {
+          Voice.speakWithOpenAI(reply).catch(() => {});
+          useUsageStore.getState().incrementTTS();
+        }
       })
       .catch(() => {
         addMessageToCurrent('user', seedMessages[0].content);
@@ -217,6 +222,10 @@ export default function HelpSomeoneScreen() {
     try {
       const reply = await sendMessageWithSystemPrompt(apiMessages, systemPrompt);
       addMessageToCurrent('assistant', reply);
+      if (useSettingsStore.getState().aiVoiceEnabled && reply?.trim()) {
+        Voice.speakWithOpenAI(reply).catch(() => {});
+        useUsageStore.getState().incrementTTS();
+      }
     } catch {
       addMessageToCurrent('assistant', "I couldn't respond right now. Try again in a moment.");
     } finally {

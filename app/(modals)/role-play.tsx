@@ -21,6 +21,7 @@ import { useRolePlayStore, type RolePlayDifficulty } from '../../src/stores/role
 import { sendRolePlayMessage, getDebrief } from '../../src/services/roleplay';
 import { hasOpenAIKey } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
+import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useUsageStore } from '../../src/stores/usageStore';
 
 const ROLE_PLAY_ACCENT = COLORS.rolePlayAccent;
@@ -146,6 +147,10 @@ export default function RolePlayScreen() {
         currentSession.difficulty
       );
       addMessage('assistant', reply);
+      if (useSettingsStore.getState().aiVoiceEnabled && reply?.trim()) {
+        Voice.speakWithOpenAI(reply).catch(() => {});
+        useUsageStore.getState().incrementTTS();
+      }
 
       const exchangeCount = nextMessages.length + 1;
       if (exchangeCount >= 10 && reply.toLowerCase().includes('debrief')) {
@@ -175,6 +180,10 @@ export default function RolePlayScreen() {
         currentSession.difficulty
       );
       addMessage('assistant', reply);
+      if (useSettingsStore.getState().aiVoiceEnabled && reply?.trim()) {
+        Voice.speakWithOpenAI(reply).catch(() => {});
+        useUsageStore.getState().incrementTTS();
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong.');
     } finally {
