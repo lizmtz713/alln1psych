@@ -74,7 +74,7 @@ function AnimatedMessageRow({
   }, []);
   return (
     <Animated.View
-      style={[style, { opacity, transform: [{ translateY }] }]}
+      style={([style, { opacity, transform: [{ translateY }] }] as StyleProp<ViewStyle>)}
     >
       {children}
     </Animated.View>
