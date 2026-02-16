@@ -21,6 +21,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { useUserStore } from '../../src/stores/userStore';
 import { registerForPushNotifications } from '../../src/services/notifications';
@@ -391,6 +392,7 @@ export default function MeScreen() {
   };
 
   return (
+    <ErrorBoundary>
     <>
     {toast && (
       <View style={[styles.toast, { top: insets.top + 10 }]} pointerEvents="none">
@@ -764,6 +766,18 @@ export default function MeScreen() {
               <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
             </Pressable>
           </View>
+          <View style={[styles.settingRow, { flexDirection: 'column', alignItems: 'stretch' }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.settingLabel}>AI Voice</Text>
+              <Switch
+                value={settings.aiVoiceEnabled}
+                onValueChange={settings.setAiVoiceEnabled}
+                trackColor={{ false: COLORS.surface, true: COLORS.accentMuted }}
+                thumbColor={COLORS.text}
+              />
+            </View>
+            <Text style={[styles.settingHint, { marginTop: 4 }]}>When on, AI responds with voice (TTS). Off = text only.</Text>
+          </View>
           <View style={styles.settingRow}>
             <Text style={styles.settingLabel}>Pause circle sharing</Text>
             <Switch
@@ -1111,6 +1125,7 @@ export default function MeScreen() {
       </View>
     </ScrollView>
     </>
+    </ErrorBoundary>
   );
 }
 

@@ -47,10 +47,10 @@ export async function generateDailyContent(userContext: DailyContentContext): Pr
   const prompt = `You are Psych, an emotional intelligence companion. Based on this user's recent history, generate personalized daily content.
 
 USER: ${userContext.name}, age group: ${userContext.ageGroup}
-RECENT MOODS (last 7 days): ${userContext.recentMoods.join(', ') || 'No check-ins yet'}
-STREAK: ${userContext.streak} days
+RECENT MOODS (last 7 days): ${(userContext.recentMoods ?? []).join(', ') || 'No check-ins yet'}
+STREAK: ${userContext.streak ?? 0} days
 LOVE LANGUAGE: ${userContext.loveLanguage || 'Unknown'}
-LESSONS COMPLETED: ${userContext.lessonsCompleted.join(', ') || 'None yet'}
+LESSONS COMPLETED: ${(userContext.lessonsCompleted ?? []).join(', ') || 'None yet'}
 LAST CONVERSATION: ${userContext.lastConversationSummary || 'No conversations yet'}
 KNOWN TRIGGERS: ${userContext.triggers?.join(', ') || 'None shared yet'}
 RECENT EMOTIONS (from conversations): ${userContext.recentEmotions?.join(', ') || 'None yet'}

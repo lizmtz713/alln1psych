@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
+import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
@@ -32,12 +33,13 @@ const ALL_ACTIVITIES: ActivitySuggestion[] = [
 ];
 
 function getSuggestedActivities(
-  recentMoods: string[],
+  recentMoods: string[] | undefined | null,
   hour: number,
   _completedActivityIds: string[] = []
 ): ActivitySuggestion[] {
+  const moods = recentMoods ?? [];
   const seed = new Date().getDate() + hour;
-  const lastMood = recentMoods[0];
+  const lastMood = moods[0];
   const isRedOrange = lastMood === 'red' || lastMood === 'orange';
   const isGreen = lastMood === 'green';
   let pool: ActivitySuggestion[];
@@ -63,70 +65,82 @@ function getSuggestedActivities(
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { myTemperature, myTemperatureLabel, members } = useCircleStore();
+  const circle = useCircleStore();
+  const members = circle.members ?? [];
+  const myTemperature = circle.myTemperature ?? 'green';
+  const myTemperatureLabel = circle.myTemperatureLabel ?? 'Doing well';
   const user = useUserStore();
-  useConversationStore((s) => s.messages.length);
-  useJournalStore((s) => s.entries.length);
-  useEducationStore((s) => ({ lastLessonDate: s.lastLessonDate, completedLessons: s.completedLessons }));
+  useConversationStore((s) => (s.messages ?? []).length);
+  useJournalStore((s) => (s.entries ?? []).length);
+  useEducationStore((s) => ({ lastLessonDate: s.lastLessonDate, completedLessons: s.completedLessons ?? [] }));
   const getEngagementStreak = useInsightsStore((s) => s.getEngagementStreak);
   const getPsychSays = useInsightsStore((s) => s.getPsychSays);
   const getWeeklySummary = useInsightsStore((s) => s.getWeeklySummary);
   const getNextLesson = useEducationStore((s) => s.getNextLesson);
-  const streak = getEngagementStreak();
-  const weeklySummary = getWeeklySummary();
-  const nextLesson = getNextLesson(userAgeToContentAge(user.ageGroup));
+  const streak = typeof getEngagementStreak === 'function' ? getEngagementStreak() : 0;
+  const weeklySummary = typeof getWeeklySummary === 'function' ? getWeeklySummary() : null;
+  const nextLesson = getNextLesson?.(userAgeToContentAge(user?.ageGroup ?? null)) ?? null;
   const { getTodayChallenge, isTodayChallengeDone, completeTodayChallenge } = useEngagementStore();
   const { content: dailyContent, isLoading: dailyContentLoading, setContent: setDailyContent, setLoading: setDailyContentLoading, isStale } = useDailyContentStore();
-  const moodTrend = useInsightsStore((s) => s.getWeeklyMoodTrend)();
-  const summaryCount = useConversationSummaryStore((s) => s.getSummaries().length);
+  const getWeeklyMoodTrend = useInsightsStore((s) => s.getWeeklyMoodTrend);
+  let moodTrend: Array<{ date: string; mood: string }> = [];
+  try {
+    moodTrend = getWeeklyMoodTrend?.() ?? [];
+  } catch {
+    moodTrend = [];
+  }
+  const summaryCount = useConversationSummaryStore((s) => (s.getSummaries?.() ?? []).length);
   const getLastSummary = useConversationSummaryStore((s) => s.getLastSummary);
   const getRecentTriggers = useConversationSummaryStore((s) => s.getRecentTriggers);
   const getEmotionalPatterns = useConversationSummaryStore((s) => s.getEmotionalPatterns);
 
   useEffect(() => {
-    if (!dailyContent || isStale()) {
-      setDailyContentLoading(true);
-      const lastSummary = getLastSummary();
-      const recentTriggers = getRecentTriggers(14);
-      const patterns = getEmotionalPatterns();
-      const lastConversationSummary = lastSummary
-        ? `${lastSummary.title}: ${lastSummary.summary}${lastSummary.insights ? ` Insight: ${lastSummary.insights}` : ''}`
-        : undefined;
-      generateDailyContent({
-        name: user.name || 'there',
-        ageGroup: user.ageGroup ?? 'unknown',
-        recentMoods: moodTrend.map((t) => t.mood),
-        streak,
-        lessonsCompleted: useEducationStore.getState().completedLessons,
-        loveLanguage: user.loveLanguage ?? undefined,
-        lastConversationSummary,
-        triggers: recentTriggers.length > 0 ? recentTriggers : undefined,
-        recentEmotions: patterns.topEmotions.slice(0, 6).map((e) => e.emotion),
-        emotionalTrend: patterns.trend,
-      })
-        .then((c) => {
-          setDailyContent(c);
+    try {
+      if (!dailyContent || isStale?.()) {
+        setDailyContentLoading(true);
+        const lastSummary = getLastSummary?.() ?? null;
+        const recentTriggers = (getRecentTriggers?.(14) ?? []) as string[];
+        const patterns = getEmotionalPatterns?.() ?? { topEmotions: [], topTriggers: [], trend: 'stable' as const };
+        const lastConversationSummary = lastSummary
+          ? `${lastSummary.title}: ${lastSummary.summary}${lastSummary.insights ? ` Insight: ${lastSummary.insights}` : ''}`
+          : undefined;
+        generateDailyContent({
+          name: user?.name ?? 'there',
+          ageGroup: user?.ageGroup ?? 'unknown',
+          recentMoods: (moodTrend ?? []).map((t) => t.mood),
+          streak: typeof streak === 'number' ? streak : 0,
+          lessonsCompleted: useEducationStore.getState?.()?.completedLessons ?? [],
+          loveLanguage: user?.loveLanguage ?? undefined,
+          lastConversationSummary,
+          triggers: recentTriggers.length > 0 ? recentTriggers : undefined,
+          recentEmotions: (patterns.topEmotions ?? []).slice(0, 6).map((e) => e.emotion),
+          emotionalTrend: patterns.trend,
         })
-        .catch(() => {
-          const hour = new Date().getHours();
-          const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 21 ? 'Good evening' : "It's late";
-          setDailyContent({
-            greeting: `${timeGreeting}, ${user.name || 'you'} 💜`,
-            affirmation: "You're doing better than you think.",
-            insight: 'Check in with yourself today. Your feelings matter.',
-            challengeSuggestion: 'Take 5 deep breaths right now.',
-          });
-        })
-        .finally(() => setDailyContentLoading(false));
+          .then((c) => setDailyContent(c))
+          .catch(() => {
+            const hour = new Date().getHours();
+            const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 21 ? 'Good evening' : "It's late";
+            setDailyContent({
+              greeting: `${timeGreeting}, ${user?.name ?? 'you'} 💜`,
+              affirmation: "You're doing better than you think.",
+              insight: 'Check in with yourself today. Your feelings matter.',
+              challengeSuggestion: 'Take 5 deep breaths right now.',
+            });
+          })
+          .finally(() => setDailyContentLoading(false));
+      }
+    } catch (err) {
+      if (__DEV__) console.error('[Home] daily content effect', err);
+      setDailyContentLoading(false);
     }
-  }, [isStale(), user.name, user.ageGroup, streak, summaryCount]);
+  }, [isStale?.(), user?.name, user?.ageGroup, streak, summaryCount]);
 
-  const greetingLine = dailyContent?.greeting ?? `Good morning, ${user.name || 'you'} 💜`;
+  const greetingLine = dailyContent?.greeting ?? `Good morning, ${user?.name ?? 'you'} 💜`;
   const affirmation = dailyContent?.affirmation ?? "You're doing better than you think.";
-  const psychSays = dailyContent?.insight ?? getPsychSays(streak);
-  const todayChallenge = getTodayChallenge();
-  const challengeDone = isTodayChallengeDone();
-  const challengeText = dailyContent?.challengeSuggestion ?? todayChallenge.text;
+  const psychSays = dailyContent?.insight ?? (typeof getPsychSays === 'function' ? getPsychSays(streak) : "You're doing better than you think.");
+  const todayChallenge = (typeof getTodayChallenge === 'function' ? getTodayChallenge() : null) ?? { text: 'Take 5 deep breaths right now', emoji: '🌬️' };
+  const challengeDone = typeof isTodayChallengeDone === 'function' ? isTodayChallengeDone() : false;
+  const challengeText = dailyContent?.challengeSuggestion ?? todayChallenge?.text ?? 'Take 5 deep breaths right now';
 
   const card0 = useRef(new Animated.Value(0)).current;
   const card1 = useRef(new Animated.Value(0)).current;
@@ -160,7 +174,7 @@ export default function HomeScreen() {
     setTimeout(() => setRefreshing(false), 600);
   };
 
-  const needsCheckIn = members.filter((m) => m.temperature === 'orange' || m.temperature === 'red');
+  const needsCheckIn = (members ?? []).filter((m) => m?.temperature === 'orange' || m?.temperature === 'red');
   const firstAlert = needsCheckIn[0];
 
   const slideY = (v: Animated.Value) => ({
@@ -169,6 +183,7 @@ export default function HomeScreen() {
   });
 
   return (
+    <ErrorBoundary>
     <ScrollView
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       contentContainerStyle={styles.content}
@@ -288,7 +303,7 @@ export default function HomeScreen() {
         <Text style={styles.cardSectionTitle}>Try this</Text>
         {(() => {
           const hour = new Date().getHours();
-          const recentMoods = moodTrend.map((t) => t.mood);
+          const recentMoods = (moodTrend ?? []).map((t) => t.mood);
           const suggestions = getSuggestedActivities(recentMoods, hour);
           return (
             <View style={styles.tryThisRow}>
@@ -380,6 +395,7 @@ export default function HomeScreen() {
 
       <Text style={styles.prompt}>How are you feeling today?</Text>
     </ScrollView>
+    </ErrorBoundary>
   );
 }
 

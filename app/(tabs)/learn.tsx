@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useEducationStore } from '../../src/stores/educationStore';
 import {
   MANUAL_SECTIONS,
@@ -45,6 +46,7 @@ export default function LearnScreen() {
   };
 
   return (
+    <ErrorBoundary>
     <ScrollView
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       contentContainerStyle={styles.content}
@@ -129,6 +131,7 @@ export default function LearnScreen() {
         );
       })}
     </ScrollView>
+    </ErrorBoundary>
   );
 }
 

@@ -30,11 +30,11 @@ function getAchievementsUnlocked(): Record<string, boolean> {
   const education = useEducationStore.getState();
   const conversation = useConversationStore.getState();
 
-  const moodCount = circle.moodHistory.length;
-  const streakDays = education.streakDays;
-  const completedLessonIds = education.completedLessons;
-  const hasVoiceMessage = conversation.messages.some((m) => m.isVoice);
-  const membersCount = circle.members.length;
+  const moodCount = (circle.moodHistory ?? []).length;
+  const streakDays = education?.streakDays ?? 0;
+  const completedLessonIds = education?.completedLessons ?? [];
+  const hasVoiceMessage = (conversation.messages ?? []).some((m) => m.isVoice);
+  const membersCount = (circle.members ?? []).length;
   const feelings101LessonIds = [
     'feelings-101-what-are-emotions',
     'feelings-101-name-it-to-tame-it',
@@ -88,7 +88,7 @@ export const useInsightsStore = create<InsightsState>(() => ({
   getWeeklyMoodTrend: () => {
     const circle = useCircleStore.getState();
     const since = oneWeekAgo();
-    return circle.moodHistory
+    return (circle.moodHistory ?? [])
       .filter((e) => new Date(e.timestamp).getTime() >= since)
       .map((e) => ({
         date: new Date(e.timestamp).toLocaleDateString(),
@@ -105,9 +105,9 @@ export const useInsightsStore = create<InsightsState>(() => ({
     const journal = useJournalStore.getState();
     const education = useEducationStore.getState();
     const dates = new Set<string>();
-    circle.moodHistory.forEach((e) => dates.add(new Date(e.timestamp).toDateString()));
-    conv.messages.filter((m) => m.role === 'user').forEach((m) => dates.add(new Date(m.timestamp).toDateString()));
-    journal.entries.forEach((e) => dates.add(new Date(e.createdAt).toDateString()));
+    (circle.moodHistory ?? []).forEach((e) => dates.add(new Date(e.timestamp).toDateString()));
+    (conv.messages ?? []).filter((m) => m.role === 'user').forEach((m) => dates.add(new Date(m.timestamp).toDateString()));
+    (journal.entries ?? []).forEach((e) => dates.add(new Date(e.createdAt).toDateString()));
     if (education.lastLessonDate) dates.add(new Date(education.lastLessonDate).toDateString());
     const sorted = Array.from(dates).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
     const today = new Date().toDateString();

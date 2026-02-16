@@ -30,6 +30,7 @@ import { useUsageStore } from '../../src/stores/usageStore';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { CrisisOverlay } from '../../src/components/CrisisOverlay';
+import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 
 const MIC_BUTTON_SIZE = 80;
 const MIC_BUTTON_SIZE_SMALL = 48;
@@ -499,6 +500,7 @@ export default function TalkScreen() {
     !isAiTyping;
 
   return (
+    <ErrorBoundary>
     <KeyboardAvoidingView
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -758,6 +760,7 @@ export default function TalkScreen() {
         )}
       </View>
     </KeyboardAvoidingView>
+    </ErrorBoundary>
   );
 }
 

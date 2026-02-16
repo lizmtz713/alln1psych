@@ -1,8 +1,3 @@
-/**
- * Catches React render errors and shows a friendly recovery screen.
- * Used in production to avoid white screen on uncaught errors.
- */
-
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { COLORS, BORDER_RADIUS } from '../lib/constants';
@@ -13,14 +8,13 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error: Error | null;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false, error: null };
+  state: State = { hasError: false };
 
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  static getDerivedStateFromError(): State {
+    return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
@@ -29,17 +23,20 @@ export class ErrorBoundary extends Component<Props, State> {
     }
   }
 
-  handleRetry = (): void => {
-    this.setState({ hasError: false, error: null });
+  retry = (): void => {
+    this.setState({ hasError: false });
   };
 
   render(): ReactNode {
     if (this.state.hasError) {
       return (
         <View style={styles.container}>
-          <Text style={styles.title}>Something went wrong.</Text>
-          <Text style={styles.subtitle}>Tap to try again.</Text>
-          <Pressable style={styles.button} onPress={this.handleRetry}>
+          <Text style={styles.title}>Something didn't load right.</Text>
+          <Text style={styles.subtitle}>Give it another try.</Text>
+          <Pressable
+            style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+            onPress={this.retry}
+          >
             <Text style={styles.buttonText}>Try again</Text>
           </Pressable>
         </View>
@@ -52,29 +49,32 @@ export class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
+    backgroundColor: COLORS.background,
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: COLORS.text,
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.textMuted,
     marginBottom: 24,
     textAlign: 'center',
   },
   button: {
     backgroundColor: COLORS.accent,
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    borderRadius: BORDER_RADIUS.input,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: BORDER_RADIUS.button,
+  },
+  buttonPressed: {
+    opacity: 0.9,
   },
   buttonText: {
     fontSize: 16,

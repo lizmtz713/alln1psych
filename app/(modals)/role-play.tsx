@@ -21,6 +21,7 @@ import { useRolePlayStore, type RolePlayDifficulty } from '../../src/stores/role
 import { sendRolePlayMessage, getDebrief } from '../../src/services/roleplay';
 import { hasOpenAIKey } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
+import { useUsageStore } from '../../src/stores/usageStore';
 
 const ROLE_PLAY_ACCENT = COLORS.rolePlayAccent;
 
@@ -78,6 +79,9 @@ export default function RolePlayScreen() {
   const [viewingPastId, setViewingPastId] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const [useWhisperFallback, setUseWhisperFallback] = useState(false);
+  const lastOnDeviceResultRef = useRef('');
 
   useEffect(() => {
     hasOpenAIKey().then(setHasApiKey);
@@ -154,40 +158,69 @@ export default function RolePlayScreen() {
     }
   };
 
+  const sendTranscribedMessage = async (text: string) => {
+    if (!currentSession || !text.trim()) return;
+    addMessage('user', text);
+    setIsLoading(true);
+    setError(null);
+    try {
+      const nextMessages = [
+        ...currentSession.messages,
+        { role: 'user' as const, content: text, timestamp: new Date() },
+      ].map((m) => ({ role: m.role, content: m.content }));
+      const reply = await sendRolePlayMessage(
+        nextMessages,
+        currentSession.scenario,
+        currentSession.character,
+        currentSession.difficulty
+      );
+      addMessage('assistant', reply);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleMicPress = async () => {
     if (!currentSession || currentSession.phase !== 'practice' || !hasApiKey || !Voice.hasVoiceSupport()) return;
     if (isRecording) {
-      try {
-        const uri = await Voice.stopRecording();
-        setIsRecording(false);
-        setIsProcessingVoice(true);
-        setError(null);
-        const text = await Voice.transcribeAudio(uri);
-        setIsProcessingVoice(false);
-        if (!text.trim()) {
-          setError("I didn't catch that. Try again or type.");
-          return;
+      if (useWhisperFallback) {
+        try {
+          const uri = await Voice.stopRecording();
+          setIsRecording(false);
+          setUseWhisperFallback(false);
+          setIsProcessingVoice(true);
+          setError(null);
+          const text = await Voice.transcribeWithWhisper(uri);
+          useUsageStore.getState().incrementWhisperFallback();
+          setIsProcessingVoice(false);
+          if (!text.trim()) {
+            setError("I didn't catch that. Try again or type.");
+            return;
+          }
+          await sendTranscribedMessage(text);
+        } catch (e) {
+          setIsRecording(false);
+          setIsProcessingVoice(false);
+          setUseWhisperFallback(false);
+          setError(e instanceof Error ? e.message : 'Voice failed. Try typing.');
         }
-        addMessage('user', text);
-        setIsLoading(true);
-        const nextMessages = [
-          ...currentSession.messages,
-          { role: 'user' as const, content: text, timestamp: new Date() },
-        ].map((m) => ({ role: m.role, content: m.content }));
-        const reply = await sendRolePlayMessage(
-          nextMessages,
-          currentSession.scenario,
-          currentSession.character,
-          currentSession.difficulty
-        );
-        addMessage('assistant', reply);
-      } catch (e) {
-        setIsRecording(false);
-        setIsProcessingVoice(false);
-        setError(e instanceof Error ? e.message : 'Voice failed. Try typing.');
-      } finally {
-        setIsLoading(false);
+        return;
       }
+      try {
+        await Voice.stopOnDeviceListening();
+      } catch (_) {}
+      setIsRecording(false);
+      setLiveTranscript('');
+      const resultRef = lastOnDeviceResultRef;
+      const fallbackText = liveTranscript;
+      setTimeout(() => {
+        const text = (resultRef.current || fallbackText).trim();
+        resultRef.current = '';
+        if (text) sendTranscribedMessage(text);
+        else setError("I didn't catch that. Try again or type.");
+      }, 100);
       return;
     }
     const { status } = await Audio.requestPermissionsAsync();
@@ -196,13 +229,30 @@ export default function RolePlayScreen() {
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setLiveTranscript('');
+    lastOnDeviceResultRef.current = '';
+    setUseWhisperFallback(false);
+    setIsRecording(true);
     try {
-      setIsRecording(true);
-      await Voice.startRecording();
-    } catch (e) {
-      setIsRecording(false);
-      if (e instanceof Error && e.message === 'Microphone permission not granted') {
-        Alert.alert('Microphone access needed', 'Go to Settings to enable it.', [{ text: 'OK' }]);
+      await Voice.startOnDeviceListening({
+        onPartial: (t) => setLiveTranscript(t),
+        onResult: (t) => { lastOnDeviceResultRef.current = t; },
+        onError: () => {
+          Voice.cancelOnDeviceListening();
+          setLiveTranscript('');
+          setUseWhisperFallback(true);
+          Voice.startRecording().catch(() => setIsRecording(false));
+        },
+      });
+    } catch (_) {
+      setUseWhisperFallback(true);
+      try {
+        await Voice.startRecording();
+      } catch (e) {
+        setIsRecording(false);
+        if (e instanceof Error && e.message === 'Microphone permission not granted') {
+          Alert.alert('Microphone access needed', 'Go to Settings to enable it.', [{ text: 'OK' }]);
+        }
       }
     }
   };
@@ -403,8 +453,19 @@ export default function RolePlayScreen() {
         {error ? <Text style={styles.errorLine}>{error}</Text> : null}
         {(isRecording || isProcessingVoice) && (
           <Text style={styles.recordingHint}>
-            {isRecording ? 'Recording... Tap mic to stop.' : 'Processing...'}
+            {isRecording
+              ? useWhisperFallback
+                ? 'Recording... Tap mic to stop.'
+                : 'Listening... Tap mic when done.'
+              : 'Processing...'}
           </Text>
+        )}
+        {isRecording && !useWhisperFallback && (
+          <View style={styles.liveTranscriptContainer}>
+            <Text style={styles.liveTranscriptText} numberOfLines={2}>
+              {liveTranscript || 'Listening...'}
+            </Text>
+          </View>
         )}
         <View style={styles.inputRow}>
           <TextInput
@@ -713,6 +774,21 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     paddingHorizontal: 16,
     paddingBottom: 4,
+  },
+  liveTranscriptContainer: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.input,
+    minHeight: 40,
+    justifyContent: 'center',
+  },
+  liveTranscriptText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    lineHeight: 20,
   },
   micBtn: {
     width: 44,

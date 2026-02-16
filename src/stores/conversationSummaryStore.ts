@@ -61,12 +61,12 @@ export const useConversationSummaryStore = create<ConversationSummaryStore>((set
   clearSummaries: () => set({ summaries: [] }),
   reset: () => set({ summaries: [] }),
 
-  getSummaries: () => get().summaries,
+  getSummaries: () => get().summaries ?? [],
 
   getSummariesByDateRange: (start, end) => {
     const startDate = new Date(start).getTime();
     const endDate = new Date(end).getTime();
-    return get().summaries.filter((s) => {
+    return (get().summaries ?? []).filter((s) => {
       const t = new Date(s.createdAt).getTime();
       return t >= startDate && t <= endDate;
     });
@@ -74,7 +74,7 @@ export const useConversationSummaryStore = create<ConversationSummaryStore>((set
 
   getRecentEmotions: (days) => {
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-    const recent = get().summaries.filter((s) => new Date(s.createdAt).getTime() >= cutoff);
+    const recent = (get().summaries ?? []).filter((s) => new Date(s.createdAt).getTime() >= cutoff);
     const counts: Record<string, number> = {};
     recent.forEach((s) => {
       s.emotions.forEach((e) => {
@@ -89,7 +89,7 @@ export const useConversationSummaryStore = create<ConversationSummaryStore>((set
 
   getRecentTriggers: (days) => {
     const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-    const recent = get().summaries.filter((s) => new Date(s.createdAt).getTime() >= cutoff);
+    const recent = (get().summaries ?? []).filter((s) => new Date(s.createdAt).getTime() >= cutoff);
     const counts: Record<string, number> = {};
     recent.forEach((s) => {
       s.triggers.forEach((t) => {
@@ -103,7 +103,7 @@ export const useConversationSummaryStore = create<ConversationSummaryStore>((set
   },
 
   getEmotionalPatterns: (summariesArg) => {
-    const summaries = summariesArg ?? get().summaries;
+    const summaries = summariesArg ?? (get().summaries ?? []);
     const emotionCounts: Record<string, number> = {};
     const triggerCounts: Record<string, number> = {};
     summaries.forEach((s) => {
@@ -151,5 +151,5 @@ export const useConversationSummaryStore = create<ConversationSummaryStore>((set
     return { topEmotions, topTriggers, trend };
   },
 
-  getLastSummary: () => get().summaries[0] ?? undefined,
+  getLastSummary: () => (get().summaries ?? [])[0] ?? undefined,
 }));

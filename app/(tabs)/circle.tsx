@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
 import {
   useCircleStore,
@@ -136,6 +137,7 @@ export default function CircleScreen() {
   };
 
   return (
+    <ErrorBoundary>
     <>
       {toast ? (
         <View style={[styles.toast, { top: insets.top + 10 }]} pointerEvents="none">
@@ -328,6 +330,7 @@ export default function CircleScreen() {
       )}
     </ScrollView>
     </>
+    </ErrorBoundary>
   );
 }
 
