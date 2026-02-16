@@ -102,68 +102,78 @@ export default function HomeScreen() {
   try {
     streak = typeof getEngagementStreak === 'function' ? getEngagementStreak() : 0;
     weeklySummary = typeof getWeeklySummary === 'function' ? getWeeklySummary() : null;
-    nextLesson = getNextLesson?.(userAgeToContentAge(user?.ageGroup ?? null)) ?? null;
-    moodTrend = getWeeklyMoodTrend?.() ?? [];
-    summaryCount = (getSummaries?.() ?? []).length;
+    const ageGroupForLesson = typeof userAgeToContentAge === 'function' ? userAgeToContentAge(user?.ageGroup ?? null) : 'adult';
+    nextLesson = typeof getNextLesson === 'function' ? getNextLesson(ageGroupForLesson) ?? null : null;
+    moodTrend = typeof getWeeklyMoodTrend === 'function' ? (getWeeklyMoodTrend() ?? []) : [];
+    const summaries = typeof getSummaries === 'function' ? getSummaries() : [];
+    summaryCount = Array.isArray(summaries) ? summaries.length : 0;
     greetingLine = dailyContent?.greeting ?? `Good morning, ${user?.name ?? 'you'} 💜`;
     affirmation = dailyContent?.affirmation ?? "You're doing better than you think.";
     psychSays = dailyContent?.insight ?? (typeof getPsychSays === 'function' ? getPsychSays(streak) : "You're doing better than you think.");
     todayChallenge = (typeof getTodayChallenge === 'function' ? getTodayChallenge() : null) ?? todayChallenge;
     challengeDone = typeof isTodayChallengeDone === 'function' ? isTodayChallengeDone() : false;
-    challengeText = dailyContent?.challengeSuggestion ?? todayChallenge?.text ?? challengeText;
-    needsCheckIn = (members ?? []).filter((m) => m?.temperature === 'orange' || m?.temperature === 'red');
+    challengeText = dailyContent?.challengeSuggestion ?? (todayChallenge?.text ?? challengeText);
+    needsCheckIn = Array.isArray(members) ? members.filter((m) => m?.temperature === 'orange' || m?.temperature === 'red') : [];
     firstAlert = needsCheckIn[0];
   } catch (e) {
     console.error('Home screen setup error:', e);
-    const message = e instanceof Error ? e.message : String(e);
+    const message = (e && typeof (e as Error).message === 'string' ? (e as Error).message : String(e)) || 'Unknown error';
     return (
-      <SafeAreaView style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: COLORS.background }}>
-        <Text style={{ fontSize: 16, color: COLORS.text, marginBottom: 8 }}>Setup error:</Text>
-        <Text style={{ color: '#666', fontSize: 12 }}>{message}</Text>
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0F0B1E', padding: 24 }}>
+        <Text style={{ color: '#fff', padding: 20, textAlign: 'center', fontSize: 14 }}>Error: {message}</Text>
       </SafeAreaView>
     );
   }
 
   useEffect(() => {
     try {
-      if (!dailyContent || isStale?.()) {
-        setDailyContentLoading(true);
-        const lastSummary = getLastSummary?.() ?? null;
-        const recentTriggers = (getRecentTriggers?.(14) ?? []) as string[];
-        const patterns = getEmotionalPatterns?.() ?? { topEmotions: [], topTriggers: [], trend: 'stable' as const };
-        const lastConversationSummary = lastSummary
-          ? `${lastSummary.title}: ${lastSummary.summary}${lastSummary.insights ? ` Insight: ${lastSummary.insights}` : ''}`
+      const isStaleResult = typeof isStale === 'function' ? isStale() : false;
+      if (!dailyContent || isStaleResult) {
+        if (typeof setDailyContentLoading === 'function') setDailyContentLoading(true);
+        const lastSummary = typeof getLastSummary === 'function' ? getLastSummary() ?? null : null;
+        const recentTriggers = (typeof getRecentTriggers === 'function' ? getRecentTriggers(14) : []) as string[];
+        const patterns = typeof getEmotionalPatterns === 'function' ? getEmotionalPatterns() : { topEmotions: [], topTriggers: [], trend: 'stable' as const };
+        const lastConversationSummary = lastSummary && typeof lastSummary === 'object'
+          ? `${lastSummary.title ?? ''}: ${lastSummary.summary ?? ''}${lastSummary.insights ? ` Insight: ${lastSummary.insights}` : ''}`
           : undefined;
+        const educationState = typeof useEducationStore?.getState === 'function' ? useEducationStore.getState() : null;
+        const lessonsCompleted = (educationState?.completedLessons ?? []) as string[];
+        if (typeof generateDailyContent !== 'function') {
+          if (typeof setDailyContentLoading === 'function') setDailyContentLoading(false);
+          return;
+        }
         generateDailyContent({
           name: user?.name ?? 'there',
           ageGroup: user?.ageGroup ?? 'unknown',
-          recentMoods: (moodTrend ?? []).map((t) => t.mood),
+          recentMoods: Array.isArray(moodTrend) ? moodTrend.map((t) => (t && typeof t === 'object' && 'mood' in t ? t.mood : '')) : [],
           streak: typeof streak === 'number' ? streak : 0,
-          lessonsCompleted: useEducationStore.getState?.()?.completedLessons ?? [],
+          lessonsCompleted,
           loveLanguage: user?.loveLanguage ?? undefined,
           lastConversationSummary,
-          triggers: recentTriggers.length > 0 ? recentTriggers : undefined,
-          recentEmotions: (patterns.topEmotions ?? []).slice(0, 6).map((e) => e.emotion),
-          emotionalTrend: patterns.trend,
+          triggers: Array.isArray(recentTriggers) && recentTriggers.length > 0 ? recentTriggers : undefined,
+          recentEmotions: Array.isArray(patterns?.topEmotions) ? patterns.topEmotions.slice(0, 6).map((e) => e?.emotion ?? '') : undefined,
+          emotionalTrend: patterns?.trend,
         })
-          .then((c) => setDailyContent(c))
+          .then((c) => { if (typeof setDailyContent === 'function' && c) setDailyContent(c); })
           .catch(() => {
             const hour = new Date().getHours();
             const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 21 ? 'Good evening' : "It's late";
-            setDailyContent({
-              greeting: `${timeGreeting}, ${user?.name ?? 'you'} 💜`,
-              affirmation: "You're doing better than you think.",
-              insight: 'Check in with yourself today. Your feelings matter.',
-              challengeSuggestion: 'Take 5 deep breaths right now.',
-            });
+            if (typeof setDailyContent === 'function') {
+              setDailyContent({
+                greeting: `${timeGreeting}, ${user?.name ?? 'you'} 💜`,
+                affirmation: "You're doing better than you think.",
+                insight: 'Check in with yourself today. Your feelings matter.',
+                challengeSuggestion: 'Take 5 deep breaths right now.',
+              });
+            }
           })
-          .finally(() => setDailyContentLoading(false));
+          .finally(() => { if (typeof setDailyContentLoading === 'function') setDailyContentLoading(false); });
       }
     } catch (err) {
-      if (__DEV__) console.error('[Home] daily content effect', err);
-      setDailyContentLoading(false);
+      console.error('[Home] daily content effect', err);
+      if (typeof setDailyContentLoading === 'function') setDailyContentLoading(false);
     }
-  }, [isStale?.(), user?.name, user?.ageGroup, streak, summaryCount]);
+  }, [typeof isStale === 'function' ? isStale() : false, user?.name, user?.ageGroup, streak, summaryCount]);
 
   const card0 = useRef(new Animated.Value(0)).current;
   const card1 = useRef(new Animated.Value(0)).current;
@@ -257,7 +267,7 @@ export default function HomeScreen() {
       {/* 4. Today's Challenge */}
       <Animated.View style={[styles.card, slideY(card1)]}>
         <Text style={styles.cardSectionTitle}>Today's challenge</Text>
-        <Text style={styles.challengeEmoji}>{todayChallenge.emoji}</Text>
+        <Text style={styles.challengeEmoji}>{todayChallenge?.emoji ?? '🌬️'}</Text>
         <Text style={styles.challengeText}>{challengeText}</Text>
         {challengeDone ? (
           <View style={styles.challengeDoneWrap}>
@@ -269,7 +279,7 @@ export default function HomeScreen() {
             style={({ pressed }) => [styles.challengeDoneButton, pressed && { opacity: 0.9 }]}
             onPress={() => {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              completeTodayChallenge();
+              if (typeof completeTodayChallenge === 'function') completeTodayChallenge();
             }}
           >
             <Text style={styles.challengeDoneButtonText}>Done ✓</Text>
@@ -295,7 +305,7 @@ export default function HomeScreen() {
       )}
 
       {/* 7. Circle alerts */}
-      {members.length > 0 && (
+      {Array.isArray(members) && members.length > 0 && (
         <Animated.View style={[styles.section, slideY(card3)]}>
           <Text style={styles.sectionTitle}>Your circle</Text>
           <Text style={styles.muted}>
@@ -323,11 +333,12 @@ export default function HomeScreen() {
         <Text style={styles.cardSectionTitle}>Try this</Text>
         {(() => {
           const hour = new Date().getHours();
-          const recentMoods = (moodTrend ?? []).map((t) => t.mood);
-          const suggestions = getSuggestedActivities(recentMoods, hour);
+          const recentMoods = Array.isArray(moodTrend) ? moodTrend.map((t) => (t && typeof t === 'object' && 'mood' in t ? t.mood : '')) : [];
+          const suggestions = typeof getSuggestedActivities === 'function' ? getSuggestedActivities(recentMoods, hour) : [];
+          const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
           return (
             <View style={styles.tryThisRow}>
-              {suggestions.map((config) => (
+              {safeSuggestions.map((config) => (
                 <Pressable
                   key={config.id}
                   style={({ pressed }) => [styles.practiceCard, styles.practiceCardHalf, pressed && { opacity: 0.9 }]}
