@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { useState, useMemo, useCallback } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated, PanResponder } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +12,12 @@ import {
   getAllManualLessonIds,
   type ManualSection,
 } from '../../src/data/manualContent';
+import {
+  type Discovery,
+  getDiscoveriesForDay,
+  getMoreDiscoveries,
+  getCategoryTag,
+} from '../../src/data/discoveries';
 
 const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string }[] = [
   { id: 'breathing', emoji: '🫁', title: 'Breathe', sub: 'Breathing exercise' },
@@ -38,11 +44,92 @@ function getSectionProgress(section: ManualSection, isLessonCompleted: (id: stri
   return { completed, total };
 }
 
+function firstLine(content: string, maxLen: number = 100): string {
+  const trimmed = content.trim();
+  if (trimmed.length <= maxLen) return trimmed;
+  const slice = trimmed.slice(0, maxLen);
+  const lastSpace = slice.lastIndexOf(' ');
+  return (lastSpace > maxLen * 0.6 ? slice.slice(0, lastSpace) : slice) + '…';
+}
+
+function DiscoveryCard({
+  discovery,
+  expanded,
+  onToggleExpand,
+  onDismiss,
+}: {
+  discovery: Discovery;
+  expanded: boolean;
+  onToggleExpand: () => void;
+  onDismiss: () => void;
+}) {
+  const translateX = useState(() => new Animated.Value(0))[0];
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 8,
+        onPanResponderMove: (_, g) => {
+          if (g.dx < 0) translateX.setValue(g.dx);
+        },
+        onPanResponderRelease: (_, g) => {
+          if (g.dx < -80 || g.vx < -0.3) {
+            Animated.timing(translateX, {
+              toValue: -400,
+              duration: 200,
+              useNativeDriver: true,
+            }).start(() => onDismiss());
+          } else {
+            Animated.spring(translateX, { toValue: 0, useNativeDriver: true, damping: 20 }).start();
+          }
+        },
+      }),
+    [translateX, onDismiss]
+  );
+
+  return (
+    <Animated.View
+      style={[styles.discoveryCardWrap, { transform: [{ translateX }] }]}
+      {...panResponder.panHandlers}
+    >
+      <Pressable style={styles.discoveryCard} onPress={onToggleExpand}>
+        <Text style={styles.discoveryCategoryTag}>{getCategoryTag(discovery.category)}</Text>
+        <Text style={styles.discoveryEmoji}>{discovery.emoji}</Text>
+        <Text style={styles.discoveryTitle}>{discovery.title}</Text>
+        <Text style={styles.discoveryContent} numberOfLines={expanded ? undefined : 2}>
+          {expanded ? discovery.content : firstLine(discovery.content)}
+        </Text>
+        {!expanded && (
+          <Text style={styles.discoveryTapHint}>Tap to read more</Text>
+        )}
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 export default function LearnScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const isLessonCompleted = useEducationStore((s) => s.isLessonCompleted);
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(null);
+
+  const initialDiscoveries = useMemo(() => getDiscoveriesForDay(), []);
+  const [visibleDiscoveries, setVisibleDiscoveries] = useState<Discovery[]>(initialDiscoveries);
+  const [expandedDiscoveryId, setExpandedDiscoveryId] = useState<string | null>(null);
+
+  const shownDiscoveryIds = useMemo(() => new Set(visibleDiscoveries.map((d) => d.id)), [visibleDiscoveries]);
+
+  const handleShowMoreDiscoveries = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const more = getMoreDiscoveries(shownDiscoveryIds);
+    if (more.length > 0) setVisibleDiscoveries((prev) => [...prev, ...more]);
+  }, [shownDiscoveryIds]);
+
+  const handleDismissDiscovery = useCallback((id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setVisibleDiscoveries((prev) => prev.filter((d) => d.id !== id));
+    setExpandedDiscoveryId((cur) => (cur === id ? null : cur));
+  }, []);
 
   const allManualIds = getAllManualLessonIds();
   const totalManualLessons = allManualIds.length;
@@ -85,6 +172,27 @@ export default function LearnScreen() {
           </Pressable>
         ))}
       </View>
+
+      {/* Discovery — bite-sized cards */}
+      <Text style={styles.sectionLabel}>Discovery 🔮</Text>
+      <Text style={styles.discoverySubtitle}>The things nobody taught you in school</Text>
+      <View style={styles.discoveryCardList}>
+        {visibleDiscoveries.map((d) => (
+          <DiscoveryCard
+            key={d.id}
+            discovery={d}
+            expanded={expandedDiscoveryId === d.id}
+            onToggleExpand={() => setExpandedDiscoveryId((cur) => (cur === d.id ? null : d.id))}
+            onDismiss={() => handleDismissDiscovery(d.id)}
+          />
+        ))}
+      </View>
+      <Pressable
+        style={({ pressed }) => [styles.showMoreBtn, pressed && styles.pressed]}
+        onPress={handleShowMoreDiscoveries}
+      >
+        <Text style={styles.showMoreBtnText}>Show me more</Text>
+      </Pressable>
 
       {/* Overall progress */}
       <View style={styles.progressBarWrap}>
@@ -196,6 +304,59 @@ const styles = StyleSheet.create({
   toolkitSub: {
     fontSize: 13,
     color: COLORS.textMuted,
+  },
+  discoverySubtitle: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginTop: -8,
+    marginBottom: 16,
+  },
+  discoveryCardList: { marginBottom: 12 },
+  discoveryCardWrap: { marginBottom: 12 },
+  discoveryCard: {
+    backgroundColor: COLORS.inputSurface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.surface,
+    overflow: 'hidden',
+  },
+  discoveryCategoryTag: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    fontSize: 11,
+    color: COLORS.textMuted,
+    fontWeight: '600',
+  },
+  discoveryEmoji: { fontSize: 28, marginBottom: 8 },
+  discoveryTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+    paddingRight: 80,
+  },
+  discoveryContent: {
+    fontSize: 15,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  discoveryTapHint: {
+    fontSize: 13,
+    color: COLORS.accent,
+    marginTop: 8,
+  },
+  showMoreBtn: {
+    alignSelf: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    marginBottom: 24,
+  },
+  showMoreBtnText: {
+    fontSize: 15,
+    color: COLORS.accent,
+    fontWeight: '600',
   },
   progressBarWrap: { marginBottom: 24 },
   progressLabel: {
