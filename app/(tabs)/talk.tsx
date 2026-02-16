@@ -157,6 +157,7 @@ export default function TalkScreen() {
   const [convToast, setConvToast] = useState(false);
   const [showFollowUpBanner, setShowFollowUpBanner] = useState(false);
   const [followUpDismissed, setFollowUpDismissed] = useState(false);
+  const [ttsState, setTtsState] = useState<'idle' | 'loading' | 'playing'>('idle');
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const addSummary = useConversationSummaryStore((s) => s.addSummary);
   const getLastSummary = useConversationSummaryStore((s) => s.getLastSummary);
@@ -360,7 +361,13 @@ export default function TalkScreen() {
       const response = await sendMessage(apiMessages, buildUserContext());
       addMessage({ role: 'assistant', content: response, isVoice: false });
       if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
-        Voice.speakWithOpenAI(response).catch(() => {});
+        setTtsState('loading');
+        Voice.speakWithOpenAI(response)
+          .then(() => {
+            setTtsState('playing');
+            setTimeout(() => setTtsState('idle'), 2000);
+          })
+          .catch(() => setTtsState('idle'));
         useUsageStore.getState().incrementTTS();
       }
     } catch (e) {
@@ -408,7 +415,13 @@ export default function TalkScreen() {
         const response = await sendMessage(apiMessages, buildUserContext());
         addMessage({ role: 'assistant', content: response, isVoice: false });
         if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
-          Voice.speakWithOpenAI(response).catch(() => {});
+          setTtsState('loading');
+          Voice.speakWithOpenAI(response)
+            .then(() => {
+              setTtsState('playing');
+              setTimeout(() => setTtsState('idle'), 2000);
+            })
+            .catch(() => setTtsState('idle'));
           useUsageStore.getState().incrementTTS();
         }
       } catch (e) {
@@ -500,6 +513,7 @@ export default function TalkScreen() {
   };
 
   const displayMessages: ConversationMessage[] = messages;
+  const lastAiMessageId = displayMessages.filter((m) => m.role === 'assistant').pop()?.id;
   const lastUserMessage = messages.filter((m) => m.role === 'user').pop();
   const showPracticeSuggestion =
     lastUserMessage &&
@@ -556,7 +570,13 @@ export default function TalkScreen() {
                   const response = await sendMessage(apiMessages, buildUserContext());
                   addMessage({ role: 'assistant', content: response, isVoice: false });
                   if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
-                    Voice.speakWithOpenAI(response).catch(() => {});
+                    setTtsState('loading');
+                    Voice.speakWithOpenAI(response)
+                      .then(() => {
+                        setTtsState('playing');
+                        setTimeout(() => setTtsState('idle'), 2000);
+                      })
+                      .catch(() => setTtsState('idle'));
                     useUsageStore.getState().incrementTTS();
                   }
                 } catch {
@@ -618,9 +638,16 @@ export default function TalkScreen() {
               </View>
             )}
             <View style={[styles.bubble, msg.role === 'user' ? styles.bubbleUser : styles.bubbleAi]}>
-              <Text style={[styles.bubbleText, msg.role === 'user' && styles.bubbleTextUser]}>
-                {msg.content}
-              </Text>
+              <View style={styles.bubbleContentRow}>
+                <Text style={[styles.bubbleText, msg.role === 'user' && styles.bubbleTextUser]}>
+                  {msg.content}
+                </Text>
+                {msg.role === 'assistant' && msg.id === lastAiMessageId && ttsState !== 'idle' && (
+                  <Text style={styles.ttsIcon} accessibilityLabel={ttsState === 'loading' ? 'Voice loading' : 'Voice playing'}>
+                    🔊
+                  </Text>
+                )}
+              </View>
               <Text style={styles.timestamp}>{formatTime(msg.timestamp)}</Text>
             </View>
           </AnimatedMessageRow>
@@ -915,13 +942,22 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.accent,
     alignSelf: 'flex-end',
   },
+  bubbleContentRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
   bubbleText: {
+    flex: 1,
     fontSize: 16,
     color: COLORS.text,
     lineHeight: 22,
   },
   bubbleTextUser: {
     color: COLORS.text,
+  },
+  ttsIcon: {
+    fontSize: 16,
   },
   timestamp: {
     fontSize: 11,

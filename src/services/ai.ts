@@ -1,9 +1,10 @@
 /**
  * AI conversation service — OpenAI API.
- * Reads API key from expo-secure-store first, then EXPO_PUBLIC_OPENAI_API_KEY env.
+ * Reads API key from: SecureStore (user-entered) > expo extra > EXPO_PUBLIC_OPENAI_API_KEY env.
  */
 
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
 import { useUsageStore } from '../stores/usageStore';
 
 const API_KEY_STORAGE = 'openai_api_key';
@@ -15,6 +16,8 @@ export async function getOpenAIKey(): Promise<string | null> {
   } catch {
     // ignore
   }
+  const fromExtra = Constants.expoConfig?.extra?.openaiApiKey as string | undefined;
+  if (fromExtra?.trim()) return fromExtra.trim();
   const fromEnv = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
   return fromEnv?.trim() ?? null;
 }
@@ -176,13 +179,17 @@ function buildSystemPrompt(ctx: UserContext): string {
     .replace(/\{culturalValues\}/g, culturalVals);
 }
 
+const NO_KEY_MESSAGE =
+  "I'm having trouble connecting right now. Check that your API key is configured.";
+
 export async function sendMessage(
   messages: Message[],
   userContext: UserContext
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   if (!apiKey) {
-    throw new Error('OpenAI API key not configured');
+    if (__DEV__) console.warn('[AI] No API key — returning user-facing message');
+    return NO_KEY_MESSAGE;
   }
 
   const systemPrompt = buildSystemPrompt(userContext);
@@ -191,29 +198,45 @@ export async function sendMessage(
     ...messages.map((m) => ({ role: m.role, content: m.content })),
   ];
 
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: apiMessages,
-      max_tokens: 500,
-      temperature: 0.8,
-    }),
-  });
+  const url = 'https://api.openai.com/v1/chat/completions';
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: apiMessages,
+        max_tokens: 500,
+        temperature: 0.8,
+      }),
+    });
+  } catch (e) {
+    if (__DEV__) console.error('[AI] Fetch failed:', e);
+    throw new Error('Network error — check your connection.');
+  }
+
+  if (__DEV__) console.log('[AI] Response status:', res.status);
 
   if (!res.ok) {
     const body = await res.text();
-    console.error('AI API Error:', res.status, body);
+    console.error('[AI] API error:', res.status, body);
     throw new Error(body || `OpenAI API error: ${res.status}`);
   }
 
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }>; error?: { message?: string } };
+  if (data.error?.message) {
+    console.error('[AI] API error payload:', data.error.message);
+    throw new Error(data.error.message);
+  }
   const content = data.choices?.[0]?.message?.content?.trim();
-  if (!content) throw new Error('Empty response from OpenAI');
+  if (!content) {
+    if (__DEV__) console.error('[AI] Empty response body');
+    throw new Error('Empty response from OpenAI');
+  }
   useUsageStore.getState().incrementGPT();
   return content;
 }

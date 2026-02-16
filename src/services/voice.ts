@@ -6,6 +6,21 @@ import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import { getOpenAIKey } from './ai';
 
+function uint8ToBase64(uint8: Uint8Array): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let out = '';
+  for (let i = 0; i < uint8.length; i += 3) {
+    const a = uint8[i];
+    const b = uint8[i + 1];
+    const c = uint8[i + 2];
+    out += chars[a >> 2];
+    out += chars[((a & 3) << 4) | ((b ?? 0) >> 4)];
+    out += b !== undefined ? chars[((b & 15) << 2) | ((c ?? 0) >> 6)] : '=';
+    out += c !== undefined ? chars[c & 63] : '=';
+  }
+  return out;
+}
+
 let Voice: any = null;
 try {
   Voice = require('@react-native-voice/voice').default;
@@ -156,14 +171,21 @@ export function hasVoiceSupport(): boolean {
 
 /** Play AI response using OpenAI TTS (Psych's voice). */
 export async function speakWithOpenAI(text: string): Promise<void> {
-  try {
-    const apiKey = await getOpenAIKey();
-    if (!apiKey?.trim()) return;
+  if (__DEV__) {
+    console.log('TTS called, voice enabled:', text.slice(0, 50) + (text.length > 50 ? '…' : ''));
+  }
 
+  const apiKey = await getOpenAIKey();
+  if (!apiKey?.trim()) {
+    if (__DEV__) console.warn('No API key for TTS');
+    return;
+  }
+
+  try {
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${trimmed}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -174,30 +196,38 @@ export async function speakWithOpenAI(text: string): Promise<void> {
       }),
     });
 
-    if (!response.ok) return;
+    if (!response.ok) {
+      if (__DEV__) console.warn('TTS API error:', response.status);
+      return;
+    }
 
-    const blob = await response.blob();
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const dataUrl = reader.result?.toString?.();
-      const base64 = dataUrl?.split(',')[1];
-      if (!base64) return;
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = uint8ToBase64(new Uint8Array(arrayBuffer));
 
-      const fileUri = FileSystem.documentDirectory + 'psych-voice.mp3';
-      await FileSystem.writeAsStringAsync(fileUri, base64, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+    const fileUri = FileSystem.documentDirectory + 'psych-voice.mp3';
+    await FileSystem.writeAsStringAsync(fileUri, base64, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
 
-      const { sound } = await Audio.Sound.createAsync({ uri: fileUri });
-      await sound.playAsync();
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && (status as { didJustFinish?: boolean }).didJustFinish) {
-          sound.unloadAsync();
-        }
-      });
-    };
-    reader.readAsDataURL(blob);
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: false,
+    });
+
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: fileUri },
+      { shouldPlay: true }
+    );
+
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.isLoaded && (status as { didJustFinish?: boolean }).didJustFinish) {
+        sound.unloadAsync();
+      }
+    });
   } catch (e) {
-    if (__DEV__) console.warn('TTS failed, text-only fallback:', e);
+    if (__DEV__) console.warn('TTS failed:', e);
   }
 }
