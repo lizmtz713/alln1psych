@@ -4,8 +4,14 @@
  */
 
 import { Audio } from 'expo-av';
-import Voice from '@react-native-voice/voice';
 import { getOpenAIKey } from './ai';
+
+let Voice: any = null;
+try {
+  Voice = require('@react-native-voice/voice').default;
+} catch (e) {
+  if (__DEV__) console.warn('Voice module not available, falling back to Whisper');
+}
 
 let recording: Audio.Recording | null = null;
 
@@ -20,6 +26,11 @@ function noop() {}
 export async function startOnDeviceListening(callbacks: OnDeviceListenCallbacks): Promise<void> {
   const { onPartial, onResult, onError } = callbacks;
 
+  if (!Voice) {
+    onError?.({ message: 'Voice module not available' });
+    return;
+  }
+
   Voice.onSpeechPartialResults = (e) => {
     const text = e.value?.[0] ?? '';
     onPartial?.(text);
@@ -28,9 +39,7 @@ export async function startOnDeviceListening(callbacks: OnDeviceListenCallbacks)
     const text = e.value?.[0] ?? '';
     onResult?.(text);
   };
-  Voice.onSpeechEnd = () => {
-    // Handlers stay; stop() will be called by caller
-  };
+  Voice.onSpeechEnd = () => {};
   Voice.onSpeechError = (e) => {
     onError?.(e.error ?? { message: 'Speech recognition error' });
   };
@@ -39,6 +48,7 @@ export async function startOnDeviceListening(callbacks: OnDeviceListenCallbacks)
 }
 
 export async function stopOnDeviceListening(): Promise<void> {
+  if (!Voice) return;
   try {
     await Voice.stop();
   } finally {
@@ -50,6 +60,7 @@ export async function stopOnDeviceListening(): Promise<void> {
 }
 
 export function cancelOnDeviceListening(): void {
+  if (!Voice) return;
   Voice.cancel?.();
   Voice.onSpeechPartialResults = noop;
   Voice.onSpeechResults = noop;

@@ -8,13 +8,14 @@ interface Props {
 
 interface State {
   hasError: boolean;
+  errorMessage: string;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
+  state: State = { hasError: false, errorMessage: '' };
 
-  static getDerivedStateFromError(): State {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, errorMessage: error?.message ?? 'Unknown error' };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
@@ -24,7 +25,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   retry = (): void => {
-    this.setState({ hasError: false });
+    this.setState({ hasError: false, errorMessage: '' });
   };
 
   render(): ReactNode {
@@ -32,7 +33,8 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <View style={styles.container}>
           <Text style={styles.title}>Something didn't load right.</Text>
-          <Text style={styles.subtitle}>Give it another try.</Text>
+          <Text style={[styles.subtitle, { marginBottom: 8 }]}>Give it another try.</Text>
+          <Text style={styles.errorMessage}>{this.state.errorMessage}</Text>
           <Pressable
             style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
             onPress={this.retry}
@@ -80,5 +82,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: COLORS.text,
+  },
+  errorMessage: {
+    color: '#666',
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 24,
+    paddingHorizontal: 20,
   },
 });

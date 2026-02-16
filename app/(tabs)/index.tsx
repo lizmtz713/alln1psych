@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, ScrollView, Animated, RefreshControl } from 'react-native';
+import { StyleSheet, Text, View, Pressable, ScrollView, Animated, RefreshControl, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -77,22 +77,52 @@ export default function HomeScreen() {
   const getPsychSays = useInsightsStore((s) => s.getPsychSays);
   const getWeeklySummary = useInsightsStore((s) => s.getWeeklySummary);
   const getNextLesson = useEducationStore((s) => s.getNextLesson);
-  const streak = typeof getEngagementStreak === 'function' ? getEngagementStreak() : 0;
-  const weeklySummary = typeof getWeeklySummary === 'function' ? getWeeklySummary() : null;
-  const nextLesson = getNextLesson?.(userAgeToContentAge(user?.ageGroup ?? null)) ?? null;
   const { getTodayChallenge, isTodayChallengeDone, completeTodayChallenge } = useEngagementStore();
   const { content: dailyContent, isLoading: dailyContentLoading, setContent: setDailyContent, setLoading: setDailyContentLoading, isStale } = useDailyContentStore();
   const getWeeklyMoodTrend = useInsightsStore((s) => s.getWeeklyMoodTrend);
-  let moodTrend: Array<{ date: string; mood: string }> = [];
-  try {
-    moodTrend = getWeeklyMoodTrend?.() ?? [];
-  } catch {
-    moodTrend = [];
-  }
-  const summaryCount = useConversationSummaryStore((s) => (s.getSummaries?.() ?? []).length);
+  const getSummaries = useConversationSummaryStore((s) => s.getSummaries);
   const getLastSummary = useConversationSummaryStore((s) => s.getLastSummary);
   const getRecentTriggers = useConversationSummaryStore((s) => s.getRecentTriggers);
   const getEmotionalPatterns = useConversationSummaryStore((s) => s.getEmotionalPatterns);
+
+  let streak: number = 0;
+  let weeklySummary: { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null = null;
+  let nextLesson: { id: string; title: string; duration: string } | null = null;
+  let moodTrend: Array<{ date: string; mood: string }> = [];
+  let summaryCount = 0;
+  let greetingLine = `Good morning, ${user?.name ?? 'you'} 💜`;
+  let affirmation = "You're doing better than you think.";
+  let psychSays = "You're doing better than you think.";
+  let todayChallenge: { text: string; emoji: string } = { text: 'Take 5 deep breaths right now', emoji: '🌬️' };
+  let challengeDone = false;
+  let challengeText = 'Take 5 deep breaths right now';
+  let needsCheckIn: typeof members = [];
+  let firstAlert: (typeof members)[0] | undefined;
+
+  try {
+    streak = typeof getEngagementStreak === 'function' ? getEngagementStreak() : 0;
+    weeklySummary = typeof getWeeklySummary === 'function' ? getWeeklySummary() : null;
+    nextLesson = getNextLesson?.(userAgeToContentAge(user?.ageGroup ?? null)) ?? null;
+    moodTrend = getWeeklyMoodTrend?.() ?? [];
+    summaryCount = (getSummaries?.() ?? []).length;
+    greetingLine = dailyContent?.greeting ?? `Good morning, ${user?.name ?? 'you'} 💜`;
+    affirmation = dailyContent?.affirmation ?? "You're doing better than you think.";
+    psychSays = dailyContent?.insight ?? (typeof getPsychSays === 'function' ? getPsychSays(streak) : "You're doing better than you think.");
+    todayChallenge = (typeof getTodayChallenge === 'function' ? getTodayChallenge() : null) ?? todayChallenge;
+    challengeDone = typeof isTodayChallengeDone === 'function' ? isTodayChallengeDone() : false;
+    challengeText = dailyContent?.challengeSuggestion ?? todayChallenge?.text ?? challengeText;
+    needsCheckIn = (members ?? []).filter((m) => m?.temperature === 'orange' || m?.temperature === 'red');
+    firstAlert = needsCheckIn[0];
+  } catch (e) {
+    console.error('Home screen setup error:', e);
+    const message = e instanceof Error ? e.message : String(e);
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: COLORS.background }}>
+        <Text style={{ fontSize: 16, color: COLORS.text, marginBottom: 8 }}>Setup error:</Text>
+        <Text style={{ color: '#666', fontSize: 12 }}>{message}</Text>
+      </SafeAreaView>
+    );
+  }
 
   useEffect(() => {
     try {
@@ -135,13 +165,6 @@ export default function HomeScreen() {
     }
   }, [isStale?.(), user?.name, user?.ageGroup, streak, summaryCount]);
 
-  const greetingLine = dailyContent?.greeting ?? `Good morning, ${user?.name ?? 'you'} 💜`;
-  const affirmation = dailyContent?.affirmation ?? "You're doing better than you think.";
-  const psychSays = dailyContent?.insight ?? (typeof getPsychSays === 'function' ? getPsychSays(streak) : "You're doing better than you think.");
-  const todayChallenge = (typeof getTodayChallenge === 'function' ? getTodayChallenge() : null) ?? { text: 'Take 5 deep breaths right now', emoji: '🌬️' };
-  const challengeDone = typeof isTodayChallengeDone === 'function' ? isTodayChallengeDone() : false;
-  const challengeText = dailyContent?.challengeSuggestion ?? todayChallenge?.text ?? 'Take 5 deep breaths right now';
-
   const card0 = useRef(new Animated.Value(0)).current;
   const card1 = useRef(new Animated.Value(0)).current;
   const card2 = useRef(new Animated.Value(0)).current;
@@ -173,9 +196,6 @@ export default function HomeScreen() {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 600);
   };
-
-  const needsCheckIn = (members ?? []).filter((m) => m?.temperature === 'orange' || m?.temperature === 'red');
-  const firstAlert = needsCheckIn[0];
 
   const slideY = (v: Animated.Value) => ({
     opacity: v,
