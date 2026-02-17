@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
+import { useUserStore } from '../../src/stores/userStore';
 import { useEducationStore } from '../../src/stores/educationStore';
 import {
   MANUAL_SECTIONS,
@@ -47,6 +48,7 @@ function getSectionProgress(section: ManualSection, isLessonCompleted: (id: stri
 
 function DiscoveryCard({
   discovery,
+  contentOverride,
   expanded,
   showLearnMore,
   onToggleExpand,
@@ -55,6 +57,7 @@ function DiscoveryCard({
   onAskPsych,
 }: {
   discovery: Discovery;
+  contentOverride?: string;
   expanded: boolean;
   showLearnMore: boolean;
   onToggleExpand: () => void;
@@ -62,6 +65,7 @@ function DiscoveryCard({
   onDismiss: () => void;
   onAskPsych?: () => void;
 }) {
+  const displayContent = contentOverride ?? discovery.content;
   const translateX = useState(() => new Animated.Value(0))[0];
   const panResponder = useMemo(
     () =>
@@ -96,7 +100,7 @@ function DiscoveryCard({
         <Text style={styles.discoveryEmoji}>{discovery.emoji}</Text>
         <Text style={styles.discoveryTitle}>{discovery.title}</Text>
         <Text style={styles.discoveryContent}>
-          {discovery.content}
+          {displayContent}
         </Text>
         {discovery.expanded && (
           <>
@@ -121,6 +125,7 @@ function DiscoveryCard({
 export default function LearnScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const ageRange = useUserStore((s) => s.ageRange);
   const isLessonCompleted = useEducationStore((s) => s.isLessonCompleted);
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(null);
 
@@ -257,6 +262,7 @@ export default function LearnScreen() {
           <DiscoveryCard
             key={d.id}
             discovery={d}
+            contentOverride={d.ageAdaptive && ageRange ? d.ageAdaptive[ageRange] : undefined}
             expanded={expandedDiscoveryId === d.id}
             showLearnMore={learnMoreDiscoveryId === d.id}
             onToggleExpand={() => setExpandedDiscoveryId((cur) => (cur === d.id ? null : d.id))}

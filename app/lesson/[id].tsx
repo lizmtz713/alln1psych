@@ -72,6 +72,7 @@ export default function LessonScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const ageGroup = useUserStore((s) => s.ageGroup);
+  const ageRange = useUserStore((s) => s.ageRange);
   const contentAge = userAgeToContentAge(ageGroup);
   const { completeLesson, saveReflection, reflections, isLessonCompleted } = useEducationStore();
   const addJournalEntry = useJournalStore((s) => s.addEntry);
@@ -150,6 +151,9 @@ export default function LessonScreen() {
   // Manual lesson layout (introduction, keyConcepts, reflectionPrompt)
   if (isManual && manualContent && 'introduction' in manualContent) {
     const mc = manualContent as { introduction: string; keyConcepts: { title: string; explanation: string }[]; reflectionPrompt: string };
+    const displayIntro = (manualLesson?.ageAdaptive && ageRange && manualLesson.ageAdaptive[ageRange])
+      ? manualLesson.ageAdaptive[ageRange]
+      : mc.introduction;
     return (
       <KeyboardAvoidingView
         style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
@@ -172,7 +176,7 @@ export default function LessonScreen() {
           >
             <Text style={styles.title}>{lesson.emoji} {lesson.title}</Text>
             <View style={styles.body}>
-              {renderBody(mc.introduction)}
+              {renderBody(displayIntro)}
             </View>
             {mc.keyConcepts.map((kc, i) => (
               <View key={i} style={styles.card}>

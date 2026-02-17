@@ -454,9 +454,14 @@ export default function MeScreen() {
             maxLength={10}
           />
         </View>
-        <Pressable style={styles.editButton} onPress={() => router.push('/(modals)/onboarding')}>
-          <Text style={styles.editButtonText}>Edit</Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
+          <Pressable style={styles.editButton} onPress={() => router.push('/(modals)/onboarding')}>
+            <Text style={styles.editButtonText}>Edit</Text>
+          </Pressable>
+          <Pressable style={styles.editButton} onPress={() => router.push('/(modals)/identity-setup')}>
+            <Text style={{ color: COLORS.accent, fontSize: 15, fontWeight: '500' }}>Update My Profile</Text>
+          </Pressable>
+        </View>
       </View>
       <View style={styles.divider} />
 

@@ -1,3 +1,11 @@
+export type DiscoveryAgeAdaptive = {
+  teen?: string;
+  'young-adult'?: string;
+  adult?: string;
+  midlife?: string;
+  'older-adult'?: string;
+};
+
 export interface Discovery {
   id: string;
   category: 'ancient' | 'science' | 'funfact' | 'future';
@@ -6,6 +14,7 @@ export interface Discovery {
   content: string;
   expanded?: string;
   source?: string;
+  ageAdaptive?: DiscoveryAgeAdaptive;
 }
 
 export const DISCOVERIES: Discovery[] = [
@@ -17,6 +26,13 @@ export const DISCOVERIES: Discovery[] = [
     title: 'The Stoics Had CBT First',
     content: "2,000 years before therapists invented Cognitive Behavioral Therapy, Marcus Aurelius wrote: 'You have power over your mind, not outside events.' The Thought Challenger activity? The Stoics were doing it in 170 AD.",
     expanded: "Modern CBT asks you to identify the thought, test the evidence, and reframe. Marcus Aurelius did exactly this in his private journal, the Meditations. He wrote to himself: 'Choose not to be harmed—and you won\'t feel harmed.' That's cognitive reframing. The Stoics also practiced negative visualization: imagining loss to reduce anxiety. Today we call it exposure. The overlap isn't coincidence—Beck and Ellis studied the Stoics when building CBT.",
+    ageAdaptive: {
+      teen: "Before anyone had a therapist, Marcus Aurelius was basically doing CBT in his journal. When your brain spirals about a test or what someone said, that's the same stuff he wrote about. You have power over your mind, not outside events. The Thought Challenger? The Stoics were there 2,000 years ago.",
+      'young-adult': "Marcus Aurelius wrote 'You have power over your mind, not outside events' in 170 AD. Job rejections, dating app ghosts, Sunday scaries — the Stoics had the same move: identify the thought, test the evidence, reframe. The Thought Challenger activity is Stoicism in your pocket.",
+      adult: "2,000 years before CBT, Marcus Aurelius was reframing his thoughts in the Meditations. The same technique — name the thought, test the evidence, choose not to be harmed — works for work stress, relationship spirals, and parenting guilt. The Stoics had it first.",
+      midlife: "Marcus Aurelius wrote his reframes in private at 170 AD. At midlife, the thoughts that need challenging often shift: identity, legacy, mortality. The same move applies. You have power over your mind, not outside events. The Stoics had CBT first.",
+      'older-adult': "The Stoics knew that the story we tell ourselves shapes our suffering. At every stage of life that's true. 'Choose not to be harmed—and you won\'t feel harmed.' That's not denial; it's cognitive reframing. Ancient wisdom, same use today.",
+    },
   },
   {
     id: 'buddhism-dashboard',
@@ -25,6 +41,13 @@ export const DISCOVERIES: Discovery[] = [
     title: "Buddhism's Dashboard",
     content: "Buddhist monks have been practicing emotional observation for 2,500 years. They called it mindfulness. Your Emotion Wheel? Same idea: name it, watch it, let it pass.",
     expanded: "The Buddha taught that suffering comes from clinging. By watching emotions without grabbing or pushing them away, we see them change on their own. Neuroscience now shows that naming an emotion (affect labeling) reduces amygdala activation. So when you use the Emotion Decoder to name what you feel, you're doing what contemplatives have done for millennia—with a modern label.",
+    ageAdaptive: {
+      teen: "Monks have been watching their feelings without grabbing or pushing them away for 2,500 years. When you name what you feel and let it pass — that's the same move. Your Emotion Wheel is Buddhism's dashboard. Name it, watch it, let it pass.",
+      'young-adult': "Buddhist mindfulness is basically: name the emotion, watch it, don't cling. Your brain calms when you label what you feel — science backs that. The Emotion Decoder is the same idea monks have used for millennia. Let it pass.",
+      adult: "The Buddha taught that watching emotions without clinging reduces suffering. Naming an emotion (affect labeling) reduces amygdala activation — neuroscience confirms it. Your Emotion Wheel is the same practice: name it, watch it, let it pass.",
+      midlife: "Contemplatives have practiced emotional observation for millennia. Watching without clinging — that's the core. Naming what you feel gives your brain a handle. At any stage, the move is the same: name it, watch it, let it pass.",
+      'older-adult': "The Buddha taught that suffering comes from clinging. Watching emotions without grabbing or pushing them away — that's mindfulness. Naming what you feel still works. Your Emotion Wheel connects to 2,500 years of practice.",
+    },
   },
   {
     id: 'rumi-breakdowns',
@@ -33,6 +56,13 @@ export const DISCOVERIES: Discovery[] = [
     title: 'Rumi on Breakdowns',
     content: "The 13th-century poet Rumi wrote: 'The wound is the place where the light enters you.' Modern psychology calls this post-traumatic growth. Ancient poets knew it first.",
     expanded: "Post-traumatic growth (PTG) is the finding that some people report better relationships, new priorities, and deeper meaning after trauma. Rumi wasn't dismissing pain—he was pointing to what can grow through it. Your hardest moments can become the places where you learn the most about yourself and others.",
+    ageAdaptive: {
+      teen: "Rumi said the wound is where the light enters. Your hardest moments — breakups, friendship drama, identity stuff — can be where you learn the most about yourself. That's not toxic positivity; it's what research now calls post-traumatic growth. Poets knew it first.",
+      'young-adult': "The wound is the place where the light enters you. Rumi said it in the 1200s. Modern psychology calls it post-traumatic growth. Your hardest phases can become where you learn the most. Not dismissing the pain — seeing what can grow through it.",
+      adult: "Rumi wrote that the wound is where the light enters. Post-traumatic growth is the research version: some people find better relationships, new priorities, and deeper meaning after trauma. Your hardest moments can become the places you learn the most.",
+      midlife: "Rumi's line — the wound is where the light enters — maps to what we now call post-traumatic growth. Loss, transition, and crisis can open new depth. Not dismissing pain; pointing to what can grow through it. Ancient and modern, same truth.",
+      'older-adult': "The wound is the place where the light enters you. You've lived long enough to see that truth. Post-traumatic growth isn't new — Rumi knew it. Your hardest moments have also been places of learning and depth.",
+    },
   },
   {
     id: 'know-thyself',
@@ -41,6 +71,13 @@ export const DISCOVERIES: Discovery[] = [
     title: 'Know Thyself',
     content: "The ancient Greeks carved 'Know Thyself' above the Oracle at Delphi. It was considered the most important thing a human could do. This entire app is built on that one idea.",
     expanded: "Knowing yourself isn't one moment—it's a practice. It means noticing your patterns, your triggers, how your body feels when you're stressed, and what actually helps. Every check-in, every gauge, every conversation with Psych is a small step toward that Delphic ideal.",
+    ageAdaptive: {
+      teen: "The Greeks thought 'Know Thyself' was the most important thing a human could do. For you that means: notice your patterns, your triggers, how your body feels when you're stressed. Every check-in is a step toward that. It's a practice, not a test.",
+      'young-adult': "Know Thyself was carved above the Oracle at Delphi. It's not one moment — it's a practice. Noticing your patterns, triggers, and what actually helps. Every gauge, every conversation with Psych is a step toward that. This app is built on that one idea.",
+      adult: "The Greeks put Know Thyself above the Oracle. It's a practice: noticing your patterns, triggers, how your body feels when you're stressed, and what helps. Every check-in and conversation here is a small step toward that ideal.",
+      midlife: "Know Thyself — the Delphic ideal. At midlife it often means revisiting who you are beyond roles. Noticing your patterns, triggers, and what helps. It's a practice that deepens with time. This app is built on that one idea.",
+      'older-adult': "The Greeks considered Know Thyself the most important task. You've had decades of practice. Noticing your patterns, your body, what helps — that's the same move. Every check-in is a step toward that ideal.",
+    },
   },
   {
     id: 'ubuntu',
@@ -49,6 +86,13 @@ export const DISCOVERIES: Discovery[] = [
     title: 'Ubuntu',
     content: "In Southern African philosophy, 'Ubuntu' means 'I am because we are.' Your Circle feature — sharing how you feel with the people who matter — is Ubuntu in your pocket.",
     expanded: "Ubuntu doesn't mean losing yourself in the group. It means your humanity is tied to theirs. When you share your temperature with your circle, you're saying: I'm part of us. When you notice someone else's and reach out, you're living Ubuntu. Connection isn't extra—it's how we stay human.",
+    ageAdaptive: {
+      teen: "Ubuntu means 'I am because we are.' Your Circle — sharing how you feel with the people who matter — is that idea in your pocket. You're not losing yourself; your humanity is tied to theirs. Connection is how we stay human.",
+      'young-adult': "'I am because we are.' Ubuntu in a phrase. When you share your temperature with your circle, you're saying I'm part of us. When you notice someone else's and reach out, you're living it. Connection isn't extra — it's how we stay human.",
+      adult: "Ubuntu: I am because we are. Your Circle feature is that philosophy in your pocket. Sharing how you feel, noticing others and reaching out — connection isn't extra. It's how we stay human.",
+      midlife: "Ubuntu — I am because we are. Your circle of people who matter, sharing how you feel and reaching out when they're low: that's Ubuntu. Connection isn't extra at any stage. It's how we stay human.",
+      'older-adult': "I am because we are. Ubuntu. When you share your temperature with your circle and notice theirs, you're living it. Connection isn't extra — it's how we stay human. Same truth at every age.",
+    },
   },
   {
     id: 'tao-doing-nothing',

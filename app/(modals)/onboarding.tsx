@@ -149,7 +149,7 @@ export default function OnboardingScreen() {
       });
     }
     completeOnboarding();
-    router.replace('/(tabs)');
+    router.replace('/(modals)/identity-setup');
   };
 
   const runFadeThen = (next: () => void) => {

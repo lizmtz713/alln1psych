@@ -4,6 +4,7 @@
  */
 
 import { buildKnowledgePrompt } from '../data/psychKnowledge';
+import { buildAdaptiveContext } from './adaptiveContext';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { useUsageStore } from '../stores/usageStore';
@@ -193,7 +194,8 @@ function buildSystemPrompt(ctx: UserContext): string {
     .replace(/\{culturalBackground\}/g, culturalBg)
     .replace(/\{environmentUpbringing\}/g, environmentUp)
     .replace(/\{culturalValues\}/g, culturalVals);
-  return base + buildKnowledgePrompt() + READ_THE_ROOM;
+  const fullPrompt = base + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
+  return fullPrompt;
 }
 
 const NO_KEY_MESSAGE =
@@ -317,7 +319,7 @@ export async function sendMessageWithSystemPrompt(
   messages: Message[],
   systemPrompt: string
 ): Promise<string> {
-  const fullPrompt = systemPrompt + buildKnowledgePrompt() + READ_THE_ROOM;
+  const fullPrompt = systemPrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
   const msgList = messages.map((m) => ({ role: m.role, content: m.content }));
   return sendMessageServerSide(msgList, fullPrompt);
 }

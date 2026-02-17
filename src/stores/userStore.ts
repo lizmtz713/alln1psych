@@ -29,6 +29,12 @@ export type Pronouns =
   | 'any'
   | 'other';
 
+/** Life stage for age-adaptive AI (identity setup). */
+export type AgeRange = 'teen' | 'young-adult' | 'adult' | 'midlife' | 'older-adult';
+
+/** Therapy experience for adaptive tone (identity setup). */
+export type TherapyExperience = 'never' | 'tried-it' | 'currently' | 'positive' | 'negative';
+
 export interface CircleInvite {
   name: string;
   relationship: 'parent' | 'sibling' | 'friend' | 'partner' | 'other';
@@ -84,6 +90,18 @@ interface UserState {
   /** User birthday ISO "YYYY-MM-DD" — for Circle relationship insights */
   birthday: string | null;
 
+  /** Cultural + Identity Profile (identity-setup flow) */
+  ageRange: AgeRange | null;
+  /** Free text: "Mexican-American", "Korean", "Black American", etc. */
+  culturalBackgroundText: string;
+  /** "single mom", "two dads", "grandparents", "foster care", "nuclear", etc. */
+  familyStructure: string;
+  /** "English", "Spanish", "Both", "Korean", etc. */
+  languageOfEmotion: string;
+  /** What "being strong" meant in their family */
+  strengthMeaning: string;
+  therapyExperience: TherapyExperience | null;
+
   setName: (name: string) => void;
   addTriggerMap: (entry: Omit<TriggerMapEntry, 'id' | 'createdAt'>) => void;
   setPronouns: (pronouns: Pronouns | null) => void;
@@ -100,6 +118,12 @@ interface UserState {
   setCulturalValues: (v: string[]) => void;
   setCulturalBackgroundOther: (v: string) => void;
   setBirthday: (v: string | null) => void;
+  setAgeRange: (v: AgeRange | null) => void;
+  setCulturalBackgroundText: (v: string) => void;
+  setFamilyStructure: (v: string) => void;
+  setLanguageOfEmotion: (v: string) => void;
+  setStrengthMeaning: (v: string) => void;
+  setTherapyExperience: (v: TherapyExperience | null) => void;
   completeOnboarding: () => void;
   resetOnboarding: () => void;
   reset: () => void;
@@ -123,6 +147,12 @@ const initialState = {
   culturalValues: [] as string[],
   culturalBackgroundOther: '',
   birthday: null as string | null,
+  ageRange: null as AgeRange | null,
+  culturalBackgroundText: '',
+  familyStructure: '',
+  languageOfEmotion: '',
+  strengthMeaning: '',
+  therapyExperience: null as TherapyExperience | null,
 };
 
 export const useUserStore = create<UserState>((set) => ({
@@ -143,6 +173,12 @@ export const useUserStore = create<UserState>((set) => ({
   setCulturalValues: (culturalValues) => set({ culturalValues }),
   setCulturalBackgroundOther: (culturalBackgroundOther) => set({ culturalBackgroundOther }),
   setBirthday: (birthday) => set({ birthday }),
+  setAgeRange: (ageRange) => set({ ageRange }),
+  setCulturalBackgroundText: (culturalBackgroundText) => set({ culturalBackgroundText }),
+  setFamilyStructure: (familyStructure) => set({ familyStructure }),
+  setLanguageOfEmotion: (languageOfEmotion) => set({ languageOfEmotion }),
+  setStrengthMeaning: (strengthMeaning) => set({ strengthMeaning }),
+  setTherapyExperience: (therapyExperience) => set({ therapyExperience }),
   addTriggerMap: (entry) =>
     set((state) => ({
       triggerMaps: [

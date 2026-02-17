@@ -16,6 +16,15 @@ export interface LessonDiagnostic {
   tryThis: string[];
 }
 
+/** Optional age-adaptive intro override (identity-setup life stage). When present, shown instead of content[age].introduction. */
+export type AgeAdaptiveMap = {
+  teen?: string;
+  'young-adult'?: string;
+  adult?: string;
+  midlife?: string;
+  'older-adult'?: string;
+};
+
 export interface ManualLesson {
   id: string;
   title: string;
@@ -26,6 +35,7 @@ export interface ManualLesson {
   diagnostics?: LessonDiagnostic[];
   tryThis?: string;
   connectsTo?: string[];
+  ageAdaptive?: AgeAdaptiveMap;
   content: {
     teen: LessonContent;
     adult: LessonContent;
@@ -83,6 +93,13 @@ const section1Module1: ManualModule = {
       ],
       tryThis: "For the next 3 days, whenever you feel a strong emotion, pause and name it as specifically as you can (e.g. not 'bad' but 'disappointed and a little embarrassed'). See if naming it changes how long it lasts.",
       connectsTo: ['emotion', 'state', 'body'],
+      ageAdaptive: {
+        teen: "Emotions are your brain's text messages — and your brain literally can't do math when you're dehydrated. That test you bombed? Check if you drank any water that day. Your body runs your brain and your brain runs your mood. Sleep, food, water aren't just health class advice. They're the difference between handling a bad day and having a total meltdown.",
+        'young-adult': "That all-nighter made you emotionally 10 years younger. When your prefrontal cortex goes offline from sleep deprivation, your amygdala runs the show. You're essentially operating with a teenager's emotional brain in an adult's life. The Sunday scaries, the 3pm crash, the random crying — check your body first.",
+        adult: "Your kid's 5pm meltdown isn't a behavior problem. It's a blood sugar problem. And yours might be too. When you snap at your partner after work, check: when did you last eat? How much sleep? How many coffees? Fix the body before diagnosing the emotion.",
+        midlife: "Sleep architecture changes after 50. You get less deep sleep, which means less emotional processing overnight. That increased irritability and decreased patience? It might not be stress — it might be biology. Afternoon naps aren't lazy. They're compensating for a structural change in how your brain recovers.",
+        'older-adult': "Medication side effects, hydration changes, and nutritional absorption all shift with age and directly affect mood and cognition. That confusion or irritability your doctor might attribute to aging could be dehydration or a medication interaction. Track your body basics — they matter MORE now, not less.",
+      },
       content: {
         teen: {
           introduction: "Emotions are your brain's text messages to you. They're not random — each one is trying to tell you something. Anger says 'something's not fair.' Fear says 'be careful.' Sadness says 'something matters to you.' They're not good or bad — they're information.",
@@ -142,6 +159,13 @@ const section1Module1: ManualModule = {
       ],
       tryThis: "For one day, every time you would say 'good,' 'bad,' or 'fine,' replace it with two more specific words (e.g. 'relieved and a little tired'). Notice if reading your dashboard gets easier.",
       connectsTo: ['emotion', 'state'],
+      ageAdaptive: {
+        teen: "Your dashboard has way more than one light — and most people only name three: good, bad, tired. When everything feels like a blur, naming even two things ('anxious and lonely' or 'relieved but still mad') gives your brain a handle. School, friends, social media — it all shows up on the dashboard. Reading it gets easier when you slow down.",
+        'young-adult': "You've got 27+ emotions per day and you're probably only naming three. When 'fine' or 'stressed' is your default, the real picture stays blurry. Dating apps, job stress, roommates — they all show up as mixed signals. The more specific you get ('disappointed and a little jealous' instead of 'bad'), the more you can actually address what's going on.",
+        adult: "Most adults experience dozens of distinct emotions per day and name maybe three. When you say 'fine' or 'stressed,' you're running on a dashboard with one light. Expanding your vocabulary isn't about being fancy — it's about giving your brain the right data so you can regulate. Right now: what are you feeling? Can you name more than one thing?",
+        midlife: "You've spent decades reading other people's dashboards — your kids, your partner, your parents. When was the last time you read your own? Mixed emotions are normal at this stage: grief and gratitude, loss and relief. Naming them doesn't make them worse; it often makes them easier to carry.",
+        'older-adult': "You've had a lifetime of feelings. You don't have to perform calm or hide what's there. When the dashboard shows multiple lights — loneliness, gratitude, worry, peace — that's not confusion. That's a full life. Naming each one is a kindness to yourself.",
+      },
       content: {
         teen: {
           introduction: "Imagine your car dashboard lit up with 5 warning lights at once. Would you panic? Probably. That's what it feels like when multiple emotions hit at the same time. The trick is learning to read them one at a time. Let's slow it down.",
@@ -202,6 +226,13 @@ const section1Module1: ManualModule = {
       ],
       tryThis: "Next time you have a strong reaction, wait 6 seconds before responding. Notice whether the urge to react shifts when your thinking brain catches up.",
       connectsTo: ['state', 'emotion', 'body'],
+      ageAdaptive: {
+        teen: "Your brain sometimes sets off the alarm when there's no real danger — heart racing before a test, anger at a friend over something small. That's not you being dramatic. It's your brain being overprotective. Strong reactions to small things can be echoes of past stuff. Knowing that doesn't fix it, but it helps you pause before you react.",
+        'young-adult': "Anxiety before the presentation, rage in traffic, Sunday night dread — often false alarms. The threat isn't real but the feeling is. Your brain is wired to react first; your thinking brain catches up later. Triggers often link to unresolved past experiences. The present situation is just the match.",
+        adult: "Reactions that feel bigger than the situation are often emotional false alarms. The threat isn't real; the feeling is. Your nervous system responds in milliseconds; the rational mind follows. Triggers are often echoes of the past. Understanding that is the first step to choosing your response.",
+        midlife: "At this stage false alarms might look like worry about adult children, health anxiety, or sadness that feels disproportionate. Your alarm system has decades of data — sometimes it triggers old patterns. That's not weakness. It's a system that was shaped by experience. You can still learn to pause.",
+        'older-adult': "Worry about loss, health, or change is understandable. Your system has a long memory. Distinguishing real risk from amplified fear helps. Old losses can make current events feel heavier. Your system is remembering, not just reacting. Acknowledging that is the first step to calming the alarm.",
+      },
       content: {
         teen: {
           introduction: "Sometimes your brain sets off the alarm for no real reason. Your heart races before a test even though a test can't hurt you. You feel angry at a friend for something small that's actually about something bigger. False alarms are normal — your brain is just being overprotective.",
@@ -270,6 +301,13 @@ const section1Module2: ManualModule = {
       ],
       tryThis: "For the next 3 days, rate your Body gauge and your Emotion gauge at the same time. See if they track together. Most people are shocked by the correlation.",
       connectsTo: ['body', 'state', 'emotion'],
+      ageAdaptive: {
+        teen: "Your brain literally can't do math when you're dehydrated. That test you bombed? Check if you drank any water that day. Your body runs your brain and your brain runs your mood. Sleep, food, water — these aren't just health class advice. They're the difference between handling a bad day and having a total meltdown.",
+        'young-adult': "That all-nighter made you emotionally 10 years younger. When your prefrontal cortex goes offline from sleep deprivation, your amygdala runs the show. You're essentially operating with a teenager's emotional brain in an adult's life. The Sunday scaries, the 3pm crash, the random crying — check your body first.",
+        adult: "Your kid's 5pm meltdown isn't a behavior problem. It's a blood sugar problem. And yours might be too. When you snap at your partner after work, check: when did you last eat? How much sleep? How many coffees? Fix the body before diagnosing the emotion.",
+        midlife: "Sleep architecture changes after 50. You get less deep sleep, which means less emotional processing overnight. That increased irritability and decreased patience? It might not be stress — it might be biology. Afternoon naps aren't lazy. They're compensating for a structural change in how your brain recovers.",
+        'older-adult': "Medication side effects, hydration changes, and nutritional absorption all shift with age and directly affect mood and cognition. That confusion or irritability your doctor might attribute to aging could be dehydration or a medication interaction. Track your body basics — they matter MORE now, not less.",
+      },
       content: {
         teen: {
           introduction: "Your brain has two main systems for handling emotions — the fast one (amygdala) and the slow one (prefrontal cortex). The fast one is like autocorrect — it reacts before you even think. The slow one is the editor that checks the work. Sometimes autocorrect wins and you say or do something you didn't mean.",
