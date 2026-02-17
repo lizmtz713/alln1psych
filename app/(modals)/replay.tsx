@@ -87,6 +87,9 @@ export default function ReplayScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
 
+  const updateEmotion = useCockpitStore((s) => s.updateEmotion);
+  const updateConnection = useCockpitStore((s) => s.updateConnection);
+
   const [phase, setPhase] = useState<Phase>('tell');
   const [story, setStory] = useState('');
   const [mirrorResponse, setMirrorResponse] = useState('');

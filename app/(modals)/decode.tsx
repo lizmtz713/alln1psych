@@ -1,7 +1,7 @@
 /**
  * Decode — Paste their message → Analysis → Intent → Suggested response with Copy.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -138,7 +139,7 @@ export default function DecodeScreen() {
     setPhase('intent');
   };
 
-  const onSelectIntent = async (intent: (typeof INTENT_OPTIONS)[number]) => {
+  const onSelectIntent = async (intent: typeof INTENT_OPTIONS[number]) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedIntent(intent.id);
     setLoading(true);
@@ -187,7 +188,13 @@ export default function DecodeScreen() {
 
   const renderRespondContent = () => {
     const parts = sectionedText(respondResponse, RESPOND_HEADERS);
-    const suggestedText = (respondResponse.match(/SUGGESTED RESPONSE[:\s]*([\s\S]*?)(?=WHY THIS|$)/i)?.[1] ?? '').trim();
+    const suggestedBlock: string[] = [];
+    let inBlock = false;
+    respondResponse.split('\n').forEach((line) => {
+      if (line.toUpperCase().startsWith('SUGGESTED RESPONSE') || line.toUpperCase().startsWith('WHY THIS')) inBlock = !inBlock;
+      if (inBlock && line.trim() && !line.toUpperCase().startsWith('SUGGESTED RESPONSE')) suggestedBlock.push(line);
+    });
+    const suggestedText = suggestedBlock.length ? suggestedBlock.join('\n').trim() : (respondResponse.match(/SUGGESTED RESPONSE[:\s]*([\s\S]*?)(?=WHY THIS|$)/i)?.[1] ?? '').trim();
 
     return (
       <View style={styles.responseCard}>
