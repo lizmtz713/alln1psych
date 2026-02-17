@@ -22,7 +22,7 @@ export function EmotionGauge({ value, size = 80 }: GaugeProps) {
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <Svg width={size} height={size} viewBox={'0 0 ' + size + ' ' + size}>
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {Array.from({ length: barCount }).map((_, i) => {
           const barHeight = maxBarHeight * ((i + 1) / barCount);
           const x = startX + i * (barWidth + gap);

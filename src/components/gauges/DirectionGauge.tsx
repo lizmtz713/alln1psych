@@ -24,7 +24,7 @@ export function DirectionGauge({ value, size = 80 }: GaugeProps) {
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <Svg width={size} height={size} viewBox={'0 0 ' + size + ' ' + size}>
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <Circle cx={cx} cy={cy} r={radius} fill="none" stroke={isSet ? 'rgba(255,255,255,0.1)' : '#1A1A2E'} strokeWidth={1.5} />
         {[0, 90, 180, 270].map((deg, i) => {
           const rad = (deg * Math.PI) / 180;

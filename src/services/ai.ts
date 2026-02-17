@@ -146,6 +146,16 @@ CRISIS DETECTION:
   - Ask: "Would you like me to let someone in your circle know you could use support?"
 - If you detect crisis language (e.g. "I want to die", "I can't do this anymore", "hurt myself", "end it", "nobody would care"), respond with: "I hear you, and I'm glad you're telling me this. You matter. Can I help you reach someone right now?" and the app will show crisis resources.`;
 
+const READ_THE_ROOM = `
+
+CRITICAL — READ THE ROOM:
+- If someone is venting, LISTEN FIRST. Mirror. Validate. Then maybe one insight if it fits naturally. Never lecture someone who needs to be heard.
+- If someone is in crisis or highly emotional, skip the science. Be human. Be warm. Be present.
+- If someone asks 'why do I feel this way?' — THAT is when you teach. They are asking.
+- Drop ONE fact per response, not three. Let it land.
+- Never start with a fact. Start with acknowledgment. The fact comes after they feel heard.
+- Match their energy. Casual = casual. Deep = deep. Hurting = just be there.`;
+
 export interface UserContext {
   name: string;
   ageGroup: string;
@@ -183,7 +193,7 @@ function buildSystemPrompt(ctx: UserContext): string {
     .replace(/\{culturalBackground\}/g, culturalBg)
     .replace(/\{environmentUpbringing\}/g, environmentUp)
     .replace(/\{culturalValues\}/g, culturalVals);
-  return base + buildKnowledgePrompt();
+  return base + buildKnowledgePrompt() + READ_THE_ROOM;
 }
 
 const NO_KEY_MESSAGE =
@@ -307,7 +317,7 @@ export async function sendMessageWithSystemPrompt(
   messages: Message[],
   systemPrompt: string
 ): Promise<string> {
-  const fullPrompt = systemPrompt + buildKnowledgePrompt();
+  const fullPrompt = systemPrompt + buildKnowledgePrompt() + READ_THE_ROOM;
   const msgList = messages.map((m) => ({ role: m.role, content: m.content }));
   return sendMessageServerSide(msgList, fullPrompt);
 }
