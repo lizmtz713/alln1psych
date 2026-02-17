@@ -19,7 +19,7 @@ import {
   getCategoryTag,
 } from '../../src/data/discoveries';
 
-const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string }[] = [
+const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string; route?: string }[] = [
   { id: 'breathing', emoji: '🫁', title: 'Breathing Reset', sub: 'Regulate your nervous system in 2 minutes' },
   { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Decoder', sub: "Identify what you're actually feeling" },
   { id: 'body-scan', emoji: '🧍', title: 'Body Awareness', sub: 'Map where stress lives in your body' },
@@ -30,6 +30,7 @@ const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: strin
   { id: 'stress-thermo', emoji: '🌡️', title: 'Stress Assessment', sub: 'Measure your current activation level' },
   { id: 'comm-builder', emoji: '💬', title: 'Communication Lab', sub: 'Build scripts for difficult conversations' },
   { id: 'mood-patterns', emoji: '📊', title: 'Mood Intelligence', sub: 'Spot trends in your emotional data' },
+  { id: 'relationship-check', emoji: '💫', title: 'Relationship Check', sub: 'Enter two birthdays. Understand the dynamic.', route: '/(modals)/relationship-check' },
 ];
 
 function getSectionProgress(section: ManualSection, isLessonCompleted: (id: string) => boolean): { completed: number; total: number } {
@@ -156,9 +157,10 @@ export default function LearnScreen() {
     setExpandedSectionId((prev) => (prev === sectionId ? null : sectionId));
   };
 
-  const openActivity = (id: string) => {
+  const openActivity = (id: string, route?: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/(modals)/activity?id=${id}`);
+    if (route) router.push(route as any);
+    else router.push(`/(modals)/activity?id=${id}`);
   };
 
   return (
@@ -277,7 +279,7 @@ export default function LearnScreen() {
           <Pressable
             key={a.id}
             style={({ pressed }) => [styles.toolkitCard, pressed && styles.pressed]}
-            onPress={() => openActivity(a.id)}
+            onPress={() => openActivity(a.id, a.route)}
           >
             <Text style={styles.toolkitEmoji}>{a.emoji}</Text>
             <Text style={styles.toolkitTitle} numberOfLines={2}>{a.title}</Text>

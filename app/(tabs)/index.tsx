@@ -444,6 +444,7 @@ export default function HomeScreen() {
             { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const },
             { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const },
             { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const },
+            { label: 'Relate', icon: '💫', route: '/(modals)/relationship-check' as const, iconIsEmoji: true },
           ].map((action) => (
             <Pressable
               key={action.label}
@@ -453,7 +454,11 @@ export default function HomeScreen() {
                 router.push(action.route);
               }}
             >
-              <Ionicons name={action.icon as any} size={22} color={ACCENT} />
+              {(action as { iconIsEmoji?: boolean }).iconIsEmoji ? (
+                <Text style={{ fontSize: 20 }}>{(action as { icon: string }).icon}</Text>
+              ) : (
+                <Ionicons name={(action as { icon: string }).icon as any} size={22} color={ACCENT} />
+              )}
               <Text style={styles.quickActionPillText}>{action.label}</Text>
             </Pressable>
           ))}
