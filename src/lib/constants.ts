@@ -22,6 +22,32 @@ export const COLORS = {
   },
   /** Role play / Practice Life — warm gold to distinguish from main Talk accent */
   rolePlayAccent: '#FFB74D',
+  /** Athlete mode accent — energetic blue-green */
+  athleteAccent: '#00BFA5',
+  /** Spectrum mode accent — calming soft blue */
+  spectrumAccent: '#64B5F6',
+} as const;
+
+/** Muted/softer color palette for Spectrum Mode accessibility */
+export const COLORS_MUTED = {
+  background: '#1A1A24',
+  surface: '#242430',
+  inputSurface: '#242430',
+  text: '#E0E0E5',
+  textMuted: '#9090A0',
+  textSecondary: '#808090',
+  accent: '#8B7BD8',
+  accentMuted: '#A090D8',
+  recording: '#E08080',
+  temperature: {
+    green: '#7BBF7B',
+    yellow: '#E0C860',
+    orange: '#E0A070',
+    red: '#E08080',
+  },
+  rolePlayAccent: '#E0B070',
+  athleteAccent: '#70C0B0',
+  spectrumAccent: '#80B0E0',
 } as const;
 
 export const BORDER_RADIUS = {

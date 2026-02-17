@@ -1524,6 +1524,409 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
     );
   }
 
+  // ============================================
+  // ATHLETE MODE ACTIVITIES
+  // ============================================
+
+  // ----- RECOVERY CHECK (Athlete Mode) -----
+  const [rcSleep, setRcSleep] = useState<number>(3);
+  const [rcSoreness, setRcSoreness] = useState<number>(3);
+  const [rcEnergy, setRcEnergy] = useState<number>(3);
+  const [rcMood, setRcMood] = useState<number>(3);
+  const [rcSubmitted, setRcSubmitted] = useState(false);
+
+  if (activity.id === 'recovery-check') {
+    const overallRecovery = Math.round((rcSleep + rcSoreness + rcEnergy + rcMood) / 4 * 20);
+    const recoveryLabel = overallRecovery >= 80 ? 'Ready to train hard' : overallRecovery >= 60 ? 'Light training recommended' : overallRecovery >= 40 ? 'Active recovery day' : 'Rest day — prioritize recovery';
+    const recoveryColor = overallRecovery >= 80 ? COLORS.temperature.green : overallRecovery >= 60 ? COLORS.temperature.yellow : overallRecovery >= 40 ? COLORS.temperature.orange : COLORS.temperature.red;
+
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>🔋 Recovery Check</Text>
+        <Text style={styles.sub}>Rate each area from 1 (poor) to 5 (excellent)</Text>
+
+        <View style={styles.card}>
+          <Text style={styles.detailLabel}>😴 Sleep Quality</Text>
+          <View style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Pressable key={n} style={[styles.ratingBtn, rcSleep === n && styles.ratingBtnSelected]} onPress={() => setRcSleep(n)}>
+                <Text style={[styles.ratingBtnText, rcSleep === n && styles.ratingBtnTextSelected]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={styles.detailLabel}>💪 Muscle Soreness (5 = not sore)</Text>
+          <View style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Pressable key={n} style={[styles.ratingBtn, rcSoreness === n && styles.ratingBtnSelected]} onPress={() => setRcSoreness(n)}>
+                <Text style={[styles.ratingBtnText, rcSoreness === n && styles.ratingBtnTextSelected]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={styles.detailLabel}>⚡ Energy Level</Text>
+          <View style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Pressable key={n} style={[styles.ratingBtn, rcEnergy === n && styles.ratingBtnSelected]} onPress={() => setRcEnergy(n)}>
+                <Text style={[styles.ratingBtnText, rcEnergy === n && styles.ratingBtnTextSelected]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={styles.detailLabel}>🧠 Mental Readiness</Text>
+          <View style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Pressable key={n} style={[styles.ratingBtn, rcMood === n && styles.ratingBtnSelected]} onPress={() => setRcMood(n)}>
+                <Text style={[styles.ratingBtnText, rcMood === n && styles.ratingBtnTextSelected]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        <View style={[styles.card, { borderLeftWidth: 4, borderLeftColor: recoveryColor }]}>
+          <Text style={[styles.detailLabel, { color: recoveryColor }]}>Recovery Score: {overallRecovery}%</Text>
+          <Text style={styles.detailText}>{recoveryLabel}</Text>
+        </View>
+
+        <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed, { backgroundColor: '#00BFA5' }]} onPress={() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); setRcSubmitted(true); }}>
+          <Text style={styles.startBtnText}>Save Recovery Check</Text>
+        </Pressable>
+
+        {rcSubmitted && (
+          <View style={styles.card}>
+            <Text style={styles.detailText}>✅ Recovery logged. Use this to guide today's training intensity.</Text>
+          </View>
+        )}
+
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  // ----- PRE-COMPETITION PREP (Athlete Mode) -----
+  const [pcStep, setPcStep] = useState(1);
+  const [pcArousal, setPcArousal] = useState<'too-low' | 'optimal' | 'too-high' | null>(null);
+
+  if (activity.id === 'pre-competition') {
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>🏆 Pre-Competition Prep</Text>
+
+        {pcStep === 1 && (
+          <>
+            <Text style={styles.sub}>How are you feeling right now?</Text>
+            <Pressable style={[styles.card, pcArousal === 'too-low' && { borderColor: COLORS.temperature.yellow, borderWidth: 2 }]} onPress={() => setPcArousal('too-low')}>
+              <Text style={styles.detailText}>😐 Too flat / low energy</Text>
+              <Text style={styles.secondaryText}>Need to get more activated</Text>
+            </Pressable>
+            <Pressable style={[styles.card, pcArousal === 'optimal' && { borderColor: COLORS.temperature.green, borderWidth: 2 }]} onPress={() => setPcArousal('optimal')}>
+              <Text style={styles.detailText}>😊 Just right / in the zone</Text>
+              <Text style={styles.secondaryText}>Ready to compete</Text>
+            </Pressable>
+            <Pressable style={[styles.card, pcArousal === 'too-high' && { borderColor: COLORS.temperature.red, borderWidth: 2 }]} onPress={() => setPcArousal('too-high')}>
+              <Text style={styles.detailText}>😰 Too amped / anxious</Text>
+              <Text style={styles.secondaryText}>Need to calm down</Text>
+            </Pressable>
+            {pcArousal && (
+              <Pressable style={[styles.startBtn, { backgroundColor: '#00BFA5' }]} onPress={() => setPcStep(2)}>
+                <Text style={styles.startBtnText}>Get my routine</Text>
+              </Pressable>
+            )}
+          </>
+        )}
+
+        {pcStep === 2 && pcArousal === 'too-low' && (
+          <View style={styles.card}>
+            <Text style={styles.detailLabel}>⬆️ Activation Routine</Text>
+            <Text style={styles.detailText}>1. Put on high-energy music</Text>
+            <Text style={styles.detailText}>2. Dynamic stretching / movement drills</Text>
+            <Text style={styles.detailText}>3. Power poses — stand tall, hands on hips</Text>
+            <Text style={styles.detailText}>4. Visualization: See yourself performing at your best</Text>
+            <Text style={styles.detailText}>5. Positive self-talk: "I'm ready. I've trained for this."</Text>
+            <Pressable style={[styles.startBtn, { backgroundColor: '#00BFA5', marginTop: 16 }]} onPress={() => { router.back(); router.push('/(modals)/activity?id=breathing'); }}>
+              <Text style={styles.startBtnText}>🌬️ Energy Breathing</Text>
+            </Pressable>
+          </View>
+        )}
+
+        {pcStep === 2 && pcArousal === 'optimal' && (
+          <View style={styles.card}>
+            <Text style={styles.detailLabel}>✅ Stay in Your Zone</Text>
+            <Text style={styles.detailText}>You're in a good place. Maintain it:</Text>
+            <Text style={styles.detailText}>• Stick to your pre-game routine</Text>
+            <Text style={styles.detailText}>• Stay present — focus on process, not outcome</Text>
+            <Text style={styles.detailText}>• Trust your preparation</Text>
+            <Text style={styles.detailText}>• One play at a time</Text>
+            <Text style={[styles.detailText, { marginTop: 12, fontWeight: '600' }]}>"I've done the work. Now I execute."</Text>
+          </View>
+        )}
+
+        {pcStep === 2 && pcArousal === 'too-high' && (
+          <View style={styles.card}>
+            <Text style={styles.detailLabel}>⬇️ Calming Routine</Text>
+            <Text style={styles.detailText}>1. Slow, deep breathing (4 in, 6 out)</Text>
+            <Text style={styles.detailText}>2. Progressive muscle relaxation</Text>
+            <Text style={styles.detailText}>3. Grounding: 5 things you can see, 4 you can hear...</Text>
+            <Text style={styles.detailText}>4. Reframe: "These nerves mean I care. I'm ready."</Text>
+            <Text style={styles.detailText}>5. Focus on controllables only</Text>
+            <Pressable style={[styles.startBtn, { backgroundColor: '#00BFA5', marginTop: 16 }]} onPress={() => { router.back(); router.push('/(modals)/activity?id=breathing'); }}>
+              <Text style={styles.startBtnText}>🌬️ Calming Breath</Text>
+            </Pressable>
+          </View>
+        )}
+
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  // ============================================
+  // SPECTRUM MODE ACTIVITIES
+  // ============================================
+
+  // ----- SENSORY CHECK (Spectrum Mode) -----
+  const [scVisual, setScVisual] = useState<number>(3);
+  const [scAuditory, setScAuditory] = useState<number>(3);
+  const [scTactile, setScTactile] = useState<number>(3);
+  const [scOlfactory, setScOlfactory] = useState<number>(3);
+  const [scProprioceptive, setScProprioceptive] = useState<number>(3);
+
+  if (activity.id === 'sensory-check') {
+    const sensorySuggestions = () => {
+      const suggestions: string[] = [];
+      if (scVisual <= 2) suggestions.push('🕶️ Dim lights or wear sunglasses');
+      if (scVisual >= 4) suggestions.push('💡 Add more light or visual interest');
+      if (scAuditory <= 2) suggestions.push('🎧 Use noise-canceling headphones or earplugs');
+      if (scAuditory >= 4) suggestions.push('🎵 Add background music or white noise');
+      if (scTactile <= 2) suggestions.push('👕 Change to softer clothes or remove tags');
+      if (scTactile >= 4) suggestions.push('🤗 Try deep pressure (weighted blanket, tight hug)');
+      if (scOlfactory <= 2) suggestions.push('🌿 Move to a neutral-smelling space');
+      if (scOlfactory >= 4) suggestions.push('🕯️ Add a calming scent you like');
+      if (scProprioceptive <= 2) suggestions.push('🧘 Do some stretching or heavy work (push-ups, carrying something)');
+      return suggestions.length > 0 ? suggestions : ['✅ Your sensory environment looks balanced!'];
+    };
+
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>👁️ Sensory Check</Text>
+        <Text style={styles.sub}>Rate each sense: 1 = overwhelmed, 3 = okay, 5 = understimulated</Text>
+
+        <View style={styles.card}>
+          <Text style={styles.detailLabel}>👁️ Visual (light, screens, movement)</Text>
+          <View style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Pressable key={n} style={[styles.ratingBtn, scVisual === n && styles.ratingBtnSelected]} onPress={() => setScVisual(n)}>
+                <Text style={[styles.ratingBtnText, scVisual === n && styles.ratingBtnTextSelected]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={styles.detailLabel}>👂 Sound (noise level, types of sounds)</Text>
+          <View style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Pressable key={n} style={[styles.ratingBtn, scAuditory === n && styles.ratingBtnSelected]} onPress={() => setScAuditory(n)}>
+                <Text style={[styles.ratingBtnText, scAuditory === n && styles.ratingBtnTextSelected]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={styles.detailLabel}>✋ Touch (clothes, textures, temperature)</Text>
+          <View style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Pressable key={n} style={[styles.ratingBtn, scTactile === n && styles.ratingBtnSelected]} onPress={() => setScTactile(n)}>
+                <Text style={[styles.ratingBtnText, scTactile === n && styles.ratingBtnTextSelected]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={styles.detailLabel}>👃 Smell (scents in the environment)</Text>
+          <View style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Pressable key={n} style={[styles.ratingBtn, scOlfactory === n && styles.ratingBtnSelected]} onPress={() => setScOlfactory(n)}>
+                <Text style={[styles.ratingBtnText, scOlfactory === n && styles.ratingBtnTextSelected]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={styles.detailLabel}>🏃 Body Awareness (need to move/be still)</Text>
+          <View style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Pressable key={n} style={[styles.ratingBtn, scProprioceptive === n && styles.ratingBtnSelected]} onPress={() => setScProprioceptive(n)}>
+                <Text style={[styles.ratingBtnText, scProprioceptive === n && styles.ratingBtnTextSelected]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        <View style={[styles.card, { borderLeftWidth: 4, borderLeftColor: '#64B5F6' }]}>
+          <Text style={[styles.detailLabel, { color: '#64B5F6' }]}>Suggestions</Text>
+          {sensorySuggestions().map((s, i) => (
+            <Text key={i} style={styles.detailText}>{s}</Text>
+          ))}
+        </View>
+
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  // ----- STIM TOOLKIT (Spectrum Mode) -----
+  if (activity.id === 'stim-toolkit') {
+    const stimCategories = [
+      {
+        name: 'Calming',
+        emoji: '😌',
+        stims: [
+          { name: 'Deep pressure (weighted blanket)', icon: '🛏️' },
+          { name: 'Slow rocking', icon: '🪑' },
+          { name: 'Soft humming', icon: '🎵' },
+          { name: 'Hand over heart', icon: '💚' },
+          { name: 'Gentle self-hug', icon: '🤗' },
+        ],
+      },
+      {
+        name: 'Alerting',
+        emoji: '⚡',
+        stims: [
+          { name: 'Cold water on face', icon: '💧' },
+          { name: 'Crunchy snacks', icon: '🥨' },
+          { name: 'Fast pacing', icon: '🚶' },
+          { name: 'Jumping jacks', icon: '🏃' },
+          { name: 'Sour candy', icon: '🍬' },
+        ],
+      },
+      {
+        name: 'Fidgeting',
+        emoji: '🌀',
+        stims: [
+          { name: 'Fidget cube/spinner', icon: '🎲' },
+          { name: 'Hair twirling', icon: '💇' },
+          { name: 'Pen clicking', icon: '🖊️' },
+          { name: 'Rubber band snapping', icon: '🎯' },
+          { name: 'Tapping fingers', icon: '👆' },
+        ],
+      },
+      {
+        name: 'Proprioceptive',
+        emoji: '💪',
+        stims: [
+          { name: 'Wall pushups', icon: '🧱' },
+          { name: 'Carry heavy items', icon: '📦' },
+          { name: 'Tight squeeze', icon: '🤝' },
+          { name: 'Stomping feet', icon: '🦶' },
+          { name: 'Chewing gum', icon: '🍬' },
+        ],
+      },
+    ];
+
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>🌀 Stim Toolkit</Text>
+        <Text style={styles.sub}>Stimming helps regulate your nervous system. Pick what you need right now.</Text>
+
+        {stimCategories.map((cat) => (
+          <View key={cat.name} style={styles.card}>
+            <Text style={styles.detailLabel}>{cat.emoji} {cat.name}</Text>
+            {cat.stims.map((stim) => (
+              <View key={stim.name} style={styles.stimItem}>
+                <Text style={styles.stimItemText}>{stim.icon} {stim.name}</Text>
+              </View>
+            ))}
+          </View>
+        ))}
+
+        <View style={[styles.card, { backgroundColor: '#64B5F620' }]}>
+          <Text style={styles.detailText}>💡 Remember: Stimming is self-regulation, not a problem. If a stim helps you, use it.</Text>
+        </View>
+
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  // ----- EMOTION CARDS (Spectrum Mode) -----
+  const EMOTION_CARDS = [
+    { emoji: '😊', name: 'Happy', color: '#66BB6A', body: 'Light, energetic, smiling' },
+    { emoji: '😢', name: 'Sad', color: '#64B5F6', body: 'Heavy, slow, want to cry' },
+    { emoji: '😤', name: 'Angry', color: '#EF5350', body: 'Hot, tense, clenched' },
+    { emoji: '😰', name: 'Anxious', color: '#FFA726', body: 'Tight chest, racing thoughts, restless' },
+    { emoji: '😴', name: 'Tired', color: '#9E9E9E', body: 'Heavy, slow, hard to focus' },
+    { emoji: '😐', name: 'Numb', color: '#78909C', body: 'Nothing, disconnected, blank' },
+    { emoji: '🤯', name: 'Overwhelmed', color: '#AB47BC', body: 'Too much, can\'t think, frozen' },
+    { emoji: '😌', name: 'Calm', color: '#26A69A', body: 'Relaxed, breathing easy, peaceful' },
+    { emoji: '🤔', name: 'Confused', color: '#FFCA28', body: 'Uncertain, foggy, questioning' },
+    { emoji: '😤', name: 'Frustrated', color: '#FF7043', body: 'Stuck, tense, want to give up' },
+    { emoji: '🥰', name: 'Loved', color: '#EC407A', body: 'Warm, connected, safe' },
+    { emoji: '😔', name: 'Lonely', color: '#5C6BC0', body: 'Empty, disconnected, longing' },
+  ];
+
+  if (activity.id === 'emotion-cards') {
+    const [selectedCard, setSelectedCard] = useState<typeof EMOTION_CARDS[0] | null>(null);
+
+    return (
+      <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.title}>🎴 Emotion Cards</Text>
+        <Text style={styles.sub}>Tap the picture that matches how you feel right now.</Text>
+
+        <View style={styles.emotionCardsGrid}>
+          {EMOTION_CARDS.map((card) => (
+            <Pressable
+              key={card.name}
+              style={[
+                styles.emotionCardItem,
+                { backgroundColor: card.color + '30', borderColor: selectedCard?.name === card.name ? card.color : 'transparent' },
+              ]}
+              onPress={() => setSelectedCard(selectedCard?.name === card.name ? null : card)}
+            >
+              <Text style={styles.emotionCardEmoji}>{card.emoji}</Text>
+              <Text style={styles.emotionCardName}>{card.name}</Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {selectedCard && (
+          <View style={[styles.card, { borderLeftWidth: 4, borderLeftColor: selectedCard.color }]}>
+            <Text style={styles.detailLabel}>You selected: {selectedCard.name}</Text>
+            <Text style={styles.detailText}>This might feel like: {selectedCard.body}</Text>
+            <Pressable
+              style={[styles.startBtn, { backgroundColor: '#64B5F6', marginTop: 12 }]}
+              onPress={() => { addJournalEntry(`I'm feeling ${selectedCard.name}. ${selectedCard.body}`); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); Alert.alert('Saved', 'Added to journal.'); }}
+            >
+              <Text style={styles.startBtnText}>Save to journal</Text>
+            </Pressable>
+          </View>
+        )}
+
+        <Pressable style={styles.doneBtn} onPress={() => router.back()}>
+          <Text style={styles.doneBtnText}>Done</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
   // ----- PLACEHOLDER -----
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -1675,4 +2078,40 @@ const styles = StyleSheet.create({
   mpCell: { width: '14.28%', aspectRatio: 1, padding: 2 },
   mpCellToday: { borderWidth: 2, borderColor: COLORS.accent, borderRadius: 6 },
   mpCellText: { fontSize: 12, color: COLORS.textMuted, textAlign: 'center' },
+  // Athlete & Spectrum mode activity styles
+  ratingRow: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 },
+  ratingBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ratingBtnSelected: { backgroundColor: COLORS.accent },
+  ratingBtnText: { fontSize: 16, color: COLORS.textMuted, fontWeight: '600' },
+  ratingBtnTextSelected: { color: COLORS.text },
+  stimItem: {
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.surface,
+  },
+  stimItemText: { fontSize: 16, color: COLORS.text },
+  emotionCardsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 24,
+  },
+  emotionCardItem: {
+    width: '30%',
+    minWidth: 90,
+    aspectRatio: 1,
+    borderRadius: BORDER_RADIUS.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+  },
+  emotionCardEmoji: { fontSize: 36, marginBottom: 4 },
+  emotionCardName: { fontSize: 14, fontWeight: '600', color: COLORS.text },
 });

@@ -47,7 +47,7 @@ import {
 } from '../../src/lib/culturalOptions';
 import { AchievementBadge } from '../../src/components/AchievementBadge';
 import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
-import type { EmergencyContact } from '../../src/stores/userStore';
+import type { EmergencyContact, AthleteModeSettings, SpectrumModeSettings, SportType } from '../../src/stores/userStore';
 import { supabase } from '../../src/lib/supabase';
 import { deleteUserData } from '../../src/services/database';
 import {
@@ -98,6 +98,15 @@ export default function MeScreen() {
     setCulturalBackgroundOther,
     birthday,
     setBirthday,
+    // Specialized modes
+    athleteMode,
+    setAthleteMode,
+    athleteModeSettings,
+    setAthleteModeSettings,
+    spectrumMode,
+    setSpectrumMode,
+    spectrumModeSettings,
+    setSpectrumModeSettings,
   } = useUserStore();
   const entries = useJournalStore((s) => s.entries);
   const getRecentEntries = useJournalStore((s) => s.getRecentEntries);
@@ -131,6 +140,8 @@ export default function MeScreen() {
   const [toast, setToast] = useState<{ title: string; emoji: string } | null>(null);
   const [showSensitiveModal, setShowSensitiveModal] = useState(false);
   const [showCulturalModal, setShowCulturalModal] = useState(false);
+  const [showAthleteModeModal, setShowAthleteModeModal] = useState(false);
+  const [showSpectrumModeModal, setShowSpectrumModeModal] = useState(false);
   const [editingContacts, setEditingContacts] = useState<EmergencyContact[]>([]);
   const [contactsEditing, setContactsEditing] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
@@ -983,6 +994,260 @@ export default function MeScreen() {
                 )}
               </ScrollView>
               <Pressable style={styles.primaryButton} onPress={() => setShowCulturalModal(false)}>
+                <Text style={styles.primaryButtonText}>Done</Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
+
+        {/* Specialized Modes */}
+        <View style={styles.settingsCard}>
+          <Text style={styles.sectionTitle}>Specialized Modes</Text>
+          <Text style={styles.settingHint}>
+            These modes adapt Psych's language, insights, and tools to your specific needs.
+          </Text>
+
+          {/* Athlete Mode */}
+          <View style={[styles.settingRow, { flexDirection: 'column', alignItems: 'stretch' }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={{ fontSize: 20 }}>🏆</Text>
+                <Text style={styles.settingLabel}>Athlete Mode</Text>
+              </View>
+              <Switch
+                value={athleteMode}
+                onValueChange={(v) => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setAthleteMode(v);
+                }}
+                trackColor={{ false: COLORS.surface, true: '#00BFA5' }}
+                thumbColor={COLORS.text}
+              />
+            </View>
+            <Text style={[styles.settingHint, { marginTop: 4 }]}>
+              Adapts gauges for athletic performance: recovery metrics, competition prep, team dynamics, performance psychology.
+            </Text>
+            {athleteMode && (
+              <Pressable
+                style={[styles.saveKeyButton, { marginTop: 8, backgroundColor: '#00BFA5' }]}
+                onPress={() => setShowAthleteModeModal(true)}
+              >
+                <Text style={styles.saveKeyButtonText}>Configure Athlete Mode</Text>
+              </Pressable>
+            )}
+          </View>
+
+          {/* Spectrum/Accessibility Mode */}
+          <View style={[styles.settingRow, { flexDirection: 'column', alignItems: 'stretch', borderBottomWidth: 0 }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={{ fontSize: 20 }}>🌈</Text>
+                <Text style={styles.settingLabel}>Spectrum Mode</Text>
+              </View>
+              <Switch
+                value={spectrumMode}
+                onValueChange={(v) => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSpectrumMode(v);
+                }}
+                trackColor={{ false: COLORS.surface, true: '#64B5F6' }}
+                thumbColor={COLORS.text}
+              />
+            </View>
+            <Text style={[styles.settingHint, { marginTop: 4 }]}>
+              Accessibility adaptations for neurodivergent users (autism, ADHD) and disabilities: clearer language, sensory tools, picture emotions, stimming toolkit.
+            </Text>
+            {spectrumMode && (
+              <Pressable
+                style={[styles.saveKeyButton, { marginTop: 8, backgroundColor: '#64B5F6' }]}
+                onPress={() => setShowSpectrumModeModal(true)}
+              >
+                <Text style={styles.saveKeyButtonText}>Configure Spectrum Mode</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+
+        {/* Athlete Mode Settings Modal */}
+        <Modal visible={showAthleteModeModal} transparent animationType="fade">
+          <Pressable style={styles.modalOverlay} onPress={() => setShowAthleteModeModal(false)}>
+            <Pressable style={styles.sensitiveModalCard} onPress={() => {}}>
+              <Text style={styles.sensitiveModalTitle}>🏆 Athlete Mode Settings</Text>
+              <Text style={styles.settingHint}>Customize how Psych adapts to your athletic life.</Text>
+              <ScrollView style={styles.sensitiveChipScroll}>
+                <Text style={styles.smallLabel}>What type of sport?</Text>
+                <View style={styles.chipRow}>
+                  {[
+                    { value: 'team', label: 'Team Sport' },
+                    { value: 'individual', label: 'Individual Sport' },
+                    { value: 'endurance', label: 'Endurance' },
+                    { value: 'power', label: 'Power/Strength' },
+                    { value: 'mixed', label: 'Mixed/Combat' },
+                  ].map((opt) => {
+                    const isSelected = athleteModeSettings?.sportType === opt.value;
+                    return (
+                      <Pressable
+                        key={opt.value}
+                        style={[styles.chip, isSelected && styles.chipSelected]}
+                        onPress={() => setAthleteModeSettings({ sportType: opt.value as SportType })}
+                      >
+                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt.label}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                <Text style={[styles.smallLabel, { marginTop: 16 }]}>Features</Text>
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Recovery Focus</Text>
+                  <Switch
+                    value={athleteModeSettings?.recoveryFocus ?? true}
+                    onValueChange={(v) => setAthleteModeSettings({ recoveryFocus: v })}
+                    trackColor={{ false: COLORS.surface, true: '#00BFA5' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Track sleep, soreness, and recovery metrics.</Text>
+
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Performance Psychology</Text>
+                  <Switch
+                    value={athleteModeSettings?.performancePsych ?? true}
+                    onValueChange={(v) => setAthleteModeSettings({ performancePsych: v })}
+                    trackColor={{ false: COLORS.surface, true: '#00BFA5' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Sport-specific mental skills and insights.</Text>
+
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Training Load Tracking</Text>
+                  <Switch
+                    value={athleteModeSettings?.trackTrainingLoad ?? true}
+                    onValueChange={(v) => setAthleteModeSettings({ trackTrainingLoad: v })}
+                    trackColor={{ false: COLORS.surface, true: '#00BFA5' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Monitor training volume and intensity.</Text>
+
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Competition Mode</Text>
+                  <Switch
+                    value={athleteModeSettings?.competitionMode ?? false}
+                    onValueChange={(v) => setAthleteModeSettings({ competitionMode: v })}
+                    trackColor={{ false: COLORS.surface, true: '#00BFA5' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Enable when actively competing — pre/post-game support.</Text>
+              </ScrollView>
+              <Pressable style={[styles.primaryButton, { backgroundColor: '#00BFA5' }]} onPress={() => setShowAthleteModeModal(false)}>
+                <Text style={styles.primaryButtonText}>Done</Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
+
+        {/* Spectrum Mode Settings Modal */}
+        <Modal visible={showSpectrumModeModal} transparent animationType="fade">
+          <Pressable style={styles.modalOverlay} onPress={() => setShowSpectrumModeModal(false)}>
+            <Pressable style={styles.sensitiveModalCard} onPress={() => {}}>
+              <Text style={styles.sensitiveModalTitle}>🌈 Spectrum Mode Settings</Text>
+              <Text style={styles.settingHint}>Choose the accommodations that help you most.</Text>
+              <ScrollView style={styles.sensitiveChipScroll}>
+                <Text style={styles.smallLabel}>Communication</Text>
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Clear, Literal Language</Text>
+                  <Switch
+                    value={spectrumModeSettings?.literalLanguage ?? false}
+                    onValueChange={(v) => setSpectrumModeSettings({ literalLanguage: v })}
+                    trackColor={{ false: COLORS.surface, true: '#64B5F6' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Less metaphor, more direct language.</Text>
+
+                <Text style={[styles.smallLabel, { marginTop: 16 }]}>Sensory & UI</Text>
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Reduced Animations</Text>
+                  <Switch
+                    value={spectrumModeSettings?.reducedAnimations ?? false}
+                    onValueChange={(v) => setSpectrumModeSettings({ reducedAnimations: v })}
+                    trackColor={{ false: COLORS.surface, true: '#64B5F6' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Muted Colors</Text>
+                  <Switch
+                    value={spectrumModeSettings?.mutedColors ?? false}
+                    onValueChange={(v) => setSpectrumModeSettings({ mutedColors: v })}
+                    trackColor={{ false: COLORS.surface, true: '#64B5F6' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Softer, less saturated colors.</Text>
+
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Sensory Tracking</Text>
+                  <Switch
+                    value={spectrumModeSettings?.sensoryTracking ?? false}
+                    onValueChange={(v) => setSpectrumModeSettings({ sensoryTracking: v })}
+                    trackColor={{ false: COLORS.surface, true: '#64B5F6' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Track sensory inputs in body check-ins.</Text>
+
+                <Text style={[styles.smallLabel, { marginTop: 16 }]}>Check-in Style</Text>
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Simplified Check-in</Text>
+                  <Switch
+                    value={spectrumModeSettings?.simplifiedCheckin ?? false}
+                    onValueChange={(v) => setSpectrumModeSettings({ simplifiedCheckin: v })}
+                    trackColor={{ false: COLORS.surface, true: '#64B5F6' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Fewer steps in check-in flow.</Text>
+
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Picture-Based Emotions</Text>
+                  <Switch
+                    value={spectrumModeSettings?.pictureEmotions ?? false}
+                    onValueChange={(v) => setSpectrumModeSettings({ pictureEmotions: v })}
+                    trackColor={{ false: COLORS.surface, true: '#64B5F6' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Use images for emotion selection.</Text>
+
+                <Text style={[styles.smallLabel, { marginTop: 16 }]}>Specific Support</Text>
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>ADHD Features</Text>
+                  <Switch
+                    value={spectrumModeSettings?.adhdFeatures ?? false}
+                    onValueChange={(v) => setSpectrumModeSettings({ adhdFeatures: v })}
+                    trackColor={{ false: COLORS.surface, true: '#64B5F6' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Shorter interactions, body doubling, time management support.</Text>
+
+                <View style={[styles.settingRow, { borderBottomWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.settingLabel}>Autism Features</Text>
+                  <Switch
+                    value={spectrumModeSettings?.autismFeatures ?? false}
+                    onValueChange={(v) => setSpectrumModeSettings({ autismFeatures: v })}
+                    trackColor={{ false: COLORS.surface, true: '#64B5F6' }}
+                    thumbColor={COLORS.text}
+                  />
+                </View>
+                <Text style={[styles.settingHint, { marginTop: -4, marginBottom: 8 }]}>Social scripts, routine support, sensory tools.</Text>
+              </ScrollView>
+              <Pressable style={[styles.primaryButton, { backgroundColor: '#64B5F6' }]} onPress={() => setShowSpectrumModeModal(false)}>
                 <Text style={styles.primaryButtonText}>Done</Text>
               </Pressable>
             </Pressable>

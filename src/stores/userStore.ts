@@ -35,6 +35,43 @@ export type AgeRange = 'teen' | 'young-adult' | 'adult' | 'midlife' | 'older-adu
 /** Therapy experience for adaptive tone (identity setup). */
 export type TherapyExperience = 'never' | 'tried-it' | 'currently' | 'positive' | 'negative';
 
+/** Sport type for athlete mode */
+export type SportType = 'team' | 'individual' | 'endurance' | 'power' | 'mixed' | null;
+
+/** Spectrum mode accessibility preferences */
+export interface SpectrumModeSettings {
+  /** Reduce animations and motion */
+  reducedAnimations: boolean;
+  /** Use muted, softer colors */
+  mutedColors: boolean;
+  /** Simplified check-in flow with fewer steps */
+  simplifiedCheckin: boolean;
+  /** Use picture-based emotion selection */
+  pictureEmotions: boolean;
+  /** Use clear, literal language (less metaphor) */
+  literalLanguage: boolean;
+  /** ADHD-specific features (shorter interactions, reminders) */
+  adhdFeatures: boolean;
+  /** Autism-specific features (social scripts, routine support) */
+  autismFeatures: boolean;
+  /** Sensory tracking in body gauge */
+  sensoryTracking: boolean;
+}
+
+/** Athlete mode settings */
+export interface AthleteModeSettings {
+  /** Type of sport for context */
+  sportType: SportType;
+  /** Focus on recovery metrics */
+  recoveryFocus: boolean;
+  /** Include performance psychology insights */
+  performancePsych: boolean;
+  /** Track training load */
+  trackTrainingLoad: boolean;
+  /** Competition mode (pre/post-competition support) */
+  competitionMode: boolean;
+}
+
 export interface CircleInvite {
   name: string;
   relationship: 'parent' | 'sibling' | 'friend' | 'partner' | 'other';
@@ -78,6 +115,16 @@ interface UserState {
   customPronouns: string;
   /** Saved trigger maps from the Trigger Map activity */
   triggerMaps: TriggerMapEntry[];
+
+  /** Specialized Mode: Athlete Mode enabled */
+  athleteMode: boolean;
+  /** Athlete mode detailed settings */
+  athleteModeSettings: AthleteModeSettings;
+
+  /** Specialized Mode: Spectrum/Accessibility Mode enabled */
+  spectrumMode: boolean;
+  /** Spectrum mode detailed settings */
+  spectrumModeSettings: SpectrumModeSettings;
 
   /** Cultural background (multi-select from onboarding/settings) */
   culturalBackground: string[];
@@ -124,10 +171,35 @@ interface UserState {
   setLanguageOfEmotion: (v: string) => void;
   setStrengthMeaning: (v: string) => void;
   setTherapyExperience: (v: TherapyExperience | null) => void;
+  /** Athlete mode */
+  setAthleteMode: (v: boolean) => void;
+  setAthleteModeSettings: (v: Partial<AthleteModeSettings>) => void;
+  /** Spectrum/Accessibility mode */
+  setSpectrumMode: (v: boolean) => void;
+  setSpectrumModeSettings: (v: Partial<SpectrumModeSettings>) => void;
   completeOnboarding: () => void;
   resetOnboarding: () => void;
   reset: () => void;
 }
+
+const defaultAthleteModeSettings: AthleteModeSettings = {
+  sportType: null,
+  recoveryFocus: true,
+  performancePsych: true,
+  trackTrainingLoad: true,
+  competitionMode: false,
+};
+
+const defaultSpectrumModeSettings: SpectrumModeSettings = {
+  reducedAnimations: false,
+  mutedColors: false,
+  simplifiedCheckin: false,
+  pictureEmotions: false,
+  literalLanguage: false,
+  adhdFeatures: false,
+  autismFeatures: false,
+  sensoryTracking: false,
+};
 
 const initialState = {
   name: '',
@@ -153,6 +225,11 @@ const initialState = {
   languageOfEmotion: '',
   strengthMeaning: '',
   therapyExperience: null as TherapyExperience | null,
+  // Specialized modes
+  athleteMode: false,
+  athleteModeSettings: { ...defaultAthleteModeSettings } as AthleteModeSettings,
+  spectrumMode: false,
+  spectrumModeSettings: { ...defaultSpectrumModeSettings } as SpectrumModeSettings,
 };
 
 export const useUserStore = create<UserState>((set) => ({
@@ -179,6 +256,18 @@ export const useUserStore = create<UserState>((set) => ({
   setLanguageOfEmotion: (languageOfEmotion) => set({ languageOfEmotion }),
   setStrengthMeaning: (strengthMeaning) => set({ strengthMeaning }),
   setTherapyExperience: (therapyExperience) => set({ therapyExperience }),
+  // Athlete mode
+  setAthleteMode: (athleteMode) => set({ athleteMode }),
+  setAthleteModeSettings: (settings) =>
+    set((state) => ({
+      athleteModeSettings: { ...state.athleteModeSettings, ...settings },
+    })),
+  // Spectrum/Accessibility mode
+  setSpectrumMode: (spectrumMode) => set({ spectrumMode }),
+  setSpectrumModeSettings: (settings) =>
+    set((state) => ({
+      spectrumModeSettings: { ...state.spectrumModeSettings, ...settings },
+    })),
   addTriggerMap: (entry) =>
     set((state) => ({
       triggerMaps: [

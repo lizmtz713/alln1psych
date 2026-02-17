@@ -17,6 +17,7 @@ import {
   getGaugeColor,
 } from '../../src/utils/gaugeHelpers';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from '../../src/components/gauges';
+import { CockpitCluster } from '../../src/components/CockpitCluster';
 import { useEngagementStore } from '../../src/stores/engagementStore';
 import { useEducationStore, userAgeToContentAge } from '../../src/stores/educationStore';
 import { useConversationStore } from '../../src/stores/conversationStore';
@@ -335,6 +336,16 @@ export default function HomeScreen() {
   const needsCheckInToday = overall < 0 || activeGaugeCount < 3;
   const psychSaysContent = showInsight && crossSystemInsight ? crossSystemInsight : psychSays;
 
+  // Quick actions for horizontal scroll
+  const quickActions = [
+    { label: 'Talk', icon: 'chatbubble-ellipses', route: '/(tabs)/talk' as const },
+    { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const },
+    { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const },
+    { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const },
+    { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const },
+    { label: 'Help', icon: 'heart', route: '/(modals)/help-someone' as const },
+  ];
+
   return (
     <ErrorBoundary>
     <ScrollView
@@ -343,107 +354,107 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
     >
-      {/* 1. Quick Action Pills — 2x3 grid */}
-      <View style={styles.quickActionsGridWrap}>
-        {[
-          { label: 'Talk', icon: 'chatbubble-ellipses', route: '/(tabs)/talk' as const, iconIsEmoji: false },
-          { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const, iconIsEmoji: false },
-          { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const, iconIsEmoji: false },
-          { label: 'Relate', icon: '💫', route: '/(modals)/relationship-check' as const, iconIsEmoji: true },
-          { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const, iconIsEmoji: false },
-          { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const, iconIsEmoji: false },
-        ].map((action) => (
-          <Pressable
-            key={action.label}
-            style={({ pressed }) => [styles.quickActionPillGrid, pressed && styles.quickActionPressed]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push(action.route);
-            }}
-          >
-            {action.iconIsEmoji ? (
-              <Text style={{ fontSize: 20 }}>{action.icon}</Text>
-            ) : (
-              <Ionicons name={action.icon as any} size={22} color={ACCENT} />
-            )}
-            <Text style={styles.quickActionPillText}>{action.label}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* 2. Six Gauges — cockpit grid; status inside each tile */}
-      <View style={styles.gaugeGridRow}>
-        <View style={styles.gaugeGridWrap}>
-          {(['body', 'state', 'emotion', 'connection', 'direction', 'alignment'] as const).map((key) => {
-            const gaugeValue = { body: bodyVal, state: stateVal, emotion: emotionVal, connection: connectionVal, direction: directionVal, alignment: alignmentVal }[key];
-            const config = GAUGE_CONFIG[key];
-            const GaugeComponent = GAUGE_COMPONENTS[key];
-            return (
-              <Pressable
-                key={key}
-                style={({ pressed }) => [styles.gaugeTile, pressed && styles.gaugeTilePressed]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push({ pathname: '/(modals)/gauge-detail', params: { gauge: key } });
-                }}
-              >
-                <GaugeComponent value={gaugeValue} size={70} />
-                <Text style={styles.gaugeTileLabel}>{config.label}</Text>
-                <Text style={[styles.gaugeTileStatus, gaugeValue < 0 && styles.gaugeTileStatusDim]}>
-                  {gaugeValue >= 0 ? getGaugeStatusLabel(gaugeValue) : 'Not checked'}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        <Pressable
-          style={styles.gaugeInfoIcon}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setShowGaugeInfo(true);
-          }}
-        >
-          <Text style={styles.gaugeInfoIconText}>ⓘ</Text>
-        </Pressable>
-      </View>
-
-      {/* 3. Tap to check in — small, only if they haven't today */}
-      {needsCheckInToday && (
-        <Pressable
-          style={styles.checkInButtonSmall}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/cockpit-checkin');
-          }}
-        >
-          <Text style={styles.checkInButtonSmallText}>Tap to check in</Text>
-        </Pressable>
-      )}
-
-      {/* 4. Greeting + Streak — smaller text */}
-      <View style={styles.greetingStreakRow}>
+      {/* ═══════════════════════════════════════════════════════════════
+          1. GREETING + STREAK — Personal anchor at TOP
+          ═══════════════════════════════════════════════════════════════ */}
+      <Animated.View style={[styles.greetingSection, slideY(card0)]}>
         {dailyContentLoading ? (
-          <Text style={styles.greetingSmall}>Loading...</Text>
+          <Text style={styles.greetingText}>Loading...</Text>
         ) : (
-          <Text style={styles.greetingSmall}>{greetingLine}</Text>
+          <Text style={styles.greetingText}>{greetingLine} 💜</Text>
         )}
         {streak > 0 && (
-          <View style={styles.streakRow}>
+          <View style={styles.streakBadge}>
             <Text style={styles.streakEmoji}>🔥</Text>
             <Text style={styles.streakText}>{streak}-day streak</Text>
           </View>
         )}
-      </View>
-
-      {/* 5. Psych Says — one card (cross-system insight or daily psych says) */}
-      <Animated.View style={[styles.card, styles.psychCard, slideY(card1)]}>
-        <Text style={styles.psychLabel}>Psych says...</Text>
-        <Text style={styles.psychText}>{psychSaysContent}</Text>
       </Animated.View>
 
-      {/* 6. Discovery — daily discovery card */}
+      {/* ═══════════════════════════════════════════════════════════════
+          2. COCKPIT CLUSTER — Center ring + 6 gauges in hex pattern
+          ═══════════════════════════════════════════════════════════════ */}
+      <Animated.View style={[styles.cockpitSection, slideY(card0)]}>
+        <View style={styles.cockpitHeader}>
+          <Text style={styles.cockpitTitle}>Your Cockpit</Text>
+          <Pressable
+            style={styles.gaugeInfoButton}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowGaugeInfo(true);
+            }}
+          >
+            <Ionicons name="information-circle-outline" size={20} color={TEXT_SECONDARY} />
+          </Pressable>
+        </View>
+        <CockpitCluster
+          gaugeValues={{
+            body: bodyVal,
+            state: stateVal,
+            emotion: emotionVal,
+            connection: connectionVal,
+            direction: directionVal,
+            alignment: alignmentVal,
+          }}
+          overall={overall}
+        />
+      </Animated.View>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          4. AI CROSS-SYSTEM INSIGHT — The magic
+          ═══════════════════════════════════════════════════════════════ */}
+      {showInsight && crossSystemInsight && (
+        <Animated.View style={[styles.insightCard, slideY(card1)]}>
+          <View style={styles.insightHeader}>
+            <Ionicons name="bulb" size={18} color={ACCENT} />
+            <Text style={styles.insightLabel}>Cross-System Insight</Text>
+          </View>
+          <Text style={styles.insightText}>{crossSystemInsight}</Text>
+        </Animated.View>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          5. QUICK ACTIONS — Horizontal scroll (secondary to gauges)
+          ═══════════════════════════════════════════════════════════════ */}
+      <Animated.View style={[styles.actionsSection, slideY(card2)]}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.actionsScroll}
+        >
+          {quickActions.map((action) => (
+            <Pressable
+              key={action.label}
+              style={({ pressed }) => [styles.actionPill, pressed && styles.actionPillPressed]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(action.route);
+              }}
+            >
+              <Ionicons name={action.icon as any} size={20} color={ACCENT} />
+              <Text style={styles.actionPillText}>{action.label}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </Animated.View>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          6. PSYCH SAYS — Daily wisdom or insight
+          ═══════════════════════════════════════════════════════════════ */}
+      {!showInsight && (
+        <Animated.View style={[styles.card, styles.psychCard, slideY(card2)]}>
+          <Text style={styles.psychLabel}>Psych says...</Text>
+          <Text style={styles.psychText}>{psychSays}</Text>
+        </Animated.View>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          BELOW THE FOLD — Discovery, Circle, Activities, etc.
+          ═══════════════════════════════════════════════════════════════ */}
+
+      {/* Discovery */}
       {discoveryPreview && (
-        <Animated.View style={[styles.card, slideY(card2)]}>
+        <Animated.View style={[styles.card, slideY(card3)]}>
           <Text style={styles.cardSectionTitle}>Discovery</Text>
           <Pressable
             style={({ pressed }) => [pressed && { opacity: 0.9 }]}
@@ -452,14 +463,14 @@ export default function HomeScreen() {
             <Text style={styles.discoveryEmoji}>{discoveryPreview.emoji}</Text>
             <Text style={styles.discoveryTitle}>{discoveryPreview.title}</Text>
             <Text style={styles.discoveryContent} numberOfLines={2}>{discoveryPreview.content}</Text>
-            <Text style={styles.discoveryTapHint}>See more in Manual →</Text>
+            <Text style={styles.discoveryLink}>See more in Manual →</Text>
           </Pressable>
         </Animated.View>
       )}
 
-      {/* 7. My Circle — preview */}
+      {/* My Circle */}
       {Array.isArray(members) && members.length > 0 && (
-        <Animated.View style={[styles.section, slideY(card2)]}>
+        <Animated.View style={[styles.section, slideY(card3)]}>
           <Text style={styles.sectionTitle}>My Circle</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.circleScroll}>
             {members.map((m) => (
@@ -484,29 +495,15 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* Help Someone — below My Circles */}
-      <Pressable
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          router.push('/(modals)/help-someone');
-        }}
-        style={styles.helpSomeoneCard}
-      >
-        <View>
-          <Text style={styles.helpSomeoneTitle}>Help Someone</Text>
-          <Text style={styles.helpSomeoneSub}>Get coaching on supporting someone you care about</Text>
-        </View>
-        <Ionicons name="heart" size={22} color="#7C4DFF" />
-      </Pressable>
-
-      {/* 8. Everything else — affirmation, Try This, weekly */}
-      <Animated.View style={[styles.card, styles.affirmationCard, slideY(card2)]}>
+      {/* Affirmation */}
+      <Animated.View style={[styles.card, styles.affirmationCard, slideY(card4)]}>
         <Text style={styles.affirmation}>{affirmation}</Text>
       </Animated.View>
 
-      <Animated.View style={[styles.tryThisPillsWrap, slideY(card3)]}>
+      {/* Try This */}
+      <Animated.View style={[styles.tryThisSection, slideY(card4)]}>
         <Text style={styles.cardSectionTitle}>Try this</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tryThisPillsRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tryThisScroll}>
           {(() => {
             const hour = new Date().getHours();
             const recentMoods = Array.isArray(moodTrend) ? moodTrend.map((t) => (t && typeof t === 'object' && 'mood' in t ? t.mood : '')) : [];
@@ -528,12 +525,14 @@ export default function HomeScreen() {
         </ScrollView>
       </Animated.View>
 
+      {/* Weekly Summary */}
       {weeklySummary && (
-        <Animated.View style={[styles.card, styles.weeklyCard, slideY(card3)]}>
-          <Text style={styles.cardSectionTitle}>Your week in review</Text>
+        <Animated.View style={[styles.card, slideY(card5)]}>
+          <Text style={styles.cardSectionTitle}>Your week</Text>
           <Text style={styles.weeklyLine}>{weeklySummary.line}</Text>
           <Text style={styles.weeklyMeta}>
-            Most common mood: {weeklySummary.mostCommonMood} · {weeklySummary.lessonsCount} lessons · {weeklySummary.conversationDays} conversation(s)
+            {weeklySummary.mostCommonMood && `Most common: ${weeklySummary.mostCommonMood} · `}
+            {weeklySummary.lessonsCount} lessons · {weeklySummary.conversationDays} conversations
           </Text>
         </Animated.View>
       )}
@@ -542,9 +541,16 @@ export default function HomeScreen() {
       <Modal visible={showGaugeInfo} transparent animationType="fade">
         <Pressable style={styles.modalOverlay} onPress={() => setShowGaugeInfo(false)}>
           <View style={styles.gaugeInfoCard}>
-            <Text style={styles.gaugeInfoTitle}>Gauge numbers</Text>
+            <Text style={styles.gaugeInfoTitle}>Your 6 Gauges</Text>
             <Text style={styles.gaugeInfoBody}>
-              These numbers (0–100) show how well each system is regulated based on your check-in. Green (75–100) = strong. Yellow (50–74) = steady. Orange (25–49) = needs attention. Red (0–24) = prioritize this. Tap any gauge to learn more.
+              Each gauge measures a different system in your life:{'\n\n'}
+              <Text style={{ fontWeight: '600' }}>Body</Text> — Sleep, nutrition, movement{'\n'}
+              <Text style={{ fontWeight: '600' }}>State</Text> — Nervous system regulation{'\n'}
+              <Text style={{ fontWeight: '600' }}>Emotion</Text> — Emotional clarity{'\n'}
+              <Text style={{ fontWeight: '600' }}>Connection</Text> — Relationships, belonging{'\n'}
+              <Text style={{ fontWeight: '600' }}>Direction</Text> — Purpose, momentum{'\n'}
+              <Text style={{ fontWeight: '600' }}>Alignment</Text> — Values match actions{'\n\n'}
+              0-100 scale. Green (75+) = thriving. Yellow (50-74) = steady. Orange (25-49) = attention needed. Red (0-24) = prioritize.
             </Text>
             <Pressable style={styles.gaugeInfoClose} onPress={() => setShowGaugeInfo(false)}>
               <Text style={styles.gaugeInfoCloseText}>Got it</Text>
@@ -559,145 +565,169 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COCKPIT_BG },
-  content: { paddingHorizontal: 24, paddingBottom: 40 },
-  statusLabelWrap: { alignItems: 'center', marginBottom: 8 },
-  statusLabelCaps: {
-    fontSize: 12,
-    letterSpacing: 1.5,
-    color: TEXT_SECONDARY,
-    textTransform: 'uppercase',
-  },
-  centralRingWrap: { alignItems: 'center', marginBottom: 20 },
-  centralRing: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 6,
+  content: { paddingHorizontal: 20, paddingBottom: 40 },
+
+  // ─── Greeting Section ───
+  greetingSection: {
+    marginTop: 16,
+    marginBottom: 12,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: CARD_BG,
   },
-  centralRingValue: {
-    fontSize: 32,
-    fontWeight: '700',
+  greetingText: {
+    fontSize: 24,
+    fontWeight: '600',
     color: TEXT_PRIMARY,
-    fontVariant: ['tabular-nums'],
+    textAlign: 'center',
   },
-  centralRingHint: { fontSize: 13, color: TEXT_MUTED, marginTop: 8 },
-  gaugeGridRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 },
-  gaugeGridWrap: {
+  streakBadge: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginTop: 12,
-    flex: 1,
-  },
-  gaugeInfoIcon: { padding: 8, marginLeft: 4 },
-  gaugeInfoIconText: { fontSize: 16, color: TEXT_SECONDARY },
-  gaugeTile: {
-    width: '48%',
-    backgroundColor: CARD_BG,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
-    padding: 12,
-    marginBottom: 10,
     alignItems: 'center',
+    marginTop: 8,
+    backgroundColor: CARD_BG,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
   },
-  gaugeTilePressed: { backgroundColor: '#16161F' },
-  gaugeTileLabel: { fontSize: 13, fontWeight: '600', color: TEXT_PRIMARY, marginTop: 6 },
-  gaugeTileStatus: { fontSize: 11, color: TEXT_SECONDARY, marginTop: 2 },
-  gaugeTileStatusDim: { color: TEXT_MUTED },
+  streakEmoji: { fontSize: 16 },
+  streakText: { fontSize: 14, fontWeight: '600', color: TEXT_PRIMARY },
+
+  // ─── Cockpit Cluster Section ───
+  cockpitSection: {
+    marginBottom: 16,
+  },
+  cockpitHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
+  cockpitTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: TEXT_PRIMARY,
+  },
+  gaugeInfoButton: {
+    padding: 4,
+  },
+
+  // ─── Insight Card ───
   insightCard: {
     backgroundColor: CARD_BG,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: ACCENT,
+    borderColor: ACCENT + '40',
   },
-  insightText: { fontSize: 15, color: TEXT_PRIMARY, lineHeight: 22 },
-  streakRow: {
+  insightHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
     gap: 8,
+    marginBottom: 10,
   },
-  streakEmoji: { fontSize: 20 },
-  streakText: { fontSize: 15, fontWeight: '600', color: TEXT_PRIMARY },
-  indicatorRow: {
+  insightLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: ACCENT,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  insightText: { 
+    fontSize: 15, 
+    color: TEXT_PRIMARY, 
+    lineHeight: 22,
+  },
+
+  // ─── Actions Section ───
+  actionsSection: {
+    marginBottom: 20,
+  },
+  actionsScroll: {
+    paddingVertical: 4,
+    gap: 10,
+  },
+  actionPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-    gap: 16,
-    flexWrap: 'wrap',
+    gap: 8,
+    backgroundColor: CARD_BG,
+    borderRadius: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    marginRight: 10,
   },
-  indicatorDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: TEXT_MUTED,
+  actionPillPressed: { backgroundColor: '#16161F' },
+  actionPillText: { 
+    fontSize: 14, 
+    color: TEXT_PRIMARY, 
+    fontWeight: '600',
   },
-  indicatorDotOn: { backgroundColor: ACCENT },
-  indicatorLabel: { fontSize: 12, color: TEXT_SECONDARY },
-  greetingSmallWrap: { marginBottom: 16 },
-  greetingSmall: {
-    fontSize: 17,
-    fontWeight: '500',
-    color: TEXT_SECONDARY,
-  },
-  affirmationCard: {
-    borderLeftWidth: 4,
-    borderLeftColor: ACCENT,
-  },
-  affirmation: {
-    fontSize: 18,
-    color: TEXT_SECONDARY,
-    lineHeight: 26,
-    fontStyle: 'italic',
-  },
+
+  // ─── Cards ───
   card: {
     backgroundColor: CARD_BG,
     borderRadius: BORDER_RADIUS.card,
-    padding: 20,
-    marginBottom: 20,
+    padding: 18,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: CARD_BORDER,
   },
   cardSectionTitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: TEXT_MUTED,
     marginBottom: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  psychCard: { borderLeftWidth: 4, borderLeftColor: ACCENT },
+  psychCard: { 
+    borderLeftWidth: 4, 
+    borderLeftColor: ACCENT,
+  },
   psychLabel: {
-    fontSize: 13,
+    fontSize: 12,
     color: TEXT_MUTED,
     marginBottom: 6,
   },
   psychText: {
     fontSize: 16,
     color: TEXT_PRIMARY,
-    lineHeight: 22,
+    lineHeight: 24,
   },
-  weeklyCard: {},
-  weeklyLine: { fontSize: 16, color: TEXT_PRIMARY, marginBottom: 8, fontWeight: '500' },
-  weeklyMeta: { fontSize: 14, color: TEXT_MUTED },
-  section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 8 },
-  muted: { fontSize: 15, color: TEXT_MUTED },
-  circleScroll: { paddingVertical: 8, gap: 12, paddingRight: 24 },
+  affirmationCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: ACCENT,
+  },
+  affirmation: {
+    fontSize: 17,
+    color: TEXT_SECONDARY,
+    lineHeight: 26,
+    fontStyle: 'italic',
+  },
+
+  // ─── Discovery ───
+  discoveryEmoji: { fontSize: 28, marginBottom: 8 },
+  discoveryTitle: { fontSize: 17, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 6 },
+  discoveryContent: { fontSize: 14, color: TEXT_SECONDARY, lineHeight: 20 },
+  discoveryLink: { fontSize: 13, color: ACCENT, marginTop: 10, fontWeight: '500' },
+
+  // ─── Circle ───
+  section: { marginBottom: 20 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 12 },
+  circleScroll: { paddingVertical: 8, gap: 8 },
   circleMember: {
     alignItems: 'center',
     marginRight: 16,
-    minWidth: 72,
+    minWidth: 64,
   },
   circleMemberName: { fontSize: 12, color: TEXT_SECONDARY, marginTop: 6 },
   alert: {
     marginTop: 12,
     backgroundColor: CARD_BG,
-    borderRadius: BORDER_RADIUS.input,
+    borderRadius: 12,
     padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
@@ -710,15 +740,13 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
-  alertText: { fontSize: 15, color: TEXT_PRIMARY, flex: 1 },
+  alertText: { fontSize: 14, color: TEXT_PRIMARY, flex: 1 },
   alertButton: { paddingVertical: 8, paddingHorizontal: 14 },
-  alertButtonText: { fontSize: 15, color: ACCENT, fontWeight: '500' },
-  discoveryEmoji: { fontSize: 24, marginBottom: 6 },
-  discoveryTitle: { fontSize: 16, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 6 },
-  discoveryContent: { fontSize: 14, color: TEXT_SECONDARY, lineHeight: 20 },
-  discoveryTapHint: { fontSize: 13, color: ACCENT, marginTop: 8 },
-  tryThisPillsWrap: { marginBottom: 24 },
-  tryThisPillsRow: { flexDirection: 'row', gap: 10, paddingVertical: 8 },
+  alertButtonText: { fontSize: 14, color: ACCENT, fontWeight: '600' },
+
+  // ─── Try This ───
+  tryThisSection: { marginBottom: 20 },
+  tryThisScroll: { paddingVertical: 8, gap: 10 },
   tryThisPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -728,100 +756,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderWidth: 1,
     borderColor: CARD_BORDER,
+    marginRight: 10,
   },
-  tryThisPillEmoji: { fontSize: 16, marginRight: 6 },
+  tryThisPillEmoji: { fontSize: 16, marginRight: 8 },
   tryThisPillText: { fontSize: 14, color: TEXT_PRIMARY, fontWeight: '500' },
+
+  // ─── Weekly ───
+  weeklyLine: { fontSize: 15, color: TEXT_PRIMARY, marginBottom: 6, fontWeight: '500' },
+  weeklyMeta: { fontSize: 13, color: TEXT_MUTED },
+
+  // ─── Modal ───
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     padding: 24,
   },
   gaugeInfoCard: {
     backgroundColor: CARD_BG,
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 20,
+    padding: 24,
     borderWidth: 1,
     borderColor: CARD_BORDER,
   },
-  gaugeInfoTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 12 },
-  gaugeInfoBody: { fontSize: 15, color: TEXT_SECONDARY, lineHeight: 22 },
+  gaugeInfoTitle: { fontSize: 20, fontWeight: '700', color: TEXT_PRIMARY, marginBottom: 16 },
+  gaugeInfoBody: { fontSize: 14, color: TEXT_SECONDARY, lineHeight: 22 },
   gaugeInfoClose: {
-    marginTop: 16,
+    marginTop: 20,
     alignSelf: 'flex-end',
-    paddingVertical: 10,
-    paddingHorizontal: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     backgroundColor: ACCENT,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   gaugeInfoCloseText: { fontSize: 15, fontWeight: '600', color: '#fff' },
-  quickActionsWrap: { marginBottom: 24 },
-  quickActionsScroll: { flexDirection: 'row', gap: 10, paddingVertical: 4 },
-  quickActionsGridWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
-  quickActionPillGrid: {
-    width: '48%',
-    marginBottom: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: CARD_BG,
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
-  },
-  quickActionPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: CARD_BG,
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
-  },
-  quickActionPressed: { opacity: 0.9 },
-  quickActionPillText: { fontSize: 14, color: TEXT_PRIMARY, fontWeight: '500' },
-  helpSomeoneCard: {
-    backgroundColor: '#111118',
-    borderRadius: 14,
-    padding: 16,
-    marginHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  helpSomeoneTitle: { color: '#F0F0F5', fontSize: 16, fontWeight: '600' },
-  helpSomeoneSub: { color: '#8888A0', fontSize: 13, marginTop: 2 },
-  quickActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 24,
-  },
-  quickAction: {
-    flex: 1,
-    minWidth: '28%',
-    backgroundColor: CARD_BG,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
-  },
-  quickActionText: { fontSize: 13, color: TEXT_PRIMARY, marginTop: 8, textAlign: 'center' },
-  practiceEmoji: { fontSize: 28, marginBottom: 8 },
-  practiceTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 4 },
-  practiceSub: { fontSize: 15, color: TEXT_MUTED },
 });
