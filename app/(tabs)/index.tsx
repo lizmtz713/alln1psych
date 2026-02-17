@@ -332,6 +332,9 @@ export default function HomeScreen() {
     transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
   });
 
+  const needsCheckInToday = overall < 0 || activeGaugeCount < 3;
+  const psychSaysContent = showInsight && crossSystemInsight ? crossSystemInsight : psychSays;
+
   return (
     <ErrorBoundary>
     <ScrollView
@@ -340,30 +343,37 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
     >
-      {/* 1. Status label — small caps above ring */}
-      <View style={styles.statusLabelWrap}>
-        <Text style={styles.statusLabelCaps}>
-          {dailyContentLoading ? '…' : (overallLabel ?? 'SYSTEMS STABLE').toUpperCase()}
-        </Text>
+      {/* 1. Quick Action Pills — very top, no header */}
+      <View style={styles.quickActionsWrap}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
+          {[
+            { label: 'Talk', icon: 'chatbubble-ellipses', route: '/(tabs)/talk' as const },
+            { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const },
+            { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const },
+            { label: 'Relate', icon: '💫', route: '/(modals)/relationship-check' as const, iconIsEmoji: true },
+            { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const },
+            { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const },
+          ].map((action) => (
+            <Pressable
+              key={action.label}
+              style={({ pressed }) => [styles.quickActionPill, pressed && styles.quickActionPressed]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(action.route);
+              }}
+            >
+              {(action as { iconIsEmoji?: boolean }).iconIsEmoji ? (
+                <Text style={{ fontSize: 20 }}>{(action as { icon: string }).icon}</Text>
+              ) : (
+                <Ionicons name={(action as { icon: string }).icon as any} size={22} color={ACCENT} />
+              )}
+              <Text style={styles.quickActionPillText}>{action.label}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
       </View>
 
-      {/* 2. Central Status Ring */}
-      <Pressable
-        style={styles.centralRingWrap}
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          router.push('/(modals)/cockpit-checkin');
-        }}
-      >
-        <Animated.View style={[styles.centralRing, { borderColor: ringColor }]}>
-          <Text style={styles.centralRingValue} numberOfLines={1}>
-            {overall >= 0 ? overall : '—'}
-          </Text>
-        </Animated.View>
-        {overall < 0 && <Text style={styles.centralRingHint}>Tap to run diagnostics</Text>}
-      </Pressable>
-
-      {/* 3. Six Gauge Tiles + info icon */}
+      {/* 2. Six Gauges — cockpit grid; status inside each tile */}
       <View style={styles.gaugeGridRow}>
         <View style={styles.gaugeGridWrap}>
           {(['body', 'state', 'emotion', 'connection', 'direction', 'alignment'] as const).map((key) => {
@@ -399,73 +409,57 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {/* 4. Streak */}
-      {streak > 0 && (
-        <Animated.View style={[styles.streakRow, slideY(card1)]}>
-          <Text style={styles.streakEmoji}>🔥</Text>
-          <Text style={styles.streakText}>{streak}-day streak</Text>
-        </Animated.View>
+      {/* 3. Tap to check in — small, only if they haven't today */}
+      {needsCheckInToday && (
+        <Pressable
+          style={styles.checkInButtonSmall}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/cockpit-checkin');
+          }}
+        >
+          <Text style={styles.checkInButtonSmallText}>Tap to check in</Text>
+        </Pressable>
       )}
 
-      {/* 5. Indicator lights */}
-      <View style={styles.indicatorRow}>
-        <View style={[styles.indicatorDot, (myTemperature != null && myTemperature !== '') && styles.indicatorDotOn]} />
-        <Text style={styles.indicatorLabel}>Check-in</Text>
-        <View style={[styles.indicatorDot, hasJournalToday && styles.indicatorDotOn]} />
-        <Text style={styles.indicatorLabel}>Journal</Text>
-        <View style={[styles.indicatorDot, false && styles.indicatorDotOn]} />
-        <Text style={styles.indicatorLabel}>Activity</Text>
-        <View style={[styles.indicatorDot, hasTalkedToday && styles.indicatorDotOn]} />
-        <Text style={styles.indicatorLabel}>Talked</Text>
-      </View>
-
-      {/* 6. Greeting — small, one line */}
-      <View style={styles.greetingSmallWrap}>
+      {/* 4. Greeting + Streak — smaller text */}
+      <View style={styles.greetingStreakRow}>
         {dailyContentLoading ? (
           <Text style={styles.greetingSmall}>Loading...</Text>
         ) : (
           <Text style={styles.greetingSmall}>{greetingLine}</Text>
         )}
+        {streak > 0 && (
+          <View style={styles.streakRow}>
+            <Text style={styles.streakEmoji}>🔥</Text>
+            <Text style={styles.streakText}>{streak}-day streak</Text>
+          </View>
+        )}
       </View>
 
-      {/* 7. AI Cross-System Insight */}
-      {showInsight && (
-        <View style={[styles.insightCard, slideY(card1)]}>
-          <Text style={styles.insightText}>{crossSystemInsight}</Text>
-        </View>
-      )}
-
-      {/* 8. Quick Actions — Talk, Replay, Decode, Journal, Practice */}
-      <Animated.View style={[styles.quickActionsWrap, slideY(card1)]}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
-          {[
-            { label: 'Talk', icon: 'chatbubble-ellipses', route: '/(tabs)/talk' as const },
-            { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const },
-            { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const },
-            { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const },
-            { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const },
-            { label: 'Relate', icon: '💫', route: '/(modals)/relationship-check' as const, iconIsEmoji: true },
-          ].map((action) => (
-            <Pressable
-              key={action.label}
-              style={({ pressed }) => [styles.quickActionPill, pressed && styles.quickActionPressed]}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push(action.route);
-              }}
-            >
-              {(action as { iconIsEmoji?: boolean }).iconIsEmoji ? (
-                <Text style={{ fontSize: 20 }}>{(action as { icon: string }).icon}</Text>
-              ) : (
-                <Ionicons name={(action as { icon: string }).icon as any} size={22} color={ACCENT} />
-              )}
-              <Text style={styles.quickActionPillText}>{action.label}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
+      {/* 5. Psych Says — one card (cross-system insight or daily psych says) */}
+      <Animated.View style={[styles.card, styles.psychCard, slideY(card1)]}>
+        <Text style={styles.psychLabel}>Psych says...</Text>
+        <Text style={styles.psychText}>{psychSaysContent}</Text>
       </Animated.View>
 
-      {/* 9. My Circle — horizontal scroll */}
+      {/* 6. Discovery — daily discovery card */}
+      {discoveryPreview && (
+        <Animated.View style={[styles.card, slideY(card2)]}>
+          <Text style={styles.cardSectionTitle}>Discovery</Text>
+          <Pressable
+            style={({ pressed }) => [pressed && { opacity: 0.9 }]}
+            onPress={() => router.push('/(tabs)/learn')}
+          >
+            <Text style={styles.discoveryEmoji}>{discoveryPreview.emoji}</Text>
+            <Text style={styles.discoveryTitle}>{discoveryPreview.title}</Text>
+            <Text style={styles.discoveryContent} numberOfLines={2}>{discoveryPreview.content}</Text>
+            <Text style={styles.discoveryTapHint}>See more in Manual →</Text>
+          </Pressable>
+        </Animated.View>
+      )}
+
+      {/* 7. My Circle — preview */}
       {Array.isArray(members) && members.length > 0 && (
         <Animated.View style={[styles.section, slideY(card2)]}>
           <Text style={styles.sectionTitle}>My Circle</Text>
@@ -492,49 +486,11 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* 10. Daily Affirmation */}
+      {/* 8. Everything else — affirmation, Try This, weekly */}
       <Animated.View style={[styles.card, styles.affirmationCard, slideY(card2)]}>
         <Text style={styles.affirmation}>{affirmation}</Text>
       </Animated.View>
 
-      {/* 11. Help Someone */}
-      <Animated.View style={[styles.card, slideY(card2)]}>
-        <Pressable
-          style={({ pressed }) => [pressed && { opacity: 0.9 }]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/help-someone');
-          }}
-        >
-          <Text style={styles.practiceEmoji}>🤝</Text>
-          <Text style={styles.practiceTitle}>Help Someone</Text>
-          <Text style={styles.practiceSub}>Worried about someone? Get coaching on what to say.</Text>
-        </Pressable>
-      </Animated.View>
-
-      {/* 12. Psych Says */}
-      <Animated.View style={[styles.card, styles.psychCard, slideY(card2)]}>
-        <Text style={styles.psychLabel}>Psych says...</Text>
-        <Text style={styles.psychText}>{psychSays}</Text>
-      </Animated.View>
-
-      {/* 13. Discovery — 1 preview card */}
-      {discoveryPreview && (
-        <Animated.View style={[styles.card, slideY(card3)]}>
-          <Text style={styles.cardSectionTitle}>Discovery</Text>
-          <Pressable
-            style={({ pressed }) => [pressed && { opacity: 0.9 }]}
-            onPress={() => router.push('/(tabs)/learn')}
-          >
-            <Text style={styles.discoveryEmoji}>{discoveryPreview.emoji}</Text>
-            <Text style={styles.discoveryTitle}>{discoveryPreview.title}</Text>
-            <Text style={styles.discoveryContent} numberOfLines={2}>{discoveryPreview.content}</Text>
-            <Text style={styles.discoveryTapHint}>See more in Manual →</Text>
-          </Pressable>
-        </Animated.View>
-      )}
-
-      {/* 14. Try This — pills at bottom */}
       <Animated.View style={[styles.tryThisPillsWrap, slideY(card3)]}>
         <Text style={styles.cardSectionTitle}>Try this</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tryThisPillsRow}>
