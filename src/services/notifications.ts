@@ -3,19 +3,21 @@
  */
 
 import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import { Platform } from 'react-native';
+
+const Device = require('expo-device') as { isDevice?: boolean };
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),
 });
 
 export async function registerForPushNotifications(): Promise<string | null> {
-  if (!Device.isDevice) {
+  if (!Device?.isDevice) {
     if (__DEV__) console.log('Push notifications only work on physical devices');
     return null;
   }
@@ -55,7 +57,7 @@ export async function scheduleDailyCheckin(hour: number = 9, minute: number = 0)
       data: { type: 'daily-checkin' },
     },
     trigger: {
-      type: 'daily' as const,
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour,
       minute,
     },
@@ -82,7 +84,7 @@ export async function scheduleEveningReflection(hour: number = 21, minute: numbe
       data: { type: 'evening-reflection' },
     },
     trigger: {
-      type: 'daily' as const,
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour,
       minute,
     },

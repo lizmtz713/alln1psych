@@ -29,7 +29,7 @@ export function GoogleSignInButton({ onSuccess, onError }: Props) {
       scopes: ['openid', 'profile', 'email'],
       responseType: 'id_token' as const,
     },
-    discovery ?? undefined
+    discovery ?? null
   );
 
   useEffect(() => {

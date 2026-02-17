@@ -24,8 +24,8 @@ import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { useUserStore } from '../../src/stores/userStore';
 import { registerForPushNotifications } from '../../src/services/notifications';
-import { useJournalStore } from '../../src/stores/journalStore';
-import { useInsightsStore } from '../../src/stores/insightsStore';
+import { useJournalStore, type JournalEntry } from '../../src/stores/journalStore';
+import { useInsightsStore, type Achievement } from '../../src/stores/insightsStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { getOpenAIKey, setOpenAIKey } from '../../src/services/ai';
 import { useCircleStore } from '../../src/stores/circleStore';
@@ -66,14 +66,14 @@ export default function MeScreen() {
   const { signOut } = useAuth();
   const user = useUserStore();
   const { setSensitiveTopics, setEmergencyContacts } = useUserStore();
-  const entries = useJournalStore((s) => s.entries);
-  const getRecentEntries = useJournalStore((s) => s.getRecentEntries);
-  const getAchievements = useInsightsStore((s) => s.getAchievements);
-  const getWeeklyMoodTrend = useInsightsStore((s) => s.getWeeklyMoodTrend);
-  const getCheckInStreak = useInsightsStore((s) => s.getCheckInStreak);
-  const getConversationCountThisWeek = useInsightsStore((s) => s.getConversationCountThisWeek);
-  const getLessonsCompletedThisWeek = useInsightsStore((s) => s.getLessonsCompletedThisWeek);
-  const getMostCommonMoodThisWeek = useInsightsStore((s) => s.getMostCommonMoodThisWeek);
+  const entries = useJournalStore((s: { entries: JournalEntry[] }) => s.entries);
+  const getRecentEntries = useJournalStore((s: { getRecentEntries: (n: number) => JournalEntry[] }) => s.getRecentEntries);
+  const getAchievements = useInsightsStore((s: { getAchievements: () => Achievement[] }) => s.getAchievements);
+  const getWeeklyMoodTrend = useInsightsStore((s: { getWeeklyMoodTrend: () => Array<{ date: string; mood: string }> }) => s.getWeeklyMoodTrend);
+  const getCheckInStreak = useInsightsStore((s: { getCheckInStreak: () => number }) => s.getCheckInStreak);
+  const getConversationCountThisWeek = useInsightsStore((s: { getConversationCountThisWeek: () => number }) => s.getConversationCountThisWeek);
+  const getLessonsCompletedThisWeek = useInsightsStore((s: { getLessonsCompletedThisWeek: () => number }) => s.getLessonsCompletedThisWeek);
+  const getMostCommonMoodThisWeek = useInsightsStore((s: { getMostCommonMoodThisWeek: () => string | null }) => s.getMostCommonMoodThisWeek);
 
   const settings = useSettingsStore();
   useCircleStore((s) => s.moodHistory.length);
@@ -93,12 +93,12 @@ export default function MeScreen() {
 
   const recentEntries = getRecentEntries(20);
   const achievements = getAchievements();
-  const unlockedIds = new Set(achievements.filter((a) => a.unlocked).map((a) => a.id));
+  const unlockedIds = new Set(achievements.filter((a: Achievement) => a.unlocked).map((a: Achievement) => a.id));
 
   useEffect(() => {
-    const nextIds = new Set(achievements.filter((a) => a.unlocked).map((a) => a.id));
+    const nextIds = new Set<string>(achievements.filter((a: Achievement) => a.unlocked).map((a: Achievement) => a.id));
     const prev = prevUnlockedIds.current;
-    const newlyUnlocked = achievements.find((a) => a.unlocked && !prev.has(a.id));
+    const newlyUnlocked = achievements.find((a: Achievement) => a.unlocked && !prev.has(a.id));
     if (newlyUnlocked) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setToast({ title: newlyUnlocked.title, emoji: newlyUnlocked.emoji });
@@ -240,7 +240,7 @@ export default function MeScreen() {
           )}
           <View style={styles.badgeIcon}>
             <Ionicons
-              name={user.communicationPreference === 'text' ? 'keyboard-outline' : 'mic-outline'}
+              name={user.communicationPreference === 'text' ? 'keypad-outline' : 'mic-outline'}
               size={16}
               color={COLORS.textMuted}
             />
@@ -271,7 +271,7 @@ export default function MeScreen() {
           </Text>
         ) : (
           <View style={styles.entryList}>
-            {recentEntries.map((e) => {
+            {recentEntries.map((e: JournalEntry) => {
               const expanded = expandedEntryId === e.id;
               const preview = e.content.split('\n').slice(0, 2).join(' ').slice(0, 80);
               return (
@@ -302,7 +302,7 @@ export default function MeScreen() {
             {moodTrend.length > 0 && (
               <>
                 <Text style={styles.insightLabel}>Mood trend</Text>
-                <Text style={styles.insightValue}>{moodTrend.map((m) => m.mood).join(' → ')}</Text>
+                <Text style={styles.insightValue}>{moodTrend.map((m: { date: string; mood: string }) => m.mood).join(' → ')}</Text>
               </>
             )}
             {mostCommonMood && (
@@ -378,7 +378,7 @@ export default function MeScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Milestones</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.achievementScroll}>
-          {achievements.map((a, i) => (
+          {achievements.map((a: Achievement, i: number) => (
             <Pressable
               key={a.id}
               onPress={() =>

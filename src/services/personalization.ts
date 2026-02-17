@@ -13,6 +13,7 @@ export interface DailyContentContext {
   lessonsCompleted: string[];
   loveLanguage?: string;
   triggers?: string[];
+  sensitiveTopics?: string[];
 }
 
 export interface DailyContent {

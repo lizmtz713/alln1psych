@@ -68,28 +68,28 @@ interface InsightsState {
   getWeeklySummary: () => { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null;
 }
 
-const oneWeekAgo = () => {
+const oneWeekAgo = (): number => {
   const d = new Date();
   d.setDate(d.getDate() - 7);
   return d.getTime();
 };
 
 export const useInsightsStore = create<InsightsState>(() => ({
-  getAchievements: () => {
+  getAchievements: (): Achievement[] => {
     const unlocked = getAchievementsUnlocked();
-    return ACHIEVEMENT_DEFS.map((a) => ({
+    return ACHIEVEMENT_DEFS.map((a: Omit<Achievement, 'unlocked' | 'unlockedAt'>) => ({
       ...a,
       unlocked: unlocked[a.id] ?? false,
       unlockedAt: undefined,
     }));
   },
 
-  getWeeklyMoodTrend: () => {
+  getWeeklyMoodTrend: (): Array<{ date: string; mood: string }> => {
     const circle = useCircleStore.getState();
     const since = oneWeekAgo();
     return circle.moodHistory
-      .filter((e) => new Date(e.timestamp).getTime() >= since)
-      .map((e) => ({
+      .filter((e: { timestamp: string | Date }) => new Date(e.timestamp).getTime() >= since)
+      .map((e: { timestamp: string | Date; mood: string }) => ({
         date: new Date(e.timestamp).toLocaleDateString(),
         mood: e.mood,
       }))
@@ -139,11 +139,11 @@ export const useInsightsStore = create<InsightsState>(() => ({
     return useEducationStore.getState().completedLessons.length;
   },
 
-  getMostCommonMoodThisWeek: () => {
+  getMostCommonMoodThisWeek: (): string | null => {
     const trend = useInsightsStore.getState().getWeeklyMoodTrend();
     if (trend.length === 0) return null;
     const counts: Record<string, number> = {};
-    trend.forEach(({ mood }) => {
+    trend.forEach(({ mood }: { mood: string }) => {
       counts[mood] = (counts[mood] || 0) + 1;
     });
     let max = 0;
@@ -157,9 +157,9 @@ export const useInsightsStore = create<InsightsState>(() => ({
     return mood;
   },
 
-  getPsychSays: (engagementStreak) => {
+  getPsychSays: (engagementStreak: number) => {
     const trend = useInsightsStore.getState().getWeeklyMoodTrend();
-    const greenCount = trend.filter((t) => t.mood === 'green').length;
+    const greenCount = trend.filter((t: { mood: string }) => t.mood === 'green').length;
     const lastMood = trend.length > 0 ? trend[0].mood : null;
     if (greenCount >= 3 && lastMood === 'green')
       return "You've been feeling good this week. What's contributing to that?";
@@ -175,14 +175,14 @@ export const useInsightsStore = create<InsightsState>(() => ({
     return tips[Math.floor(Math.random() * tips.length)];
   },
 
-  getWeeklySummary: () => {
+  getWeeklySummary: (): { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null => {
     const now = new Date();
     if (now.getDay() !== 0) return null; // Sunday = 0
     const trend = useInsightsStore.getState().getWeeklyMoodTrend();
     const convCount = useInsightsStore.getState().getConversationCountThisWeek();
     const lessonsCount = useInsightsStore.getState().getLessonsCompletedThisWeek();
     const moodCounts: Record<string, number> = {};
-    trend.forEach(({ mood }) => {
+    trend.forEach(({ mood }: { mood: string }) => {
       moodCounts[mood] = (moodCounts[mood] || 0) + 1;
     });
     let mostCommonMood: string | null = null;
@@ -193,7 +193,7 @@ export const useInsightsStore = create<InsightsState>(() => ({
         mostCommonMood = m;
       }
     });
-    const checkInDays = trend.length;
+    const checkInDays: number = trend.length;
     const dayLabels: Record<string, string> = { green: 'good', yellow: 'okay', orange: 'low', red: 'struggling' };
     const moodLabel = mostCommonMood ? dayLabels[mostCommonMood] ?? mostCommonMood : 'mixed';
     let line: string;
@@ -206,6 +206,6 @@ export const useInsightsStore = create<InsightsState>(() => ({
 
 // Re-export for components that need to read achievements reactively
 export function useAchievements(): Achievement[] {
-  const getAchievements = useInsightsStore((s) => s.getAchievements);
+  const getAchievements = useInsightsStore((s: InsightsState) => s.getAchievements);
   return getAchievements();
 }

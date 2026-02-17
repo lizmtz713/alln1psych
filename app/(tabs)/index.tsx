@@ -66,17 +66,17 @@ export default function HomeScreen() {
   const user = useUserStore();
   useConversationStore((s) => s.messages.length);
   useJournalStore((s) => s.entries.length);
-  useEducationStore((s) => ({ lastLessonDate: s.lastLessonDate, completedLessons: s.completedLessons }));
-  const getEngagementStreak = useInsightsStore((s) => s.getEngagementStreak);
-  const getPsychSays = useInsightsStore((s) => s.getPsychSays);
-  const getWeeklySummary = useInsightsStore((s) => s.getWeeklySummary);
-  const getNextLesson = useEducationStore((s) => s.getNextLesson);
+  useEducationStore((s: { lastLessonDate: Date | null; completedLessons: string[] }) => ({ lastLessonDate: s.lastLessonDate, completedLessons: s.completedLessons }));
+  const getEngagementStreak = useInsightsStore((s: { getEngagementStreak: () => number }) => s.getEngagementStreak);
+  const getPsychSays = useInsightsStore((s: { getPsychSays: (n: number) => string }) => s.getPsychSays);
+  const getWeeklySummary = useInsightsStore((s: { getWeeklySummary: () => { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null }) => s.getWeeklySummary);
+  const getNextLesson = useEducationStore((s: { getNextLesson: (age: import('../../src/stores/educationStore').ContentAgeGroup) => { id: string; title: string; duration: number } | null }) => s.getNextLesson);
   const streak = getEngagementStreak();
   const weeklySummary = getWeeklySummary();
   const nextLesson = getNextLesson(userAgeToContentAge(user.ageGroup));
   const { getTodayChallenge, isTodayChallengeDone, completeTodayChallenge } = useEngagementStore();
   const { content: dailyContent, isLoading: dailyContentLoading, setContent: setDailyContent, setLoading: setDailyContentLoading, isStale } = useDailyContentStore();
-  const moodTrend = useInsightsStore((s) => s.getWeeklyMoodTrend)();
+  const moodTrend = useInsightsStore((s: { getWeeklyMoodTrend: () => Array<{ date: string; mood: string }> }) => s.getWeeklyMoodTrend)();
 
   useEffect(() => {
     if (!dailyContent || isStale()) {
@@ -84,7 +84,7 @@ export default function HomeScreen() {
       generateDailyContent({
         name: user.name || 'there',
         ageGroup: user.ageGroup ?? 'unknown',
-        recentMoods: moodTrend.map((t) => t.mood),
+        recentMoods: moodTrend.map((t: { date: string; mood: string }) => t.mood),
         streak,
         lessonsCompleted: useEducationStore.getState().completedLessons,
         loveLanguage: user.loveLanguage ?? undefined,
@@ -274,7 +274,7 @@ export default function HomeScreen() {
         <Text style={styles.cardSectionTitle}>Try this</Text>
         {(() => {
           const hour = new Date().getHours();
-          const recentMoods = moodTrend.map((t) => t.mood);
+          const recentMoods = moodTrend.map((t: { date: string; mood: string }) => t.mood);
           const suggestions = getSuggestedActivities(recentMoods, hour);
           return (
             <View style={styles.tryThisRow}>

@@ -63,12 +63,12 @@ export const useEducationStore = create<EducationState>((set, get) => ({
       const already = state.completedLessons.includes(lessonId);
       if (already) return state;
       const last = state.lastLessonDate;
-      const lastDay = last ? new Date(last).toDateString() : null;
+      const lastDay = last ? new Date(last.getTime()).toDateString() : null;
       const today = now.toDateString();
       const streak =
         lastDay === today
           ? state.streakDays
-          : lastDay && new Date(last).getTime() === new Date(today).getTime() - 86400000
+          : lastDay && last !== null && new Date(last.getTime()).getTime() === new Date(today).getTime() - 86400000
             ? state.streakDays + 1
             : 1;
       return {

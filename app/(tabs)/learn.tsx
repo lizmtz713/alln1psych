@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Animated, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated, PanResponder, type ViewStyle } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -244,7 +244,7 @@ export default function LearnScreen() {
                         width: getProgressAnim(mod.id).interpolate({
                           inputRange: [0, 1],
                           outputRange: ['0%', `${(progress / total) * 100}%`],
-                        }) as unknown as string,
+                        }) as unknown as ViewStyle['width'],
                       },
                     ]}
                   />
@@ -285,7 +285,7 @@ export default function LearnScreen() {
                             width: getProgressAnim(mod.id).interpolate({
                               inputRange: [0, 1],
                               outputRange: ['0%', `${(progress / total) * 100}%`],
-                            }) as unknown as string,
+                            }) as unknown as ViewStyle['width'],
                           },
                         ]}
                       />
