@@ -11,6 +11,7 @@ import {
   Platform,
   Keyboard,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +24,7 @@ import {
 } from '../../src/stores/educationStore';
 import { useJournalStore } from '../../src/stores/journalStore';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
+import { sendMessageWithSystemPrompt, hasOpenAIKey } from '../../src/services/ai';
 import * as Haptics from 'expo-haptics';
 import {
   getLessonById,
@@ -73,6 +75,8 @@ export default function LessonScreen() {
   const addJournalEntry = useJournalStore((s) => s.addEntry);
   const [reflectionText, setReflectionText] = useState(reflections[id ?? ''] ?? '');
   const [justCompleted, setJustCompleted] = useState(false);
+  const [completionAiResponse, setCompletionAiResponse] = useState<string | null>(null);
+  const [completionLoading, setCompletionLoading] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
 
   const legacyLesson = id ? getLessonById(id) : null;
@@ -112,16 +116,32 @@ export default function LessonScreen() {
       ? `${manualSection.emoji} ${manualSection.title}`
       : 'Manual';
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     saveReflection(lesson.id, reflectionText);
     completeLesson(lesson.id, reflectionText);
     if (reflectionText.trim()) {
       addJournalEntry(reflectionText.trim(), { source: 'manual' });
     }
-    useCockpitStore.getState().addLessonBonus();
+    useCockpitStore.getState().addLessonBonus?.();
     setJustCompleted(true);
-    setTimeout(() => router.back(), 1600);
+    setCompletionLoading(true);
+    setCompletionAiResponse(null);
+    const hasKey = await hasOpenAIKey();
+    if (hasKey && (reflectionText?.trim() ?? '').length > 0) {
+      try {
+        const userContent = `I just completed a lesson about "${lesson.title}". Here's what I wrote: "${reflectionText.trim()}". Give me a brief, personalized insight based on what I shared. Connect it to what the lesson taught. Be warm and specific to what I said, not generic. 2-3 sentences max.`;
+        const sysPrompt = 'You are Psych, an emotional intelligence companion. The user just completed a lesson and shared their thoughts. Give them a brief, personalized insight that connects what they shared to the lesson content. Be warm, specific, and insightful. Never be generic.';
+        const response = await sendMessageWithSystemPrompt(
+          [{ role: 'user', content: userContent }],
+          sysPrompt
+        );
+        setCompletionAiResponse(response ?? null);
+      } catch (e) {
+        if (__DEV__) console.warn('Lesson completion AI:', e);
+      }
+    }
+    setCompletionLoading(false);
   };
 
   // Manual lesson layout (introduction, keyConcepts, reflectionPrompt)
@@ -172,9 +192,31 @@ export default function LessonScreen() {
               />
             </View>
             {justCompleted ? (
-              <View style={styles.completeSuccess}>
-                <Text style={styles.completeSuccessText}>Lesson complete ✓</Text>
-              </View>
+              <>
+                <View style={styles.completeSuccess}>
+                  <Text style={styles.completeSuccessText}>Lesson complete ✓</Text>
+                </View>
+                {completionLoading && (
+                  <View style={styles.aiResponseCard}>
+                    <ActivityIndicator size="small" color={COLORS.accent} />
+                    <Text style={styles.aiResponseLabel}>Psych is reflecting...</Text>
+                  </View>
+                )}
+                {!completionLoading && completionAiResponse && (
+                  <View style={styles.aiResponseCard}>
+                    <Text style={styles.aiResponseLabel}>Psych says</Text>
+                    <Text style={styles.aiResponseText}>{completionAiResponse}</Text>
+                  </View>
+                )}
+                <View style={styles.completeActions}>
+                  <Pressable style={({ pressed }) => [styles.completeActionBtn, pressed && { opacity: 0.9 }]} onPress={() => router.push('/(tabs)/learn')}>
+                    <Text style={styles.completeActionText}>Next lesson →</Text>
+                  </Pressable>
+                  <Pressable style={({ pressed }) => [styles.completeActionBtnSecondary, pressed && { opacity: 0.9 }]} onPress={() => router.back()}>
+                    <Text style={styles.completeActionTextSecondary}>Back to Manual</Text>
+                  </Pressable>
+                </View>
+              </>
             ) : (
               <Pressable
                 style={({ pressed }) => [styles.completeButton, pressed && styles.completeButtonPressed]}
@@ -243,9 +285,31 @@ export default function LessonScreen() {
         )}
 
         {justCompleted ? (
-          <View style={styles.completeSuccess}>
-            <Text style={styles.completeSuccessText}>Lesson complete ✓</Text>
-          </View>
+          <>
+            <View style={styles.completeSuccess}>
+              <Text style={styles.completeSuccessText}>Lesson complete ✓</Text>
+            </View>
+            {completionLoading && (
+              <View style={styles.aiResponseCard}>
+                <ActivityIndicator size="small" color={COLORS.accent} />
+                <Text style={styles.aiResponseLabel}>Psych is reflecting...</Text>
+              </View>
+            )}
+            {!completionLoading && completionAiResponse && (
+              <View style={styles.aiResponseCard}>
+                <Text style={styles.aiResponseLabel}>Psych says</Text>
+                <Text style={styles.aiResponseText}>{completionAiResponse}</Text>
+              </View>
+            )}
+            <View style={styles.completeActions}>
+              <Pressable style={({ pressed }) => [styles.completeActionBtn, pressed && { opacity: 0.9 }]} onPress={() => router.push('/(tabs)/learn')}>
+                <Text style={styles.completeActionText}>Next lesson →</Text>
+              </Pressable>
+              <Pressable style={({ pressed }) => [styles.completeActionBtnSecondary, pressed && { opacity: 0.9 }]} onPress={() => router.back()}>
+                <Text style={styles.completeActionTextSecondary}>Back to Manual</Text>
+              </Pressable>
+            </View>
+          </>
         ) : (
           <Pressable
             style={({ pressed }) => [styles.completeButton, pressed && styles.completeButtonPressed]}
@@ -367,6 +431,40 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.accent,
   },
+  aiResponseCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 16,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  aiResponseLabel: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginBottom: 8,
+  },
+  aiResponseText: {
+    fontSize: 16,
+    color: COLORS.text,
+    lineHeight: 24,
+  },
+  completeActions: {
+    gap: 12,
+  },
+  completeActionBtn: {
+    backgroundColor: COLORS.accent,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: BORDER_RADIUS.input,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  completeActionBtnSecondary: {
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  completeActionText: { fontSize: 16, fontWeight: '600', color: COLORS.text },
+  completeActionTextSecondary: { fontSize: 15, color: COLORS.textMuted },
   completeButton: {
     backgroundColor: COLORS.accent,
     paddingVertical: 16,
