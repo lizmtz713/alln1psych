@@ -1,11 +1,41 @@
 /**
- * AI conversation service — OpenAI API.
- * Reads API key from expo-secure-store first, then EXPO_PUBLIC_OPENAI_API_KEY env.
+ * AI conversation service — Supabase Edge Function first, then direct OpenAI fallback.
+ * Reads Supabase URL/key from env and expo-constants extra; OpenAI key from secure-store/env.
  */
 
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
 
 const API_KEY_STORAGE = 'openai_api_key';
+
+const SUPABASE_URL =
+  process.env.EXPO_PUBLIC_SUPABASE_URL ||
+  (Constants.expoConfig?.extra as Record<string, string> | undefined)?.supabaseUrl ||
+  '';
+const SUPABASE_ANON_KEY =
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+  (Constants.expoConfig?.extra as Record<string, string> | undefined)?.supabaseAnonKey ||
+  '';
+
+async function callEdgeFunction<T = unknown>(
+  functionName: string,
+  payload: Record<string, unknown>
+): Promise<T> {
+  const url = `${SUPABASE_URL}/functions/v1/${functionName}`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || `Edge function error: ${response.status}`);
+  }
+  return response.json() as Promise<T>;
+}
 
 export async function getOpenAIKey(): Promise<string | null> {
   try {
@@ -129,41 +159,110 @@ export async function sendMessage(
   messages: Message[],
   userContext: UserContext
 ): Promise<string> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) {
-    throw new Error('OpenAI API key not configured');
-  }
-
   const systemPrompt = buildSystemPrompt(userContext);
   const apiMessages: Array<{ role: string; content: string }> = [
     { role: 'system', content: systemPrompt },
     ...messages.map((m) => ({ role: m.role, content: m.content })),
   ];
 
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: apiMessages,
-      max_tokens: 500,
-      temperature: 0.8,
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    console.error('AI API Error:', res.status, body);
-    throw new Error(body || `OpenAI API error: ${res.status}`);
+  try {
+    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+      const data = await callEdgeFunction<{ content?: string; data?: { content?: string } }>(
+        'chat',
+        { messages: apiMessages, max_tokens: 500, temperature: 0.8 }
+      );
+      const content = data?.content ?? data?.data?.content ?? '';
+      if (content) return content.trim();
+    }
+  } catch (edgeErr: unknown) {
+    console.error('AI ERROR (edge):', edgeErr);
+    const msg = (edgeErr as { message?: string })?.message ?? String(edgeErr);
+    return `[AI Error: ${msg}]`;
   }
 
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const content = data.choices?.[0]?.message?.content?.trim();
-  if (!content) throw new Error('Empty response from OpenAI');
-  return content;
+  try {
+    const apiKey = await getOpenAIKey();
+    if (!apiKey) return '[AI Error: OpenAI API key not configured]';
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: apiMessages,
+        max_tokens: 500,
+        temperature: 0.8,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      console.error('AI API Error:', res.status, body);
+      return `[AI Error: ${body || `OpenAI ${res.status}`}]`;
+    }
+    const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    const content = data.choices?.[0]?.message?.content?.trim();
+    if (!content) return '[AI Error: Empty response from OpenAI]';
+    return content;
+  } catch (error: unknown) {
+    console.error('AI ERROR:', (error as { message?: string })?.message ?? error);
+    return `[AI Error: ${(error as { message?: string })?.message || 'Unknown error'}]`;
+  }
+}
+
+/** One-off request with a custom system prompt (e.g. Relationship Check). Does not use UserContext. */
+export async function sendMessageWithSystemPrompt(
+  messages: Message[],
+  systemPrompt: string
+): Promise<string> {
+  const apiMessages: Array<{ role: string; content: string }> = [
+    { role: 'system', content: systemPrompt },
+    ...messages.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  try {
+    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+      const data = await callEdgeFunction<{ content?: string; data?: { content?: string } }>(
+        'chat',
+        { messages: apiMessages, max_tokens: 500, temperature: 0.8 }
+      );
+      const content = data?.content ?? data?.data?.content ?? '';
+      if (content) return content.trim();
+    }
+  } catch (edgeErr: unknown) {
+    console.error('AI ERROR (edge):', edgeErr);
+    const msg = (edgeErr as { message?: string })?.message ?? String(edgeErr);
+    return `[AI Error: ${msg}]`;
+  }
+
+  try {
+    const apiKey = await getOpenAIKey();
+    if (!apiKey) return '[AI Error: OpenAI API key not configured]';
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: apiMessages,
+        max_tokens: 500,
+        temperature: 0.8,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      return `[AI Error: ${body || `OpenAI ${res.status}`}]`;
+    }
+    const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    const content = data.choices?.[0]?.message?.content?.trim();
+    return content ?? '';
+  } catch (error: unknown) {
+    console.error('AI ERROR:', (error as { message?: string })?.message ?? error);
+    return `[AI Error: ${(error as { message?: string })?.message || 'Unknown error'}]`;
+  }
 }
 
 export async function hasOpenAIKey(): Promise<boolean> {

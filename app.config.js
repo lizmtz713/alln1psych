@@ -46,6 +46,8 @@ module.exports = {
       eas: {
         projectId: 'b2be53d8-2212-4f77-99b6-e2a829b7dc5b',
       },
+      supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL || '',
+      supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '',
     },
     plugins: [
       'expo-router',

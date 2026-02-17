@@ -7,6 +7,7 @@ import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
+import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { useEngagementStore } from '../../src/stores/engagementStore';
 import { useEducationStore, userAgeToContentAge } from '../../src/stores/educationStore';
@@ -14,7 +15,20 @@ import { useConversationStore } from '../../src/stores/conversationStore';
 import { useJournalStore } from '../../src/stores/journalStore';
 import { useDailyContentStore } from '../../src/stores/dailyContentStore';
 import { generateDailyContent } from '../../src/services/personalization';
+import { getGaugeColor, getGaugeStatusLabel } from '../../src/utils/gaugeHelpers';
+import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import { Ionicons } from '@expo/vector-icons';
+
+const GAUGE_KEYS: GaugeKey[] = ['body', 'state', 'emotion', 'connection', 'direction', 'alignment'];
+
+function SmallGauge({ value, size }: { value: number; size: number }) {
+  const color = getGaugeColor(value);
+  return (
+    <View style={[styles.smallGaugeRing, { width: size, height: size, borderRadius: size / 2, borderWidth: 3, borderColor: color }]}>
+      <Text style={styles.smallGaugeValue}>{value >= 0 ? value : '—'}</Text>
+    </View>
+  );
+}
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
 
@@ -113,6 +127,36 @@ export default function HomeScreen() {
   const todayChallenge = getTodayChallenge();
   const challengeDone = isTodayChallengeDone();
   const challengeText = dailyContent?.challengeSuggestion ?? todayChallenge.text;
+  const discoveryPreview = getDiscoveriesForDay()[0];
+
+  const bodyVal = useCockpitStore((s) => s.body?.value ?? -1);
+  const stateVal = useCockpitStore((s) => s.state?.value ?? -1);
+  const emotionVal = useCockpitStore((s) => s.emotion?.value ?? -1);
+  const connectionVal = useCockpitStore((s) => s.connection?.value ?? -1);
+  const directionVal = useCockpitStore((s) => s.direction?.value ?? -1);
+  const alignmentVal = useCockpitStore((s) => s.alignment?.value ?? -1);
+  const gaugeValues: Record<GaugeKey, number> = {
+    body: bodyVal,
+    state: stateVal,
+    emotion: emotionVal,
+    connection: connectionVal,
+    direction: directionVal,
+    alignment: alignmentVal,
+  };
+  const activeGauges = GAUGE_KEYS.filter((k) => gaugeValues[k] >= 0);
+  const overallScore =
+    activeGauges.length > 0
+      ? Math.round(activeGauges.reduce((sum, k) => sum + gaugeValues[k], 0) / activeGauges.length)
+      : -1;
+
+  const quickActions = [
+    { label: 'Talk', icon: 'chatbubble-ellipses', route: '/(tabs)/talk' as const, isEmoji: false },
+    { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const, isEmoji: false },
+    { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const, isEmoji: false },
+    { label: 'Relate', icon: '💫', route: '/(modals)/relationship-check' as const, isEmoji: true },
+    { label: 'Journal', icon: 'book', route: '/(modals)/new-journal' as const, isEmoji: false },
+    { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const, isEmoji: false },
+  ];
 
   const card0 = useRef(new Animated.Value(0)).current;
   const card1 = useRef(new Animated.Value(0)).current;
@@ -161,7 +205,7 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}
     >
-      {/* 1. Greeting + daily affirmation */}
+      {/* 1. GREETING + STREAK */}
       <Animated.View style={[styles.greetingBlock, slideY(card0)]}>
         {dailyContentLoading ? (
           <View style={styles.shimmer}>
@@ -170,43 +214,157 @@ export default function HomeScreen() {
         ) : (
           <>
             <Text style={styles.greeting}>{greetingLine}</Text>
-            <Text style={styles.affirmation}>{affirmation}</Text>
+            {streak > 0 && (
+              <View style={styles.streakRow}>
+                <Text style={styles.streakEmoji}>🔥</Text>
+                <Text style={styles.streakText}>{streak}-day streak</Text>
+              </View>
+            )}
           </>
         )}
       </Animated.View>
 
-      {/* 2. Temperature gauge + Check in */}
-      <Animated.View style={[styles.card, styles.tempCard, slideY(card0)]}>
-        <View style={styles.cardRow}>
-          <TemperatureGauge temperature={myTemperature} size="md" />
-          <View style={styles.cardTextWrap}>
-            <Text style={styles.cardTitle}>You're feeling</Text>
-            <Text style={styles.cardLabel}>{myTemperatureLabel}</Text>
-          </View>
-        </View>
-        <Pressable
-          style={({ pressed }) => [styles.checkInButton, pressed && { transform: [{ scale: 0.96 }] }]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/mood-checkin');
-          }}
+      {/* 2. OVERALL TEMPERATURE CIRCLE */}
+      <View style={styles.overallCircleWrap}>
+        <View
+          style={[
+            styles.overallCircle,
+            { borderColor: getGaugeColor(overallScore) },
+          ]}
         >
-          <Text style={styles.checkInButtonText}>Check in</Text>
-        </Pressable>
-      </Animated.View>
+          <Text style={styles.overallCircleValue}>{overallScore >= 0 ? overallScore : '—'}</Text>
+          <Text style={styles.overallCircleLabel}>Overall</Text>
+        </View>
+        {overallScore < 0 && (
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/(modals)/cockpit-checkin');
+            }}
+            style={styles.overallCircleCta}
+          >
+            <Text style={styles.overallCircleCtaText}>Tap to check in</Text>
+          </Pressable>
+        )}
+      </View>
 
-      {/* 3. Streak counter */}
-      {streak > 0 && (
-        <Animated.View style={[styles.streakRow, slideY(card1)]}>
-          <Text style={styles.streakEmoji}>🔥</Text>
-          <Text style={styles.streakText}>
-            {streak}-day streak
-          </Text>
+      {/* 3. SIX GAUGES — 2x3 grid */}
+      <View style={styles.gaugesGrid}>
+        {GAUGE_KEYS.map((key) => {
+          const value = gaugeValues[key];
+          return (
+            <Pressable
+              key={key}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push({ pathname: '/(modals)/gauge-detail', params: { gauge: key } });
+              }}
+              style={styles.gaugeCard}
+            >
+              <SmallGauge value={value} size={60} />
+              <Text style={styles.gaugeCardLabel}>{key}</Text>
+              <Text style={styles.gaugeCardStatus}>
+                {value >= 0 ? getGaugeStatusLabel(value) : 'Not checked'}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* 4. QUICK ACTION PILLS — 2x3 grid */}
+      <View style={styles.quickActionsGrid}>
+        {quickActions.map((a) => (
+          <Pressable
+            key={a.label}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push(a.route);
+            }}
+            style={styles.quickActionCard}
+          >
+            {a.isEmoji ? (
+              <Text style={styles.quickActionEmoji}>{a.icon}</Text>
+            ) : (
+              <Ionicons name={a.icon as 'chatbubble-ellipses' | 'refresh' | 'search' | 'book' | 'people'} size={18} color="#7C4DFF" />
+            )}
+            <Text style={styles.quickActionCardText}>{a.label}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {/* 5. MY CIRCLES */}
+      {members.length > 0 && (
+        <Animated.View style={[styles.section, slideY(card2)]}>
+          <Text style={styles.sectionTitle}>My Circle</Text>
+          <View style={styles.circleScroll}>
+            {members.slice(0, 5).map((m) => (
+              <Pressable
+                key={m?.id ?? m?.name ?? ''}
+                onPress={() => router.push('/(tabs)/circle')}
+                style={styles.circleMemberChip}
+              >
+                <TemperatureGauge temperature={m?.temperature ?? 'green'} size="sm" />
+                <Text style={styles.circleMemberName} numberOfLines={1}>{m?.name ?? 'Someone'}</Text>
+              </Pressable>
+            ))}
+          </View>
+          {firstAlert && (
+            <View style={[styles.alert, styles.alertGlow]}>
+              <Text style={styles.alertText}>{firstAlert.name} could use a check-in</Text>
+              <Pressable
+                style={({ pressed }) => [styles.alertButton, pressed && { opacity: 0.9 }]}
+                onPress={() => router.push('/(tabs)/circle')}
+              >
+                <Text style={styles.alertButtonText}>See Circle</Text>
+              </Pressable>
+            </View>
+          )}
         </Animated.View>
       )}
 
-      {/* 4. Today's Challenge */}
-      <Animated.View style={[styles.card, slideY(card1)]}>
+      {/* 6. HELP SOMEONE */}
+      <Pressable
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.push('/(modals)/help-someone');
+        }}
+        style={styles.helpSomeoneCard}
+      >
+        <View>
+          <Text style={styles.helpSomeoneTitle}>Help Someone</Text>
+          <Text style={styles.helpSomeoneSub}>Get coaching on supporting someone you care about</Text>
+        </View>
+        <Ionicons name="heart" size={22} color="#7C4DFF" />
+      </Pressable>
+
+      {/* 7. PSYCH SAYS */}
+      <Animated.View style={[styles.card, styles.psychCard, slideY(card2)]}>
+        <Text style={styles.psychLabel}>Psych says...</Text>
+        <Text style={styles.psychText}>{psychSays}</Text>
+      </Animated.View>
+
+      {/* 8. DISCOVERY */}
+      {discoveryPreview && (
+        <Animated.View style={[styles.card, slideY(card3)]}>
+          <Text style={styles.cardSectionTitle}>Discovery</Text>
+          <Pressable
+            onPress={() => router.push('/(tabs)/learn')}
+            style={({ pressed }) => pressed && { opacity: 0.9 }}
+          >
+            <Text style={styles.discoveryEmoji}>{discoveryPreview.emoji}</Text>
+            <Text style={styles.discoveryTitle}>{discoveryPreview.title}</Text>
+            <Text style={styles.discoveryContent} numberOfLines={2}>{discoveryPreview.content}</Text>
+            <Text style={styles.discoveryLink}>See more in Manual →</Text>
+          </Pressable>
+        </Animated.View>
+      )}
+
+      {/* 9. Everything else */}
+      <Animated.View style={[styles.card, slideY(card3)]}>
+        <Text style={styles.affirmation}>{affirmation}</Text>
+      </Animated.View>
+
+      <Animated.View style={[styles.card, slideY(card3)]}>
         <Text style={styles.cardSectionTitle}>Today's challenge</Text>
         <Text style={styles.challengeEmoji}>{todayChallenge.emoji}</Text>
         <Text style={styles.challengeText}>{challengeText}</Text>
@@ -228,15 +386,8 @@ export default function HomeScreen() {
         )}
       </Animated.View>
 
-      {/* 5. Psych Says */}
-      <Animated.View style={[styles.card, styles.psychCard, slideY(card2)]}>
-        <Text style={styles.psychLabel}>Psych says...</Text>
-        <Text style={styles.psychText}>{psychSays}</Text>
-      </Animated.View>
-
-      {/* 6. Weekly Summary (Sundays only) */}
       {weeklySummary && (
-        <Animated.View style={[styles.card, styles.weeklyCard, slideY(card2)]}>
+        <Animated.View style={[styles.card, styles.weeklyCard, slideY(card3)]}>
           <Text style={styles.cardSectionTitle}>Your week in review</Text>
           <Text style={styles.weeklyLine}>{weeklySummary.line}</Text>
           <Text style={styles.weeklyMeta}>
@@ -245,31 +396,6 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* 7. Circle alerts */}
-      {members.length > 0 && (
-        <Animated.View style={[styles.section, slideY(card3)]}>
-          <Text style={styles.sectionTitle}>Your circle</Text>
-          <Text style={styles.muted}>
-            {members.length} {members.length === 1 ? 'person' : 'people'} in your circle
-          </Text>
-          {firstAlert && (
-            <View style={[styles.alert, styles.alertGlow]}>
-              <Text style={styles.alertText}>{firstAlert.name} could use a check-in</Text>
-              <Pressable
-                style={({ pressed }) => [styles.alertButton, pressed && { opacity: 0.9 }]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push('/(tabs)/circle');
-                }}
-              >
-                <Text style={styles.alertButtonText}>See Circle</Text>
-              </Pressable>
-            </View>
-          )}
-        </Animated.View>
-      )}
-
-      {/* Try this — 2 suggestions by time and mood */}
       <Animated.View style={[styles.card, slideY(card3)]}>
         <Text style={styles.cardSectionTitle}>Try this</Text>
         {(() => {
@@ -297,50 +423,15 @@ export default function HomeScreen() {
         })()}
       </Animated.View>
 
-      {/* Quick actions */}
-      <Animated.View style={[styles.quickActions, slideY(card3)]}>
-        <Pressable
-          style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(tabs)/talk');
-          }}
-        >
-          <Ionicons name="chatbubble-ellipses" size={24} color={COLORS.accent} />
-          <Text style={styles.quickActionText}>Talk to Psych</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/new-journal');
-          }}
-        >
-          <Ionicons name="journal" size={24} color={COLORS.accent} />
-          <Text style={styles.quickActionText}>Write in Journal</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/role-play');
-          }}
-        >
-          <Ionicons name="people" size={24} color={COLORS.accent} />
-          <Text style={styles.quickActionText}>Practice a conversation</Text>
-        </Pressable>
-      </Animated.View>
-
-      {/* 9. Today's Lesson */}
       {nextLesson && (
         <Animated.View style={[styles.card, styles.practiceCard, slideY(card4)]}>
           <Text style={styles.cardSectionTitle}>Today's lesson</Text>
           <Pressable
-            style={({ pressed }) => [pressed && { opacity: 0.9 }]}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.push(`/lesson/${nextLesson.id}`);
             }}
+            style={({ pressed }) => pressed && { opacity: 0.9 }}
           >
             <Text style={styles.practiceEmoji}>📖</Text>
             <Text style={styles.practiceTitle}>{nextLesson.title}</Text>
@@ -356,25 +447,87 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  content: { paddingHorizontal: 24, paddingBottom: 40 },
-  greetingBlock: {
-    marginBottom: 20,
+  content: { paddingHorizontal: 16, paddingBottom: 40 },
+  greetingBlock: { marginBottom: 12 },
+  shimmer: { minHeight: 60 },
+  greeting: { fontSize: 24, fontWeight: '600', color: COLORS.text, marginBottom: 8 },
+  affirmation: { fontSize: 18, color: COLORS.textMuted, lineHeight: 26, fontStyle: 'italic' },
+  overallCircleWrap: { alignItems: 'center', marginVertical: 16 },
+  overallCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#111118',
   },
-  shimmer: {
-    minHeight: 60,
+  overallCircleValue: { color: '#F0F0F5', fontSize: 36, fontWeight: '700' },
+  overallCircleLabel: { color: '#8888A0', fontSize: 12, marginTop: 4 },
+  overallCircleCta: { marginTop: 8 },
+  overallCircleCtaText: { color: '#7C4DFF', fontSize: 14 },
+  gaugesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
   },
-  greeting: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: COLORS.text,
+  gaugeCard: {
+    width: '48%',
+    backgroundColor: '#111118',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  gaugeCardLabel: { color: '#F0F0F5', fontSize: 13, fontWeight: '600', marginTop: 6, textTransform: 'capitalize' },
+  gaugeCardStatus: { color: '#8888A0', fontSize: 11, marginTop: 2 },
+  smallGaugeRing: { alignItems: 'center', justifyContent: 'center' },
+  smallGaugeValue: { color: '#F0F0F5', fontSize: 14, fontWeight: '700' },
+  quickActionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginTop: 16,
+  },
+  quickActionCard: {
+    width: '48%',
+    backgroundColor: '#111118',
+    borderRadius: 12,
+    padding: 12,
     marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
-  affirmation: {
-    fontSize: 18,
-    color: COLORS.textMuted,
-    lineHeight: 26,
-    fontStyle: 'italic',
+  quickActionCardText: { color: '#F0F0F5', fontSize: 14 },
+  quickActionEmoji: { fontSize: 18 },
+  circleScroll: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
+  circleMemberChip: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#111118', paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12 },
+  circleMemberName: { color: '#F0F0F5', fontSize: 14, maxWidth: 80 },
+  helpSomeoneCard: {
+    backgroundColor: '#111118',
+    borderRadius: 14,
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
+  helpSomeoneTitle: { color: '#F0F0F5', fontSize: 16, fontWeight: '600' },
+  helpSomeoneSub: { color: '#8888A0', fontSize: 13, marginTop: 2 },
+  discoveryEmoji: { fontSize: 24, marginBottom: 6 },
+  discoveryTitle: { fontSize: 16, fontWeight: '600', color: COLORS.text, marginBottom: 6 },
+  discoveryContent: { fontSize: 14, color: COLORS.textMuted, lineHeight: 20 },
+  discoveryLink: { fontSize: 13, color: COLORS.accent, marginTop: 8 },
   card: {
     backgroundColor: COLORS.inputSurface,
     borderRadius: BORDER_RADIUS.card,
