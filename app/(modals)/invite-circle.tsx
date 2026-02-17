@@ -24,15 +24,23 @@ export default function InviteCircleScreen() {
   const [relationship, setRelationship] = useState<RelationshipType>('friend');
   const [contact, setContact] = useState('');
   const [sharingLevel, setSharingLevel] = useState<'full' | 'limited'>('full');
+  const [birthday, setBirthday] = useState('');
 
   const handleSend = () => {
     const trimmedName = name.trim();
     if (!trimmedName) return;
+    // Convert MM/DD/YYYY to ISO YYYY-MM-DD for storage
+    let birthdayIso: string | undefined;
+    if (birthday.length === 10) {
+      const [mm, dd, yyyy] = birthday.split('/');
+      if (mm && dd && yyyy) birthdayIso = `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+    }
     addMember({
       name: trimmedName,
       relationship,
       contactMethod: contact.trim(),
       sharingLevel,
+      birthday: birthdayIso,
     });
     router.back();
   };
@@ -57,6 +65,21 @@ export default function InviteCircleScreen() {
         placeholderTextColor={COLORS.textMuted}
         value={name}
         onChangeText={setName}
+      />
+      <Text style={{ color: '#8888A0', fontSize: 13, marginTop: 16, marginBottom: 6 }}>Their birthday (optional — unlocks relationship insights)</Text>
+      <TextInput
+        style={{ backgroundColor: '#111118', color: '#F0F0F5', borderRadius: 12, padding: 14, fontSize: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', marginBottom: 20 }}
+        placeholder="MM/DD/YYYY"
+        placeholderTextColor="#55556A"
+        value={birthday}
+        onChangeText={(text) => {
+          const cleaned = text.replace(/\D/g, '');
+          if (cleaned.length <= 2) setBirthday(cleaned);
+          else if (cleaned.length <= 4) setBirthday(cleaned.slice(0, 2) + '/' + cleaned.slice(2));
+          else setBirthday(cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8));
+        }}
+        keyboardType="number-pad"
+        maxLength={10}
       />
       <Text style={styles.label}>Relationship</Text>
       <View style={styles.chipRow}>

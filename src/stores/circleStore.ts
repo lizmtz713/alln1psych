@@ -32,6 +32,8 @@ export interface CircleMember {
   temperatureLabel: string;
   lastUpdated: Date;
   addedAt: Date;
+  /** ISO date string "1999-03-15" — unlocks relationship insights */
+  birthday?: string;
 }
 
 export interface MoodEntry {
@@ -105,6 +107,7 @@ interface CircleState {
       'id' | 'temperature' | 'temperatureLabel' | 'lastUpdated' | 'addedAt'
     >
   ) => void;
+  updateMember: (id: string, updates: Partial<Pick<CircleMember, 'birthday'>>) => void;
   removeMember: (id: string) => void;
   updateMemberTemperature: (id: string, temp: Temperature) => void;
   updateMyTemperature: (temp: Temperature, note?: string) => void;
@@ -144,6 +147,7 @@ export const useCircleStore = create<CircleState>((set) => ({
       temperatureLabel: TEMPERATURE_LABELS.green,
       lastUpdated: now,
       addedAt: now,
+      birthday: member.birthday,
     };
     set((state) => ({ members: [...state.members, newMember] }));
     if (userId) {
@@ -164,6 +168,11 @@ export const useCircleStore = create<CircleState>((set) => ({
         .catch(() => {});
     }
   },
+
+  updateMember: (id, updates) =>
+    set((state) => ({
+      members: state.members.map((m) => (m.id === id ? { ...m, ...updates } : m)),
+    })),
 
   removeMember: (id) => {
     useAuthStore.getState().userId && database.removeCircleMember(id).catch(() => {});

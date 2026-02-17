@@ -11,6 +11,7 @@ import {
   UIManager,
   RefreshControl,
   Alert,
+  TextInput,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -26,6 +27,8 @@ import {
   type Temperature,
   type Nudge,
 } from '../../src/stores/circleStore';
+import { useUserStore } from '../../src/stores/userStore';
+import { getPersonality, getRelationshipDynamic } from '../../src/services/personology';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -47,6 +50,8 @@ export default function CircleScreen() {
   const [expandedNudgeId, setExpandedNudgeId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [editingBirthdayId, setEditingBirthdayId] = useState<string | null>(null);
+  const [birthdayInput, setBirthdayInput] = useState('');
   const onRefresh = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
@@ -60,7 +65,9 @@ export default function CircleScreen() {
     nudges,
     markNudgeRead,
     markNudgeActedOn,
+    updateMember,
   } = useCircleStore();
+  const myBirthday = useUserStore((s) => s.birthday);
 
   const isDemoData = members.some((m) => DEMO_MEMBER_IDS.includes(m.id));
 
@@ -251,6 +258,96 @@ export default function CircleScreen() {
                         >
                           <Text style={styles.helpSomeoneBtnText}>Need help talking to {m.name}?</Text>
                         </Pressable>
+                      )}
+                      {/* Personology: their personality */}
+                      {getPersonality(m.birthday ?? '') && (
+                        <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, marginTop: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+                          <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600', marginBottom: 8 }}>
+                            {m.name}: {getPersonality(m.birthday!)!.name}
+                          </Text>
+                          <Text style={{ color: '#B0B0C0', fontSize: 14, lineHeight: 20, marginBottom: 8 }}>
+                            {getPersonality(m.birthday!)!.communicationStyle}
+                          </Text>
+                          <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 4 }}>
+                            Strengths: {getPersonality(m.birthday!)!.strengths.join(', ')}
+                          </Text>
+                          <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 4 }}>
+                            Under stress: {getPersonality(m.birthday!)!.stressResponse}
+                          </Text>
+                          <Text style={{ color: '#8888A0', fontSize: 13 }}>
+                            Needs: {getPersonality(m.birthday!)!.needsInRelationships}
+                          </Text>
+                        </View>
+                      )}
+                      {/* Our Dynamic — both birthdays */}
+                      {myBirthday && m.birthday && getRelationshipDynamic(myBirthday, m.birthday) && (() => {
+                        const dynamic = getRelationshipDynamic(myBirthday, m.birthday!);
+                        if (!dynamic) return null;
+                        return (
+                          <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, marginTop: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+                            <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600', marginBottom: 10 }}>Our Dynamic</Text>
+                            <Text style={{ color: '#F0F0F5', fontSize: 13, fontWeight: '600', marginBottom: 4 }}>Strengths</Text>
+                            {dynamic.strengths.map((s, i) => (
+                              <Text key={i} style={{ color: '#B0B0C0', fontSize: 13, lineHeight: 18, marginBottom: 4, marginLeft: 8 }}>• {s}</Text>
+                            ))}
+                            <Text style={{ color: '#F0F0F5', fontSize: 13, fontWeight: '600', marginTop: 10, marginBottom: 4 }}>Watch For</Text>
+                            {dynamic.frictionPoints.map((f, i) => (
+                              <Text key={i} style={{ color: '#B0B0C0', fontSize: 13, lineHeight: 18, marginBottom: 4, marginLeft: 8 }}>• {f}</Text>
+                            ))}
+                            <Text style={{ color: '#F0F0F5', fontSize: 13, fontWeight: '600', marginTop: 10, marginBottom: 4 }}>Communication Tip</Text>
+                            <Text style={{ color: '#B0B0C0', fontSize: 13, lineHeight: 18 }}>{dynamic.communicationTip}</Text>
+                            <Text style={{ color: '#F0F0F5', fontSize: 13, fontWeight: '600', marginTop: 10, marginBottom: 4 }}>Your Conflict Pattern</Text>
+                            <Text style={{ color: '#B0B0C0', fontSize: 13, lineHeight: 18 }}>{dynamic.conflictPattern}</Text>
+                          </View>
+                        );
+                      })()}
+                      {/* Add birthday */}
+                      {!m.birthday && (
+                        <View style={{ marginTop: 16 }}>
+                          {editingBirthdayId === m.id ? (
+                            <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}>
+                              <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 6 }}>Birthday (MM/DD/YYYY)</Text>
+                              <TextInput
+                                style={{ backgroundColor: '#09090F', color: '#F0F0F5', borderRadius: 12, padding: 14, fontSize: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', marginBottom: 10 }}
+                                placeholder="MM/DD/YYYY"
+                                placeholderTextColor="#55556A"
+                                value={birthdayInput}
+                                onChangeText={(text) => {
+                                  const cleaned = text.replace(/\D/g, '');
+                                  if (cleaned.length <= 2) setBirthdayInput(cleaned);
+                                  else if (cleaned.length <= 4) setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2));
+                                  else setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8));
+                                }}
+                                keyboardType="number-pad"
+                                maxLength={10}
+                              />
+                              <View style={{ flexDirection: 'row', gap: 10 }}>
+                                <Pressable onPress={() => { setEditingBirthdayId(null); setBirthdayInput(''); }} style={{ flex: 1, paddingVertical: 10, alignItems: 'center' }}>
+                                  <Text style={{ color: '#8888A0', fontSize: 14 }}>Cancel</Text>
+                                </Pressable>
+                                <Pressable
+                                  onPress={() => {
+                                    if (birthdayInput.length === 10) {
+                                      const [mm, dd, yyyy] = birthdayInput.split('/');
+                                      if (mm && dd && yyyy) {
+                                        updateMember(m.id, { birthday: `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}` });
+                                        setEditingBirthdayId(null);
+                                        setBirthdayInput('');
+                                      }
+                                    }
+                                  }}
+                                  style={{ flex: 1, paddingVertical: 10, alignItems: 'center' }}
+                                >
+                                  <Text style={{ color: '#7C4DFF', fontSize: 14, fontWeight: '600' }}>Save</Text>
+                                </Pressable>
+                              </View>
+                            </View>
+                          ) : (
+                            <Pressable onPress={() => { setEditingBirthdayId(m.id); setBirthdayInput(''); }} style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}>
+                              <Text style={{ color: '#7C4DFF', fontSize: 14, textAlign: 'center' }}>Add their birthday to unlock relationship insights</Text>
+                            </Pressable>
+                          )}
+                        </View>
                       )}
                     </View>
                   )}

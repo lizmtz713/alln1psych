@@ -81,6 +81,8 @@ interface UserState {
   culturalValues: string[];
   /** When culturalBackground includes "Other", optional free text */
   culturalBackgroundOther: string;
+  /** User birthday ISO "YYYY-MM-DD" — for Circle relationship insights */
+  birthday: string | null;
 
   setName: (name: string) => void;
   addTriggerMap: (entry: Omit<TriggerMapEntry, 'id' | 'createdAt'>) => void;
@@ -97,6 +99,7 @@ interface UserState {
   setEnvironmentUpbringing: (v: string[]) => void;
   setCulturalValues: (v: string[]) => void;
   setCulturalBackgroundOther: (v: string) => void;
+  setBirthday: (v: string | null) => void;
   completeOnboarding: () => void;
   resetOnboarding: () => void;
   reset: () => void;
@@ -119,6 +122,7 @@ const initialState = {
   environmentUpbringing: [] as string[],
   culturalValues: [] as string[],
   culturalBackgroundOther: '',
+  birthday: null as string | null,
 };
 
 export const useUserStore = create<UserState>((set) => ({
@@ -138,6 +142,7 @@ export const useUserStore = create<UserState>((set) => ({
   setEnvironmentUpbringing: (environmentUpbringing) => set({ environmentUpbringing }),
   setCulturalValues: (culturalValues) => set({ culturalValues }),
   setCulturalBackgroundOther: (culturalBackgroundOther) => set({ culturalBackgroundOther }),
+  setBirthday: (birthday) => set({ birthday }),
   addTriggerMap: (entry) =>
     set((state) => ({
       triggerMaps: [

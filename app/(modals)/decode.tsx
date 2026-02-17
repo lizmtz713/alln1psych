@@ -21,6 +21,9 @@ import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
+import { useCircleStore } from '../../src/stores/circleStore';
+import { useUserStore } from '../../src/stores/userStore';
+import { buildRelationshipContext } from '../../src/services/personology';
 
 const BG = '#09090F';
 const CARD_BG = '#111118';
@@ -113,15 +116,29 @@ export default function DecodeScreen() {
     }
   };
 
+  const buildDecodeRelationshipContext = () => {
+    const userText = (message + ' ' + (sender || '')).toLowerCase();
+    const circleMembers = useCircleStore.getState().members;
+    const myBirthday = useUserStore.getState().birthday;
+    let relationshipContext = '';
+    circleMembers.forEach((member) => {
+      if (member.birthday && myBirthday && userText.includes(member.name.toLowerCase())) {
+        relationshipContext += buildRelationshipContext(myBirthday, member.birthday, member.name);
+      }
+    });
+    return relationshipContext;
+  };
+
   const onDecode = async () => {
     if (message.trim().length < 3 || loading) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     try {
       const userContent = `Message:\n${message}\n\nWho sent this: ${sender || 'not specified'}\nContext: ${context || 'none'}`;
+      const fullPrompt = DECODE_ANALYSIS_SYSTEM + buildDecodeRelationshipContext();
       const response = await sendMessageWithSystemPrompt(
         [{ role: 'user', content: userContent }],
-        DECODE_ANALYSIS_SYSTEM
+        fullPrompt
       );
       setAnalysisResponse(response?.trim() ?? '');
       setPhase('analysis');
@@ -145,9 +162,10 @@ export default function DecodeScreen() {
     setLoading(true);
     try {
       const userContent = `Message:\n${message}\n\nSender: ${sender}\nContext: ${context}\n\nAnalysis:\n${analysisResponse}\n\nUser's intent: ${intent.title} — ${intent.desc}`;
+      const fullPrompt = DECODE_RESPOND_SYSTEM + buildDecodeRelationshipContext();
       const response = await sendMessageWithSystemPrompt(
         [{ role: 'user', content: userContent }],
-        DECODE_RESPOND_SYSTEM
+        fullPrompt
       );
       setRespondResponse(response?.trim() ?? '');
       setPhase('respond');

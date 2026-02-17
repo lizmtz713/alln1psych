@@ -96,6 +96,8 @@ export default function MeScreen() {
     setCulturalValues,
     culturalBackgroundOther,
     setCulturalBackgroundOther,
+    birthday,
+    setBirthday,
   } = useUserStore();
   const entries = useJournalStore((s) => s.entries);
   const getRecentEntries = useJournalStore((s) => s.getRecentEntries);
@@ -133,6 +135,7 @@ export default function MeScreen() {
   const [contactsEditing, setContactsEditing] = useState(false);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [birthdayInput, setBirthdayInput] = useState('');
   const prevUnlockedIds = useRef<Set<string>>(new Set());
 
   const LEGAL_DISCLAIMER =
@@ -428,6 +431,29 @@ export default function MeScreen() {
             {LOVE_LANG_LABELS[user.loveLanguage] ?? user.loveLanguage}
           </Text>
         )}
+        <View style={{ marginTop: 8 }}>
+          <Text style={{ fontSize: 12, color: COLORS.textMuted, marginBottom: 4 }}>Birthday (for Circle relationship insights)</Text>
+          <TextInput
+            style={{ backgroundColor: COLORS.inputSurface, borderRadius: BORDER_RADIUS.input, padding: 12, fontSize: 15, color: COLORS.text, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}
+            placeholder="MM/DD/YYYY"
+            placeholderTextColor={COLORS.textMuted}
+            value={birthdayInput || (birthday ? (() => { const d = new Date(birthday); const m = (d.getMonth() + 1).toString().padStart(2, '0'); const day = d.getDate().toString().padStart(2, '0'); const y = d.getFullYear(); return `${m}/${day}/${y}`; })() : '')}
+            onChangeText={(text) => {
+              const cleaned = text.replace(/\D/g, '');
+              if (cleaned.length <= 2) setBirthdayInput(cleaned);
+              else if (cleaned.length <= 4) setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2));
+              else setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8));
+              if (cleaned.length === 0) setBirthday(null);
+              else if (cleaned.length >= 8) {
+                const mm = cleaned.slice(0, 2), dd = cleaned.slice(2, 4), yyyy = cleaned.slice(4, 8);
+                setBirthday(`${yyyy}-${mm}-${dd}`);
+              }
+            }}
+            onBlur={() => setBirthdayInput('')}
+            keyboardType="number-pad"
+            maxLength={10}
+          />
+        </View>
         <Pressable style={styles.editButton} onPress={() => router.push('/(modals)/onboarding')}>
           <Text style={styles.editButtonText}>Edit</Text>
         </Pressable>
