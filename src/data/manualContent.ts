@@ -9,11 +9,23 @@ export interface LessonContent {
   reflectionPrompt: string;
 }
 
+export interface LessonDiagnostic {
+  symptom: string;
+  checkFirst: string;
+  possibleCauses: string[];
+  tryThis: string[];
+}
+
 export interface ManualLesson {
   id: string;
   title: string;
   emoji: string;
   linkedActivity?: string;
+  deepDive?: string;
+  realWorld?: string[];
+  diagnostics?: LessonDiagnostic[];
+  tryThis?: string;
+  connectsTo?: string[];
   content: {
     teen: LessonContent;
     adult: LessonContent;
@@ -49,6 +61,28 @@ const section1Module1: ManualModule = {
       title: 'What Are Emotions, Really?',
       emoji: '💡',
       linkedActivity: 'emotion-wheel',
+      deepDive: "Your brain has at least 27 scientifically documented emotions — not just happy, sad, mad. Research shows that the more precisely you can name what you feel (emotional granularity), the better your brain can process it and the stronger your mental health. Anger is almost always a secondary emotion: it's the bodyguard for hurt, fear, or powerlessness. Anxiety and excitement produce identical physical sensations; the only difference is the label your brain puts on it. Understanding this doesn't make feelings go away — it gives you a map so you're not lost in the storm.",
+      realWorld: [
+        "A manager snaps at his team every Monday morning. He thinks he has an anger problem. Underneath: dread of the week ahead and fear of underperforming. Once he names the fear, the anger loses its grip.",
+        "A student feels 'anxious' before every exam. When she relabels the same butterflies as 'excitement to show what I know,' her performance improves. Same body state, different story.",
+        "Someone who says 'I'm fine' when they're not is often suppressing — which research shows increases internal stress and cortisol. The brave face doesn't help; it costs more.",
+      ],
+      diagnostics: [
+        {
+          symptom: "You feel angry and don't know why",
+          checkFirst: "Emotion gauge — what's under the anger? Hurt, fear, powerlessness, shame?",
+          possibleCauses: ["Anger as secondary emotion masking something more vulnerable", "Unmet need or boundary violation", "Body/State depletion making regulation harder"],
+          tryThis: ["Pause and ask: what would I feel if I wasn't angry?", "Name the vulnerable feeling out loud or in writing", "Check Body and State gauges — are you hungry, tired, overloaded?"],
+        },
+        {
+          symptom: "You feel anxious for no clear reason",
+          checkFirst: "Body gauge first (sleep, food, water, caffeine), then Emotion — is it actually excitement or another emotion mislabeled?",
+          possibleCauses: ["Low blood sugar or sleep deprivation mimicking anxiety", "Anxiety and excitement share the same physical sensations", "Unnamed emotion showing up as generic 'anxiety'"],
+          tryThis: ["Eat something with protein, drink water", "Try saying 'I'm excited' and see if the sensation shifts", "Use the emotion wheel to find a more specific word than 'anxious'"],
+        },
+      ],
+      tryThis: "For the next 3 days, whenever you feel a strong emotion, pause and name it as specifically as you can (e.g. not 'bad' but 'disappointed and a little embarrassed'). See if naming it changes how long it lasts.",
+      connectsTo: ['emotion', 'state', 'body'],
       content: {
         teen: {
           introduction: "Emotions are your brain's text messages to you. They're not random — each one is trying to tell you something. Anger says 'something's not fair.' Fear says 'be careful.' Sadness says 'something matters to you.' They're not good or bad — they're information.",
@@ -86,6 +120,28 @@ const section1Module1: ManualModule = {
       id: 'manual-1-1-2',
       title: 'Reading Your Dashboard',
       emoji: '📊',
+      deepDive: "Research identifies at least 27 distinct emotions — not just happy, sad, mad. The more precisely you can name what you feel (emotional granularity), the better your brain can process it and the stronger your mental health outcomes. Most people use maybe 5 words. Expanding your vocabulary isn't about being fancy — it's about giving your brain the right data so it can regulate. Mixed emotions are normal: you can feel grief and gratitude, fear and excitement, at the same time. The dashboard isn't broken when it shows multiple lights; it's giving you a fuller picture.",
+      realWorld: [
+        "A person who always says 'I'm fine' discovers that when they slow down and name what they feel — overwhelmed, lonely, and a little hopeful — the overwhelm becomes manageable. Naming it didn't create the feeling; it gave the brain a handle.",
+        "Someone in conflict keeps saying 'I'm just angry.' When they pause and read their dashboard: hurt (they didn't listen), fear (this relationship might end), and anger. Addressing the hurt and fear defuses the anger.",
+        "A teenager learns that 'anxious' can be broken into: nervous about the test, excited about the weekend, and tired from poor sleep. Three different needs, three different responses.",
+      ],
+      diagnostics: [
+        {
+          symptom: "You feel 'fine' or 'okay' but something is off",
+          checkFirst: "Emotion gauge — slow down and name 2–3 more specific feelings. What's the mix?",
+          possibleCauses: ["Overuse of generic labels (fine, bad) hides specific emotions", "Mixed emotions that need to be named separately", "Suppression making the dashboard harder to read"],
+          tryThis: ["Use an emotion wheel or list and pick the most accurate words", "Ask: if I couldn't say 'fine,' what would I say?", "Check Body and State — sometimes 'off' is hunger, fatigue, or overload"],
+        },
+        {
+          symptom: "You have multiple strong feelings and don't know which to address first",
+          checkFirst: "All are valid. Which one is most urgent or most driving the others?",
+          possibleCauses: ["Mixed emotions are normal; the brain can hold more than one", "One emotion may be masking another (e.g. anger masking hurt)", "Overwhelm from too many lights at once"],
+          tryThis: ["List them: 'I feel X, Y, and Z.' No need to fix yet.", "Pick one to tend to first — often the most vulnerable one", "If overwhelmed, tend to Body/State first (breath, water, pause)"],
+        },
+      ],
+      tryThis: "For one day, every time you would say 'good,' 'bad,' or 'fine,' replace it with two more specific words (e.g. 'relieved and a little tired'). Notice if reading your dashboard gets easier.",
+      connectsTo: ['emotion', 'state'],
       content: {
         teen: {
           introduction: "Imagine your car dashboard lit up with 5 warning lights at once. Would you panic? Probably. That's what it feels like when multiple emotions hit at the same time. The trick is learning to read them one at a time. Let's slow it down.",
@@ -124,6 +180,28 @@ const section1Module1: ManualModule = {
       title: 'False Alarms',
       emoji: '⚠️',
       linkedActivity: 'thought-challenger',
+      deepDive: "Your nervous system has three modes: fight, flight, and freeze. It responds to perceived threat in milliseconds — before your thinking brain can decide if the threat is real. After trauma, the system can recalibrate: stimuli that wouldn't alarm others trigger full activation. That's not overreacting; that's a system that was retrained by experience. You can't think your way out of activation; the body must be regulated first (breathing, movement, co-regulation). Cognitive distortions — catastrophizing, mind-reading, all-or-nothing — are thinking shortcuts everyone has; they become problems when unexamined.",
+      realWorld: [
+        "A veteran jumps at loud noises. He's not 'broken' — his nervous system was trained in combat to detect threat early. With practice, he can recalibrate.",
+        "A person gets disproportionately angry at a partner's tone. The tone triggered an old alarm: a parent's voice before punishment. The present situation is the match; the fuel was the past.",
+        "Someone who always expects the worst (catastrophizing) learns to ask: 'What's the evidence? What's a more likely outcome?' The alarm stays but the story changes.",
+      ],
+      diagnostics: [
+        {
+          symptom: "Your reaction felt bigger than the situation",
+          checkFirst: "State gauge — were you already activated? Emotion — what old alarm might this have triggered?",
+          possibleCauses: ["Trauma or past experience wired this trigger", "Body/State already depleted (hungry, tired, overloaded)", "Cognitive distortion (catastrophizing, mind-reading)"],
+          tryThis: ["Trace back: what was I feeling 30 minutes before the trigger?", "Check Body basics (food, water, sleep)", "Name the distortion: 'I'm mind-reading' or 'I'm catastrophizing'", "Regulate body first: 6 breaths, then re-evaluate"],
+        },
+        {
+          symptom: "You feel numb or frozen, can't think or act",
+          checkFirst: "State gauge — this may be freeze (dorsal vagal) shutdown, not laziness or depression.",
+          possibleCauses: ["Nervous system overwhelmed into shutdown", "Chronic stress without discharge", "Unprocessed trauma"],
+          tryThis: ["Don't force. Gentle movement, cold water on face, or presence of a calm person (co-regulation) can help", "Small steps: one tiny action to re-engage", "If persistent, consider professional support for trauma"],
+        },
+      ],
+      tryThis: "Next time you have a strong reaction, wait 6 seconds before responding. Notice whether the urge to react shifts when your thinking brain catches up.",
+      connectsTo: ['state', 'emotion', 'body'],
       content: {
         teen: {
           introduction: "Sometimes your brain sets off the alarm for no real reason. Your heart races before a test even though a test can't hurt you. You feel angry at a friend for something small that's actually about something bigger. False alarms are normal — your brain is just being overprotective.",
@@ -170,6 +248,28 @@ const section1Module2: ManualModule = {
       title: 'How Your Brain Processes Feelings',
       emoji: '⚙️',
       linkedActivity: 'breathing',
+      deepDive: "Your brain has three major systems: the brainstem (survival — heart rate, breathing, fight-or-flight), the limbic system (emotions, social bonding), and the prefrontal cortex (planning, judgment, impulse control). Under stress, the brain prioritizes survival first, emotions second, rational thought last. That's why you can't 'think clearly' when upset — your prefrontal cortex has literally gone offline. Sleep deprivation amplifies amygdala reactivity by up to 60%, so when you're tired, the alarm runs hotter. The goal isn't preventing this; it's recognizing when it's happening and using body-based tools (breath, movement) to bring the prefrontal cortex back online.",
+      realWorld: [
+        "A mother snaps at her kids every evening around 5pm. She thinks she has an anger problem. She actually has a blood sugar and cortisol problem — she hasn't eaten since noon. A snack at 3:30pm changes her entire evening.",
+        "A college student can't focus or regulate emotions on Sunday nights. It's not just 'dread of Monday' — his weekend sleep schedule (up until 3am) has disrupted his circadian rhythm. Fix the sleep, fix the Sunday scaries.",
+        "Someone in an argument says something they regret. In the moment, their amygdala was in charge. After 6 seconds and a breath, the prefrontal cortex could have chosen a different response. They're not 'bad' — their brain was in survival mode.",
+      ],
+      diagnostics: [
+        {
+          symptom: "You can't think clearly or make decisions when upset",
+          checkFirst: "State/Body — your prefrontal cortex may be offline. Regulate first, then think.",
+          possibleCauses: ["Amygdala activation suppressing prefrontal function", "Sleep deprivation amplifying emotional reactivity", "Stress or hunger further reducing cognitive capacity"],
+          tryThis: ["6 slow breaths to start bringing the thinking brain back", "Check Body: food, water, sleep", "Delay big decisions until you're regulated", "Name it: 'My alarm is on; I'll decide when I'm calmer'"],
+        },
+        {
+          symptom: "You react before you think and regret it later",
+          checkFirst: "This is the 6-second gap. Your fast brain is winning.",
+          possibleCauses: ["Evolutionary wiring: survival favored speed", "Repeated practice of reacting (path is deep)", "High State activation (nervous system already on alert)"],
+          tryThis: ["Practice the pause: count to 6 before responding in low-stakes situations", "Create a ritual: one breath before replying to messages", "After a blowup, reflect: what was the trigger? What did I need in that moment?"],
+        },
+      ],
+      tryThis: "For the next 3 days, rate your Body gauge and your Emotion gauge at the same time. See if they track together. Most people are shocked by the correlation.",
+      connectsTo: ['body', 'state', 'emotion'],
       content: {
         teen: {
           introduction: "Your brain has two main systems for handling emotions — the fast one (amygdala) and the slow one (prefrontal cortex). The fast one is like autocorrect — it reacts before you even think. The slow one is the editor that checks the work. Sometimes autocorrect wins and you say or do something you didn't mean.",
@@ -207,6 +307,28 @@ const section1Module2: ManualModule = {
       id: 'manual-1-2-2',
       title: 'Rewiring Your Responses',
       emoji: '🔄',
+      deepDive: "Neuroplasticity means your brain physically changes based on what you repeatedly do. BDNF (brain-derived neurotrophic factor) — released during exercise and learning — is like fertilizer for new pathways. The path you want (e.g. pause then respond) requires repetition, not willpower. Willpower is a limited resource; design your environment so the right choice is easier. Habits are neural pathways: every time you do the new behavior, the new path gets deeper. It's never too late; the brain remains capable of change throughout life.",
+      realWorld: [
+        "Someone who used to yell when angry now notices the urge, takes a breath, and speaks calmly — not because they 'try harder' but because they've practiced the new response hundreds of times. The new path is now the default.",
+        "A person who used to suppress emotions now names them out loud. At first it felt forced; after months it's automatic. The brain rewired.",
+        "An office worker puts their phone in another room during focus blocks. They're not relying on willpower — they're changing the environment so the desired path is the only easy path.",
+      ],
+      diagnostics: [
+        {
+          symptom: "I keep doing the same thing even though I want to change",
+          checkFirst: "Direction/Alignment — is this change actually aligned with your values? Are you relying on willpower alone?",
+          possibleCauses: ["Old pathway is very deep; new one needs repetition", "Environment still cues the old behavior", "Willpower is exhausted; need systems, not just intention"],
+          tryThis: ["Pick one specific situation and one new response. Practice only that.", "Change the environment: remove cues for old behavior, add cues for new", "Track small wins: each time you do the new thing, the path gets deeper"],
+        },
+        {
+          symptom: "I don't know what to do instead of my usual reaction",
+          checkFirst: "Get specific. What would the ideal response look like in one scenario?",
+          possibleCauses: ["Vague goals ('be calmer') are hard to wire", "Need a concrete alternative behavior to practice", "Might need to learn a new skill (e.g. assertiveness, breathing)"],
+          tryThis: ["Script it: 'When X happens, I will do Y' (e.g. take one breath, then speak)", "Practice in a safe context first", "Use the Manual and activities to build the skill"],
+        },
+      ],
+      tryThis: "Choose one small situation where you usually react on autopilot. For one week, practice one different response in that situation only. Notice the new path forming.",
+      connectsTo: ['body', 'state', 'direction', 'alignment'],
       content: {
         teen: {
           introduction: "Your brain is like a path through a forest. The more you walk the same path, the deeper it gets. If you always yell when you're mad, that path gets deep. But you can make a new path — it just takes practice. Every time you pause instead of react, the new path gets a little deeper.",
@@ -253,6 +375,28 @@ const section1Module3: ManualModule = {
       title: 'Your Body Runs Your Mood',
       emoji: '🔋',
       linkedActivity: 'body-scan',
+      deepDive: "Your brain is approximately 75% water; dehydration of just 1–2% impairs cognitive function, mood, and concentration. 95% of serotonin is produced in the gut — so digestive health directly affects mood. Low blood sugar mimics anxiety almost perfectly (racing heart, shakiness, can't focus); your body can't tell 'I haven't eaten' from 'something is wrong.' Sleep deprivation amplifies amygdala reactivity by up to 60%; chronic sleep debt can't be repaid with one good night. Caffeine blocks the tired signal while increasing cortisol — so you feel awake but wired. Movement releases BDNF, the brain's growth fertilizer; a 20-minute walk helps. Body isn't separate from emotion — it IS the substrate.",
+      realWorld: [
+        "A mother of three snaps at her kids every evening around 5pm. She thinks she has an anger problem. She actually has a blood sugar problem — she hasn't eaten since noon and cortisol peaks in late afternoon. A snack at 3:30pm changes her entire evening.",
+        "A college student feels depressed every Sunday night. He thinks it's about Monday classes. It's actually his weekend sleep schedule — staying up until 3am disrupts his circadian rhythm. Fix the sleep, fix the Sunday scaries.",
+        "An office worker has been irritable for weeks and blames her relationship. Her water bottle has been untouched on her desk for days. Mild chronic dehydration is elevating her baseline irritability.",
+      ],
+      diagnostics: [
+        {
+          symptom: "You feel anxious for no clear reason",
+          checkFirst: "Body gauge — sleep, food, water, caffeine intake",
+          possibleCauses: ["Sleep deprivation amplifies amygdala by 60%", "Low blood sugar mimics anxiety perfectly", "Dehydration impairs mood and cognition", "Caffeine elevates cortisol and masks fatigue"],
+          tryThis: ["Eat something with protein right now", "Drink 16oz of water", "Count your caffeine today", "Check last night's sleep hours", "If all basics are covered, THEN explore emotional causes"],
+        },
+        {
+          symptom: "You overreacted and don't know why",
+          checkFirst: "State gauge — were you already activated before the trigger? Body — basics covered?",
+          possibleCauses: ["Cumulative stress without discharge", "Sensory overload from environment", "Body gauge already depleted", "Unprocessed emotion from earlier today"],
+          tryThis: ["Trace back 2 hours before the reaction", "Check all Body basics first", "6 slow breaths to reset nervous system", "Journal: what was the trigger vs what was the reaction?"],
+        },
+      ],
+      tryThis: "For the next 3 days, rate your Body gauge AND your Emotion gauge at the same time. See if they track together. Most people are shocked by the correlation.",
+      connectsTo: ['body', 'state', 'emotion'],
       content: {
         teen: {
           introduction: "Ever notice you're way more irritable when you're hungry? Or anxious when you didn't sleep? Or calmer after a run? That's because your body and your emotions run on the same fuel. If you want to feel better emotionally, sometimes the fastest fix is physical.",

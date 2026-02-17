@@ -13,6 +13,7 @@ import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
 import { GAUGE_CONFIG, getGaugeStatusLabel } from '../../src/utils/gaugeHelpers';
 import { useCircleStore } from '../../src/stores/circleStore';
+import { getDailyFact } from '../../src/data/psychKnowledge';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from '../../src/components/gauges';
 
 const GAUGE_COMPONENTS: Record<string, React.FC<{ value: number; size?: number }>> = {
@@ -180,6 +181,19 @@ export default function GaugeDetailScreen() {
           <Text style={styles.gaugeStatusText}>{statusLabel}</Text>
           <TrendIndicator trend={trend} />
         </View>
+
+        {/* 2b. Knowledge base — Did you know? */}
+        {(() => {
+          const dailyFact = getDailyFact(gaugeId);
+          return dailyFact ? (
+            <View style={{ backgroundColor: CARD_BG, borderRadius: 14, padding: 16, marginTop: 16, borderWidth: 1, borderColor: CARD_BORDER }}>
+              <Text style={{ color: ACCENT, fontSize: 13, fontWeight: '600', marginBottom: 6 }}>Did you know?</Text>
+              <Text style={{ color: TEXT_PRIMARY, fontSize: 15, fontWeight: '600', marginBottom: 8 }}>{dailyFact.principle}</Text>
+              <Text style={{ color: '#B0B0C0', fontSize: 14, lineHeight: 20 }}>{dailyFact.userFriendly}</Text>
+              <Text style={{ color: '#55556A', fontSize: 11, marginTop: 8 }}>Source: {dailyFact.source}</Text>
+            </View>
+          ) : null;
+        })()}
 
         {/* 3. WHY THIS MATTERS */}
         <View style={styles.card}>

@@ -12,6 +12,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  LayoutAnimation,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,6 +37,7 @@ import {
   getManualModuleByLessonId,
   getManualSectionByLessonId,
   contentAgeToManualAge,
+  type ManualLesson,
 } from '../../src/data/manualContent';
 
 function renderBody(text: string): React.ReactNode[] {
@@ -77,6 +79,10 @@ export default function LessonScreen() {
   const [justCompleted, setJustCompleted] = useState(false);
   const [completionAiResponse, setCompletionAiResponse] = useState('');
   const [completionLoading, setCompletionLoading] = useState(false);
+  const [showDeepDive, setShowDeepDive] = useState(false);
+  const [showRealWorld, setShowRealWorld] = useState(false);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const [showTryThis, setShowTryThis] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
 
   const legacyLesson = id ? getLessonById(id) : null;
@@ -174,6 +180,75 @@ export default function LessonScreen() {
                 <Text style={styles.cardBody}>{kc.explanation}</Text>
               </View>
             ))}
+            {(lesson as ManualLesson).deepDive && (
+              <Pressable onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setShowDeepDive(!showDeepDive); }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' }}>
+                  <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600' }}>Go Deeper</Text>
+                  <Text style={{ color: '#7C4DFF' }}>{showDeepDive ? '▲' : '▼'}</Text>
+                </View>
+              </Pressable>
+            )}
+            {showDeepDive && (lesson as ManualLesson).deepDive && (
+              <Text style={{ color: '#B0B0C0', fontSize: 14, lineHeight: 22, marginBottom: 16 }}>{(lesson as ManualLesson).deepDive}</Text>
+            )}
+            {(lesson as ManualLesson).realWorld && (lesson as ManualLesson).realWorld!.length > 0 && (
+              <Pressable onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setShowRealWorld(!showRealWorld); }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' }}>
+                  <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600' }}>Real World</Text>
+                  <Text style={{ color: '#7C4DFF' }}>{showRealWorld ? '▲' : '▼'}</Text>
+                </View>
+              </Pressable>
+            )}
+            {showRealWorld && (lesson as ManualLesson).realWorld?.map((example, i) => (
+              <View key={i} style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+                <Text style={{ color: '#B0B0C0', fontSize: 14, lineHeight: 20 }}>{example}</Text>
+              </View>
+            ))}
+            {(lesson as ManualLesson).diagnostics && (lesson as ManualLesson).diagnostics!.length > 0 && (
+              <Pressable onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setShowDiagnostics(!showDiagnostics); }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' }}>
+                  <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600' }}>Diagnose It</Text>
+                  <Text style={{ color: '#7C4DFF' }}>{showDiagnostics ? '▲' : '▼'}</Text>
+                </View>
+              </Pressable>
+            )}
+            {showDiagnostics && (lesson as ManualLesson).diagnostics?.map((d, i) => (
+              <View key={i} style={{ backgroundColor: '#111118', borderRadius: 12, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+                <Text style={{ color: '#F0F0F5', fontSize: 14, fontWeight: '600', marginBottom: 6 }}>If: {d.symptom}</Text>
+                <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 6 }}>Check first: {d.checkFirst}</Text>
+                <Text style={{ color: '#7C4DFF', fontSize: 12, fontWeight: '600', marginBottom: 4 }}>Possible causes:</Text>
+                {d.possibleCauses.map((c, j) => (
+                  <Text key={j} style={{ color: '#B0B0C0', fontSize: 13, marginLeft: 8, marginBottom: 2 }}>• {c}</Text>
+                ))}
+                <Text style={{ color: '#7C4DFF', fontSize: 12, fontWeight: '600', marginTop: 6, marginBottom: 4 }}>What to try:</Text>
+                {d.tryThis.map((t, j) => (
+                  <Text key={j} style={{ color: '#B0B0C0', fontSize: 13, marginLeft: 8, marginBottom: 2 }}>• {t}</Text>
+                ))}
+              </View>
+            ))}
+            {(lesson as ManualLesson).tryThis && (
+              <Pressable onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setShowTryThis(!showTryThis); }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' }}>
+                  <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600' }}>Try This</Text>
+                  <Text style={{ color: '#7C4DFF' }}>{showTryThis ? '▲' : '▼'}</Text>
+                </View>
+              </Pressable>
+            )}
+            {showTryThis && (lesson as ManualLesson).tryThis && (
+              <View style={{ backgroundColor: 'rgba(124,77,255,0.08)', borderRadius: 10, padding: 14, marginBottom: 16 }}>
+                <Text style={{ color: '#E0E0E0', fontSize: 14, lineHeight: 20 }}>{(lesson as ManualLesson).tryThis}</Text>
+              </View>
+            )}
+            {(lesson as ManualLesson).connectsTo && (lesson as ManualLesson).connectsTo!.length > 0 && (
+              <View style={{ flexDirection: 'row', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                <Text style={{ color: '#55556A', fontSize: 12 }}>Connects to:</Text>
+                {(lesson as ManualLesson).connectsTo!.map((g) => (
+                  <View key={g} style={{ backgroundColor: 'rgba(124,77,255,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
+                    <Text style={{ color: '#7C4DFF', fontSize: 12, textTransform: 'capitalize' }}>{g}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
             <View style={styles.reflection}>
               <Text style={styles.reflectionQuestion}>{mc.reflectionPrompt}</Text>
               <TextInput

@@ -4,6 +4,7 @@
 
 import { getOpenAIKey } from './ai';
 import { useUsageStore } from '../stores/usageStore';
+import { buildKnowledgePrompt } from '../data/psychKnowledge';
 
 export interface RolePlayMessage {
   role: 'user' | 'assistant';
@@ -109,7 +110,8 @@ export async function getDebrief(
   const transcript = messages
     .map((m) => `${m.role === 'user' ? 'User' : character}: ${m.content}`)
     .join('\n\n');
-  const systemPrompt = buildDebriefPrompt(scenario, character, difficulty, transcript);
+  let systemPrompt = buildDebriefPrompt(scenario, character, difficulty, transcript);
+  systemPrompt += buildKnowledgePrompt();
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',

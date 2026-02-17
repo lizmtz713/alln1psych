@@ -3,6 +3,7 @@
  * Prefers Supabase Edge Functions (server-side, no key in app). Falls back to client-side key if edge fails.
  */
 
+import { buildKnowledgePrompt } from '../data/psychKnowledge';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { useUsageStore } from '../stores/usageStore';
@@ -173,7 +174,7 @@ function buildSystemPrompt(ctx: UserContext): string {
   const culturalVals = ctx.culturalValues?.length
     ? ctx.culturalValues.join(', ')
     : 'Not specified';
-  return SYSTEM_PROMPT_TEMPLATE.replace(/\{name\}/g, ctx.name || 'there')
+  const base = SYSTEM_PROMPT_TEMPLATE.replace(/\{name\}/g, ctx.name || 'there')
     .replace(/\{ageGroup\}/g, ctx.ageGroup || 'unknown')
     .replace(/\{loveLanguage\}/g, ctx.loveLanguage || 'unknown')
     .replace(/\{communicationPreference\}/g, ctx.communicationPreference || 'voice')
@@ -182,6 +183,7 @@ function buildSystemPrompt(ctx: UserContext): string {
     .replace(/\{culturalBackground\}/g, culturalBg)
     .replace(/\{environmentUpbringing\}/g, environmentUp)
     .replace(/\{culturalValues\}/g, culturalVals);
+  return base + buildKnowledgePrompt();
 }
 
 const NO_KEY_MESSAGE =
@@ -305,8 +307,9 @@ export async function sendMessageWithSystemPrompt(
   messages: Message[],
   systemPrompt: string
 ): Promise<string> {
+  const fullPrompt = systemPrompt + buildKnowledgePrompt();
   const msgList = messages.map((m) => ({ role: m.role, content: m.content }));
-  return sendMessageServerSide(msgList, systemPrompt);
+  return sendMessageServerSide(msgList, fullPrompt);
 }
 
 export async function hasOpenAIKey(): Promise<boolean> {

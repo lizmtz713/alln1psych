@@ -3,6 +3,7 @@
  * Uses OpenAI when available; falls back to hardcoded patterns.
  */
 
+import { buildKnowledgePrompt } from '../data/psychKnowledge';
 import { sendMessageWithSystemPrompt } from './ai';
 
 export interface CockpitGauges {
@@ -38,6 +39,9 @@ Rules:
 - Always ground it in how the systems affect each other
 - Sound like a wise friend who happens to understand neuroscience, not a therapist`;
 
+  const knowledge = buildKnowledgePrompt(gauges);
+  const systemPromptWithKnowledge = systemPrompt + knowledge;
+
   try {
     const response = await sendMessageWithSystemPrompt(
       [
@@ -47,7 +51,7 @@ Rules:
             'Read my gauges and give me one insight about how my systems are interacting right now.',
         },
       ],
-      systemPrompt
+      systemPromptWithKnowledge
     );
     return response?.trim() ?? null;
   } catch {
