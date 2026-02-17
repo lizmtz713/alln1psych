@@ -208,25 +208,52 @@ const SUPABASE_ANON_KEY =
 
 /** Call a Supabase Edge Function. Used for server-side OpenAI (chat, TTS) so the API key never ships in the app. */
 export async function callEdgeFunction<T = unknown>(functionName: string, body: object): Promise<T> {
+  const url = `${SUPABASE_URL}/functions/v1/${functionName}`;
+  if (__DEV__) console.log('[AI] callEdgeFunction URL:', url, 'SUPABASE_URL set:', !!SUPABASE_URL);
+
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token ?? '';
 
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      apikey: SUPABASE_ANON_KEY,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error((err as { error?: string }).error || `Edge function error: ${response.status}`);
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        apikey: SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    if (__DEV__) console.error('[AI] callEdgeFunction fetch failed:', e);
+    throw e;
   }
 
-  return response.json() as Promise<T>;
+  if (__DEV__) console.log('[AI] callEdgeFunction response status:', response.status);
+
+  const rawText = await response.text();
+  if (__DEV__) console.log('[AI] callEdgeFunction raw response (first 500 chars):', rawText.slice(0, 500));
+
+  if (!response.ok) {
+    let errMessage = `Edge function error: ${response.status}`;
+    try {
+      const err = JSON.parse(rawText) as { error?: string };
+      if (err?.error) errMessage = err.error;
+    } catch {
+      if (rawText?.trim()) errMessage = rawText.slice(0, 200);
+    }
+    if (__DEV__) console.error('[AI] callEdgeFunction error:', errMessage);
+    throw new Error(errMessage);
+  }
+
+  try {
+    const data = JSON.parse(rawText) as T;
+    return data;
+  } catch (e) {
+    if (__DEV__) console.error('[AI] callEdgeFunction JSON parse failed:', e, 'raw:', rawText?.slice(0, 300));
+    throw new Error('Invalid JSON from edge function');
+  }
 }
 
 /** Direct OpenAI call (fallback when edge function is unavailable or not deployed). Requires client API key. */
@@ -272,18 +299,21 @@ async function sendMessageDirectly(
 }
 
 /** Server-side chat via Supabase Edge Function. Falls back to direct API if edge fails. */
+/** Edge function returns { content: string, usage?: object } — NOT OpenAI's choices format. */
 async function sendMessageServerSide(
   messages: Array<{ role: string; content: string }>,
   systemPrompt: string
 ): Promise<string> {
   try {
-    const data = await callEdgeFunction<{ content?: string }>('chat', {
+    if (__DEV__) console.log('[AI] sendMessageServerSide calling edge function chat');
+    const data = await callEdgeFunction<{ content?: string; usage?: unknown }>('chat', {
       messages,
       systemPrompt,
       model: 'gpt-4o-mini',
       max_tokens: 1000,
     });
-    const content = data.content?.trim();
+    if (__DEV__) console.log('[AI] sendMessageServerSide edge returned, has content:', !!data?.content);
+    const content = typeof data?.content === 'string' ? data.content.trim() : '';
     if (content) {
       useUsageStore.getState().incrementGPT();
       return content;

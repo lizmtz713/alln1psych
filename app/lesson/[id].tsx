@@ -143,8 +143,10 @@ export default function LessonScreen() {
         setCompletionAiResponse(response ?? '');
       } catch (e) {
         if (__DEV__) console.warn('Lesson AI response failed:', e);
+        setCompletionAiResponse('');
+      } finally {
+        setCompletionLoading(false);
       }
-      setCompletionLoading(false);
     }
   };
 

@@ -59,34 +59,50 @@ export default function RelationshipCheck() {
 
   function parseBirthday(mmddyyyy: string): string {
     const parts = mmddyyyy.split('/');
-    if (parts.length === 3 && parts[2].length === 4) {
-      return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
-    }
-    return '';
+    if (parts.length !== 3 || parts[2].length !== 4) return '';
+    const month = parseInt(parts[0], 10);
+    const day = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    if (isNaN(month) || isNaN(day) || isNaN(year)) return '';
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   }
 
   async function handleCheck() {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const myIso = parseBirthday(myBirthday);
-    const theirIso = parseBirthday(theirBirthday);
-    if (!myIso || !theirIso) return;
-    const me = getPersonality(myIso);
-    const them = getPersonality(theirIso);
-    const dynamic = getRelationshipDynamic(myIso, theirIso);
-    setResult({ me, them, dynamic, myIso, theirIso });
-    setLoading(true);
     try {
-      const name = theirName.trim() || 'them';
-      const response = await sendMessageWithSystemPrompt(
-        [{ role: 'user', content: `My personality: ${me?.name} (${me?.communicationStyle}). Their personality: ${them?.name} (${them?.communicationStyle}). Relationship: ${relType}. Their name: ${name}. Give me a relationship insight.` }],
-        `You are Psych, a relationship intelligence companion. Based on two personality profiles and their relationship type, give a warm, specific, insightful reading.\n\nFor ROMANTIC: Chemistry, communication differences, what makes them click, what could pull them apart, one tip for long-term success.\nFor FAMILY: Generational dynamics, communication gaps, unspoken expectations, how to bridge differences.\nFor FRIENDSHIP: What drew them together, what keeps it strong, what could cause drift, how to maintain it.\nFor WORK: Professional communication styles, collaboration strengths, potential friction, how to get the best from each other.\n\nBe specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences. End with one surprising insight they probably have not considered. Be warm and real, not clinical.`
-      );
-      setAiInsight(response ?? '');
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const myIso = parseBirthday(myBirthday);
+      const theirIso = parseBirthday(theirBirthday);
+      if (__DEV__) console.log('[RelationshipCheck] handleCheck birthdays:', { myBirthday, theirBirthday, myIso, theirIso });
+      if (!myIso || !theirIso) {
+        if (__DEV__) console.warn('[RelationshipCheck] Invalid birthdays:', myBirthday, theirBirthday);
+        return;
+      }
+      const me = getPersonality(myIso);
+      const them = getPersonality(theirIso);
+      const dynamic = getRelationshipDynamic(myIso, theirIso);
+      if (!me || !them) {
+        if (__DEV__) console.warn('[RelationshipCheck] Could not get personality:', myIso, theirIso);
+        return;
+      }
+      setResult({ me, them, dynamic, myIso, theirIso });
+
+      setLoading(true);
+      try {
+        const name = theirName.trim() || 'them';
+        const response = await sendMessageWithSystemPrompt(
+          [{ role: 'user', content: `My personality: ${me.name} (${me.communicationStyle}). Their personality: ${them.name} (${them.communicationStyle}). Relationship: ${relType}. Their name: ${name}. Give me a relationship insight.` }],
+          `You are Psych, a relationship intelligence companion. Based on two personality profiles and their relationship type, give a warm, specific, insightful reading.\n\nFor ROMANTIC: Chemistry, communication differences, what makes them click, what could pull them apart, one tip for long-term success.\nFor FAMILY: Generational dynamics, communication gaps, unspoken expectations, how to bridge differences.\nFor FRIENDSHIP: What drew them together, what keeps it strong, what could cause drift, how to maintain it.\nFor WORK: Professional communication styles, collaboration strengths, potential friction, how to get the best from each other.\n\nBe specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences. End with one surprising insight they probably have not considered. Be warm and real, not clinical.`
+        );
+        setAiInsight(response ?? '');
+      } catch (e) {
+        if (__DEV__) console.warn('[RelationshipCheck] AI insight failed:', e);
+        setAiInsight('');
+      }
+      setLoading(false);
     } catch (e) {
-      if (__DEV__) console.warn('Relationship check AI failed:', e);
-      setAiInsight('');
+      if (__DEV__) console.error('[RelationshipCheck] handleCheck crashed:', e);
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   function handleAddToCircle() {
