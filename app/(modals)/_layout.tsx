@@ -19,6 +19,8 @@ export default function ModalsLayout() {
       <Stack.Screen name="help-someone" options={{ presentation: 'modal' }} />
       <Stack.Screen name="cockpit-checkin" options={{ presentation: 'modal' }} />
       <Stack.Screen name="gauge-detail" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="replay" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="decode" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

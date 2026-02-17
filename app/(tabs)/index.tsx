@@ -79,38 +79,36 @@ const TEXT_MUTED = '#55556A';
 const ACCENT = '#7C4DFF';
 
 function getDynamicGreeting(name: string): string {
+  const n = name?.trim() || 'you';
   const hour = new Date().getHours();
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-  );
   const greetings = {
     morning: [
-      `Morning, ${name}`,
-      `New day, ${name}`,
-      `Rise and check in, ${name}`,
-      `Good morning, ${name}`,
-      `Hey ${name}, fresh start`,
+      `Morning, ${n}`,
+      `New day, ${n}`,
+      `Rise and check in, ${n}`,
+      `Good morning, ${n}`,
+      `Hey ${n}, fresh start`,
     ],
     afternoon: [
-      `Afternoon, ${name}`,
-      `Hey ${name}`,
-      `Checking in, ${name}`,
-      `How's the day going, ${name}`,
-      `Good afternoon, ${name}`,
+      `Afternoon, ${n}`,
+      `Hey ${n}`,
+      `Checking in, ${n}`,
+      `How's the day going, ${n}`,
+      `Good afternoon, ${n}`,
     ],
     evening: [
-      `Evening, ${name}`,
-      `Hey ${name}, winding down?`,
-      `Good evening, ${name}`,
-      `End of day check, ${name}`,
-      `Hey ${name}`,
+      `Evening, ${n}`,
+      `Hey ${n}, winding down?`,
+      `Good evening, ${n}`,
+      `End of day check, ${n}`,
+      `Hey ${n}`,
     ],
     night: [
-      `Still up, ${name}?`,
-      `Late night, ${name}`,
-      `Hey ${name}, can't sleep?`,
-      `Night owl mode, ${name}`,
-      `${name}, take it easy tonight`,
+      `Still up, ${n}?`,
+      `Late night, ${n}`,
+      `Hey ${n}, can't sleep?`,
+      `Night owl mode, ${n}`,
+      `${n}, take it easy tonight`,
     ],
   };
   let timeGreetings: string[];
@@ -118,6 +116,7 @@ function getDynamicGreeting(name: string): string {
   else if (hour >= 12 && hour < 17) timeGreetings = greetings.afternoon;
   else if (hour >= 17 && hour < 22) timeGreetings = greetings.evening;
   else timeGreetings = greetings.night;
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   return timeGreetings[dayOfYear % timeGreetings.length];
 }
 
@@ -207,7 +206,7 @@ export default function HomeScreen() {
   let nextLesson: { id: string; title: string; duration: string } | null = null;
   let moodTrend: Array<{ date: string; mood: string }> = [];
   let summaryCount = 0;
-  let greetingLine = `Good morning, ${user?.name ?? 'you'} 💜`;
+  let greetingLine = getDynamicGreeting(user?.name ?? 'you');
   let affirmation = "You're doing better than you think.";
   let psychSays = "You're doing better than you think.";
   let todayChallenge: { text: string; emoji: string } = { text: 'Take 5 deep breaths right now', emoji: '🌬️' };
@@ -440,38 +439,29 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {/* 8. Quick Actions */}
-      <Animated.View style={[styles.quickActions, slideY(card1)]}>
-        <Pressable
-          style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(tabs)/talk');
-          }}
-        >
-          <Ionicons name="chatbubble-ellipses" size={24} color={ACCENT} />
-          <Text style={styles.quickActionText}>Talk to Psych</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/new-journal');
-          }}
-        >
-          <Ionicons name="journal" size={24} color={ACCENT} />
-          <Text style={styles.quickActionText}>Journal</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.quickAction, pressed && styles.quickActionPressed]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/role-play');
-          }}
-        >
-          <Ionicons name="people" size={24} color={ACCENT} />
-          <Text style={styles.quickActionText}>Practice</Text>
-        </Pressable>
+      {/* 8. Quick Actions — Talk, Replay, Decode, Journal, Practice */}
+      <Animated.View style={[styles.quickActionsWrap, slideY(card1)]}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
+          {[
+            { label: 'Talk', icon: 'chatbubble-ellipses', route: '/(tabs)/talk' as const },
+            { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const },
+            { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const },
+            { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const },
+            { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const },
+          ].map((action) => (
+            <Pressable
+              key={action.label}
+              style={({ pressed }) => [styles.quickActionPill, pressed && styles.quickActionPressed]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(action.route);
+              }}
+            >
+              <Ionicons name={action.icon as any} size={22} color={ACCENT} />
+              <Text style={styles.quickActionPillText}>{action.label}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
       </Animated.View>
 
       {/* 9. My Circle — horizontal scroll */}
@@ -803,6 +793,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   gaugeInfoCloseText: { fontSize: 15, fontWeight: '600', color: '#fff' },
+  quickActionsWrap: { marginBottom: 24 },
+  quickActionsScroll: { flexDirection: 'row', gap: 10, paddingVertical: 4 },
+  quickActionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: CARD_BG,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  quickActionPressed: { opacity: 0.9 },
+  quickActionPillText: { fontSize: 14, color: TEXT_PRIMARY, fontWeight: '500' },
   quickActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -819,7 +824,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: CARD_BORDER,
   },
-  quickActionPressed: { opacity: 0.9 },
   quickActionText: { fontSize: 13, color: TEXT_PRIMARY, marginTop: 8, textAlign: 'center' },
   practiceEmoji: { fontSize: 28, marginBottom: 8 },
   practiceTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 4 },

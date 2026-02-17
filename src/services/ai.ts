@@ -1,11 +1,12 @@
 /**
  * AI conversation service — OpenAI API.
- * Reads API key from: SecureStore (user-entered) > expo extra > EXPO_PUBLIC_OPENAI_API_KEY env.
+ * Prefers Supabase Edge Functions (server-side, no key in app). Falls back to client-side key if edge fails.
  */
 
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { useUsageStore } from '../stores/usageStore';
+import { supabase } from '../lib/supabase';
 
 const API_KEY_STORAGE = 'openai_api_key';
 
@@ -122,6 +123,10 @@ WHAT YOU NEVER DO:
 - Never use clinical/medical jargon unless the user does first
 - Never start with "As an AI..." — you are Psych, their companion
 
+REPLAY AND DECODE MODES:
+- If the user describes something that already happened and wants to process it, suggest: "It sounds like you want to replay something that happened. Want to use Replay mode? It walks you through understanding the situation step by step." But don't force it — if they want to just talk, let them talk.
+- If the user pastes a message from someone else and asks what it means or how to respond, suggest: "Want to use Decode mode? It breaks down the message and helps you craft the right response." But again, don't force it.
+
 SENSITIVE TOPICS: The user has indicated sensitivity around: {sensitiveTopics}
 IMPORTANT RULES FOR THESE TOPICS:
 - Never push the user to talk about these topics directly
@@ -182,78 +187,46 @@ function buildSystemPrompt(ctx: UserContext): string {
 const NO_KEY_MESSAGE =
   "I'm having trouble connecting right now. Check that your API key is configured.";
 
-export async function sendMessage(
-  messages: Message[],
-  userContext: UserContext
-): Promise<string> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) {
-    if (__DEV__) console.warn('[AI] No API key — returning user-facing message');
-    return NO_KEY_MESSAGE;
+const SUPABASE_URL =
+  process.env.EXPO_PUBLIC_SUPABASE_URL || (Constants.expoConfig?.extra as Record<string, string> | undefined)?.supabaseUrl || '';
+const SUPABASE_ANON_KEY =
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || (Constants.expoConfig?.extra as Record<string, string> | undefined)?.supabaseAnonKey || '';
+
+/** Call a Supabase Edge Function. Used for server-side OpenAI (chat, TTS) so the API key never ships in the app. */
+export async function callEdgeFunction<T = unknown>(functionName: string, body: object): Promise<T> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token ?? '';
+
+  const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      apikey: SUPABASE_ANON_KEY,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error((err as { error?: string }).error || `Edge function error: ${response.status}`);
   }
 
-  const systemPrompt = buildSystemPrompt(userContext);
-  const apiMessages: Array<{ role: string; content: string }> = [
-    { role: 'system', content: systemPrompt },
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
-  ];
-
-  const url = 'https://api.openai.com/v1/chat/completions';
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: apiMessages,
-        max_tokens: 500,
-        temperature: 0.8,
-      }),
-    });
-  } catch (e) {
-    if (__DEV__) console.error('[AI] Fetch failed:', e);
-    throw new Error('Network error — check your connection.');
-  }
-
-  if (__DEV__) console.log('[AI] Response status:', res.status);
-
-  if (!res.ok) {
-    const body = await res.text();
-    console.error('[AI] API error:', res.status, body);
-    throw new Error(body || `OpenAI API error: ${res.status}`);
-  }
-
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }>; error?: { message?: string } };
-  if (data.error?.message) {
-    console.error('[AI] API error payload:', data.error.message);
-    throw new Error(data.error.message);
-  }
-  const content = data.choices?.[0]?.message?.content?.trim();
-  if (!content) {
-    if (__DEV__) console.error('[AI] Empty response body');
-    throw new Error('Empty response from OpenAI');
-  }
-  useUsageStore.getState().incrementGPT();
-  return content;
+  return response.json() as Promise<T>;
 }
 
-/** Send a message with a custom system prompt (e.g. Help Someone coaching mode). */
-export async function sendMessageWithSystemPrompt(
-  messages: Message[],
-  systemPrompt: string
+/** Direct OpenAI call (fallback when edge function is unavailable or not deployed). Requires client API key. */
+async function sendMessageDirectly(
+  messages: Array<{ role: string; content: string }>,
+  systemPrompt: string,
+  maxTokens: number = 500
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
-  if (!apiKey) {
-    throw new Error('OpenAI API key not configured');
-  }
+  if (!apiKey) throw new Error('OpenAI API key not configured');
 
   const apiMessages: Array<{ role: string; content: string }> = [
     { role: 'system', content: systemPrompt },
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
+    ...messages,
   ];
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -265,22 +238,75 @@ export async function sendMessageWithSystemPrompt(
     body: JSON.stringify({
       model: 'gpt-4o-mini',
       messages: apiMessages,
-      max_tokens: 600,
+      max_tokens: maxTokens,
       temperature: 0.8,
     }),
   });
 
   if (!res.ok) {
     const body = await res.text();
-    console.error('AI API Error:', res.status, body);
+    if (__DEV__) console.error('[AI] Direct API error:', res.status, body);
     throw new Error(body || `OpenAI API error: ${res.status}`);
   }
 
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }>; error?: { message?: string } };
+  if (data.error?.message) throw new Error(data.error.message);
   const content = data.choices?.[0]?.message?.content?.trim();
   if (!content) throw new Error('Empty response from OpenAI');
   useUsageStore.getState().incrementGPT();
   return content;
+}
+
+/** Server-side chat via Supabase Edge Function. Falls back to direct API if edge fails. */
+async function sendMessageServerSide(
+  messages: Array<{ role: string; content: string }>,
+  systemPrompt: string
+): Promise<string> {
+  try {
+    const data = await callEdgeFunction<{ content?: string }>('chat', {
+      messages,
+      systemPrompt,
+      model: 'gpt-4o-mini',
+      max_tokens: 1000,
+    });
+    const content = data.content?.trim();
+    if (content) {
+      useUsageStore.getState().incrementGPT();
+      return content;
+    }
+    throw new Error('Empty content from edge');
+  } catch (e) {
+    if (__DEV__) console.warn('[AI] Server-side chat failed, trying client-side fallback:', e);
+    return sendMessageDirectly(messages, systemPrompt, 600);
+  }
+}
+
+export async function sendMessage(
+  messages: Message[],
+  userContext: UserContext
+): Promise<string> {
+  const systemPrompt = buildSystemPrompt(userContext);
+  const msgList = messages.map((m) => ({ role: m.role, content: m.content }));
+
+  try {
+    return await sendMessageServerSide(msgList, systemPrompt);
+  } catch (e) {
+    const apiKey = await getOpenAIKey();
+    if (!apiKey) {
+      if (__DEV__) console.warn('[AI] No API key — returning user-facing message');
+      return NO_KEY_MESSAGE;
+    }
+    throw e;
+  }
+}
+
+/** Send a message with a custom system prompt (e.g. Help Someone coaching mode). */
+export async function sendMessageWithSystemPrompt(
+  messages: Message[],
+  systemPrompt: string
+): Promise<string> {
+  const msgList = messages.map((m) => ({ role: m.role, content: m.content }));
+  return sendMessageServerSide(msgList, systemPrompt);
 }
 
 export async function hasOpenAIKey(): Promise<boolean> {
