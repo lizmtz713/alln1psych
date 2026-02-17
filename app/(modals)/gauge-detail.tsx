@@ -3,6 +3,7 @@
  * Route: /(modals)/gauge-detail?gauge=body|state|emotion|connection|direction|alignment
  */
 
+import React from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,8 +11,18 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
-import { GAUGE_CONFIG, getGaugeStatusLabel, getGaugeColor } from '../../src/utils/gaugeHelpers';
+import { GAUGE_CONFIG, getGaugeStatusLabel } from '../../src/utils/gaugeHelpers';
 import { useCircleStore } from '../../src/stores/circleStore';
+import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from '../../src/components/gauges';
+
+const GAUGE_COMPONENTS: Record<string, React.FC<{ value: number; size?: number }>> = {
+  body: BodyGauge,
+  state: StateGauge,
+  emotion: EmotionGauge,
+  connection: ConnectionGauge,
+  direction: DirectionGauge,
+  alignment: AlignmentGauge,
+};
 
 const COCKPIT_BG = '#09090F';
 const CARD_BG = '#111118';
@@ -112,12 +123,10 @@ export default function GaugeDetailScreen() {
   const gaugeId = (gaugeParam ?? 'body') as GaugeKey;
   const config = GAUGE_CONFIG[gaugeId];
   const gaugeState = useCockpitStore((s) => s[gaugeId]);
-  const getStoreGaugeColor = useCockpitStore((s) => s.getGaugeColor);
   const members = useCircleStore((s) => s.members) ?? [];
 
   const value = gaugeState?.value ?? -1;
   const trend = gaugeState?.trend ?? null;
-  const ringColor = getStoreGaugeColor(gaugeId);
   const statusLabel = getStatusLabel(value);
   const content = GAUGE_DETAIL_CONTENT[gaugeId] ?? GAUGE_DETAIL_CONTENT.body;
 
@@ -164,12 +173,11 @@ export default function GaugeDetailScreen() {
       >
         {/* 2. LARGE GAUGE */}
         <View style={styles.gaugeWrap}>
-          <View style={[styles.gaugeRing, { width: GAUGE_SIZE, height: GAUGE_SIZE, borderRadius: GAUGE_SIZE / 2, borderWidth: 8, borderColor: ringColor }]}>
-            <Text style={styles.gaugeValueText} numberOfLines={1}>
-              {value >= 0 ? value : '—'}
-            </Text>
-            <Text style={styles.gaugeStatusText}>{statusLabel}</Text>
-          </View>
+          {(() => {
+            const GaugeComponent = GAUGE_COMPONENTS[gaugeId] ?? BodyGauge;
+            return <GaugeComponent value={value} size={140} />;
+          })()}
+          <Text style={styles.gaugeStatusText}>{statusLabel}</Text>
           <TrendIndicator trend={trend} />
         </View>
 
@@ -264,18 +272,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
   gaugeWrap: { alignItems: 'center', marginBottom: 24 },
-  gaugeRing: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: CARD_BG,
-  },
-  gaugeValueText: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: TEXT_PRIMARY,
-    fontVariant: ['tabular-nums'],
-  },
-  gaugeStatusText: { fontSize: 14, color: TEXT_SECONDARY, marginTop: 4 },
+  gaugeStatusText: { fontSize: 14, color: TEXT_SECONDARY, marginTop: 8 },
   trendRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 },
   trendText: { fontSize: 14, color: TEXT_SECONDARY },
   card: {

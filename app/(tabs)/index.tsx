@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, Pressable, ScrollView, Animated, RefreshControl, SafeAreaView, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,6 +16,7 @@ import {
   getGaugeStatusLabel,
   getGaugeColor,
 } from '../../src/utils/gaugeHelpers';
+import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from '../../src/components/gauges';
 import { useEngagementStore } from '../../src/stores/engagementStore';
 import { useEducationStore, userAgeToContentAge } from '../../src/stores/educationStore';
 import { useConversationStore } from '../../src/stores/conversationStore';
@@ -120,30 +121,14 @@ function getDynamicGreeting(name: string): string {
   return timeGreetings[dayOfYear % timeGreetings.length];
 }
 
-function GaugeTile({ gaugeId, onPress }: { gaugeId: GaugeKey; onPress: () => void }) {
-  const gauge = useCockpitStore((s) => s[gaugeId]);
-  const getStoreGaugeColor = useCockpitStore((s) => s.getGaugeColor);
-  const config = GAUGE_CONFIG[gaugeId];
-  const value = gauge?.value ?? -1;
-  const color = getStoreGaugeColor(gaugeId);
-  const status = getGaugeStatusLabel(value);
-
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.gaugeTile, pressed && styles.gaugeTilePressed]}
-      onPress={onPress}
-    >
-      <View style={[styles.gaugeTileRing, { borderColor: color }]}>
-        <Text style={styles.gaugeTileValue} numberOfLines={1}>
-          {value >= 0 ? value : '—'}
-        </Text>
-      </View>
-      <Text style={styles.gaugeTileLabel}>{config?.label ?? gaugeId}</Text>
-      <Text style={styles.gaugeTileSub}>{config?.subtitle ?? ''}</Text>
-      <Text style={[styles.gaugeTileStatus, value < 0 && styles.gaugeTileStatusDim]}>{status}</Text>
-    </Pressable>
-  );
-}
+const GAUGE_COMPONENTS: Record<string, React.FC<{ value: number; size?: number }>> = {
+  body: BodyGauge,
+  state: StateGauge,
+  emotion: EmotionGauge,
+  connection: ConnectionGauge,
+  direction: DirectionGauge,
+  alignment: AlignmentGauge,
+};
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -380,17 +365,28 @@ export default function HomeScreen() {
 
       {/* 3. Six Gauge Tiles + info icon */}
       <View style={styles.gaugeGridRow}>
-        <View style={styles.gaugeGrid}>
-          {(['body', 'state', 'emotion', 'connection', 'direction', 'alignment'] as GaugeKey[]).map((id) => (
-            <GaugeTile
-              key={id}
-              gaugeId={id}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({ pathname: '/(modals)/gauge-detail', params: { gauge: id } });
-              }}
-            />
-          ))}
+        <View style={styles.gaugeGridWrap}>
+          {(['body', 'state', 'emotion', 'connection', 'direction', 'alignment'] as const).map((key) => {
+            const gaugeValue = { body: bodyVal, state: stateVal, emotion: emotionVal, connection: connectionVal, direction: directionVal, alignment: alignmentVal }[key];
+            const config = GAUGE_CONFIG[key];
+            const GaugeComponent = GAUGE_COMPONENTS[key];
+            return (
+              <Pressable
+                key={key}
+                style={({ pressed }) => [styles.gaugeTile, pressed && styles.gaugeTilePressed]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push({ pathname: '/(modals)/gauge-detail', params: { gauge: key } });
+                }}
+              >
+                <GaugeComponent value={gaugeValue} size={70} />
+                <Text style={styles.gaugeTileLabel}>{config.label}</Text>
+                <Text style={[styles.gaugeTileStatus, gaugeValue < 0 && styles.gaugeTileStatusDim]}>
+                  {gaugeValue >= 0 ? getGaugeStatusLabel(gaugeValue) : 'Not checked'}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
         <Pressable
           style={styles.gaugeInfoIcon}
@@ -615,37 +611,29 @@ const styles = StyleSheet.create({
   },
   centralRingHint: { fontSize: 13, color: TEXT_MUTED, marginTop: 8 },
   gaugeGridRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 },
-  gaugeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, flex: 1 },
+  gaugeGridWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginTop: 12,
+    flex: 1,
+  },
   gaugeInfoIcon: { padding: 8, marginLeft: 4 },
   gaugeInfoIconText: { fontSize: 16, color: TEXT_SECONDARY },
   gaugeTile: {
-    width: '31%',
-    minWidth: 100,
+    width: '48%',
     backgroundColor: CARD_BG,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: CARD_BORDER,
+    padding: 12,
+    marginBottom: 10,
+    alignItems: 'center',
   },
   gaugeTilePressed: { backgroundColor: '#16161F' },
-  gaugeTileRing: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  gaugeTileValue: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: TEXT_PRIMARY,
-    fontVariant: ['tabular-nums'],
-  },
-  gaugeTileLabel: { fontSize: 13, fontWeight: '600', color: TEXT_PRIMARY },
-  gaugeTileSub: { fontSize: 10, color: TEXT_MUTED, marginTop: 2 },
-  gaugeTileStatus: { fontSize: 11, color: TEXT_SECONDARY, marginTop: 4 },
+  gaugeTileLabel: { fontSize: 13, fontWeight: '600', color: TEXT_PRIMARY, marginTop: 6 },
+  gaugeTileStatus: { fontSize: 11, color: TEXT_SECONDARY, marginTop: 2 },
   gaugeTileStatusDim: { color: TEXT_MUTED },
   insightCard: {
     backgroundColor: CARD_BG,
