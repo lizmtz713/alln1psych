@@ -343,34 +343,32 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
     >
-      {/* 1. Quick Action Pills — very top, no header */}
-      <View style={styles.quickActionsWrap}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
-          {[
-            { label: 'Talk', icon: 'chatbubble-ellipses', route: '/(tabs)/talk' as const },
-            { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const },
-            { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const },
-            { label: 'Relate', icon: '💫', route: '/(modals)/relationship-check' as const, iconIsEmoji: true },
-            { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const },
-            { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const },
-          ].map((action) => (
-            <Pressable
-              key={action.label}
-              style={({ pressed }) => [styles.quickActionPill, pressed && styles.quickActionPressed]}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push(action.route);
-              }}
-            >
-              {(action as { iconIsEmoji?: boolean }).iconIsEmoji ? (
-                <Text style={{ fontSize: 20 }}>{(action as { icon: string }).icon}</Text>
-              ) : (
-                <Ionicons name={(action as { icon: string }).icon as any} size={22} color={ACCENT} />
-              )}
-              <Text style={styles.quickActionPillText}>{action.label}</Text>
-            </Pressable>
-          ))}
-        </ScrollView>
+      {/* 1. Quick Action Pills — 2x3 grid */}
+      <View style={styles.quickActionsGridWrap}>
+        {[
+          { label: 'Talk', icon: 'chatbubble-ellipses', route: '/(tabs)/talk' as const, iconIsEmoji: false },
+          { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const, iconIsEmoji: false },
+          { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const, iconIsEmoji: false },
+          { label: 'Relate', icon: '💫', route: '/(modals)/relationship-check' as const, iconIsEmoji: true },
+          { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const, iconIsEmoji: false },
+          { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const, iconIsEmoji: false },
+        ].map((action) => (
+          <Pressable
+            key={action.label}
+            style={({ pressed }) => [styles.quickActionPillGrid, pressed && styles.quickActionPressed]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push(action.route);
+            }}
+          >
+            {action.iconIsEmoji ? (
+              <Text style={{ fontSize: 20 }}>{action.icon}</Text>
+            ) : (
+              <Ionicons name={action.icon as any} size={22} color={ACCENT} />
+            )}
+            <Text style={styles.quickActionPillText}>{action.label}</Text>
+          </Pressable>
+        ))}
       </View>
 
       {/* 2. Six Gauges — cockpit grid; status inside each tile */}
@@ -485,6 +483,21 @@ export default function HomeScreen() {
           )}
         </Animated.View>
       )}
+
+      {/* Help Someone — below My Circles */}
+      <Pressable
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.push('/(modals)/help-someone');
+        }}
+        style={styles.helpSomeoneCard}
+      >
+        <View>
+          <Text style={styles.helpSomeoneTitle}>Help Someone</Text>
+          <Text style={styles.helpSomeoneSub}>Get coaching on supporting someone you care about</Text>
+        </View>
+        <Ionicons name="heart" size={22} color="#7C4DFF" />
+      </Pressable>
 
       {/* 8. Everything else — affirmation, Try This, weekly */}
       <Animated.View style={[styles.card, styles.affirmationCard, slideY(card2)]}>
@@ -744,6 +757,25 @@ const styles = StyleSheet.create({
   gaugeInfoCloseText: { fontSize: 15, fontWeight: '600', color: '#fff' },
   quickActionsWrap: { marginBottom: 24 },
   quickActionsScroll: { flexDirection: 'row', gap: 10, paddingVertical: 4 },
+  quickActionsGridWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  quickActionPillGrid: {
+    width: '48%',
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: CARD_BG,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
   quickActionPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -757,6 +789,21 @@ const styles = StyleSheet.create({
   },
   quickActionPressed: { opacity: 0.9 },
   quickActionPillText: { fontSize: 14, color: TEXT_PRIMARY, fontWeight: '500' },
+  helpSomeoneCard: {
+    backgroundColor: '#111118',
+    borderRadius: 14,
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  helpSomeoneTitle: { color: '#F0F0F5', fontSize: 16, fontWeight: '600' },
+  helpSomeoneSub: { color: '#8888A0', fontSize: 13, marginTop: 2 },
   quickActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',

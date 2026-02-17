@@ -340,7 +340,9 @@ export async function sendMessage(
       if (__DEV__) console.warn('[AI] No API key — returning user-facing message');
       return NO_KEY_MESSAGE;
     }
-    throw e;
+    const err = e as Error | undefined;
+    if (__DEV__) console.error('[AI] sendMessage error:', err?.message ?? e);
+    return `[AI Error: ${err?.message || String(e)}]`;
   }
 }
 
@@ -351,7 +353,13 @@ export async function sendMessageWithSystemPrompt(
 ): Promise<string> {
   const fullPrompt = systemPrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
   const msgList = messages.map((m) => ({ role: m.role, content: m.content }));
-  return sendMessageServerSide(msgList, fullPrompt);
+  try {
+    return await sendMessageServerSide(msgList, fullPrompt);
+  } catch (e) {
+    const err = e as Error | undefined;
+    if (__DEV__) console.error('[AI] sendMessageWithSystemPrompt error:', err?.message ?? e);
+    return `[AI Error: ${err?.message || String(e)}]`;
+  }
 }
 
 export async function hasOpenAIKey(): Promise<boolean> {
