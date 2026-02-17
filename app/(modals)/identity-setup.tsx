@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useUserStore, type AgeRange, type TherapyExperience } from '../../src/stores/userStore';
 
-const TOTAL_STEPS = 7;
+const ALL_STEP_INDICES = [0, 1, 2, 3, 4, 5, 6] as const; // age, pronouns, culture, family, language, strength, therapy
 
 const AGE_OPTIONS: { value: AgeRange; label: string }[] = [
   { value: 'teen', label: 'Teen (13-17)' },
@@ -66,8 +66,22 @@ const pillSelected = {
   backgroundColor: 'rgba(124,77,255,0.1)',
 };
 
+function isStepFilled(stepIndex: number, user: ReturnType<typeof useUserStore.getState>): boolean {
+  switch (stepIndex) {
+    case 0: return user.ageRange != null;
+    case 1: return user.pronouns != null;
+    case 2: return (user.culturalBackgroundText ?? '').trim() !== '';
+    case 3: return (user.familyStructure ?? '').trim() !== '';
+    case 4: return (user.languageOfEmotion ?? '').trim() !== '';
+    case 5: return (user.strengthMeaning ?? '').trim() !== '';
+    case 6: return user.therapyExperience != null;
+    default: return false;
+  }
+}
+
 export default function IdentitySetupScreen() {
   const router = useRouter();
+  const user = useUserStore();
   const setAgeRange = useUserStore((s) => s.setAgeRange);
   const setPronouns = useUserStore((s) => s.setPronouns);
   const setCustomPronouns = useUserStore((s) => s.setCustomPronouns);
@@ -88,9 +102,33 @@ export default function IdentitySetupScreen() {
   const [strengthMeaning, setLocalStrength] = useState('');
   const [therapyExperience, setLocalTherapy] = useState<TherapyExperience | null>(null);
 
+  const visibleStepIndices = useMemo(
+    () => ALL_STEP_INDICES.filter((i) => !isStepFilled(i, user)),
+    [user.ageRange, user.pronouns, user.culturalBackgroundText, user.familyStructure, user.languageOfEmotion, user.strengthMeaning, user.therapyExperience]
+  );
+
+  useEffect(() => {
+    const u = useUserStore.getState();
+    setLocalAgeRange(u.ageRange ?? null);
+    setLocalPronoun(u.pronouns ?? null);
+    setPronounsCustom(u.customPronouns ?? '');
+    setLocalCultural(u.culturalBackgroundText?.trim() ?? '');
+    setLocalFamily(u.familyStructure?.trim() ?? '');
+    setLocalLanguage(u.languageOfEmotion?.trim() ?? '');
+    setLocalStrength(u.strengthMeaning?.trim() ?? '');
+    setLocalTherapy(u.therapyExperience ?? null);
+  }, []);
+
+  const realStep = visibleStepIndices[step] ?? 0;
+  const totalVisibleSteps = visibleStepIndices.length;
+
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (step < TOTAL_STEPS - 1) setStep(step + 1);
+    if (totalVisibleSteps === 0) {
+      handleComplete();
+      return;
+    }
+    if (step < totalVisibleSteps - 1) setStep(step + 1);
     else handleComplete();
   };
 
@@ -102,7 +140,11 @@ export default function IdentitySetupScreen() {
 
   const handleSkip = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (step < TOTAL_STEPS - 1) setStep(step + 1);
+    if (totalVisibleSteps === 0) {
+      handleComplete();
+      return;
+    }
+    if (step < totalVisibleSteps - 1) setStep(step + 1);
     else handleComplete();
   };
 
@@ -120,13 +162,13 @@ export default function IdentitySetupScreen() {
   };
 
   const canProceed =
-    step === 0 ? true :
-    step === 1 ? true :
-    step === 2 ? true :
-    step === 3 ? true :
-    step === 4 ? (languageOfEmotion !== 'Other' || languageOther.trim().length > 0) :
-    step === 5 ? true :
-    step === 6 ? true : true;
+    realStep === 0 ? true :
+    realStep === 1 ? true :
+    realStep === 2 ? true :
+    realStep === 3 ? true :
+    realStep === 4 ? (languageOfEmotion !== 'Other' || languageOther.trim().length > 0) :
+    realStep === 5 ? true :
+    realStep === 6 ? true : true;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#09090F' }}>
@@ -135,7 +177,7 @@ export default function IdentitySetupScreen() {
           <Text style={{ color: '#8888A0', fontSize: 16 }}>← Back</Text>
         </Pressable>
         <View style={{ flexDirection: 'row', gap: 6 }}>
-          {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+          {totalVisibleSteps > 0 && Array.from({ length: totalVisibleSteps }).map((_, i) => (
             <View key={i} style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: i === step ? '#7C4DFF' : 'rgba(255,255,255,0.2)' }} />
           ))}
         </View>
@@ -145,8 +187,18 @@ export default function IdentitySetupScreen() {
       </View>
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24 }} keyboardShouldPersistTaps="handled">
-        {/* Screen 1: Age */}
-        {step === 0 && (
+        {/* Screen 0: Age */}
+        {totalVisibleSteps === 0 && (
+          <>
+            <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 16 }}>
+              You're all set.
+            </Text>
+            <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleComplete(); }} style={{ marginTop: 32, backgroundColor: '#7C4DFF', borderRadius: 14, padding: 16, alignItems: 'center' }}>
+              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Done</Text>
+            </Pressable>
+          </>
+        )}
+        {totalVisibleSteps > 0 && realStep === 0 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 8 }}>
               So Psych can speak your language —
@@ -168,8 +220,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 2: Pronouns */}
-        {step === 1 && (
+        {/* Screen 1: Pronouns */}
+        {totalVisibleSteps > 0 && realStep === 1 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 16 }}>
               What pronouns should Psych use for you?
@@ -204,8 +256,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 3: Cultural Background */}
-        {step === 2 && (
+        {/* Screen 2: Cultural Background */}
+        {totalVisibleSteps > 0 && realStep === 2 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 12 }}>
               What's your cultural background?
@@ -224,8 +276,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 4: Family Structure */}
-        {step === 3 && (
+        {/* Screen 3: Family Structure */}
+        {totalVisibleSteps > 0 && realStep === 3 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 12 }}>
               Who raised you?
@@ -247,8 +299,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 5: Language of Emotion */}
-        {step === 4 && (
+        {/* Screen 4: Language of Emotion */}
+        {totalVisibleSteps > 0 && realStep === 4 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 16 }}>
               What language do you think and feel in?
@@ -279,8 +331,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 6: What Strength Means */}
-        {step === 5 && (
+        {/* Screen 5: What Strength Means */}
+        {totalVisibleSteps > 0 && realStep === 5 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 12 }}>
               In your family, what did "being strong" mean?
@@ -302,8 +354,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 7: Therapy Experience */}
-        {step === 6 && (
+        {/* Screen 6: Therapy Experience */}
+        {totalVisibleSteps > 0 && realStep === 6 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 16 }}>
               Have you ever been to therapy?
@@ -325,12 +377,14 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        <Pressable
-          onPress={handleNext}
-          style={{ marginTop: 32, backgroundColor: '#7C4DFF', borderRadius: 14, padding: 16, alignItems: 'center' }}
-        >
-          <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>{step === TOTAL_STEPS - 1 ? 'Done' : 'Next'}</Text>
-        </Pressable>
+        {totalVisibleSteps > 0 && (
+          <Pressable
+            onPress={handleNext}
+            style={{ marginTop: 32, backgroundColor: '#7C4DFF', borderRadius: 14, padding: 16, alignItems: 'center' }}
+          >
+            <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>{step === totalVisibleSteps - 1 ? 'Done' : 'Next'}</Text>
+          </Pressable>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

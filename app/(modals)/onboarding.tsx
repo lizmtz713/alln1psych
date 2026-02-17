@@ -121,6 +121,8 @@ export default function OnboardingScreen() {
     culturalBackgroundOther,
     setCulturalBackgroundOther,
     completeOnboarding,
+    birthday,
+    setBirthday,
   } = useUserStore();
 
   const [inviteName, setInviteName] = useState(circleInvite?.name ?? '');
@@ -129,9 +131,18 @@ export default function OnboardingScreen() {
   );
   const [wantsToInvite, setWantsToInvite] = useState<boolean | null>(null);
   const [nameInputFocused, setNameInputFocused] = useState(false);
+  const [birthdayInputLocal, setBirthdayInputLocal] = useState('');
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const setNotificationsCheckIn = useSettingsStore((s) => s.setNotificationsCheckIn);
   const stepOpacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (step === 2 && birthday && !birthdayInputLocal) {
+      const d = new Date(birthday + 'T12:00:00');
+      if (!isNaN(d.getTime()))
+        setBirthdayInputLocal(`${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}/${d.getFullYear()}`);
+    }
+  }, [step, birthday]);
 
   const finishOnboarding = async () => {
     if (wantsToInvite === true && inviteName.trim()) {
@@ -313,7 +324,7 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 2 — Name & Pronouns */}
+            {/* STEP 2 — Name, Birthday (optional), Pronouns */}
             {step === 2 && (
               <View style={styles.step}>
                 <Text style={styles.question}>What should I call you?</Text>
@@ -330,6 +341,32 @@ export default function OnboardingScreen() {
                   onBlur={() => setNameInputFocused(false)}
                   autoCapitalize="words"
                   autoCorrect={false}
+                />
+                <Text style={[styles.question, styles.questionMargin]}>Birthday (optional — for relationship insights)</Text>
+                <TextInput
+                  style={[styles.input, styles.inputMargin]}
+                  placeholder="MM/DD/YYYY"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={birthdayInputLocal}
+                  onChangeText={(text) => {
+                    const cleaned = text.replace(/\D/g, '');
+                    if (cleaned.length <= 2) setBirthdayInputLocal(cleaned);
+                    else if (cleaned.length <= 4) setBirthdayInputLocal(cleaned.slice(0, 2) + '/' + cleaned.slice(2));
+                    else setBirthdayInputLocal(cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8));
+                    if (cleaned.length === 8) {
+                      const mm = cleaned.slice(0, 2), dd = cleaned.slice(2, 4), yyyy = cleaned.slice(4, 8);
+                      setBirthday(`${yyyy}-${mm}-${dd}`);
+                    } else if (cleaned.length < 8) setBirthday(null);
+                  }}
+                  onFocus={() => {
+                    if (!birthdayInputLocal && birthday) {
+                      const d = new Date(birthday + 'T12:00:00');
+                      if (!isNaN(d.getTime()))
+                        setBirthdayInputLocal(`${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}/${d.getFullYear()}`);
+                    }
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={10}
                 />
                 <Text style={[styles.question, styles.questionMargin]}>And your pronouns?</Text>
                 <View style={styles.chipRow}>

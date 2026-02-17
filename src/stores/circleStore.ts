@@ -32,8 +32,14 @@ export interface CircleMember {
   temperatureLabel: string;
   lastUpdated: Date;
   addedAt: Date;
-  /** ISO date string "1999-03-15" — unlocks relationship insights */
+  /** ISO date string "1999-03-15" — unlocks relationship insights; saved once */
   birthday?: string;
+  /** Phone number; saved once, never re-enter */
+  phone?: string;
+  /** ISO date of last check-in */
+  lastReachedOut?: string;
+  /** Total times reached out */
+  reachedOutCount?: number;
 }
 
 export interface MoodEntry {
@@ -107,7 +113,7 @@ interface CircleState {
       'id' | 'temperature' | 'temperatureLabel' | 'lastUpdated' | 'addedAt'
     >
   ) => void;
-  updateMember: (id: string, updates: Partial<Pick<CircleMember, 'birthday'>>) => void;
+  updateMember: (id: string, updates: Partial<Pick<CircleMember, 'birthday' | 'phone' | 'lastReachedOut' | 'reachedOutCount'>>) => void;
   removeMember: (id: string) => void;
   updateMemberTemperature: (id: string, temp: Temperature) => void;
   updateMyTemperature: (temp: Temperature, note?: string) => void;

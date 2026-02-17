@@ -52,6 +52,8 @@ export default function CircleScreen() {
   const [toast, setToast] = useState<string | null>(null);
   const [editingBirthdayId, setEditingBirthdayId] = useState<string | null>(null);
   const [birthdayInput, setBirthdayInput] = useState('');
+  const [editingPhoneId, setEditingPhoneId] = useState<string | null>(null);
+  const [phoneInput, setPhoneInput] = useState('');
   const onRefresh = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
@@ -87,6 +89,11 @@ export default function CircleScreen() {
   };
 
   const handleSendText = (m: CircleMember) => {
+    const number = m.phone || (m.contactMethod && !m.contactMethod.includes('@') ? m.contactMethod : null);
+    if (number) {
+      Linking.openURL(`sms:${number.replace(/\D/g, '')}`);
+      return;
+    }
     if (Platform.OS === 'ios') {
       Alert.prompt(
         `Send text to ${m.name}`,
@@ -96,9 +103,6 @@ export default function CircleScreen() {
         }
       );
     } else {
-      if (m.contactMethod && !m.contactMethod.includes('@')) {
-        Linking.openURL(`sms:${m.contactMethod.replace(/\D/g, '')}`);
-      } else {
         Alert.alert(
           `Send text to ${m.name}`,
           'Enter their phone number in your circle, or open your messages app.',
@@ -108,10 +112,14 @@ export default function CircleScreen() {
           ]
         );
       }
-    }
   };
 
   const handleCall = (m: CircleMember) => {
+    const number = m.phone || (m.contactMethod && !m.contactMethod.includes('@') ? m.contactMethod : null);
+    if (number) {
+      Linking.openURL(`tel:${number.replace(/\D/g, '')}`);
+      return;
+    }
     if (Platform.OS === 'ios') {
       Alert.prompt(
         `Call ${m.name}`,
@@ -121,24 +129,25 @@ export default function CircleScreen() {
         }
       );
     } else {
-      if (m.contactMethod && !m.contactMethod.includes('@')) {
-        Linking.openURL(`tel:${m.contactMethod.replace(/\D/g, '')}`);
-      } else {
-        Alert.alert(
-          `Call ${m.name}`,
-          'Add their phone number in your circle, or open your dialer.',
-          [
-            { text: 'Open dialer', onPress: () => Linking.openURL('tel:') },
-            { text: 'Cancel', style: 'cancel' },
-          ]
-        );
-      }
+      Alert.alert(
+        `Call ${m.name}`,
+        'Add their phone number in your circle, or open your dialer.',
+        [
+          { text: 'Open dialer', onPress: () => Linking.openURL('tel:') },
+          { text: 'Cancel', style: 'cancel' },
+        ]
+      );
     }
   };
 
   const handleReachedOut = (m: CircleMember) => {
+    updateMember(m.id, {
+      lastReachedOut: new Date().toISOString(),
+      reachedOutCount: (m.reachedOutCount || 0) + 1,
+    });
     const n = nudges.find((x) => x.memberName === m.name);
     if (n) markNudgeActedOn(n.id);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setToast('Reached out recorded');
     setTimeout(() => setToast(null), 2000);
   };
@@ -163,6 +172,44 @@ export default function CircleScreen() {
           <Text style={styles.demoBadgeText}>Demo data</Text>
         </View>
       )}
+
+      {/* Time to check in — members who need a check-in (7+ days or never) */}
+      {(() => {
+        const needsCheckIn = members.filter((m) => {
+          if (!m.lastReachedOut) return true;
+          const daysSince = Math.floor((Date.now() - new Date(m.lastReachedOut).getTime()) / 86400000);
+          return daysSince >= 7;
+        });
+        return needsCheckIn.length > 0 ? (
+          <View style={{ backgroundColor: 'rgba(124,77,255,0.08)', borderRadius: 14, padding: 14, marginHorizontal: 16, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}>
+            <Text style={{ color: '#7C4DFF', fontSize: 14, fontWeight: '600', marginBottom: 8 }}>Time to check in</Text>
+            {needsCheckIn.map((m) => {
+              const days = m.lastReachedOut
+                ? Math.floor((Date.now() - new Date(m.lastReachedOut).getTime()) / 86400000)
+                : null;
+              return (
+                <View key={m.id} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <Text style={{ color: '#F0F0F5', fontSize: 14 }}>
+                    {m.name} — {days !== null ? `${days} days ago` : 'never reached out'}
+                  </Text>
+                  <Pressable
+                    onPress={() => {
+                      updateMember(m.id, {
+                        lastReachedOut: new Date().toISOString(),
+                        reachedOutCount: (m.reachedOutCount || 0) + 1,
+                      });
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    }}
+                    style={{ backgroundColor: '#7C4DFF', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}
+                  >
+                    <Text style={{ color: '#fff', fontSize: 12 }}>Done ✓</Text>
+                  </Pressable>
+                </View>
+              );
+            })}
+          </View>
+        ) : null;
+      })()}
 
       {/* YOUR TEMPERATURE */}
       <View style={styles.section}>
@@ -228,6 +275,14 @@ export default function CircleScreen() {
                   {expanded && (
                     <View style={styles.memberExpand}>
                       <Text style={styles.actionText}>{action}</Text>
+                      <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 10 }}>
+                        {m.lastReachedOut
+                          ? `Last reached out: ${(() => {
+                              const days = Math.floor((Date.now() - new Date(m.lastReachedOut!).getTime()) / 86400000);
+                              return days === 0 ? 'today' : days === 1 ? '1 day ago' : `${days} days ago`;
+                            })()}`
+                          : "You've never reached out"}
+                      </Text>
                       <View style={styles.actionRow}>
                         <Pressable
                           style={styles.actionBtn}
@@ -245,6 +300,56 @@ export default function CircleScreen() {
                           <Text style={styles.actionBtnText}>I reached out</Text>
                         </Pressable>
                       </View>
+                      {/* Phone: show or add */}
+                      {m.phone ? (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 4 }}>
+                          <Text style={{ color: '#8888A0', fontSize: 13 }}>Phone: </Text>
+                          <Text style={{ color: '#F0F0F5', fontSize: 13 }}>{m.phone}</Text>
+                        </View>
+                      ) : (
+                        <View style={{ marginTop: 12 }}>
+                          {editingPhoneId === m.id ? (
+                            <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}>
+                              <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 6 }}>Phone number</Text>
+                              <TextInput
+                                style={{ backgroundColor: '#09090F', color: '#F0F0F5', borderRadius: 12, padding: 14, fontSize: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', marginBottom: 10 }}
+                                placeholder="(555) 123-4567"
+                                placeholderTextColor="#55556A"
+                                value={phoneInput}
+                                onChangeText={setPhoneInput}
+                                keyboardType="phone-pad"
+                              />
+                              <View style={{ flexDirection: 'row', gap: 10 }}>
+                                <Pressable onPress={() => { setEditingPhoneId(null); setPhoneInput(''); }} style={{ flex: 1, paddingVertical: 10, alignItems: 'center' }}>
+                                  <Text style={{ color: '#8888A0', fontSize: 14 }}>Cancel</Text>
+                                </Pressable>
+                                <Pressable
+                                  onPress={() => {
+                                    if (phoneInput.trim()) {
+                                      updateMember(m.id, { phone: phoneInput.trim() });
+                                      setEditingPhoneId(null);
+                                      setPhoneInput('');
+                                    }
+                                  }}
+                                  style={{ flex: 1, paddingVertical: 10, alignItems: 'center' }}
+                                >
+                                  <Text style={{ color: '#7C4DFF', fontSize: 14, fontWeight: '600' }}>Save</Text>
+                                </Pressable>
+                              </View>
+                            </View>
+                          ) : (
+                            <Pressable onPress={() => { setEditingPhoneId(m.id); setPhoneInput(''); }} style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}>
+                              <Text style={{ color: '#7C4DFF', fontSize: 14, textAlign: 'center' }}>Add phone number</Text>
+                            </Pressable>
+                          )}
+                        </View>
+                      )}
+                      {/* Birthday: show when present */}
+                      {m.birthday && (
+                        <Text style={{ color: '#8888A0', fontSize: 13, marginTop: 6 }}>
+                          Birthday: {new Date(m.birthday + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </Text>
+                      )}
                       {(m.temperature === 'orange' || m.temperature === 'red') && (
                         <Pressable
                           style={styles.helpSomeoneBtn}
