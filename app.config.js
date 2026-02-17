@@ -47,7 +47,6 @@ module.exports = {
       eas: {
         projectId: 'b2be53d8-2212-4f77-99b6-e2a829b7dc5b',
       },
-      openaiApiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
     },
     plugins: [
       'expo-router',
