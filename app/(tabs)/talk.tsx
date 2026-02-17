@@ -164,6 +164,18 @@ export default function TalkScreen() {
   const addSummary = useConversationSummaryStore((s) => s.addSummary);
   const getLastSummary = useConversationSummaryStore((s) => s.getLastSummary);
   const clearMessages = useConversationStore((s) => s.clearMessages);
+  const [conversationId, setConversationId] = useState(Date.now());
+
+  function handleNewTopic() {
+    clearMessages();
+    addMessage({ role: 'assistant', content: "Fresh start. What's on your mind?", isVoice: false });
+    setInitialGreetingAdded(true);
+    setConversationId(Date.now());
+  }
+
+  function handleSaveAndClose() {
+    router.push('/(tabs)');
+  }
 
   const runSaveConversation = (showToast: boolean) => {
     const state = useConversationStore.getState();
@@ -535,17 +547,17 @@ export default function TalkScreen() {
           <CrisisOverlay onDismiss={() => setShowCrisisOverlay(false)} />
         </View>
       )}
-      {/* Status area */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Your Space</Text>
-        {messages.length >= 3 && (
-          <Pressable
-            style={styles.endConvButton}
-            onPress={() => runSaveConversation(true)}
-          >
-            <Text style={styles.endConvButtonText}>End conversation</Text>
+      {/* Header with session controls */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
+        <Text style={{ color: '#F0F0F5', fontSize: 18, fontWeight: '600' }}>Talk to Psych</Text>
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleNewTopic(); }} style={{ backgroundColor: '#111118', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+            <Text style={{ color: '#8888A0', fontSize: 13 }}>New Topic</Text>
           </Pressable>
-        )}
+          <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleSaveAndClose(); }} style={{ backgroundColor: '#111118', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+            <Text style={{ color: '#8888A0', fontSize: 13 }}>Save & Close</Text>
+          </Pressable>
+        </View>
       </View>
 
       {/* Follow-up from last time */}

@@ -75,7 +75,7 @@ export default function LessonScreen() {
   const addJournalEntry = useJournalStore((s) => s.addEntry);
   const [reflectionText, setReflectionText] = useState(reflections[id ?? ''] ?? '');
   const [justCompleted, setJustCompleted] = useState(false);
-  const [completionAiResponse, setCompletionAiResponse] = useState<string | null>(null);
+  const [completionAiResponse, setCompletionAiResponse] = useState('');
   const [completionLoading, setCompletionLoading] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
 
@@ -125,23 +125,20 @@ export default function LessonScreen() {
     }
     useCockpitStore.getState().addLessonBonus?.();
     setJustCompleted(true);
-    setCompletionLoading(true);
-    setCompletionAiResponse(null);
-    const hasKey = await hasOpenAIKey();
-    if (hasKey && (reflectionText?.trim() ?? '').length > 0) {
+    if (reflectionText && reflectionText.trim().length > 5) {
+      setCompletionLoading(true);
+      setCompletionAiResponse('');
       try {
-        const userContent = `I just completed a lesson about "${lesson.title}". Here's what I wrote: "${reflectionText.trim()}". Give me a brief, personalized insight based on what I shared. Connect it to what the lesson taught. Be warm and specific to what I said, not generic. 2-3 sentences max.`;
-        const sysPrompt = 'You are Psych, an emotional intelligence companion. The user just completed a lesson and shared their thoughts. Give them a brief, personalized insight that connects what they shared to the lesson content. Be warm, specific, and insightful. Never be generic.';
         const response = await sendMessageWithSystemPrompt(
-          [{ role: 'user', content: userContent }],
-          sysPrompt
+          [{ role: 'user', content: `I just completed a lesson called "${lesson.title}". Here's what I reflected on: "${reflectionText}". Give me a brief, personalized insight connecting what I shared to the lesson. Be warm, specific to what I said. 2-3 sentences.` }],
+          'You are Psych, an emotional intelligence companion. Give a brief personalized insight based on their reflection. Be warm and specific. Never generic.'
         );
-        setCompletionAiResponse(response ?? null);
+        setCompletionAiResponse(response ?? '');
       } catch (e) {
-        if (__DEV__) console.warn('Lesson completion AI:', e);
+        if (__DEV__) console.warn('Lesson AI response failed:', e);
       }
+      setCompletionLoading(false);
     }
-    setCompletionLoading(false);
   };
 
   // Manual lesson layout (introduction, keyConcepts, reflectionPrompt)
@@ -196,18 +193,13 @@ export default function LessonScreen() {
                 <View style={styles.completeSuccess}>
                   <Text style={styles.completeSuccessText}>Lesson complete ✓</Text>
                 </View>
-                {completionLoading && (
-                  <View style={styles.aiResponseCard}>
-                    <ActivityIndicator size="small" color={COLORS.accent} />
-                    <Text style={styles.aiResponseLabel}>Psych is reflecting...</Text>
+                {completionLoading && <ActivityIndicator color="#7C4DFF" style={{ marginTop: 12 }} />}
+                {completionAiResponse ? (
+                  <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, marginTop: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+                    <Text style={{ color: '#7C4DFF', fontSize: 13, fontWeight: '600', marginBottom: 4 }}>Psych says</Text>
+                    <Text style={{ color: '#E0E0E0', fontSize: 15, lineHeight: 22 }}>{completionAiResponse}</Text>
                   </View>
-                )}
-                {!completionLoading && completionAiResponse && (
-                  <View style={styles.aiResponseCard}>
-                    <Text style={styles.aiResponseLabel}>Psych says</Text>
-                    <Text style={styles.aiResponseText}>{completionAiResponse}</Text>
-                  </View>
-                )}
+                ) : null}
                 <View style={styles.completeActions}>
                   <Pressable style={({ pressed }) => [styles.completeActionBtn, pressed && { opacity: 0.9 }]} onPress={() => router.push('/(tabs)/learn')}>
                     <Text style={styles.completeActionText}>Next lesson →</Text>
@@ -289,18 +281,13 @@ export default function LessonScreen() {
             <View style={styles.completeSuccess}>
               <Text style={styles.completeSuccessText}>Lesson complete ✓</Text>
             </View>
-            {completionLoading && (
-              <View style={styles.aiResponseCard}>
-                <ActivityIndicator size="small" color={COLORS.accent} />
-                <Text style={styles.aiResponseLabel}>Psych is reflecting...</Text>
+            {completionLoading && <ActivityIndicator color="#7C4DFF" style={{ marginTop: 12 }} />}
+            {completionAiResponse ? (
+              <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, marginTop: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+                <Text style={{ color: '#7C4DFF', fontSize: 13, fontWeight: '600', marginBottom: 4 }}>Psych says</Text>
+                <Text style={{ color: '#E0E0E0', fontSize: 15, lineHeight: 22 }}>{completionAiResponse}</Text>
               </View>
-            )}
-            {!completionLoading && completionAiResponse && (
-              <View style={styles.aiResponseCard}>
-                <Text style={styles.aiResponseLabel}>Psych says</Text>
-                <Text style={styles.aiResponseText}>{completionAiResponse}</Text>
-              </View>
-            )}
+            ) : null}
             <View style={styles.completeActions}>
               <Pressable style={({ pressed }) => [styles.completeActionBtn, pressed && { opacity: 0.9 }]} onPress={() => router.push('/(tabs)/learn')}>
                 <Text style={styles.completeActionText}>Next lesson →</Text>
