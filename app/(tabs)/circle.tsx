@@ -301,6 +301,19 @@ export default function CircleScreen() {
                           </View>
                         );
                       })()}
+                      {/* Relationship Check — when member has birthday */}
+                      {m.birthday && (
+                        <Pressable
+                          style={{ marginTop: 12, backgroundColor: '#111118', borderRadius: 10, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push({ pathname: '/(modals)/relationship-check', params: { name: m.name, birthday: m.birthday } });
+                          }}
+                        >
+                          <Text style={{ fontSize: 18 }}>💫</Text>
+                          <Text style={{ color: '#7C4DFF', fontSize: 14, fontWeight: '500' }}>Relationship Check with {m.name}</Text>
+                        </Pressable>
+                      )}
                       {/* Add birthday */}
                       {!m.birthday && (
                         <View style={{ marginTop: 16 }}>

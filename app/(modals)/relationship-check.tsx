@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { getPersonality, getRelationshipDynamic } from '../../src/services/personology';
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
@@ -9,8 +9,18 @@ import { useUserStore } from '../../src/stores/userStore';
 
 type RelType = 'romantic' | 'family' | 'friendship' | 'work';
 
+function isoToMMDDYYYY(iso: string): string {
+  if (!iso || iso.length < 10) return '';
+  const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) return `${match[2]}/${match[3]}/${match[1]}`;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
+}
+
 export default function RelationshipCheck() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ name?: string; birthday?: string }>();
   const userBirthday = useUserStore((s) => s.birthday);
   const [myBirthday, setMyBirthday] = useState('');
   const [theirBirthday, setTheirBirthday] = useState('');
@@ -31,6 +41,14 @@ export default function RelationshipCheck() {
       }
     }
   }, [userBirthday, myBirthday]);
+
+  useEffect(() => {
+    if (params.name && params.name !== theirName) setTheirName(params.name);
+    if (params.birthday) {
+      const display = isoToMMDDYYYY(params.birthday);
+      if (display && display !== theirBirthday) setTheirBirthday(display);
+    }
+  }, [params.name, params.birthday]);
 
   function formatBirthday(text: string, setter: (v: string) => void) {
     const cleaned = text.replace(/\D/g, '');

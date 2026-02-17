@@ -23,9 +23,6 @@ import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
-import { useCircleStore } from '../../src/stores/circleStore';
-import { useUserStore } from '../../src/stores/userStore';
-import { buildRelationshipContext } from '../../src/services/personology';
 
 const BG = '#09090F';
 const CARD_BG = '#111118';
@@ -109,18 +106,9 @@ export default function ReplayScreen() {
     if (!userContent.trim()) return;
     setLoading(true);
     try {
-      let fullPrompt = sysPrompt;
-      const circleMembers = useCircleStore.getState().members;
-      const myBirthday = useUserStore.getState().birthday;
-      const userText = userContent.toLowerCase();
-      circleMembers.forEach((member) => {
-        if (member.birthday && myBirthday && userText.includes(member.name.toLowerCase())) {
-          fullPrompt += buildRelationshipContext(myBirthday, member.birthday, member.name);
-        }
-      });
       const response = await sendMessageWithSystemPrompt(
         [{ role: 'user', content: userContent }],
-        fullPrompt
+        sysPrompt
       );
       setResult(response?.trim() ?? '');
       setPhase(nextPhase);
