@@ -169,7 +169,7 @@ export function hasVoiceSupport(): boolean {
   return true;
 }
 
-/** Play AI response using OpenAI TTS (Psych's voice). */
+/** Play AI response using OpenAI TTS (Psych's voice). Uses fetch + blob + FileReader for reliable binary in RN. */
 export async function speakWithOpenAI(text: string): Promise<void> {
   try {
     const apiKey = await getOpenAIKey();
@@ -200,8 +200,17 @@ export async function speakWithOpenAI(text: string): Promise<void> {
       return;
     }
 
-    const arrayBuffer = await response.arrayBuffer();
-    const base64Audio = uint8ToBase64(new Uint8Array(arrayBuffer));
+    const blob = await response.blob();
+    const base64Audio = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        const base64 = dataUrl.split(',')[1];
+        resolve(base64 ?? '');
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
 
     const fileUri = FileSystem.documentDirectory + 'psych-tts-' + Date.now() + '.mp3';
     await FileSystem.writeAsStringAsync(fileUri, base64Audio, {

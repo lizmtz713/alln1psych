@@ -11,6 +11,8 @@ import {
   Platform,
   Alert,
   AppState,
+  type StyleProp,
+  type ViewStyle,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
@@ -621,7 +623,7 @@ export default function TalkScreen() {
       {/* Conversation */}
       <ScrollView
         ref={scrollRef}
-        style={styles.scroll}
+        style={[styles.scroll, { flex: 1, width: '100%' }]}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -637,18 +639,20 @@ export default function TalkScreen() {
                 <Text style={styles.psychLabelText}>Psych</Text>
               </View>
             )}
-            <View style={[styles.bubble, msg.role === 'user' ? styles.bubbleUser : styles.bubbleAi]}>
-              <View style={styles.bubbleContentRow}>
-                <Text style={[styles.bubbleText, msg.role === 'user' && styles.bubbleTextUser]}>
-                  {msg.content}
-                </Text>
-                {msg.role === 'assistant' && msg.id === lastAiMessageId && ttsState !== 'idle' && (
-                  <Text style={styles.ttsIcon} accessibilityLabel={ttsState === 'loading' ? 'Voice loading' : 'Voice playing'}>
-                    🔊
+            <View style={[styles.bubbleWrap, msg.role === 'user' ? styles.bubbleWrapUser : styles.bubbleWrapAi]}>
+              <View style={[styles.bubble, msg.role === 'user' ? styles.bubbleUser : styles.bubbleAi]}>
+                <View style={styles.bubbleContentRow}>
+                  <Text style={[styles.bubbleText, msg.role === 'user' && styles.bubbleTextUser]}>
+                    {msg.content}
                   </Text>
-                )}
+                  {msg.role === 'assistant' && msg.id === lastAiMessageId && ttsState !== 'idle' && (
+                    <Text style={styles.ttsIcon} accessibilityLabel={ttsState === 'loading' ? 'Voice loading' : 'Voice playing'}>
+                      🔊
+                    </Text>
+                  )}
+                </View>
+                <Text style={styles.timestamp}>{formatTime(msg.timestamp)}</Text>
               </View>
-              <Text style={styles.timestamp}>{formatTime(msg.timestamp)}</Text>
             </View>
           </AnimatedMessageRow>
         ))}
@@ -658,6 +662,7 @@ export default function TalkScreen() {
               <View style={styles.psychDot} />
               <Text style={styles.psychLabelText}>Psych</Text>
             </View>
+            <View style={[styles.bubbleWrap, styles.bubbleWrapAi]}>
             <View style={[styles.bubble, styles.bubbleAi, styles.typingBubble]}>
               <View style={styles.typingDots}>
                 {[dot0, dot1, dot2].map((d, i) => (
@@ -679,6 +684,7 @@ export default function TalkScreen() {
                   />
                 ))}
               </View>
+            </View>
             </View>
           </View>
         )}
@@ -895,11 +901,11 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     lineHeight: 20,
   },
-  scroll: { flex: 1 },
+  scroll: { flex: 1, width: '100%' },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 12,
     paddingVertical: 16,
-    paddingBottom: 24,
+    paddingBottom: 20,
   },
   messageRow: {
     marginBottom: 16,
@@ -929,18 +935,33 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.textMuted,
   },
+  bubbleWrap: {
+    flex: 1,
+    maxWidth: '88%',
+    minWidth: 200,
+    marginRight: 40,
+    marginBottom: 8,
+  },
+  bubbleWrapUser: {
+    alignSelf: 'flex-end',
+    marginRight: 8,
+    marginLeft: 40,
+    maxWidth: '80%',
+  },
+  bubbleWrapAi: {
+    alignSelf: 'flex-start',
+  },
   bubble: {
-    maxWidth: '82%',
     padding: 14,
     borderRadius: BORDER_RADIUS.card,
   },
   bubbleAi: {
     backgroundColor: COLORS.inputSurface,
-    alignSelf: 'flex-start',
+    borderTopLeftRadius: 4,
   },
   bubbleUser: {
     backgroundColor: COLORS.accent,
-    alignSelf: 'flex-end',
+    borderTopRightRadius: 4,
   },
   bubbleContentRow: {
     flexDirection: 'row',
@@ -951,7 +972,8 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: COLORS.text,
-    lineHeight: 22,
+    lineHeight: 24,
+    flexWrap: 'wrap',
   },
   bubbleTextUser: {
     color: COLORS.text,

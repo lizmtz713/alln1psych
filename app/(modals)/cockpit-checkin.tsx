@@ -1,9 +1,10 @@
 /**
  * Cockpit check-in — 6-screen flow, one per gauge. Under 60 seconds.
  * Progress dots, Back, Skip on each screen. Writes to cockpitStore.
+ * Step navigation is 0-based; gauge answers live in refs to avoid re-render cascades during animation.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -61,6 +62,8 @@ const STATE_OPTIONS = [
 
 const EMOTION_OPTIONS = ['Calm', 'Happy', 'Sad', 'Anxious', 'Angry', 'Overwhelmed', 'Numb', 'Confused'] as const;
 
+const TOTAL_STEPS = 6;
+
 function emotionToScore(selected: string[]): number {
   if (selected.length === 0) return 50;
   if (selected.includes('Numb')) return 30;
@@ -70,10 +73,32 @@ function emotionToScore(selected: string[]): number {
   return 50;
 }
 
+type AnswersRef = {
+  body: Record<BodyKey, boolean>;
+  stateValue: number | null;
+  emotionSelected: string[];
+  listenedToMe: boolean | null;
+  iListened: boolean | null;
+  directionValue: number | null;
+  alignmentValue: number | null;
+};
+
+const initialAnswers: AnswersRef = {
+  body: { sleep: false, food: false, water: false, movement: false },
+  stateValue: null,
+  emotionSelected: [],
+  listenedToMe: null,
+  iListened: null,
+  directionValue: null,
+  alignmentValue: null,
+};
+
 export default function CockpitCheckinScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
+  const [formVersion, setFormVersion] = useState(0);
+  const answersRef = useRef<AnswersRef>({ ...initialAnswers, body: { ...initialAnswers.body } });
 
   const setBodyCheckIn = useCockpitStore((s) => s.setBodyCheckIn);
   const updateState = useCockpitStore((s) => s.updateState);
@@ -83,83 +108,119 @@ export default function CockpitCheckinScreen() {
   const updateAlignment = useCockpitStore((s) => s.updateAlignment);
   const setLastCheckInDate = useCockpitStore((s) => s.setLastCheckInDate);
 
-  const [body, setBody] = useState<Record<BodyKey, boolean>>({
-    sleep: false,
-    food: false,
-    water: false,
-    movement: false,
-  });
-  const [stateValue, setStateValue] = useState<number | null>(null);
-  const [emotionSelected, setEmotionSelected] = useState<string[]>([]);
-  const [listenedToMe, setListenedToMe] = useState<boolean | null>(null);
-  const [iListened, setIListened] = useState<boolean | null>(null);
-  const [directionValue, setDirectionValue] = useState<number | null>(null);
-  const [alignmentValue, setAlignmentValue] = useState<number | null>(null);
+  const a = answersRef.current;
+  void formVersion;
 
-  const bodyYesCount = BODY_KEYS.filter((k) => body[k]).length;
+  const bodyYesCount = BODY_KEYS.filter((k) => a.body[k]).length;
   const bodyScore = bodyYesCount * 25;
-
-  useEffect(() => {
-    if (step === 1) setBodyCheckIn(body.sleep, body.food, body.water, body.movement);
-  }, [body, step, setBodyCheckIn]);
-
-  const toggleBody = (key: BodyKey) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setBody((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
   const connectionScore =
-    listenedToMe === true && iListened === true ? 100 : listenedToMe === true || iListened === true ? 60 : 20;
+    a.listenedToMe === true && a.iListened === true ? 100 : a.listenedToMe === true || a.iListened === true ? 60 : 20;
 
-  const handleNext = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const flushAndNext = useCallback(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    if (step < 6) setStep(step + 1);
-    else {
-      setLastCheckInDate(new Date().toISOString().slice(0, 10));
-      router.back();
-    }
-  };
+    setStep((prev) => {
+      if (prev >= TOTAL_STEPS - 1) {
+        setLastCheckInDate(new Date().toISOString().slice(0, 10));
+        setTimeout(() => router.back(), 0);
+        return prev;
+      }
+      return prev + 1;
+    });
+  }, [setLastCheckInDate, router]);
 
-  const handleSkip = () => {
+  const handleNext = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    if (step < 6) setStep(step + 1);
-    else {
-      setLastCheckInDate(new Date().toISOString().slice(0, 10));
-      router.back();
-    }
-  };
+    flushAndNext();
+  }, [flushAndNext]);
 
-  const applyStepAndNext = () => {
-    if (step === 2 && stateValue !== null) updateState(stateValue);
-    if (step === 3) updateEmotion(emotionToScore(emotionSelected));
-    if (step === 4) updateConnection(connectionScore);
-    if (step === 5 && directionValue !== null) updateDirection(directionValue);
-    if (step === 6 && alignmentValue !== null) updateAlignment(alignmentValue);
+  const handleSkip = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    flushAndNext();
+  }, [flushAndNext]);
+
+  const applyStepAndNext = useCallback(() => {
+    const cur = answersRef.current;
+    if (step === 0) {
+      setBodyCheckIn(cur.body.sleep, cur.body.food, cur.body.water, cur.body.movement);
+    } else if (step === 1 && cur.stateValue !== null) {
+      updateState(cur.stateValue);
+    } else if (step === 2) {
+      updateEmotion(emotionToScore(cur.emotionSelected ?? []));
+    } else if (step === 3) {
+      updateConnection(connectionScore);
+    } else if (step === 4 && cur.directionValue !== null) {
+      updateDirection(cur.directionValue);
+    } else if (step === 5 && cur.alignmentValue !== null) {
+      updateAlignment(cur.alignmentValue);
+    }
     handleNext();
-  };
+  }, [step, connectionScore, setBodyCheckIn, updateState, updateEmotion, updateConnection, updateDirection, updateAlignment, handleNext]);
 
-  const canProceed = () => {
-    if (step === 1) return true;
-    if (step === 2) return stateValue !== null;
-    if (step === 3) return true;
-    if (step === 4) return listenedToMe !== null && iListened !== null;
-    if (step === 5) return directionValue !== null;
-    if (step === 6) return alignmentValue !== null;
+  const canProceed = useCallback(() => {
+    if (step === 0) return true;
+    if (step === 1) return a.stateValue !== null;
+    if (step === 2) return true;
+    if (step === 3) return a.listenedToMe !== null && a.iListened !== null;
+    if (step === 4) return a.directionValue !== null;
+    if (step === 5) return a.alignmentValue !== null;
     return false;
-  };
+  }, [step, a.stateValue, a.listenedToMe, a.iListened, a.directionValue, a.alignmentValue]);
 
   const bodyResponseText = (() => {
     const n = bodyYesCount;
-    const template = BODY_RESPONSES[n];
+    const template = BODY_RESPONSES[n] ?? BODY_RESPONSES[0];
     if (n === 3) {
-      const missing = BODY_KEYS.find((k) => !body[k]);
+      const missing = BODY_KEYS.find((k) => !a.body[k]);
       const word = missing === 'sleep' ? 'rest' : missing === 'food' ? 'food' : missing === 'water' ? 'water' : 'movement';
       return template.replace('%s', word);
     }
     return template;
   })();
+
+  const tick = useCallback(() => setFormVersion((v) => v + 1), []);
+
+  const toggleBody = useCallback((key: BodyKey) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    answersRef.current.body[key] = !answersRef.current.body[key];
+    tick();
+  }, [tick]);
+
+  const setStateValue = useCallback((value: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    answersRef.current.stateValue = value;
+    tick();
+  }, [tick]);
+
+  const toggleEmotion = useCallback((e: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const prev = answersRef.current.emotionSelected;
+    answersRef.current.emotionSelected = prev.includes(e) ? prev.filter((x) => x !== e) : [...prev, e];
+    tick();
+  }, [tick]);
+
+  const setListenedToMe = useCallback((v: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    answersRef.current.listenedToMe = v;
+    tick();
+  }, [tick]);
+
+  const setIListened = useCallback((v: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    answersRef.current.iListened = v;
+    tick();
+  }, [tick]);
+
+  const setDirectionValue = useCallback((value: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    answersRef.current.directionValue = value;
+    tick();
+  }, [tick]);
+
+  const setAlignmentValue = useCallback((value: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    answersRef.current.alignmentValue = value;
+    tick();
+  }, [tick]);
 
   return (
     <ErrorBoundary>
@@ -170,16 +231,16 @@ export default function CockpitCheckinScreen() {
           style={styles.backBtn}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            if (step > 1) {
+            if (step > 0) {
               LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-              setStep(step - 1);
+              setStep((prev) => prev - 1);
             } else router.back();
           }}
         >
           <Ionicons name="arrow-back" size={24} color={TEXT_PRIMARY} />
         </Pressable>
         <View style={styles.dots}>
-          {[1, 2, 3, 4, 5, 6].map((i) => (
+          {[0, 1, 2, 3, 4, 5].map((i) => (
             <View
               key={i}
               style={[styles.dot, i <= step ? styles.dotFilled : styles.dotEmpty]}
@@ -187,7 +248,7 @@ export default function CockpitCheckinScreen() {
           ))}
         </View>
         <Pressable style={styles.skipBtn} onPress={handleSkip}>
-          <Text style={styles.skipText}>{step === 6 ? 'Done' : 'Skip'}</Text>
+          <Text style={styles.skipText}>{step === 5 ? 'Done' : 'Skip'}</Text>
         </Pressable>
       </View>
 
@@ -197,8 +258,8 @@ export default function CockpitCheckinScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ——— SCREEN 1: BODY ——— */}
-        {step === 1 && (
+        {/* ——— SCREEN 0: BODY ——— */}
+        {step === 0 && (
           <>
             <Text style={styles.title}>How's your body today?</Text>
             <View style={styles.gaugeWrap}>
@@ -210,12 +271,12 @@ export default function CockpitCheckinScreen() {
             {BODY_KEYS.map((key, i) => (
               <Pressable
                 key={key}
-                style={[styles.bodyRow, body[key] && styles.bodyRowYes]}
+                style={[styles.bodyRow, a.body[key] && styles.bodyRowYes]}
                 onPress={() => toggleBody(key)}
               >
                 <Text style={styles.bodyLabel}>{BODY_LABELS[i]}</Text>
-                <View style={[styles.toggle, body[key] && { backgroundColor: GREEN }]}>
-                  <Text style={styles.toggleText}>{body[key] ? 'Yes' : 'No'}</Text>
+                <View style={[styles.toggle, a.body[key] && { backgroundColor: GREEN }]}>
+                  <Text style={styles.toggleText}>{a.body[key] ? 'Yes' : 'No'}</Text>
                 </View>
               </Pressable>
             ))}
@@ -223,8 +284,8 @@ export default function CockpitCheckinScreen() {
           </>
         )}
 
-        {/* ——— SCREEN 2: STATE ——— */}
-        {step === 2 && (
+        {/* ——— SCREEN 1: STATE ——— */}
+        {step === 1 && (
           <>
             <Text style={styles.title}>Where is your nervous system?</Text>
             <View style={styles.chipRow}>
@@ -234,43 +295,35 @@ export default function CockpitCheckinScreen() {
                   style={[
                     styles.stateChip,
                     { borderColor: opt.color },
-                    stateValue === opt.value && { backgroundColor: opt.color + '22' },
+                    a.stateValue === opt.value && { backgroundColor: opt.color + '22' },
                   ]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setStateValue(opt.value);
-                  }}
+                  onPress={() => setStateValue(opt.value)}
                 >
                   <Text style={[styles.stateChipText, { color: opt.color }]}>{opt.label}</Text>
                 </Pressable>
               ))}
             </View>
-            {stateValue !== null && (
+            {a.stateValue !== null && (
               <Text style={styles.stateDesc}>
-                {STATE_OPTIONS.find((o) => o.value === stateValue)?.desc}
+                {STATE_OPTIONS.find((o) => o.value === a.stateValue)?.desc ?? ''}
               </Text>
             )}
           </>
         )}
 
-        {/* ——— SCREEN 3: EMOTION ——— */}
-        {step === 3 && (
+        {/* ——— SCREEN 2: EMOTION ——— */}
+        {step === 2 && (
           <>
             <Text style={styles.title}>What are you actually feeling?</Text>
             <Text style={styles.sub}>Tap any that fit (you can pick more than one).</Text>
             <View style={styles.emotionGrid}>
               {EMOTION_OPTIONS.map((e) => {
-                const selected = emotionSelected.includes(e);
+                const selected = (a.emotionSelected ?? []).includes(e);
                 return (
                   <Pressable
                     key={e}
                     style={[styles.emotionChip, selected && styles.emotionChipSelected]}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setEmotionSelected((prev) =>
-                        prev.includes(e) ? prev.filter((x) => x !== e) : [...prev, e]
-                      );
-                    }}
+                    onPress={() => toggleEmotion(e)}
                   >
                     <Text style={[styles.emotionChipText, selected && styles.emotionChipTextSelected]}>{e}</Text>
                   </Pressable>
@@ -290,8 +343,8 @@ export default function CockpitCheckinScreen() {
           </>
         )}
 
-        {/* ——— SCREEN 4: CONNECTION ——— */}
-        {step === 4 && (
+        {/* ——— SCREEN 3: CONNECTION ——— */}
+        {step === 3 && (
           <>
             <Text style={styles.title}>How's your connection?</Text>
             <Text style={styles.sub}>In the last 24 hours...</Text>
@@ -299,16 +352,16 @@ export default function CockpitCheckinScreen() {
               <Text style={styles.connectionLabel}>Did someone really listen to you?</Text>
               <View style={styles.yesNoRow}>
                 <Pressable
-                  style={[styles.yesNoBtn, listenedToMe === true && styles.yesNoBtnYes]}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setListenedToMe(true); }}
+                  style={[styles.yesNoBtn, a.listenedToMe === true && styles.yesNoBtnYes]}
+                  onPress={() => setListenedToMe(true)}
                 >
-                  <Text style={[styles.yesNoText, listenedToMe === true && styles.yesNoTextSelected]}>Yes</Text>
+                  <Text style={[styles.yesNoText, a.listenedToMe === true && styles.yesNoTextSelected]}>Yes</Text>
                 </Pressable>
                 <Pressable
-                  style={[styles.yesNoBtn, listenedToMe === false && styles.yesNoBtnNo]}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setListenedToMe(false); }}
+                  style={[styles.yesNoBtn, a.listenedToMe === false && styles.yesNoBtnNo]}
+                  onPress={() => setListenedToMe(false)}
                 >
-                  <Text style={[styles.yesNoText, listenedToMe === false && styles.yesNoTextSelected]}>No</Text>
+                  <Text style={[styles.yesNoText, a.listenedToMe === false && styles.yesNoTextSelected]}>No</Text>
                 </Pressable>
               </View>
             </View>
@@ -316,16 +369,16 @@ export default function CockpitCheckinScreen() {
               <Text style={styles.connectionLabel}>Did you really listen to someone?</Text>
               <View style={styles.yesNoRow}>
                 <Pressable
-                  style={[styles.yesNoBtn, iListened === true && styles.yesNoBtnYes]}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setIListened(true); }}
+                  style={[styles.yesNoBtn, a.iListened === true && styles.yesNoBtnYes]}
+                  onPress={() => setIListened(true)}
                 >
-                  <Text style={[styles.yesNoText, iListened === true && styles.yesNoTextSelected]}>Yes</Text>
+                  <Text style={[styles.yesNoText, a.iListened === true && styles.yesNoTextSelected]}>Yes</Text>
                 </Pressable>
                 <Pressable
-                  style={[styles.yesNoBtn, iListened === false && styles.yesNoBtnNo]}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setIListened(false); }}
+                  style={[styles.yesNoBtn, a.iListened === false && styles.yesNoBtnNo]}
+                  onPress={() => setIListened(false)}
                 >
-                  <Text style={[styles.yesNoText, iListened === false && styles.yesNoTextSelected]}>No</Text>
+                  <Text style={[styles.yesNoText, a.iListened === false && styles.yesNoTextSelected]}>No</Text>
                 </Pressable>
               </View>
             </View>
@@ -335,8 +388,8 @@ export default function CockpitCheckinScreen() {
           </>
         )}
 
-        {/* ——— SCREEN 5: DIRECTION ——— */}
-        {step === 5 && (
+        {/* ——— SCREEN 4: DIRECTION ——— */}
+        {step === 4 && (
           <>
             <Text style={styles.title}>Did you move toward something that matters to you today?</Text>
             <View style={styles.optionRow}>
@@ -347,13 +400,10 @@ export default function CockpitCheckinScreen() {
               ].map((opt) => (
                 <Pressable
                   key={opt.label}
-                  style={[styles.optionChip, directionValue === opt.value && styles.optionChipSelected]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setDirectionValue(opt.value);
-                  }}
+                  style={[styles.optionChip, a.directionValue === opt.value && styles.optionChipSelected]}
+                  onPress={() => setDirectionValue(opt.value)}
                 >
-                  <Text style={[styles.optionChipText, directionValue === opt.value && styles.optionChipTextSelected]}>{opt.label}</Text>
+                  <Text style={[styles.optionChipText, a.directionValue === opt.value && styles.optionChipTextSelected]}>{opt.label}</Text>
                 </Pressable>
               ))}
             </View>
@@ -363,8 +413,8 @@ export default function CockpitCheckinScreen() {
           </>
         )}
 
-        {/* ——— SCREEN 6: ALIGNMENT ——— */}
-        {step === 6 && (
+        {/* ——— SCREEN 5: ALIGNMENT ——— */}
+        {step === 5 && (
           <>
             <Text style={styles.title}>Are your actions matching your values right now?</Text>
             <View style={styles.optionRow}>
@@ -375,13 +425,10 @@ export default function CockpitCheckinScreen() {
               ].map((opt) => (
                 <Pressable
                   key={opt.label}
-                  style={[styles.optionChip, alignmentValue === opt.value && styles.optionChipSelected]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setAlignmentValue(opt.value);
-                  }}
+                  style={[styles.optionChip, a.alignmentValue === opt.value && styles.optionChipSelected]}
+                  onPress={() => setAlignmentValue(opt.value)}
                 >
-                  <Text style={[styles.optionChipText, alignmentValue === opt.value && styles.optionChipTextSelected]}>{opt.label}</Text>
+                  <Text style={[styles.optionChipText, a.alignmentValue === opt.value && styles.optionChipTextSelected]}>{opt.label}</Text>
                 </Pressable>
               ))}
             </View>
@@ -393,11 +440,11 @@ export default function CockpitCheckinScreen() {
         )}
 
         <Pressable
-          style={[styles.primaryBtn, (!canProceed() && step !== 1) && styles.primaryBtnDisabled]}
+          style={[styles.primaryBtn, (step !== 0 && !canProceed()) && styles.primaryBtnDisabled]}
           onPress={applyStepAndNext}
-          disabled={step !== 1 && !canProceed()}
+          disabled={step !== 0 && !canProceed()}
         >
-          <Text style={styles.primaryBtnText}>{step === 6 ? 'Done' : 'Next'}</Text>
+          <Text style={styles.primaryBtnText}>{step === 5 ? 'Done' : 'Next'}</Text>
         </Pressable>
       </ScrollView>
     </View>

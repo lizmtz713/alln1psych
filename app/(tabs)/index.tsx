@@ -78,6 +78,49 @@ const TEXT_SECONDARY = '#8888A0';
 const TEXT_MUTED = '#55556A';
 const ACCENT = '#7C4DFF';
 
+function getDynamicGreeting(name: string): string {
+  const hour = new Date().getHours();
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  );
+  const greetings = {
+    morning: [
+      `Morning, ${name}`,
+      `New day, ${name}`,
+      `Rise and check in, ${name}`,
+      `Good morning, ${name}`,
+      `Hey ${name}, fresh start`,
+    ],
+    afternoon: [
+      `Afternoon, ${name}`,
+      `Hey ${name}`,
+      `Checking in, ${name}`,
+      `How's the day going, ${name}`,
+      `Good afternoon, ${name}`,
+    ],
+    evening: [
+      `Evening, ${name}`,
+      `Hey ${name}, winding down?`,
+      `Good evening, ${name}`,
+      `End of day check, ${name}`,
+      `Hey ${name}`,
+    ],
+    night: [
+      `Still up, ${name}?`,
+      `Late night, ${name}`,
+      `Hey ${name}, can't sleep?`,
+      `Night owl mode, ${name}`,
+      `${name}, take it easy tonight`,
+    ],
+  };
+  let timeGreetings: string[];
+  if (hour >= 5 && hour < 12) timeGreetings = greetings.morning;
+  else if (hour >= 12 && hour < 17) timeGreetings = greetings.afternoon;
+  else if (hour >= 17 && hour < 22) timeGreetings = greetings.evening;
+  else timeGreetings = greetings.night;
+  return timeGreetings[dayOfYear % timeGreetings.length];
+}
+
 function GaugeTile({ gaugeId, onPress }: { gaugeId: GaugeKey; onPress: () => void }) {
   const gauge = useCockpitStore((s) => s[gaugeId]);
   const getStoreGaugeColor = useCockpitStore((s) => s.getGaugeColor);
@@ -181,7 +224,7 @@ export default function HomeScreen() {
     moodTrend = typeof getWeeklyMoodTrend === 'function' ? (getWeeklyMoodTrend() ?? []) : [];
     const summaries = typeof getSummaries === 'function' ? getSummaries() : [];
     summaryCount = Array.isArray(summaries) ? summaries.length : 0;
-    greetingLine = dailyContent?.greeting ?? `Good morning, ${user?.name ?? 'you'} 💜`;
+    greetingLine = dailyContent?.greeting ?? getDynamicGreeting(user?.name ?? 'you');
     affirmation = dailyContent?.affirmation ?? "You're doing better than you think.";
     psychSays = dailyContent?.insight ?? (typeof getPsychSays === 'function' ? getPsychSays(streak) : "You're doing better than you think.");
     todayChallenge = (typeof getTodayChallenge === 'function' ? getTodayChallenge() : null) ?? todayChallenge;

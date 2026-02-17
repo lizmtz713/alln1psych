@@ -104,11 +104,37 @@ export default function RolePlayScreen() {
     }
   }, [difficultyParam]);
 
+  const openingRequestedRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (currentSession?.messages.length) {
       scrollRef.current?.scrollToEnd({ animated: true });
     }
   }, [currentSession?.messages.length]);
+
+  // When practice starts with empty messages, get opening line from character
+  useEffect(() => {
+    const session = currentSession;
+    if (!session || session.phase !== 'practice' || session.messages.length > 0 || !hasApiKey) return;
+    if (openingRequestedRef.current === session.id) return;
+    openingRequestedRef.current = session.id;
+    (async () => {
+      setIsLoading(true);
+      try {
+        const opener = await sendRolePlayMessage(
+          [{ role: 'user', content: `[The user is about to start practicing. As ${session.character}, say a brief opening line to start the conversation — 1-2 sentences. Stay in character.]` }],
+          session.scenario,
+          session.character,
+          session.difficulty
+        );
+        addMessage('assistant', opener);
+      } catch {
+        // ignore — user can still type first
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, [currentSession?.id, currentSession?.phase, currentSession?.messages.length, hasApiKey]);
 
   const applyQuickStart = (s: string, c: string) => {
     setScenario(s);
@@ -313,6 +339,11 @@ export default function RolePlayScreen() {
     setViewingPastId(null);
   };
 
+  const handleStartOver = () => {
+    if (!currentSession) return;
+    startSession(currentSession.scenario, currentSession.character, currentSession.difficulty);
+  };
+
   const handleDone = () => {
     endSession();
     clearCurrentSession();
@@ -417,18 +448,6 @@ export default function RolePlayScreen() {
           <View style={styles.headerLeft}>
             <Text style={styles.headerTitle} numberOfLines={1}>Practicing: {summary}</Text>
           </View>
-          <Pressable
-            onPress={() => {
-              if (!canEndSession) {
-                Alert.alert('Start the conversation first', 'Type or tap the mic to practice.');
-                return;
-              }
-              handleEndSession();
-            }}
-            style={[styles.endButton, !canEndSession && styles.endButtonDisabled]}
-          >
-            <Text style={[styles.endButtonText, !canEndSession && styles.endButtonTextDisabled]}>End Session</Text>
-          </Pressable>
         </View>
         <ScrollView
           ref={scrollRef}
@@ -479,7 +498,7 @@ export default function RolePlayScreen() {
         <View style={styles.inputRow}>
           <TextInput
             style={[styles.input, styles.inputInRow]}
-            placeholder="Type your response..."
+            placeholder="Type or tap the mic..."
             placeholderTextColor={COLORS.textMuted}
             value={input}
             onChangeText={setInput}
@@ -505,6 +524,29 @@ export default function RolePlayScreen() {
               <Ionicons name="mic" size={24} color={COLORS.text} />
             </Pressable>
           )}
+        </View>
+        <View style={styles.sessionActions}>
+          <Pressable
+            style={[styles.sessionActionBtn, !canEndSession && styles.sessionActionBtnDisabled]}
+            onPress={() => {
+              if (!canEndSession) {
+                Alert.alert('Start the conversation first', 'Type or tap the mic to practice.');
+                return;
+              }
+              handleEndSession();
+            }}
+          >
+            <Text style={[styles.sessionActionText, !canEndSession && styles.sessionActionTextDisabled]}>End & Review</Text>
+          </Pressable>
+          <Pressable style={styles.sessionActionBtn} onPress={handleStartOver}>
+            <Text style={styles.sessionActionText}>Start Over</Text>
+          </Pressable>
+          <Pressable style={styles.sessionActionBtn} onPress={handleNewScenario}>
+            <Text style={styles.sessionActionText}>New Scenario</Text>
+          </Pressable>
+          <Pressable style={styles.sessionActionBtn} onPress={handleDone}>
+            <Text style={styles.sessionActionText}>Done</Text>
+          </Pressable>
         </View>
       </KeyboardAvoidingView>
     );
@@ -625,6 +667,24 @@ const styles = StyleSheet.create({
   endButtonTextDisabled: {
     color: COLORS.textMuted,
   },
+  sessionActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.surface,
+  },
+  sessionActionBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: COLORS.surface,
+  },
+  sessionActionBtnDisabled: { opacity: 0.5 },
+  sessionActionText: { fontSize: 13, color: COLORS.text },
+  sessionActionTextDisabled: { color: COLORS.textMuted },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingVertical: 16, paddingBottom: 24 },
   setupContent: { paddingHorizontal: 24, paddingVertical: 24, paddingBottom: 40 },
