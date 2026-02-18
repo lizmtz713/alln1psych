@@ -171,6 +171,42 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* Specialized Modes */}
+        <Text style={styles.sectionTitle}>Specialized Modes</Text>
+        <View style={styles.card}>
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.rowLabel}>🏆 Athlete Mode</Text>
+              <Text style={styles.rowHint}>Recovery tracking, pre-competition prep, performance debriefs</Text>
+            </View>
+            <Switch
+              value={user.athleteMode}
+              onValueChange={(v) => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                useUserStore.getState().setAthleteMode(v);
+              }}
+              trackColor={{ false: '#2A2A3A', true: ACCENT + '60' }}
+              thumbColor={user.athleteMode ? ACCENT : TEXT_MUTED}
+            />
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.rowLabel}>🌈 Spectrum Mode</Text>
+              <Text style={styles.rowHint}>Sensory tools, stim toolkit, social scripts, visual supports</Text>
+            </View>
+            <Switch
+              value={user.spectrumMode}
+              onValueChange={(v) => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                useUserStore.getState().setSpectrumMode(v);
+              }}
+              trackColor={{ false: '#2A2A3A', true: ACCENT + '60' }}
+              thumbColor={user.spectrumMode ? ACCENT : TEXT_MUTED}
+            />
+          </View>
+        </View>
+
         {/* Data */}
         <Text style={styles.sectionTitle}>Your Data</Text>
         <View style={styles.card}>

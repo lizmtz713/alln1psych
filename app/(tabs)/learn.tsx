@@ -20,7 +20,7 @@ import {
   getCategoryTag,
 } from '../../src/data/discoveries';
 
-const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string; route?: string }[] = [
+const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string; route?: string; mode?: 'athlete' | 'spectrum' }[] = [
   { id: 'breathing', emoji: '🫁', title: 'Breathing Reset', sub: 'Regulate your nervous system in 2 minutes' },
   { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Decoder', sub: "Identify what you're actually feeling" },
   { id: 'body-scan', emoji: '🧍', title: 'Body Awareness', sub: 'Map where stress lives in your body' },
@@ -32,6 +32,18 @@ const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: strin
   { id: 'comm-builder', emoji: '💬', title: 'Communication Lab', sub: 'Build scripts for difficult conversations' },
   { id: 'mood-patterns', emoji: '📊', title: 'Mood Intelligence', sub: 'Spot trends in your emotional data' },
   { id: 'relationship-check', emoji: '💫', title: 'Relationship Check', sub: 'Enter two birthdays. Understand the dynamic.', route: '/(modals)/relationship-check' },
+  // Athlete Mode activities
+  { id: 'recovery-check', emoji: '🔋', title: 'Recovery Check', sub: 'Assess sleep, soreness, energy, mood', mode: 'athlete' },
+  { id: 'pre-competition', emoji: '🏆', title: 'Pre-Competition', sub: 'Get in your optimal zone', mode: 'athlete' },
+  { id: 'performance-debrief', emoji: '📋', title: 'Performance Debrief', sub: 'Process training or competition', mode: 'athlete' },
+  { id: 'athlete-identity', emoji: '🌟', title: 'Beyond the Sport', sub: 'Who are you off the field?', mode: 'athlete' },
+  // Spectrum Mode activities
+  { id: 'sensory-check', emoji: '👁️', title: 'Sensory Check', sub: "What's affecting you right now?", mode: 'spectrum' },
+  { id: 'stim-toolkit', emoji: '🌀', title: 'Stim Toolkit', sub: 'Regulation tools for different needs', mode: 'spectrum' },
+  { id: 'social-script', emoji: '📝', title: 'Social Scripts', sub: 'Prepare for social situations', mode: 'spectrum' },
+  { id: 'body-double', emoji: '👥', title: 'Body Double', sub: 'A gentle presence for focus', mode: 'spectrum' },
+  { id: 'routine-builder', emoji: '📅', title: 'Routine Helper', sub: 'Build and track routines', mode: 'spectrum' },
+  { id: 'emotion-cards', emoji: '🎴', title: 'Emotion Cards', sub: 'Picture-based emotions', mode: 'spectrum' },
 ];
 
 function getSectionProgress(section: ManualSection, isLessonCompleted: (id: string) => boolean): { completed: number; total: number } {
@@ -126,7 +138,19 @@ export default function LearnScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const ageRange = useUserStore((s) => s.ageRange);
+  const athleteMode = useUserStore((s) => s.athleteMode);
+  const spectrumMode = useUserStore((s) => s.spectrumMode);
   const isLessonCompleted = useEducationStore((s) => s.isLessonCompleted);
+
+  // Filter toolkit activities based on active modes
+  const visibleToolkitActivities = useMemo(() => {
+    return TOOLKIT_ACTIVITIES.filter((a) => {
+      if (!a.mode) return true; // base activities always show
+      if (a.mode === 'athlete') return athleteMode;
+      if (a.mode === 'spectrum') return spectrumMode;
+      return false;
+    });
+  }, [athleteMode, spectrumMode]);
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(null);
 
   const initialDiscoveries = useMemo(() => getDiscoveriesForDay(), []);
@@ -281,7 +305,7 @@ export default function LearnScreen() {
       {/* 3. Your Toolkit — THIRD at bottom */}
       <Text style={styles.sectionLabel}>Your Toolkit 🧰</Text>
       <View style={styles.toolkitGrid}>
-        {TOOLKIT_ACTIVITIES.map((a) => (
+        {visibleToolkitActivities.map((a) => (
           <Pressable
             key={a.id}
             style={({ pressed }) => [styles.toolkitCard, pressed && styles.pressed]}

@@ -41,7 +41,7 @@ import {
   CULTURAL_VALUES_OPTIONS,
 } from '../../src/lib/culturalOptions';
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 6;
 
 const LEARNING_STYLE_OPTIONS: { value: LearningStyle; label: string; emoji: string }[] = [
   { value: 'reading', label: 'Reading — I like to read and reflect', emoji: '📖' },
@@ -75,7 +75,7 @@ const LOVE_LANGUAGE_OPTIONS: { value: LoveLanguage; label: string; sublabel: str
   { value: 'acts-of-service', label: 'Thoughtful gestures', sublabel: 'Acts of Service' },
   { value: 'physical-touch', label: 'A warm hug', sublabel: 'Physical Touch' },
   { value: 'gifts', label: 'A small gift or surprise', sublabel: 'Gifts' },
-  { value: 'unknown', label: "I'm not sure yet ✨", sublabel: '' },
+  { value: 'unknown', label: "Not sure? Skip for now", sublabel: "I'll help you figure it out" },
 ];
 
 const RELATIONSHIP_OPTIONS: { value: CircleInvite['relationship']; label: string }[] = [
@@ -445,58 +445,8 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 4 — How You Communicate */}
+            {/* STEP 4 — Love Language */}
             {step === 4 && (
-              <View style={styles.step}>
-                <Text style={styles.question}>Do you prefer to talk or type?</Text>
-                <Pressable
-                  style={[
-                    styles.commCard,
-                    communicationPreference === 'voice' && styles.commCardSelected,
-                  ]}
-                  onPress={() => handleChoiceThenNext(() => setCommunicationPreference('voice'))}
-                >
-                  <Ionicons
-                    name="mic"
-                    size={40}
-                    color={communicationPreference === 'voice' ? COLORS.accent : COLORS.textMuted}
-                  />
-                  <Text
-                    style={[
-                      styles.commCardText,
-                      communicationPreference === 'voice' && styles.commCardTextSelected,
-                    ]}
-                  >
-                    I'd rather talk — like a real conversation
-                  </Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.commCard,
-                    communicationPreference === 'text' && styles.commCardSelected,
-                  ]}
-                  onPress={() => handleChoiceThenNext(() => setCommunicationPreference('text'))}
-                >
-                  <Ionicons
-                    name="keypad-outline"
-                    size={40}
-                    color={communicationPreference === 'text' ? COLORS.accent : COLORS.textMuted}
-                  />
-                  <Text
-                    style={[
-                      styles.commCardText,
-                      communicationPreference === 'text' && styles.commCardTextSelected,
-                    ]}
-                  >
-                    I'd rather type — I like to think before I share
-                  </Text>
-                </Pressable>
-                <Text style={styles.note}>You can always switch anytime.</Text>
-              </View>
-            )}
-
-            {/* STEP 5 — Love Language */}
-            {step === 5 && (
               <View style={styles.step}>
                 <Text style={styles.question}>How do you feel most cared for?</Text>
                 <View style={styles.loveCardList}>
@@ -523,141 +473,19 @@ export default function OnboardingScreen() {
                     </Pressable>
                   ))}
                 </View>
+                <Pressable onPress={() => Linking.openURL('https://5lovelanguages.com/quizzes/love-language')}>
+                  <Text style={styles.loveLanguageQuizLink}>
+                    Don't know yours? Take a 2-min quiz →
+                  </Text>
+                </Pressable>
                 <Text style={styles.loveLanguageNote}>
                   No worries — I'll learn what makes you feel cared for as we talk.
                 </Text>
               </View>
             )}
 
-            {/* STEP 6 — Sensitive Topics (optional) */}
-            {step === 6 && (
-              <View style={styles.step}>
-                <Text style={styles.question}>Is there anything Psych should be extra gentle about?</Text>
-                <Text style={styles.explain}>
-                  This is optional. Skip anything you're not ready to share. It helps Psych use trauma-informed language and never push you.
-                </Text>
-                <View style={styles.chipRow}>
-                  {SENSITIVE_TOPIC_OPTIONS.map((opt) => {
-                    const isNone = opt.value === 'none';
-                    const isSelected = isNone ? sensitiveTopics.length === 0 : sensitiveTopics.includes(opt.value);
-                    const toggle = () => {
-                      if (isNone) setSensitiveTopics([]);
-                      else if (sensitiveTopics.includes(opt.value))
-                        setSensitiveTopics(sensitiveTopics.filter((t) => t !== opt.value));
-                      else setSensitiveTopics([...sensitiveTopics.filter((t) => t !== 'none'), opt.value]);
-                    };
-                    return (
-                      <Pressable
-                        key={opt.value}
-                        style={[styles.chip, isSelected && styles.chipSelected]}
-                        onPress={toggle}
-                      >
-                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt.label}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-                <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]} onPress={goNext}>
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                </Pressable>
-              </View>
-            )}
-
-            {/* STEP 7 — Cultural context (optional) */}
-            {step === 7 && (
-              <View style={styles.step}>
-                <Pressable style={styles.skipButton} onPress={goNext}>
-                  <Text style={styles.skipText}>Skip</Text>
-                </Pressable>
-                <Text style={styles.question}>Where are you coming from?</Text>
-                <Text style={styles.explain}>
-                  This helps Psych understand your world — not just your words.
-                </Text>
-                <Text style={styles.smallLabel}>Which of these feel like part of your identity?</Text>
-                <View style={styles.chipRow}>
-                  {CULTURAL_BACKGROUND_OPTIONS.map((opt) => {
-                    const isSelected = culturalBackground.includes(opt);
-                    const toggle = () => {
-                      if (isSelected) setCulturalBackground(culturalBackground.filter((c) => c !== opt));
-                      else setCulturalBackground([...culturalBackground, opt]);
-                    };
-                    return (
-                      <Pressable key={opt} style={[styles.chip, isSelected && styles.chipSelected]} onPress={toggle}>
-                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-                <Text style={styles.smallLabel}>What shaped how you grew up?</Text>
-                <View style={styles.chipRow}>
-                  {ENVIRONMENT_UPBRINGING_OPTIONS.map((opt) => {
-                    const isSelected = environmentUpbringing.includes(opt);
-                    const toggle = () => {
-                      if (isSelected) setEnvironmentUpbringing(environmentUpbringing.filter((e) => e !== opt));
-                      else setEnvironmentUpbringing([...environmentUpbringing, opt]);
-                    };
-                    return (
-                      <Pressable key={opt} style={[styles.chip, isSelected && styles.chipSelected]} onPress={toggle}>
-                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-                <Text style={styles.smallLabel}>Which of these matter in your world?</Text>
-                <View style={styles.chipRow}>
-                  {CULTURAL_VALUES_OPTIONS.map((opt) => {
-                    const isSelected = culturalValues.includes(opt);
-                    const toggle = () => {
-                      if (isSelected) setCulturalValues(culturalValues.filter((v) => v !== opt));
-                      else setCulturalValues([...culturalValues, opt]);
-                    };
-                    return (
-                      <Pressable key={opt} style={[styles.chip, isSelected && styles.chipSelected]} onPress={toggle}>
-                        <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-                {culturalBackground.includes('Other') && (
-                  <TextInput
-                    style={[styles.input, styles.inputMargin]}
-                    placeholder="Describe (e.g. Southeast Asian, biracial...)"
-                    placeholderTextColor={COLORS.textMuted}
-                    value={culturalBackgroundOther}
-                    onChangeText={setCulturalBackgroundOther}
-                  />
-                )}
-                <Text style={styles.pronounHint}>You can change this anytime in settings.</Text>
-                <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]} onPress={goNext}>
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                </Pressable>
-              </View>
-            )}
-
-            {/* STEP 8 — Learning Style (optional) */}
-            {step === 8 && (
-              <View style={styles.step}>
-                <Text style={styles.question}>How do you learn best?</Text>
-                <Text style={styles.explain}>Optional — we'll tailor your manual and activities.</Text>
-                <View style={styles.loveCardList}>
-                  {LEARNING_STYLE_OPTIONS.map((opt) => (
-                    <Pressable
-                      key={opt.value}
-                      style={[styles.loveCard, learningStyle === opt.value && styles.loveCardSelected]}
-                      onPress={() => handleChoiceThenNext(() => setLearningStyle(opt.value))}
-                    >
-                      <Text style={styles.loveCardLabel}>{opt.emoji} {opt.label}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-                <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]} onPress={goNext}>
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                </Pressable>
-              </View>
-            )}
-
-            {/* STEP 9 — First Connection */}
-            {step === 9 && (
+            {/* STEP 5 — First Connection */}
+            {step === 5 && (
               <View style={styles.step}>
                 <Text style={styles.question}>
                   Would you like to connect someone who cares about you?
@@ -753,8 +581,8 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 10 — Promise (last step: open notification modal directly) */}
-            {step === 10 && (
+            {/* STEP 6 — Promise (last step: open notification modal directly) */}
+            {step === 6 && (
               <View style={styles.step}>
                 <Text style={styles.question}>Here's my promise to you:</Text>
                 <View style={styles.promiseList}>
@@ -994,6 +822,13 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 16,
     fontStyle: 'italic',
+  },
+  loveLanguageQuizLink: {
+    fontSize: 14,
+    color: COLORS.accent,
+    textAlign: 'center',
+    marginBottom: 12,
+    textDecorationLine: 'underline',
   },
   loveCard: {
     backgroundColor: COLORS.surface,

@@ -338,9 +338,9 @@ export default function HomeScreen() {
 
   // Quick actions for horizontal scroll
   const quickActions = [
-    { label: 'Talk', icon: 'chatbubble-ellipses', route: '/(tabs)/talk' as const },
     { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const },
     { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const },
+    { label: 'Check-In', icon: 'heart-circle', route: '/(modals)/relationship-check' as const },
     { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const },
     { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const },
     { label: 'Help', icon: 'heart', route: '/(modals)/help-someone' as const },
