@@ -31,13 +31,15 @@ import {
 } from '../../src/services/exportData';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 
-const ACCENT = '#7C4DFF';
-const BG = '#09090F';
-const CARD_BG = '#111118';
-const TEXT = '#F0F0F5';
-const TEXT_MUTED = '#8888A0';
-const TEXT_DIM = '#55556A';
+// Use design system colors
+const ACCENT = COLORS.accent;
+const BG = COLORS.background;
+const CARD_BG = COLORS.surface;
+const TEXT = COLORS.text;
+const TEXT_MUTED = COLORS.textSecondary;
+const TEXT_DIM = COLORS.textMuted;
 
 function HealthConnectionCard() {
   const isAvailable = useHealthStore((s) => s.isAvailable);
