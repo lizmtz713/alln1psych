@@ -195,7 +195,29 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
       direction: s.direction.value,
       alignment: s.alignment.value,
     };
-    const insight = await generateCrossSystemInsight(gauges);
+    
+    // Get health data if available
+    let healthData;
+    try {
+      const healthStore = require('./healthStore').useHealthStore.getState();
+      const snapshot = healthStore.snapshot;
+      if (snapshot) {
+        healthData = {
+          sleepHours: snapshot.sleep?.lastNight?.duration,
+          sleepQuality: snapshot.sleep?.lastNight?.quality,
+          steps: snapshot.activity?.steps,
+          exerciseMinutes: snapshot.activity?.exerciseMinutes,
+          waterOz: snapshot.nutrition?.waterOz,
+          hrv: snapshot.heart?.hrv ?? undefined,
+          cyclePhase: snapshot.menstruation?.currentPhase ?? undefined,
+          cycleDay: snapshot.menstruation?.dayOfCycle ?? undefined,
+        };
+      }
+    } catch (e) {
+      // Health store not available
+    }
+    
+    const insight = await generateCrossSystemInsight(gauges, healthData);
     set({ crossSystemInsight: insight });
   },
 

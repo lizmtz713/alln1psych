@@ -1,5 +1,5 @@
 /**
- * Cockpit AI — cross-system insight from the 6 gauges.
+ * Cockpit AI — cross-system insight from the 6 gauges + health data.
  * Uses OpenAI when available; falls back to hardcoded patterns.
  */
 
@@ -15,11 +15,52 @@ export interface CockpitGauges {
   alignment: number;
 }
 
-export async function generateCrossSystemInsight(gauges: CockpitGauges): Promise<string | null> {
+export interface HealthContext {
+  sleepHours?: number;
+  sleepQuality?: string;
+  steps?: number;
+  exerciseMinutes?: number;
+  waterOz?: number;
+  hrv?: number;
+  cyclePhase?: string;
+  cycleDay?: number;
+}
+
+export async function generateCrossSystemInsight(
+  gauges: CockpitGauges,
+  healthData?: HealthContext
+): Promise<string | null> {
   const active = Object.values(gauges).filter((v) => v >= 0);
   if (active.length < 3) return null;
 
-  const systemPrompt = `You are the AI brain of a Human Cockpit — a 6-gauge emotional regulation system. You read all gauges together and provide ONE brief insight (2-3 sentences max) about how the user's systems are interacting.
+  // Build health context string
+  let healthContext = '';
+  if (healthData) {
+    const parts: string[] = [];
+    if (healthData.sleepHours !== undefined) {
+      parts.push(`Sleep: ${healthData.sleepHours.toFixed(1)}h (${healthData.sleepQuality || 'unknown'})`);
+    }
+    if (healthData.steps !== undefined) {
+      parts.push(`Steps: ${healthData.steps.toLocaleString()}`);
+    }
+    if (healthData.exerciseMinutes !== undefined && healthData.exerciseMinutes > 0) {
+      parts.push(`Exercise: ${healthData.exerciseMinutes}min`);
+    }
+    if (healthData.waterOz !== undefined && healthData.waterOz > 0) {
+      parts.push(`Water: ${healthData.waterOz}oz`);
+    }
+    if (healthData.hrv !== undefined) {
+      parts.push(`HRV: ${healthData.hrv}ms`);
+    }
+    if (healthData.cyclePhase) {
+      parts.push(`Cycle: Day ${healthData.cycleDay}, ${healthData.cyclePhase}`);
+    }
+    if (parts.length > 0) {
+      healthContext = `\n\nHEALTH DATA (from Apple Health):\n${parts.join(' | ')}`;
+    }
+  }
+
+  const systemPrompt = `You are the AI brain of a Human Cockpit — a 6-gauge emotional regulation system. You read all gauges AND health data together and provide ONE brief insight (2-3 sentences max) about how the user's systems are interacting.
 
 The 6 gauges (0-100 scale, -1 means not checked):
 - Body (sleep, nutrition, hydration, movement): ${gauges.body}
@@ -27,7 +68,7 @@ The 6 gauges (0-100 scale, -1 means not checked):
 - Emotion (emotional clarity): ${gauges.emotion}
 - Connection (belonging, being seen): ${gauges.connection}
 - Direction (purpose, momentum): ${gauges.direction}
-- Alignment (actions matching values): ${gauges.alignment}
+- Alignment (actions matching values): ${gauges.alignment}${healthContext}
 
 Rules:
 - Read the PATTERN across gauges, not individual numbers
