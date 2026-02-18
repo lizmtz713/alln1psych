@@ -441,15 +441,31 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>Voice & AI</Text>
         <View style={styles.card}>
           <View style={styles.row}>
-            <View>
-              <Text style={styles.rowLabel}>AI Voice Responses</Text>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={styles.rowLabel}>AI Voice Responses</Text>
+                {!usePremiumStore.getState().isPremium() && (
+                  <View style={{ backgroundColor: '#FFD700' + '30', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>
+                    <Text style={{ fontSize: 9, fontWeight: '700', color: '#FFD700' }}>PRO</Text>
+                  </View>
+                )}
+              </View>
               <Text style={styles.rowHint}>Psych speaks back with voice</Text>
             </View>
             <Switch
-              value={settings.aiVoiceEnabled}
-              onValueChange={settings.setAiVoiceEnabled}
+              value={settings.aiVoiceEnabled && usePremiumStore.getState().isPremium()}
+              onValueChange={(v) => {
+                if (!usePremiumStore.getState().isPremium()) {
+                  Alert.alert('Premium Feature', 'Voice responses are available with InGauge Premium.', [
+                    { text: 'Maybe Later', style: 'cancel' },
+                    { text: 'Upgrade', onPress: () => Alert.alert('Coming Soon', 'Premium subscriptions launching soon!') },
+                  ]);
+                  return;
+                }
+                settings.setAiVoiceEnabled(v);
+              }}
               trackColor={{ false: '#2A2A3A', true: ACCENT + '60' }}
-              thumbColor={settings.aiVoiceEnabled ? ACCENT : TEXT_MUTED}
+              thumbColor={settings.aiVoiceEnabled && usePremiumStore.getState().isPremium() ? ACCENT : TEXT_MUTED}
             />
           </View>
         </View>
