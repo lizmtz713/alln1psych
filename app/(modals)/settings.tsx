@@ -8,6 +8,7 @@ import {
   Switch,
   Alert,
   Linking,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,6 +22,7 @@ import { useConversationSummaryStore } from '../../src/stores/conversationSummar
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useEducationStore } from '../../src/stores/educationStore';
 import { usePremiumStore } from '../../src/stores/premiumStore';
+import { useHealthStore } from '../../src/stores/healthStore';
 import { registerForPushNotifications } from '../../src/services/notifications';
 import {
   buildExportData,
@@ -36,6 +38,190 @@ const CARD_BG = '#111118';
 const TEXT = '#F0F0F5';
 const TEXT_MUTED = '#8888A0';
 const TEXT_DIM = '#55556A';
+
+function HealthConnectionCard() {
+  const isAvailable = useHealthStore((s) => s.isAvailable);
+  const isAuthorized = useHealthStore((s) => s.isAuthorized);
+  const snapshot = useHealthStore((s) => s.snapshot);
+  const bodyScore = useHealthStore((s) => s.bodyScoreFromHealth);
+  const initialize = useHealthStore((s) => s.initialize);
+  const requestPermissions = useHealthStore((s) => s.requestPermissions);
+  const syncHealthData = useHealthStore((s) => s.syncHealthData);
+  const [connecting, setConnecting] = useState(false);
+
+  useEffect(() => {
+    initialize();
+  }, []);
+
+  const handleConnect = async () => {
+    setConnecting(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    const success = await requestPermissions();
+    if (success) {
+      Alert.alert('Connected!', 'Apple Health is now syncing with your Body gauge.');
+    } else {
+      Alert.alert('Connection Failed', 'Please enable Health access in Settings > Privacy > Health.');
+    }
+    setConnecting(false);
+  };
+
+  const handleSync = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await syncHealthData();
+  };
+
+  // Don't show on Android
+  if (!isAvailable && Platform.OS === 'android') {
+    return null;
+  }
+
+  return (
+    <>
+      <Text style={styles.sectionTitle}>Health Data</Text>
+      <View style={styles.card}>
+        {!isAuthorized ? (
+          <>
+            <View style={styles.row}>
+              <Ionicons name="heart-circle" size={24} color="#FF6B6B" />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.rowLabel}>Connect Apple Health</Text>
+                <Text style={styles.rowHint}>
+                  Sync sleep, activity, water, cycle data to your Body gauge
+                </Text>
+              </View>
+            </View>
+            <Pressable
+              style={({ pressed }) => [
+                healthStyles.connectBtn,
+                pressed && { opacity: 0.9 },
+                connecting && { opacity: 0.6 },
+              ]}
+              onPress={handleConnect}
+              disabled={connecting}
+            >
+              <Ionicons name="fitness" size={18} color="#fff" />
+              <Text style={healthStyles.connectBtnText}>
+                {connecting ? 'Connecting...' : 'Connect Health'}
+              </Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <View style={styles.row}>
+              <Ionicons name="checkmark-circle" size={24} color="#34D399" />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.rowLabel}>Apple Health Connected</Text>
+                <Text style={styles.rowHint}>
+                  {snapshot ? `Last sync: ${new Date(snapshot.lastSynced).toLocaleTimeString()}` : 'Tap to sync'}
+                </Text>
+              </View>
+              <Pressable onPress={handleSync} style={healthStyles.syncBtn}>
+                <Ionicons name="refresh" size={18} color={ACCENT} />
+              </Pressable>
+            </View>
+            
+            {snapshot && (
+              <View style={healthStyles.statsGrid}>
+                <View style={healthStyles.statItem}>
+                  <Text style={healthStyles.statValue}>
+                    {snapshot.sleep.lastNight.duration.toFixed(1)}h
+                  </Text>
+                  <Text style={healthStyles.statLabel}>Sleep</Text>
+                </View>
+                <View style={healthStyles.statItem}>
+                  <Text style={healthStyles.statValue}>
+                    {snapshot.activity.steps.toLocaleString()}
+                  </Text>
+                  <Text style={healthStyles.statLabel}>Steps</Text>
+                </View>
+                <View style={healthStyles.statItem}>
+                  <Text style={healthStyles.statValue}>
+                    {snapshot.nutrition.waterOz}oz
+                  </Text>
+                  <Text style={healthStyles.statLabel}>Water</Text>
+                </View>
+                <View style={healthStyles.statItem}>
+                  <Text style={healthStyles.statValue}>
+                    {bodyScore ?? '--'}
+                  </Text>
+                  <Text style={healthStyles.statLabel}>Body Score</Text>
+                </View>
+              </View>
+            )}
+
+            {snapshot?.menstruation && (
+              <View style={healthStyles.cycleInfo}>
+                <Ionicons name="calendar" size={16} color={ACCENT} />
+                <Text style={healthStyles.cycleText}>
+                  Day {snapshot.menstruation.dayOfCycle} • {snapshot.menstruation.currentPhase}
+                </Text>
+              </View>
+            )}
+          </>
+        )}
+      </View>
+    </>
+  );
+}
+
+const healthStyles = StyleSheet.create({
+  connectBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#FF6B6B',
+    borderRadius: 12,
+    paddingVertical: 12,
+    marginTop: 16,
+  },
+  connectBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  syncBtn: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: ACCENT + '20',
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: TEXT,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: TEXT_MUTED,
+    marginTop: 2,
+  },
+  cycleInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  cycleText: {
+    fontSize: 13,
+    color: TEXT_MUTED,
+    textTransform: 'capitalize',
+  },
+});
 
 function PremiumCard() {
   const isPremium = usePremiumStore((s) => s.isPremium());
@@ -297,6 +483,9 @@ export default function SettingsScreen() {
             />
           </View>
         </View>
+
+        {/* Apple Health Integration */}
+        <HealthConnectionCard />
 
         {/* Specialized Modes */}
         <Text style={styles.sectionTitle}>Specialized Modes</Text>
