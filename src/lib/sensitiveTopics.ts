@@ -1,17 +1,15 @@
-export const SENSITIVE_TOPIC_OPTIONS: { value: string; label: string }[] = [
-  { value: 'physical-abuse', label: 'Physical abuse' },
-  { value: 'emotional-abuse', label: 'Emotional abuse' },
-  { value: 'sexual-abuse', label: 'Sexual abuse' },
-  { value: 'neglect', label: 'Neglect' },
-  { value: 'bullying', label: 'Bullying' },
-  { value: 'loss-grief', label: 'Loss / grief' },
-  { value: 'addiction', label: 'Addiction' },
-  { value: 'disordered-eating', label: 'Disordered eating' },
-  { value: 'self-harm-history', label: 'Self-harm history' },
-  { value: 'gender-identity-dysphoria', label: 'Gender identity / dysphoria' },
-  { value: 'coming-out', label: 'Coming out' },
-  { value: 'family-rejection', label: 'Family rejection' },
-  { value: 'identity-discrimination', label: 'Identity-based discrimination' },
-  { value: 'prefer-not-to-say', label: 'Prefer not to say' },
-  { value: 'none', label: 'None of these' },
+/**
+ * Sensitive Topics — streamlined, non-repetitive categories
+ * Used in onboarding to help Psych be more thoughtful
+ */
+export const SENSITIVE_TOPIC_OPTIONS: { value: string; label: string; emoji?: string }[] = [
+  { value: 'trauma', label: 'Trauma or abuse', emoji: '💔' },
+  { value: 'loss', label: 'Loss & grief', emoji: '🕊️' },
+  { value: 'mental-health', label: 'Mental health struggles', emoji: '🧠' },
+  { value: 'body-image', label: 'Body image & eating', emoji: '🪞' },
+  { value: 'identity', label: 'Identity & belonging', emoji: '🌈' },
+  { value: 'family', label: 'Family difficulties', emoji: '🏠' },
+  { value: 'addiction', label: 'Addiction', emoji: '⛓️' },
+  { value: 'relationships', label: 'Relationship pain', emoji: '💫' },
+  { value: 'none', label: 'None of these', emoji: '✨' },
 ];
