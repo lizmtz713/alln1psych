@@ -33,6 +33,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { CrisisOverlay } from '../../src/components/CrisisOverlay';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
+import { PremiumGate, AIUsageIndicator } from '../../src/components/PremiumGate';
+import { usePremiumStore } from '../../src/stores/premiumStore';
 
 const MIC_BUTTON_SIZE = 80;
 const MIC_BUTTON_SIZE_SMALL = 48;
@@ -135,6 +137,9 @@ export default function TalkScreen() {
 
   const user = useUserStore();
   const [showCrisisOverlay, setShowCrisisOverlay] = useState(false);
+  const [showPremiumGate, setShowPremiumGate] = useState(false);
+  const canUseAI = usePremiumStore((s) => s.canUseAI());
+  const incrementAIUsage = usePremiumStore((s) => s.incrementAIUsage);
   const {
     messages,
     isRecording,
@@ -353,6 +358,14 @@ export default function TalkScreen() {
   const handleSendText = async () => {
     const content = textInput.trim();
     if (!content) return;
+    
+    // Check premium limits before sending
+    if (!canUseAI) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      setShowPremiumGate(true);
+      return;
+    }
+    
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setTextInput('');
     addMessage({ role: 'user', content, isVoice: false });
@@ -374,6 +387,7 @@ export default function TalkScreen() {
         .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
       const response = await sendMessage(apiMessages, buildUserContext());
       addMessage({ role: 'assistant', content: response, isVoice: false });
+      incrementAIUsage(); // Track for free tier limits
       if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
         setTtsState('loading');
         Voice.speakWithOpenAI(response)
@@ -547,9 +561,19 @@ export default function TalkScreen() {
           <CrisisOverlay onDismiss={() => setShowCrisisOverlay(false)} />
         </View>
       )}
+      
+      {/* Premium gate when hitting free tier limits */}
+      <PremiumGate
+        visible={showPremiumGate}
+        onClose={() => setShowPremiumGate(false)}
+        feature="ai"
+      />
       {/* Header with session controls */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
-        <Text style={{ color: '#F0F0F5', fontSize: 18, fontWeight: '600' }}>Talk to Psych</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Text style={{ color: '#F0F0F5', fontSize: 18, fontWeight: '600' }}>Talk to Psych</Text>
+          <AIUsageIndicator />
+        </View>
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleNewTopic(); }} style={{ backgroundColor: '#111118', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
             <Text style={{ color: '#8888A0', fontSize: 13 }}>New Topic</Text>
