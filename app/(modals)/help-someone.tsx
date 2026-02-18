@@ -155,21 +155,36 @@ export default function HelpSomeoneScreen() {
 
   const handleQuickSelect = (topic: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setConcerns((prev) => (prev.includes(topic) ? prev : [...prev, topic]));
-    setSituation((s) => (s.trim() ? s : topic));
-    quickSelectGoToCoachingRef.current = true;
+    const newConcerns = concerns.includes(topic) ? concerns : [...concerns, topic];
+    setConcerns(newConcerns);
+    const newSituation = situation.trim() ? situation : topic;
+    setSituation(newSituation);
+    
+    // If step 1 is complete, go straight to coaching
+    const name = selectedMember ? selectedMember.name : personName.trim();
+    const rel = selectedMember
+      ? selectedMember.relationship.charAt(0).toUpperCase() + selectedMember.relationship.slice(1)
+      : relationship;
+    
+    if (name && rel && newSituation.trim().length >= 10) {
+      // Go straight to coaching with the new situation
+      setTimeout(() => {
+        startCoaching(newSituation);
+      }, 150);
+    }
   };
 
   const canProceedStep1 = displayName.length > 0 && displayRelationship.length > 0;
   const canProceedStep2 = situation.trim().length >= 10;
 
-  const startCoaching = () => {
-    if (!canProceedStep2 || !displayName) return;
+  const startCoaching = (overrideSituation?: string) => {
+    const sitToUse = overrideSituation ?? situation;
+    if (sitToUse.trim().length < 10 || !displayName) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const added = startNewSession({
       personName: displayName,
       relationship: displayRelationship,
-      situation: situation.trim(),
+      situation: sitToUse.trim(),
       concerns: [...concerns],
       messages: [],
     });

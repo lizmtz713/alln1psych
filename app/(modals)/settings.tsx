@@ -36,6 +36,7 @@ import { getOpenAIKey, setOpenAIKey } from '../../src/services/ai';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
+import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
 
 // Use design system colors
 const ACCENT = COLORS.accent;
@@ -958,18 +959,37 @@ export default function SettingsScreen() {
         {/* Privacy */}
         <Text style={styles.sectionTitle}>Privacy</Text>
         <View style={styles.card}>
-          <Pressable
-            style={styles.row}
-            onPress={() => router.push('/(modals)/onboarding')}
-          >
-            <Text style={styles.rowLabel}>Sensitive topics</Text>
-            <View style={styles.rowRight}>
-              <Text style={styles.rowValue}>
-                {user.sensitiveTopics?.length || 0} selected
-              </Text>
-              <Ionicons name="chevron-forward" size={20} color={TEXT_DIM} />
+          <View style={styles.row}>
+            <View>
+              <Text style={styles.rowLabel}>Sensitive topics</Text>
+              <Text style={styles.rowHint}>Psych will be extra thoughtful about these</Text>
             </View>
-          </Pressable>
+          </View>
+          {SENSITIVE_TOPIC_OPTIONS.filter(opt => opt.value !== 'none').map((opt, idx) => {
+            const isSelected = user.sensitiveTopics?.includes(opt.value);
+            return (
+              <View key={opt.value}>
+                <View style={styles.divider} />
+                <Pressable
+                  style={styles.row}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    const newTopics = isSelected
+                      ? (user.sensitiveTopics || []).filter(t => t !== opt.value)
+                      : [...(user.sensitiveTopics || []), opt.value];
+                    user.setSensitiveTopics(newTopics);
+                  }}
+                >
+                  <Text style={styles.rowLabel}>{opt.emoji} {opt.label}</Text>
+                  <Ionicons
+                    name={isSelected ? 'checkmark-circle' : 'ellipse-outline'}
+                    size={24}
+                    color={isSelected ? ACCENT : TEXT_DIM}
+                  />
+                </Pressable>
+              </View>
+            );
+          })}
           <View style={styles.divider} />
           <View style={styles.row}>
             <View>

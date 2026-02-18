@@ -28,11 +28,31 @@ export interface DailyContent {
 
 function getStaticDefaults(name: string): DailyContent {
   const hour = new Date().getHours();
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   const timeGreeting =
     hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 21 ? 'Good evening' : "It's late";
+  
+  // Rotating affirmations — changes daily
+  const AFFIRMATIONS = [
+    "You're doing better than you think.",
+    "Showing up is the hardest part. You did it.",
+    "Progress isn't always visible. Trust the process.",
+    "You don't have to be perfect to be growing.",
+    "The fact that you're here means you care. That matters.",
+    "Small steps still move you forward.",
+    "You survived 100% of your worst days.",
+    "Awareness is the first step. You're already ahead.",
+    "Be patient with yourself. You're learning.",
+    "Your effort counts, even when results are slow.",
+    "It's okay to not be okay. But you won't stay here.",
+    "You're allowed to take up space.",
+    "Your feelings are valid, even the messy ones.",
+    "Rest is productive. You've earned it.",
+  ];
+  
   return {
     greeting: `${timeGreeting}, ${name || 'you'} 💜`,
-    affirmation: "You're doing better than you think.",
+    affirmation: AFFIRMATIONS[dayOfYear % AFFIRMATIONS.length],
     insight: 'Check in with yourself today. Your feelings matter.',
     challengeSuggestion: 'Take 5 deep breaths right now.',
   };
