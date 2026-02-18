@@ -218,8 +218,25 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
     } catch (e) {
       // Health store not available
     }
+
+    // Get Spotify listening data if available
+    let spotifyData;
+    try {
+      const spotifyStore = require('./spotifyStore').useSpotifyStore.getState();
+      if (spotifyStore.isConnected && spotifyStore.listeningMood) {
+        spotifyData = {
+          averageValence: spotifyStore.listeningMood.averageValence,
+          averageEnergy: spotifyStore.listeningMood.averageEnergy,
+          moodLabel: spotifyStore.listeningMood.moodLabel,
+          trackCount: spotifyStore.listeningMood.trackCount,
+          moodScore: spotifyStore.moodScore ?? undefined,
+        };
+      }
+    } catch (e) {
+      // Spotify store not available
+    }
     
-    const insight = await generateCrossSystemInsight(gauges, healthData);
+    const insight = await generateCrossSystemInsight(gauges, healthData, spotifyData);
     set({ crossSystemInsight: insight });
   },
 

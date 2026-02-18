@@ -26,9 +26,18 @@ export interface HealthContext {
   cycleDay?: number;
 }
 
+export interface SpotifyContext {
+  averageValence?: number;    // 0-1: positivity/happiness in music
+  averageEnergy?: number;     // 0-1: energy level of music
+  moodLabel?: string;         // e.g., "Melancholic & Reflective"
+  trackCount?: number;        // how many tracks in the window
+  moodScore?: number;         // 0-100 composite score
+}
+
 export async function generateCrossSystemInsight(
   gauges: CockpitGauges,
-  healthData?: HealthContext
+  healthData?: HealthContext,
+  spotifyData?: SpotifyContext
 ): Promise<string | null> {
   const active = Object.values(gauges).filter((v) => v >= 0);
   if (active.length < 3) return null;
@@ -60,6 +69,27 @@ export async function generateCrossSystemInsight(
     }
   }
 
+  // Build Spotify/music context string
+  let musicContext = '';
+  if (spotifyData && (spotifyData.averageValence !== undefined || spotifyData.moodLabel)) {
+    const parts: string[] = [];
+    if (spotifyData.moodLabel) {
+      parts.push(`Mood: ${spotifyData.moodLabel}`);
+    }
+    if (spotifyData.averageValence !== undefined) {
+      parts.push(`Positivity: ${Math.round(spotifyData.averageValence * 100)}%`);
+    }
+    if (spotifyData.averageEnergy !== undefined) {
+      parts.push(`Energy: ${Math.round(spotifyData.averageEnergy * 100)}%`);
+    }
+    if (spotifyData.trackCount !== undefined) {
+      parts.push(`Tracks (24h): ${spotifyData.trackCount}`);
+    }
+    if (parts.length > 0) {
+      musicContext = `\n\nMUSIC LISTENING (from Spotify, last 24h):\n${parts.join(' | ')}`;
+    }
+  }
+
   const systemPrompt = `You are the AI brain of a Human Cockpit — a 6-gauge emotional regulation system. You read all gauges AND health data together and provide ONE brief insight (2-3 sentences max) about how the user's systems are interacting.
 
 The 6 gauges (0-100 scale, -1 means not checked):
@@ -68,7 +98,7 @@ The 6 gauges (0-100 scale, -1 means not checked):
 - Emotion (emotional clarity): ${gauges.emotion}
 - Connection (belonging, being seen): ${gauges.connection}
 - Direction (purpose, momentum): ${gauges.direction}
-- Alignment (actions matching values): ${gauges.alignment}${healthContext}
+- Alignment (actions matching values): ${gauges.alignment}${healthContext}${musicContext}
 
 Rules:
 - Read the PATTERN across gauges, not individual numbers
@@ -78,7 +108,9 @@ Rules:
 - If everything is high, acknowledge what they're doing right
 - If something is low, name it without judgment and suggest which gauge to address first
 - Always ground it in how the systems affect each other
-- Sound like a wise friend who happens to understand neuroscience, not a therapist`;
+- Sound like a wise friend who happens to understand neuroscience, not a therapist
+- If music data is present, note patterns: low-energy music + low State = seeking calm; high-energy music + low Body = pushing through fatigue; melancholic music + low Emotion = processing something
+- Music choices often reveal what the body/mind is seeking before we're conscious of it`;
 
   const knowledge = buildKnowledgePrompt(gauges);
   const systemPromptWithKnowledge = systemPrompt + knowledge;
