@@ -183,7 +183,7 @@ export function CockpitCluster({
         const gaugeValue = gaugeValues[key as keyof typeof gaugeValues];
         const GaugeComponent = GAUGE_COMPONENTS[key];
         const config = GAUGE_CONFIG[key as keyof typeof GAUGE_CONFIG];
-        const gaugeColor = gaugeValue >= 0 ? getGaugeColor(gaugeValue) : TEXT_MUTED;
+        const gaugeColor = gaugeValue >= 0 ? getGaugeColor(gaugeValue) : '#E0E0E0';
         
         // Calculate position
         const radians = (angle * Math.PI) / 180;
@@ -211,7 +211,7 @@ export function CockpitCluster({
               style={({ pressed }) => [
                 styles.gaugeBubble,
                 {
-                  borderColor: gaugeValue >= 0 ? gaugeColor : TEXT_MUTED + '60',
+                  borderColor: gaugeValue >= 0 ? gaugeColor : 'rgba(255,255,255,0.5)',
                   shadowColor: gaugeColor,
                   shadowOpacity: gaugeValue >= 0 ? 0.4 : 0,
                   shadowRadius: 8,
