@@ -543,16 +543,21 @@ export default function HomeScreen() {
       <Modal visible={showGaugeInfo} transparent animationType="fade">
         <Pressable style={styles.modalOverlay} onPress={() => setShowGaugeInfo(false)}>
           <View style={styles.gaugeInfoCard}>
-            <Text style={styles.gaugeInfoTitle}>Your 6 Gauges</Text>
+            <Text style={styles.gaugeInfoTitle}>You're not a mood. You're a system.</Text>
+            <Text style={styles.gaugeInfoPhilosophy}>
+              6 gauges. All connected. When one drops, others follow. When you lift one, others rise.
+            </Text>
             <Text style={styles.gaugeInfoBody}>
-              Each gauge measures a different system in your life:{'\n\n'}
               <Text style={{ fontWeight: '600' }}>Body</Text> — Sleep, nutrition, movement{'\n'}
               <Text style={{ fontWeight: '600' }}>State</Text> — Nervous system regulation{'\n'}
               <Text style={{ fontWeight: '600' }}>Emotion</Text> — Emotional clarity{'\n'}
               <Text style={{ fontWeight: '600' }}>Connection</Text> — Relationships, belonging{'\n'}
               <Text style={{ fontWeight: '600' }}>Direction</Text> — Purpose, momentum{'\n'}
               <Text style={{ fontWeight: '600' }}>Alignment</Text> — Values match actions{'\n\n'}
-              0-100 scale. Green (75+) = thriving. Yellow (50-74) = steady. Orange (25-49) = attention needed. Red (0-24) = prioritize.
+              <Text style={{ fontWeight: '600', color: '#4ADE80' }}>Green (75+)</Text> = thriving{'\n'}
+              <Text style={{ fontWeight: '600', color: '#FACC15' }}>Yellow (50-74)</Text> = steady{'\n'}
+              <Text style={{ fontWeight: '600', color: '#FB923C' }}>Orange (25-49)</Text> = attention needed{'\n'}
+              <Text style={{ fontWeight: '600', color: '#F87171' }}>Red (0-24)</Text> = prioritize
             </Text>
             <Pressable style={styles.gaugeInfoClose} onPress={() => setShowGaugeInfo(false)}>
               <Text style={styles.gaugeInfoCloseText}>Got it</Text>
@@ -769,8 +774,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
   },
-  gaugeInfoTitle: { fontSize: 20, fontWeight: '700', color: TEXT_PRIMARY, marginBottom: 16 },
-  gaugeInfoBody: { fontSize: 14, color: TEXT_SECONDARY, lineHeight: 22 },
+  gaugeInfoTitle: { fontSize: 20, fontWeight: '700', color: TEXT_PRIMARY, marginBottom: 8 },
+  gaugeInfoPhilosophy: { fontSize: 15, color: TEXT_PRIMARY, lineHeight: 22, marginBottom: 16, fontStyle: 'italic' },
+  gaugeInfoBody: { fontSize: 14, color: TEXT_SECONDARY, lineHeight: 24 },
   gaugeInfoClose: {
     marginTop: 20,
     alignSelf: 'flex-end',

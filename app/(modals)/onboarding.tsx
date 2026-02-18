@@ -347,12 +347,6 @@ export default function OnboardingScreen() {
             {step === 2 && (
               <View style={styles.step}>
                 <Text style={styles.welcomeTitle}>You're not a mood.{'\n'}You're a system.</Text>
-                <Text style={styles.cockpitIntroText}>
-                  Most apps ask "How do you feel?" and stop there.
-                </Text>
-                <Text style={styles.cockpitIntroText}>
-                  But you're more than one number. You're <Text style={styles.cockpitHighlight}>body</Text>, <Text style={styles.cockpitHighlight}>nervous system</Text>, <Text style={styles.cockpitHighlight}>emotions</Text>, <Text style={styles.cockpitHighlight}>relationships</Text>, <Text style={styles.cockpitHighlight}>purpose</Text>, and <Text style={styles.cockpitHighlight}>values</Text> — all connected.
-                </Text>
                 <View style={styles.cockpitVisual}>
                   <View style={styles.cockpitRing}>
                     <Text style={styles.cockpitBrain}>🧠</Text>
@@ -369,10 +363,10 @@ export default function OnboardingScreen() {
                   </View>
                 </View>
                 <Text style={styles.cockpitIntroText}>
-                  When one drops, others follow.{'\n'}When you lift one, others rise.
+                  6 gauges. All connected.{'\n'}When one drops, others follow.{'\n'}When you lift one, others rise.
                 </Text>
                 <Text style={styles.cockpitTagline}>
-                  This is your cockpit. 6 gauges. One view of you.
+                  This is your cockpit.
                 </Text>
                 <Pressable
                   style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
@@ -381,7 +375,7 @@ export default function OnboardingScreen() {
                     goNext();
                   }}
                 >
-                  <Text style={styles.primaryButtonText}>I'm ready</Text>
+                  <Text style={styles.primaryButtonText}>Let's go</Text>
                 </Pressable>
               </View>
             )}
