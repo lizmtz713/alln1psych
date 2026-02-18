@@ -15,7 +15,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 import * as Haptics from 'expo-haptics';
 import {
   useUserStore,
@@ -460,19 +460,22 @@ export default function OnboardingScreen() {
                   <View style={styles.optionalSection}>
                     {/* Sensitive Topics */}
                     <Text style={styles.optionalLabel}>Anything I should be gentle about?</Text>
-                    <View style={styles.chipRow}>
-                      {SENSITIVE_TOPIC_OPTIONS.slice(0, 6).map((opt) => {
+                    <Text style={styles.optionalHint}>This helps me be more thoughtful. Select any that apply, or skip.</Text>
+                    <View style={styles.sensitiveGrid}>
+                      {SENSITIVE_TOPIC_OPTIONS.map((opt) => {
                         const isSelected = sensitiveTopics.includes(opt.value);
                         return (
                           <Pressable
                             key={opt.value}
-                            style={[styles.chip, isSelected && styles.chipSelected]}
+                            style={[styles.sensitiveChip, isSelected && styles.sensitiveChipSelected]}
                             onPress={() => {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                               if (isSelected) setSensitiveTopics(sensitiveTopics.filter((t) => t !== opt.value));
                               else setSensitiveTopics([...sensitiveTopics, opt.value]);
                             }}
                           >
-                            <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt.label}</Text>
+                            {isSelected && <Ionicons name="checkmark-circle" size={16} color={COLORS.accent} style={{ marginRight: 6 }} />}
+                            <Text style={[styles.sensitiveChipText, isSelected && styles.sensitiveChipTextSelected]}>{opt.label}</Text>
                           </Pressable>
                         );
                       })}
@@ -793,37 +796,34 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   welcomeTitle: {
-    fontSize: 32,
-    fontWeight: '600',
+    ...TYPOGRAPHY.displayMd,
     color: COLORS.text,
-    marginBottom: 16,
-    lineHeight: 40,
+    marginBottom: SPACING.md,
   },
   welcomeSub: {
-    fontSize: 18,
-    color: COLORS.textMuted,
+    ...TYPOGRAPHY.bodyLg,
+    color: COLORS.textSecondary,
     lineHeight: 26,
-    marginBottom: 48,
+    marginBottom: SPACING.xxxl,
   },
   primaryButton: {
     backgroundColor: COLORS.accent,
-    paddingVertical: 18,
-    borderRadius: BORDER_RADIUS.button,
+    paddingVertical: SPACING.lg,
+    borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: SPACING.xl,
   },
   primaryButtonPressed: { opacity: 0.9 },
   primaryButtonDisabled: { opacity: 0.5 },
   primaryButtonText: {
-    fontSize: 17,
+    ...TYPOGRAPHY.labelLg,
     fontWeight: '600',
-    color: COLORS.text,
+    color: '#fff',
   },
   question: {
-    fontSize: 22,
-    fontWeight: '600',
+    ...TYPOGRAPHY.headlineLg,
     color: COLORS.text,
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   questionMargin: { marginTop: 28, marginBottom: 12 },
   input: {
@@ -862,38 +862,68 @@ const styles = StyleSheet.create({
   },
   optionalSection: {
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
   },
   optionalLabel: {
-    fontSize: 14,
+    ...TYPOGRAPHY.headlineSm,
     color: COLORS.text,
-    marginBottom: 10,
-    fontWeight: '500',
+    marginBottom: SPACING.xs,
+  },
+  optionalHint: {
+    ...TYPOGRAPHY.bodySm,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.lg,
+    lineHeight: 20,
   },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 8,
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
   },
   chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 20,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
     backgroundColor: COLORS.surface,
   },
   chipSelected: {
     backgroundColor: COLORS.accent,
   },
   chipText: {
-    fontSize: 15,
+    ...TYPOGRAPHY.labelMd,
     color: COLORS.textMuted,
   },
   chipTextSelected: {
-    color: COLORS.text,
-    fontWeight: '500',
+    color: '#fff',
+    fontWeight: '600',
+  },
+  sensitiveGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginBottom: SPACING.lg,
+  },
+  sensitiveChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: COLORS.background,
+  },
+  sensitiveChipSelected: {
+    backgroundColor: COLORS.accentBg,
+  },
+  sensitiveChipText: {
+    ...TYPOGRAPHY.labelSm,
+    color: COLORS.textSecondary,
+  },
+  sensitiveChipTextSelected: {
+    color: COLORS.accent,
+    fontWeight: '600',
   },
   cardGrid: {
     flexDirection: 'row',
