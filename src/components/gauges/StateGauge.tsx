@@ -15,7 +15,6 @@ export function StateGauge({ value, size = 80 }: GaugeProps) {
   const cy = size * 0.6;
   const radius = size * 0.38;
 
-  // Needle angle: value 0 = far right (hot/red), value 100 = far left (cool/green)
   const angle = isSet ? Math.PI - (value / 100) * Math.PI : Math.PI / 2;
   const needleLength = radius * 0.85;
   const needleX = cx + needleLength * Math.cos(angle);

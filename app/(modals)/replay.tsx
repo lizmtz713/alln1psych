@@ -297,7 +297,6 @@ export default function ReplayScreen() {
                   value={story}
                   onChangeText={setStory}
                   multiline
-                  minHeight={140}
                   textAlignVertical="top"
                 />
                 <View style={styles.inputRow}>

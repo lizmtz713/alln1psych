@@ -32,14 +32,8 @@ export interface CircleMember {
   temperatureLabel: string;
   lastUpdated: Date;
   addedAt: Date;
-  /** ISO date string "1999-03-15" — unlocks relationship insights; saved once */
+  /** ISO date string "1999-03-15" — unlocks relationship insights */
   birthday?: string;
-  /** Phone number; saved once, never re-enter */
-  phone?: string;
-  /** ISO date of last check-in */
-  lastReachedOut?: string;
-  /** Total times reached out */
-  reachedOutCount?: number;
 }
 
 export interface MoodEntry {
@@ -113,9 +107,9 @@ interface CircleState {
       'id' | 'temperature' | 'temperatureLabel' | 'lastUpdated' | 'addedAt'
     >
   ) => void;
-  updateMember: (id: string, updates: Partial<Pick<CircleMember, 'birthday' | 'phone' | 'lastReachedOut' | 'reachedOutCount'>>) => void;
   removeMember: (id: string) => void;
   updateMemberTemperature: (id: string, temp: Temperature) => void;
+  updateMemberBirthday: (id: string, birthday: string | undefined) => void;
   updateMyTemperature: (temp: Temperature, note?: string) => void;
   addMoodCheckin: (mood: Temperature, note?: string) => void;
   addNudge: (memberName: string, message: string) => void;
@@ -153,7 +147,6 @@ export const useCircleStore = create<CircleState>((set) => ({
       temperatureLabel: TEMPERATURE_LABELS.green,
       lastUpdated: now,
       addedAt: now,
-      birthday: member.birthday,
     };
     set((state) => ({ members: [...state.members, newMember] }));
     if (userId) {
@@ -174,11 +167,6 @@ export const useCircleStore = create<CircleState>((set) => ({
         .catch(() => {});
     }
   },
-
-  updateMember: (id, updates) =>
-    set((state) => ({
-      members: state.members.map((m) => (m.id === id ? { ...m, ...updates } : m)),
-    })),
 
   removeMember: (id) => {
     useAuthStore.getState().userId && database.removeCircleMember(id).catch(() => {});
@@ -207,6 +195,14 @@ export const useCircleStore = create<CircleState>((set) => ({
       }
       return { members: next };
     });
+  },
+
+  updateMemberBirthday: (id, birthday) => {
+    set((state) => ({
+      members: state.members.map((m) =>
+        m.id === id ? { ...m, birthday: birthday || undefined, lastUpdated: new Date() } : m
+      ),
+    }));
   },
 
   updateMyTemperature: (temp, note) =>

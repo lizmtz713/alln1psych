@@ -1,12 +1,15 @@
 import { useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Animated, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Animated, PanResponder, LayoutAnimation, Platform, UIManager } from 'react-native';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
+import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
-import { useUserStore } from '../../src/stores/userStore';
 import { useEducationStore } from '../../src/stores/educationStore';
 import {
   MANUAL_SECTIONS,
@@ -20,33 +23,19 @@ import {
   getCategoryTag,
 } from '../../src/data/discoveries';
 
-const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string; route?: string; mode?: 'athlete' | 'spectrum' }[] = [
-  // AI-Powered Tools (featured)
-  { id: 'replay', emoji: '🔄', title: 'Replay', sub: 'Process what happened with AI', route: '/(modals)/replay' },
-  { id: 'decode', emoji: '🔍', title: 'Decode', sub: 'Analyze messages and situations', route: '/(modals)/decode' },
-  { id: 'relate', emoji: '💫', title: 'Relate', sub: 'Understand anyone deeply', route: '/(modals)/relate' },
-  { id: 'love', emoji: '💕', title: 'Love', sub: 'Love, intimacy, connection', route: '/(modals)/love' },
-  { id: 'help-someone', emoji: '🤝', title: 'Help Someone', sub: 'Support someone you care about', route: '/(modals)/help-someone' },
-  { id: 'role-play', emoji: '🎭', title: 'Role Play', sub: 'Practice difficult conversations', route: '/(modals)/role-play' },
-  // Self-guided activities
-  { id: 'breathing', emoji: '🫁', title: 'Breathing Reset', sub: 'Regulate your nervous system' },
-  { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Decoder', sub: "Identify what you're feeling" },
-  { id: 'body-scan', emoji: '🧍', title: 'Body Awareness', sub: 'Map where stress lives' },
-  { id: 'thought-challenger', emoji: '🧠', title: 'Thought Analysis', sub: 'Test your assumptions' },
-  { id: 'gratitude-jar', emoji: '✨', title: 'Gratitude Practice', sub: "Focus on what's working" },
-  { id: 'mood-patterns', emoji: '📊', title: 'Mood Intelligence', sub: 'Spot emotional trends' },
-  // Athlete Mode activities
-  { id: 'recovery-check', emoji: '🔋', title: 'Recovery Check', sub: 'Assess sleep, soreness, energy, mood', mode: 'athlete' },
-  { id: 'pre-competition', emoji: '🏆', title: 'Pre-Competition', sub: 'Get in your optimal zone', mode: 'athlete' },
-  { id: 'performance-debrief', emoji: '📋', title: 'Performance Debrief', sub: 'Process training or competition', mode: 'athlete' },
-  { id: 'athlete-identity', emoji: '🌟', title: 'Beyond the Sport', sub: 'Who are you off the field?', mode: 'athlete' },
-  // Spectrum Mode activities
-  { id: 'sensory-check', emoji: '👁️', title: 'Sensory Check', sub: "What's affecting you right now?", mode: 'spectrum' },
-  { id: 'stim-toolkit', emoji: '🌀', title: 'Stim Toolkit', sub: 'Regulation tools for different needs', mode: 'spectrum' },
-  { id: 'social-script', emoji: '📝', title: 'Social Scripts', sub: 'Prepare for social situations', mode: 'spectrum' },
-  { id: 'body-double', emoji: '👥', title: 'Body Double', sub: 'A gentle presence for focus', mode: 'spectrum' },
-  { id: 'routine-builder', emoji: '📅', title: 'Routine Helper', sub: 'Build and track routines', mode: 'spectrum' },
-  { id: 'emotion-cards', emoji: '🎴', title: 'Emotion Cards', sub: 'Picture-based emotions', mode: 'spectrum' },
+const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string }[] = [
+  { id: 'talk', emoji: '💬', title: 'Talk to Psych', sub: 'Open conversation with your AI companion' },
+  { id: 'journal', emoji: '📓', title: 'Journal', sub: 'Write and reflect' },
+  { id: 'breathing', emoji: '🫁', title: 'Breathing Reset', sub: 'Regulate your nervous system in 2 minutes' },
+  { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Decoder', sub: "Identify what you're actually feeling" },
+  { id: 'body-scan', emoji: '🧍', title: 'Body Awareness', sub: 'Map where stress lives in your body' },
+  { id: 'thought-challenger', emoji: '🧠', title: 'Thought Analysis', sub: 'Test your assumptions against reality' },
+  { id: 'emotion-match', emoji: '🎮', title: 'Pattern Recognition', sub: 'Connect emotions to their real sources' },
+  { id: 'trigger-map', emoji: '🗺️', title: 'Trigger Analysis', sub: 'Trace reactions back to their roots' },
+  { id: 'gratitude-jar', emoji: '✨', title: 'Gratitude Practice', sub: "Rewire your brain toward what's working" },
+  { id: 'stress-thermo', emoji: '🌡️', title: 'Stress Assessment', sub: 'Measure your current activation level' },
+  { id: 'comm-builder', emoji: '💬', title: 'Communication Lab', sub: 'Build scripts for difficult conversations' },
+  { id: 'mood-patterns', emoji: '📊', title: 'Mood Intelligence', sub: 'Spot trends in your emotional data' },
 ];
 
 function getSectionProgress(section: ManualSection, isLessonCompleted: (id: string) => boolean): { completed: number; total: number } {
@@ -63,7 +52,6 @@ function getSectionProgress(section: ManualSection, isLessonCompleted: (id: stri
 
 function DiscoveryCard({
   discovery,
-  contentOverride,
   expanded,
   showLearnMore,
   onToggleExpand,
@@ -72,7 +60,6 @@ function DiscoveryCard({
   onAskPsych,
 }: {
   discovery: Discovery;
-  contentOverride?: string;
   expanded: boolean;
   showLearnMore: boolean;
   onToggleExpand: () => void;
@@ -80,7 +67,6 @@ function DiscoveryCard({
   onDismiss: () => void;
   onAskPsych?: () => void;
 }) {
-  const displayContent = contentOverride ?? discovery.content;
   const translateX = useState(() => new Animated.Value(0))[0];
   const panResponder = useMemo(
     () =>
@@ -115,17 +101,17 @@ function DiscoveryCard({
         <Text style={styles.discoveryEmoji}>{discovery.emoji}</Text>
         <Text style={styles.discoveryTitle}>{discovery.title}</Text>
         <Text style={styles.discoveryContent}>
-          {displayContent}
+          {discovery.content}
         </Text>
-        {discovery.expanded && (
-          <>
-            <Pressable style={styles.learnMoreToggle} onPress={(e) => { e.stopPropagation(); onToggleLearnMore(); }}>
-              <Text style={styles.learnMoreToggleText}>{showLearnMore ? 'Hide' : 'Learn more'}</Text>
-            </Pressable>
-            {showLearnMore && (
-              <Text style={styles.discoveryExpanded}>{discovery.expanded}</Text>
-            )}
-          </>
+        <Pressable style={styles.learnMoreToggle} onPress={(e) => { e.stopPropagation(); onToggleLearnMore(); }}>
+          <Text style={styles.learnMoreToggleText}>
+            {showLearnMore ? 'Hide' : (discovery.expanded ? 'Learn more' : 'Expand')}
+          </Text>
+        </Pressable>
+        {showLearnMore && (
+          <Text style={styles.discoveryExpanded}>
+            {discovery.expanded ?? 'More coming soon.'}
+          </Text>
         )}
         {onAskPsych && (
           <Pressable style={styles.askPsychBtn} onPress={(e) => { e.stopPropagation(); onAskPsych(); }}>
@@ -140,20 +126,7 @@ function DiscoveryCard({
 export default function LearnScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const ageRange = useUserStore((s) => s.ageRange);
-  const athleteMode = useUserStore((s) => s.athleteMode);
-  const spectrumMode = useUserStore((s) => s.spectrumMode);
   const isLessonCompleted = useEducationStore((s) => s.isLessonCompleted);
-
-  // Filter toolkit activities based on active modes
-  const visibleToolkitActivities = useMemo(() => {
-    return TOOLKIT_ACTIVITIES.filter((a) => {
-      if (!a.mode) return true; // base activities always show
-      if (a.mode === 'athlete') return athleteMode;
-      if (a.mode === 'spectrum') return spectrumMode;
-      return false;
-    });
-  }, [athleteMode, spectrumMode]);
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(null);
 
   const initialDiscoveries = useMemo(() => getDiscoveriesForDay(), []);
@@ -189,10 +162,17 @@ export default function LearnScreen() {
     setExpandedSectionId((prev) => (prev === sectionId ? null : sectionId));
   };
 
-  const openActivity = (id: string, route?: string) => {
+  const openActivity = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (route) router.push(route as any);
-    else router.push(`/(modals)/activity?id=${id}`);
+    if (id === 'talk') {
+      router.push('/(tabs)/talk');
+      return;
+    }
+    if (id === 'journal') {
+      router.push('/(modals)/new-journal');
+      return;
+    }
+    router.push(`/(modals)/activity?id=${id}`);
   };
 
   return (
@@ -289,11 +269,13 @@ export default function LearnScreen() {
           <DiscoveryCard
             key={d.id}
             discovery={d}
-            contentOverride={d.ageAdaptive && ageRange ? d.ageAdaptive[ageRange] : undefined}
             expanded={expandedDiscoveryId === d.id}
             showLearnMore={learnMoreDiscoveryId === d.id}
             onToggleExpand={() => setExpandedDiscoveryId((cur) => (cur === d.id ? null : d.id))}
-            onToggleLearnMore={() => setLearnMoreDiscoveryId((cur) => (cur === d.id ? null : d.id))}
+            onToggleLearnMore={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setLearnMoreDiscoveryId((cur) => (cur === d.id ? null : d.id));
+            }}
             onDismiss={() => handleDismissDiscovery(d.id)}
           />
         ))}
@@ -308,11 +290,11 @@ export default function LearnScreen() {
       {/* 3. Your Toolkit — THIRD at bottom */}
       <Text style={styles.sectionLabel}>Your Toolkit 🧰</Text>
       <View style={styles.toolkitGrid}>
-        {visibleToolkitActivities.map((a) => (
+        {TOOLKIT_ACTIVITIES.map((a) => (
           <Pressable
             key={a.id}
             style={({ pressed }) => [styles.toolkitCard, pressed && styles.pressed]}
-            onPress={() => openActivity(a.id, a.route)}
+            onPress={() => openActivity(a.id)}
           >
             <Text style={styles.toolkitEmoji}>{a.emoji}</Text>
             <Text style={styles.toolkitTitle} numberOfLines={2}>{a.title}</Text>
@@ -408,6 +390,9 @@ const styles = StyleSheet.create({
     color: TEXT_MUTED,
     lineHeight: 22,
     marginTop: 10,
+    padding: 12,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 8,
   },
   askPsychBtn: {
     marginTop: 12,

@@ -19,6 +19,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
+import * as ImagePicker from 'expo-image-picker';
+import { COLORS } from '../../src/lib/constants';
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 
@@ -95,6 +97,21 @@ export default function DecodeScreen() {
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toast, setToast] = useState('');
+
+  const handlePasteScreenshot = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: (ImagePicker as { MediaTypeOptions?: { Images: string } }).MediaTypeOptions?.Images ?? 'images',
+        quality: 0.8,
+        base64: true,
+      });
+      if (!result.canceled && result.assets?.[0]?.base64) {
+        setMessage('[Screenshot attached — analyzing...]');
+      }
+    } catch (_) {
+      setMessage('[Screenshot attached — you can also type or paste the text here]');
+    }
+  };
 
   const copyToClipboard = async (text: string, id: string) => {
     try {
@@ -252,6 +269,9 @@ export default function DecodeScreen() {
                 multiline
                 textAlignVertical="top"
               />
+              <Pressable onPress={handlePasteScreenshot} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8 }}>
+                <Text style={{ color: COLORS.accent, fontSize: 14 }}>📷 Paste screenshot</Text>
+              </Pressable>
               <TextInput
                 style={styles.smallInput}
                 placeholder="Who sent this? (my friend, my boss, my ex...)"

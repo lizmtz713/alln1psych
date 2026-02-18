@@ -600,17 +600,45 @@ export default function RolePlayScreen() {
       </View>
 
       <Text style={styles.quickLabel}>Quick start</Text>
-      <View style={styles.quickRow}>
-        {QUICK_STARTS.map((q, i) => (
-          <Pressable
-            key={i}
-            style={styles.quickCard}
-            onPress={() => applyQuickStart(q.scenario, q.character)}
-          >
-            <Text style={styles.quickEmoji}>{q.emoji}</Text>
-            <Text style={styles.quickText} numberOfLines={2}>{q.scenario}</Text>
-          </Pressable>
-        ))}
+      <View>
+        {(() => {
+          const scenarios = QUICK_STARTS.map((q, i) => ({ id: String(i), ...q, title: q.scenario, subtitle: q.character }));
+          const row1 = scenarios.slice(0, Math.ceil(scenarios.length / 2));
+          const row2 = scenarios.slice(Math.ceil(scenarios.length / 2));
+          const selectScenario = (s: typeof scenarios[0]) => applyQuickStart(s.scenario, s.character);
+          return (
+            <>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
+                <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 16 }}>
+                  {row1.map((s) => (
+                    <Pressable
+                      key={s.id}
+                      onPress={() => selectScenario(s)}
+                      style={{ backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, width: 160, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}
+                    >
+                      <Text style={{ color: COLORS.text, fontSize: 14, fontWeight: '600' }}>{s.emoji} {s.title}</Text>
+                      <Text style={{ color: COLORS.textSecondary, fontSize: 12, marginTop: 4 }} numberOfLines={2}>{s.subtitle}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 16 }}>
+                  {row2.map((s) => (
+                    <Pressable
+                      key={s.id}
+                      onPress={() => selectScenario(s)}
+                      style={{ backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, width: 160, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}
+                    >
+                      <Text style={{ color: COLORS.text, fontSize: 14, fontWeight: '600' }}>{s.emoji} {s.title}</Text>
+                      <Text style={{ color: COLORS.textSecondary, fontSize: 12, marginTop: 4 }} numberOfLines={2}>{s.subtitle}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          );
+        })()}
       </View>
 
       {error ? <Text style={styles.errorLine}>{error}</Text> : null}

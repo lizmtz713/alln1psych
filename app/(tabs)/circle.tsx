@@ -5,13 +5,13 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
+  TextInput,
   Linking,
   LayoutAnimation,
   Platform,
   UIManager,
   RefreshControl,
   Alert,
-  TextInput,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -43,6 +43,34 @@ const SUGGESTED_ACTIONS: Record<Temperature, (name: string) => string> = {
 
 const DEMO_MEMBER_IDS = ['demo-mom', 'demo-sarah', 'demo-dad'];
 
+function formatBirthday(iso: string | undefined): string {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  if (!m || !d) return iso;
+  return `${m}/${d}/${y}`;
+}
+
+function formatBirthdayInput(text: string, setter: (t: string) => void): void {
+  const digits = text.replace(/\D/g, '');
+  let out = '';
+  if (digits.length > 0) out += digits.slice(0, 2);
+  if (digits.length > 2) out += '/' + digits.slice(2, 4);
+  if (digits.length > 4) out += '/' + digits.slice(4, 8);
+  setter(out);
+}
+
+function parseBirthdayToIso(mmDdYyyy: string): string | undefined {
+  const parts = mmDdYyyy.split('/').map((p) => p.trim());
+  if (parts.length !== 3) return undefined;
+  const [mm, dd, yyyy] = parts;
+  if (!mm || !dd || !yyyy || mm.length !== 2 || dd.length !== 2 || yyyy.length !== 4) return undefined;
+  const m = parseInt(mm, 10);
+  const d = parseInt(dd, 10);
+  const y = parseInt(yyyy, 10);
+  if (m < 1 || m > 12 || d < 1 || d > 31 || y < 1900 || y > 2100) return undefined;
+  return `${y}-${mm}-${dd}`;
+}
+
 export default function CircleScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -50,10 +78,8 @@ export default function CircleScreen() {
   const [expandedNudgeId, setExpandedNudgeId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [editingBirthdayId, setEditingBirthdayId] = useState<string | null>(null);
-  const [birthdayInput, setBirthdayInput] = useState('');
-  const [editingPhoneId, setEditingPhoneId] = useState<string | null>(null);
-  const [phoneInput, setPhoneInput] = useState('');
+  const [editingBirthday, setEditingBirthday] = useState<string | null>(null);
+  const [editBirthdayValue, setEditBirthdayValue] = useState('');
   const onRefresh = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
@@ -67,9 +93,8 @@ export default function CircleScreen() {
     nudges,
     markNudgeRead,
     markNudgeActedOn,
-    updateMember,
+    updateMemberBirthday,
   } = useCircleStore();
-  const myBirthday = useUserStore((s) => s.birthday);
 
   const isDemoData = members.some((m) => DEMO_MEMBER_IDS.includes(m.id));
 
@@ -89,11 +114,6 @@ export default function CircleScreen() {
   };
 
   const handleSendText = (m: CircleMember) => {
-    const number = m.phone || (m.contactMethod && !m.contactMethod.includes('@') ? m.contactMethod : null);
-    if (number) {
-      Linking.openURL(`sms:${number.replace(/\D/g, '')}`);
-      return;
-    }
     if (Platform.OS === 'ios') {
       Alert.prompt(
         `Send text to ${m.name}`,
@@ -103,6 +123,9 @@ export default function CircleScreen() {
         }
       );
     } else {
+      if (m.contactMethod && !m.contactMethod.includes('@')) {
+        Linking.openURL(`sms:${m.contactMethod.replace(/\D/g, '')}`);
+      } else {
         Alert.alert(
           `Send text to ${m.name}`,
           'Enter their phone number in your circle, or open your messages app.',
@@ -112,14 +135,10 @@ export default function CircleScreen() {
           ]
         );
       }
+    }
   };
 
   const handleCall = (m: CircleMember) => {
-    const number = m.phone || (m.contactMethod && !m.contactMethod.includes('@') ? m.contactMethod : null);
-    if (number) {
-      Linking.openURL(`tel:${number.replace(/\D/g, '')}`);
-      return;
-    }
     if (Platform.OS === 'ios') {
       Alert.prompt(
         `Call ${m.name}`,
@@ -129,27 +148,44 @@ export default function CircleScreen() {
         }
       );
     } else {
-      Alert.alert(
-        `Call ${m.name}`,
-        'Add their phone number in your circle, or open your dialer.',
-        [
-          { text: 'Open dialer', onPress: () => Linking.openURL('tel:') },
-          { text: 'Cancel', style: 'cancel' },
-        ]
-      );
+      if (m.contactMethod && !m.contactMethod.includes('@')) {
+        Linking.openURL(`tel:${m.contactMethod.replace(/\D/g, '')}`);
+      } else {
+        Alert.alert(
+          `Call ${m.name}`,
+          'Add their phone number in your circle, or open your dialer.',
+          [
+            { text: 'Open dialer', onPress: () => Linking.openURL('tel:') },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+      }
     }
   };
 
   const handleReachedOut = (m: CircleMember) => {
-    updateMember(m.id, {
-      lastReachedOut: new Date().toISOString(),
-      reachedOutCount: (m.reachedOutCount || 0) + 1,
-    });
     const n = nudges.find((x) => x.memberName === m.name);
     if (n) markNudgeActedOn(n.id);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setToast('Reached out recorded');
     setTimeout(() => setToast(null), 2000);
+  };
+
+  const saveBirthday = (memberId: string, value: string) => {
+    const iso = parseBirthdayToIso(value);
+    if (iso) {
+      updateMemberBirthday(memberId, iso);
+      setToast('Birthday saved');
+    } else {
+      setToast('Use MM/DD/YYYY');
+    }
+    setEditingBirthday(null);
+    setEditBirthdayValue('');
+    setTimeout(() => setToast(null), 2000);
+  };
+
+  const startEditBirthday = (m: CircleMember) => {
+    setEditingBirthday(m.id);
+    setEditBirthdayValue(m.birthday ? formatBirthday(m.birthday) : '');
   };
 
   return (
@@ -172,44 +208,6 @@ export default function CircleScreen() {
           <Text style={styles.demoBadgeText}>Demo data</Text>
         </View>
       )}
-
-      {/* Time to check in — members who need a check-in (7+ days or never) */}
-      {(() => {
-        const needsCheckIn = members.filter((m) => {
-          if (!m.lastReachedOut) return true;
-          const daysSince = Math.floor((Date.now() - new Date(m.lastReachedOut).getTime()) / 86400000);
-          return daysSince >= 7;
-        });
-        return needsCheckIn.length > 0 ? (
-          <View style={{ backgroundColor: 'rgba(124,77,255,0.08)', borderRadius: 14, padding: 14, marginHorizontal: 16, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}>
-            <Text style={{ color: '#7C4DFF', fontSize: 14, fontWeight: '600', marginBottom: 8 }}>Time to check in</Text>
-            {needsCheckIn.map((m) => {
-              const days = m.lastReachedOut
-                ? Math.floor((Date.now() - new Date(m.lastReachedOut).getTime()) / 86400000)
-                : null;
-              return (
-                <View key={m.id} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <Text style={{ color: '#F0F0F5', fontSize: 14 }}>
-                    {m.name} — {days !== null ? `${days} days ago` : 'never reached out'}
-                  </Text>
-                  <Pressable
-                    onPress={() => {
-                      updateMember(m.id, {
-                        lastReachedOut: new Date().toISOString(),
-                        reachedOutCount: (m.reachedOutCount || 0) + 1,
-                      });
-                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                    }}
-                    style={{ backgroundColor: '#7C4DFF', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}
-                  >
-                    <Text style={{ color: '#fff', fontSize: 12 }}>Done ✓</Text>
-                  </Pressable>
-                </View>
-              );
-            })}
-          </View>
-        ) : null;
-      })()}
 
       {/* YOUR TEMPERATURE */}
       <View style={styles.section}>
@@ -274,15 +272,40 @@ export default function CircleScreen() {
                   </Pressable>
                   {expanded && (
                     <View style={styles.memberExpand}>
+                      {(m.birthday || editingBirthday === m.id) ? (
+                        <>
+                          {editingBirthday !== m.id ? (
+                            <Pressable onPress={() => startEditBirthday(m)} style={{ marginBottom: 8 }}>
+                              <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>
+                                🎂 {formatBirthday(m.birthday)} ✏️
+                              </Text>
+                            </Pressable>
+                          ) : (
+                            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                              <TextInput
+                                value={editBirthdayValue}
+                                onChangeText={(t) => formatBirthdayInput(t, setEditBirthdayValue)}
+                                placeholder="MM/DD/YYYY"
+                                placeholderTextColor={COLORS.textSecondary}
+                                keyboardType="number-pad"
+                                maxLength={10}
+                                style={{ backgroundColor: COLORS.surface, color: COLORS.text, borderRadius: BORDER_RADIUS.input, padding: 10, flex: 1, minWidth: 120 }}
+                              />
+                              <Pressable onPress={() => saveBirthday(m.id, editBirthdayValue)}>
+                                <Text style={{ color: COLORS.accent, fontSize: 14, fontWeight: '600' }}>Save</Text>
+                              </Pressable>
+                              <Pressable onPress={() => { setEditingBirthday(null); setEditBirthdayValue(''); }}>
+                                <Text style={{ color: COLORS.textSecondary, fontSize: 14 }}>Cancel</Text>
+                              </Pressable>
+                            </View>
+                          )}
+                        </>
+                      ) : (
+                        <Pressable onPress={() => startEditBirthday(m)} style={{ marginBottom: 8 }}>
+                          <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>🎂 Add birthday</Text>
+                        </Pressable>
+                      )}
                       <Text style={styles.actionText}>{action}</Text>
-                      <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 10 }}>
-                        {m.lastReachedOut
-                          ? `Last reached out: ${(() => {
-                              const days = Math.floor((Date.now() - new Date(m.lastReachedOut!).getTime()) / 86400000);
-                              return days === 0 ? 'today' : days === 1 ? '1 day ago' : `${days} days ago`;
-                            })()}`
-                          : "You've never reached out"}
-                      </Text>
                       <View style={styles.actionRow}>
                         <Pressable
                           style={styles.actionBtn}
@@ -300,56 +323,6 @@ export default function CircleScreen() {
                           <Text style={styles.actionBtnText}>I reached out</Text>
                         </Pressable>
                       </View>
-                      {/* Phone: show or add */}
-                      {m.phone ? (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 4 }}>
-                          <Text style={{ color: '#8888A0', fontSize: 13 }}>Phone: </Text>
-                          <Text style={{ color: '#F0F0F5', fontSize: 13 }}>{m.phone}</Text>
-                        </View>
-                      ) : (
-                        <View style={{ marginTop: 12 }}>
-                          {editingPhoneId === m.id ? (
-                            <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}>
-                              <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 6 }}>Phone number</Text>
-                              <TextInput
-                                style={{ backgroundColor: '#09090F', color: '#F0F0F5', borderRadius: 12, padding: 14, fontSize: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', marginBottom: 10 }}
-                                placeholder="(555) 123-4567"
-                                placeholderTextColor="#55556A"
-                                value={phoneInput}
-                                onChangeText={setPhoneInput}
-                                keyboardType="phone-pad"
-                              />
-                              <View style={{ flexDirection: 'row', gap: 10 }}>
-                                <Pressable onPress={() => { setEditingPhoneId(null); setPhoneInput(''); }} style={{ flex: 1, paddingVertical: 10, alignItems: 'center' }}>
-                                  <Text style={{ color: '#8888A0', fontSize: 14 }}>Cancel</Text>
-                                </Pressable>
-                                <Pressable
-                                  onPress={() => {
-                                    if (phoneInput.trim()) {
-                                      updateMember(m.id, { phone: phoneInput.trim() });
-                                      setEditingPhoneId(null);
-                                      setPhoneInput('');
-                                    }
-                                  }}
-                                  style={{ flex: 1, paddingVertical: 10, alignItems: 'center' }}
-                                >
-                                  <Text style={{ color: '#7C4DFF', fontSize: 14, fontWeight: '600' }}>Save</Text>
-                                </Pressable>
-                              </View>
-                            </View>
-                          ) : (
-                            <Pressable onPress={() => { setEditingPhoneId(m.id); setPhoneInput(''); }} style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}>
-                              <Text style={{ color: '#7C4DFF', fontSize: 14, textAlign: 'center' }}>Add phone number</Text>
-                            </Pressable>
-                          )}
-                        </View>
-                      )}
-                      {/* Birthday: show when present */}
-                      {m.birthday && (
-                        <Text style={{ color: '#8888A0', fontSize: 13, marginTop: 6 }}>
-                          Birthday: {new Date(m.birthday + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </Text>
-                      )}
                       {(m.temperature === 'orange' || m.temperature === 'red') && (
                         <Pressable
                           style={styles.helpSomeoneBtn}
@@ -363,109 +336,6 @@ export default function CircleScreen() {
                         >
                           <Text style={styles.helpSomeoneBtnText}>Need help talking to {m.name}?</Text>
                         </Pressable>
-                      )}
-                      {/* Personology: their personality */}
-                      {getPersonality(m.birthday ?? '') && (
-                        <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, marginTop: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
-                          <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600', marginBottom: 8 }}>
-                            {m.name}: {getPersonality(m.birthday!)!.name}
-                          </Text>
-                          <Text style={{ color: '#B0B0C0', fontSize: 14, lineHeight: 20, marginBottom: 8 }}>
-                            {getPersonality(m.birthday!)!.communicationStyle}
-                          </Text>
-                          <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 4 }}>
-                            Strengths: {getPersonality(m.birthday!)!.strengths.join(', ')}
-                          </Text>
-                          <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 4 }}>
-                            Under stress: {getPersonality(m.birthday!)!.stressResponse}
-                          </Text>
-                          <Text style={{ color: '#8888A0', fontSize: 13 }}>
-                            Needs: {getPersonality(m.birthday!)!.needsInRelationships}
-                          </Text>
-                        </View>
-                      )}
-                      {/* Our Dynamic — both birthdays */}
-                      {myBirthday && m.birthday && getRelationshipDynamic(myBirthday, m.birthday) && (() => {
-                        const dynamic = getRelationshipDynamic(myBirthday, m.birthday!);
-                        if (!dynamic) return null;
-                        return (
-                          <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, marginTop: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
-                            <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600', marginBottom: 10 }}>Our Dynamic</Text>
-                            <Text style={{ color: '#F0F0F5', fontSize: 13, fontWeight: '600', marginBottom: 4 }}>Strengths</Text>
-                            {dynamic.strengths.map((s, i) => (
-                              <Text key={i} style={{ color: '#B0B0C0', fontSize: 13, lineHeight: 18, marginBottom: 4, marginLeft: 8 }}>• {s}</Text>
-                            ))}
-                            <Text style={{ color: '#F0F0F5', fontSize: 13, fontWeight: '600', marginTop: 10, marginBottom: 4 }}>Watch For</Text>
-                            {dynamic.frictionPoints.map((f, i) => (
-                              <Text key={i} style={{ color: '#B0B0C0', fontSize: 13, lineHeight: 18, marginBottom: 4, marginLeft: 8 }}>• {f}</Text>
-                            ))}
-                            <Text style={{ color: '#F0F0F5', fontSize: 13, fontWeight: '600', marginTop: 10, marginBottom: 4 }}>Communication Tip</Text>
-                            <Text style={{ color: '#B0B0C0', fontSize: 13, lineHeight: 18 }}>{dynamic.communicationTip}</Text>
-                            <Text style={{ color: '#F0F0F5', fontSize: 13, fontWeight: '600', marginTop: 10, marginBottom: 4 }}>Your Conflict Pattern</Text>
-                            <Text style={{ color: '#B0B0C0', fontSize: 13, lineHeight: 18 }}>{dynamic.conflictPattern}</Text>
-                          </View>
-                        );
-                      })()}
-                      {/* Relate — when member has birthday */}
-                      {m.birthday && (
-                        <Pressable
-                          style={{ marginTop: 12, backgroundColor: '#111118', borderRadius: 10, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}
-                          onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            router.push({ pathname: '/(modals)/relate', params: { name: m.name, birthday: m.birthday } });
-                          }}
-                        >
-                          <Text style={{ fontSize: 18 }}>💫</Text>
-                          <Text style={{ color: '#7C4DFF', fontSize: 14, fontWeight: '500' }}>Relate to {m.name}</Text>
-                        </Pressable>
-                      )}
-                      {/* Add birthday */}
-                      {!m.birthday && (
-                        <View style={{ marginTop: 16 }}>
-                          {editingBirthdayId === m.id ? (
-                            <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}>
-                              <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 6 }}>Birthday (MM/DD/YYYY)</Text>
-                              <TextInput
-                                style={{ backgroundColor: '#09090F', color: '#F0F0F5', borderRadius: 12, padding: 14, fontSize: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', marginBottom: 10 }}
-                                placeholder="MM/DD/YYYY"
-                                placeholderTextColor="#55556A"
-                                value={birthdayInput}
-                                onChangeText={(text) => {
-                                  const cleaned = text.replace(/\D/g, '');
-                                  if (cleaned.length <= 2) setBirthdayInput(cleaned);
-                                  else if (cleaned.length <= 4) setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2));
-                                  else setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8));
-                                }}
-                                keyboardType="number-pad"
-                                maxLength={10}
-                              />
-                              <View style={{ flexDirection: 'row', gap: 10 }}>
-                                <Pressable onPress={() => { setEditingBirthdayId(null); setBirthdayInput(''); }} style={{ flex: 1, paddingVertical: 10, alignItems: 'center' }}>
-                                  <Text style={{ color: '#8888A0', fontSize: 14 }}>Cancel</Text>
-                                </Pressable>
-                                <Pressable
-                                  onPress={() => {
-                                    if (birthdayInput.length === 10) {
-                                      const [mm, dd, yyyy] = birthdayInput.split('/');
-                                      if (mm && dd && yyyy) {
-                                        updateMember(m.id, { birthday: `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}` });
-                                        setEditingBirthdayId(null);
-                                        setBirthdayInput('');
-                                      }
-                                    }
-                                  }}
-                                  style={{ flex: 1, paddingVertical: 10, alignItems: 'center' }}
-                                >
-                                  <Text style={{ color: '#7C4DFF', fontSize: 14, fontWeight: '600' }}>Save</Text>
-                                </Pressable>
-                              </View>
-                            </View>
-                          ) : (
-                            <Pressable onPress={() => { setEditingBirthdayId(m.id); setBirthdayInput(''); }} style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}>
-                              <Text style={{ color: '#7C4DFF', fontSize: 14, textAlign: 'center' }}>Add their birthday to unlock relationship insights</Text>
-                            </Pressable>
-                          )}
-                        </View>
                       )}
                     </View>
                   )}
