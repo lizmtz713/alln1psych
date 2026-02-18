@@ -74,7 +74,7 @@ const GAUGE_DETAIL_CONTENT: Record<
     whatToTry: [
       { label: 'Check on someone', route: '/(tabs)/circle' },
       { label: 'Role play a hard conversation', route: '/(modals)/role-play' },
-      { label: 'Help Someone', route: '/(modals)/help-someone' },
+      { label: 'Help', route: '/(modals)/help-someone' },
     ],
     funFact:
       "Social isolation affects the brain like physical pain. Connection isn't a luxury. It's a biological requirement.",

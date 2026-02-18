@@ -56,8 +56,8 @@ export default function MeScreen() {
 
   const menuItems = [
     { icon: 'journal-outline', label: 'Journal', route: '/(modals)/new-journal' },
-    { icon: 'refresh-outline', label: 'Replay Session', route: '/(modals)/replay' },
-    { icon: 'people-outline', label: 'Help Someone', route: '/(modals)/help-someone' },
+    { icon: 'refresh-outline', label: 'Replay', route: '/(modals)/replay' },
+    { icon: 'people-outline', label: 'Help', route: '/(modals)/help-someone' },
     { icon: 'settings-outline', label: 'Settings', route: '/(modals)/settings' },
   ];
 
