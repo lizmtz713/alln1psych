@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Audio } from 'expo-av';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 import { useHelpSomeoneStore, type HelpSession } from '../../src/stores/helpSomeoneStore';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';

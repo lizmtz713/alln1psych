@@ -16,7 +16,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 import { useRolePlayStore, type RolePlayDifficulty } from '../../src/stores/rolePlayStore';
 import { sendRolePlayMessage, getDebrief } from '../../src/services/roleplay';
 import { hasOpenAIKey } from '../../src/services/ai';
