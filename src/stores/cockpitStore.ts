@@ -235,8 +235,26 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
     } catch (e) {
       // Spotify store not available
     }
+
+    // Get weather data if available
+    let weatherData;
+    try {
+      const weatherStore = require('./weatherStore').useWeatherStore.getState();
+      if (weatherStore.isConfigured && weatherStore.weather) {
+        weatherData = {
+          temperature: weatherStore.weather.temperature,
+          humidity: weatherStore.weather.humidity,
+          pressure: weatherStore.weather.pressure,
+          description: weatherStore.weather.description,
+          lightLevel: weatherStore.weather.lightLevel,
+          moodImpact: weatherStore.weather.moodImpact,
+        };
+      }
+    } catch (e) {
+      // Weather store not available
+    }
     
-    const insight = await generateCrossSystemInsight(gauges, healthData, spotifyData);
+    const insight = await generateCrossSystemInsight(gauges, healthData, spotifyData, weatherData);
     set({ crossSystemInsight: insight });
   },
 

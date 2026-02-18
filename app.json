@@ -38,7 +38,13 @@
     },
     "scheme": "alln1-psych",
     "plugins": [
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "InGauge uses your location to provide weather-based mood insights."
+        }
+      ]
     ]
   }
 }

@@ -34,10 +34,20 @@ export interface SpotifyContext {
   moodScore?: number;         // 0-100 composite score
 }
 
+export interface WeatherContext {
+  temperature?: number;       // Fahrenheit
+  humidity?: number;          // percentage
+  pressure?: number;          // hPa (barometric)
+  description?: string;       // "partly cloudy"
+  lightLevel?: string;        // bright/overcast/dark
+  moodImpact?: string;        // positive/neutral/negative
+}
+
 export async function generateCrossSystemInsight(
   gauges: CockpitGauges,
   healthData?: HealthContext,
-  spotifyData?: SpotifyContext
+  spotifyData?: SpotifyContext,
+  weatherData?: WeatherContext
 ): Promise<string | null> {
   const active = Object.values(gauges).filter((v) => v >= 0);
   if (active.length < 3) return null;
@@ -90,6 +100,30 @@ export async function generateCrossSystemInsight(
     }
   }
 
+  // Build weather context string
+  let weatherContext = '';
+  if (weatherData && weatherData.description) {
+    const parts: string[] = [];
+    parts.push(`Conditions: ${weatherData.description}`);
+    if (weatherData.temperature !== undefined) {
+      parts.push(`Temp: ${weatherData.temperature}°F`);
+    }
+    if (weatherData.lightLevel) {
+      parts.push(`Light: ${weatherData.lightLevel}`);
+    }
+    if (weatherData.pressure !== undefined) {
+      const pressureNote = weatherData.pressure < 1000 ? ' (low - may cause headaches)' : 
+                          weatherData.pressure > 1025 ? ' (high)' : '';
+      parts.push(`Pressure: ${weatherData.pressure}hPa${pressureNote}`);
+    }
+    if (weatherData.humidity !== undefined && weatherData.humidity > 75) {
+      parts.push(`Humidity: ${weatherData.humidity}% (high)`);
+    }
+    if (parts.length > 0) {
+      weatherContext = `\n\nWEATHER (current):\n${parts.join(' | ')}`;
+    }
+  }
+
   const systemPrompt = `You are the AI brain of a Human Cockpit — a 6-gauge emotional regulation system. You read all gauges AND health data together and provide ONE brief insight (2-3 sentences max) about how the user's systems are interacting.
 
 The 6 gauges (0-100 scale, -1 means not checked):
@@ -98,7 +132,7 @@ The 6 gauges (0-100 scale, -1 means not checked):
 - Emotion (emotional clarity): ${gauges.emotion}
 - Connection (belonging, being seen): ${gauges.connection}
 - Direction (purpose, momentum): ${gauges.direction}
-- Alignment (actions matching values): ${gauges.alignment}${healthContext}${musicContext}
+- Alignment (actions matching values): ${gauges.alignment}${healthContext}${musicContext}${weatherContext}
 
 Rules:
 - Read the PATTERN across gauges, not individual numbers
@@ -110,7 +144,9 @@ Rules:
 - Always ground it in how the systems affect each other
 - Sound like a wise friend who happens to understand neuroscience, not a therapist
 - If music data is present, note patterns: low-energy music + low State = seeking calm; high-energy music + low Body = pushing through fatigue; melancholic music + low Emotion = processing something
-- Music choices often reveal what the body/mind is seeking before we're conscious of it`;
+- Music choices often reveal what the body/mind is seeking before we're conscious of it
+- If weather data is present: overcast/dark days affect State and Emotion; low pressure causes headaches and irritability; gray days make Connection feel harder
+- Weather isn't an excuse but it IS a factor — name it so they don't blame themselves`;
 
   const knowledge = buildKnowledgePrompt(gauges);
   const systemPromptWithKnowledge = systemPrompt + knowledge;

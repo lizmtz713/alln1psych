@@ -25,6 +25,7 @@ import { useEducationStore } from '../../src/stores/educationStore';
 import { usePremiumStore } from '../../src/stores/premiumStore';
 import { useHealthStore } from '../../src/stores/healthStore';
 import { useSpotifyStore } from '../../src/stores/spotifyStore';
+import { useWeatherStore } from '../../src/stores/weatherStore';
 import { registerForPushNotifications } from '../../src/services/notifications';
 import {
   buildExportData,
@@ -458,6 +459,302 @@ const spotifyStyles = StyleSheet.create({
   },
 });
 
+function WeatherConnectionCard() {
+  const isConfigured = useWeatherStore((s) => s.isConfigured);
+  const isLoading = useWeatherStore((s) => s.isLoading);
+  const weather = useWeatherStore((s) => s.weather);
+  const lastUpdated = useWeatherStore((s) => s.lastUpdated);
+  const error = useWeatherStore((s) => s.error);
+  const checkConfiguration = useWeatherStore((s) => s.checkConfiguration);
+  const setApiKey = useWeatherStore((s) => s.setApiKey);
+  const refreshWeather = useWeatherStore((s) => s.refreshWeather);
+
+  const [showKeyInput, setShowKeyInput] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
+
+  useEffect(() => {
+    checkConfiguration();
+  }, []);
+
+  const handleSetKey = async () => {
+    if (!apiKeyInput.trim()) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const success = await setApiKey(apiKeyInput.trim());
+    if (success) {
+      setShowKeyInput(false);
+      setApiKeyInput('');
+      Alert.alert('Connected!', 'Weather data is now syncing.');
+    } else {
+      Alert.alert('Error', 'Could not connect. Check your API key.');
+    }
+  };
+
+  const handleRefresh = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await refreshWeather();
+  };
+
+  const getWeatherIcon = () => {
+    if (!weather) return 'partly-sunny';
+    const desc = weather.description.toLowerCase();
+    if (desc.includes('rain')) return 'rainy';
+    if (desc.includes('cloud')) return 'cloudy';
+    if (desc.includes('clear') || desc.includes('sun')) return 'sunny';
+    if (desc.includes('snow')) return 'snow';
+    if (desc.includes('storm') || desc.includes('thunder')) return 'thunderstorm';
+    return 'partly-sunny';
+  };
+
+  const getMoodColor = () => {
+    if (!weather) return TEXT_MUTED;
+    if (weather.moodImpact === 'positive') return '#4ADE80';
+    if (weather.moodImpact === 'negative') return '#FB923C';
+    return '#FACC15';
+  };
+
+  return (
+    <>
+      <Text style={styles.sectionTitle}>Weather & Environment</Text>
+      <View style={styles.card}>
+        {!isConfigured ? (
+          <>
+            <View style={styles.row}>
+              <Ionicons name="partly-sunny" size={24} color="#60A5FA" />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.rowLabel}>Connect Weather</Text>
+                <Text style={styles.rowHint}>
+                  Track how weather affects your mood (requires free API key)
+                </Text>
+              </View>
+            </View>
+
+            {!showKeyInput ? (
+              <Pressable
+                style={({ pressed }) => [
+                  weatherStyles.connectBtn,
+                  pressed && { opacity: 0.9 },
+                ]}
+                onPress={() => setShowKeyInput(true)}
+              >
+                <Ionicons name="key" size={18} color="#fff" />
+                <Text style={weatherStyles.connectBtnText}>Add API Key</Text>
+              </Pressable>
+            ) : (
+              <View style={weatherStyles.keyInputSection}>
+                <Text style={weatherStyles.keyInstructions}>
+                  1. Go to openweathermap.org{'\n'}
+                  2. Sign up (free){'\n'}
+                  3. Get your API key{'\n'}
+                  4. Paste it below
+                </Text>
+                <TextInput
+                  style={weatherStyles.keyInput}
+                  placeholder="Paste API key here"
+                  placeholderTextColor={TEXT_DIM}
+                  value={apiKeyInput}
+                  onChangeText={setApiKeyInput}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <View style={weatherStyles.keyButtons}>
+                  <Pressable
+                    style={weatherStyles.cancelBtn}
+                    onPress={() => {
+                      setShowKeyInput(false);
+                      setApiKeyInput('');
+                    }}
+                  >
+                    <Text style={weatherStyles.cancelBtnText}>Cancel</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[weatherStyles.saveBtn, !apiKeyInput.trim() && { opacity: 0.5 }]}
+                    onPress={handleSetKey}
+                    disabled={!apiKeyInput.trim()}
+                  >
+                    <Text style={weatherStyles.saveBtnText}>Connect</Text>
+                  </Pressable>
+                </View>
+                <Pressable
+                  onPress={() => Linking.openURL('https://openweathermap.org/api')}
+                >
+                  <Text style={weatherStyles.linkText}>Get free API key →</Text>
+                </Pressable>
+              </View>
+            )}
+          </>
+        ) : (
+          <>
+            <View style={styles.row}>
+              <Ionicons name={getWeatherIcon()} size={24} color="#60A5FA" />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.rowLabel}>Weather Connected</Text>
+                <Text style={styles.rowHint}>
+                  {lastUpdated
+                    ? `Last sync: ${new Date(lastUpdated).toLocaleTimeString()}`
+                    : 'Tap to sync'}
+                </Text>
+              </View>
+              <Pressable onPress={handleRefresh} style={weatherStyles.syncBtn}>
+                <Ionicons name="refresh" size={18} color="#60A5FA" />
+              </Pressable>
+            </View>
+
+            {weather && (
+              <View style={weatherStyles.weatherSection}>
+                <View style={weatherStyles.weatherMain}>
+                  <Text style={weatherStyles.temperature}>{weather.temperature}°</Text>
+                  <View>
+                    <Text style={weatherStyles.description}>{weather.description}</Text>
+                    <Text style={[weatherStyles.moodImpact, { color: getMoodColor() }]}>
+                      {weather.moodImpact === 'positive' && '☀️ Good for mood'}
+                      {weather.moodImpact === 'neutral' && '🌤 Neutral impact'}
+                      {weather.moodImpact === 'negative' && '🌧 May affect mood'}
+                    </Text>
+                  </View>
+                </View>
+                <View style={weatherStyles.statsRow}>
+                  <View style={weatherStyles.statItem}>
+                    <Text style={weatherStyles.statValue}>{weather.humidity}%</Text>
+                    <Text style={weatherStyles.statLabel}>Humidity</Text>
+                  </View>
+                  <View style={weatherStyles.statItem}>
+                    <Text style={weatherStyles.statValue}>{weather.pressure}</Text>
+                    <Text style={weatherStyles.statLabel}>Pressure</Text>
+                  </View>
+                  <View style={weatherStyles.statItem}>
+                    <Text style={weatherStyles.statValue}>{weather.lightLevel}</Text>
+                    <Text style={weatherStyles.statLabel}>Light</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+          </>
+        )}
+      </View>
+    </>
+  );
+}
+
+const weatherStyles = StyleSheet.create({
+  connectBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#60A5FA',
+    borderRadius: 12,
+    paddingVertical: 12,
+    marginTop: 16,
+  },
+  connectBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  syncBtn: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#60A5FA' + '20',
+  },
+  keyInputSection: {
+    marginTop: 16,
+  },
+  keyInstructions: {
+    fontSize: 13,
+    color: TEXT_MUTED,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  keyInput: {
+    backgroundColor: BG,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: TEXT,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  keyButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+  },
+  cancelBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  cancelBtnText: {
+    fontSize: 14,
+    color: TEXT_MUTED,
+  },
+  saveBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: '#60A5FA',
+  },
+  saveBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  linkText: {
+    fontSize: 13,
+    color: '#60A5FA',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  weatherSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  weatherMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 16,
+  },
+  temperature: {
+    fontSize: 48,
+    fontWeight: '300',
+    color: TEXT,
+  },
+  description: {
+    fontSize: 16,
+    color: TEXT,
+    textTransform: 'capitalize',
+  },
+  moodImpact: {
+    fontSize: 13,
+    marginTop: 4,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: TEXT,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: TEXT_MUTED,
+    marginTop: 2,
+    textTransform: 'capitalize',
+  },
+});
+
 function PremiumCard() {
   const isPremium = usePremiumStore((s) => s.isPremium());
   const remaining = usePremiumStore((s) => s.getRemainingAIChats());
@@ -836,6 +1133,9 @@ export default function SettingsScreen() {
 
         {/* Spotify Integration */}
         <SpotifyConnectionCard />
+
+        {/* Weather Integration */}
+        <WeatherConnectionCard />
 
         {/* Specialized Modes */}
         <Text style={styles.sectionTitle}>Specialized Modes</Text>
