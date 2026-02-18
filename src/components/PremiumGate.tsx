@@ -2,6 +2,9 @@
  * PremiumGate — Shows upsell when user hits free tier limits
  */
 
+// TESTING MODE — remove before App Store submission
+const TESTING_MODE = true;
+
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -47,6 +50,7 @@ const PREMIUM_FEATURES = [
 ];
 
 export function PremiumGate({ visible, onClose, feature = 'ai' }: PremiumGateProps) {
+  if (TESTING_MODE) return null; // Bypass paywall during testing
   const copy = FEATURE_COPY[feature];
   
   const handleUpgrade = () => {
