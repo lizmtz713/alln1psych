@@ -1,8 +1,8 @@
 /**
- * Decode — Paste their message OR add a screenshot → Analysis → Intent → Suggested response with Copy.
- * Now with screenshot support using GPT-4o Vision!
+ * Decode — Analyze messages with AI, now with screenshot support.
+ * Premium UI with Fortune 500 polish.
  */
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,8 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,23 +24,21 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
 import * as FileSystem from 'expo-file-system';
-// NOTE: Run `npx expo install expo-image-picker` if not already installed
 import * as ImagePicker from 'expo-image-picker';
 import { sendMessageWithSystemPrompt, analyzeImageWithVision } from '../../src/services/ai';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { buildRelationshipContext } from '../../src/services/personology';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '../../src/lib/constants';
 
-const BG = '#09090F';
-const CARD_BG = '#111118';
-const CARD_BORDER = 'rgba(255,255,255,0.06)';
-const TEXT_PRIMARY = '#F0F0F5';
-const TEXT_SECONDARY = '#8888A0';
-const ACCENT = '#7C4DFF';
-const AI_HEADER = '#7C4DFF';
-const AI_BODY = '#E0E0E0';
-const LOADING_TEXT = '#8888A0';
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+type Phase = 'paste' | 'analysis' | 'intent' | 'respond';
+
+const DECODE_ACCENT = '#7C4DFF';
+const DECODE_ACCENT_BG = 'rgba(124, 77, 255, 0.12)';
+const DECODE_ACCENT_BORDER = 'rgba(124, 77, 255, 0.25)';
 
 const DECODE_ANALYSIS_SYSTEM = `You are Psych in AllN1 Psych "Decode" mode. The user pasted a message someone sent them. Analyze it.
 
@@ -76,16 +76,32 @@ THE WAIT OPTION — When it might be better to not reply yet, and what to do ins
 
 Be specific to their message and chosen intent. Keep suggested response copy-paste ready.`;
 
-type Phase = 'paste' | 'analysis' | 'intent' | 'respond';
-
 const ANALYSIS_HEADERS = ['WHAT I SEE', "WHAT THEY'RE SAYING", 'WHAT THEY MIGHT MEAN', 'WHAT THEY WANT FROM YOU', 'RED FLAGS'];
 const RESPOND_HEADERS = ['SUGGESTED RESPONSE', 'WHY THIS WORKS', 'AN ALTERNATIVE', 'THE WAIT OPTION'];
 
 const INTENT_OPTIONS = [
-  { id: 'reconnect', title: 'Reconnect', desc: 'I want to open the door and rebuild' },
-  { id: 'address', title: 'Address it', desc: 'I need to acknowledge what happened first' },
-  { id: 'not_ready', title: 'Not ready', desc: 'I need more time before responding' },
+  { id: 'reconnect', title: 'Reconnect', desc: 'I want to open the door and rebuild', icon: '🤝', color: '#4ADE80' },
+  { id: 'address', title: 'Address it', desc: 'I need to acknowledge what happened first', icon: '💬', color: '#60A5FA' },
+  { id: 'not_ready', title: 'Not ready', desc: 'I need more time before responding', icon: '⏸️', color: '#F59E0B' },
 ] as const;
+
+function AnimatedSection({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(16)).current;
+  
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 350, delay, useNativeDriver: true }),
+      Animated.timing(translateY, { toValue: 0, duration: 350, delay, useNativeDriver: true }),
+    ]).start();
+  }, []);
+  
+  return (
+    <Animated.View style={[{ opacity, transform: [{ translateY }] }, style]}>
+      {children}
+    </Animated.View>
+  );
+}
 
 function sectionedText(text: string, headers: string[]) {
   const parts: { bold: boolean; content: string }[] = [];
@@ -106,6 +122,7 @@ function sectionedText(text: string, headers: string[]) {
 export default function DecodeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const scrollRef = useRef<ScrollView>(null);
 
   const [phase, setPhase] = useState<Phase>('paste');
   const [message, setMessage] = useState('');
@@ -121,11 +138,7 @@ export default function DecodeScreen() {
 
   const copyToClipboard = async (text: string, id: string) => {
     try {
-      if (Clipboard.setStringAsync) {
-        await Clipboard.setStringAsync(text);
-      } else {
-        (Clipboard as { setString?: (t: string) => void }).setString?.(text);
-      }
+      await Clipboard.setStringAsync(text);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setCopiedId(id);
       setToast('Copied!');
@@ -164,11 +177,10 @@ export default function DecodeScreen() {
       });
 
       if (!result.canceled && result.assets?.[0]?.uri) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         setScreenshotUri(result.assets[0].uri);
       }
     } catch (e) {
-      if (__DEV__) console.warn('Image picker error:', e);
       Alert.alert('Error', 'Could not open photo library');
     }
   };
@@ -185,14 +197,13 @@ export default function DecodeScreen() {
     if (!hasText && !hasImage) return;
     if (loading) return;
     
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setLoading(true);
     
     try {
       let response: string | undefined;
 
       if (hasImage) {
-        // Use vision API for screenshot
         const base64 = await FileSystem.readAsStringAsync(screenshotUri!, {
           encoding: FileSystem.EncodingType.Base64,
         });
@@ -211,7 +222,6 @@ export default function DecodeScreen() {
           DECODE_SCREENSHOT_SYSTEM + buildDecodeRelationshipContext()
         );
       } else {
-        // Text-only analysis
         const userContent = `Message:\n${message}\n\nWho sent this: ${sender || 'not specified'}\nContext: ${context || 'none'}`;
         const fullPrompt = DECODE_ANALYSIS_SYSTEM + buildDecodeRelationshipContext();
         response = await sendMessageWithSystemPrompt(
@@ -222,8 +232,8 @@ export default function DecodeScreen() {
       
       setAnalysisResponse(response?.trim() ?? '');
       setPhase('analysis');
+      setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), 100);
     } catch (e) {
-      if (__DEV__) console.warn('Decode analysis error:', e);
       setAnalysisResponse("I couldn't analyze that right now. Try again in a moment.");
       setPhase('analysis');
     } finally {
@@ -231,15 +241,12 @@ export default function DecodeScreen() {
     }
   };
 
-  const onHowToRespond = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setPhase('intent');
-  };
-
   const onSelectIntent = async (intent: typeof INTENT_OPTIONS[number]) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setSelectedIntent(intent.id);
     setLoading(true);
+    setPhase('respond');
+    
     try {
       const msgSource = screenshotUri ? '[Screenshot attached]' : message;
       const userContent = `Message:\n${msgSource}\n\nSender: ${sender}\nContext: ${context}\n\nAnalysis:\n${analysisResponse}\n\nUser's intent: ${intent.title} — ${intent.desc}`;
@@ -249,11 +256,9 @@ export default function DecodeScreen() {
         fullPrompt
       );
       setRespondResponse(response?.trim() ?? '');
-      setPhase('respond');
+      setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), 100);
     } catch (e) {
-      if (__DEV__) console.warn('Decode respond error:', e);
       setRespondResponse("I couldn't generate a response right now. Try again in a moment.");
-      setPhase('respond');
     } finally {
       setLoading(false);
     }
@@ -263,274 +268,626 @@ export default function DecodeScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (phase === 'paste') {
       router.back();
-      return;
+    } else if (phase === 'respond') {
+      setPhase('intent');
+    } else {
+      setPhase('paste');
     }
-    const order: Phase[] = ['paste', 'analysis', 'intent', 'respond'];
-    const idx = order.indexOf(phase);
-    if (idx > 0) setPhase(order[idx - 1]);
-    else router.back();
   };
 
-  const renderAnalysisContent = () => {
-    const parts = sectionedText(analysisResponse, ANALYSIS_HEADERS);
-    return (
-      <View style={styles.responseCard}>
-        {screenshotUri && (
-          <Image source={{ uri: screenshotUri }} style={styles.screenshotPreview} resizeMode="contain" />
-        )}
-        {parts.map((p, i) => (
-          <Text key={i} style={p.bold ? styles.sectionHeader : styles.aiBody}>
-            {p.content}
-            {p.bold && '\n'}
-          </Text>
-        ))}
-      </View>
-    );
-  };
-
-  const renderRespondContent = () => {
-    const parts = sectionedText(respondResponse, RESPOND_HEADERS);
-    const suggestedBlock: string[] = [];
-    let inBlock = false;
-    respondResponse.split('\n').forEach((line) => {
-      if (line.toUpperCase().startsWith('SUGGESTED RESPONSE') || line.toUpperCase().startsWith('WHY THIS')) inBlock = !inBlock;
-      if (inBlock && line.trim() && !line.toUpperCase().startsWith('SUGGESTED RESPONSE')) suggestedBlock.push(line);
-    });
-    const suggestedText = suggestedBlock.length ? suggestedBlock.join('\n').trim() : (respondResponse.match(/SUGGESTED RESPONSE[:\s]*([\s\S]*?)(?=WHY THIS|$)/i)?.[1] ?? '').trim();
-
-    return (
-      <View style={styles.responseCard}>
-        {parts.map((p, i) => (
-          <View key={i}>
-            <Text style={p.bold ? styles.sectionHeader : styles.aiBody}>
-              {p.content}
-              {p.bold && '\n'}
-            </Text>
-            {p.bold && p.content.toUpperCase().includes('SUGGESTED RESPONSE') && suggestedText ? (
-              <Pressable
-                style={styles.copyBtn}
-                onPress={() => copyToClipboard(suggestedText, 'suggested')}
-              >
-                <Text style={styles.copyBtnText}>{copiedId === 'suggested' ? 'Copied!' : 'Copy response'}</Text>
-              </Pressable>
-            ) : null}
-          </View>
-        ))}
-        {toast ? <Text style={styles.toast}>{toast}</Text> : null}
-      </View>
-    );
+  const startOver = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setPhase('paste');
+    setMessage('');
+    setSender('');
+    setContext('');
+    setScreenshotUri(null);
+    setAnalysisResponse('');
+    setSelectedIntent('');
+    setRespondResponse('');
   };
 
   const canDecode = message.trim().length >= 3 || !!screenshotUri;
 
+  const getHeaderTitle = () => {
+    switch (phase) {
+      case 'analysis': return 'Analysis';
+      case 'intent': return 'Your Intent';
+      case 'respond': return 'Response Guide';
+      default: return 'Decode';
+    }
+  };
+
   return (
     <ErrorBoundary>
       <KeyboardAvoidingView
-        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+        style={[styles.container, { paddingTop: insets.top }]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
       >
+        {/* Header */}
         <View style={styles.header}>
-          <Pressable style={styles.backBtn} onPress={goBack}>
-            <Ionicons name="arrow-back" size={24} color={TEXT_PRIMARY} />
+          <Pressable style={styles.backBtn} onPress={goBack} hitSlop={8}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
           </Pressable>
-          <Text style={styles.headerTitle}>Decode</Text>
-          <View style={styles.headerRight} />
+          <Text style={styles.headerTitle}>{getHeaderTitle()}</Text>
+          <View style={styles.headerRight}>
+            {phase !== 'paste' && (
+              <Pressable onPress={startOver} hitSlop={8}>
+                <Ionicons name="refresh" size={22} color={COLORS.textMuted} />
+              </Pressable>
+            )}
+          </View>
         </View>
 
         <ScrollView
+          ref={scrollRef}
           style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + SPACING.xxl }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           {phase === 'paste' && (
             <>
-              <Text style={styles.prompt}>Paste what they sent you — or add a screenshot.</Text>
-              
-              {/* Screenshot section */}
-              {screenshotUri ? (
-                <View style={styles.screenshotContainer}>
-                  <Image source={{ uri: screenshotUri }} style={styles.screenshotImage} resizeMode="contain" />
-                  <Pressable style={styles.removeScreenshotBtn} onPress={removeScreenshot}>
-                    <Ionicons name="close-circle" size={28} color={TEXT_PRIMARY} />
+              {/* Hero */}
+              <AnimatedSection delay={0}>
+                <View style={styles.heroSection}>
+                  <Text style={styles.heroEmoji}>🔍</Text>
+                  <Text style={styles.heroTitle}>Decode Messages</Text>
+                  <Text style={styles.heroSubtitle}>
+                    Paste what they sent — or add a screenshot.{'\n'}
+                    Understand what's really being said.
+                  </Text>
+                </View>
+              </AnimatedSection>
+
+              {/* Screenshot Option */}
+              <AnimatedSection delay={100}>
+                {screenshotUri ? (
+                  <View style={styles.screenshotContainer}>
+                    <Image source={{ uri: screenshotUri }} style={styles.screenshotImage} resizeMode="contain" />
+                    <Pressable style={styles.removeScreenshotBtn} onPress={removeScreenshot}>
+                      <Ionicons name="close-circle" size={28} color={COLORS.text} />
+                    </Pressable>
+                    <View style={styles.screenshotBadge}>
+                      <Ionicons name="checkmark-circle" size={16} color={COLORS.success} />
+                      <Text style={styles.screenshotBadgeText}>Screenshot added</Text>
+                    </View>
+                  </View>
+                ) : (
+                  <Pressable style={styles.screenshotBtn} onPress={pickScreenshot}>
+                    <View style={styles.screenshotBtnIcon}>
+                      <Ionicons name="image" size={24} color={DECODE_ACCENT} />
+                    </View>
+                    <View style={styles.screenshotBtnContent}>
+                      <Text style={styles.screenshotBtnTitle}>Add Screenshot</Text>
+                      <Text style={styles.screenshotBtnDesc}>Let AI read the message for you</Text>
+                    </View>
+                    <Ionicons name="add-circle-outline" size={24} color={DECODE_ACCENT} />
                   </Pressable>
-                </View>
-              ) : (
-                <Pressable style={styles.screenshotBtn} onPress={pickScreenshot}>
-                  <Ionicons name="image-outline" size={24} color={ACCENT} />
-                  <Text style={styles.screenshotBtnText}>Add Screenshot</Text>
-                </Pressable>
-              )}
+                )}
+              </AnimatedSection>
 
-              <Text style={styles.orText}>— or paste the text —</Text>
-
-              <TextInput
-                style={styles.largeInput}
-                placeholder="Paste their message here..."
-                placeholderTextColor={TEXT_SECONDARY}
-                value={message}
-                onChangeText={setMessage}
-                multiline
-                minHeight={100}
-                textAlignVertical="top"
-              />
-              <TextInput
-                style={styles.smallInput}
-                placeholder="Who sent this? (my friend, my boss, my ex...)"
-                placeholderTextColor={TEXT_SECONDARY}
-                value={sender}
-                onChangeText={setSender}
-              />
-              <TextInput
-                style={styles.smallInput}
-                placeholder="Quick context (e.g. we haven't talked in 3 months...)"
-                placeholderTextColor={TEXT_SECONDARY}
-                value={context}
-                onChangeText={setContext}
-              />
-              {loading ? (
-                <View style={styles.loadingWrap}>
-                  <ActivityIndicator size="small" color={ACCENT} />
-                  <Text style={styles.loadingText}>Psych is analyzing{screenshotUri ? ' the screenshot' : ''}...</Text>
+              <AnimatedSection delay={150}>
+                <View style={styles.divider}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>or type it</Text>
+                  <View style={styles.dividerLine} />
                 </View>
-              ) : (
-                <Pressable
-                  style={[styles.primaryBtn, !canDecode && styles.primaryBtnDisabled]}
-                  onPress={onDecode}
-                  disabled={!canDecode || loading}
-                >
-                  <Text style={styles.primaryBtnText}>Decode</Text>
-                </Pressable>
-              )}
+              </AnimatedSection>
+
+              {/* Message Input */}
+              <AnimatedSection delay={200}>
+                <TextInput
+                  style={styles.largeInput}
+                  placeholder="Paste their message here..."
+                  placeholderTextColor={COLORS.textMuted}
+                  value={message}
+                  onChangeText={setMessage}
+                  multiline
+                  textAlignVertical="top"
+                />
+              </AnimatedSection>
+
+              {/* Context Fields */}
+              <AnimatedSection delay={250}>
+                <TextInput
+                  style={styles.smallInput}
+                  placeholder="Who sent this? (my friend, my boss, my ex...)"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={sender}
+                  onChangeText={setSender}
+                />
+              </AnimatedSection>
+
+              <AnimatedSection delay={300}>
+                <TextInput
+                  style={styles.smallInput}
+                  placeholder="Quick context (e.g. we haven't talked in 3 months...)"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={context}
+                  onChangeText={setContext}
+                />
+              </AnimatedSection>
+
+              {/* Decode Button */}
+              <AnimatedSection delay={350}>
+                {loading ? (
+                  <View style={styles.loadingCard}>
+                    <ActivityIndicator color={DECODE_ACCENT} />
+                    <Text style={styles.loadingText}>
+                      Psych is {screenshotUri ? 'reading the screenshot' : 'analyzing'}...
+                    </Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    style={[styles.primaryBtn, !canDecode && styles.primaryBtnDisabled]}
+                    onPress={onDecode}
+                    disabled={!canDecode}
+                  >
+                    <Ionicons name="search" size={20} color="#FFF" style={{ marginRight: 8 }} />
+                    <Text style={styles.primaryBtnText}>Decode</Text>
+                  </Pressable>
+                )}
+              </AnimatedSection>
             </>
           )}
 
           {phase === 'analysis' && (
             <>
-              {analysisResponse ? renderAnalysisContent() : null}
-              {analysisResponse && !loading ? (
-                <Pressable style={styles.primaryBtn} onPress={onHowToRespond}>
-                  <Text style={styles.primaryBtnText}>How should I respond?</Text>
-                </Pressable>
-              ) : null}
-              {loading ? (
-                <View style={styles.loadingWrap}>
-                  <ActivityIndicator size="small" color={ACCENT} />
-                  <Text style={styles.loadingText}>Psych is thinking...</Text>
+              {screenshotUri && (
+                <AnimatedSection delay={0}>
+                  <Image source={{ uri: screenshotUri }} style={styles.analysisScreenshot} resizeMode="contain" />
+                </AnimatedSection>
+              )}
+              
+              <AnimatedSection delay={100}>
+                <View style={styles.analysisCard}>
+                  {sectionedText(analysisResponse, ANALYSIS_HEADERS).map((p, i) => (
+                    <View key={i} style={p.bold ? styles.analysisSectionHeader : styles.analysisSection}>
+                      <Text style={p.bold ? styles.analysisSectionTitle : styles.analysisSectionText}>
+                        {p.content}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
-              ) : null}
+              </AnimatedSection>
+
+              <AnimatedSection delay={200}>
+                <Pressable style={styles.primaryBtn} onPress={() => setPhase('intent')}>
+                  <Text style={styles.primaryBtnText}>How should I respond?</Text>
+                  <Ionicons name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8 }} />
+                </Pressable>
+              </AnimatedSection>
             </>
           )}
 
           {phase === 'intent' && (
             <>
-              <Text style={styles.prompt}>What do you want from this?</Text>
-              {loading ? (
-                <View style={styles.loadingWrap}>
-                  <ActivityIndicator size="small" color={ACCENT} />
-                  <Text style={styles.loadingText}>Psych is thinking...</Text>
-                </View>
-              ) : (
-                <>
-                  {INTENT_OPTIONS.map((opt) => (
-                    <Pressable
-                      key={opt.id}
-                      style={[styles.intentCard, selectedIntent === opt.id && styles.intentCardSelected]}
-                      onPress={() => onSelectIntent(opt)}
-                    >
-                      <Text style={styles.intentTitle}>{opt.title}</Text>
-                      <Text style={styles.intentDesc}>{opt.desc}</Text>
-                    </Pressable>
-                  ))}
-                </>
+              <AnimatedSection delay={0}>
+                <Text style={styles.intentTitle}>What do you want from this?</Text>
+                <Text style={styles.intentSubtitle}>Choose your intent and I'll help you respond.</Text>
+              </AnimatedSection>
+
+              {INTENT_OPTIONS.map((opt, index) => (
+                <AnimatedSection key={opt.id} delay={100 + index * 50}>
+                  <Pressable
+                    style={[styles.intentCard, selectedIntent === opt.id && styles.intentCardSelected]}
+                    onPress={() => onSelectIntent(opt)}
+                  >
+                    <View style={[styles.intentIcon, { backgroundColor: opt.color + '20' }]}>
+                      <Text style={styles.intentEmoji}>{opt.icon}</Text>
+                    </View>
+                    <View style={styles.intentContent}>
+                      <Text style={styles.intentCardTitle}>{opt.title}</Text>
+                      <Text style={styles.intentCardDesc}>{opt.desc}</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+                  </Pressable>
+                </AnimatedSection>
+              ))}
+
+              {loading && (
+                <AnimatedSection delay={0}>
+                  <View style={styles.loadingCard}>
+                    <ActivityIndicator color={DECODE_ACCENT} />
+                    <Text style={styles.loadingText}>Crafting your response guide...</Text>
+                  </View>
+                </AnimatedSection>
               )}
             </>
           )}
 
           {phase === 'respond' && (
             <>
-              {respondResponse ? renderRespondContent() : null}
-              {respondResponse ? (
-                <Pressable style={styles.primaryBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.back(); }}>
+              <AnimatedSection delay={0}>
+                <View style={styles.responseCard}>
+                  {sectionedText(respondResponse, RESPOND_HEADERS).map((p, i) => (
+                    <View key={i}>
+                      {p.bold ? (
+                        <View style={styles.responseSectionHeader}>
+                          <Text style={styles.responseSectionTitle}>{p.content}</Text>
+                          {p.content.toUpperCase().includes('SUGGESTED RESPONSE') && (
+                            <Pressable
+                              style={styles.copyBtn}
+                              onPress={() => {
+                                const suggestedText = respondResponse.match(/SUGGESTED RESPONSE[:\s]*([\s\S]*?)(?=WHY THIS|$)/i)?.[1]?.trim() ?? '';
+                                copyToClipboard(suggestedText, 'suggested');
+                              }}
+                            >
+                              <Ionicons 
+                                name={copiedId === 'suggested' ? 'checkmark' : 'copy-outline'} 
+                                size={18} 
+                                color={DECODE_ACCENT} 
+                              />
+                              <Text style={styles.copyBtnText}>
+                                {copiedId === 'suggested' ? 'Copied!' : 'Copy'}
+                              </Text>
+                            </Pressable>
+                          )}
+                        </View>
+                      ) : (
+                        <Text style={styles.responseSectionText}>{p.content}</Text>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              </AnimatedSection>
+
+              <AnimatedSection delay={100}>
+                <Pressable style={styles.primaryBtn} onPress={() => router.back()}>
+                  <Ionicons name="checkmark-circle" size={20} color="#FFF" style={{ marginRight: 8 }} />
                   <Text style={styles.primaryBtnText}>Done</Text>
                 </Pressable>
-              ) : null}
+              </AnimatedSection>
             </>
           )}
         </ScrollView>
-        {toast ? <View style={styles.toastWrap}><Text style={styles.toastText}>{toast}</Text></View> : null}
+
+        {/* Toast */}
+        {toast ? (
+          <View style={[styles.toast, { bottom: insets.bottom + SPACING.xxl }]}>
+            <Text style={styles.toastText}>{toast}</Text>
+          </View>
+        ) : null}
       </KeyboardAvoidingView>
     </ErrorBoundary>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: BG },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: CARD_BORDER },
-  backBtn: { padding: 8 },
-  headerTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY },
-  headerRight: { width: 40 },
-  scroll: { flex: 1 },
-  scrollContent: { padding: 20, paddingBottom: 40 },
-  prompt: { fontSize: 18, fontWeight: '500', color: TEXT_PRIMARY, marginBottom: 16 },
-  orText: { color: TEXT_SECONDARY, fontSize: 13, textAlign: 'center', marginVertical: 12 },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  backBtn: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    ...TYPOGRAPHY.headlineMd,
+    color: COLORS.text,
+  },
+  headerRight: {
+    width: 44,
+    alignItems: 'flex-end',
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: SPACING.lg,
+  },
+  
+  // Hero
+  heroSection: {
+    alignItems: 'center',
+    marginBottom: SPACING.xl,
+    paddingVertical: SPACING.md,
+  },
+  heroEmoji: {
+    fontSize: 48,
+    marginBottom: SPACING.md,
+  },
+  heroTitle: {
+    ...TYPOGRAPHY.displaySm,
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
+  },
+  heroSubtitle: {
+    ...TYPOGRAPHY.bodyMd,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  
+  // Screenshot
   screenshotBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: CARD_BG,
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
     borderWidth: 1,
-    borderColor: ACCENT,
+    borderColor: DECODE_ACCENT_BORDER,
     borderStyle: 'dashed',
-    gap: 8,
+    marginBottom: SPACING.md,
   },
-  screenshotBtnText: { color: ACCENT, fontSize: 16, fontWeight: '500' },
+  screenshotBtnIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: DECODE_ACCENT_BG,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  screenshotBtnContent: {
+    flex: 1,
+  },
+  screenshotBtnTitle: {
+    ...TYPOGRAPHY.headlineSm,
+    color: COLORS.text,
+  },
+  screenshotBtnDesc: {
+    ...TYPOGRAPHY.bodySm,
+    color: COLORS.textSecondary,
+  },
   screenshotContainer: {
     position: 'relative',
-    backgroundColor: CARD_BG,
-    borderRadius: 12,
-    padding: 8,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.sm,
+    marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: CARD_BORDER,
+    borderColor: COLORS.success + '40',
   },
   screenshotImage: {
     width: '100%',
-    height: 200,
-    borderRadius: 8,
+    height: 180,
+    borderRadius: BORDER_RADIUS.md,
   },
   removeScreenshotBtn: {
     position: 'absolute',
-    top: 4,
-    right: 4,
+    top: SPACING.sm,
+    right: SPACING.sm,
     backgroundColor: 'rgba(0,0,0,0.6)',
     borderRadius: 14,
   },
-  screenshotPreview: {
+  screenshotBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.sm,
+  },
+  screenshotBadgeText: {
+    ...TYPOGRAPHY.labelSm,
+    color: COLORS.success,
+  },
+  
+  // Divider
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: SPACING.md,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.border,
+  },
+  dividerText: {
+    ...TYPOGRAPHY.labelSm,
+    color: COLORS.textMuted,
+    paddingHorizontal: SPACING.md,
+  },
+  
+  // Inputs
+  largeInput: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.lg,
+    fontSize: 16,
+    color: COLORS.text,
+    minHeight: 120,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: SPACING.md,
+    textAlignVertical: 'top',
+  },
+  smallInput: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.lg,
+    fontSize: 16,
+    color: COLORS.text,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: SPACING.md,
+  },
+  
+  // Buttons
+  primaryBtn: {
+    flexDirection: 'row',
+    backgroundColor: DECODE_ACCENT,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryBtnDisabled: {
+    opacity: 0.5,
+  },
+  primaryBtnText: {
+    ...TYPOGRAPHY.labelLg,
+    color: '#FFF',
+    fontWeight: '600',
+  },
+  
+  // Loading
+  loadingCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.xl,
+    gap: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  loadingText: {
+    ...TYPOGRAPHY.bodyMd,
+    color: COLORS.textMuted,
+  },
+  
+  // Analysis
+  analysisScreenshot: {
     width: '100%',
     height: 150,
-    borderRadius: 8,
-    marginBottom: 12,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.lg,
   },
-  largeInput: { backgroundColor: CARD_BG, color: TEXT_PRIMARY, fontSize: 16, minHeight: 100, padding: 14, borderRadius: 12, marginBottom: 12, textAlignVertical: 'top', borderWidth: 1, borderColor: CARD_BORDER },
-  smallInput: { backgroundColor: CARD_BG, color: TEXT_PRIMARY, fontSize: 16, padding: 14, borderRadius: 12, marginBottom: 12, borderWidth: 1, borderColor: CARD_BORDER },
-  primaryBtn: { backgroundColor: ACCENT, paddingVertical: 16, paddingHorizontal: 20, borderRadius: 14, alignItems: 'center' },
-  primaryBtnDisabled: { opacity: 0.5 },
-  primaryBtnText: { fontSize: 17, fontWeight: '600', color: '#fff' },
-  responseCard: { backgroundColor: CARD_BG, borderWidth: 1, borderColor: CARD_BORDER, borderRadius: 14, padding: 16, marginBottom: 20 },
-  sectionHeader: { fontWeight: '700', color: AI_HEADER, fontSize: 15, marginBottom: 4 },
-  aiBody: { color: AI_BODY, fontSize: 15, lineHeight: 22, marginBottom: 8 },
-  loadingWrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 24 },
-  loadingText: { fontSize: 15, color: LOADING_TEXT, marginTop: 8 },
-  intentCard: { backgroundColor: CARD_BG, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: CARD_BORDER, marginBottom: 12 },
-  intentCardSelected: { borderColor: ACCENT, backgroundColor: 'rgba(124,77,255,0.1)' },
-  intentTitle: { fontSize: 16, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 4 },
-  intentDesc: { fontSize: 15, color: TEXT_SECONDARY, lineHeight: 22 },
-  copyBtn: { marginTop: 8, marginBottom: 12 },
-  copyBtnText: { fontSize: 15, color: ACCENT, fontWeight: '600' },
-  toast: { fontSize: 13, color: ACCENT, marginTop: 4 },
-  toastWrap: { position: 'absolute', bottom: 24, alignSelf: 'center', backgroundColor: CARD_BG, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10 },
-  toastText: { color: ACCENT, fontSize: 14 },
+  analysisCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  analysisSectionHeader: {
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
+  },
+  analysisSection: {
+    marginBottom: SPACING.sm,
+  },
+  analysisSectionTitle: {
+    ...TYPOGRAPHY.labelMd,
+    color: DECODE_ACCENT,
+    fontWeight: '700',
+  },
+  analysisSectionText: {
+    ...TYPOGRAPHY.bodyMd,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  
+  // Intent
+  intentTitle: {
+    ...TYPOGRAPHY.displaySm,
+    color: COLORS.text,
+    marginBottom: SPACING.xs,
+  },
+  intentSubtitle: {
+    ...TYPOGRAPHY.bodyMd,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xl,
+  },
+  intentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  intentCardSelected: {
+    borderColor: DECODE_ACCENT,
+    backgroundColor: DECODE_ACCENT_BG,
+  },
+  intentIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  intentEmoji: {
+    fontSize: 24,
+  },
+  intentContent: {
+    flex: 1,
+  },
+  intentCardTitle: {
+    ...TYPOGRAPHY.headlineSm,
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  intentCardDesc: {
+    ...TYPOGRAPHY.bodySm,
+    color: COLORS.textSecondary,
+  },
+  
+  // Response
+  responseCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  responseSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
+  },
+  responseSectionTitle: {
+    ...TYPOGRAPHY.labelMd,
+    color: DECODE_ACCENT,
+    fontWeight: '700',
+    flex: 1,
+  },
+  responseSectionText: {
+    ...TYPOGRAPHY.bodyMd,
+    color: COLORS.text,
+    lineHeight: 22,
+    marginBottom: SPACING.sm,
+  },
+  copyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+  },
+  copyBtnText: {
+    ...TYPOGRAPHY.labelSm,
+    color: DECODE_ACCENT,
+  },
+  
+  // Toast
+  toast: {
+    position: 'absolute',
+    alignSelf: 'center',
+    backgroundColor: COLORS.surfaceElevated,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.md,
+  },
+  toastText: {
+    ...TYPOGRAPHY.labelMd,
+    color: COLORS.text,
+  },
 });
