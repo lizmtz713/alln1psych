@@ -84,7 +84,30 @@ export default function LessonScreen() {
   const [showRealWorld, setShowRealWorld] = useState(false);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showTryThis, setShowTryThis] = useState(false);
+  const [showAskPsych, setShowAskPsych] = useState(false);
+  const [askPsychQuestion, setAskPsychQuestion] = useState('');
+  const [askPsychResponse, setAskPsychResponse] = useState('');
+  const [askPsychLoading, setAskPsychLoading] = useState(false);
   const scrollRef = React.useRef<ScrollView>(null);
+  
+  const handleAskPsych = async () => {
+    if (!askPsychQuestion.trim() || askPsychLoading) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Keyboard.dismiss();
+    setAskPsychLoading(true);
+    setAskPsychResponse('');
+    try {
+      const response = await sendMessageWithSystemPrompt(
+        [{ role: 'user', content: `I'm reading a lesson called "${lesson?.title}". My question: ${askPsychQuestion}` }],
+        `You are Psych, an emotional intelligence companion. The user is reading a lesson in the Human Manual about "${lesson?.title}". Answer their question helpfully, connecting it to the lesson content when relevant. Be warm, clear, and practical. Keep responses concise (2-4 sentences unless more detail is needed).`
+      );
+      setAskPsychResponse(response ?? 'I couldn\'t process that. Try again?');
+    } catch (e) {
+      setAskPsychResponse('Something went wrong. Check your connection and try again.');
+    } finally {
+      setAskPsychLoading(false);
+    }
+  };
 
   const legacyLesson = id ? getLessonById(id) : null;
   const manualLesson = id ? getManualLessonById(id) : null;
@@ -255,6 +278,48 @@ export default function LessonScreen() {
                 ))}
               </View>
             )}
+            
+            {/* Ask Psych Section */}
+            <Pressable onPress={() => { LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); setShowAskPsych(!showAskPsych); }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)', marginTop: 16 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text style={{ fontSize: 18 }}>💬</Text>
+                  <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600' }}>Ask Psych</Text>
+                </View>
+                <Text style={{ color: '#7C4DFF' }}>{showAskPsych ? '▲' : '▼'}</Text>
+              </View>
+            </Pressable>
+            {showAskPsych && (
+              <View style={{ backgroundColor: '#111118', borderRadius: 14, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+                <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 12 }}>Have a question about this lesson? Ask Psych.</Text>
+                <TextInput
+                  style={{ backgroundColor: '#09090F', color: '#F0F0F5', borderRadius: 10, padding: 14, fontSize: 15, minHeight: 60, textAlignVertical: 'top', borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}
+                  placeholder="What's on your mind?"
+                  placeholderTextColor="#55556A"
+                  value={askPsychQuestion}
+                  onChangeText={setAskPsychQuestion}
+                  multiline
+                />
+                <Pressable
+                  style={{ backgroundColor: askPsychQuestion.trim() ? '#7C4DFF' : 'rgba(124,77,255,0.3)', borderRadius: 10, padding: 12, marginTop: 12, alignItems: 'center' }}
+                  onPress={handleAskPsych}
+                  disabled={!askPsychQuestion.trim() || askPsychLoading}
+                >
+                  {askPsychLoading ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text style={{ color: '#fff', fontSize: 15, fontWeight: '600' }}>Ask</Text>
+                  )}
+                </Pressable>
+                {askPsychResponse ? (
+                  <View style={{ backgroundColor: 'rgba(124,77,255,0.08)', borderRadius: 10, padding: 14, marginTop: 12 }}>
+                    <Text style={{ color: '#7C4DFF', fontSize: 12, fontWeight: '600', marginBottom: 6 }}>Psych</Text>
+                    <Text style={{ color: '#E0E0E0', fontSize: 14, lineHeight: 21 }}>{askPsychResponse}</Text>
+                  </View>
+                ) : null}
+              </View>
+            )}
+            
             <View style={styles.reflection}>
               <Text style={styles.reflectionQuestion}>{mc.reflectionPrompt}</Text>
               <TextInput
