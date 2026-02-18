@@ -1,6 +1,10 @@
 /**
- * Prompt Generator — AI prompts personalized to your full context
- * The killer feature: gives you exactly what to ask based on your gauges, history, and situation.
+ * Prompt Generator — Your personal context layer for ANY AI
+ * 
+ * InGauge knows you: your gauges, culture, age, values, struggles, communication style.
+ * This tool injects that context into prompts so ANY AI can serve you better.
+ * 
+ * You say what you need → We generate a rich, personalized prompt → You paste it into ChatGPT/Claude/etc.
  */
 import { useState, useEffect } from 'react';
 import {
@@ -9,8 +13,8 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
+  TextInput,
   ActivityIndicator,
-  Share,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,29 +24,82 @@ import * as Clipboard from 'expo-clipboard';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { useUserStore } from '../../src/stores/userStore';
-import { useCircleStore } from '../../src/stores/circleStore';
 import { useEngagementStore } from '../../src/stores/engagementStore';
-import { sendMessageWithSystemPrompt, hasOpenAIKey } from '../../src/services/ai';
+import { getGaugeColor, getGaugeStatusLabel, GAUGE_CONFIG } from '../../src/utils/gaugeHelpers';
 
 const ACCENT = COLORS.accent;
 
-// Categories for prompt generation
-const CATEGORIES = [
-  { id: 'self', label: 'Understand myself', emoji: '🪞', desc: 'Based on your current gauges' },
-  { id: 'relationship', label: 'Navigate a relationship', emoji: '💫', desc: 'Based on your Circle' },
-  { id: 'decision', label: 'Make a decision', emoji: '🧭', desc: 'When you're stuck' },
-  { id: 'emotion', label: 'Process an emotion', emoji: '💜', desc: 'Based on what you're feeling' },
-  { id: 'growth', label: 'Personal growth', emoji: '🌱', desc: 'Based on your patterns' },
-  { id: 'surprise', label: 'Surprise me', emoji: '✨', desc: 'Something unexpected' },
+// Quick-start templates
+const TEMPLATES = [
+  { id: 'essay', label: 'Write an essay', emoji: '📝', placeholder: 'Topic: ' },
+  { id: 'email', label: 'Draft an email', emoji: '✉️', placeholder: 'Email about: ' },
+  { id: 'advice', label: 'Get advice', emoji: '💡', placeholder: 'I need advice on: ' },
+  { id: 'explain', label: 'Explain something', emoji: '🎓', placeholder: 'Explain: ' },
+  { id: 'create', label: 'Creative writing', emoji: '✨', placeholder: 'Create: ' },
+  { id: 'plan', label: 'Make a plan', emoji: '📋', placeholder: 'Plan for: ' },
+  { id: 'custom', label: 'Something else', emoji: '🔧', placeholder: 'I need help with: ' },
 ];
 
-function buildContextSummary(
-  user: ReturnType<typeof useUserStore.getState>,
-  cockpit: ReturnType<typeof useCockpitStore.getState>,
-  circle: ReturnType<typeof useCircleStore.getState>,
-  engagement: ReturnType<typeof useEngagementStore.getState>
-): string {
-  const gaugeValues = {
+function getGaugeDescription(name: string, value: number): string {
+  if (value < 0) return '';
+  if (value < 30) return `very low ${name}`;
+  if (value < 50) return `low ${name}`;
+  if (value < 70) return `moderate ${name}`;
+  if (value < 85) return `good ${name}`;
+  return `high ${name}`;
+}
+
+function buildContextBlock(user: ReturnType<typeof useUserStore.getState>, cockpit: ReturnType<typeof useCockpitStore.getState>): string {
+  const lines: string[] = [];
+  
+  // Age & life stage
+  if (user.ageGroup) {
+    const ageLabels: Record<string, string> = {
+      'under-18': "I'm a teenager (under 18)",
+      '18-25': "I'm a young adult (18-25), navigating early adulthood",
+      '26-40': "I'm an adult (26-40), in my career/family building years",
+      '41-60': "I'm in midlife (41-60), experienced with life transitions",
+      '60+': "I'm a senior (60+), with decades of life experience",
+    };
+    lines.push(ageLabels[user.ageGroup] || '');
+  }
+  
+  // Cultural background
+  if (user.culturalBackground?.length) {
+    lines.push(`My cultural background: ${user.culturalBackground.join(', ')}`);
+  }
+  if (user.environmentUpbringing) {
+    lines.push(`I grew up in a ${user.environmentUpbringing} environment`);
+  }
+  if (user.culturalValues?.length) {
+    lines.push(`Values important to me: ${user.culturalValues.join(', ')}`);
+  }
+  
+  // Communication style
+  if (user.communicationPreference) {
+    const commStyles: Record<string, string> = {
+      direct: 'I prefer direct, straightforward communication',
+      gentle: 'I prefer gentle, supportive communication',
+      analytical: 'I prefer analytical, detailed explanations',
+      casual: 'I prefer casual, conversational tone',
+    };
+    lines.push(commStyles[user.communicationPreference] || '');
+  }
+  
+  // Love language (how I process/receive)
+  if (user.loveLanguage) {
+    const loveDesc: Record<string, string> = {
+      words: 'I respond well to words of affirmation and encouragement',
+      acts: 'I appreciate practical help and actionable steps',
+      gifts: 'I value thoughtful examples and resources',
+      time: 'I appreciate thorough, unhurried explanations',
+      touch: 'I connect through warmth and emotional presence in responses',
+    };
+    lines.push(loveDesc[user.loveLanguage] || '');
+  }
+  
+  // Current state from gauges
+  const gauges = {
     body: cockpit.body?.value ?? -1,
     state: cockpit.state?.value ?? -1,
     emotion: cockpit.emotion?.value ?? -1,
@@ -51,66 +108,94 @@ function buildContextSummary(
     alignment: cockpit.alignment?.value ?? -1,
   };
   
-  const activeGauges = Object.entries(gaugeValues)
-    .filter(([_, v]) => v >= 0)
-    .map(([k, v]) => `${k}: ${v}/100`);
+  const activeGauges = Object.entries(gauges).filter(([_, v]) => v >= 0);
+  if (activeGauges.length > 0) {
+    const stateDescriptions: string[] = [];
+    
+    if (gauges.body >= 0) {
+      if (gauges.body < 40) stateDescriptions.push("I'm physically tired/low energy");
+      else if (gauges.body >= 70) stateDescriptions.push("I'm feeling physically good");
+    }
+    
+    if (gauges.state >= 0) {
+      if (gauges.state < 40) stateDescriptions.push("I'm feeling stressed/anxious right now");
+      else if (gauges.state >= 70) stateDescriptions.push("I'm in a calm, regulated state");
+    }
+    
+    if (gauges.emotion >= 0) {
+      if (gauges.emotion < 40) stateDescriptions.push("I'm emotionally struggling today");
+      else if (gauges.emotion >= 70) stateDescriptions.push("I'm emotionally balanced");
+    }
+    
+    if (gauges.direction >= 0) {
+      if (gauges.direction < 40) stateDescriptions.push("I'm feeling lost/uncertain about direction");
+    }
+    
+    if (stateDescriptions.length > 0) {
+      lines.push(`Current state: ${stateDescriptions.join('. ')}`);
+    }
+  }
   
-  const lowGauges = Object.entries(gaugeValues)
-    .filter(([_, v]) => v >= 0 && v < 40)
-    .map(([k]) => k);
+  // Sensitive topics to be aware of
+  if (user.sensitiveTopics?.length && !user.sensitiveTopics.includes('none')) {
+    lines.push(`Please be thoughtful about: ${user.sensitiveTopics.join(', ')}`);
+  }
   
-  const circleNames = circle.members.map(m => `${m.name} (${m.relationship}, ${m.temperature})`);
-  const strugglingContacts = circle.members.filter(m => m.temperature === 'red' || m.temperature === 'orange');
-  
-  return `USER CONTEXT:
-- Name: ${user.name || 'Unknown'}
-- Age group: ${user.ageGroup || 'Unknown'}
-- Love language: ${user.loveLanguage || 'Unknown'}
-- Current streak: ${engagement.streak} days
-
-CURRENT GAUGES:
-${activeGauges.length ? activeGauges.join('\n') : 'No check-ins yet'}
-${lowGauges.length ? `\nLOW AREAS: ${lowGauges.join(', ')}` : ''}
-
-CIRCLE:
-${circleNames.length ? circleNames.join('\n') : 'No circle members'}
-${strugglingContacts.length ? `\nNEEDING ATTENTION: ${strugglingContacts.map(m => m.name).join(', ')}` : ''}
-
-SENSITIVE TOPICS: ${user.sensitiveTopics?.join(', ') || 'None specified'}`;
+  return lines.filter(l => l.trim()).join('. ') + '.';
 }
 
-async function generatePrompts(
-  category: string,
-  context: string
-): Promise<string[]> {
-  const systemPrompt = `You are an expert at crafting introspective prompts that help people understand themselves.
-
-Based on the user's current context, generate 5 powerful prompts they could explore with an AI companion or in their journal.
-
-RULES:
-- Make prompts SPECIFIC to their actual situation (reference their gauges, relationships, patterns)
-- Don't be generic — use the context
-- Each prompt should lead to genuine insight
-- Vary the depth: some quick, some deep
-- If they have low gauges, address those
-- If they have struggling relationships, incorporate that
-- Format: Return ONLY the 5 prompts, one per line, no numbers or bullets
-- Keep each prompt under 100 characters
-
-CATEGORY: ${category}
-
-${context}`;
-
-  const response = await sendMessageWithSystemPrompt(
-    [{ role: 'user', content: `Generate 5 ${category} prompts for me based on my context.` }],
-    systemPrompt
-  );
+function generateEnhancedPrompt(task: string, context: string, template: string): string {
+  // Build the enhanced prompt
+  let prompt = '';
   
-  return response
-    .split('\n')
-    .map(p => p.trim())
-    .filter(p => p.length > 10 && p.length < 150)
-    .slice(0, 5);
+  // Start with the task
+  prompt += task.trim();
+  
+  // Add context block
+  prompt += '\n\n---\nABOUT ME (for better, personalized responses):\n';
+  prompt += context;
+  
+  // Add guidance based on template type
+  prompt += '\n\n---\nGUIDANCE:\n';
+  
+  switch (template) {
+    case 'essay':
+      prompt += '- Break this into clear sections I can tackle one at a time\n';
+      prompt += '- Match the tone to my background and communication style\n';
+      prompt += '- If I seem stressed, keep explanations simple and encouraging';
+      break;
+    case 'email':
+      prompt += '- Match my communication style (see above)\n';
+      prompt += '- Keep it professional but authentic to who I am\n';
+      prompt += '- If I seem stressed, help me be clear without being terse';
+      break;
+    case 'advice':
+      prompt += '- Consider my cultural background and values\n';
+      prompt += '- Account for my current emotional state\n';
+      prompt += '- Give advice that fits WHO I am, not generic advice';
+      break;
+    case 'explain':
+      prompt += '- Adjust complexity to my current mental state\n';
+      prompt += '- Use examples that resonate with my background\n';
+      prompt += '- If I\'m stressed, break into smaller chunks';
+      break;
+    case 'create':
+      prompt += '- Let my background and values inspire the creative direction\n';
+      prompt += '- Match the emotional tone to where I am right now\n';
+      prompt += '- Make it feel authentic to who I am';
+      break;
+    case 'plan':
+      prompt += '- Account for my energy level when suggesting timelines\n';
+      prompt += '- Make steps manageable given my current state\n';
+      prompt += '- Align the plan with my values and communication style';
+      break;
+    default:
+      prompt += '- Tailor your response to my background and current state\n';
+      prompt += '- Be mindful of my values and communication preferences\n';
+      prompt += '- Adjust complexity based on my energy/stress level';
+  }
+  
+  return prompt;
 }
 
 export default function PromptGeneratorScreen() {
@@ -119,65 +204,55 @@ export default function PromptGeneratorScreen() {
   
   const user = useUserStore();
   const cockpit = useCockpitStore();
-  const circle = useCircleStore();
-  const engagement = useEngagementStore();
   
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [prompts, setPrompts] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hasKey, setHasKey] = useState(false);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [taskInput, setTaskInput] = useState('');
+  const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [showContext, setShowContext] = useState(false);
   
-  useEffect(() => {
-    hasOpenAIKey().then(setHasKey);
-  }, []);
+  const contextBlock = buildContextBlock(user, cockpit);
   
-  const handleSelectCategory = async (catId: string) => {
-    if (!hasKey) {
-      setError('Add your OpenAI API key in Settings to generate prompts.');
-      return;
-    }
-    
+  const handleSelectTemplate = (templateId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedCategory(catId);
-    setPrompts([]);
-    setError(null);
-    setLoading(true);
-    
-    try {
-      const context = buildContextSummary(user, cockpit, circle, engagement);
-      const cat = CATEGORIES.find(c => c.id === catId);
-      const generated = await generatePrompts(cat?.label || catId, context);
-      setPrompts(generated);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to generate prompts');
-    } finally {
-      setLoading(false);
+    setSelectedTemplate(templateId);
+    setGeneratedPrompt(null);
+    setCopied(false);
+    const template = TEMPLATES.find(t => t.id === templateId);
+    if (template && template.id !== 'custom') {
+      setTaskInput(template.placeholder);
+    } else {
+      setTaskInput('');
     }
   };
   
-  const handleCopyPrompt = async (prompt: string, index: number) => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    await Clipboard.setStringAsync(prompt);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
-  };
-  
-  const handleUsePrompt = (prompt: string) => {
+  const handleGenerate = () => {
+    if (!taskInput.trim() || !selectedTemplate) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    // Navigate to Talk with the prompt pre-filled
-    router.push({
-      pathname: '/(tabs)/talk',
-      params: { initialMessage: prompt },
-    });
+    
+    const prompt = generateEnhancedPrompt(taskInput, contextBlock, selectedTemplate);
+    setGeneratedPrompt(prompt);
+    setCopied(false);
   };
   
-  const handleRefresh = () => {
-    if (selectedCategory) {
-      handleSelectCategory(selectedCategory);
-    }
+  const handleCopy = async () => {
+    if (!generatedPrompt) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    await Clipboard.setStringAsync(generatedPrompt);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
   };
+  
+  const handleReset = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedTemplate(null);
+    setTaskInput('');
+    setGeneratedPrompt(null);
+    setCopied(false);
+  };
+  
+  // Check if we have enough context
+  const hasMinimalContext = user.name || user.ageGroup || (cockpit.body?.value ?? -1) >= 0;
   
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
@@ -187,8 +262,8 @@ export default function PromptGeneratorScreen() {
         </Pressable>
         <Text style={styles.headerTitle}>Prompt Generator</Text>
         <View style={styles.headerRight}>
-          {prompts.length > 0 && (
-            <Pressable style={styles.refreshBtn} onPress={handleRefresh}>
+          {generatedPrompt && (
+            <Pressable style={styles.resetBtn} onPress={handleReset}>
               <Ionicons name="refresh" size={22} color={COLORS.text} />
             </Pressable>
           )}
@@ -199,98 +274,127 @@ export default function PromptGeneratorScreen() {
         style={styles.scroll} 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        {!selectedCategory ? (
+        {!generatedPrompt ? (
           <>
             <Text style={styles.intro}>
-              Get AI prompts personalized to your gauges, relationships, and current situation.
+              Generate prompts for ChatGPT, Claude, or any AI — enhanced with who you are.
             </Text>
-            <Text style={styles.subtitle}>What do you want to explore?</Text>
             
-            <View style={styles.categoryGrid}>
-              {CATEGORIES.map((cat) => (
-                <Pressable
-                  key={cat.id}
-                  style={({ pressed }) => [
-                    styles.categoryCard,
-                    pressed && styles.categoryCardPressed,
-                  ]}
-                  onPress={() => handleSelectCategory(cat.id)}
-                >
-                  <Text style={styles.categoryEmoji}>{cat.emoji}</Text>
-                  <Text style={styles.categoryLabel}>{cat.label}</Text>
-                  <Text style={styles.categoryDesc}>{cat.desc}</Text>
+            {/* Context preview */}
+            <Pressable 
+              style={styles.contextPreview}
+              onPress={() => setShowContext(!showContext)}
+            >
+              <View style={styles.contextPreviewHeader}>
+                <Text style={styles.contextPreviewTitle}>🧠 Your context</Text>
+                <Ionicons 
+                  name={showContext ? 'chevron-up' : 'chevron-down'} 
+                  size={18} 
+                  color={COLORS.textSecondary} 
+                />
+              </View>
+              {showContext && (
+                <Text style={styles.contextPreviewText}>{contextBlock || 'Complete your profile and check-ins to build your context.'}</Text>
+              )}
+              {!showContext && (
+                <Text style={styles.contextPreviewHint}>
+                  {hasMinimalContext 
+                    ? 'Tap to see what AI will know about you' 
+                    : 'Complete profile & check-ins for better results'}
+                </Text>
+              )}
+            </Pressable>
+            
+            {!selectedTemplate ? (
+              <>
+                <Text style={styles.subtitle}>What do you need?</Text>
+                <View style={styles.templateGrid}>
+                  {TEMPLATES.map((t) => (
+                    <Pressable
+                      key={t.id}
+                      style={({ pressed }) => [
+                        styles.templateCard,
+                        pressed && styles.templateCardPressed,
+                      ]}
+                      onPress={() => handleSelectTemplate(t.id)}
+                    >
+                      <Text style={styles.templateEmoji}>{t.emoji}</Text>
+                      <Text style={styles.templateLabel}>{t.label}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </>
+            ) : (
+              <>
+                <Pressable style={styles.backLink} onPress={handleReset}>
+                  <Ionicons name="arrow-back" size={16} color={COLORS.accent} />
+                  <Text style={styles.backLinkText}>Choose different type</Text>
                 </Pressable>
-              ))}
-            </View>
-            
-            {error && <Text style={styles.error}>{error}</Text>}
+                
+                <Text style={styles.inputLabel}>
+                  {TEMPLATES.find(t => t.id === selectedTemplate)?.emoji}{' '}
+                  {TEMPLATES.find(t => t.id === selectedTemplate)?.label}
+                </Text>
+                
+                <TextInput
+                  style={styles.taskInput}
+                  placeholder="Describe what you need..."
+                  placeholderTextColor={COLORS.textMuted}
+                  value={taskInput}
+                  onChangeText={setTaskInput}
+                  multiline
+                  textAlignVertical="top"
+                  autoFocus
+                />
+                
+                <Pressable
+                  style={[styles.generateBtn, !taskInput.trim() && styles.generateBtnDisabled]}
+                  onPress={handleGenerate}
+                  disabled={!taskInput.trim()}
+                >
+                  <Ionicons name="sparkles" size={20} color="#fff" />
+                  <Text style={styles.generateBtnText}>Generate Enhanced Prompt</Text>
+                </Pressable>
+              </>
+            )}
           </>
         ) : (
           <>
-            <Pressable 
-              style={styles.backToCategories} 
-              onPress={() => {
-                setSelectedCategory(null);
-                setPrompts([]);
-                setError(null);
-              }}
+            <Text style={styles.resultTitle}>✨ Your Enhanced Prompt</Text>
+            <Text style={styles.resultHint}>Copy this and paste it into ChatGPT, Claude, or any AI:</Text>
+            
+            <View style={styles.promptBox}>
+              <ScrollView style={styles.promptScroll} nestedScrollEnabled>
+                <Text style={styles.promptText}>{generatedPrompt}</Text>
+              </ScrollView>
+            </View>
+            
+            <Pressable
+              style={[styles.copyBtn, copied && styles.copyBtnSuccess]}
+              onPress={handleCopy}
             >
-              <Ionicons name="arrow-back" size={18} color={COLORS.accent} />
-              <Text style={styles.backToCategoriesText}>Choose different category</Text>
+              <Ionicons 
+                name={copied ? 'checkmark' : 'copy-outline'} 
+                size={22} 
+                color="#fff" 
+              />
+              <Text style={styles.copyBtnText}>
+                {copied ? 'Copied!' : 'Copy to Clipboard'}
+              </Text>
             </Pressable>
             
-            <Text style={styles.selectedCategory}>
-              {CATEGORIES.find(c => c.id === selectedCategory)?.emoji}{' '}
-              {CATEGORIES.find(c => c.id === selectedCategory)?.label}
-            </Text>
+            <Pressable style={styles.newPromptBtn} onPress={handleReset}>
+              <Text style={styles.newPromptBtnText}>Generate Another Prompt</Text>
+            </Pressable>
             
-            {loading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={ACCENT} />
-                <Text style={styles.loadingText}>Generating prompts based on your context...</Text>
-              </View>
-            ) : error ? (
-              <View style={styles.errorContainer}>
-                <Text style={styles.error}>{error}</Text>
-                <Pressable style={styles.retryBtn} onPress={handleRefresh}>
-                  <Text style={styles.retryBtnText}>Try Again</Text>
-                </Pressable>
-              </View>
-            ) : (
-              <View style={styles.promptList}>
-                {prompts.map((prompt, i) => (
-                  <View key={i} style={styles.promptCard}>
-                    <Text style={styles.promptText}>{prompt}</Text>
-                    <View style={styles.promptActions}>
-                      <Pressable 
-                        style={styles.promptAction}
-                        onPress={() => handleCopyPrompt(prompt, i)}
-                      >
-                        <Ionicons 
-                          name={copiedIndex === i ? 'checkmark' : 'copy-outline'} 
-                          size={18} 
-                          color={copiedIndex === i ? COLORS.success : COLORS.textSecondary} 
-                        />
-                        <Text style={[
-                          styles.promptActionText,
-                          copiedIndex === i && { color: COLORS.success }
-                        ]}>
-                          {copiedIndex === i ? 'Copied' : 'Copy'}
-                        </Text>
-                      </Pressable>
-                      <Pressable 
-                        style={[styles.promptAction, styles.promptActionPrimary]}
-                        onPress={() => handleUsePrompt(prompt)}
-                      >
-                        <Ionicons name="chatbubble" size={18} color="#fff" />
-                        <Text style={styles.promptActionTextPrimary}>Ask Psych</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            )}
+            <View style={styles.tipBox}>
+              <Text style={styles.tipTitle}>💡 Tip</Text>
+              <Text style={styles.tipText}>
+                The more you use InGauge (check-ins, profile info), the smarter your prompts become. Your context travels with you to any AI.
+              </Text>
+            </View>
           </>
         )}
       </ScrollView>
@@ -311,136 +415,195 @@ const styles = StyleSheet.create({
   backBtn: { padding: 8, marginLeft: -8 },
   headerTitle: { flex: 1, fontSize: 18, fontWeight: '600', color: COLORS.text, textAlign: 'center' },
   headerRight: { width: 40, alignItems: 'flex-end' },
-  refreshBtn: { padding: 8 },
+  resetBtn: { padding: 8 },
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
   intro: {
     fontSize: 16,
     color: COLORS.textSecondary,
     lineHeight: 24,
+    marginBottom: 20,
+  },
+  contextPreview: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: 14,
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  contextPreviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  contextPreviewTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  contextPreviewHint: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginTop: 4,
+  },
+  contextPreviewText: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+    marginTop: 12,
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: COLORS.text,
     marginBottom: 16,
   },
-  categoryGrid: {
+  templateGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
-  categoryCard: {
+  templateCard: {
+    width: '47%',
     backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
+    alignItems: 'center',
   },
-  categoryCardPressed: {
+  templateCardPressed: {
     opacity: 0.8,
     transform: [{ scale: 0.98 }],
   },
-  categoryEmoji: {
+  templateEmoji: {
     fontSize: 28,
     marginBottom: 8,
   },
-  categoryLabel: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  categoryDesc: {
+  templateLabel: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    fontWeight: '500',
+    color: COLORS.text,
+    textAlign: 'center',
   },
-  backToCategories: {
+  backLink: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     marginBottom: 20,
   },
-  backToCategoriesText: {
-    fontSize: 15,
+  backLinkText: {
+    fontSize: 14,
     color: COLORS.accent,
   },
-  selectedCategory: {
+  inputLabel: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 12,
+  },
+  taskInput: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: 16,
+    fontSize: 16,
+    color: COLORS.text,
+    minHeight: 120,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 20,
+  },
+  generateBtn: {
+    backgroundColor: ACCENT,
+    borderRadius: BORDER_RADIUS.button,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  generateBtnDisabled: {
+    opacity: 0.5,
+  },
+  generateBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  resultTitle: {
     fontSize: 22,
     fontWeight: '700',
     color: COLORS.text,
-    marginBottom: 20,
+    marginBottom: 8,
   },
-  loadingContainer: {
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 15,
+  resultHint: {
+    fontSize: 14,
     color: COLORS.textSecondary,
-  },
-  errorContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  error: {
-    fontSize: 15,
-    color: COLORS.error,
-    textAlign: 'center',
     marginBottom: 16,
   },
-  retryBtn: {
-    backgroundColor: COLORS.surface,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: BORDER_RADIUS.button,
-  },
-  retryBtnText: {
-    fontSize: 15,
-    color: COLORS.text,
-    fontWeight: '600',
-  },
-  promptList: {
-    gap: 16,
-  },
-  promptCard: {
+  promptBox: {
     backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: 16,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.accent,
+    marginBottom: 20,
+    maxHeight: 300,
+  },
+  promptScroll: {
+    maxHeight: 268,
   },
   promptText: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.text,
-    lineHeight: 24,
-    marginBottom: 12,
+    lineHeight: 22,
+    fontFamily: 'monospace',
   },
-  promptActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  promptAction: {
+  copyBtn: {
+    backgroundColor: ACCENT,
+    borderRadius: BORDER_RADIUS.button,
+    paddingVertical: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: BORDER_RADIUS.button,
-    backgroundColor: COLORS.inputSurface,
-  },
-  promptActionPrimary: {
-    backgroundColor: ACCENT,
-    flex: 1,
     justifyContent: 'center',
+    gap: 8,
+    marginBottom: 12,
   },
-  promptActionText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
+  copyBtnSuccess: {
+    backgroundColor: COLORS.success,
   },
-  promptActionTextPrimary: {
-    fontSize: 14,
-    color: '#fff',
+  copyBtnText: {
+    fontSize: 16,
     fontWeight: '600',
+    color: '#fff',
+  },
+  newPromptBtn: {
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  newPromptBtnText: {
+    fontSize: 15,
+    color: COLORS.accent,
+    fontWeight: '500',
+  },
+  tipBox: {
+    backgroundColor: COLORS.accentBg,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.accent,
+  },
+  tipTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 6,
+  },
+  tipText: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
   },
 });
