@@ -334,11 +334,13 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   centerLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: TEXT_SECONDARY,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
     marginTop: 2,
+    textAlign: 'center',
+    maxWidth: 80,
   },
   gaugeBubble: {
     width: GAUGE_SIZE,

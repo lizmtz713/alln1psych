@@ -53,12 +53,12 @@ export function getGaugeStatusLabel(value: number): string {
 }
 
 export function getOverallStatusLabel(value: number): string {
-  if (value < 0) return 'Tap to run diagnostics';
-  if (value >= 80) return 'All systems running smooth';
-  if (value >= 60) return 'Systems stable';
-  if (value >= 40) return 'Some systems need attention';
-  if (value >= 20) return 'Multiple systems strained';
-  return 'Your system needs care right now';
+  if (value < 0) return 'Check In';
+  if (value >= 80) return 'Optimal';
+  if (value >= 60) return 'Stable';
+  if (value >= 40) return 'Needs Care';
+  if (value >= 20) return 'Strained';
+  return 'Critical';
 }
 
 export function getGaugeColor(value: number): string {
