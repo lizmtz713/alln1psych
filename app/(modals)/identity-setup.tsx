@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useUserStore, type AgeRange, type TherapyExperience } from '../../src/stores/userStore';
 
-const ALL_STEP_INDICES = [0, 1, 2, 3, 4, 5, 6] as const; // age, pronouns, culture, family, language, strength, therapy
+const ALL_STEP_INDICES = [0, 1, 2, 3, 4, 5, 6, 7] as const; // name, age, pronouns, culture, family, language, strength, therapy
 
 const AGE_OPTIONS: { value: AgeRange; label: string }[] = [
   { value: 'teen', label: 'Teen (13-17)' },
@@ -68,13 +68,14 @@ const pillSelected = {
 
 function isStepFilled(stepIndex: number, user: ReturnType<typeof useUserStore.getState>): boolean {
   switch (stepIndex) {
-    case 0: return user.ageRange != null;
-    case 1: return user.pronouns != null;
-    case 2: return (user.culturalBackgroundText ?? '').trim() !== '';
-    case 3: return (user.familyStructure ?? '').trim() !== '';
-    case 4: return (user.languageOfEmotion ?? '').trim() !== '';
-    case 5: return (user.strengthMeaning ?? '').trim() !== '';
-    case 6: return user.therapyExperience != null;
+    case 0: return (user.name ?? '').trim() !== '';
+    case 1: return user.ageRange != null;
+    case 2: return user.pronouns != null;
+    case 3: return (user.culturalBackgroundText ?? '').trim() !== '';
+    case 4: return (user.familyStructure ?? '').trim() !== '';
+    case 5: return (user.languageOfEmotion ?? '').trim() !== '';
+    case 6: return (user.strengthMeaning ?? '').trim() !== '';
+    case 7: return user.therapyExperience != null;
     default: return false;
   }
 }
@@ -82,6 +83,7 @@ function isStepFilled(stepIndex: number, user: ReturnType<typeof useUserStore.ge
 export default function IdentitySetupScreen() {
   const router = useRouter();
   const user = useUserStore();
+  const setName = useUserStore((s) => s.setName);
   const setAgeRange = useUserStore((s) => s.setAgeRange);
   const setPronouns = useUserStore((s) => s.setPronouns);
   const setCustomPronouns = useUserStore((s) => s.setCustomPronouns);
@@ -92,6 +94,7 @@ export default function IdentitySetupScreen() {
   const setTherapyExperience = useUserStore((s) => s.setTherapyExperience);
 
   const [step, setStep] = useState(0);
+  const [localName, setLocalName] = useState('');
   const [ageRange, setLocalAgeRange] = useState<AgeRange | null>(null);
   const [pronoun, setLocalPronoun] = useState<'she/her' | 'he/him' | 'they/them' | 'other' | null>(null);
   const [pronounsCustom, setPronounsCustom] = useState('');
@@ -104,11 +107,12 @@ export default function IdentitySetupScreen() {
 
   const visibleStepIndices = useMemo(
     () => ALL_STEP_INDICES.filter((i) => !isStepFilled(i, user)),
-    [user.ageRange, user.pronouns, user.culturalBackgroundText, user.familyStructure, user.languageOfEmotion, user.strengthMeaning, user.therapyExperience]
+    [user.name, user.ageRange, user.pronouns, user.culturalBackgroundText, user.familyStructure, user.languageOfEmotion, user.strengthMeaning, user.therapyExperience]
   );
 
   useEffect(() => {
     const u = useUserStore.getState();
+    setLocalName(u.name ?? '');
     setLocalAgeRange(u.ageRange ?? null);
     setLocalPronoun(u.pronouns ?? null);
     setPronounsCustom(u.customPronouns ?? '');
@@ -149,6 +153,7 @@ export default function IdentitySetupScreen() {
   };
 
   const handleComplete = () => {
+    if (localName.trim()) setName(localName.trim());
     setAgeRange(ageRange);
     setPronouns(pronoun === 'other' ? 'other' : pronoun);
     if (pronoun === 'other') setCustomPronouns(pronounsCustom.trim());
@@ -162,13 +167,14 @@ export default function IdentitySetupScreen() {
   };
 
   const canProceed =
-    realStep === 0 ? true :
+    realStep === 0 ? localName.trim().length > 0 :
     realStep === 1 ? true :
     realStep === 2 ? true :
     realStep === 3 ? true :
-    realStep === 4 ? (languageOfEmotion !== 'Other' || languageOther.trim().length > 0) :
-    realStep === 5 ? true :
-    realStep === 6 ? true : true;
+    realStep === 4 ? true :
+    realStep === 5 ? (languageOfEmotion !== 'Other' || languageOther.trim().length > 0) :
+    realStep === 6 ? true :
+    realStep === 7 ? true : true;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#09090F' }}>
@@ -198,7 +204,26 @@ export default function IdentitySetupScreen() {
             </Pressable>
           </>
         )}
+        {/* Screen 0: Name */}
         {totalVisibleSteps > 0 && realStep === 0 && (
+          <>
+            <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 16 }}>
+              What should I call you?
+            </Text>
+            <TextInput
+              style={{ backgroundColor: '#111118', color: '#F0F0F5', borderRadius: 12, padding: 16, fontSize: 18, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}
+              placeholder="Your name"
+              placeholderTextColor="#55556A"
+              value={localName}
+              onChangeText={setLocalName}
+              autoCapitalize="words"
+              autoCorrect={false}
+            />
+          </>
+        )}
+
+        {/* Screen 1: Age */}
+        {totalVisibleSteps > 0 && realStep === 1 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 8 }}>
               So Psych can speak your language —
@@ -220,8 +245,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 1: Pronouns */}
-        {totalVisibleSteps > 0 && realStep === 1 && (
+        {/* Screen 2: Pronouns */}
+        {totalVisibleSteps > 0 && realStep === 2 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 16 }}>
               What pronouns should Psych use for you?
@@ -256,8 +281,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 2: Cultural Background */}
-        {totalVisibleSteps > 0 && realStep === 2 && (
+        {/* Screen 3: Cultural Background */}
+        {totalVisibleSteps > 0 && realStep === 3 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 12 }}>
               What's your cultural background?
@@ -276,8 +301,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 3: Family Structure */}
-        {totalVisibleSteps > 0 && realStep === 3 && (
+        {/* Screen 4: Family Structure */}
+        {totalVisibleSteps > 0 && realStep === 4 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 12 }}>
               Who raised you?
@@ -299,8 +324,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 4: Language of Emotion */}
-        {totalVisibleSteps > 0 && realStep === 4 && (
+        {/* Screen 5: Language of Emotion */}
+        {totalVisibleSteps > 0 && realStep === 5 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 16 }}>
               What language do you think and feel in?
@@ -331,8 +356,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 5: What Strength Means */}
-        {totalVisibleSteps > 0 && realStep === 5 && (
+        {/* Screen 6: What Strength Means */}
+        {totalVisibleSteps > 0 && realStep === 6 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 12 }}>
               In your family, what did "being strong" mean?
@@ -354,8 +379,8 @@ export default function IdentitySetupScreen() {
           </>
         )}
 
-        {/* Screen 6: Therapy Experience */}
-        {totalVisibleSteps > 0 && realStep === 6 && (
+        {/* Screen 7: Therapy Experience */}
+        {totalVisibleSteps > 0 && realStep === 7 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 16 }}>
               Have you ever been to therapy?
