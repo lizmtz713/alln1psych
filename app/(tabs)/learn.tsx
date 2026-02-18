@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useUserStore } from '../../src/stores/userStore';
 import { useEducationStore } from '../../src/stores/educationStore';

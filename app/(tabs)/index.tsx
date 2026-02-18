@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Pressable, ScrollView, Animated, RefreshControl
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCircleStore } from '../../src/stores/circleStore';
@@ -72,13 +72,14 @@ function getSuggestedActivities(
   return [first, second];
 }
 
-const COCKPIT_BG = '#09090F';
-const CARD_BG = '#111118';
-const CARD_BORDER = 'rgba(255,255,255,0.06)';
-const TEXT_PRIMARY = '#F0F0F5';
-const TEXT_SECONDARY = '#8888A0';
-const TEXT_MUTED = '#55556A';
-const ACCENT = '#7C4DFF';
+// Use design system colors
+const COCKPIT_BG = COLORS.background;
+const CARD_BG = COLORS.surface;
+const CARD_BORDER = COLORS.border;
+const TEXT_PRIMARY = COLORS.text;
+const TEXT_SECONDARY = COLORS.textSecondary;
+const TEXT_MUTED = COLORS.textMuted;
+const ACCENT = COLORS.accent;
 
 function getDynamicGreeting(name: string): string {
   const n = name?.trim() || 'you';
