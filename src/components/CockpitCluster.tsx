@@ -1,15 +1,16 @@
 /**
- * CockpitCluster — The visual centerpiece of AllN1 Psych
+ * CockpitCluster — The visual centerpiece of InGauge
  * 
  * A hexagonal arrangement of 6 gauge circles surrounding a central status ring.
- * Looks like a cockpit instrument cluster or a logo.
+ * Tesla/Rivian inspired cockpit aesthetic with glows, gradients, and premium feel.
  */
 
-import React from 'react';
-import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, Pressable, StyleSheet, Dimensions, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from './gauges';
 import { getGaugeColor, getOverallStatusLabel, GAUGE_CONFIG } from '../utils/gaugeHelpers';
 
@@ -47,6 +48,47 @@ const GAUGE_POSITIONS = [
   { key: 'alignment', angle: 210 }, // Top-left
 ];
 
+// Animated glow component for gauges
+function GaugeGlow({ color, intensity, size }: { color: string; intensity: number; size: number }) {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  
+  useEffect(() => {
+    // Pulse animation for attention (low values)
+    if (intensity < 40 && intensity >= 0) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.15, duration: 800, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      pulseAnim.setValue(1);
+    }
+  }, [intensity]);
+  
+  if (intensity < 0) return null;
+  
+  const opacity = Math.min(0.6, (intensity / 100) * 0.4 + 0.2);
+  
+  return (
+    <Animated.View
+      style={{
+        position: 'absolute',
+        width: size + 20,
+        height: size + 20,
+        borderRadius: (size + 20) / 2,
+        backgroundColor: color,
+        opacity,
+        transform: [{ scale: pulseAnim }],
+        shadowColor: color,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 15,
+      }}
+    />
+  );
+}
+
 interface CockpitClusterProps {
   gaugeValues: {
     body: number;
@@ -68,10 +110,21 @@ export function CockpitCluster({
   onGaugePress 
 }: CockpitClusterProps) {
   const router = useRouter();
+  const centerPulse = useRef(new Animated.Value(1)).current;
   
   const overallLabel = getOverallStatusLabel(overall);
   const ringColor = overall < 0 ? TEXT_MUTED : getGaugeColor(overall);
   const activeCount = Object.values(gaugeValues).filter(v => v >= 0).length;
+  
+  // Subtle breathing animation for center ring
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(centerPulse, { toValue: 1.02, duration: 2000, useNativeDriver: true }),
+        Animated.timing(centerPulse, { toValue: 1, duration: 2000, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
 
   const handleCenterPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -93,11 +146,13 @@ export function CockpitCluster({
 
   return (
     <View style={styles.container}>
-      {/* Connection lines from center to each gauge */}
+      {/* Energy flow lines from center to each gauge */}
       <View style={styles.linesContainer}>
         {GAUGE_POSITIONS.map(({ key, angle }) => {
           const gaugeValue = gaugeValues[key as keyof typeof gaugeValues];
-          const lineColor = gaugeValue >= 0 ? getGaugeColor(gaugeValue) + '40' : TEXT_MUTED + '20';
+          const lineColor = gaugeValue >= 0 ? getGaugeColor(gaugeValue) : TEXT_MUTED;
+          const opacity = gaugeValue >= 0 ? 0.5 : 0.15;
+          const lineWidth = gaugeValue >= 50 ? 3 : 2;
           const radians = (angle * Math.PI) / 180;
           const lineLength = GAUGE_RADIUS - CENTER_SIZE / 2 - GAUGE_SIZE / 2 + 10;
           
@@ -108,7 +163,12 @@ export function CockpitCluster({
                 styles.connectionLine,
                 {
                   width: lineLength,
+                  height: lineWidth,
                   backgroundColor: lineColor,
+                  opacity,
+                  shadowColor: lineColor,
+                  shadowOpacity: gaugeValue >= 0 ? 0.5 : 0,
+                  shadowRadius: 4,
                   transform: [
                     { translateX: -lineLength / 2 },
                     { rotate: `${angle + 90}deg` },
@@ -121,7 +181,17 @@ export function CockpitCluster({
         })}
       </View>
 
-      {/* Center Status Ring */}
+      {/* Center Status Ring with Glow */}
+      <Animated.View
+        style={[
+          styles.centerGlow,
+          {
+            backgroundColor: overall >= 0 ? ringColor : 'transparent',
+            opacity: overall >= 0 ? 0.15 : 0,
+            transform: [{ scale: centerPulse }],
+          },
+        ]}
+      />
       <Pressable
         style={({ pressed }) => [
           styles.centerRing,
@@ -156,27 +226,44 @@ export function CockpitCluster({
         const y = Math.sin(radians) * GAUGE_RADIUS;
 
         return (
-          <Pressable
+          <View
             key={key}
-            style={({ pressed }) => [
-              styles.gaugeBubble,
-              {
-                left: CLUSTER_SIZE / 2 + x - GAUGE_SIZE / 2,
-                top: CLUSTER_SIZE / 2 + y - GAUGE_SIZE / 2,
-                borderColor: gaugeValue >= 0 ? gaugeColor + '60' : TEXT_MUTED + '30',
-              },
-              pressed && styles.gaugeBubblePressed,
-            ]}
-            onPress={() => handleGaugePress(key)}
+            style={{
+              position: 'absolute',
+              left: CLUSTER_SIZE / 2 + x - GAUGE_SIZE / 2 - 10,
+              top: CLUSTER_SIZE / 2 + y - GAUGE_SIZE / 2 - 10,
+              width: GAUGE_SIZE + 20,
+              height: GAUGE_SIZE + 20,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
-            <GaugeComponent value={gaugeValue} size={36} />
-            <Text style={[styles.gaugeLabel, { color: gaugeColor }]}>
-              {config.label.slice(0, 4).toUpperCase()}
-            </Text>
-            {gaugeValue >= 0 && (
-              <Text style={[styles.gaugeValue, { color: gaugeColor }]}>{gaugeValue}</Text>
-            )}
-          </Pressable>
+            {/* Glow layer */}
+            <GaugeGlow color={gaugeColor} intensity={gaugeValue} size={GAUGE_SIZE} />
+            
+            {/* Gauge bubble */}
+            <Pressable
+              style={({ pressed }) => [
+                styles.gaugeBubble,
+                {
+                  borderColor: gaugeValue >= 0 ? gaugeColor + '80' : TEXT_MUTED + '30',
+                  shadowColor: gaugeColor,
+                  shadowOpacity: gaugeValue >= 0 ? 0.4 : 0,
+                  shadowRadius: 8,
+                },
+                pressed && styles.gaugeBubblePressed,
+              ]}
+              onPress={() => handleGaugePress(key)}
+            >
+              <GaugeComponent value={gaugeValue} size={36} />
+              <Text style={[styles.gaugeLabel, { color: gaugeColor }]}>
+                {config.label.slice(0, 4).toUpperCase()}
+              </Text>
+              {gaugeValue >= 0 && (
+                <Text style={[styles.gaugeValue, { color: gaugeColor }]}>{gaugeValue}</Text>
+              )}
+            </Pressable>
+          </View>
         );
       })}
 
@@ -184,8 +271,8 @@ export function CockpitCluster({
       <View style={styles.hintContainer}>
         <Text style={styles.hintText}>
           {overall >= 0 
-            ? `${activeCount} of 6 systems checked`
-            : 'Tap center to check in'
+            ? `${activeCount}/6 systems online • ${overallLabel}`
+            : '⬤ Tap center to run diagnostics'
           }
         </Text>
       </View>
@@ -209,8 +296,16 @@ const styles = StyleSheet.create({
   },
   connectionLine: {
     position: 'absolute',
-    height: 2,
-    borderRadius: 1,
+    borderRadius: 2,
+    shadowOffset: { width: 0, height: 0 },
+  },
+  centerGlow: {
+    position: 'absolute',
+    width: CENTER_SIZE + 40,
+    height: CENTER_SIZE + 40,
+    borderRadius: (CENTER_SIZE + 40) / 2,
+    left: CLUSTER_SIZE / 2 - (CENTER_SIZE + 40) / 2,
+    top: CLUSTER_SIZE / 2 - (CENTER_SIZE + 40) / 2,
   },
   centerRing: {
     position: 'absolute',
@@ -225,9 +320,9 @@ const styles = StyleSheet.create({
     top: CLUSTER_SIZE / 2 - CENTER_SIZE / 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 10,
   },
   centerRingPressed: {
     backgroundColor: '#1a1a24',
@@ -246,7 +341,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   gaugeBubble: {
-    position: 'absolute',
     width: GAUGE_SIZE,
     height: GAUGE_SIZE,
     borderRadius: GAUGE_SIZE / 2,
@@ -254,11 +348,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
+    elevation: 6,
   },
   gaugeBubblePressed: {
     backgroundColor: '#1a1a24',
