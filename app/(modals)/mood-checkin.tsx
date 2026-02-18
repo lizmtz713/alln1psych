@@ -154,8 +154,8 @@ export default function MoodCheckinScreen() {
         {/* Header */}
         <AnimatedSection delay={0}>
           <View style={styles.header}>
-            <Pressable style={styles.closeBtn} onPress={() => router.back()}>
-              <Ionicons name="close" size={28} color={COLORS.text} />
+            <Pressable style={styles.cancelBtn} onPress={() => router.back()}>
+              <Text style={styles.cancelText}>Cancel</Text>
             </Pressable>
           </View>
           <Text style={styles.title}>How are you feeling?</Text>
@@ -253,14 +253,16 @@ const styles = StyleSheet.create({
   // Header
   header: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
     marginBottom: SPACING.lg,
   },
-  closeBtn: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+  cancelBtn: {
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
+  },
+  cancelText: {
+    ...TYPOGRAPHY.labelLg,
+    color: COLORS.accent,
   },
   title: {
     ...TYPOGRAPHY.displayMd,
