@@ -10,7 +10,7 @@ interface GaugeProps {
 
 export function AlignmentGauge({ value, size = 80 }: GaugeProps) {
   const isSet = value >= 0;
-  const color = isSet ? getGaugeColor(value) : '#2A2A3A';
+  const color = isSet ? getGaugeColor(value) : '#5A5A6A';
   const cx = size / 2;
   const cy = size / 2;
   const trackWidth = size * 0.7;
@@ -36,8 +36,8 @@ export function AlignmentGauge({ value, size = 80 }: GaugeProps) {
           width={trackWidth}
           height={trackHeight}
           rx={trackHeight / 2}
-          fill="#1A1A2E"
-          stroke="#2A2A3A"
+          fill="#3A3A4E"
+          stroke="#5A5A6A"
           strokeWidth={1}
         />
         <Rect
@@ -53,7 +53,7 @@ export function AlignmentGauge({ value, size = 80 }: GaugeProps) {
           cx={isSet ? bubbleX : cx}
           cy={bubbleY}
           r={bubbleRadius}
-          fill={isSet ? color : '#2A2A3A'}
+          fill={isSet ? color : '#5A5A6A'}
           opacity={isSet ? 0.9 : 0.3}
         />
       </Svg>

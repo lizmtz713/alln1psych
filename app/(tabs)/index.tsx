@@ -211,7 +211,8 @@ export default function HomeScreen() {
     moodTrend = typeof getWeeklyMoodTrend === 'function' ? (getWeeklyMoodTrend() ?? []) : [];
     const summaries = typeof getSummaries === 'function' ? getSummaries() : [];
     summaryCount = Array.isArray(summaries) ? summaries.length : 0;
-    greetingLine = dailyContent?.greeting ?? getDynamicGreeting(user?.name ?? 'you');
+    // Always use current time for greeting (don't cache the time-of-day part)
+    greetingLine = getDynamicGreeting(user?.name ?? 'you');
     affirmation = dailyContent?.affirmation ?? "You're doing better than you think.";
     psychSays = dailyContent?.insight ?? (typeof getPsychSays === 'function' ? getPsychSays(streak) : "You're doing better than you think.");
     todayChallenge = (typeof getTodayChallenge === 'function' ? getTodayChallenge() : null) ?? todayChallenge;
