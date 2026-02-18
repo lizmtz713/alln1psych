@@ -26,6 +26,8 @@ module.exports = {
         NSMicrophoneUsageDescription:
           'AllN1 Psych uses your microphone so you can talk to your AI companion by voice.',
         NSCameraUsageDescription: 'AllN1 Psych uses your camera for profile photos.',
+        NSPhotoLibraryUsageDescription:
+          'AllN1 Psych uses your photo library so you can upload a conversation screenshot in Decode.',
       },
     },
     android: {

@@ -32,6 +32,8 @@ export interface CircleMember {
   temperatureLabel: string;
   lastUpdated: Date;
   addedAt: Date;
+  /** ISO date string "1999-03-15" — for personality insights in Decode etc. */
+  birthday?: string;
 }
 
 export interface MoodEntry {

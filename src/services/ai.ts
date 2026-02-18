@@ -265,6 +265,51 @@ export async function sendMessageWithSystemPrompt(
   }
 }
 
+/** Decode with optional screenshot. Uses GPT-4o (vision) when imageBase64 is provided; otherwise text-only. */
+export async function sendDecodeWithOptionalImage(
+  systemPrompt: string,
+  userTextContent: string,
+  imageBase64?: string
+): Promise<string> {
+  const apiKey = await getOpenAIKey();
+  if (!apiKey) return '[AI Error: OpenAI API key not configured]';
+
+  const apiMessages: Array<{ role: string; content: string | Array<{ type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }> }> = [
+    { role: 'system', content: systemPrompt },
+    {
+      role: 'user',
+      content: imageBase64
+        ? [
+            { type: 'text' as const, text: userTextContent },
+            { type: 'image_url' as const, image_url: { url: `data:image/jpeg;base64,${imageBase64}` } },
+          ]
+        : userTextContent,
+    },
+  ];
+
+  const model = imageBase64 ? 'gpt-4o' : 'gpt-4o-mini';
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: apiMessages,
+      max_tokens: 800,
+      temperature: 0.7,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    return `[AI Error: ${body || `OpenAI ${res.status}`}]`;
+  }
+  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const content = data.choices?.[0]?.message?.content?.trim();
+  return content ?? '';
+}
+
 export async function hasOpenAIKey(): Promise<boolean> {
   const key = await getOpenAIKey();
   return Boolean(key);
