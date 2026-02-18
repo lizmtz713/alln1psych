@@ -21,8 +21,12 @@ export const COLORS = {
   accent: '#7C4DFF',
   accentLight: '#9D7AFF',
   accentDark: '#5C3ACC',
+  accentMuted: 'rgba(124, 77, 255, 0.3)',
   accentBg: 'rgba(124, 77, 255, 0.12)',
   accentBgStrong: 'rgba(124, 77, 255, 0.20)',
+  
+  // Inputs
+  inputSurface: 'rgba(255,255,255,0.06)',
   
   // Borders
   border: 'rgba(255, 255, 255, 0.06)',
@@ -36,6 +40,10 @@ export const COLORS = {
     orange: '#FB923C',
     red: '#F87171',
   },
+  green: '#4ADE80',
+  yellow: '#FACC15',
+  orange: '#FB923C',
+  red: '#F87171',
   
   // Semantic colors
   success: '#4ADE80',
@@ -72,6 +80,9 @@ export const SPACING = {
 export const BORDER_RADIUS = {
   sm: 8,
   md: 12,
+  input: 12,
+  card: 14,
+  button: 14,
   lg: 16,
   xl: 20,
   full: 9999,

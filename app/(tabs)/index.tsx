@@ -26,6 +26,7 @@ import { useJournalStore } from '../../src/stores/journalStore';
 import { useDailyContentStore } from '../../src/stores/dailyContentStore';
 import { generateDailyContent } from '../../src/services/personalization';
 import { getDiscoveriesForDay } from '../../src/data/discoveries';
+import type { Lesson } from '../../src/data/educationContent';
 import { Ionicons } from '@expo/vector-icons';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
@@ -190,7 +191,7 @@ export default function HomeScreen() {
 
   let streak: number = 0;
   let weeklySummary: { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null = null;
-  let nextLesson: { id: string; title: string; duration: string } | null = null;
+  let nextLesson: Lesson | null = null;
   let moodTrend: Array<{ date: string; mood: string }> = [];
   let summaryCount = 0;
   let greetingLine = getDynamicGreeting(user?.name ?? 'you');

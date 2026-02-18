@@ -294,13 +294,12 @@ export default function ReplayScreen() {
               <Text style={styles.subtitle}>Just talk — no structure needed.</Text>
               <View style={styles.inputCard}>
                 <TextInput
-                  style={styles.largeInput}
+                  style={[styles.largeInput, { minHeight: 140 }]}
                   placeholder="What happened?"
                   placeholderTextColor={TEXT_SECONDARY}
                   value={story}
                   onChangeText={setStory}
                   multiline
-                  minHeight={140}
                   textAlignVertical="top"
                 />
                 <View style={styles.inputRow}>
@@ -476,7 +475,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background, 
     color: COLORS.text, 
     fontSize: 16, 
-    minHeight: 140, 
     padding: SPACING.lg, 
     borderRadius: BORDER_RADIUS.md, 
     textAlignVertical: 'top',

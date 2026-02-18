@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { useUserStore, type AgeRange, type TherapyExperience } from '../../src/stores/userStore';
+import { useUserStore, type AgeRange, type TherapyExperience, type Pronouns } from '../../src/stores/userStore';
 
 const ALL_STEP_INDICES = [0, 1, 2, 3, 4, 5, 6, 7] as const; // name, age, pronouns, culture, family, language, strength, therapy
 
@@ -96,7 +96,7 @@ export default function IdentitySetupScreen() {
   const [step, setStep] = useState(0);
   const [localName, setLocalName] = useState('');
   const [ageRange, setLocalAgeRange] = useState<AgeRange | null>(null);
-  const [pronoun, setLocalPronoun] = useState<'she/her' | 'he/him' | 'they/them' | 'other' | null>(null);
+  const [pronoun, setLocalPronoun] = useState<Pronouns | null>(null);
   const [pronounsCustom, setPronounsCustom] = useState('');
   const [culturalBackgroundText, setLocalCultural] = useState('');
   const [familyStructure, setLocalFamily] = useState('');

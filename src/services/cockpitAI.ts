@@ -172,7 +172,7 @@ Rules:
 - Moon phases: some people are affected, others aren't — mention only if relevant to the pattern
 - Winter/low daylight periods: acknowledge SAD patterns without diagnosing`;
 
-  const knowledge = buildKnowledgePrompt(gauges);
+  const knowledge = buildKnowledgePrompt(gauges as unknown as Record<string, number>);
   const systemPromptWithKnowledge = systemPrompt + knowledge;
 
   try {

@@ -199,7 +199,7 @@ export default function LessonScreen() {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={styles.title}>{lesson.emoji} {lesson.title}</Text>
+            <Text style={styles.title}>{(lesson as { emoji?: string }).emoji ?? ''} {lesson.title}</Text>
             <View style={styles.body}>
               {renderBody(displayIntro)}
             </View>

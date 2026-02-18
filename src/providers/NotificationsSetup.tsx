@@ -65,7 +65,7 @@ export function NotificationsSetup({ children }: { children: React.ReactNode }) 
 
     return () => {
       if (listenerRef.current) {
-        Notifications.removeNotificationSubscription(listenerRef.current);
+        (listenerRef.current as { remove?: () => void }).remove?.();
         listenerRef.current = null;
       }
     };

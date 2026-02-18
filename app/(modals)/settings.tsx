@@ -304,7 +304,7 @@ function SpotifyConnectionCard() {
               onPress={handleConnect}
               disabled={isConnecting}
             >
-              <Ionicons name="logo-spotify" size={20} color="#fff" />
+              <Ionicons name={"logo-spotify" as any} size={20} color="#fff" />
               <Text style={spotifyStyles.connectBtnText}>
                 {isConnecting ? 'Connecting...' : 'Connect Spotify'}
               </Text>
@@ -668,7 +668,7 @@ function PremiumCard() {
       {__DEV__ && (
         <Pressable 
           style={premiumStyles.devButton}
-          onPress={() => _setTier('premium')}
+          onPress={() => _setTier('pro')}
         >
           <Text style={premiumStyles.devButtonText}>DEV: Switch to Premium</Text>
         </Pressable>
@@ -798,7 +798,7 @@ export default function SettingsScreen() {
     try {
       const data = buildExportData('all');
       const text = buildTherapistSummary(data);
-      const path = `${FileSystem.documentDirectory}therapist-summary.txt`;
+      const path = `${(FileSystem as any).documentDirectory ?? ''}therapist-summary.txt`;
       await FileSystem.writeAsStringAsync(path, text);
       await Sharing.shareAsync(path, { mimeType: 'text/plain' });
     } catch (e) {

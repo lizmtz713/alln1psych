@@ -144,9 +144,10 @@ export function buildExportData(range: ExportRange): DataExport {
 }
 
 export async function shareExportFile(data: DataExport, filename: string): Promise<void> {
-  const path = `${FileSystem.documentDirectory}${filename}`;
+  const dir = (FileSystem as any).documentDirectory ?? '';
+  const path = `${dir}${filename}`;
   await FileSystem.writeAsStringAsync(path, JSON.stringify(data, null, 2), {
-    encoding: FileSystem.EncodingType.UTF8,
+    encoding: (FileSystem as any).EncodingType?.UTF8 ?? 'utf8',
   });
   const canShare = await Sharing.isAvailableAsync();
   if (!canShare) throw new Error('Sharing is not available on this device');
