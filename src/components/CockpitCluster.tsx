@@ -113,7 +113,7 @@ export function CockpitCluster({
   const centerPulse = useRef(new Animated.Value(1)).current;
   
   const overallLabel = getOverallStatusLabel(overall);
-  const ringColor = overall < 0 ? TEXT_MUTED : getGaugeColor(overall);
+  const ringColor = overall < 0 ? (TEXT_MUTED + '90') : getGaugeColor(overall);
   const activeCount = Object.values(gaugeValues).filter(v => v >= 0).length;
   
   // Subtle breathing animation for center ring
@@ -211,7 +211,7 @@ export function CockpitCluster({
               style={({ pressed }) => [
                 styles.gaugeBubble,
                 {
-                  borderColor: gaugeValue >= 0 ? gaugeColor + '80' : TEXT_MUTED + '30',
+                  borderColor: gaugeValue >= 0 ? gaugeColor : TEXT_MUTED + '60',
                   shadowColor: gaugeColor,
                   shadowOpacity: gaugeValue >= 0 ? 0.4 : 0,
                   shadowRadius: 8,
