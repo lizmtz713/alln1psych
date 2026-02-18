@@ -41,7 +41,7 @@ import {
   CULTURAL_VALUES_OPTIONS,
 } from '../../src/lib/culturalOptions';
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 const LEARNING_STYLE_OPTIONS: { value: LearningStyle; label: string; emoji: string }[] = [
   { value: 'reading', label: 'Reading — I like to read and reflect', emoji: '📖' },
@@ -194,12 +194,12 @@ export default function OnboardingScreen() {
       return;
     }
     
-    // If birthday provided on step 2, auto-set age group and skip step 3
-    if (step === 2 && birthday) {
+    // If birthday provided on step 3 (name step), auto-set age group and skip step 4
+    if (step === 3 && birthday) {
       const calculatedAge = getAgeGroupFromBirthday(birthday);
       if (calculatedAge) {
         setAgeGroup(calculatedAge);
-        runFadeThen(() => setStep(4)); // Skip age group step
+        runFadeThen(() => setStep(5)); // Skip age group step
         return;
       }
     }
@@ -209,9 +209,9 @@ export default function OnboardingScreen() {
 
   const goBack = () => {
     if (step <= 1) return;
-    // If going back from step 4 and birthday exists, skip step 3
-    if (step === 4 && birthday) {
-      runFadeThen(() => setStep(2));
+    // If going back from step 5 (love language) and birthday exists, skip step 4 (age)
+    if (step === 5 && birthday) {
+      runFadeThen(() => setStep(3));
       return;
     }
     runFadeThen(() => setStep((s) => s - 1));
@@ -243,25 +243,19 @@ export default function OnboardingScreen() {
   const canProceed = () => {
     switch (step) {
       case 1:
-        return true;
+        return true; // welcome
       case 2:
-        return name.trim().length > 0 && pronouns !== null;
+        return true; // cockpit intro — just continue
       case 3:
-        return ageGroup !== null;
+        return name.trim().length > 0 && pronouns !== null;
       case 4:
-        return communicationPreference !== null;
+        return ageGroup !== null;
       case 5:
         return loveLanguage !== null;
       case 6:
-        return true; // sensitive topics — optional
-      case 7:
-        return true; // cultural context — optional
-      case 8:
-        return true; // learning style — optional
-      case 9:
         return wantsToInvite !== null && (wantsToInvite === false || inviteName.trim().length > 0);
-      case 10:
-        return true;
+      case 7:
+        return true; // promise
       default:
         return false;
     }
@@ -349,8 +343,51 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 2 — Name, Birthday (optional), Pronouns */}
+            {/* STEP 2 — Cockpit Introduction */}
             {step === 2 && (
+              <View style={styles.step}>
+                <Text style={styles.welcomeTitle}>You're not a mood.{'\n'}You're a system.</Text>
+                <Text style={styles.cockpitIntroText}>
+                  Most apps ask "How do you feel?" and stop there.
+                </Text>
+                <Text style={styles.cockpitIntroText}>
+                  But you're more than one number. You're <Text style={styles.cockpitHighlight}>body</Text>, <Text style={styles.cockpitHighlight}>nervous system</Text>, <Text style={styles.cockpitHighlight}>emotions</Text>, <Text style={styles.cockpitHighlight}>relationships</Text>, <Text style={styles.cockpitHighlight}>purpose</Text>, and <Text style={styles.cockpitHighlight}>values</Text> — all connected.
+                </Text>
+                <View style={styles.cockpitVisual}>
+                  <View style={styles.cockpitRing}>
+                    <Text style={styles.cockpitBrain}>🧠</Text>
+                  </View>
+                  <View style={styles.cockpitDotsRow}>
+                    <View style={[styles.cockpitDot, { backgroundColor: '#4ADE80' }]} />
+                    <View style={[styles.cockpitDot, { backgroundColor: '#FACC15' }]} />
+                    <View style={[styles.cockpitDot, { backgroundColor: '#FB923C' }]} />
+                  </View>
+                  <View style={styles.cockpitDotsRow}>
+                    <View style={[styles.cockpitDot, { backgroundColor: '#4ADE80' }]} />
+                    <View style={[styles.cockpitDot, { backgroundColor: '#FACC15' }]} />
+                    <View style={[styles.cockpitDot, { backgroundColor: '#F87171' }]} />
+                  </View>
+                </View>
+                <Text style={styles.cockpitIntroText}>
+                  When one drops, others follow.{'\n'}When you lift one, others rise.
+                </Text>
+                <Text style={styles.cockpitTagline}>
+                  This is your cockpit. 6 gauges. One view of you.
+                </Text>
+                <Pressable
+                  style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    goNext();
+                  }}
+                >
+                  <Text style={styles.primaryButtonText}>I'm ready</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {/* STEP 3 — Name, Birthday (optional), Pronouns */}
+            {step === 3 && (
               <View style={styles.step}>
                 <Text style={styles.question}>What should I call you?</Text>
                 <TextInput
@@ -517,8 +554,8 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 3 — Age Group */}
-            {step === 3 && (
+            {/* STEP 4 — Age Group */}
+            {step === 4 && (
               <View style={styles.step}>
                 <Text style={styles.question}>What stage of life are you in?</Text>
                 <Text style={styles.explain}>This helps me speak your language.</Text>
@@ -547,8 +584,8 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 4 — Love Language */}
-            {step === 4 && (
+            {/* STEP 5 — Love Language */}
+            {step === 5 && (
               <View style={styles.step}>
                 <Text style={styles.question}>How do you feel most cared for?</Text>
                 <View style={styles.loveCardList}>
@@ -586,8 +623,8 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 5 — First Connection */}
-            {step === 5 && (
+            {/* STEP 6 — First Connection */}
+            {step === 6 && (
               <View style={styles.step}>
                 <Text style={styles.question}>
                   Would you like to connect someone who cares about you?
@@ -683,8 +720,8 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 6 — Promise (last step: open notification modal directly) */}
-            {step === 6 && (
+            {/* STEP 7 — Promise (last step: open notification modal directly) */}
+            {step === 7 && (
               <View style={styles.step}>
                 <Text style={styles.question}>Here's my promise to you:</Text>
                 <View style={styles.promiseList}>
@@ -788,6 +825,62 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 26,
     marginBottom: SPACING.xxxl,
+  },
+  cockpitIntroText: {
+    ...TYPOGRAPHY.bodyLg,
+    color: COLORS.textSecondary,
+    lineHeight: 26,
+    marginBottom: SPACING.md,
+    textAlign: 'center',
+  },
+  cockpitHighlight: {
+    color: COLORS.text,
+    fontWeight: '600',
+  },
+  cockpitVisual: {
+    alignItems: 'center',
+    marginVertical: SPACING.xl,
+  },
+  cockpitRing: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 4,
+    borderColor: COLORS.accent,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  cockpitBrain: {
+    fontSize: 40,
+  },
+  cockpitDotsRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginVertical: 4,
+  },
+  cockpitDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    shadowColor: '#fff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  cockpitTagline: {
+    ...TYPOGRAPHY.bodyLg,
+    color: COLORS.text,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.sm,
   },
   primaryButton: {
     backgroundColor: COLORS.accent,
