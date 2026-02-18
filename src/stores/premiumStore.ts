@@ -51,18 +51,18 @@ const FAMILY_LIMITS: PremiumLimits = {
 
 export const PRICING = {
   pro: {
-    monthly: 6.99,
-    yearly: 49.99, // Save $34 (~40% off) - undercuts Calm/Headspace
-    yearlyPerMonth: 4.17,
-    savings: 34,
+    monthly: 4.99,
+    yearly: 39.99, // $3.33/mo - CHEAPEST premium mental health app
+    yearlyPerMonth: 3.33,
+    savings: 20,
     productId: 'ingauge_pro_monthly',
     yearlyProductId: 'ingauge_pro_yearly',
   },
   family: {
-    monthly: 9.99,
-    yearly: 79.99, // Save $40 (~33% off) - $16/person/year!
-    yearlyPerMonth: 6.67,
-    savings: 40,
+    monthly: 7.99,
+    yearly: 59.99, // $5/mo for 5 people = $12/person/year!
+    yearlyPerMonth: 5.00,
+    savings: 36,
     maxMembers: 5,
     productId: 'ingauge_family_monthly',
     yearlyProductId: 'ingauge_family_yearly',
