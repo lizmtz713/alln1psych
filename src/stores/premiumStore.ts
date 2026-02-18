@@ -31,8 +31,11 @@ const FREE_LIMITS: PremiumLimits = {
   familyCircle: false,
 };
 
+// "Unlimited" = 100/day (way more than anyone needs, protects against abuse)
+// Average user does 3-5/day, power users maybe 20
+// 100/day = ~3000/month = still reasonable API costs
 const PRO_LIMITS: PremiumLimits = {
-  dailyAIConversations: Infinity,
+  dailyAIConversations: 100, // "Unlimited" with fair use cap
   circleMembers: Infinity,
   voiceEnabled: true,
   unlimitedReplay: true,
@@ -41,7 +44,7 @@ const PRO_LIMITS: PremiumLimits = {
 };
 
 const FAMILY_LIMITS: PremiumLimits = {
-  dailyAIConversations: Infinity,
+  dailyAIConversations: 100, // Per family member
   circleMembers: Infinity,
   voiceEnabled: true,
   unlimitedReplay: true,
