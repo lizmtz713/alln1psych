@@ -257,7 +257,7 @@ export function CockpitCluster({
             >
               <GaugeComponent value={gaugeValue} size={36} />
               <Text style={[styles.gaugeLabel, { color: gaugeColor }]}>
-                {config.label.slice(0, 4).toUpperCase()}
+                {config.label.toUpperCase()}
               </Text>
               {gaugeValue >= 0 && (
                 <Text style={[styles.gaugeValue, { color: gaugeColor }]}>{gaugeValue}</Text>
@@ -358,10 +358,11 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.94 }],
   },
   gaugeLabel: {
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
     marginTop: 2,
+    textAlign: 'center',
   },
   gaugeValue: {
     fontSize: 11,

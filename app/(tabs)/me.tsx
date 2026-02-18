@@ -144,11 +144,11 @@ export default function MeScreen() {
                 style={styles.statItem}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push('/(modals)/achievements');
+                  router.push('/(modals)/awards');
                 }}
               >
                 <Text style={styles.statValue}>{unlockedCount}</Text>
-                <Text style={[styles.statLabel, { color: COLORS.accent }]}>Achievements →</Text>
+                <Text style={[styles.statLabel, { color: COLORS.accent }]}>Awards →</Text>
               </Pressable>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>

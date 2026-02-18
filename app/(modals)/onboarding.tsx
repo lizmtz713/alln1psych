@@ -121,6 +121,8 @@ export default function OnboardingScreen() {
     culturalBackgroundOther,
     setCulturalBackgroundOther,
     completeOnboarding,
+    birthday,
+    setBirthday,
   } = useUserStore();
 
   const [inviteName, setInviteName] = useState(circleInvite?.name ?? '');
@@ -130,6 +132,7 @@ export default function OnboardingScreen() {
   const [wantsToInvite, setWantsToInvite] = useState<boolean | null>(null);
   const [nameInputFocused, setNameInputFocused] = useState(false);
   const [showOptional, setShowOptional] = useState(false);
+  const [birthdayInput, setBirthdayInput] = useState('');
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const setNotificationsCheckIn = useSettingsStore((s) => s.setNotificationsCheckIn);
   const stepOpacity = useRef(new Animated.Value(1)).current;
@@ -169,10 +172,36 @@ export default function OnboardingScreen() {
     });
   };
 
+  // Calculate age group from birthday
+  const getAgeGroupFromBirthday = (bday: string): typeof ageGroup => {
+    const d = new Date(bday + 'T12:00:00');
+    if (isNaN(d.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const m = today.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+    if (age < 13) return 'under13';
+    if (age <= 17) return '13-17';
+    if (age <= 25) return '18-25';
+    if (age <= 40) return '26-40';
+    if (age <= 60) return '41-60';
+    return '60+';
+  };
+
   const goNext = () => {
     if (step >= TOTAL_STEPS) {
       setShowNotificationPrompt(true);
       return;
+    }
+    
+    // If birthday provided on step 2, auto-set age group and skip step 3
+    if (step === 2 && birthday) {
+      const calculatedAge = getAgeGroupFromBirthday(birthday);
+      if (calculatedAge) {
+        setAgeGroup(calculatedAge);
+        runFadeThen(() => setStep(4)); // Skip age group step
+        return;
+      }
     }
     
     runFadeThen(() => setStep((s) => s + 1));
@@ -180,6 +209,11 @@ export default function OnboardingScreen() {
 
   const goBack = () => {
     if (step <= 1) return;
+    // If going back from step 4 and birthday exists, skip step 3
+    if (step === 4 && birthday) {
+      runFadeThen(() => setStep(2));
+      return;
+    }
     runFadeThen(() => setStep((s) => s - 1));
   };
 
@@ -332,6 +366,28 @@ export default function OnboardingScreen() {
                   onBlur={() => setNameInputFocused(false)}
                   autoCapitalize="words"
                   autoCorrect={false}
+                />
+                <Text style={[styles.question, styles.questionMargin]}>Birthday (optional)</Text>
+                <Text style={styles.birthdayHint}>Helps personalize insights based on your life stage</Text>
+                <TextInput
+                  style={[styles.input, styles.inputMargin]}
+                  placeholder="MM/DD/YYYY"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={birthdayInput}
+                  onChangeText={(text) => {
+                    const cleaned = text.replace(/\D/g, '');
+                    if (cleaned.length <= 2) setBirthdayInput(cleaned);
+                    else if (cleaned.length <= 4) setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2));
+                    else setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8));
+                    if (cleaned.length === 8) {
+                      const mm = cleaned.slice(0, 2), dd = cleaned.slice(2, 4), yyyy = cleaned.slice(4, 8);
+                      setBirthday(`${yyyy}-${mm}-${dd}`);
+                    } else {
+                      setBirthday(null);
+                    }
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={10}
                 />
                 <Text style={[styles.question, styles.questionMargin]}>And your pronouns?</Text>
                 <View style={styles.chipRow}>
@@ -753,6 +809,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   questionMargin: { marginTop: 28, marginBottom: 12 },
+  birthdayHint: {
+    ...TYPOGRAPHY.bodySm,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+  },
   input: {
     backgroundColor: COLORS.inputSurface,
     borderRadius: BORDER_RADIUS.input,
