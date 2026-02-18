@@ -13,7 +13,17 @@
       "backgroundColor": "#0F0B1E"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.alln1network.psych",
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": ["health-records"],
+        "com.apple.developer.healthkit.background-delivery": true
+      },
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "InGauge reads your health data (sleep, activity, heart rate, cycle) to power your Body gauge and give personalized insights.",
+        "NSHealthUpdateUsageDescription": "InGauge may write wellness data to Health."
+      }
     },
     "android": {
       "adaptiveIcon": {
