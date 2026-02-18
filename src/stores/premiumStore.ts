@@ -51,18 +51,18 @@ const FAMILY_LIMITS: PremiumLimits = {
 
 export const PRICING = {
   pro: {
-    monthly: 9.99,
-    yearly: 79.99, // Save $40 (~33% off)
-    yearlyPerMonth: 6.67,
-    savings: 40,
+    monthly: 6.99,
+    yearly: 49.99, // Save $34 (~40% off) - undercuts Calm/Headspace
+    yearlyPerMonth: 4.17,
+    savings: 34,
     productId: 'ingauge_pro_monthly',
     yearlyProductId: 'ingauge_pro_yearly',
   },
   family: {
-    monthly: 15.00,
-    yearly: 99.99, // Save $80 (~44% off)
-    yearlyPerMonth: 8.33,
-    savings: 80,
+    monthly: 9.99,
+    yearly: 79.99, // Save $40 (~33% off) - $16/person/year!
+    yearlyPerMonth: 6.67,
+    savings: 40,
     maxMembers: 5,
     productId: 'ingauge_family_monthly',
     yearlyProductId: 'ingauge_family_yearly',
