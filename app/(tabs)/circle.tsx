@@ -406,7 +406,7 @@ export default function CircleScreen() {
                           </View>
                         );
                       })()}
-                      {/* Relationship Check — when member has birthday */}
+                      {/* Relate — when member has birthday */}
                       {m.birthday && (
                         <Pressable
                           style={{ marginTop: 12, backgroundColor: '#111118', borderRadius: 10, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: 'rgba(124,77,255,0.2)' }}
@@ -416,7 +416,7 @@ export default function CircleScreen() {
                           }}
                         >
                           <Text style={{ fontSize: 18 }}>💫</Text>
-                          <Text style={{ color: '#7C4DFF', fontSize: 14, fontWeight: '500' }}>Relationship Check with {m.name}</Text>
+                          <Text style={{ color: '#7C4DFF', fontSize: 14, fontWeight: '500' }}>Relate to {m.name}</Text>
                         </Pressable>
                       )}
                       {/* Add birthday */}

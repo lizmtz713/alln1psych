@@ -57,6 +57,9 @@ export default function MeScreen() {
   const menuItems = [
     { icon: 'journal-outline', label: 'Journal', route: '/(modals)/new-journal' },
     { icon: 'refresh-outline', label: 'Replay', route: '/(modals)/replay' },
+    { icon: 'search-outline', label: 'Decode', route: '/(modals)/decode' },
+    { icon: 'heart-circle-outline', label: 'Relate', route: '/(modals)/relate' },
+    { icon: 'heart-half-outline', label: 'Love', route: '/(modals)/love' },
     { icon: 'people-outline', label: 'Help', route: '/(modals)/help-someone' },
     { icon: 'settings-outline', label: 'Settings', route: '/(modals)/settings' },
   ];
