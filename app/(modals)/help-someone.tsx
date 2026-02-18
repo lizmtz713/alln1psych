@@ -419,14 +419,26 @@ Keep it practical and warm. No extra preamble.`;
         >
           <Text style={[styles.question, { marginBottom: 16 }]}>Who are you worried about?</Text>
           {members.length > 0 && (
-            <View style={[styles.chipRow, { flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 16, marginBottom: 16 }]}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              style={{ marginBottom: 20, marginHorizontal: -20 }}
+              contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
+            >
               {members.map((m) => (
                 <Pressable
                   key={m.id}
-                  style={[
-                    styles.card,
-                    useCircleMember === m.id && styles.cardSelected,
-                    { alignItems: 'center', width: 70, minWidth: 70, padding: 10 },
+                  style={({ pressed }) => [
+                    {
+                      alignItems: 'center',
+                      backgroundColor: COLORS.surface,
+                      borderRadius: 16,
+                      padding: 14,
+                      width: 90,
+                      borderWidth: 2,
+                      borderColor: useCircleMember === m.id ? COLORS.accent : 'transparent',
+                    },
+                    pressed && { opacity: 0.8 },
                   ]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -437,10 +449,10 @@ Keep it practical and warm. No extra preamble.`;
                   }}
                 >
                   <TemperatureGauge temperature={m.temperature} size="sm" />
-                  <Text numberOfLines={1} style={[styles.cardName, { fontSize: 12, textAlign: 'center', marginTop: 4 }]}>{m.name}</Text>
+                  <Text numberOfLines={1} style={{ fontSize: 13, color: COLORS.text, textAlign: 'center', marginTop: 8, fontWeight: '500' }}>{m.name}</Text>
                 </Pressable>
               ))}
-            </View>
+            </ScrollView>
           )}
           <Text style={styles.label}>Or someone not in your circle</Text>
           <TextInput
