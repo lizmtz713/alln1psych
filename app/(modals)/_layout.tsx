@@ -23,6 +23,7 @@ export default function ModalsLayout() {
       <Stack.Screen name="decode" options={{ presentation: 'modal' }} />
       <Stack.Screen name="relate" options={{ presentation: 'modal' }} />
       <Stack.Screen name="love" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
       <Stack.Screen name="identity-setup" options={{ presentation: 'fullScreenModal' }} />
     </Stack>
   );
