@@ -52,13 +52,17 @@ const FAMILY_LIMITS: PremiumLimits = {
 export const PRICING = {
   pro: {
     monthly: 9.99,
-    yearly: 99.99, // ~2 months free
+    yearly: 79.99, // Save $40 (~33% off)
+    yearlyPerMonth: 6.67,
+    savings: 40,
     productId: 'ingauge_pro_monthly',
     yearlyProductId: 'ingauge_pro_yearly',
   },
   family: {
     monthly: 15.00,
-    yearly: 149.99, // ~2 months free
+    yearly: 99.99, // Save $80 (~44% off)
+    yearlyPerMonth: 8.33,
+    savings: 80,
     maxMembers: 5,
     productId: 'ingauge_family_monthly',
     yearlyProductId: 'ingauge_family_yearly',

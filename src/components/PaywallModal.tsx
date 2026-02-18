@@ -1,6 +1,6 @@
 /**
  * Paywall Modal
- * Shows upgrade options when user hits a premium feature
+ * Conversion-optimized upgrade flow
  */
 
 import { useState } from 'react';
@@ -11,10 +11,11 @@ import {
   Modal,
   Pressable,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, SPACING, BORDER_RADIUS } from '../lib/constants';
 import { PRICING, usePremiumStore } from '../stores/premiumStore';
 
@@ -24,38 +25,35 @@ interface PaywallModalProps {
   feature?: string; // What feature triggered the paywall
 }
 
-const FEATURES = {
-  free: [
-    { icon: 'shield-checkmark', text: 'Crisis support 24/7 forever' },
-    { icon: 'speedometer', text: 'All 6 gauges + daily check-ins' },
-    { icon: 'book', text: 'Full Human Manual (48 lessons)' },
-    { icon: 'chatbubbles', text: '3 AI chats per day' },
-  ],
-  pro: [
-    { icon: 'infinite', text: 'Unlimited AI conversations' },
-    { icon: 'mic', text: 'Voice responses from Psych' },
-    { icon: 'people', text: 'Full Circle features' },
-    { icon: 'finger-print', text: 'Personology deep dives' },
-    { icon: 'construct', text: 'All 7 AI tools unlocked' },
-  ],
-  family: [
-    { icon: 'home', text: 'Pro features for up to 5 people' },
-    { icon: 'heart-circle', text: 'Shared family Circle' },
-    { icon: 'wallet', text: 'Best value for families' },
-  ],
-};
+const PRO_FEATURES = [
+  { icon: 'infinite', text: 'Unlimited AI conversations', highlight: true },
+  { icon: 'mic', text: 'Voice responses from Psych' },
+  { icon: 'people', text: 'Full Circle features' },
+  { icon: 'finger-print', text: 'Personology deep dives' },
+  { icon: 'construct', text: 'All 7 AI tools unlocked' },
+];
+
+const FAMILY_FEATURES = [
+  { icon: 'home', text: 'Everything in Pro for up to 5 people', highlight: true },
+  { icon: 'heart-circle', text: 'Shared family Circle' },
+  { icon: 'wallet', text: 'Best value — less than $2/person' },
+];
 
 export function PaywallModal({ visible, onClose, feature }: PaywallModalProps) {
+  const insets = useSafeAreaInsets();
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'family'>('pro');
+  const [billingCycle, setBillingCycle] = useState<'yearly' | 'monthly'>('yearly');
   const [loading, setLoading] = useState(false);
   const _setTier = usePremiumStore((s) => s._setTier);
+
+  const pricing = selectedPlan === 'pro' ? PRICING.pro : PRICING.family;
+  const isYearly = billingCycle === 'yearly';
 
   const handlePurchase = async () => {
     setLoading(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     
     // TODO: Implement actual IAP with expo-in-app-purchases or revenue-cat
-    // For now, just show coming soon
     setTimeout(() => {
       setLoading(false);
       Alert.alert(
@@ -78,127 +76,182 @@ export function PaywallModal({ visible, onClose, feature }: PaywallModalProps) {
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingBottom: insets.bottom + 16 }]}>
         {/* Header */}
         <View style={styles.header}>
           <View style={{ width: 40 }} />
-          <Text style={styles.title}>Upgrade to Pro</Text>
+          <Text style={styles.title}>Unlock InGauge</Text>
           <Pressable onPress={onClose} style={styles.closeBtn}>
             <Ionicons name="close" size={24} color={COLORS.text} />
           </Pressable>
         </View>
 
-        {/* Feature trigger */}
-        {feature && (
-          <View style={styles.featureBanner}>
-            <Ionicons name="sparkles" size={16} color={COLORS.accent} />
-            <Text style={styles.featureText}>
-              Unlock {feature} with Pro
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Feature trigger */}
+          {feature && (
+            <View style={styles.featureBanner}>
+              <Ionicons name="lock-open" size={16} color={COLORS.accent} />
+              <Text style={styles.featureText}>
+                Unlock {feature}
+              </Text>
+            </View>
+          )}
+
+          {/* Plan Cards */}
+          <View style={styles.planCards}>
+            {/* Pro Card */}
+            <Pressable
+              style={[styles.planCard, selectedPlan === 'pro' && styles.planCardActive]}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setSelectedPlan('pro');
+              }}
+            >
+              <View style={styles.planCardHeader}>
+                <Text style={styles.planCardTitle}>Pro</Text>
+                {selectedPlan === 'pro' && (
+                  <Ionicons name="checkmark-circle" size={20} color={COLORS.accent} />
+                )}
+              </View>
+              <Text style={styles.planCardPrice}>
+                ${isYearly ? PRICING.pro.yearlyPerMonth.toFixed(2) : PRICING.pro.monthly}
+                <Text style={styles.planCardPriceUnit}>/mo</Text>
+              </Text>
+              {isYearly && (
+                <Text style={styles.planCardBilled}>Billed ${PRICING.pro.yearly}/year</Text>
+              )}
+            </Pressable>
+
+            {/* Family Card */}
+            <Pressable
+              style={[styles.planCard, selectedPlan === 'family' && styles.planCardActive]}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setSelectedPlan('family');
+              }}
+            >
+              <View style={styles.bestValueBadge}>
+                <Text style={styles.bestValueText}>BEST VALUE</Text>
+              </View>
+              <View style={styles.planCardHeader}>
+                <Text style={styles.planCardTitle}>Family</Text>
+                {selectedPlan === 'family' && (
+                  <Ionicons name="checkmark-circle" size={20} color={COLORS.accent} />
+                )}
+              </View>
+              <Text style={styles.planCardPrice}>
+                ${isYearly ? PRICING.family.yearlyPerMonth.toFixed(2) : PRICING.family.monthly}
+                <Text style={styles.planCardPriceUnit}>/mo</Text>
+              </Text>
+              {isYearly && (
+                <Text style={styles.planCardBilled}>Billed ${PRICING.family.yearly}/year</Text>
+              )}
+              <Text style={styles.planCardNote}>Up to 5 people</Text>
+            </Pressable>
+          </View>
+
+          {/* Billing Toggle */}
+          <View style={styles.billingToggle}>
+            <Pressable
+              style={[styles.billingOption, billingCycle === 'yearly' && styles.billingOptionActive]}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setBillingCycle('yearly');
+              }}
+            >
+              <Text style={[styles.billingOptionText, billingCycle === 'yearly' && styles.billingOptionTextActive]}>
+                Yearly
+              </Text>
+              <View style={styles.saveBadge}>
+                <Text style={styles.saveBadgeText}>SAVE ${pricing.savings}</Text>
+              </View>
+            </Pressable>
+            <Pressable
+              style={[styles.billingOption, billingCycle === 'monthly' && styles.billingOptionActive]}
+              onPress={() => {
+                Haptics.selectionAsync();
+                setBillingCycle('monthly');
+              }}
+            >
+              <Text style={[styles.billingOptionText, billingCycle === 'monthly' && styles.billingOptionTextActive]}>
+                Monthly
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Features List */}
+          <View style={styles.featuresSection}>
+            <Text style={styles.sectionTitle}>
+              {selectedPlan === 'pro' ? 'Pro includes' : 'Family includes'}
+            </Text>
+            {(selectedPlan === 'pro' ? PRO_FEATURES : FAMILY_FEATURES).map((item, i) => (
+              <View key={i} style={styles.featureRow}>
+                <View style={[styles.featureIcon, item.highlight && styles.featureIconHighlight]}>
+                  <Ionicons name={item.icon as any} size={18} color={item.highlight ? '#fff' : COLORS.accent} />
+                </View>
+                <Text style={[styles.featureRowText, item.highlight && styles.featureRowTextHighlight]}>
+                  {item.text}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Free features reminder */}
+          <View style={styles.freeReminder}>
+            <Ionicons name="shield-checkmark" size={18} color={COLORS.success} />
+            <Text style={styles.freeReminderText}>
+              Crisis support is always free — 24/7/365
             </Text>
           </View>
-        )}
 
-        {/* Plan Toggle */}
-        <View style={styles.planToggle}>
-          <Pressable
-            style={[styles.planTab, selectedPlan === 'pro' && styles.planTabActive]}
-            onPress={() => {
-              Haptics.selectionAsync();
-              setSelectedPlan('pro');
-            }}
-          >
-            <Text style={[styles.planTabText, selectedPlan === 'pro' && styles.planTabTextActive]}>
-              Pro
+          {/* Social Proof */}
+          <View style={styles.socialProof}>
+            <Text style={styles.socialProofText}>
+              Join thousands improving their emotional intelligence
             </Text>
-          </Pressable>
-          <Pressable
-            style={[styles.planTab, selectedPlan === 'family' && styles.planTabActive]}
-            onPress={() => {
-              Haptics.selectionAsync();
-              setSelectedPlan('family');
-            }}
-          >
-            <Text style={[styles.planTabText, selectedPlan === 'family' && styles.planTabTextActive]}>
-              Family
-            </Text>
-            <View style={styles.saveBadge}>
-              <Text style={styles.saveBadgeText}>BEST VALUE</Text>
-            </View>
-          </Pressable>
-        </View>
-
-        {/* Price Display */}
-        <View style={styles.priceSection}>
-          <Text style={styles.price}>
-            ${selectedPlan === 'pro' ? PRICING.pro.monthly : PRICING.family.monthly}
-          </Text>
-          <Text style={styles.priceUnit}>/month</Text>
-        </View>
-        {selectedPlan === 'family' && (
-          <Text style={styles.familyNote}>For up to 5 family members</Text>
-        )}
-
-        {/* Features List */}
-        <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>
-            {selectedPlan === 'pro' ? 'Everything in Pro' : 'Family includes'}
-          </Text>
-          {(selectedPlan === 'pro' ? FEATURES.pro : FEATURES.family).map((item, i) => (
-            <View key={i} style={styles.featureRow}>
-              <Ionicons name={item.icon as any} size={20} color={COLORS.accent} />
-              <Text style={styles.featureRowText}>{item.text}</Text>
-            </View>
-          ))}
-          
-          {selectedPlan === 'family' && (
-            <>
-              <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Plus all Pro features</Text>
-              {FEATURES.pro.slice(0, 3).map((item, i) => (
-                <View key={i} style={styles.featureRow}>
-                  <Ionicons name={item.icon as any} size={20} color={COLORS.textSecondary} />
-                  <Text style={[styles.featureRowText, { color: COLORS.textSecondary }]}>{item.text}</Text>
-                </View>
+            <View style={styles.stars}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Ionicons key={i} name="star" size={16} color="#FFD700" />
               ))}
-            </>
-          )}
-        </View>
-
-        {/* Free features reminder */}
-        <View style={styles.freeReminder}>
-          <Ionicons name="heart" size={16} color={COLORS.success} />
-          <Text style={styles.freeReminderText}>
-            Crisis support is always free, 24/7/365
-          </Text>
-        </View>
+              <Text style={styles.starsText}>4.9</Text>
+            </View>
+          </View>
+        </ScrollView>
 
         {/* CTA Button */}
-        <Pressable
-          style={({ pressed }) => [
-            styles.ctaButton,
-            pressed && { opacity: 0.9 },
-            loading && { opacity: 0.6 },
-          ]}
-          onPress={handlePurchase}
-          disabled={loading}
-        >
-          <Text style={styles.ctaText}>
-            {loading ? 'Processing...' : `Start ${selectedPlan === 'pro' ? 'Pro' : 'Family'} Plan`}
+        <View style={styles.ctaSection}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.ctaButton,
+              pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+              loading && { opacity: 0.6 },
+            ]}
+            onPress={handlePurchase}
+            disabled={loading}
+          >
+            <Text style={styles.ctaText}>
+              {loading ? 'Processing...' : `Start ${selectedPlan === 'pro' ? 'Pro' : 'Family'} — $${isYearly ? pricing.yearly : pricing.monthly}${isYearly ? '/year' : '/mo'}`}
+            </Text>
+          </Pressable>
+          
+          <Text style={styles.ctaSubtext}>
+            Cancel anytime. {isYearly ? '7-day' : '3-day'} free trial.
           </Text>
-        </Pressable>
 
-        {/* Restore / Terms */}
-        <View style={styles.footer}>
-          <Pressable onPress={handleRestore}>
-            <Text style={styles.footerLink}>Restore Purchases</Text>
-          </Pressable>
-          <Text style={styles.footerDot}>•</Text>
-          <Pressable>
-            <Text style={styles.footerLink}>Terms</Text>
-          </Pressable>
-          <Text style={styles.footerDot}>•</Text>
-          <Pressable>
-            <Text style={styles.footerLink}>Privacy</Text>
-          </Pressable>
+          {/* Footer Links */}
+          <View style={styles.footer}>
+            <Pressable onPress={handleRestore}>
+              <Text style={styles.footerLink}>Restore</Text>
+            </Pressable>
+            <Text style={styles.footerDot}>•</Text>
+            <Pressable>
+              <Text style={styles.footerLink}>Terms</Text>
+            </Pressable>
+            <Text style={styles.footerDot}>•</Text>
+            <Pressable>
+              <Text style={styles.footerLink}>Privacy</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Dev toggle */}
@@ -223,18 +276,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    paddingHorizontal: 20,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 8,
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: COLORS.text,
   },
   closeBtn: {
@@ -253,79 +306,120 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     alignSelf: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   featureText: {
     fontSize: 14,
     color: COLORS.accent,
-    fontWeight: '500',
+    fontWeight: '600',
   },
-  planToggle: {
+  planCards: {
     flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  planCard: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    position: 'relative',
+  },
+  planCardActive: {
+    borderColor: COLORS.accent,
+    backgroundColor: COLORS.accent + '10',
+  },
+  planCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  planCardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  planCardPrice: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: COLORS.text,
+  },
+  planCardPriceUnit: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.textSecondary,
+  },
+  planCardBilled: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  planCardNote: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 4,
+  },
+  bestValueBadge: {
+    position: 'absolute',
+    top: -10,
+    right: 12,
+    backgroundColor: COLORS.success,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  bestValueText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
+  billingToggle: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
     backgroundColor: COLORS.surface,
     borderRadius: 12,
     padding: 4,
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  planTab: {
+  billingOption: {
     flex: 1,
-    paddingVertical: 12,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
     borderRadius: 10,
-    position: 'relative',
   },
-  planTabActive: {
+  billingOptionActive: {
     backgroundColor: COLORS.accent,
   },
-  planTabText: {
-    fontSize: 15,
+  billingOptionText: {
+    fontSize: 14,
     fontWeight: '600',
     color: COLORS.textSecondary,
   },
-  planTabTextActive: {
+  billingOptionTextActive: {
     color: '#fff',
   },
   saveBadge: {
-    position: 'absolute',
-    top: -8,
-    right: 8,
     backgroundColor: COLORS.success,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
   saveBadgeText: {
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: '700',
     color: '#fff',
   },
-  priceSection: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  price: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  priceUnit: {
-    fontSize: 18,
-    color: COLORS.textSecondary,
-    marginLeft: 4,
-  },
-  familyNote: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
   featuresSection: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 16,
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 13,
@@ -339,41 +433,96 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
+  },
+  featureIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: COLORS.accent + '20',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureIconHighlight: {
+    backgroundColor: COLORS.accent,
   },
   featureRowText: {
     fontSize: 15,
     color: COLORS.text,
+    flex: 1,
+  },
+  featureRowTextHighlight: {
+    fontWeight: '600',
   },
   freeReminder: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    marginTop: 16,
+    paddingVertical: 12,
+    marginHorizontal: 20,
+    backgroundColor: COLORS.success + '10',
+    borderRadius: 12,
+    marginBottom: 12,
   },
   freeReminderText: {
     fontSize: 13,
     color: COLORS.success,
+    fontWeight: '500',
+  },
+  socialProof: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+  socialProofText: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginBottom: 6,
+  },
+  stars: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  starsText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginLeft: 6,
+  },
+  ctaSection: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
   },
   ctaButton: {
     backgroundColor: COLORS.accent,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 24,
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   ctaText: {
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#fff',
+  },
+  ctaSubtext: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginTop: 8,
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    marginTop: 16,
+    gap: 12,
+    marginTop: 12,
   },
   footerLink: {
     fontSize: 13,
@@ -384,7 +533,6 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
   devButton: {
-    marginTop: 16,
     paddingVertical: 12,
     alignItems: 'center',
   },
