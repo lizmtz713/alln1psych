@@ -7,8 +7,8 @@
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Free tier API key - users can add their own in settings for higher limits
-const DEFAULT_API_KEY = ''; // Will prompt user to add key
+// Free tier API key - works out of the box
+const DEFAULT_API_KEY = 'fe119f4e4a4d36a14c97640da75e44e1';
 const STORAGE_KEYS = {
   apiKey: 'weather_api_key',
   lastWeather: 'weather_last_data',
@@ -60,19 +60,18 @@ class WeatherService {
   }
 
   /**
-   * Get API key (user's or prompt to add)
+   * Get API key (user's custom key or default)
    */
-  async getApiKey(): Promise<string | null> {
-    const key = await AsyncStorage.getItem(STORAGE_KEYS.apiKey);
-    return key || null;
+  async getApiKey(): Promise<string> {
+    const customKey = await AsyncStorage.getItem(STORAGE_KEYS.apiKey);
+    return customKey || DEFAULT_API_KEY;
   }
 
   /**
-   * Check if weather is configured
+   * Check if weather is configured (always true now with default key)
    */
   async isConfigured(): Promise<boolean> {
-    const key = await this.getApiKey();
-    return !!key;
+    return true; // Always configured with default key
   }
 
   /**
