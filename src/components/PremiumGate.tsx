@@ -91,10 +91,10 @@ export function PremiumGate({ visible, onClose, feature = 'ai' }: PremiumGatePro
 
           {/* Price */}
           <View style={styles.priceWrap}>
-            <Text style={styles.price}>$9.99</Text>
-            <Text style={styles.priceUnit}>/month</Text>
+            <Text style={styles.price}>$39.99</Text>
+            <Text style={styles.priceUnit}>/year</Text>
           </View>
-          <Text style={styles.priceHint}>Cancel anytime. Your growth matters more than a subscription.</Text>
+          <Text style={styles.priceHint}>Just $3.33/mo. Cancel anytime. Your growth matters.</Text>
 
           {/* CTA */}
           <Pressable
