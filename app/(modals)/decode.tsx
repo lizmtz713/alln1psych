@@ -244,7 +244,7 @@ export default function DecodeScreen() {
             <>
               <Text style={styles.prompt}>Paste what they sent you.</Text>
               <TextInput
-                style={[styles.largeInput, { minHeight: 120 }]}
+                style={styles.largeInput}
                 placeholder="Paste their message here..."
                 placeholderTextColor={TEXT_SECONDARY}
                 value={message}

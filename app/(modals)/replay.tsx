@@ -24,18 +24,15 @@ import * as Voice from '../../src/services/voice';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
-
-// Use design system
-const BG = COLORS.background;
-const CARD_BG = COLORS.surface;
-const CARD_BORDER = COLORS.border;
-const TEXT_PRIMARY = COLORS.text;
-const TEXT_SECONDARY = COLORS.textSecondary;
-const ACCENT = COLORS.accent;
-const AI_HEADER = COLORS.accent;
-const AI_BODY = COLORS.text;
-const LOADING_TEXT = COLORS.textMuted;
+const BG = '#09090F';
+const CARD_BG = '#111118';
+const CARD_BORDER = 'rgba(255,255,255,0.06)';
+const TEXT_PRIMARY = '#F0F0F5';
+const TEXT_SECONDARY = '#8888A0';
+const ACCENT = '#7C4DFF';
+const AI_HEADER = '#7C4DFF';
+const AI_BODY = '#E0E0E0';
+const LOADING_TEXT = '#8888A0';
 
 const REPLAY_MIRROR_SYSTEM = `You are Psych, an emotional intelligence companion. The user just told you something that happened to them. Your job in this phase is ONLY to mirror it back accurately.
 Restate what happened in clear, organized language. Use this format:
@@ -294,12 +291,13 @@ export default function ReplayScreen() {
               <Text style={styles.subtitle}>Just talk — no structure needed.</Text>
               <View style={styles.inputCard}>
                 <TextInput
-                  style={[styles.largeInput, { minHeight: 140 }]}
+                  style={styles.largeInput}
                   placeholder="What happened?"
                   placeholderTextColor={TEXT_SECONDARY}
                   value={story}
                   onChangeText={setStory}
                   multiline
+                  minHeight={140}
                   textAlignVertical="top"
                 />
                 <View style={styles.inputRow}>
@@ -430,173 +428,36 @@ export default function ReplayScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'space-between', 
-    paddingHorizontal: SPACING.lg, 
-    paddingVertical: SPACING.md, 
-    borderBottomWidth: 1, 
-    borderBottomColor: COLORS.border 
-  },
-  backBtn: { 
-    width: 44, 
-    height: 44, 
-    alignItems: 'center', 
-    justifyContent: 'center' 
-  },
-  headerTitle: { 
-    ...TYPOGRAPHY.headlineMd, 
-    color: COLORS.text 
-  },
-  headerRight: { width: 44 },
+  container: { flex: 1, backgroundColor: BG },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: CARD_BORDER },
+  backBtn: { padding: 8 },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY },
+  headerRight: { width: 40 },
   scroll: { flex: 1 },
-  scrollContent: { padding: SPACING.lg, paddingBottom: SPACING.xxxl },
-  prompt: { 
-    ...TYPOGRAPHY.headlineLg, 
-    color: COLORS.text, 
-    marginBottom: SPACING.xs 
-  },
-  subtitle: { 
-    ...TYPOGRAPHY.bodyMd, 
-    color: COLORS.textSecondary, 
-    marginBottom: SPACING.lg 
-  },
-  inputCard: { 
-    backgroundColor: COLORS.surface, 
-    borderRadius: BORDER_RADIUS.lg, 
-    borderWidth: 1, 
-    borderColor: COLORS.border, 
-    padding: SPACING.lg, 
-    marginBottom: SPACING.lg 
-  },
-  largeInput: { 
-    backgroundColor: COLORS.background, 
-    color: COLORS.text, 
-    fontSize: 16, 
-    padding: SPACING.lg, 
-    borderRadius: BORDER_RADIUS.md, 
-    textAlignVertical: 'top',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  inputRow: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    gap: SPACING.md, 
-    marginTop: SPACING.md 
-  },
-  micBtn: { 
-    width: 48, 
-    height: 48, 
-    borderRadius: 24, 
-    backgroundColor: COLORS.accentBg, 
-    alignItems: 'center', 
-    justifyContent: 'center' 
-  },
-  micBtnRecording: { 
-    backgroundColor: COLORS.accent + '40' 
-  },
-  liveText: { 
-    ...TYPOGRAPHY.bodySm, 
-    color: COLORS.textSecondary, 
-    flex: 1 
-  },
-  primaryBtn: { 
-    backgroundColor: COLORS.accent, 
-    paddingVertical: SPACING.lg, 
-    paddingHorizontal: SPACING.xl, 
-    borderRadius: BORDER_RADIUS.md, 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    flexDirection: 'row', 
-    gap: SPACING.sm 
-  },
+  scrollContent: { padding: 20, paddingBottom: 40 },
+  prompt: { fontSize: 18, fontWeight: '500', color: TEXT_PRIMARY, marginBottom: 4 },
+  subtitle: { fontSize: 15, color: TEXT_SECONDARY, marginBottom: 16, lineHeight: 22 },
+  inputCard: { backgroundColor: CARD_BG, borderRadius: 14, borderWidth: 1, borderColor: CARD_BORDER, padding: 16, marginBottom: 16 },
+  largeInput: { backgroundColor: CARD_BG, color: TEXT_PRIMARY, fontSize: 16, minHeight: 140, padding: 14, borderRadius: 12, textAlignVertical: 'top' },
+  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 },
+  micBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' },
+  micBtnRecording: { backgroundColor: 'rgba(124,77,255,0.3)' },
+  liveText: { fontSize: 14, color: TEXT_SECONDARY, flex: 1 },
+  primaryBtn: { backgroundColor: ACCENT, paddingVertical: 16, paddingHorizontal: 20, borderRadius: 14, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
   primaryBtnDisabled: { opacity: 0.5 },
-  primaryBtnText: { 
-    ...TYPOGRAPHY.labelLg, 
-    color: '#fff', 
-    fontWeight: '600' 
-  },
-  secondaryBtn: { 
-    backgroundColor: COLORS.surface, 
-    borderWidth: 1, 
-    borderColor: COLORS.border, 
-    paddingVertical: SPACING.lg, 
-    paddingHorizontal: SPACING.xl, 
-    borderRadius: BORDER_RADIUS.md, 
-    alignItems: 'center', 
-    flex: 1 
-  },
-  secondaryBtnText: { 
-    ...TYPOGRAPHY.labelLg, 
-    color: COLORS.text 
-  },
-  twoButtonRow: { 
-    flexDirection: 'row', 
-    gap: SPACING.md, 
-    marginTop: SPACING.sm 
-  },
-  responseCard: { 
-    backgroundColor: COLORS.surface, 
-    borderWidth: 1, 
-    borderColor: COLORS.border, 
-    borderRadius: BORDER_RADIUS.lg, 
-    padding: SPACING.lg, 
-    marginBottom: SPACING.xl 
-  },
-  sectionHeader: { 
-    ...TYPOGRAPHY.labelMd, 
-    fontWeight: '700', 
-    color: COLORS.accent, 
-    marginBottom: SPACING.xs 
-  },
-  aiBody: { 
-    ...TYPOGRAPHY.bodyMd, 
-    color: COLORS.text, 
-    lineHeight: 22, 
-    marginBottom: SPACING.sm 
-  },
-  loadingWrap: { 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    paddingVertical: SPACING.xxl 
-  },
-  loadingText: { 
-    ...TYPOGRAPHY.bodyMd, 
-    color: COLORS.textMuted, 
-    marginTop: SPACING.sm 
-  },
-  checkoutPrompt: { 
-    ...TYPOGRAPHY.headlineSm, 
-    color: COLORS.text, 
-    marginBottom: SPACING.md, 
-    marginTop: SPACING.md 
-  },
-  chipRow: { 
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    gap: SPACING.sm, 
-    marginBottom: SPACING.lg 
-  },
-  chip: { 
-    backgroundColor: COLORS.surface, 
-    borderRadius: BORDER_RADIUS.md, 
-    paddingVertical: SPACING.md, 
-    paddingHorizontal: SPACING.lg, 
-    borderWidth: 1, 
-    borderColor: COLORS.border 
-  },
-  chipSelected: { 
-    borderColor: COLORS.accent, 
-    backgroundColor: COLORS.accentBg 
-  },
-  chipText: { 
-    ...TYPOGRAPHY.labelMd, 
-    color: COLORS.text 
-  },
-  chipTextSelected: { 
-    color: COLORS.accent 
-  },
+  primaryBtnText: { fontSize: 17, fontWeight: '600', color: '#fff' },
+  secondaryBtn: { backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', paddingVertical: 16, paddingHorizontal: 20, borderRadius: 14, alignItems: 'center', flex: 1 },
+  secondaryBtnText: { fontSize: 17, fontWeight: '600', color: TEXT_PRIMARY },
+  twoButtonRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  responseCard: { backgroundColor: CARD_BG, borderWidth: 1, borderColor: CARD_BORDER, borderRadius: 14, padding: 16, marginBottom: 20 },
+  sectionHeader: { fontWeight: '700', color: AI_HEADER, fontSize: 15, marginBottom: 4 },
+  aiBody: { color: AI_BODY, fontSize: 15, lineHeight: 22, marginBottom: 8 },
+  loadingWrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 24 },
+  loadingText: { fontSize: 15, color: LOADING_TEXT, marginTop: 8 },
+  checkoutPrompt: { fontSize: 16, fontWeight: '500', color: TEXT_PRIMARY, marginBottom: 12, marginTop: 8 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 8 },
+  chip: { backgroundColor: CARD_BG, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: CARD_BORDER },
+  chipSelected: { borderColor: ACCENT, backgroundColor: 'rgba(124,77,255,0.1)' },
+  chipText: { fontSize: 15, color: TEXT_PRIMARY },
+  chipTextSelected: { color: ACCENT },
 });
