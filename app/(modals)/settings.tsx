@@ -24,6 +24,7 @@ import { useCircleStore } from '../../src/stores/circleStore';
 import { useEducationStore } from '../../src/stores/educationStore';
 import { usePremiumStore } from '../../src/stores/premiumStore';
 import { useHealthStore } from '../../src/stores/healthStore';
+import { useSpotifyStore } from '../../src/stores/spotifyStore';
 import { registerForPushNotifications } from '../../src/services/notifications';
 import {
   buildExportData,
@@ -224,6 +225,236 @@ const healthStyles = StyleSheet.create({
     fontSize: 13,
     color: TEXT_MUTED,
     textTransform: 'capitalize',
+  },
+});
+
+function SpotifyConnectionCard() {
+  const isConnected = useSpotifyStore((s) => s.isConnected);
+  const isConnecting = useSpotifyStore((s) => s.isConnecting);
+  const listeningMood = useSpotifyStore((s) => s.listeningMood);
+  const moodScore = useSpotifyStore((s) => s.moodScore);
+  const lastUpdated = useSpotifyStore((s) => s.lastUpdated);
+  const checkConnection = useSpotifyStore((s) => s.checkConnection);
+  const connect = useSpotifyStore((s) => s.connect);
+  const disconnect = useSpotifyStore((s) => s.disconnect);
+  const refreshData = useSpotifyStore((s) => s.refreshData);
+
+  useEffect(() => {
+    checkConnection();
+  }, []);
+
+  const handleConnect = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const success = await connect();
+    if (success) {
+      Alert.alert('Connected!', 'Spotify is now tracking your listening mood.');
+    }
+  };
+
+  const handleDisconnect = () => {
+    Alert.alert(
+      'Disconnect Spotify?',
+      'Your listening data will no longer sync.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Disconnect',
+          style: 'destructive',
+          onPress: () => disconnect(),
+        },
+      ]
+    );
+  };
+
+  const handleRefresh = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await refreshData();
+  };
+
+  // Get mood color based on valence
+  const getMoodColor = (valence: number) => {
+    if (valence >= 0.6) return '#4ADE80'; // green
+    if (valence >= 0.4) return '#FACC15'; // yellow
+    if (valence >= 0.25) return '#FB923C'; // orange
+    return '#F87171'; // red
+  };
+
+  return (
+    <>
+      <Text style={styles.sectionTitle}>Music & Mood</Text>
+      <View style={styles.card}>
+        {!isConnected ? (
+          <>
+            <View style={styles.row}>
+              <Ionicons name="musical-notes" size={24} color="#1DB954" />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.rowLabel}>Connect Spotify</Text>
+                <Text style={styles.rowHint}>
+                  Track your listening mood and see patterns with your gauges
+                </Text>
+              </View>
+            </View>
+            <Pressable
+              style={({ pressed }) => [
+                spotifyStyles.connectBtn,
+                pressed && { opacity: 0.9 },
+                isConnecting && { opacity: 0.6 },
+              ]}
+              onPress={handleConnect}
+              disabled={isConnecting}
+            >
+              <Ionicons name="logo-spotify" size={20} color="#fff" />
+              <Text style={spotifyStyles.connectBtnText}>
+                {isConnecting ? 'Connecting...' : 'Connect Spotify'}
+              </Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <View style={styles.row}>
+              <Ionicons name="checkmark-circle" size={24} color="#1DB954" />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.rowLabel}>Spotify Connected</Text>
+                <Text style={styles.rowHint}>
+                  {lastUpdated
+                    ? `Last sync: ${new Date(lastUpdated).toLocaleTimeString()}`
+                    : 'Tap to sync'}
+                </Text>
+              </View>
+              <Pressable onPress={handleRefresh} style={spotifyStyles.syncBtn}>
+                <Ionicons name="refresh" size={18} color="#1DB954" />
+              </Pressable>
+            </View>
+
+            {listeningMood && (
+              <View style={spotifyStyles.moodSection}>
+                <View style={spotifyStyles.moodHeader}>
+                  <Text style={spotifyStyles.moodLabel}>24h Listening Mood</Text>
+                  <View
+                    style={[
+                      spotifyStyles.moodBadge,
+                      { backgroundColor: getMoodColor(listeningMood.averageValence) + '30' },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        spotifyStyles.moodBadgeText,
+                        { color: getMoodColor(listeningMood.averageValence) },
+                      ]}
+                    >
+                      {listeningMood.moodLabel}
+                    </Text>
+                  </View>
+                </View>
+                <View style={spotifyStyles.statsRow}>
+                  <View style={spotifyStyles.statItem}>
+                    <Text style={spotifyStyles.statValue}>
+                      {Math.round(listeningMood.averageValence * 100)}%
+                    </Text>
+                    <Text style={spotifyStyles.statLabel}>Positivity</Text>
+                  </View>
+                  <View style={spotifyStyles.statItem}>
+                    <Text style={spotifyStyles.statValue}>
+                      {Math.round(listeningMood.averageEnergy * 100)}%
+                    </Text>
+                    <Text style={spotifyStyles.statLabel}>Energy</Text>
+                  </View>
+                  <View style={spotifyStyles.statItem}>
+                    <Text style={spotifyStyles.statValue}>{listeningMood.trackCount}</Text>
+                    <Text style={spotifyStyles.statLabel}>Tracks</Text>
+                  </View>
+                  {moodScore !== null && (
+                    <View style={spotifyStyles.statItem}>
+                      <Text style={spotifyStyles.statValue}>{moodScore}</Text>
+                      <Text style={spotifyStyles.statLabel}>Mood Score</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
+
+            <Pressable style={spotifyStyles.disconnectBtn} onPress={handleDisconnect}>
+              <Text style={spotifyStyles.disconnectText}>Disconnect Spotify</Text>
+            </Pressable>
+          </>
+        )}
+      </View>
+    </>
+  );
+}
+
+const spotifyStyles = StyleSheet.create({
+  connectBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#1DB954',
+    borderRadius: 12,
+    paddingVertical: 12,
+    marginTop: 16,
+  },
+  connectBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  syncBtn: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#1DB954' + '20',
+  },
+  moodSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  moodHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  moodLabel: {
+    fontSize: 13,
+    color: TEXT_MUTED,
+    fontWeight: '500',
+  },
+  moodBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  moodBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: TEXT,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: TEXT_MUTED,
+    marginTop: 2,
+  },
+  disconnectBtn: {
+    marginTop: 16,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  disconnectText: {
+    fontSize: 13,
+    color: TEXT_DIM,
   },
 });
 
@@ -602,6 +833,9 @@ export default function SettingsScreen() {
 
         {/* Apple Health Integration */}
         <HealthConnectionCard />
+
+        {/* Spotify Integration */}
+        <SpotifyConnectionCard />
 
         {/* Specialized Modes */}
         <Text style={styles.sectionTitle}>Specialized Modes</Text>
