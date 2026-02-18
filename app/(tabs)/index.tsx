@@ -339,6 +339,7 @@ export default function HomeScreen() {
 
   // Quick actions for horizontal scroll
   const quickActions = [
+    { label: 'Patterns', icon: 'analytics', route: '/(modals)/patterns' as const },
     { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const },
     { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const },
     { label: 'Relate', icon: 'heart-circle', route: '/(modals)/relate' as const },
