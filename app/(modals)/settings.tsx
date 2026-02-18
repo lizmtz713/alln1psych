@@ -20,6 +20,7 @@ import { useConversationStore } from '../../src/stores/conversationStore';
 import { useConversationSummaryStore } from '../../src/stores/conversationSummaryStore';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useEducationStore } from '../../src/stores/educationStore';
+import { usePremiumStore } from '../../src/stores/premiumStore';
 import { registerForPushNotifications } from '../../src/services/notifications';
 import {
   buildExportData,
@@ -35,6 +36,129 @@ const CARD_BG = '#111118';
 const TEXT = '#F0F0F5';
 const TEXT_MUTED = '#8888A0';
 const TEXT_DIM = '#55556A';
+
+function PremiumCard() {
+  const isPremium = usePremiumStore((s) => s.isPremium());
+  const remaining = usePremiumStore((s) => s.getRemainingAIChats());
+  const _setTier = usePremiumStore((s) => s._setTier);
+  
+  if (isPremium) {
+    return (
+      <View style={[premiumStyles.card, premiumStyles.cardPremium]}>
+        <View style={premiumStyles.row}>
+          <Ionicons name="star" size={24} color="#FFD700" />
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={premiumStyles.title}>InGauge Premium</Text>
+            <Text style={premiumStyles.subtitle}>Unlimited access • All features</Text>
+          </View>
+        </View>
+        {__DEV__ && (
+          <Pressable 
+            style={premiumStyles.devButton}
+            onPress={() => _setTier('free')}
+          >
+            <Text style={premiumStyles.devButtonText}>DEV: Switch to Free</Text>
+          </Pressable>
+        )}
+      </View>
+    );
+  }
+  
+  return (
+    <View style={premiumStyles.card}>
+      <View style={premiumStyles.row}>
+        <View style={premiumStyles.iconWrap}>
+          <Ionicons name="sparkles" size={20} color={ACCENT} />
+        </View>
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          <Text style={premiumStyles.title}>Free Plan</Text>
+          <Text style={premiumStyles.subtitle}>
+            {remaining > 0 
+              ? `${remaining} AI chat${remaining !== 1 ? 's' : ''} left today`
+              : 'AI chats refresh tomorrow'
+            }
+          </Text>
+        </View>
+      </View>
+      <Pressable 
+        style={({ pressed }) => [premiumStyles.upgradeBtn, pressed && { opacity: 0.9 }]}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          // TODO: Show premium modal
+          Alert.alert('Coming Soon', 'Premium subscriptions launching soon!');
+        }}
+      >
+        <Text style={premiumStyles.upgradeBtnText}>Upgrade • $9.99/mo</Text>
+      </Pressable>
+      {__DEV__ && (
+        <Pressable 
+          style={premiumStyles.devButton}
+          onPress={() => _setTier('premium')}
+        >
+          <Text style={premiumStyles.devButtonText}>DEV: Switch to Premium</Text>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
+const premiumStyles = StyleSheet.create({
+  card: {
+    backgroundColor: CARD_BG,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  cardPremium: {
+    borderColor: '#FFD700' + '40',
+    backgroundColor: '#FFD700' + '08',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: ACCENT + '20',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: TEXT,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: TEXT_MUTED,
+    marginTop: 2,
+  },
+  upgradeBtn: {
+    backgroundColor: ACCENT,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  upgradeBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  devButton: {
+    marginTop: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  devButtonText: {
+    fontSize: 12,
+    color: TEXT_DIM,
+  },
+});
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -97,6 +221,9 @@ export default function SettingsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Premium Status */}
+        <PremiumCard />
+
         {/* Notifications */}
         <Text style={styles.sectionTitle}>Notifications</Text>
         <View style={styles.card}>
