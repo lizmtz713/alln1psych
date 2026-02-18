@@ -24,6 +24,7 @@ export default function ModalsLayout() {
       <Stack.Screen name="relate" options={{ presentation: 'modal' }} />
       <Stack.Screen name="love" options={{ presentation: 'modal' }} />
       <Stack.Screen name="history" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="prompt-generator" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

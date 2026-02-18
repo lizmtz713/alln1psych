@@ -94,6 +94,8 @@ export default function CircleScreen() {
     markNudgeRead,
     markNudgeActedOn,
     updateMemberBirthday,
+    updateMemberLoveLanguage,
+    getLoveLanguageNudge,
   } = useCircleStore();
 
   const isDemoData = members.some((m) => DEMO_MEMBER_IDS.includes(m.id));
@@ -305,6 +307,53 @@ export default function CircleScreen() {
                           <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>🎂 Add birthday</Text>
                         </Pressable>
                       )}
+
+                      {/* Love Language */}
+                      <View style={{ marginBottom: 12 }}>
+                        <Text style={{ color: COLORS.textMuted, fontSize: 12, marginBottom: 6 }}>💜 Love language</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -8 }}>
+                          <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 8 }}>
+                            {[
+                              { value: 'words', label: 'Words', emoji: '💬' },
+                              { value: 'acts', label: 'Acts', emoji: '🤝' },
+                              { value: 'gifts', label: 'Gifts', emoji: '🎁' },
+                              { value: 'time', label: 'Time', emoji: '⏰' },
+                              { value: 'touch', label: 'Touch', emoji: '🤗' },
+                            ].map((opt) => (
+                              <Pressable
+                                key={opt.value}
+                                onPress={() => {
+                                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                  updateMemberLoveLanguage(m.id, m.loveLanguage === opt.value ? null : opt.value as any);
+                                }}
+                                style={{
+                                  paddingHorizontal: 12,
+                                  paddingVertical: 6,
+                                  borderRadius: 16,
+                                  backgroundColor: m.loveLanguage === opt.value ? COLORS.accent : COLORS.surface,
+                                }}
+                              >
+                                <Text style={{ color: m.loveLanguage === opt.value ? '#fff' : COLORS.text, fontSize: 13 }}>
+                                  {opt.emoji} {opt.label}
+                                </Text>
+                              </Pressable>
+                            ))}
+                          </View>
+                        </ScrollView>
+                      </View>
+
+                      {/* Love Language Nudge */}
+                      {m.loveLanguage && (() => {
+                        const nudge = getLoveLanguageNudge(m);
+                        if (!nudge) return null;
+                        return (
+                          <View style={{ backgroundColor: COLORS.accentBg, borderRadius: 12, padding: 12, marginBottom: 12, borderLeftWidth: 3, borderLeftColor: COLORS.accent }}>
+                            <Text style={{ color: COLORS.textMuted, fontSize: 11, marginBottom: 4 }}>💡 SUGGESTION BASED ON THEIR LOVE LANGUAGE</Text>
+                            <Text style={{ color: COLORS.text, fontSize: 14, lineHeight: 20 }}>{nudge}</Text>
+                          </View>
+                        );
+                      })()}
+
                       <Text style={styles.actionText}>{action}</Text>
                       <View style={styles.actionRow}>
                         <Pressable

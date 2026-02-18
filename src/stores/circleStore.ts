@@ -22,6 +22,8 @@ export type RelationshipType =
   | 'mentor'
   | 'other';
 
+export type LoveLanguage = 'words' | 'acts' | 'gifts' | 'time' | 'touch' | null;
+
 export interface CircleMember {
   id: string;
   name: string;
@@ -34,6 +36,8 @@ export interface CircleMember {
   addedAt: Date;
   /** ISO date string "1999-03-15" — unlocks relationship insights */
   birthday?: string;
+  /** Their love language — enables personalized nudges */
+  loveLanguage?: LoveLanguage;
 }
 
 export interface MoodEntry {
@@ -110,6 +114,8 @@ interface CircleState {
   removeMember: (id: string) => void;
   updateMemberTemperature: (id: string, temp: Temperature) => void;
   updateMemberBirthday: (id: string, birthday: string | undefined) => void;
+  updateMemberLoveLanguage: (id: string, lang: LoveLanguage) => void;
+  getLoveLanguageNudge: (member: CircleMember) => string | null;
   updateMyTemperature: (temp: Temperature, note?: string) => void;
   addMoodCheckin: (mood: Temperature, note?: string) => void;
   addNudge: (memberName: string, message: string) => void;
@@ -203,6 +209,64 @@ export const useCircleStore = create<CircleState>((set) => ({
         m.id === id ? { ...m, birthday: birthday || undefined, lastUpdated: new Date() } : m
       ),
     }));
+  },
+
+  updateMemberLoveLanguage: (id, lang) => {
+    set((state) => ({
+      members: state.members.map((m) =>
+        m.id === id ? { ...m, loveLanguage: lang, lastUpdated: new Date() } : m
+      ),
+    }));
+  },
+
+  getLoveLanguageNudge: (member) => {
+    if (!member.loveLanguage) return null;
+    
+    const NUDGES: Record<string, string[]> = {
+      words: [
+        `Send ${member.name} a text telling them why you appreciate them`,
+        `Write ${member.name} a note about what makes them special`,
+        `Tell ${member.name} specifically what you admire about them`,
+        `Compliment ${member.name} on something they did recently`,
+        `Send ${member.name} an encouraging voice message`,
+      ],
+      acts: [
+        `Do something helpful for ${member.name} without being asked`,
+        `Offer to run an errand or handle a task for ${member.name}`,
+        `Cook or order food for ${member.name}`,
+        `Help ${member.name} with something on their to-do list`,
+        `Take care of something ${member.name} has been putting off`,
+      ],
+      gifts: [
+        `Get ${member.name} their favorite snack or drink`,
+        `Find a small gift that reminded you of ${member.name}`,
+        `Send ${member.name} flowers or a surprise delivery`,
+        `Pick up something ${member.name} mentioned wanting`,
+        `Create or make something personal for ${member.name}`,
+      ],
+      time: [
+        `Schedule uninterrupted time with ${member.name}`,
+        `Put your phone away and be fully present with ${member.name}`,
+        `Plan an activity you can do together with ${member.name}`,
+        `Go for a walk or drive with ${member.name}, just to talk`,
+        `Video call ${member.name} if you can't meet in person`,
+      ],
+      touch: [
+        `Give ${member.name} a long hug when you see them`,
+        `Sit close to ${member.name} — physical presence matters`,
+        `Offer ${member.name} a shoulder massage or back rub`,
+        `Hold ${member.name}'s hand or put your arm around them`,
+        `Make plans to see ${member.name} in person`,
+      ],
+    };
+    
+    const options = NUDGES[member.loveLanguage] || [];
+    if (!options.length) return null;
+    
+    // Rotate based on day + member name hash for variety
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+    const nameHash = member.name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return options[(dayOfYear + nameHash) % options.length];
   },
 
   updateMyTemperature: (temp, note) =>
