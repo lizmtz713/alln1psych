@@ -440,7 +440,7 @@ export default function OnboardingScreen() {
                   />
                 )}
 
-                {/* Optional: Tell me more (collapsed by default) */}
+                {/* Optional: Go deeper or skip */}
                 <Pressable
                   style={styles.optionalToggle}
                   onPress={() => {
@@ -449,8 +449,11 @@ export default function OnboardingScreen() {
                   }}
                 >
                   <Text style={styles.optionalToggleText}>
-                    {showOptional ? '▼' : '▶'} Tell me more (optional)
+                    {showOptional ? '▼ Less' : '▶ Want to go deeper?'}
                   </Text>
+                  {!showOptional && (
+                    <Text style={styles.optionalToggleHint}>Or skip — you can always add this later in Settings</Text>
+                  )}
                 </Pressable>
 
                 {showOptional && (
@@ -848,9 +851,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   optionalToggleText: {
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.accent,
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  optionalToggleHint: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginTop: 4,
   },
   optionalSection: {
     backgroundColor: COLORS.surface,
