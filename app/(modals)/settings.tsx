@@ -9,6 +9,7 @@ import {
   Alert,
   Linking,
   Platform,
+  TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,6 +30,7 @@ import {
   shareExportFile,
   buildTherapistSummary,
 } from '../../src/services/exportData';
+import { getOpenAIKey, setOpenAIKey } from '../../src/services/ai';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
@@ -353,6 +355,50 @@ export default function SettingsScreen() {
   const router = useRouter();
   const settings = useSettingsStore();
   const user = useUserStore();
+  
+  // API Key state
+  const [apiKey, setApiKey] = useState('');
+  const [apiKeyMasked, setApiKeyMasked] = useState('');
+  const [showApiInput, setShowApiInput] = useState(false);
+  
+  // Load existing API key on mount
+  useEffect(() => {
+    getOpenAIKey().then((key) => {
+      if (key) {
+        setApiKeyMasked('sk-••••••••' + key.slice(-4));
+      }
+    });
+  }, []);
+  
+  const handleSaveApiKey = async () => {
+    if (!apiKey.trim()) return;
+    if (!apiKey.startsWith('sk-')) {
+      Alert.alert('Invalid Key', 'OpenAI API keys start with "sk-"');
+      return;
+    }
+    await setOpenAIKey(apiKey.trim());
+    setApiKeyMasked('sk-••••••••' + apiKey.slice(-4));
+    setApiKey('');
+    setShowApiInput(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Alert.alert('Saved', 'Your API key is securely stored.');
+  };
+  
+  const handleRemoveApiKey = () => {
+    Alert.alert('Remove API Key?', 'You\'ll use the default service instead.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: async () => {
+          await setOpenAIKey(null);
+          setApiKeyMasked('');
+          setShowApiInput(false);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        },
+      },
+    ]);
+  };
 
   const handleExportData = async () => {
     try {
@@ -470,6 +516,58 @@ export default function SettingsScreen() {
               thumbColor={settings.aiVoiceEnabled && usePremiumStore.getState().isPremium() ? ACCENT : TEXT_MUTED}
             />
           </View>
+        </View>
+
+        {/* API Key (Power Users) */}
+        <Text style={styles.sectionTitle}>Advanced</Text>
+        <View style={styles.card}>
+          <Pressable
+            style={styles.row}
+            onPress={() => setShowApiInput(!showApiInput)}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={styles.rowLabel}>Your OpenAI API Key</Text>
+              <Text style={styles.rowHint}>
+                {apiKeyMasked ? apiKeyMasked : 'Use your own key for unlimited AI'}
+              </Text>
+            </View>
+            <Ionicons name={showApiInput ? 'chevron-up' : 'chevron-down'} size={20} color={TEXT_DIM} />
+          </Pressable>
+          
+          {showApiInput && (
+            <View style={{ padding: 16, borderTopWidth: 1, borderTopColor: COLORS.border }}>
+              <TextInput
+                style={styles.apiInput}
+                placeholder="sk-..."
+                placeholderTextColor={TEXT_DIM}
+                value={apiKey}
+                onChangeText={setApiKey}
+                autoCapitalize="none"
+                autoCorrect={false}
+                secureTextEntry
+              />
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
+                <Pressable
+                  style={[styles.apiButton, { backgroundColor: ACCENT }]}
+                  onPress={handleSaveApiKey}
+                >
+                  <Text style={styles.apiButtonText}>Save Key</Text>
+                </Pressable>
+                {apiKeyMasked ? (
+                  <Pressable
+                    style={[styles.apiButton, { backgroundColor: '#F87171' }]}
+                    onPress={handleRemoveApiKey}
+                  >
+                    <Text style={styles.apiButtonText}>Remove</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+              <Text style={{ fontSize: 12, color: TEXT_DIM, marginTop: 12, lineHeight: 18 }}>
+                Your key is stored securely on-device and never sent to our servers.
+                Get one at platform.openai.com
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Privacy */}
@@ -661,5 +759,25 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.06)',
     marginLeft: 16,
+  },
+  apiInput: {
+    backgroundColor: COLORS.background,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    fontSize: 16,
+    color: TEXT,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  apiButton: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'center',
+  },
+  apiButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#fff',
   },
 });
