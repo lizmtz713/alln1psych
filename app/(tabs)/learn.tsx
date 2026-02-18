@@ -21,18 +21,20 @@ import {
 } from '../../src/data/discoveries';
 
 const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string; route?: string; mode?: 'athlete' | 'spectrum' }[] = [
-  { id: 'breathing', emoji: '🫁', title: 'Breathing Reset', sub: 'Regulate your nervous system in 2 minutes' },
-  { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Decoder', sub: "Identify what you're actually feeling" },
-  { id: 'body-scan', emoji: '🧍', title: 'Body Awareness', sub: 'Map where stress lives in your body' },
-  { id: 'thought-challenger', emoji: '🧠', title: 'Thought Analysis', sub: 'Test your assumptions against reality' },
-  { id: 'emotion-match', emoji: '🎮', title: 'Pattern Recognition', sub: 'Connect emotions to their real sources' },
-  { id: 'trigger-map', emoji: '🗺️', title: 'Trigger Analysis', sub: 'Trace reactions back to their roots' },
-  { id: 'gratitude-jar', emoji: '✨', title: 'Gratitude Practice', sub: "Rewire your brain toward what's working" },
-  { id: 'stress-thermo', emoji: '🌡️', title: 'Stress Assessment', sub: 'Measure your current activation level' },
-  { id: 'comm-builder', emoji: '💬', title: 'Communication Lab', sub: 'Build scripts for difficult conversations' },
-  { id: 'mood-patterns', emoji: '📊', title: 'Mood Intelligence', sub: 'Spot trends in your emotional data' },
-  { id: 'relate', emoji: '💫', title: 'Relate', sub: 'Understand anyone. Enter two birthdays.', route: '/(modals)/relate' },
-  { id: 'love', emoji: '💕', title: 'Love', sub: 'Love, intimacy, connection — no shame, real science.', route: '/(modals)/love' },
+  // AI-Powered Tools (featured)
+  { id: 'replay', emoji: '🔄', title: 'Replay', sub: 'Process what happened with AI', route: '/(modals)/replay' },
+  { id: 'decode', emoji: '🔍', title: 'Decode', sub: 'Analyze messages and situations', route: '/(modals)/decode' },
+  { id: 'relate', emoji: '💫', title: 'Relate', sub: 'Understand anyone deeply', route: '/(modals)/relate' },
+  { id: 'love', emoji: '💕', title: 'Love', sub: 'Love, intimacy, connection', route: '/(modals)/love' },
+  { id: 'help-someone', emoji: '🤝', title: 'Help Someone', sub: 'Support someone you care about', route: '/(modals)/help-someone' },
+  { id: 'role-play', emoji: '🎭', title: 'Role Play', sub: 'Practice difficult conversations', route: '/(modals)/role-play' },
+  // Self-guided activities
+  { id: 'breathing', emoji: '🫁', title: 'Breathing Reset', sub: 'Regulate your nervous system' },
+  { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Decoder', sub: "Identify what you're feeling" },
+  { id: 'body-scan', emoji: '🧍', title: 'Body Awareness', sub: 'Map where stress lives' },
+  { id: 'thought-challenger', emoji: '🧠', title: 'Thought Analysis', sub: 'Test your assumptions' },
+  { id: 'gratitude-jar', emoji: '✨', title: 'Gratitude Practice', sub: "Focus on what's working" },
+  { id: 'mood-patterns', emoji: '📊', title: 'Mood Intelligence', sub: 'Spot emotional trends' },
   // Athlete Mode activities
   { id: 'recovery-check', emoji: '🔋', title: 'Recovery Check', sub: 'Assess sleep, soreness, energy, mood', mode: 'athlete' },
   { id: 'pre-competition', emoji: '🏆', title: 'Pre-Competition', sub: 'Get in your optimal zone', mode: 'athlete' },

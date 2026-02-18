@@ -146,41 +146,6 @@ export function CockpitCluster({
 
   return (
     <View style={styles.container}>
-      {/* Energy flow lines from center to each gauge */}
-      <View style={styles.linesContainer}>
-        {GAUGE_POSITIONS.map(({ key, angle }) => {
-          const gaugeValue = gaugeValues[key as keyof typeof gaugeValues];
-          const lineColor = gaugeValue >= 0 ? getGaugeColor(gaugeValue) : TEXT_MUTED;
-          const opacity = gaugeValue >= 0 ? 0.5 : 0.15;
-          const lineWidth = gaugeValue >= 50 ? 3 : 2;
-          const radians = (angle * Math.PI) / 180;
-          const lineLength = GAUGE_RADIUS - CENTER_SIZE / 2 - GAUGE_SIZE / 2 + 10;
-          
-          return (
-            <View
-              key={`line-${key}`}
-              style={[
-                styles.connectionLine,
-                {
-                  width: lineLength,
-                  height: lineWidth,
-                  backgroundColor: lineColor,
-                  opacity,
-                  shadowColor: lineColor,
-                  shadowOpacity: gaugeValue >= 0 ? 0.5 : 0,
-                  shadowRadius: 4,
-                  transform: [
-                    { translateX: -lineLength / 2 },
-                    { rotate: `${angle + 90}deg` },
-                    { translateX: lineLength / 2 + CENTER_SIZE / 2 - 5 },
-                  ],
-                },
-              ]}
-            />
-          );
-        })}
-      </View>
-
       {/* Center Status Ring with Glow */}
       <Animated.View
         style={[
@@ -286,18 +251,6 @@ const styles = StyleSheet.create({
     height: CLUSTER_SIZE + 40, // Extra space for hint
     alignSelf: 'center',
     position: 'relative',
-  },
-  linesContainer: {
-    position: 'absolute',
-    width: CLUSTER_SIZE,
-    height: CLUSTER_SIZE,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  connectionLine: {
-    position: 'absolute',
-    borderRadius: 2,
-    shadowOffset: { width: 0, height: 0 },
   },
   centerGlow: {
     position: 'absolute',
