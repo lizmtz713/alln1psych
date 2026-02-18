@@ -344,6 +344,7 @@ export default function HomeScreen() {
     { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const },
     { label: 'Role Play', icon: 'people', route: '/(modals)/role-play' as const },
     { label: 'Help', icon: 'heart', route: '/(modals)/help-someone' as const },
+    { label: 'Love', icon: 'heart-half', route: '/(modals)/love' as const },
   ];
 
   return (

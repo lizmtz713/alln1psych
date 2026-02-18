@@ -32,6 +32,7 @@ const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: strin
   { id: 'comm-builder', emoji: '💬', title: 'Communication Lab', sub: 'Build scripts for difficult conversations' },
   { id: 'mood-patterns', emoji: '📊', title: 'Mood Intelligence', sub: 'Spot trends in your emotional data' },
   { id: 'relate', emoji: '💫', title: 'Relate', sub: 'Understand anyone. Enter two birthdays.', route: '/(modals)/relate' },
+  { id: 'love', emoji: '💕', title: 'Love', sub: 'Love, intimacy, connection — no shame, real science.', route: '/(modals)/love' },
   // Athlete Mode activities
   { id: 'recovery-check', emoji: '🔋', title: 'Recovery Check', sub: 'Assess sleep, soreness, energy, mood', mode: 'athlete' },
   { id: 'pre-competition', emoji: '🏆', title: 'Pre-Competition', sub: 'Get in your optimal zone', mode: 'athlete' },
