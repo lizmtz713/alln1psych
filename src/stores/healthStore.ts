@@ -81,6 +81,14 @@ export const useHealthStore = create<HealthState>()(
             stateContributionFromHealth: stateContribution,
             syncError: null,
           });
+          
+          // Auto-update cockpit gauges from health data
+          try {
+            const cockpitStore = require('./cockpitStore').useCockpitStore.getState();
+            cockpitStore.syncBodyFromHealth();
+          } catch (e) {
+            // Cockpit store not available
+          }
         } catch (e) {
           set({ syncError: (e as Error).message });
         }

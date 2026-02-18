@@ -36,6 +36,8 @@ interface CockpitState {
   addLessonBonus: () => void;
   runDailyDecayIfNeeded: () => void;
   setLastCheckInDate: (date: string) => void;
+  /** Sync Body gauge from Apple Health data */
+  syncBodyFromHealth: () => void;
   reset: () => void;
 }
 
@@ -233,6 +235,27 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
       direction: s.direction.value >= 0 ? { ...s.direction, value: clamp(s.direction.value + 5) } : s.direction,
       alignment: s.alignment.value >= 0 ? { ...s.alignment, value: clamp(s.alignment.value + 5) } : s.alignment,
     }));
+  },
+
+  syncBodyFromHealth: () => {
+    try {
+      const healthStore = require('./healthStore').useHealthStore.getState();
+      const bodyScore = healthStore.bodyScoreFromHealth;
+      if (bodyScore !== null && bodyScore !== undefined) {
+        get().updateBody(bodyScore);
+        // Also update State if HRV data available
+        const stateContribution = healthStore.stateContributionFromHealth;
+        if (stateContribution !== null && stateContribution !== undefined) {
+          // Blend with existing state or use HRV-based value
+          const currentState = get().state.value;
+          if (currentState < 0) {
+            get().updateState(stateContribution);
+          }
+        }
+      }
+    } catch (e) {
+      // Health store not available
+    }
   },
 
   runDailyDecayIfNeeded: () => {
