@@ -1,21 +1,25 @@
 /**
  * Premium subscription store
  * 
- * Free tier: 3 AI conversations/day, all gauges, full manual
- * Premium ($9.99/mo): Unlimited AI, voice mode, unlimited Circle
+ * PRICING:
+ * - Free: Crisis 24/7, 3 AI chats/day, all gauges, full manual
+ * - Pro ($9.99/mo): Unlimited AI, voice, full Circle, Personology deep dives
+ * - Family ($15/mo for 5): Pro for everyone, shared family Circle
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type PremiumTier = 'free' | 'premium';
+export type PremiumTier = 'free' | 'pro' | 'family';
 
 export interface PremiumLimits {
   dailyAIConversations: number;
   circleMembers: number;
   voiceEnabled: boolean;
   unlimitedReplay: boolean;
+  personologyDeepDives: boolean;
+  familyCircle: boolean;
 }
 
 const FREE_LIMITS: PremiumLimits = {
@@ -23,18 +27,48 @@ const FREE_LIMITS: PremiumLimits = {
   circleMembers: 3,
   voiceEnabled: false,
   unlimitedReplay: false,
+  personologyDeepDives: false,
+  familyCircle: false,
 };
 
-const PREMIUM_LIMITS: PremiumLimits = {
+const PRO_LIMITS: PremiumLimits = {
   dailyAIConversations: Infinity,
   circleMembers: Infinity,
   voiceEnabled: true,
   unlimitedReplay: true,
+  personologyDeepDives: true,
+  familyCircle: false,
 };
+
+const FAMILY_LIMITS: PremiumLimits = {
+  dailyAIConversations: Infinity,
+  circleMembers: Infinity,
+  voiceEnabled: true,
+  unlimitedReplay: true,
+  personologyDeepDives: true,
+  familyCircle: true,
+};
+
+export const PRICING = {
+  pro: {
+    monthly: 9.99,
+    yearly: 99.99, // ~2 months free
+    productId: 'ingauge_pro_monthly',
+    yearlyProductId: 'ingauge_pro_yearly',
+  },
+  family: {
+    monthly: 15.00,
+    yearly: 149.99, // ~2 months free
+    maxMembers: 5,
+    productId: 'ingauge_family_monthly',
+    yearlyProductId: 'ingauge_family_yearly',
+  },
+} as const;
 
 interface PremiumState {
   tier: PremiumTier;
   expiresAt: string | null; // ISO date string
+  familyOwnerId: string | null; // For family members
   
   // Daily usage tracking
   aiConversationsToday: number;
@@ -42,12 +76,15 @@ interface PremiumState {
   
   // Computed
   isPremium: () => boolean;
+  isPro: () => boolean;
+  isFamily: () => boolean;
   getLimits: () => PremiumLimits;
   canUseAI: () => boolean;
   getRemainingAIChats: () => number;
   
   // Actions
-  setPremium: (expiresAt: string) => void;
+  setPro: (expiresAt: string) => void;
+  setFamily: (expiresAt: string, ownerId?: string) => void;
   clearPremium: () => void;
   incrementAIUsage: () => void;
   resetDailyUsage: () => void;
@@ -63,18 +100,32 @@ export const usePremiumStore = create<PremiumState>()(
     (set, get) => ({
       tier: 'free',
       expiresAt: null,
+      familyOwnerId: null,
       aiConversationsToday: 0,
       lastUsageDate: null,
       
       isPremium: () => {
         const { tier, expiresAt } = get();
-        if (tier !== 'premium') return false;
+        if (tier === 'free') return false;
         if (!expiresAt) return false;
         return new Date(expiresAt) > new Date();
       },
       
+      isPro: () => {
+        const state = get();
+        return state.isPremium() && state.tier === 'pro';
+      },
+      
+      isFamily: () => {
+        const state = get();
+        return state.isPremium() && state.tier === 'family';
+      },
+      
       getLimits: () => {
-        return get().isPremium() ? PREMIUM_LIMITS : FREE_LIMITS;
+        const state = get();
+        if (!state.isPremium()) return FREE_LIMITS;
+        if (state.tier === 'family') return FAMILY_LIMITS;
+        return PRO_LIMITS;
       },
       
       canUseAI: () => {
@@ -102,12 +153,16 @@ export const usePremiumStore = create<PremiumState>()(
         return Math.max(0, FREE_LIMITS.dailyAIConversations - state.aiConversationsToday);
       },
       
-      setPremium: (expiresAt: string) => {
-        set({ tier: 'premium', expiresAt });
+      setPro: (expiresAt: string) => {
+        set({ tier: 'pro', expiresAt, familyOwnerId: null });
+      },
+      
+      setFamily: (expiresAt: string, ownerId?: string) => {
+        set({ tier: 'family', expiresAt, familyOwnerId: ownerId || null });
       },
       
       clearPremium: () => {
-        set({ tier: 'free', expiresAt: null });
+        set({ tier: 'free', expiresAt: null, familyOwnerId: null });
       },
       
       incrementAIUsage: () => {
@@ -129,9 +184,10 @@ export const usePremiumStore = create<PremiumState>()(
       _setTier: (tier: PremiumTier) => {
         set({ 
           tier, 
-          expiresAt: tier === 'premium' 
+          expiresAt: tier !== 'free' 
             ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() 
-            : null 
+            : null,
+          familyOwnerId: null,
         });
       },
     }),
@@ -141,6 +197,7 @@ export const usePremiumStore = create<PremiumState>()(
       partialize: (state) => ({
         tier: state.tier,
         expiresAt: state.expiresAt,
+        familyOwnerId: state.familyOwnerId,
         aiConversationsToday: state.aiConversationsToday,
         lastUsageDate: state.lastUsageDate,
       }),
@@ -150,10 +207,13 @@ export const usePremiumStore = create<PremiumState>()(
 
 // Helper hook for components
 export function usePremium() {
+  const tier = usePremiumStore((s) => s.tier);
   const isPremium = usePremiumStore((s) => s.isPremium());
+  const isPro = usePremiumStore((s) => s.isPro());
+  const isFamily = usePremiumStore((s) => s.isFamily());
   const canUseAI = usePremiumStore((s) => s.canUseAI());
   const remaining = usePremiumStore((s) => s.getRemainingAIChats());
   const limits = usePremiumStore((s) => s.getLimits());
   
-  return { isPremium, canUseAI, remaining, limits };
+  return { tier, isPremium, isPro, isFamily, canUseAI, remaining, limits };
 }
