@@ -179,16 +179,53 @@ export default function OnboardingScreen() {
     });
   };
 
+  // Calculate age group from birthday
+  const getAgeGroupFromBirthday = (bday: string | null): AgeGroup | null => {
+    if (!bday) return null;
+    const d = new Date(bday + 'T12:00:00');
+    if (isNaN(d.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - d.getFullYear();
+    const monthDiff = today.getMonth() - d.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < d.getDate())) {
+      age--;
+    }
+    if (age < 13) return 'under13';
+    if (age <= 17) return '13-17';
+    if (age <= 25) return '18-25';
+    if (age <= 40) return '26-40';
+    if (age <= 60) return '41-60';
+    return '60+';
+  };
+
   const goNext = () => {
     if (step >= TOTAL_STEPS) {
       setShowNotificationPrompt(true);
       return;
     }
+    
+    // After step 2: if birthday provided, auto-set age group and skip step 3
+    if (step === 2 && birthday) {
+      const calculatedAge = getAgeGroupFromBirthday(birthday);
+      if (calculatedAge) {
+        setAgeGroup(calculatedAge);
+        runFadeThen(() => setStep(4)); // Skip to Love Language
+        return;
+      }
+    }
+    
     runFadeThen(() => setStep((s) => s + 1));
   };
 
   const goBack = () => {
     if (step <= 1) return;
+    
+    // If going back from step 4 and birthday exists, skip step 3
+    if (step === 4 && birthday) {
+      runFadeThen(() => setStep(2));
+      return;
+    }
+    
     runFadeThen(() => setStep((s) => s - 1));
   };
 
@@ -416,10 +453,11 @@ export default function OnboardingScreen() {
               </View>
             )}
 
-            {/* STEP 3 — Age Group */}
+            {/* STEP 3 — Age Group (only shown if birthday not provided) */}
             {step === 3 && (
               <View style={styles.step}>
-                <Text style={styles.question}>This helps me speak your language.</Text>
+                <Text style={styles.question}>What stage of life are you in?</Text>
+                <Text style={styles.explain}>This helps me speak your language.</Text>
                 <View style={styles.cardGrid}>
                   {AGE_OPTIONS.map((opt) => (
                     <Pressable
