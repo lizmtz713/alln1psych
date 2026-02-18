@@ -35,6 +35,8 @@ import { CrisisOverlay } from '../../src/components/CrisisOverlay';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { PremiumGate, AIUsageIndicator } from '../../src/components/PremiumGate';
 import { usePremiumStore } from '../../src/stores/premiumStore';
+import { useHealthStore } from '../../src/stores/healthStore';
+import { useCockpitStore } from '../../src/stores/cockpitStore';
 
 const MIC_BUTTON_SIZE = 80;
 const MIC_BUTTON_SIZE_SMALL = 48;
@@ -98,11 +100,24 @@ function buildUserContext(): UserContext {
     environmentUpbringing,
     culturalValues,
     culturalBackgroundOther,
+    athleteMode,
+    spectrumMode,
+    athleteModeSettings,
+    spectrumModeSettings,
   } = useUserStore.getState();
+  
+  // Get health data if connected
+  const healthState = useHealthStore.getState();
+  const healthSnapshot = healthState.snapshot;
+  
+  // Get current gauge values
+  const cockpitState = useCockpitStore.getState();
+  
   const pronounsDisplay =
     pronouns === 'other'
       ? (customPronouns?.trim() || 'not specified')
       : (pronouns ?? 'not specified');
+  
   return {
     name: name || 'there',
     ageGroup: ageGroup ?? 'unknown',
@@ -114,6 +129,32 @@ function buildUserContext(): UserContext {
     environmentUpbringing: environmentUpbringing?.length ? environmentUpbringing : undefined,
     culturalValues: culturalValues?.length ? culturalValues : undefined,
     culturalBackgroundOther: culturalBackgroundOther?.trim() || undefined,
+    athleteMode,
+    spectrumMode,
+    athleteModeSettings: athleteMode ? athleteModeSettings : undefined,
+    spectrumModeSettings: spectrumMode ? spectrumModeSettings : undefined,
+    // Health data for systems-aware AI
+    healthData: healthSnapshot ? {
+      sleepHours: healthSnapshot.sleep.lastNight.duration,
+      sleepQuality: healthSnapshot.sleep.lastNight.quality,
+      steps: healthSnapshot.activity.steps,
+      exerciseMinutes: healthSnapshot.activity.exerciseMinutes,
+      waterOz: healthSnapshot.nutrition.waterOz,
+      restingHR: healthSnapshot.heart.restingHR ?? undefined,
+      hrv: healthSnapshot.heart.hrv ?? undefined,
+      cyclePhase: healthSnapshot.menstruation?.currentPhase ?? undefined,
+      cycleDay: healthSnapshot.menstruation?.dayOfCycle ?? undefined,
+      bodyScore: healthState.bodyScoreFromHealth ?? undefined,
+    } : undefined,
+    // Gauge values for cross-system insights
+    gaugeValues: {
+      body: cockpitState.body.value >= 0 ? cockpitState.body.value : undefined,
+      state: cockpitState.state.value >= 0 ? cockpitState.state.value : undefined,
+      emotion: cockpitState.emotion.value >= 0 ? cockpitState.emotion.value : undefined,
+      connection: cockpitState.connection.value >= 0 ? cockpitState.connection.value : undefined,
+      direction: cockpitState.direction.value >= 0 ? cockpitState.direction.value : undefined,
+      alignment: cockpitState.alignment.value >= 0 ? cockpitState.alignment.value : undefined,
+    },
   };
 }
 

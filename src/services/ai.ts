@@ -267,6 +267,28 @@ export interface UserContext {
     performancePsych?: boolean;
     competitionMode?: boolean;
   };
+  // Health data (from Apple Health)
+  healthData?: {
+    sleepHours?: number;
+    sleepQuality?: 'poor' | 'fair' | 'good' | 'excellent';
+    steps?: number;
+    exerciseMinutes?: number;
+    waterOz?: number;
+    restingHR?: number;
+    hrv?: number; // Heart rate variability - stress indicator
+    cyclePhase?: 'menstrual' | 'follicular' | 'ovulation' | 'luteal' | null;
+    cycleDay?: number;
+    bodyScore?: number; // 0-100 calculated score
+  };
+  // Gauge values for cross-system analysis
+  gaugeValues?: {
+    body?: number;
+    state?: number;
+    emotion?: number;
+    connection?: number;
+    direction?: number;
+    alignment?: number;
+  };
 }
 
 function buildSystemPrompt(ctx: UserContext): string {
@@ -319,7 +341,59 @@ function buildSystemPrompt(ctx: UserContext): string {
     }
   }
   
-  const fullPrompt = base + modePrompts + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
+  // Add health context for systems-aware insights
+  let healthPrompt = '';
+  if (ctx.healthData) {
+    const h = ctx.healthData;
+    healthPrompt = '\n\nHEALTH DATA (use for systems-aware insights):';
+    
+    if (h.sleepHours !== undefined) {
+      healthPrompt += `\n- Sleep last night: ${h.sleepHours.toFixed(1)} hours (${h.sleepQuality || 'unknown'} quality)`;
+      if (h.sleepHours < 6) healthPrompt += ' ⚠️ SLEEP DEPRIVED - this affects EVERYTHING';
+    }
+    if (h.steps !== undefined) {
+      healthPrompt += `\n- Activity: ${h.steps.toLocaleString()} steps today`;
+      if (h.exerciseMinutes) healthPrompt += `, ${h.exerciseMinutes} min exercise`;
+      if (h.steps < 2000) healthPrompt += ' ⚠️ LOW MOVEMENT - may affect mood & energy';
+    }
+    if (h.waterOz !== undefined && h.waterOz > 0) {
+      healthPrompt += `\n- Hydration: ${h.waterOz}oz water`;
+      if (h.waterOz < 32) healthPrompt += ' ⚠️ LIKELY DEHYDRATED - affects cognition & mood';
+    }
+    if (h.hrv !== undefined) {
+      healthPrompt += `\n- HRV (nervous system): ${h.hrv}ms`;
+      if (h.hrv < 30) healthPrompt += ' ⚠️ LOW HRV - high stress/low recovery';
+      else if (h.hrv > 60) healthPrompt += ' ✓ Good parasympathetic activity';
+    }
+    if (h.cyclePhase) {
+      healthPrompt += `\n- Menstrual cycle: Day ${h.cycleDay}, ${h.cyclePhase} phase`;
+      if (h.cyclePhase === 'luteal') healthPrompt += ' (may affect mood, energy, sensitivity)';
+      if (h.cyclePhase === 'menstrual') healthPrompt += ' (may affect energy, comfort)';
+    }
+    if (h.bodyScore !== undefined) {
+      healthPrompt += `\n- Overall Body Score: ${h.bodyScore}/100`;
+    }
+    
+    healthPrompt += '\n\nUSE THIS DATA: When someone shares how they feel, consider whether their physical state might be a factor. Connect the dots. "You slept 4 hours — no wonder everything feels harder." This is systems thinking.';
+  }
+  
+  // Add gauge context for cross-system insights
+  let gaugePrompt = '';
+  if (ctx.gaugeValues) {
+    const g = ctx.gaugeValues;
+    const activeGauges = Object.entries(g).filter(([_, v]) => v !== undefined && v >= 0);
+    if (activeGauges.length > 0) {
+      gaugePrompt = '\n\nCURRENT GAUGE VALUES (for cross-system analysis):';
+      activeGauges.forEach(([key, value]) => {
+        const label = key.charAt(0).toUpperCase() + key.slice(1);
+        gaugePrompt += `\n- ${label}: ${value}/100`;
+        if (value !== undefined && value < 40) gaugePrompt += ' ⚠️ LOW';
+      });
+      gaugePrompt += '\n\nLook for patterns: Low Body often pulls down State. Low Connection affects Emotion. When multiple gauges are low, acknowledge the compound effect.';
+    }
+  }
+  
+  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
   return fullPrompt;
 }
 
