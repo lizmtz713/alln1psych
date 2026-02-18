@@ -18,7 +18,7 @@ function isoToMMDDYYYY(iso: string): string {
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-export default function RelationshipCheck() {
+export default function Relate() {
   const router = useRouter();
   const params = useLocalSearchParams<{ name?: string; birthday?: string }>();
   const userBirthday = useUserStore((s) => s.birthday);
@@ -139,13 +139,13 @@ export default function RelationshipCheck() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#09090F' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
         <Pressable onPress={() => router.back()}><Text style={{ color: '#8888A0', fontSize: 16 }}>← Back</Text></Pressable>
-        <Text style={{ color: '#F0F0F5', fontSize: 18, fontWeight: '600' }}>Relationship Check</Text>
+        <Text style={{ color: '#F0F0F5', fontSize: 18, fontWeight: '600' }}>Relate</Text>
         <View style={{ width: 50 }} />
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }} keyboardShouldPersistTaps="handled">
         {!result ? (
           <>
-            <Text style={{ color: '#8888A0', fontSize: 14, marginBottom: 20, textAlign: 'center' }}>Enter two birthdays. Understand the dynamic.</Text>
+            <Text style={{ color: '#8888A0', fontSize: 14, marginBottom: 20, textAlign: 'center' }}>Understand anyone. Just enter two birthdays.</Text>
             <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 6 }}>Your birthday</Text>
             <TextInput style={{ backgroundColor: '#111118', color: '#F0F0F5', borderRadius: 12, padding: 14, fontSize: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', marginBottom: 16 }} placeholder="MM/DD/YYYY" placeholderTextColor="#55556A" value={myBirthday} onChangeText={(t) => formatBirthday(t, setMyBirthday)} keyboardType="number-pad" maxLength={10} />
             <Text style={{ color: '#8888A0', fontSize: 13, marginBottom: 6 }}>Their name (optional)</Text>

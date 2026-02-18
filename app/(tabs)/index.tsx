@@ -340,7 +340,7 @@ export default function HomeScreen() {
   const quickActions = [
     { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const },
     { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const },
-    { label: 'Check-In', icon: 'heart-circle', route: '/(modals)/relationship-check' as const },
+    { label: 'Relate', icon: 'heart-circle', route: '/(modals)/relate' as const },
     { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const },
     { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const },
     { label: 'Help', icon: 'heart', route: '/(modals)/help-someone' as const },
