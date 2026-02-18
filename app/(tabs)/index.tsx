@@ -620,8 +620,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: ACCENT + '40',
   },
   insightHeader: {
     flexDirection: 'row',
@@ -658,8 +656,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingVertical: 12,
     paddingHorizontal: 18,
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
     marginRight: 10,
   },
   actionPillPressed: { backgroundColor: '#16161F' },
@@ -675,8 +671,6 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.card,
     padding: 18,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
   },
   cardSectionTitle: {
     fontSize: 13,
@@ -686,8 +680,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   psychCard: { 
-    borderLeftWidth: 4, 
-    borderLeftColor: ACCENT,
+    // Clean card, no border
   },
   psychLabel: {
     fontSize: 12,
@@ -700,8 +693,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   affirmationCard: {
-    borderLeftWidth: 4,
-    borderLeftColor: ACCENT,
+    // Clean card, no border
   },
   affirmation: {
     fontSize: 17,
@@ -756,8 +748,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
     marginRight: 10,
   },
   tryThisPillEmoji: { fontSize: 16, marginRight: 8 },
@@ -778,8 +768,6 @@ const styles = StyleSheet.create({
     backgroundColor: CARD_BG,
     borderRadius: 20,
     padding: 24,
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
   },
   gaugeInfoTitle: { fontSize: 20, fontWeight: '700', color: TEXT_PRIMARY, marginBottom: 16 },
   gaugeInfoBody: { fontSize: 14, color: TEXT_SECONDARY, lineHeight: 22 },
