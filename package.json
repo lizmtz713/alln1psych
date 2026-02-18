@@ -40,7 +40,8 @@
     "react-native-screens": "~4.16.0",
     "react-native-svg": "15.12.1",
     "react-native-health": "^1.18.0",
-    "expo-linear-gradient": "~14.0.2",
+    "expo-image-picker": "~16.0.6",
+    "expo-linear-gradient": "~15.0.8",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
