@@ -140,10 +140,16 @@ export default function MeScreen() {
                 <Text style={styles.statLabel}>Day Streak</Text>
               </View>
               <View style={styles.statDivider} />
-              <View style={styles.statItem}>
+              <Pressable 
+                style={styles.statItem}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push('/(modals)/achievements');
+                }}
+              >
                 <Text style={styles.statValue}>{unlockedCount}</Text>
-                <Text style={styles.statLabel}>Achievements</Text>
-              </View>
+                <Text style={[styles.statLabel, { color: COLORS.accent }]}>Achievements →</Text>
+              </Pressable>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <View style={[styles.tempIndicator, { backgroundColor: tempColor + '20' }]}>
