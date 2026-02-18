@@ -131,6 +131,7 @@ export default function OnboardingScreen() {
   );
   const [wantsToInvite, setWantsToInvite] = useState<boolean | null>(null);
   const [nameInputFocused, setNameInputFocused] = useState(false);
+  const [showOptional, setShowOptional] = useState(false);
   const [birthdayInputLocal, setBirthdayInputLocal] = useState('');
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const setNotificationsCheckIn = useSettingsStore((s) => s.setNotificationsCheckIn);
@@ -438,7 +439,81 @@ export default function OnboardingScreen() {
                     autoCorrect={false}
                   />
                 )}
-                <Text style={styles.pronounHint}>You can change this anytime in settings.</Text>
+
+                {/* Optional: Tell me more (collapsed by default) */}
+                <Pressable
+                  style={styles.optionalToggle}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowOptional(!showOptional);
+                  }}
+                >
+                  <Text style={styles.optionalToggleText}>
+                    {showOptional ? '▼' : '▶'} Tell me more (optional)
+                  </Text>
+                </Pressable>
+
+                {showOptional && (
+                  <View style={styles.optionalSection}>
+                    {/* Sensitive Topics */}
+                    <Text style={styles.optionalLabel}>Anything I should be gentle about?</Text>
+                    <View style={styles.chipRow}>
+                      {SENSITIVE_TOPIC_OPTIONS.slice(0, 6).map((opt) => {
+                        const isSelected = sensitiveTopics.includes(opt.value);
+                        return (
+                          <Pressable
+                            key={opt.value}
+                            style={[styles.chip, isSelected && styles.chipSelected]}
+                            onPress={() => {
+                              if (isSelected) setSensitiveTopics(sensitiveTopics.filter((t) => t !== opt.value));
+                              else setSensitiveTopics([...sensitiveTopics, opt.value]);
+                            }}
+                          >
+                            <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt.label}</Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+
+                    {/* Cultural Background */}
+                    <Text style={[styles.optionalLabel, { marginTop: 16 }]}>Cultural background?</Text>
+                    <View style={styles.chipRow}>
+                      {CULTURAL_BACKGROUND_OPTIONS.slice(0, 6).map((opt) => {
+                        const isSelected = culturalBackground.includes(opt);
+                        return (
+                          <Pressable
+                            key={opt}
+                            style={[styles.chip, isSelected && styles.chipSelected]}
+                            onPress={() => {
+                              if (isSelected) setCulturalBackground(culturalBackground.filter((c) => c !== opt));
+                              else setCulturalBackground([...culturalBackground, opt]);
+                            }}
+                          >
+                            <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+
+                    {/* Learning Style */}
+                    <Text style={[styles.optionalLabel, { marginTop: 16 }]}>How do you learn best?</Text>
+                    <View style={styles.chipRow}>
+                      {LEARNING_STYLE_OPTIONS.map((opt) => (
+                        <Pressable
+                          key={opt.value}
+                          style={[styles.chip, learningStyle === opt.value && styles.chipSelected]}
+                          onPress={() => setLearningStyle(opt.value)}
+                        >
+                          <Text style={[styles.chipText, learningStyle === opt.value && styles.chipTextSelected]}>
+                            {opt.emoji} {opt.label.split(' — ')[0]}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                <Text style={styles.pronounHint}>You can change all of this in settings.</Text>
                 <Pressable
                   style={({ pressed }) => [
                     styles.primaryButton,
@@ -766,6 +841,28 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.textMuted,
     marginBottom: 16,
+  },
+  optionalToggle: {
+    marginTop: 20,
+    marginBottom: 8,
+    paddingVertical: 12,
+  },
+  optionalToggleText: {
+    fontSize: 14,
+    color: COLORS.accent,
+    fontWeight: '500',
+  },
+  optionalSection: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  optionalLabel: {
+    fontSize: 14,
+    color: COLORS.text,
+    marginBottom: 10,
+    fontWeight: '500',
   },
   chipRow: {
     flexDirection: 'row',
