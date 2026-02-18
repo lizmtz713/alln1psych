@@ -1,5 +1,6 @@
 /**
- * Decode — Paste their message → Analysis → Intent → Suggested response with Copy.
+ * Decode — Paste their message OR add a screenshot → Analysis → Intent → Suggested response with Copy.
+ * Now with screenshot support using GPT-4o Vision!
  */
 import { useState, useEffect } from 'react';
 import {
@@ -13,13 +14,17 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
-import { sendMessageWithSystemPrompt } from '../../src/services/ai';
+import * as FileSystem from 'expo-file-system';
+// NOTE: Run `npx expo install expo-image-picker` if not already installed
+import * as ImagePicker from 'expo-image-picker';
+import { sendMessageWithSystemPrompt, analyzeImageWithVision } from '../../src/services/ai';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
@@ -46,6 +51,20 @@ RED FLAGS — If anything feels manipulative, guilt-trippy, or off; otherwise sa
 
 Be direct, warm, and concise. 2-4 sentences per section.`;
 
+const DECODE_SCREENSHOT_SYSTEM = `You are Psych in AllN1 Psych "Decode" mode. The user shared a screenshot of a message conversation. 
+
+First, read and transcribe the key messages from the screenshot. Then analyze them.
+
+Respond with these sections (use ALL CAPS for section headers):
+
+WHAT I SEE — Briefly describe the messages visible in the screenshot.
+WHAT THEY'RE SAYING — Literally: what are the surface words and ask?
+WHAT THEY MIGHT MEAN — Subtext, tone, what might be going on for them.
+WHAT THEY WANT FROM YOU — What are they asking for (time, reassurance, a response, space)?
+RED FLAGS — If anything feels manipulative, guilt-trippy, or off; otherwise say "Nothing obvious."
+
+Be direct, warm, and concise. 2-4 sentences per section.`;
+
 const DECODE_RESPOND_SYSTEM = `You are Psych. The user received a message, saw your analysis, and chose an intent. Now give them a response guide.
 
 Include these sections (ALL CAPS headers):
@@ -59,7 +78,7 @@ Be specific to their message and chosen intent. Keep suggested response copy-pas
 
 type Phase = 'paste' | 'analysis' | 'intent' | 'respond';
 
-const ANALYSIS_HEADERS = ["WHAT THEY'RE SAYING", 'WHAT THEY MIGHT MEAN', 'WHAT THEY WANT FROM YOU', 'RED FLAGS'];
+const ANALYSIS_HEADERS = ['WHAT I SEE', "WHAT THEY'RE SAYING", 'WHAT THEY MIGHT MEAN', 'WHAT THEY WANT FROM YOU', 'RED FLAGS'];
 const RESPOND_HEADERS = ['SUGGESTED RESPONSE', 'WHY THIS WORKS', 'AN ALTERNATIVE', 'THE WAIT OPTION'];
 
 const INTENT_OPTIONS = [
@@ -92,6 +111,7 @@ export default function DecodeScreen() {
   const [message, setMessage] = useState('');
   const [sender, setSender] = useState('');
   const [context, setContext] = useState('');
+  const [screenshotUri, setScreenshotUri] = useState<string | null>(null);
   const [analysisResponse, setAnalysisResponse] = useState('');
   const [selectedIntent, setSelectedIntent] = useState('');
   const [respondResponse, setRespondResponse] = useState('');
@@ -129,17 +149,77 @@ export default function DecodeScreen() {
     return relationshipContext;
   };
 
+  const pickScreenshot = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please allow access to your photos to add a screenshot.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsEditing: false,
+      });
+
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        setScreenshotUri(result.assets[0].uri);
+      }
+    } catch (e) {
+      if (__DEV__) console.warn('Image picker error:', e);
+      Alert.alert('Error', 'Could not open photo library');
+    }
+  };
+
+  const removeScreenshot = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setScreenshotUri(null);
+  };
+
   const onDecode = async () => {
-    if (message.trim().length < 3 || loading) return;
+    const hasText = message.trim().length >= 3;
+    const hasImage = !!screenshotUri;
+    
+    if (!hasText && !hasImage) return;
+    if (loading) return;
+    
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
+    
     try {
-      const userContent = `Message:\n${message}\n\nWho sent this: ${sender || 'not specified'}\nContext: ${context || 'none'}`;
-      const fullPrompt = DECODE_ANALYSIS_SYSTEM + buildDecodeRelationshipContext();
-      const response = await sendMessageWithSystemPrompt(
-        [{ role: 'user', content: userContent }],
-        fullPrompt
-      );
+      let response: string | undefined;
+
+      if (hasImage) {
+        // Use vision API for screenshot
+        const base64 = await FileSystem.readAsStringAsync(screenshotUri!, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        
+        const contextText = [
+          sender ? `Who sent this: ${sender}` : '',
+          context ? `Context: ${context}` : '',
+          message.trim() ? `Additional info: ${message}` : '',
+        ].filter(Boolean).join('\n');
+        
+        const prompt = `Analyze this message screenshot.\n\n${contextText || 'No additional context provided.'}`;
+        
+        response = await analyzeImageWithVision(
+          base64,
+          prompt,
+          DECODE_SCREENSHOT_SYSTEM + buildDecodeRelationshipContext()
+        );
+      } else {
+        // Text-only analysis
+        const userContent = `Message:\n${message}\n\nWho sent this: ${sender || 'not specified'}\nContext: ${context || 'none'}`;
+        const fullPrompt = DECODE_ANALYSIS_SYSTEM + buildDecodeRelationshipContext();
+        response = await sendMessageWithSystemPrompt(
+          [{ role: 'user', content: userContent }],
+          fullPrompt
+        );
+      }
+      
       setAnalysisResponse(response?.trim() ?? '');
       setPhase('analysis');
     } catch (e) {
@@ -161,7 +241,8 @@ export default function DecodeScreen() {
     setSelectedIntent(intent.id);
     setLoading(true);
     try {
-      const userContent = `Message:\n${message}\n\nSender: ${sender}\nContext: ${context}\n\nAnalysis:\n${analysisResponse}\n\nUser's intent: ${intent.title} — ${intent.desc}`;
+      const msgSource = screenshotUri ? '[Screenshot attached]' : message;
+      const userContent = `Message:\n${msgSource}\n\nSender: ${sender}\nContext: ${context}\n\nAnalysis:\n${analysisResponse}\n\nUser's intent: ${intent.title} — ${intent.desc}`;
       const fullPrompt = DECODE_RESPOND_SYSTEM + buildDecodeRelationshipContext();
       const response = await sendMessageWithSystemPrompt(
         [{ role: 'user', content: userContent }],
@@ -194,6 +275,9 @@ export default function DecodeScreen() {
     const parts = sectionedText(analysisResponse, ANALYSIS_HEADERS);
     return (
       <View style={styles.responseCard}>
+        {screenshotUri && (
+          <Image source={{ uri: screenshotUri }} style={styles.screenshotPreview} resizeMode="contain" />
+        )}
         {parts.map((p, i) => (
           <Text key={i} style={p.bold ? styles.sectionHeader : styles.aiBody}>
             {p.content}
@@ -237,6 +321,8 @@ export default function DecodeScreen() {
     );
   };
 
+  const canDecode = message.trim().length >= 3 || !!screenshotUri;
+
   return (
     <ErrorBoundary>
       <KeyboardAvoidingView
@@ -260,7 +346,25 @@ export default function DecodeScreen() {
         >
           {phase === 'paste' && (
             <>
-              <Text style={styles.prompt}>Paste what they sent you.</Text>
+              <Text style={styles.prompt}>Paste what they sent you — or add a screenshot.</Text>
+              
+              {/* Screenshot section */}
+              {screenshotUri ? (
+                <View style={styles.screenshotContainer}>
+                  <Image source={{ uri: screenshotUri }} style={styles.screenshotImage} resizeMode="contain" />
+                  <Pressable style={styles.removeScreenshotBtn} onPress={removeScreenshot}>
+                    <Ionicons name="close-circle" size={28} color={TEXT_PRIMARY} />
+                  </Pressable>
+                </View>
+              ) : (
+                <Pressable style={styles.screenshotBtn} onPress={pickScreenshot}>
+                  <Ionicons name="image-outline" size={24} color={ACCENT} />
+                  <Text style={styles.screenshotBtnText}>Add Screenshot</Text>
+                </Pressable>
+              )}
+
+              <Text style={styles.orText}>— or paste the text —</Text>
+
               <TextInput
                 style={styles.largeInput}
                 placeholder="Paste their message here..."
@@ -268,7 +372,7 @@ export default function DecodeScreen() {
                 value={message}
                 onChangeText={setMessage}
                 multiline
-                minHeight={120}
+                minHeight={100}
                 textAlignVertical="top"
               />
               <TextInput
@@ -288,13 +392,13 @@ export default function DecodeScreen() {
               {loading ? (
                 <View style={styles.loadingWrap}>
                   <ActivityIndicator size="small" color={ACCENT} />
-                  <Text style={styles.loadingText}>Psych is thinking...</Text>
+                  <Text style={styles.loadingText}>Psych is analyzing{screenshotUri ? ' the screenshot' : ''}...</Text>
                 </View>
               ) : (
                 <Pressable
-                  style={[styles.primaryBtn, (message.trim().length < 3 || loading) && styles.primaryBtnDisabled]}
+                  style={[styles.primaryBtn, !canDecode && styles.primaryBtnDisabled]}
                   onPress={onDecode}
-                  disabled={message.trim().length < 3 || loading}
+                  disabled={!canDecode || loading}
                 >
                   <Text style={styles.primaryBtnText}>Decode</Text>
                 </Pressable>
@@ -370,7 +474,47 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
   prompt: { fontSize: 18, fontWeight: '500', color: TEXT_PRIMARY, marginBottom: 16 },
-  largeInput: { backgroundColor: CARD_BG, color: TEXT_PRIMARY, fontSize: 16, minHeight: 120, padding: 14, borderRadius: 12, marginBottom: 12, textAlignVertical: 'top', borderWidth: 1, borderColor: CARD_BORDER },
+  orText: { color: TEXT_SECONDARY, fontSize: 13, textAlign: 'center', marginVertical: 12 },
+  screenshotBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: CARD_BG,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: ACCENT,
+    borderStyle: 'dashed',
+    gap: 8,
+  },
+  screenshotBtnText: { color: ACCENT, fontSize: 16, fontWeight: '500' },
+  screenshotContainer: {
+    position: 'relative',
+    backgroundColor: CARD_BG,
+    borderRadius: 12,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  screenshotImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+  },
+  removeScreenshotBtn: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 14,
+  },
+  screenshotPreview: {
+    width: '100%',
+    height: 150,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  largeInput: { backgroundColor: CARD_BG, color: TEXT_PRIMARY, fontSize: 16, minHeight: 100, padding: 14, borderRadius: 12, marginBottom: 12, textAlignVertical: 'top', borderWidth: 1, borderColor: CARD_BORDER },
   smallInput: { backgroundColor: CARD_BG, color: TEXT_PRIMARY, fontSize: 16, padding: 14, borderRadius: 12, marginBottom: 12, borderWidth: 1, borderColor: CARD_BORDER },
   primaryBtn: { backgroundColor: ACCENT, paddingVertical: 16, paddingHorizontal: 20, borderRadius: 14, alignItems: 'center' },
   primaryBtnDisabled: { opacity: 0.5 },

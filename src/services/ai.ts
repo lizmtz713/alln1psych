@@ -645,3 +645,67 @@ Respond ONLY with valid JSON.`;
     followUp: parsed.followUp ?? '',
   };
 }
+
+/**
+ * Analyze an image with GPT-4o vision.
+ * @param imageBase64 - Base64 encoded image (with or without data URL prefix)
+ * @param prompt - What to analyze about the image
+ * @param systemPrompt - Optional system prompt for context
+ */
+export async function analyzeImageWithVision(
+  imageBase64: string,
+  prompt: string,
+  systemPrompt?: string
+): Promise<string> {
+  const apiKey = await getOpenAIKey();
+  if (!apiKey) {
+    if (__DEV__) console.warn('[AI] No API key for vision');
+    throw new Error('No API key configured');
+  }
+
+  // Ensure proper data URL format
+  const imageUrl = imageBase64.startsWith('data:')
+    ? imageBase64
+    : `data:image/jpeg;base64,${imageBase64}`;
+
+  const messages: Array<{ role: string; content: string | Array<{ type: string; text?: string; image_url?: { url: string } }> }> = [];
+
+  if (systemPrompt) {
+    messages.push({ role: 'system', content: systemPrompt });
+  }
+
+  messages.push({
+    role: 'user',
+    content: [
+      { type: 'text', text: prompt },
+      { type: 'image_url', image_url: { url: imageUrl } },
+    ],
+  });
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages,
+      max_tokens: 1000,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    if (__DEV__) console.error('[AI] Vision API error:', res.status, body);
+    throw new Error(body || `OpenAI Vision API error: ${res.status}`);
+  }
+
+  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }>; error?: { message?: string } };
+  if (data.error?.message) throw new Error(data.error.message);
+  const content = data.choices?.[0]?.message?.content?.trim();
+  if (!content) throw new Error('Empty response from OpenAI Vision');
+  useUsageStore.getState().incrementGPT();
+  return content;
+}
