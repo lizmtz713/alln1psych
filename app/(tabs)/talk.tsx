@@ -427,6 +427,11 @@ export default function TalkScreen() {
         .concat([{ id: '', role: 'user' as const, content, timestamp: new Date(), isVoice: false }])
         .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
       const response = await sendMessage(apiMessages, buildUserContext());
+      // Check for error responses
+      if (response?.startsWith('[AI Error') || response?.includes('"error"')) {
+        addMessage({ role: 'assistant', content: "I'm having trouble connecting right now. Try again in a moment.", isVoice: false });
+        return;
+      }
       addMessage({ role: 'assistant', content: response, isVoice: false });
       incrementAIUsage(); // Track for free tier limits
       if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
@@ -482,8 +487,13 @@ export default function TalkScreen() {
           .concat([{ id: '', role: 'user' as const, content: text, timestamp: new Date(), isVoice: true }])
           .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
         const response = await sendMessage(apiMessages, buildUserContext());
-        addMessage({ role: 'assistant', content: response, isVoice: false });
-        if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
+        // Check for error responses
+        if (response?.startsWith('[AI Error') || response?.includes('"error"')) {
+          addMessage({ role: 'assistant', content: "I'm having trouble connecting right now. Try again in a moment.", isVoice: false });
+        } else {
+          addMessage({ role: 'assistant', content: response, isVoice: false });
+        }
+        if (useSettingsStore.getState().aiVoiceEnabled && response?.trim() && !response?.startsWith('[AI Error')) {
           setTtsState('loading');
           Voice.speakWithOpenAI(response)
             .then(() => {
@@ -647,8 +657,13 @@ export default function TalkScreen() {
                     .concat([{ id: '', role: 'user' as const, content, timestamp: new Date(), isVoice: false }])
                     .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
                   const response = await sendMessage(apiMessages, buildUserContext());
-                  addMessage({ role: 'assistant', content: response, isVoice: false });
-                  if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
+                  // Check for error responses
+                  if (response?.startsWith('[AI Error') || response?.includes('"error"')) {
+                    addMessage({ role: 'assistant', content: "I'm having trouble connecting right now. Try again in a moment.", isVoice: false });
+                  } else {
+                    addMessage({ role: 'assistant', content: response, isVoice: false });
+                  }
+                  if (useSettingsStore.getState().aiVoiceEnabled && response?.trim() && !response?.startsWith('[AI Error')) {
                     setTtsState('loading');
                     Voice.speakWithOpenAI(response)
                       .then(() => {
