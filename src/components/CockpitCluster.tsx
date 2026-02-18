@@ -271,8 +271,8 @@ export function CockpitCluster({
       <View style={styles.hintContainer}>
         <Text style={styles.hintText}>
           {overall >= 0 
-            ? `${activeCount}/6 systems online • ${overallLabel}`
-            : '⬤ Tap center to run diagnostics'
+            ? `${activeCount}/6 online • ${overallLabel}`
+            : 'Tap center to check in'
           }
         </Text>
       </View>

@@ -94,7 +94,11 @@ Rules:
       ],
       systemPromptWithKnowledge
     );
-    return response?.trim() ?? null;
+    // Check for error responses (AI service returns string like "[AI Error: ...]")
+    if (!response || response.startsWith('[AI Error') || response.includes('error')) {
+      return getHardcodedInsight(gauges);
+    }
+    return response.trim();
   } catch {
     return getHardcodedInsight(gauges);
   }
