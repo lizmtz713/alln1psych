@@ -5,6 +5,7 @@
 
 import { buildKnowledgePrompt } from '../data/psychKnowledge';
 import { sendMessageWithSystemPrompt } from './ai';
+import { getEnvironmentContext, getEnvironmentNotes } from './environment';
 
 export interface CockpitGauges {
   body: number;
@@ -124,6 +125,26 @@ export async function generateCrossSystemInsight(
     }
   }
 
+  // Build environment context (always available - no setup needed)
+  const envContext = getEnvironmentContext();
+  const envNotes = getEnvironmentNotes();
+  let environmentContext = '';
+  if (envContext.time || envContext.moon) {
+    const parts: string[] = [];
+    if (envContext.time) {
+      parts.push(`${envContext.time.dayOfWeek} ${envContext.time.timeOfDay}`);
+      if (envContext.time.isWeekend) parts.push('(weekend)');
+      parts.push(`Season: ${envContext.time.season}`);
+    }
+    if (envContext.moon) {
+      parts.push(`Moon: ${envContext.moon.emoji} ${envContext.moon.phase} (${envContext.moon.illumination}%)`);
+    }
+    environmentContext = `\n\nTIME & ENVIRONMENT:\n${parts.join(' | ')}`;
+    if (envNotes.length > 0) {
+      environmentContext += `\nNotes: ${envNotes[0]}`; // Just the most relevant note
+    }
+  }
+
   const systemPrompt = `You are the AI brain of a Human Cockpit — a 6-gauge emotional regulation system. You read all gauges AND health data together and provide ONE brief insight (2-3 sentences max) about how the user's systems are interacting.
 
 The 6 gauges (0-100 scale, -1 means not checked):
@@ -132,7 +153,7 @@ The 6 gauges (0-100 scale, -1 means not checked):
 - Emotion (emotional clarity): ${gauges.emotion}
 - Connection (belonging, being seen): ${gauges.connection}
 - Direction (purpose, momentum): ${gauges.direction}
-- Alignment (actions matching values): ${gauges.alignment}${healthContext}${musicContext}${weatherContext}
+- Alignment (actions matching values): ${gauges.alignment}${healthContext}${musicContext}${weatherContext}${environmentContext}
 
 Rules:
 - Read the PATTERN across gauges, not individual numbers
@@ -146,7 +167,10 @@ Rules:
 - If music data is present, note patterns: low-energy music + low State = seeking calm; high-energy music + low Body = pushing through fatigue; melancholic music + low Emotion = processing something
 - Music choices often reveal what the body/mind is seeking before we're conscious of it
 - If weather data is present: overcast/dark days affect State and Emotion; low pressure causes headaches and irritability; gray days make Connection feel harder
-- Weather isn't an excuse but it IS a factor — name it so they don't blame themselves`;
+- Weather isn't an excuse but it IS a factor — name it so they don't blame themselves
+- Time context matters: Sunday evening anxiety is real; Monday transitions are hard; late-night check-ins suggest sleep issues; weekend patterns differ from weekday
+- Moon phases: some people are affected, others aren't — mention only if relevant to the pattern
+- Winter/low daylight periods: acknowledge SAD patterns without diagnosing`;
 
   const knowledge = buildKnowledgePrompt(gauges);
   const systemPromptWithKnowledge = systemPrompt + knowledge;
