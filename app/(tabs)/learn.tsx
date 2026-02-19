@@ -133,6 +133,7 @@ const TOOL_CATEGORIES = [
     id: 'understand',
     title: 'Understand',
     tools: [
+      { id: 'learning-style-quiz', icon: 'school', title: 'Learning Style', color: '#7C4DFF' },
       { id: 'emotion-wheel', icon: 'color-palette', title: 'Emotions', color: '#F59E0B' },
       { id: 'emotion-match', icon: 'extension-puzzle', title: 'Match', color: '#EC4899' },
       { id: 'thought-challenger', icon: 'bulb', title: 'Thoughts', color: '#3B82F6' },
@@ -208,6 +209,7 @@ export default function LearnScreen() {
       'mood-checkin': '/(modals)/mood-checkin',
       'cockpit-checkin': '/(modals)/cockpit-checkin',
       'mood-patterns': '/(modals)/patterns',
+      'learning-style-quiz': '/(modals)/learning-style-quiz',
     };
     if (modalRoutes[id]) {
       return router.push(modalRoutes[id] as any);

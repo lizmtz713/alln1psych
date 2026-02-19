@@ -638,6 +638,9 @@ export default function OnboardingScreen() {
                           </Pressable>
                         ))}
                       </View>
+                      <Pressable onPress={() => router.push('/(modals)/learning-style-quiz')}>
+                        <Text style={styles.quizLink}>Not sure? Take the quick quiz →</Text>
+                      </Pressable>
                     </View>
                   )}
 

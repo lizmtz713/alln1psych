@@ -30,6 +30,7 @@ export default function ModalsLayout() {
       <Stack.Screen name="patterns" options={{ presentation: 'modal' }} />
       <Stack.Screen name="awards" options={{ presentation: 'modal' }} />
       <Stack.Screen name="identity-setup" options={{ presentation: 'fullScreenModal' }} />
+      <Stack.Screen name="learning-style-quiz" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }
