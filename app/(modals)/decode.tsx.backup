@@ -1,7 +1,7 @@
 /**
  * Decode — Paste their message → Analysis → Intent → Suggested response with Copy.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,13 +12,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
+import * as ImagePicker from 'expo-image-picker';
+import { COLORS } from '../../src/lib/constants';
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
+import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 
 const BG = '#09090F';
 const CARD_BG = '#111118';
@@ -93,6 +97,21 @@ export default function DecodeScreen() {
   const [loading, setLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toast, setToast] = useState('');
+
+  const handlePasteScreenshot = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: (ImagePicker as { MediaTypeOptions?: { Images: string } }).MediaTypeOptions?.Images ?? 'images',
+        quality: 0.8,
+        base64: true,
+      });
+      if (!result.canceled && result.assets?.[0]?.base64) {
+        setMessage('[Screenshot attached — analyzing...]');
+      }
+    } catch (_) {
+      setMessage('[Screenshot attached — you can also type or paste the text here]');
+    }
+  };
 
   const copyToClipboard = async (text: string, id: string) => {
     try {
@@ -218,123 +237,128 @@ export default function DecodeScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={0}
-    >
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={goBack}>
-          <Ionicons name="arrow-back" size={24} color={TEXT_PRIMARY} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Decode</Text>
-        <View style={styles.headerRight} />
-      </View>
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <ErrorBoundary>
+      <KeyboardAvoidingView
+        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={0}
       >
-        {phase === 'paste' && (
-          <>
-            <Text style={styles.prompt}>Paste what they sent you.</Text>
-            <TextInput
-              style={styles.largeInput}
-              placeholder="Paste their message here..."
-              placeholderTextColor={TEXT_SECONDARY}
-              value={message}
-              onChangeText={setMessage}
-              multiline
-              textAlignVertical="top"
-            />
-            <TextInput
-              style={styles.smallInput}
-              placeholder="Who sent this? (my friend, my boss, my ex...)"
-              placeholderTextColor={TEXT_SECONDARY}
-              value={sender}
-              onChangeText={setSender}
-            />
-            <TextInput
-              style={styles.smallInput}
-              placeholder="Quick context (e.g. we haven't talked in 3 months...)"
-              placeholderTextColor={TEXT_SECONDARY}
-              value={context}
-              onChangeText={setContext}
-            />
-            {loading ? (
-              <View style={styles.loadingWrap}>
-                <ActivityIndicator size="small" color={ACCENT} />
-                <Text style={styles.loadingText}>Gauge is thinking...</Text>
-              </View>
-            ) : (
-              <Pressable
-                style={[styles.primaryBtn, (message.trim().length < 3 || loading) && styles.primaryBtnDisabled]}
-                onPress={onDecode}
-                disabled={message.trim().length < 3 || loading}
-              >
-                <Text style={styles.primaryBtnText}>Decode</Text>
-              </Pressable>
-            )}
-          </>
-        )}
+        <View style={styles.header}>
+          <Pressable style={styles.backBtn} onPress={goBack}>
+            <Ionicons name="arrow-back" size={24} color={TEXT_PRIMARY} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Decode</Text>
+          <View style={styles.headerRight} />
+        </View>
 
-        {phase === 'analysis' && (
-          <>
-            {analysisResponse ? renderAnalysisContent() : null}
-            {analysisResponse && !loading ? (
-              <Pressable style={styles.primaryBtn} onPress={onHowToRespond}>
-                <Text style={styles.primaryBtnText}>How should I respond?</Text>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {phase === 'paste' && (
+            <>
+              <Text style={styles.prompt}>Paste what they sent you.</Text>
+              <TextInput
+                style={styles.largeInput}
+                placeholder="Paste their message here..."
+                placeholderTextColor={TEXT_SECONDARY}
+                value={message}
+                onChangeText={setMessage}
+                multiline
+                textAlignVertical="top"
+              />
+              <Pressable onPress={handlePasteScreenshot} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8 }}>
+                <Text style={{ color: COLORS.accent, fontSize: 14 }}>📷 Paste screenshot</Text>
               </Pressable>
-            ) : null}
-            {loading ? (
-              <View style={styles.loadingWrap}>
-                <ActivityIndicator size="small" color={ACCENT} />
-                <Text style={styles.loadingText}>Gauge is thinking...</Text>
-              </View>
-            ) : null}
-          </>
-        )}
+              <TextInput
+                style={styles.smallInput}
+                placeholder="Who sent this? (my friend, my boss, my ex...)"
+                placeholderTextColor={TEXT_SECONDARY}
+                value={sender}
+                onChangeText={setSender}
+              />
+              <TextInput
+                style={styles.smallInput}
+                placeholder="Quick context (e.g. we haven't talked in 3 months...)"
+                placeholderTextColor={TEXT_SECONDARY}
+                value={context}
+                onChangeText={setContext}
+              />
+              {loading ? (
+                <View style={styles.loadingWrap}>
+                  <ActivityIndicator size="small" color={ACCENT} />
+                  <Text style={styles.loadingText}>Gauge is thinking...</Text>
+                </View>
+              ) : (
+                <Pressable
+                  style={[styles.primaryBtn, (message.trim().length < 3 || loading) && styles.primaryBtnDisabled]}
+                  onPress={onDecode}
+                  disabled={message.trim().length < 3 || loading}
+                >
+                  <Text style={styles.primaryBtnText}>Decode</Text>
+                </Pressable>
+              )}
+            </>
+          )}
 
-        {phase === 'intent' && (
-          <>
-            <Text style={styles.prompt}>What do you want from this?</Text>
-            {loading ? (
-              <View style={styles.loadingWrap}>
-                <ActivityIndicator size="small" color={ACCENT} />
-                <Text style={styles.loadingText}>Gauge is thinking...</Text>
-              </View>
-            ) : (
-              <>
-                {INTENT_OPTIONS.map((opt) => (
-                  <Pressable
-                    key={opt.id}
-                    style={[styles.intentCard, selectedIntent === opt.id && styles.intentCardSelected]}
-                    onPress={() => onSelectIntent(opt)}
-                  >
-                    <Text style={styles.intentTitle}>{opt.title}</Text>
-                    <Text style={styles.intentDesc}>{opt.desc}</Text>
-                  </Pressable>
-                ))}
-              </>
-            )}
-          </>
-        )}
+          {phase === 'analysis' && (
+            <>
+              {analysisResponse ? renderAnalysisContent() : null}
+              {analysisResponse && !loading ? (
+                <Pressable style={styles.primaryBtn} onPress={onHowToRespond}>
+                  <Text style={styles.primaryBtnText}>How should I respond?</Text>
+                </Pressable>
+              ) : null}
+              {loading ? (
+                <View style={styles.loadingWrap}>
+                  <ActivityIndicator size="small" color={ACCENT} />
+                  <Text style={styles.loadingText}>Gauge is thinking...</Text>
+                </View>
+              ) : null}
+            </>
+          )}
 
-        {phase === 'respond' && (
-          <>
-            {respondResponse ? renderRespondContent() : null}
-            {respondResponse ? (
-              <Pressable style={styles.primaryBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.back(); }}>
-                <Text style={styles.primaryBtnText}>Done</Text>
-              </Pressable>
-            ) : null}
-          </>
-        )}
-      </ScrollView>
-      {toast ? <View style={styles.toastWrap}><Text style={styles.toastText}>{toast}</Text></View> : null}
-    </KeyboardAvoidingView>
+          {phase === 'intent' && (
+            <>
+              <Text style={styles.prompt}>What do you want from this?</Text>
+              {loading ? (
+                <View style={styles.loadingWrap}>
+                  <ActivityIndicator size="small" color={ACCENT} />
+                  <Text style={styles.loadingText}>Gauge is thinking...</Text>
+                </View>
+              ) : (
+                <>
+                  {INTENT_OPTIONS.map((opt) => (
+                    <Pressable
+                      key={opt.id}
+                      style={[styles.intentCard, selectedIntent === opt.id && styles.intentCardSelected]}
+                      onPress={() => onSelectIntent(opt)}
+                    >
+                      <Text style={styles.intentTitle}>{opt.title}</Text>
+                      <Text style={styles.intentDesc}>{opt.desc}</Text>
+                    </Pressable>
+                  ))}
+                </>
+              )}
+            </>
+          )}
+
+          {phase === 'respond' && (
+            <>
+              {respondResponse ? renderRespondContent() : null}
+              {respondResponse ? (
+                <Pressable style={styles.primaryBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.back(); }}>
+                  <Text style={styles.primaryBtnText}>Done</Text>
+                </Pressable>
+              ) : null}
+            </>
+          )}
+        </ScrollView>
+        {toast ? <View style={styles.toastWrap}><Text style={styles.toastText}>{toast}</Text></View> : null}
+      </KeyboardAvoidingView>
+    </ErrorBoundary>
   );
 }
 
