@@ -68,7 +68,7 @@ const TABS = [
 
 type TabId = typeof TABS[number]['id'];
 
-// Tools organized by category
+// Tools organized by category - ALL app tools
 const TOOL_CATEGORIES = [
   {
     id: 'ai',
@@ -76,7 +76,7 @@ const TOOL_CATEGORIES = [
     tools: [
       { id: 'talk', icon: 'chatbubbles', title: 'Talk', color: '#7C4DFF' },
       { id: 'referee', icon: 'scale', title: 'Referee', color: '#F59E0B' },
-      { id: 'journal', icon: 'journal', title: 'Journal', color: '#EC4899' },
+      { id: 'prompt-generator', icon: 'sparkles', title: 'Prompts', color: '#EC4899' },
       { id: 'replay', icon: 'refresh', title: 'Replay', color: '#14B8A6' },
       { id: 'decode', icon: 'search', title: 'Decode', color: '#3B82F6' },
     ],
@@ -89,6 +89,15 @@ const TOOL_CATEGORIES = [
       { id: 'love', icon: 'heart-half', title: 'Love', color: '#F43F5E' },
       { id: 'help-someone', icon: 'hand-left', title: 'Help', color: '#8B5CF6' },
       { id: 'role-play', icon: 'people-circle', title: 'Role Play', color: '#F59E0B' },
+      { id: 'comm-builder', icon: 'chatbox', title: 'Comm Lab', color: '#10B981' },
+    ],
+  },
+  {
+    id: 'checkin',
+    title: 'Check In',
+    tools: [
+      { id: 'mood-checkin', icon: 'pulse', title: 'Quick Check', color: '#7C4DFF' },
+      { id: 'cockpit-checkin', icon: 'speedometer', title: 'Full Cockpit', color: '#14B8A6' },
     ],
   },
   {
@@ -105,6 +114,7 @@ const TOOL_CATEGORIES = [
     title: 'Understand',
     tools: [
       { id: 'emotion-wheel', icon: 'color-palette', title: 'Emotions', color: '#F59E0B' },
+      { id: 'emotion-match', icon: 'extension-puzzle', title: 'Match', color: '#EC4899' },
       { id: 'thought-challenger', icon: 'bulb', title: 'Thoughts', color: '#3B82F6' },
       { id: 'trigger-map', icon: 'map', title: 'Triggers', color: '#10B981' },
     ],
@@ -113,9 +123,31 @@ const TOOL_CATEGORIES = [
     id: 'grow',
     title: 'Grow',
     tools: [
+      { id: 'journal', icon: 'journal', title: 'Journal', color: '#EC4899' },
       { id: 'gratitude-jar', icon: 'sparkles', title: 'Gratitude', color: '#FBBF24' },
       { id: 'mood-patterns', icon: 'analytics', title: 'Patterns', color: '#6366F1' },
-      { id: 'comm-builder', icon: 'people', title: 'Comm Lab', color: '#EC4899' },
+    ],
+  },
+  {
+    id: 'athlete',
+    title: 'Athlete Mode',
+    tools: [
+      { id: 'recovery-check', icon: 'battery-charging', title: 'Recovery', color: '#10B981' },
+      { id: 'pre-competition', icon: 'trophy', title: 'Pre-Comp', color: '#FBBF24' },
+      { id: 'performance-debrief', icon: 'clipboard', title: 'Debrief', color: '#3B82F6' },
+      { id: 'athlete-identity', icon: 'star', title: 'Identity', color: '#8B5CF6' },
+    ],
+  },
+  {
+    id: 'spectrum',
+    title: 'Spectrum Mode',
+    tools: [
+      { id: 'sensory-check', icon: 'eye', title: 'Sensory', color: '#14B8A6' },
+      { id: 'stim-toolkit', icon: 'infinite', title: 'Stim', color: '#F59E0B' },
+      { id: 'social-script', icon: 'document-text', title: 'Scripts', color: '#3B82F6' },
+      { id: 'body-double', icon: 'people', title: 'Body Double', color: '#8B5CF6' },
+      { id: 'routine-builder', icon: 'calendar', title: 'Routines', color: '#EC4899' },
+      { id: 'emotion-cards', icon: 'images', title: 'Cards', color: '#FBBF24' },
     ],
   },
 ];
@@ -140,17 +172,27 @@ export default function LearnScreen() {
 
   const openTool = useCallback((id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // Direct route tools
+    // Tab-based tools
     if (id === 'talk') return router.push('/(tabs)/talk');
-    if (id === 'journal') return router.push('/(modals)/new-journal');
-    if (id === 'referee') return router.push('/(modals)/referee');
-    if (id === 'replay') return router.push('/(modals)/replay');
-    if (id === 'decode') return router.push('/(modals)/decode');
-    if (id === 'relate') return router.push('/(modals)/relate');
-    if (id === 'love') return router.push('/(modals)/love');
-    if (id === 'help-someone') return router.push('/(modals)/help-someone');
-    if (id === 'role-play') return router.push('/(modals)/role-play');
-    // Activity-based tools
+    // Modal-based tools with direct routes
+    const modalRoutes: Record<string, string> = {
+      'journal': '/(modals)/new-journal',
+      'referee': '/(modals)/referee',
+      'replay': '/(modals)/replay',
+      'decode': '/(modals)/decode',
+      'relate': '/(modals)/relate',
+      'love': '/(modals)/love',
+      'help-someone': '/(modals)/help-someone',
+      'role-play': '/(modals)/role-play',
+      'prompt-generator': '/(modals)/prompt-generator',
+      'mood-checkin': '/(modals)/mood-checkin',
+      'cockpit-checkin': '/(modals)/cockpit-checkin',
+      'mood-patterns': '/(modals)/patterns',
+    };
+    if (modalRoutes[id]) {
+      return router.push(modalRoutes[id] as any);
+    }
+    // Activity-based tools (breathing, body-scan, emotion-wheel, etc.)
     router.push(`/(modals)/activity?id=${id}`);
   }, [router]);
 
