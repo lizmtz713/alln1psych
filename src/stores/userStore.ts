@@ -105,7 +105,7 @@ interface UserState {
   loveLanguage: LoveLanguage | null;
   circleInvite: CircleInvite | null;
   onboardingCompleted: boolean;
-  /** Topics the user wants Psych to be extra gentle about (trauma-informed) */
+  /** Topics the user wants Gauge to be extra gentle about (trauma-informed) */
   sensitiveTopics: string[];
   /** How the user learns best — affects lesson/activity presentation */
   learningStyle: LearningStyle | null;

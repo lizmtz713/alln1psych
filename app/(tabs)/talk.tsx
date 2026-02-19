@@ -550,7 +550,7 @@ export default function TalkScreen() {
     if (status !== 'granted') {
       Alert.alert(
         'Microphone access needed',
-        'Go to Settings > AllN1 Psych to enable it.',
+        'Go to Settings > InGauge to enable it.',
         [{ text: 'OK' }]
       );
       return;
@@ -583,7 +583,7 @@ export default function TalkScreen() {
         if (e instanceof Error && e.message === 'Microphone permission not granted') {
           Alert.alert(
             'Microphone access needed',
-            'Go to Settings > AllN1 Psych to enable it.',
+            'Go to Settings > InGauge to enable it.',
             [{ text: 'OK' }]
           );
         }
@@ -622,7 +622,7 @@ export default function TalkScreen() {
       {/* Header with session controls */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <Text style={{ color: '#F0F0F5', fontSize: 18, fontWeight: '600' }}>Talk to Psych</Text>
+          <Text style={{ color: '#F0F0F5', fontSize: 18, fontWeight: '600' }}>Talk to Gauge</Text>
           <AIUsageIndicator />
         </View>
         <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -728,7 +728,7 @@ export default function TalkScreen() {
             {msg.role === 'assistant' && (
               <View style={styles.psychLabel}>
                 <View style={styles.psychDot} />
-                <Text style={styles.psychLabelText}>Psych</Text>
+                <Text style={styles.psychLabelText}>Gauge</Text>
               </View>
             )}
             <View style={[styles.bubbleWrap, msg.role === 'user' ? styles.bubbleWrapUser : styles.bubbleWrapAi]}>
@@ -752,7 +752,7 @@ export default function TalkScreen() {
           <View style={[styles.messageRow, styles.messageRowAi]}>
             <View style={styles.psychLabel}>
               <View style={styles.psychDot} />
-              <Text style={styles.psychLabelText}>Psych</Text>
+              <Text style={styles.psychLabelText}>Gauge</Text>
             </View>
             <View style={[styles.bubbleWrap, styles.bubbleWrapAi]}>
             <View style={[styles.bubble, styles.bubbleAi, styles.typingBubble]}>
@@ -794,6 +794,39 @@ export default function TalkScreen() {
             </Text>
             <Text style={styles.practiceSuggestionLink}>Practice this conversation →</Text>
           </Pressable>
+        )}
+
+        {/* Topic Starters - show when conversation is fresh */}
+        {messages.length <= 1 && !isAiTyping && (
+          <View style={styles.topicStartersSection}>
+            <Text style={styles.topicStartersTitle}>Not sure where to start?</Text>
+            <View style={styles.topicStartersGrid}>
+              {[
+                { emoji: '💔', label: 'Betrayal / Trust', prompt: "I'm dealing with betrayal in my relationship. I need to talk through what happened." },
+                { emoji: '😰', label: 'Anxiety', prompt: "I've been feeling really anxious lately and I don't know why." },
+                { emoji: '😢', label: 'Grief / Loss', prompt: "I'm grieving and I need someone to talk to about it." },
+                { emoji: '😤', label: 'Anger', prompt: "I'm really angry about something and I need to process it." },
+                { emoji: '💭', label: 'Relationship Issues', prompt: "I'm having relationship problems and need to talk through them." },
+                { emoji: '😞', label: 'Feeling Low', prompt: "I've been feeling really down lately. Can we talk about it?" },
+                { emoji: '🤯', label: 'Overwhelmed', prompt: "I'm completely overwhelmed right now and don't know where to start." },
+                { emoji: '💬', label: 'Just Vent', prompt: "I just need to vent about something. Can you listen?" },
+              ].map((topic) => (
+                <Pressable
+                  key={topic.label}
+                  style={styles.topicStarterChip}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setTextInput(topic.prompt);
+                    setInputMode('text');
+                    setTimeout(() => textInputRef.current?.focus(), 100);
+                  }}
+                >
+                  <Text style={styles.topicStarterEmoji}>{topic.emoji}</Text>
+                  <Text style={styles.topicStarterLabel}>{topic.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
         )}
       </ScrollView>
 
@@ -1233,5 +1266,41 @@ const styles = StyleSheet.create({
   },
   micButtonSmallActive: {
     backgroundColor: COLORS.inputSurface,
+  },
+  // Topic Starters
+  topicStartersSection: {
+    marginTop: 16,
+    paddingHorizontal: 4,
+  },
+  topicStartersTitle: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  topicStartersGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    justifyContent: 'center',
+  },
+  topicStarterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  topicStarterEmoji: {
+    fontSize: 16,
+  },
+  topicStarterLabel: {
+    fontSize: 13,
+    color: COLORS.text,
+    fontWeight: '500',
   },
 });

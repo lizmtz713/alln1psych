@@ -70,10 +70,10 @@ export const DISCOVERIES: Discovery[] = [
     emoji: '🏺',
     title: 'Know Thyself',
     content: "The ancient Greeks carved 'Know Thyself' above the Oracle at Delphi. It was considered the most important thing a human could do. This entire app is built on that one idea.",
-    expanded: "Knowing yourself isn't one moment—it's a practice. It means noticing your patterns, your triggers, how your body feels when you're stressed, and what actually helps. Every check-in, every gauge, every conversation with Psych is a small step toward that Delphic ideal.",
+    expanded: "Knowing yourself isn't one moment—it's a practice. It means noticing your patterns, your triggers, how your body feels when you're stressed, and what actually helps. Every check-in, every gauge, every conversation with Gauge is a small step toward that Delphic ideal.",
     ageAdaptive: {
       teen: "The Greeks thought 'Know Thyself' was the most important thing a human could do. For you that means: notice your patterns, your triggers, how your body feels when you're stressed. Every check-in is a step toward that. It's a practice, not a test.",
-      'young-adult': "Know Thyself was carved above the Oracle at Delphi. It's not one moment — it's a practice. Noticing your patterns, triggers, and what actually helps. Every gauge, every conversation with Psych is a step toward that. This app is built on that one idea.",
+      'young-adult': "Know Thyself was carved above the Oracle at Delphi. It's not one moment — it's a practice. Noticing your patterns, triggers, and what actually helps. Every gauge, every conversation with Gauge is a step toward that. This app is built on that one idea.",
       adult: "The Greeks put Know Thyself above the Oracle. It's a practice: noticing your patterns, triggers, how your body feels when you're stressed, and what helps. Every check-in and conversation here is a small step toward that ideal.",
       midlife: "Know Thyself — the Delphic ideal. At midlife it often means revisiting who you are beyond roles. Noticing your patterns, triggers, and what helps. It's a practice that deepens with time. This app is built on that one idea.",
       'older-adult': "The Greeks considered Know Thyself the most important task. You've had decades of practice. Noticing your patterns, your body, what helps — that's the same move. Every check-in is a step toward that ideal.",
@@ -99,7 +99,7 @@ export const DISCOVERIES: Discovery[] = [
     category: 'ancient',
     emoji: '☯️',
     title: 'The Tao of Doing Nothing',
-    content: "Lao Tzu taught that sometimes the wisest action is no action. When Psych goes quiet and lets you sit with a feeling instead of fixing it — that's 2,500-year-old wisdom.",
+    content: "Lao Tzu taught that sometimes the wisest action is no action. When Gauge goes quiet and lets you sit with a feeling instead of fixing it — that's 2,500-year-old wisdom.",
     expanded: "Wu wei isn't laziness—it's not forcing. In therapy we call it holding space. Sometimes the best thing to do is listen, breathe, and let the feeling be there. Your nervous system needs that pause. The Tao Te Ching says the soft overcomes the hard. Letting yourself feel without immediately fixing is a kind of strength.",
   },
   {
@@ -217,7 +217,7 @@ export const DISCOVERIES: Discovery[] = [
     category: 'ancient',
     emoji: '🦘',
     title: 'Aboriginal Dreamtime and Story',
-    content: "Aboriginal Dreamtime teachings carry wisdom in story, not abstraction. How you tell your story — to Psych, in your journal — shapes how you hold your past. Narrative has always been healing.",
+    content: "Aboriginal Dreamtime teachings carry wisdom in story, not abstraction. How you tell your story — to Gauge, in your journal — shapes how you hold your past. Narrative has always been healing.",
   },
   {
     id: 'aztec-flower-song',
@@ -274,7 +274,7 @@ export const DISCOVERIES: Discovery[] = [
     category: 'science',
     emoji: '🏷️',
     title: 'Naming Feelings Calms You Down',
-    content: "Brain scans show that simply naming an emotion (affect labeling) reduces amygdala activation. When you tell Psych 'I feel anxious,' your brain is already starting to calm down.",
+    content: "Brain scans show that simply naming an emotion (affect labeling) reduces amygdala activation. When you tell Gauge 'I feel anxious,' your brain is already starting to calm down.",
   },
   {
     id: 'heart-neurons',

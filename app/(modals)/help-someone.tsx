@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Audio } from 'expo-av';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
+import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { useHelpSomeoneStore, type HelpSession } from '../../src/stores/helpSomeoneStore';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
@@ -58,19 +58,27 @@ function buildCoachingSystemPrompt(
   concerns: string[]
 ): string {
   const concernsList = concerns.length ? concerns.join('\n- ') : 'None specified';
-  return `You are Psych, an AI emotional intelligence coach. The user is trying to help someone they care about who is struggling. Your job is to coach the USER on how to support this person. Be specific, practical, and warm. Ask clarifying questions. Suggest what to say, what NOT to say, and when to just listen. Never be generic. Every response should feel personalized to the specific situation they described.
+  return `You are Gauge, an AI emotional intelligence coach. The user is trying to help someone they care about who is struggling.
+
+IMPORTANT RULES:
+- Focus on the SITUATION and the OTHER PERSON, not the user's feelings
+- Give specific, actionable advice about what to DO and SAY
+- Suggest exact phrases they can use
+- Explain what the other person might be experiencing and why
+- Tell them what NOT to say (common mistakes)
+- Tell them when to just listen vs when to offer solutions
+- Only ask about the user's feelings if it's directly relevant to helping the other person
+- Never be generic. Every response must be specific to what they described.
+- If you need more info about the situation, ask about the SITUATION, not about how the user feels.
+- You are coaching them like a wise mentor, not therapizing them.
+- Do NOT keep asking about the USER's feelings. Focus on coaching them to help the OTHER person.
 
 PERSON IN NEED: ${personName} (${relationship})
 SITUATION: ${situation}
 SPECIFIC CONCERNS:
 - ${concernsList}
 
-RULES:
-- Do NOT keep asking about the USER's feelings. Focus on coaching them about the SITUATION and the other person.
-- Give 1-2 specific, actionable things at a time. Use their name: "When you talk to ${personName}..."
-- Offer exact scripts when helpful: "You could say: 'I've noticed you've been quiet lately. I'm not going anywhere. Whenever you're ready to talk, I'm here.'"
-- Acknowledge how hard this is for the USER. Never be preachy or generic.
-- If the situation involves potential self-harm or suicide: be very clear. Tell them to ask directly "Are you thinking about hurting yourself?" (asking does NOT plant the idea). If yes: stay with them, call 988 together. If immediate danger: call 911. You can also call 988 yourself for guidance.`;
+When the situation involves potential self-harm or suicide: be very clear. Tell them to ask directly "Are you thinking about hurting yourself?" (asking does NOT plant the idea). If yes: stay with them, call 988 together. If immediate danger: call 911. They can also call 988 themselves for guidance.`;
 }
 
 const CRISIS_RESOURCES_TEXT = `Crisis resources to share:
@@ -116,6 +124,7 @@ export default function HelpSomeoneScreen() {
   const lastOnDeviceResultRef = useRef('');
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [reminderDays, setReminderDays] = useState<1 | 2 | 3 | null>(null);
+  const quickSelectGoToCoachingRef = useRef(false);
 
   useEffect(() => {
     hasOpenAIKey().then(setHasApiKey);
@@ -125,6 +134,13 @@ export default function HelpSomeoneScreen() {
     if (params.name) setPersonName(params.name);
     if (params.relationship) setRelationship(params.relationship);
   }, [params.name, params.relationship]);
+
+  useEffect(() => {
+    if (quickSelectGoToCoachingRef.current && step === 2 && canProceedStep1 && canProceedStep2) {
+      quickSelectGoToCoachingRef.current = false;
+      startCoaching();
+    }
+  }, [step, situation, concerns, canProceedStep1, canProceedStep2]);
 
   const selectedMember = useCircleMember ? members.find((m) => m.id === useCircleMember) : null;
   const displayName = selectedMember ? selectedMember.name : personName.trim();
@@ -137,16 +153,38 @@ export default function HelpSomeoneScreen() {
     setConcerns((prev) => (prev.includes(label) ? prev.filter((c) => c !== label) : [...prev, label]));
   };
 
+  const handleQuickSelect = (topic: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const newConcerns = concerns.includes(topic) ? concerns : [...concerns, topic];
+    setConcerns(newConcerns);
+    const newSituation = situation.trim() ? situation : topic;
+    setSituation(newSituation);
+    
+    // If step 1 is complete, go straight to coaching
+    const name = selectedMember ? selectedMember.name : personName.trim();
+    const rel = selectedMember
+      ? selectedMember.relationship.charAt(0).toUpperCase() + selectedMember.relationship.slice(1)
+      : relationship;
+    
+    if (name && rel && newSituation.trim().length >= 10) {
+      // Go straight to coaching with the new situation
+      setTimeout(() => {
+        startCoaching(newSituation);
+      }, 150);
+    }
+  };
+
   const canProceedStep1 = displayName.length > 0 && displayRelationship.length > 0;
   const canProceedStep2 = situation.trim().length >= 10;
 
-  const startCoaching = () => {
-    if (!canProceedStep2 || !displayName) return;
+  const startCoaching = (overrideSituation?: string) => {
+    const sitToUse = overrideSituation ?? situation;
+    if (sitToUse.trim().length < 10 || !displayName) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const added = startNewSession({
       personName: displayName,
       relationship: displayRelationship,
-      situation: situation.trim(),
+      situation: sitToUse.trim(),
       concerns: [...concerns],
       messages: [],
     });
@@ -287,7 +325,7 @@ export default function HelpSomeoneScreen() {
     if (!currentSession || !canEndSession) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setSummaryLoading(true);
-    const systemPrompt = `You are Psych. The user just had a coaching session about helping someone named ${currentSession.personName}. Generate a concise action plan summary.
+    const systemPrompt = `You are Gauge. The user just had a coaching session about helping someone named ${currentSession.personName}. Generate a concise action plan summary.
 
 Format your response as:
 1. "Here's your action plan for helping [name]:"
@@ -374,15 +412,17 @@ Keep it practical and warm. No extra preamble.`;
       keyboardVerticalOffset={0}
     >
       <View style={styles.header}>
-        <Pressable style={styles.closeBtn} onPress={closeAndSaveSession}>
+        {step !== 1 ? (
+          <Text style={styles.headerTitle}>
+            {step === 2 && "What's happening?"}
+            {step === 3 && 'Coaching'}
+            {step === 4 && 'Action plan'}
+          </Text>
+        ) : null}
+        <View style={{ flex: 1 }} />
+        <Pressable style={styles.closeBtn} onPress={cancelAndBack}>
           <Ionicons name="close" size={28} color={COLORS.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>
-          {step === 1 && 'Who needs help?'}
-          {step === 2 && "What's happening?"}
-          {step === 3 && 'Coaching'}
-          {step === 4 && 'Action plan'}
-        </Text>
       </View>
 
       {step === 1 && (
@@ -392,19 +432,28 @@ Keep it practical and warm. No extra preamble.`;
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Pressable onPress={cancelAndBack} style={styles.cancelRow}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-            <Text style={styles.cancelText}>Cancel</Text>
-          </Pressable>
-          <Text style={styles.question}>Who are you worried about?</Text>
+          <Text style={[styles.question, { marginBottom: 16 }]}>Who are you worried about?</Text>
           {members.length > 0 && (
-            <View style={styles.chipRow}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              style={{ marginBottom: 20, marginHorizontal: -20 }}
+              contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
+            >
               {members.map((m) => (
                 <Pressable
                   key={m.id}
-                  style={[
-                    styles.card,
-                    useCircleMember === m.id && styles.cardSelected,
+                  style={({ pressed }) => [
+                    {
+                      alignItems: 'center',
+                      backgroundColor: COLORS.surface,
+                      borderRadius: 16,
+                      padding: 14,
+                      width: 90,
+                      borderWidth: 2,
+                      borderColor: useCircleMember === m.id ? COLORS.accent : 'transparent',
+                    },
+                    pressed && { opacity: 0.8 },
                   ]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -414,11 +463,11 @@ Keep it practical and warm. No extra preamble.`;
                     }
                   }}
                 >
-                  <Text style={styles.cardName}>{m.name}</Text>
                   <TemperatureGauge temperature={m.temperature} size="sm" />
+                  <Text numberOfLines={1} style={{ fontSize: 13, color: COLORS.text, textAlign: 'center', marginTop: 8, fontWeight: '500' }}>{m.name}</Text>
                 </Pressable>
               ))}
-            </View>
+            </ScrollView>
           )}
           <Text style={styles.label}>Or someone not in your circle</Text>
           <TextInput
@@ -454,6 +503,9 @@ Keep it practical and warm. No extra preamble.`;
           >
             <Text style={styles.primaryButtonText}>Continue</Text>
           </Pressable>
+          <Pressable onPress={cancelAndBack} style={styles.cancelBottom}>
+            <Text style={styles.cancelBottomText}>Cancel</Text>
+          </Pressable>
         </ScrollView>
       )}
 
@@ -464,10 +516,6 @@ Keep it practical and warm. No extra preamble.`;
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Pressable onPress={cancelAndBack} style={styles.cancelRow}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-            <Text style={styles.cancelText}>Cancel</Text>
-          </Pressable>
           <Text style={styles.question}>What's going on with them?</Text>
           <Text style={styles.hint}>Tell me as much or as little as you know.</Text>
           <TextInput
@@ -479,13 +527,13 @@ Keep it practical and warm. No extra preamble.`;
             multiline
             numberOfLines={4}
           />
-          <Text style={styles.label}>Quick-select (optional)</Text>
+          <Text style={styles.label}>Quick-select (tap to add or go straight to coaching)</Text>
           <View style={styles.chipWrap}>
             {CONCERN_CHIPS.map((c) => (
               <Pressable
                 key={c}
                 style={[styles.chip, concerns.includes(c) && styles.chipSelected]}
-                onPress={() => toggleConcern(c)}
+                onPress={() => handleQuickSelect(c)}
               >
                 <Text style={[styles.chipText, concerns.includes(c) && styles.chipTextSelected]} numberOfLines={1}>{c}</Text>
               </Pressable>
@@ -497,6 +545,9 @@ Keep it practical and warm. No extra preamble.`;
             disabled={!canProceedStep2 || !displayName}
           >
             <Text style={styles.primaryButtonText}>Help me help them</Text>
+          </Pressable>
+          <Pressable onPress={cancelAndBack} style={styles.cancelBottom}>
+            <Text style={styles.cancelBottomText}>Cancel</Text>
           </Pressable>
         </ScrollView>
       )}
@@ -518,7 +569,7 @@ Keep it practical and warm. No extra preamble.`;
                 {msg.role === 'assistant' && (
                   <View style={styles.psychLabel}>
                     <View style={styles.psychDot} />
-                    <Text style={styles.psychLabelText}>Psych</Text>
+                    <Text style={styles.psychLabelText}>Gauge</Text>
                   </View>
                 )}
                 <View style={[styles.bubble, msg.role === 'user' ? styles.bubbleUser : styles.bubbleAi]}>
@@ -530,7 +581,7 @@ Keep it practical and warm. No extra preamble.`;
               <View style={[styles.bubbleWrap, styles.bubbleWrapAi]}>
                 <View style={styles.psychLabel}>
                   <View style={styles.psychDot} />
-                  <Text style={styles.psychLabelText}>Psych</Text>
+                  <Text style={styles.psychLabelText}>Gauge</Text>
                 </View>
                 <View style={[styles.bubble, styles.bubbleAi]}>
                   <ActivityIndicator size="small" color={COLORS.accent} />
@@ -652,6 +703,15 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.surface,
   },
   closeBtn: { padding: 8, marginRight: 8 },
+  cancelBottom: {
+    alignSelf: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+  },
+  cancelBottomText: {
+    fontSize: 15,
+    color: '#8888A0',
+  },
   cancelRow: {
     flexDirection: 'row',
     alignItems: 'center',

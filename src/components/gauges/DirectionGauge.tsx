@@ -10,7 +10,7 @@ interface GaugeProps {
 
 export function DirectionGauge({ value, size = 80 }: GaugeProps) {
   const isSet = value >= 0;
-  const color = isSet ? getGaugeColor(value) : '#2A2A3A';
+  const color = isSet ? getGaugeColor(value) : '#5A5A6A';
   const cx = size / 2;
   const cy = size / 2;
   const radius = size * 0.38;
@@ -25,7 +25,7 @@ export function DirectionGauge({ value, size = 80 }: GaugeProps) {
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <Circle cx={cx} cy={cy} r={radius} fill="none" stroke={isSet ? 'rgba(255,255,255,0.1)' : '#1A1A2E'} strokeWidth={1.5} />
+        <Circle cx={cx} cy={cy} r={radius} fill="none" stroke={isSet ? 'rgba(255,255,255,0.1)' : '#3A3A4E'} strokeWidth={1.5} />
         {[0, 90, 180, 270].map((deg, i) => {
           const rad = (deg * Math.PI) / 180;
           const innerR = radius * 0.85;
@@ -36,14 +36,14 @@ export function DirectionGauge({ value, size = 80 }: GaugeProps) {
               y1={cy - innerR * Math.cos(rad)}
               x2={cx + radius * Math.sin(rad)}
               y2={cy - radius * Math.cos(rad)}
-              stroke="#2A2A3A"
+              stroke="#5A5A6A"
               strokeWidth={1.5}
             />
           );
         })}
-        <Line x1={tailX} y1={tailY} x2={tipX} y2={tipY} stroke={isSet ? color : '#2A2A3A'} strokeWidth={2.5} strokeLinecap="round" />
-        <Circle cx={tipX} cy={tipY} r={2.5} fill={isSet ? color : '#2A2A3A'} />
-        <Circle cx={cx} cy={cy} r={3} fill={isSet ? '#F0F0F5' : '#2A2A3A'} />
+        <Line x1={tailX} y1={tailY} x2={tipX} y2={tipY} stroke={isSet ? color : '#5A5A6A'} strokeWidth={2.5} strokeLinecap="round" />
+        <Circle cx={tipX} cy={tipY} r={2.5} fill={isSet ? color : '#5A5A6A'} />
+        <Circle cx={cx} cy={cy} r={3} fill={isSet ? '#F0F0F5' : '#5A5A6A'} />
       </Svg>
     </View>
   );

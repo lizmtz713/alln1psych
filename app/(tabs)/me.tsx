@@ -78,6 +78,19 @@ export default function MeScreen() {
     { icon: 'flash-outline', label: 'Activity', route: '/(modals)/activity', color: COLORS.warning },
   ];
 
+  const toolsMenu = [
+    { icon: 'refresh-outline', label: 'Replay', desc: 'Process what happened', route: '/(modals)/replay' },
+    { icon: 'search-outline', label: 'Decode', desc: 'Analyze messages', route: '/(modals)/decode' },
+    { icon: 'heart-circle-outline', label: 'Relate', desc: 'Understand anyone', route: '/(modals)/relate' },
+    { icon: 'heart-half-outline', label: 'Love', desc: 'Love & intimacy', route: '/(modals)/love' },
+    { icon: 'people-outline', label: 'Help', desc: 'Help someone', route: '/(modals)/help-someone' },
+    { icon: 'chatbubbles-outline', label: 'Role Play', desc: 'Practice conversations', route: '/(modals)/role-play' },
+  ];
+
+  const settingsMenu = [
+    { icon: 'settings-outline', label: 'Settings', route: '/(modals)/settings' },
+  ];
+
   return (
     <ErrorBoundary>
       <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -127,16 +140,10 @@ export default function MeScreen() {
                 <Text style={styles.statLabel}>Day Streak</Text>
               </View>
               <View style={styles.statDivider} />
-              <Pressable 
-                style={styles.statItem}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push('/(modals)/awards');
-                }}
-              >
+              <View style={styles.statItem}>
                 <Text style={styles.statValue}>{unlockedCount}</Text>
-                <Text style={[styles.statLabel, { color: COLORS.accent }]}>Awards →</Text>
-              </Pressable>
+                <Text style={styles.statLabel}>Awards</Text>
+              </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <View style={[styles.tempIndicator, { backgroundColor: tempColor + '20' }]}>
@@ -169,8 +176,40 @@ export default function MeScreen() {
             </View>
           </AnimatedSection>
 
-          {/* Settings */}
+          {/* Tools Menu */}
           <AnimatedSection delay={300}>
+            <Text style={styles.sectionTitle}>Your Tools</Text>
+            <View style={styles.menuCard}>
+              {toolsMenu.map((item, index) => (
+                <Pressable
+                  key={item.label}
+                  style={({ pressed }) => [
+                    styles.menuItem,
+                    index < toolsMenu.length - 1 && styles.menuItemBorder,
+                    pressed && styles.menuItemPressed,
+                  ]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push(item.route as any);
+                  }}
+                >
+                  <View style={styles.menuItemLeft}>
+                    <View style={styles.menuItemIconWrap}>
+                      <Ionicons name={item.icon as any} size={20} color={COLORS.accent} />
+                    </View>
+                    <View>
+                      <Text style={styles.menuItemLabel}>{item.label}</Text>
+                      <Text style={styles.menuItemDesc}>{item.desc}</Text>
+                    </View>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+                </Pressable>
+              ))}
+            </View>
+          </AnimatedSection>
+
+          {/* Settings */}
+          <AnimatedSection delay={400}>
             <Text style={styles.sectionTitle}>Settings</Text>
             <View style={styles.menuCard}>
               <Pressable

@@ -62,7 +62,7 @@ function GaugeBar({ label, value, emoji }: { label: string; value: number; emoji
         </Text>
       </View>
       <View style={styles.gaugeBarTrack}>
-        <View style={[styles.gaugeBarFill, { width, backgroundColor: color }]} />
+        <View style={[styles.gaugeBarFill, { width: width as any, backgroundColor: color }]} />
       </View>
     </View>
   );

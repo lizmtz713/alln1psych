@@ -46,16 +46,16 @@ export async function startOnDeviceListening(callbacks: OnDeviceListenCallbacks)
     return;
   }
 
-  Voice.onSpeechPartialResults = (e) => {
+  Voice.onSpeechPartialResults = (e: any) => {
     const text = e.value?.[0] ?? '';
     onPartial?.(text);
   };
-  Voice.onSpeechResults = (e) => {
+  Voice.onSpeechResults = (e: any) => {
     const text = e.value?.[0] ?? '';
     onResult?.(text);
   };
   Voice.onSpeechEnd = () => {};
-  Voice.onSpeechError = (e) => {
+  Voice.onSpeechError = (e: any) => {
     onError?.(e.error ?? { message: 'Speech recognition error' });
   };
 
@@ -169,7 +169,7 @@ export function hasVoiceSupport(): boolean {
   return true;
 }
 
-/** Play AI response using OpenAI TTS (Psych's voice). Uses fetch + blob + FileReader for reliable binary in RN. */
+/** Play AI response using OpenAI TTS (Gauge's voice). Uses fetch + blob + FileReader for reliable binary in RN. */
 export async function speakWithOpenAI(text: string): Promise<void> {
   try {
     const apiKey = await getOpenAIKey();
@@ -212,9 +212,10 @@ export async function speakWithOpenAI(text: string): Promise<void> {
       reader.readAsDataURL(blob);
     });
 
-    const fileUri = FileSystem.documentDirectory + 'psych-tts-' + Date.now() + '.mp3';
+    const dir = (FileSystem as any).documentDirectory ?? '';
+    const fileUri = dir + 'psych-tts-' + Date.now() + '.mp3';
     await FileSystem.writeAsStringAsync(fileUri, base64Audio, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: (FileSystem as any).EncodingType?.Base64 ?? 'base64',
     });
 
     await Audio.setAudioModeAsync({

@@ -26,6 +26,7 @@ import { useJournalStore } from '../../src/stores/journalStore';
 import { useDailyContentStore } from '../../src/stores/dailyContentStore';
 import { generateDailyContent } from '../../src/services/personalization';
 import { getDiscoveriesForDay } from '../../src/data/discoveries';
+import type { Lesson } from '../../src/data/educationContent';
 import { Ionicons } from '@expo/vector-icons';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
@@ -38,7 +39,7 @@ const ALL_ACTIVITIES: ActivitySuggestion[] = [
   { id: 'body-scan', emoji: '🧍', title: 'Body Check', sub: 'Tap where you feel tension. Connect body and emotions.' },
   { id: 'mood-patterns', emoji: '📊', title: 'Your Patterns', sub: 'See your mood calendar and AI insights.' },
   { id: 'stress-thermo', emoji: '🌡️', title: 'Stress Check', sub: 'Rate your stress and get support that fits.' },
-  { id: 'thought-challenger', emoji: '💭', title: 'Thought Challenger', sub: 'Challenge a tough thought with Psych.' },
+  { id: 'thought-challenger', emoji: '💭', title: 'Thought Challenger', sub: 'Challenge a tough thought with Gauge.' },
   { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Explorer', sub: 'Name your feelings with precision.' },
 ];
 
@@ -143,7 +144,7 @@ export default function HomeScreen() {
   useConversationStore((s) => (s.messages ?? []).length);
   useJournalStore((s) => (s.entries ?? []).length);
   const getEngagementStreak = useInsightsStore((s) => s.getEngagementStreak);
-  const getPsychSays = useInsightsStore((s) => s.getPsychSays);
+  const getGaugeSays = useInsightsStore((s) => s.getGaugeSays);
   const getWeeklySummary = useInsightsStore((s) => s.getWeeklySummary);
   const getNextLesson = useEducationStore((s) => s.getNextLesson);
   const { getTodayChallenge, isTodayChallengeDone, completeTodayChallenge } = useEngagementStore();
@@ -190,12 +191,12 @@ export default function HomeScreen() {
 
   let streak: number = 0;
   let weeklySummary: { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null = null;
-  let nextLesson: { id: string; title: string; duration: string } | null = null;
+  let nextLesson: Lesson | null = null;
   let moodTrend: Array<{ date: string; mood: string }> = [];
   let summaryCount = 0;
   let greetingLine = getDynamicGreeting(user?.name ?? 'you');
   let affirmation = "You're doing better than you think.";
-  let psychSays = "You're doing better than you think.";
+  let gaugeSays = "You're doing better than you think.";
   let todayChallenge: { text: string; emoji: string } = { text: 'Take 5 deep breaths right now', emoji: '🌬️' };
   let challengeDone = false;
   let challengeText = 'Take 5 deep breaths right now';
@@ -210,9 +211,10 @@ export default function HomeScreen() {
     moodTrend = typeof getWeeklyMoodTrend === 'function' ? (getWeeklyMoodTrend() ?? []) : [];
     const summaries = typeof getSummaries === 'function' ? getSummaries() : [];
     summaryCount = Array.isArray(summaries) ? summaries.length : 0;
-    greetingLine = dailyContent?.greeting ?? getDynamicGreeting(user?.name ?? 'you');
+    // Always use current time for greeting (don't cache the time-of-day part)
+    greetingLine = getDynamicGreeting(user?.name ?? 'you');
     affirmation = dailyContent?.affirmation ?? "You're doing better than you think.";
-    psychSays = dailyContent?.insight ?? (typeof getPsychSays === 'function' ? getPsychSays(streak) : "You're doing better than you think.");
+    gaugeSays = dailyContent?.insight ?? (typeof getGaugeSays === 'function' ? getGaugeSays(streak) : "You're doing better than you think.");
     todayChallenge = (typeof getTodayChallenge === 'function' ? getTodayChallenge() : null) ?? todayChallenge;
     challengeDone = typeof isTodayChallengeDone === 'function' ? isTodayChallengeDone() : false;
     challengeText = dailyContent?.challengeSuggestion ?? (todayChallenge?.text ?? challengeText);
@@ -335,10 +337,11 @@ export default function HomeScreen() {
   });
 
   const needsCheckInToday = overall < 0 || activeGaugeCount < 3;
-  const psychSaysContent = showInsight && crossSystemInsight ? crossSystemInsight : psychSays;
+  const gaugeSaysContent = showInsight && crossSystemInsight ? crossSystemInsight : gaugeSays;
 
   // Quick actions for horizontal scroll
   const quickActions = [
+    { label: 'Prompts', icon: 'sparkles', route: '/(modals)/prompt-generator' as const },
     { label: 'Patterns', icon: 'analytics', route: '/(modals)/patterns' as const },
     { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const },
     { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const },
@@ -446,8 +449,8 @@ export default function HomeScreen() {
           ═══════════════════════════════════════════════════════════════ */}
       {!showInsight && (
         <Animated.View style={[styles.card, styles.psychCard, slideY(card2)]}>
-          <Text style={styles.psychLabel}>Psych says...</Text>
-          <Text style={styles.psychText}>{psychSays}</Text>
+          <Text style={styles.psychLabel}>Gauge says...</Text>
+          <Text style={styles.psychText}>{gaugeSays}</Text>
         </Animated.View>
       )}
 

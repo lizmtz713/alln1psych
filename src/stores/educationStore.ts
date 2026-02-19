@@ -69,7 +69,7 @@ export const useEducationStore = create<EducationState>((set, get) => ({
       const streak =
         lastDay === today
           ? state.streakDays
-          : lastDay && new Date(last).getTime() === new Date(today).getTime() - 86400000
+          : lastDay && last && new Date(last).getTime() === new Date(today).getTime() - 86400000
             ? state.streakDays + 1
             : 1;
       return {

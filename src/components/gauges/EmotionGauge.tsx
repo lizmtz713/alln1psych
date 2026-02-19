@@ -10,7 +10,7 @@ interface GaugeProps {
 
 export function EmotionGauge({ value, size = 80 }: GaugeProps) {
   const isSet = value >= 0;
-  const color = isSet ? getGaugeColor(value) : '#2A2A3A';
+  const color = isSet ? getGaugeColor(value) : '#5A5A6A';
   const barCount = 5;
   const barWidth = size * 0.12;
   const gap = size * 0.05;
@@ -36,8 +36,8 @@ export function EmotionGauge({ value, size = 80 }: GaugeProps) {
               width={barWidth}
               height={barHeight}
               rx={barWidth / 3}
-              fill={isLit ? color : '#1A1A2E'}
-              stroke={isLit ? color : '#2A2A3A'}
+              fill={isLit ? color : '#3A3A4E'}
+              stroke={isLit ? color : '#5A5A6A'}
               strokeWidth={0.5}
               opacity={isLit ? 0.9 : 0.4}
             />

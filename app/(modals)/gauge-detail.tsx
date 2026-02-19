@@ -64,7 +64,7 @@ const GAUGE_DETAIL_CONTENT: Record<
     whatToTry: [
       { label: 'Emotion Wheel', route: '/(modals)/activity?id=emotion-wheel' },
       { label: 'Thought Challenger', route: '/(modals)/activity?id=thought-challenger' },
-      { label: 'Talk to Psych', route: '/(tabs)/talk' },
+      { label: 'Talk to Gauge', route: '/(tabs)/talk' },
     ],
     funFact:
       'Anger often masks hurt + powerlessness. "Laziness" often masks overwhelm. Naming the real feeling reduces its grip.',
@@ -93,7 +93,7 @@ const GAUGE_DETAIL_CONTENT: Record<
     whatToTry: [
       { label: 'Trigger Map', route: '/(modals)/activity?id=trigger-map' },
       { label: 'Journal reflection', route: '/(modals)/new-journal' },
-      { label: 'Talk to Psych', route: '/(tabs)/talk' },
+      { label: 'Talk to Gauge', route: '/(tabs)/talk' },
     ],
     funFact:
       "When actions don't match values, stress increases. That stress isn't punishment. It's your alignment system working correctly.",

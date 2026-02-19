@@ -5,7 +5,7 @@
  * Adapts the AI's language, examples, tone, and assumptions based on
  * who the user is — their age, culture, family background, and experience.
  *
- * This is what makes Psych feel like it was built for YOU.
+ * This is what makes Gauge feel like it was built for YOU.
  */
 
 import { useUserStore } from '../stores/userStore';
@@ -115,7 +115,7 @@ export function buildAdaptiveContext(): string {
         context += `ADAPTATION: Something didn't click. Don't push therapy as a solution. They already tried. Focus on what THIS app offers that's different from their therapy experience. Be practical and results-oriented.\n`;
         break;
       case 'currently':
-        context += `ADAPTATION: They have a therapist. Psych is a COMPLEMENT, not a replacement. Don't contradict therapeutic work. If they mention their therapist's advice, support it. Offer tools and insights that supplement therapy — not compete with it.\n`;
+        context += `ADAPTATION: They have a therapist. Gauge is a COMPLEMENT, not a replacement. Don't contradict therapeutic work. If they mention their therapist's advice, support it. Offer tools and insights that supplement therapy — not compete with it.\n`;
         break;
       case 'positive':
         context += `ADAPTATION: They understand therapeutic concepts. Can use more sophisticated language. May appreciate deeper psychological insights. Build on what they've learned.\n`;
@@ -126,7 +126,7 @@ export function buildAdaptiveContext(): string {
     }
   }
 
-  context += `\nREMEMBER: You are not a generic AI. You are Psych — built specifically for THIS person. Every response should feel like it was written by someone who gets their world, their culture, their generation, and their experience. If you default to generic wellness advice that could come from any app, you've failed.\n`;
+  context += `\nREMEMBER: You are not a generic AI. You are Gauge — built specifically for THIS person. Every response should feel like it was written by someone who gets their world, their culture, their generation, and their experience. If you default to generic wellness advice that could come from any app, you've failed.\n`;
 
   return context;
 }

@@ -10,12 +10,11 @@ interface GaugeProps {
 
 export function StateGauge({ value, size = 80 }: GaugeProps) {
   const isSet = value >= 0;
-  const color = isSet ? getGaugeColor(value) : '#2A2A3A';
+  const color = isSet ? getGaugeColor(value) : '#5A5A6A';
   const cx = size / 2;
   const cy = size * 0.6;
   const radius = size * 0.38;
 
-  // Needle angle: value 0 = far right (hot/red), value 100 = far left (cool/green)
   const angle = isSet ? Math.PI - (value / 100) * Math.PI : Math.PI / 2;
   const needleLength = radius * 0.85;
   const needleX = cx + needleLength * Math.cos(angle);
@@ -40,15 +39,15 @@ export function StateGauge({ value, size = 80 }: GaugeProps) {
             <Path
               key={i}
               d={`M ${x1} ${y1} A ${radius} ${radius} 0 0 0 ${x2} ${y2}`}
-              stroke={isSet ? seg.color : '#2A2A3A'}
+              stroke={isSet ? seg.color : '#5A5A6A'}
               strokeWidth={4}
               fill="none"
               opacity={isSet ? 0.7 : 0.3}
             />
           );
         })}
-        <Line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={isSet ? color : '#2A2A3A'} strokeWidth={2} strokeLinecap="round" />
-        <Circle cx={cx} cy={cy} r={3} fill={isSet ? color : '#2A2A3A'} />
+        <Line x1={cx} y1={cy} x2={needleX} y2={needleY} stroke={isSet ? color : '#5A5A6A'} strokeWidth={2} strokeLinecap="round" />
+        <Circle cx={cx} cy={cy} r={3} fill={isSet ? color : '#5A5A6A'} />
       </Svg>
     </View>
   );

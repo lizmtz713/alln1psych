@@ -29,7 +29,7 @@ export function GoogleSignInButton({ onSuccess, onError }: Props) {
       scopes: ['openid', 'profile', 'email'],
       responseType: 'id_token' as const,
     },
-    discovery ?? undefined
+    discovery ?? null
   );
 
   useEffect(() => {
@@ -37,8 +37,10 @@ export function GoogleSignInButton({ onSuccess, onError }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!response || response.type !== 'success' || !response.params?.id_token) return;
-    const token = response.params.id_token as string;
+    if (!response || response.type !== 'success') return;
+    const params = (response as { type: 'success'; params?: { id_token?: string } }).params;
+    if (!params?.id_token) return;
+    const token = params.id_token;
     (async () => {
       setLoading(true);
       onError('');
@@ -50,7 +52,7 @@ export function GoogleSignInButton({ onSuccess, onError }: Props) {
       }
       onSuccess();
     })();
-  }, [response?.type, response?.params?.id_token]);
+  }, [response]);
 
   const handlePress = () => {
     onError('');

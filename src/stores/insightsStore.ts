@@ -64,7 +64,7 @@ interface InsightsState {
   getConversationCountThisWeek: () => number;
   getLessonsCompletedThisWeek: () => number;
   getMostCommonMoodThisWeek: () => string | null;
-  getPsychSays: (engagementStreak: number) => string;
+  getGaugeSays: (engagementStreak: number) => string;
   getWeeklySummary: () => { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null;
   reset: () => void;
 }
@@ -109,7 +109,7 @@ export const useInsightsStore = create<InsightsState>(() => ({
     (conv.messages ?? []).filter((m) => m.role === 'user').forEach((m) => dates.add(new Date(m.timestamp).toDateString()));
     (journal.entries ?? []).forEach((e) => dates.add(new Date(e.createdAt).toDateString()));
     if (education.lastLessonDate) dates.add(new Date(education.lastLessonDate).toDateString());
-    const sorted = Array.from(dates).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    const sorted = Array.from(dates).sort((a: string, b: string) => new Date(b).getTime() - new Date(a).getTime());
     const today = new Date().toDateString();
     if (sorted[0] !== today) return 0;
     let streak = 0;
@@ -140,11 +140,11 @@ export const useInsightsStore = create<InsightsState>(() => ({
     return useEducationStore.getState().completedLessons.length;
   },
 
-  getMostCommonMoodThisWeek: () => {
+  getMostCommonMoodThisWeek: (): string | null => {
     const trend = useInsightsStore.getState().getWeeklyMoodTrend();
     if (trend.length === 0) return null;
     const counts: Record<string, number> = {};
-    trend.forEach(({ mood }) => {
+    trend.forEach(({ mood }: { mood: string }) => {
       counts[mood] = (counts[mood] || 0) + 1;
     });
     let max = 0;
@@ -158,9 +158,9 @@ export const useInsightsStore = create<InsightsState>(() => ({
     return mood;
   },
 
-  getPsychSays: (engagementStreak) => {
+  getGaugeSays: (engagementStreak: number): string => {
     const trend = useInsightsStore.getState().getWeeklyMoodTrend();
-    const greenCount = trend.filter((t) => t.mood === 'green').length;
+    const greenCount = trend.filter((t: { mood: string }) => t.mood === 'green').length;
     const lastMood = trend.length > 0 ? trend[0].mood : null;
     if (greenCount >= 3 && lastMood === 'green')
       return "You've been feeling good this week. What's contributing to that?";
@@ -176,19 +176,19 @@ export const useInsightsStore = create<InsightsState>(() => ({
     return tips[Math.floor(Math.random() * tips.length)];
   },
 
-  getWeeklySummary: () => {
+  getWeeklySummary: (): { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null => {
     const now = new Date();
     if (now.getDay() !== 0) return null; // Sunday = 0
     const trend = useInsightsStore.getState().getWeeklyMoodTrend();
     const convCount = useInsightsStore.getState().getConversationCountThisWeek();
     const lessonsCount = useInsightsStore.getState().getLessonsCompletedThisWeek();
     const moodCounts: Record<string, number> = {};
-    trend.forEach(({ mood }) => {
+    trend.forEach(({ mood }: { mood: string }) => {
       moodCounts[mood] = (moodCounts[mood] || 0) + 1;
     });
     let mostCommonMood: string | null = null;
     let max = 0;
-    Object.entries(moodCounts).forEach(([m, c]) => {
+    Object.entries(moodCounts).forEach(([m, c]: [string, number]) => {
       if (c > max) {
         max = c;
         mostCommonMood = m;

@@ -1,6 +1,6 @@
 /**
  * Full-screen crisis overlay — 988, 741741, culturally relevant resources, emergency contacts, 911.
- * Calm, safe design. "I want to keep talking to Psych" dismisses.
+ * Calm, safe design. "I want to keep talking to Gauge" dismisses.
  */
 
 import { View, Text, StyleSheet, Pressable, Linking } from 'react-native';
@@ -97,7 +97,7 @@ export function CrisisOverlay({ onDismiss }: CrisisOverlayProps) {
       </Pressable>
 
       <Pressable style={styles.keepTalking} onPress={onDismiss}>
-        <Text style={styles.keepTalkingText}>I want to keep talking to Psych</Text>
+        <Text style={styles.keepTalkingText}>I want to keep talking to Gauge</Text>
       </Pressable>
     </View>
   );

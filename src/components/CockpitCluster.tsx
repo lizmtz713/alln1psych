@@ -183,7 +183,7 @@ export function CockpitCluster({
         const gaugeValue = gaugeValues[key as keyof typeof gaugeValues];
         const GaugeComponent = GAUGE_COMPONENTS[key];
         const config = GAUGE_CONFIG[key as keyof typeof GAUGE_CONFIG];
-        const gaugeColor = gaugeValue >= 0 ? getGaugeColor(gaugeValue) : TEXT_MUTED;
+        const gaugeColor = gaugeValue >= 0 ? getGaugeColor(gaugeValue) : '#E0E0E0';
         
         // Calculate position
         const radians = (angle * Math.PI) / 180;
@@ -211,22 +211,20 @@ export function CockpitCluster({
               style={({ pressed }) => [
                 styles.gaugeBubble,
                 {
-                  borderColor: gaugeValue >= 0 ? gaugeColor : TEXT_MUTED + '60',
+                  borderColor: gaugeValue >= 0 ? gaugeColor : 'rgba(255,255,255,0.3)',
                   shadowColor: gaugeColor,
-                  shadowOpacity: gaugeValue >= 0 ? 0.4 : 0,
-                  shadowRadius: 8,
+                  shadowOpacity: gaugeValue >= 0 ? 0.5 : 0,
+                  shadowRadius: 10,
                 },
                 pressed && styles.gaugeBubblePressed,
               ]}
               onPress={() => handleGaugePress(key)}
             >
-              <GaugeComponent value={gaugeValue} size={36} />
-              <Text style={[styles.gaugeLabel, { color: gaugeColor }]}>
+              {/* Emoji icon for visibility */}
+              <Text style={styles.gaugeEmoji}>{config.icon}</Text>
+              <Text style={[styles.gaugeLabel, { color: gaugeValue >= 0 ? gaugeColor : '#888' }]}>
                 {config.label.toUpperCase()}
               </Text>
-              {gaugeValue >= 0 && (
-                <Text style={[styles.gaugeValue, { color: gaugeColor }]}>{gaugeValue}</Text>
-              )}
             </Pressable>
           </View>
         );
@@ -310,11 +308,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a24',
     transform: [{ scale: 0.94 }],
   },
+  gaugeEmoji: {
+    fontSize: 24,
+    marginBottom: 2,
+  },
   gaugeLabel: {
-    fontSize: 7,
+    fontSize: 8,
     fontWeight: '700',
-    letterSpacing: 0.3,
-    marginTop: 2,
+    letterSpacing: 0.5,
     textAlign: 'center',
   },
   gaugeValue: {

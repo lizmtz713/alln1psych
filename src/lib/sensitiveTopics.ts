@@ -1,6 +1,6 @@
 /**
  * Sensitive Topics — streamlined, non-repetitive categories
- * Used in onboarding to help Psych be more thoughtful
+ * Used in onboarding to help Gauge be more thoughtful
  */
 export const SENSITIVE_TOPIC_OPTIONS: { value: string; label: string; emoji?: string }[] = [
   { value: 'trauma', label: 'Trauma or abuse', emoji: '💔' },

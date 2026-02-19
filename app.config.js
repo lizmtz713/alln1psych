@@ -1,10 +1,10 @@
 /**
- * Expo app config for AllN1 Psych.
+ * Expo app config for InGauge.
  * Production-ready for EAS Build / TestFlight.
  */
 module.exports = {
   expo: {
-    name: 'AllN1 Psych',
+    name: 'InGauge',
     slug: 'alln1-psych',
     version: '1.0.0',
     orientation: 'portrait',
@@ -25,8 +25,8 @@ module.exports = {
       usesAppleSignIn: true,
       infoPlist: {
         NSMicrophoneUsageDescription:
-          'AllN1 Psych uses your microphone so you can talk to your AI companion by voice.',
-        NSCameraUsageDescription: 'AllN1 Psych uses your camera for profile photos.',
+          'InGauge uses your microphone so you can talk to Gauge by voice.',
+        NSCameraUsageDescription: 'InGauge uses your camera for profile photos.',
       },
     },
     android: {
@@ -66,14 +66,14 @@ module.exports = {
         'expo-av',
         {
           microphonePermission:
-            'AllN1 Psych needs microphone access so you can talk to your AI companion.',
+            'InGauge needs microphone access so you can talk to Gauge.',
         },
       ],
       [
         '@react-native-voice/voice',
         {
-          microphonePermission: 'AllN1 Psych uses the microphone so you can speak to your AI companion.',
-          speechRecognitionPermission: 'AllN1 Psych uses speech recognition to transcribe what you say.',
+          microphonePermission: 'InGauge uses the microphone so you can speak to Gauge.',
+          speechRecognitionPermission: 'InGauge uses speech recognition to transcribe what you say.',
         },
       ],
     ],

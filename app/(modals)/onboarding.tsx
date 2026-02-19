@@ -278,7 +278,7 @@ export default function OnboardingScreen() {
         <View style={styles.notificationPromptOverlay}>
           <View style={styles.notificationPromptCard}>
             <Text style={styles.notificationPromptTitle}>
-              Can Psych send you a daily check-in reminder?
+              Can Gauge send you a daily check-in reminder?
             </Text>
             <Text style={styles.notificationPromptSub}>
               It's a gentle nudge to check in with yourself.
@@ -351,22 +351,53 @@ export default function OnboardingScreen() {
                   <View style={styles.cockpitRing}>
                     <Text style={styles.cockpitBrain}>🧠</Text>
                   </View>
-                  <View style={styles.cockpitDotsRow}>
-                    <View style={[styles.cockpitDot, { backgroundColor: '#4ADE80' }]} />
-                    <View style={[styles.cockpitDot, { backgroundColor: '#FACC15' }]} />
-                    <View style={[styles.cockpitDot, { backgroundColor: '#FB923C' }]} />
+                </View>
+                
+                {/* 6 Gauges Display */}
+                <View style={styles.gaugesIntroGrid}>
+                  <View style={styles.gaugeIntroItem}>
+                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
+                      <Text style={styles.gaugeIntroEmoji}>🫀</Text>
+                    </View>
+                    <Text style={[styles.gaugeIntroLabel, { color: '#EF4444' }]}>Body</Text>
                   </View>
-                  <View style={styles.cockpitDotsRow}>
-                    <View style={[styles.cockpitDot, { backgroundColor: '#4ADE80' }]} />
-                    <View style={[styles.cockpitDot, { backgroundColor: '#FACC15' }]} />
-                    <View style={[styles.cockpitDot, { backgroundColor: '#F87171' }]} />
+                  <View style={styles.gaugeIntroItem}>
+                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
+                      <Text style={styles.gaugeIntroEmoji}>⚡</Text>
+                    </View>
+                    <Text style={[styles.gaugeIntroLabel, { color: '#F59E0B' }]}>State</Text>
+                  </View>
+                  <View style={styles.gaugeIntroItem}>
+                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(139, 92, 246, 0.15)' }]}>
+                      <Text style={styles.gaugeIntroEmoji}>💜</Text>
+                    </View>
+                    <Text style={[styles.gaugeIntroLabel, { color: '#8B5CF6' }]}>Emotion</Text>
+                  </View>
+                  <View style={styles.gaugeIntroItem}>
+                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
+                      <Text style={styles.gaugeIntroEmoji}>💙</Text>
+                    </View>
+                    <Text style={[styles.gaugeIntroLabel, { color: '#3B82F6' }]}>Connection</Text>
+                  </View>
+                  <View style={styles.gaugeIntroItem}>
+                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
+                      <Text style={styles.gaugeIntroEmoji}>🧭</Text>
+                    </View>
+                    <Text style={[styles.gaugeIntroLabel, { color: '#10B981' }]}>Direction</Text>
+                  </View>
+                  <View style={styles.gaugeIntroItem}>
+                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(236, 72, 153, 0.15)' }]}>
+                      <Text style={styles.gaugeIntroEmoji}>✨</Text>
+                    </View>
+                    <Text style={[styles.gaugeIntroLabel, { color: '#EC4899' }]}>Alignment</Text>
                   </View>
                 </View>
+
                 <Text style={styles.cockpitIntroText}>
-                  6 gauges. All connected.{'\n'}When one drops, others follow.{'\n'}When you lift one, others rise.
+                  Your body affects your mood.{'\n'}Your mood affects your relationships.{'\n'}Your relationships affect your sense of self.
                 </Text>
                 <Text style={styles.cockpitTagline}>
-                  This is your cockpit.
+                  Everything is connected. This is your cockpit.
                 </Text>
                 <Pressable
                   style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
@@ -727,7 +758,7 @@ export default function OnboardingScreen() {
                   </Text>
                 </View>
                 <Text style={styles.disclaimerText}>
-                  AllN1 Psych is an emotional wellness tool, not a medical device. It does not diagnose, treat, or cure any mental health condition. If you are in crisis, please contact 988 (Suicide & Crisis Lifeline), text HOME to 741741, or call 911. By using this app, you agree to our{' '}
+                  InGauge is an emotional wellness tool, not a medical device. It does not diagnose, treat, or cure any mental health condition. If you are in crisis, please contact 988 (Suicide & Crisis Lifeline), text HOME to 741741, or call 911. By using this app, you agree to our{' '}
                   <Text style={styles.disclaimerLink} onPress={() => Linking.openURL('https://alln1network.com/terms')}>Terms of Service</Text>
                   {' '}and{' '}
                   <Text style={styles.disclaimerLink} onPress={() => Linking.openURL('https://alln1network.com/privacy')}>Privacy Policy</Text>.
@@ -861,6 +892,33 @@ const styles = StyleSheet.create({
   cockpitDot: {
     width: 14,
     height: 14,
+  },
+  gaugesIntroGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: SPACING.xl,
+    paddingHorizontal: SPACING.md,
+  },
+  gaugeIntroItem: {
+    alignItems: 'center',
+    width: 90,
+  },
+  gaugeIntroIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  gaugeIntroEmoji: {
+    fontSize: 22,
+  },
+  gaugeIntroLabel: {
+    fontSize: 12,
+    fontWeight: '600',
     borderRadius: 7,
     shadowColor: '#fff',
     shadowOffset: { width: 0, height: 0 },

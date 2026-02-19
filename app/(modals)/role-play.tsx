@@ -563,11 +563,69 @@ export default function RolePlayScreen() {
         <Text style={styles.cancelText}>Cancel</Text>
       </Pressable>
       <Text style={styles.setupTitle}>Practice a conversation</Text>
+      <Text style={styles.setupSubtitle}>Pick a scenario or create your own</Text>
+
+      {/* Quick starts FIRST — immediately visible */}
+      <View style={{ marginBottom: 24, marginHorizontal: -24 }}>
+        {(() => {
+          const scenarios = QUICK_STARTS.map((q, i) => ({ id: String(i), ...q, title: q.scenario, subtitle: q.character }));
+          const row1 = scenarios.slice(0, Math.ceil(scenarios.length / 2));
+          const row2 = scenarios.slice(Math.ceil(scenarios.length / 2));
+          const selectScenario = (s: typeof scenarios[0]) => applyQuickStart(s.scenario, s.character);
+          return (
+            <>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 10 }}>
+                <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 24 }}>
+                  {row1.map((s) => (
+                    <Pressable
+                      key={s.id}
+                      onPress={() => selectScenario(s)}
+                      style={({ pressed }) => [
+                        { backgroundColor: COLORS.surface, borderRadius: 14, padding: 16, width: 170, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
+                        pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] }
+                      ]}
+                    >
+                      <Text style={{ fontSize: 22, marginBottom: 8 }}>{s.emoji}</Text>
+                      <Text style={{ color: COLORS.text, fontSize: 14, fontWeight: '600', lineHeight: 18 }} numberOfLines={2}>{s.title}</Text>
+                      <Text style={{ color: COLORS.textSecondary, fontSize: 12, marginTop: 6 }} numberOfLines={1}>as {s.subtitle}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 24 }}>
+                  {row2.map((s) => (
+                    <Pressable
+                      key={s.id}
+                      onPress={() => selectScenario(s)}
+                      style={({ pressed }) => [
+                        { backgroundColor: COLORS.surface, borderRadius: 14, padding: 16, width: 170, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
+                        pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] }
+                      ]}
+                    >
+                      <Text style={{ fontSize: 22, marginBottom: 8 }}>{s.emoji}</Text>
+                      <Text style={{ color: COLORS.text, fontSize: 14, fontWeight: '600', lineHeight: 18 }} numberOfLines={2}>{s.title}</Text>
+                      <Text style={{ color: COLORS.textSecondary, fontSize: 12, marginTop: 6 }} numberOfLines={1}>as {s.subtitle}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+            </>
+          );
+        })()}
+      </View>
+
+      {/* Divider */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+        <View style={{ flex: 1, height: 1, backgroundColor: COLORS.border }} />
+        <Text style={{ color: COLORS.textMuted, fontSize: 13, marginHorizontal: 12 }}>or create your own</Text>
+        <View style={{ flex: 1, height: 1, backgroundColor: COLORS.border }} />
+      </View>
 
       <Text style={styles.setupLabel}>What do you want to practice?</Text>
       <TextInput
         style={[styles.input, styles.inputLarge]}
-        placeholder="e.g., Asking my boss for a raise, telling my friend I'm hurt, setting a boundary with my mom..."
+        placeholder="Describe the conversation..."
         placeholderTextColor={COLORS.textMuted}
         value={scenario}
         onChangeText={(t) => { setScenario(t); setError(null); }}
@@ -578,7 +636,7 @@ export default function RolePlayScreen() {
       <Text style={styles.setupLabel}>Who should I play?</Text>
       <TextInput
         style={styles.input}
-        placeholder="e.g., My boss, my mom, my best friend..."
+        placeholder="e.g., My boss, my mom, my friend..."
         placeholderTextColor={COLORS.textMuted}
         value={character}
         onChangeText={setCharacter}
@@ -595,20 +653,6 @@ export default function RolePlayScreen() {
             <Text style={[styles.chipText, difficulty === opt.value && styles.chipTextSelected]}>
               {opt.label}
             </Text>
-          </Pressable>
-        ))}
-      </View>
-
-      <Text style={styles.quickLabel}>Quick start</Text>
-      <View style={styles.quickRow}>
-        {QUICK_STARTS.map((q, i) => (
-          <Pressable
-            key={i}
-            style={styles.quickCard}
-            onPress={() => applyQuickStart(q.scenario, q.character)}
-          >
-            <Text style={styles.quickEmoji}>{q.emoji}</Text>
-            <Text style={styles.quickText} numberOfLines={2}>{q.scenario}</Text>
           </Pressable>
         ))}
       </View>
@@ -692,7 +736,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '600',
     color: COLORS.text,
-    marginBottom: 24,
+    marginBottom: 8,
+  },
+  setupSubtitle: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    marginBottom: 20,
   },
   setupLabel: {
     fontSize: 15,

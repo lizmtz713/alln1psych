@@ -11,6 +11,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -54,11 +56,7 @@ export async function scheduleDailyCheckin(hour: number = 9, minute: number = 0)
       body: 'Take a moment to check in with yourself.',
       data: { type: 'daily-checkin' },
     },
-    trigger: {
-      type: 'daily' as const,
-      hour,
-      minute,
-    },
+    trigger: { type: 'daily', hour, minute } as Notifications.NotificationTriggerInput,
   });
 }
 
@@ -78,14 +76,10 @@ export async function scheduleEveningReflection(hour: number = 21, minute: numbe
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'How was your day? 🌙',
-      body: 'Psych is here if you want to talk about it.',
+      body: 'Gauge is here if you want to talk about it.',
       data: { type: 'evening-reflection' },
     },
-    trigger: {
-      type: 'daily' as const,
-      hour,
-      minute,
-    },
+    trigger: { type: 'daily', hour, minute } as Notifications.NotificationTriggerInput,
   });
 }
 
@@ -124,7 +118,7 @@ export async function scheduleCheckInReminder(
       body: 'You set a reminder to follow up. How are they doing?',
       data: { type: 'help-someone-reminder', personName },
     },
-    trigger: { date: d, type: 'date' as const },
+    trigger: { date: d, type: 'date' } as Notifications.NotificationTriggerInput,
   });
   return id;
 }

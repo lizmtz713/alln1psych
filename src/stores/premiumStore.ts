@@ -7,6 +7,11 @@
  * - Family ($15/mo for 5): Pro for everyone, shared family Circle
  */
 
+// TESTING MODE — remove before App Store submission
+// When true: all users get Pro features, paywalls are bypassed
+// Set to false before App Store submission
+export const TESTING_MODE = true;
+
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -112,6 +117,7 @@ export const usePremiumStore = create<PremiumState>()(
       lastUsageDate: null,
       
       isPremium: () => {
+        if (TESTING_MODE) return true; // All features unlocked during testing
         const { tier, expiresAt } = get();
         if (tier === 'free') return false;
         if (!expiresAt) return false;
@@ -130,12 +136,14 @@ export const usePremiumStore = create<PremiumState>()(
       
       getLimits: () => {
         const state = get();
+        if (TESTING_MODE) return PRO_LIMITS; // All features unlocked during testing
         if (!state.isPremium()) return FREE_LIMITS;
         if (state.tier === 'family') return FAMILY_LIMITS;
         return PRO_LIMITS;
       },
       
       canUseAI: () => {
+        if (TESTING_MODE) return true; // All features unlocked during testing
         const state = get();
         if (state.isPremium()) return true;
         

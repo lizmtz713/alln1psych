@@ -1,6 +1,6 @@
 /**
  * Relate — Understand anyone through personality dynamics.
- * Premium UI with Fortune 500 polish.
+ * Demo-ready with animations, polish, and expandable learning.
  */
 import { useState, useEffect, useRef } from 'react';
 import {
@@ -10,6 +10,11 @@ import {
   Pressable,
   ScrollView,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  LayoutAnimation,
+  UIManager,
   Animated,
   Dimensions,
 } from 'react-native';
@@ -18,28 +23,157 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { StyleSheet } from 'react-native';
 import { getPersonality, getRelationshipDynamic } from '../../src/services/personology';
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
-import { ErrorBoundary } from '../../src/components/ErrorBoundary';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '../../src/lib/constants';
+import { COLORS, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 type RelType = 'romantic' | 'family' | 'friendship' | 'work';
 
 const RELATE_ACCENT = '#7C4DFF';
-const RELATE_ACCENT_BG = 'rgba(124, 77, 255, 0.12)';
-const RELATE_ACCENT_BORDER = 'rgba(124, 77, 255, 0.25)';
+const RELATE_GRADIENT = ['#7C4DFF', '#9C6AFF'];
+const LEARN_BG = 'rgba(124,77,255,0.06)';
+const LEARN_BORDER = 'rgba(124,77,255,0.15)';
+const CARD_GLOW = 'rgba(124,77,255,0.08)';
 
-const REL_TYPES: { type: RelType; icon: string; label: string; color: string }[] = [
-  { type: 'romantic', icon: '💕', label: 'Romantic', color: '#EC4899' },
-  { type: 'family', icon: '👨‍👩‍👧', label: 'Family', color: '#14B8A6' },
-  { type: 'friendship', icon: '🤝', label: 'Friendship', color: '#F59E0B' },
-  { type: 'work', icon: '💼', label: 'Work', color: '#3B82F6' },
-];
+// Animated card component with staggered entrance
+function AnimatedCard({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(24)).current;
+  const scale = useRef(new Animated.Value(0.96)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 400, delay, useNativeDriver: true }),
+      Animated.spring(translateY, { toValue: 0, tension: 50, friction: 8, delay, useNativeDriver: true }),
+      Animated.spring(scale, { toValue: 1, tension: 50, friction: 8, delay, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View style={[{ opacity, transform: [{ translateY }, { scale }] }, style]}>
+      {children}
+    </Animated.View>
+  );
+}
+
+// Educational content for each concept
+const LEARN_CONTENT: Record<string, { quick: string; deep: string; source: string; lessonId?: string }> = {
+  communicationStyle: {
+    quick: "How someone processes and shares information shapes every interaction.",
+    deep: "Communication style isn't about introversion or extroversion — it's about how someone's brain naturally processes information. Some people think out loud (external processors), others need silence to form thoughts (internal processors). Neither is better. Mismatches cause most relationship friction.",
+    source: "Goldschneider, The Secret Language of Relationships",
+  },
+  strengths: {
+    quick: "Knowing someone's natural gifts helps you see them clearly — not who you want them to be.",
+    deep: "We often fall in love with someone's strengths, then spend years trying to fix their challenges. Understanding that strengths and challenges are two sides of the same trait changes everything. Their 'stubbornness' is also their 'loyalty.' Their 'overthinking' is also their 'thoroughness.'",
+    source: "Personality Psychology (Feist & Feist)",
+  },
+  challenges: {
+    quick: "Challenges aren't flaws — they're the shadow side of strengths.",
+    deep: "Every strength has a shadow. The same trait that makes someone 'spontaneous' also makes them 'unreliable' under stress. When you understand this, you stop trying to eliminate their challenges and start managing the conditions that trigger them.",
+    source: "Clinical Psychology (Compas & Gotlib)",
+  },
+  stressResponse: {
+    quick: "Under stress, we all regress to our default wiring. Knowing theirs prevents misreading.",
+    deep: "Stress shrinks the 'window of tolerance' — the range where we can think clearly and respond thoughtfully. Outside that window, we go into fight, flight, freeze, or fawn. Their stress response isn't a choice; it's their nervous system's learned survival pattern. It can be rewired, but not in the moment.",
+    source: "Polyvagal Theory (Stephen Porges); Biopsychology (Pinel)",
+  },
+  needs: {
+    quick: "Unmet needs drive 90% of relationship conflict. Most people can't articulate theirs.",
+    deep: "Behind every complaint is an unmet need. 'You never listen' = need for validation. 'You're always working' = need for presence. When you know someone's core needs, you can meet them directly instead of guessing. And when you know your own, you can ask clearly.",
+    source: "Nonviolent Communication (Rosenberg); Attachment Theory",
+  },
+  dynamicStrengths: {
+    quick: "What works between you isn't luck — it's the fit between your patterns.",
+    deep: "Relationship strengths emerge from complementary patterns. One person's calm balances another's intensity. One's optimism lifts another's realism. These aren't coincidences — they're why you were drawn together. Knowing them helps you lean into what works.",
+    source: "Social Psychology (Aronson)",
+  },
+  frictionPoints: {
+    quick: "Friction isn't failure. It's information about where you need translation.",
+    deep: "Every relationship has predictable friction points based on personality combinations. The goal isn't to eliminate friction — it's to understand it. When you see friction as 'different operating systems' instead of 'they're wrong,' you can build bridges instead of walls.",
+    source: "Gottman Institute Research",
+  },
+  communicationTip: {
+    quick: "Small adjustments in how you say things can completely change how they land.",
+    deep: "Communication isn't just about what you say — it's about matching their processing style. Some people need the headline first ('I need help'), then context. Others need context first, then the ask. Getting the order wrong makes them feel manipulated or confused, even when your intentions are good.",
+    source: "Cognitive Psychology (Matlin)",
+  },
+  conflictPattern: {
+    quick: "Every couple has a conflict pattern. Yours is predictable. That means it's changeable.",
+    deep: "Dr. John Gottman identified four patterns that predict relationship failure: criticism, contempt, defensiveness, stonewalling. But before those, there's a dance — pursue/withdraw, escalate/escalate, avoid/avoid. Knowing your dance lets you change the music.",
+    source: "Gottman Institute; Clinical Psychology",
+    lessonId: "conflict-patterns",
+  },
+  whatTheyNeed: {
+    quick: "Meeting someone's needs isn't about mind-reading — it's about learning their language.",
+    deep: "The 5 Love Languages framework is backed by research: people feel loved differently. Words of affirmation, acts of service, gifts, quality time, physical touch. If you're speaking a different language than they hear, you're both trying hard and both feeling unloved.",
+    source: "Social Psychology (Aronson); Chapman's research",
+    lessonId: "love-languages",
+  },
+  whatYouNeed: {
+    quick: "You can't pour from an empty cup. Knowing your needs lets you ask for them.",
+    deep: "Most people are better at identifying what's wrong than what they need. 'I feel disconnected' is a complaint. 'I need 20 minutes of undivided attention' is a request. Translating feelings into needs is a skill. This section helps you practice.",
+    source: "Clinical Psychology; Emotion-Focused Therapy",
+  },
+};
+
+// Expandable learning component
+function LearnMore({ 
+  id, 
+  expanded, 
+  onToggle,
+  onLesson,
+}: { 
+  id: string;
+  expanded: boolean;
+  onToggle: () => void;
+  onLesson?: (lessonId: string) => void;
+}) {
+  const content = LEARN_CONTENT[id];
+  if (!content) return null;
+
+  return (
+    <View style={styles.learnContainer}>
+      <Pressable onPress={onToggle} style={styles.learnQuickRow}>
+        <Ionicons name="bulb-outline" size={14} color={RELATE_ACCENT} style={{ marginRight: 6 }} />
+        <Text style={styles.learnQuick}>{content.quick}</Text>
+        <Ionicons 
+          name={expanded ? "chevron-up" : "chevron-down"} 
+          size={14} 
+          color={RELATE_ACCENT} 
+          style={{ marginLeft: 4 }}
+        />
+      </Pressable>
+      {expanded && (
+        <View style={styles.learnExpanded}>
+          <Text style={styles.learnDeep}>{content.deep}</Text>
+          <Text style={styles.learnSource}>— {content.source}</Text>
+          {content.lessonId && onLesson && (
+            <Pressable 
+              style={styles.lessonLink}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onLesson(content.lessonId!);
+              }}
+            >
+              <Ionicons name="book-outline" size={14} color={RELATE_ACCENT} />
+              <Text style={styles.lessonLinkText}>Learn more in Human Manual</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+    </View>
+  );
+}
 
 function isoToMMDDYYYY(iso: string): string {
   if (!iso || iso.length < 10) return '';
@@ -50,38 +184,59 @@ function isoToMMDDYYYY(iso: string): string {
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-function AnimatedSection({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: any }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(16)).current;
-  
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 350, delay, useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: 0, duration: 350, delay, useNativeDriver: true }),
-    ]).start();
-  }, []);
-  
-  return (
-    <Animated.View style={[{ opacity, transform: [{ translateY }] }, style]}>
-      {children}
-    </Animated.View>
-  );
-}
-
 export default function Relate() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ name?: string; birthday?: string }>();
   const userBirthday = useUserStore((s) => s.birthday);
-  
+  const userName = useUserStore((s) => s.name);
+
+  // Mode: 'solo' = just viewing your own profile, 'compare' = comparing two people
+  const [mode, setMode] = useState<'solo' | 'compare'>('solo');
   const [myBirthday, setMyBirthday] = useState('');
+  const [myName, setMyName] = useState('');
   const [theirBirthday, setTheirBirthday] = useState('');
   const [theirName, setTheirName] = useState('');
   const [relType, setRelType] = useState<RelType | null>(null);
   const [result, setResult] = useState<{ me: any; them: any; dynamic: any; myIso: string; theirIso: string } | null>(null);
+  const [soloResult, setSoloResult] = useState<any>(null);
   const [aiInsight, setAiInsight] = useState('');
   const [loading, setLoading] = useState(false);
+  const [expandedLearn, setExpandedLearn] = useState<string | null>(null);
+  const [showResults, setShowResults] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+
+  // Initialize with user's data
+  useEffect(() => {
+    if (userName && !myName) {
+      setMyName(userName);
+    }
+  }, [userName, myName]);
+
+  // Auto-show solo profile if user has birthday
+  useEffect(() => {
+    if (userBirthday && mode === 'solo' && !soloResult) {
+      const d = new Date(userBirthday);
+      if (!isNaN(d.getTime())) {
+        const isoDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const personality = getPersonality(isoDate);
+        if (personality) {
+          setSoloResult(personality);
+        }
+      }
+    }
+  }, [userBirthday, mode, soloResult]);
+
+  const toggleLearn = (id: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setExpandedLearn(expandedLearn === id ? null : id);
+  };
+
+  const goToLesson = (lessonId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/lesson/${lessonId}`);
+  };
 
   useEffect(() => {
     if (userBirthday && !myBirthday) {
@@ -122,17 +277,19 @@ export default function Relate() {
 
   async function handleCheck() {
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const myIso = parseBirthday(myBirthday);
       const theirIso = parseBirthday(theirBirthday);
       if (!myIso || !theirIso) return;
-      
+
       const me = getPersonality(myIso);
       const them = getPersonality(theirIso);
       const dynamic = getRelationshipDynamic(myIso, theirIso);
       if (!me || !them) return;
-      
+
       setResult({ me, them, dynamic, myIso, theirIso });
+      setExpandedLearn(null);
+      setShowResults(true);
       setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), 100);
 
       setLoading(true);
@@ -140,7 +297,7 @@ export default function Relate() {
         const name = theirName.trim() || 'them';
         const response = await sendMessageWithSystemPrompt(
           [{ role: 'user', content: `My personality: ${me.name} (${me.communicationStyle}). Their personality: ${them.name} (${them.communicationStyle}). Relationship: ${relType}. Their name: ${name}. Give me a relationship insight.` }],
-          `You are Psych, a relationship intelligence companion. Based on two personality profiles and their relationship type, give a warm, specific, insightful reading.
+          `You are Gauge, a relationship intelligence companion. Based on two personality profiles and their relationship type, give a warm, specific, insightful reading.
 
 For ROMANTIC: Chemistry, communication differences, what makes them click, what could pull them apart, one tip for long-term success.
 For FAMILY: Generational dynamics, communication gaps, unspoken expectations, how to bridge differences.
@@ -174,51 +331,156 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
 
   function handleTryAnother() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShowResults(false);
     setMyBirthday(userBirthday ? (() => { const d = new Date(userBirthday); return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`; })() : '');
     setTheirBirthday('');
     setTheirName('');
     setRelType(null);
     setResult(null);
     setAiInsight('');
+    setExpandedLearn(null);
   }
 
   const canCheck = myBirthday.length === 10 && theirBirthday.length === 10 && relType !== null;
 
+  const relTypes: { type: RelType; icon: string; label: string; color: string }[] = [
+    { type: 'romantic', icon: '💕', label: 'Romantic', color: '#EC4899' },
+    { type: 'family', icon: '👨‍👩‍👧', label: 'Family', color: '#14B8A6' },
+    { type: 'friendship', icon: '🤝', label: 'Friendship', color: '#F59E0B' },
+    { type: 'work', icon: '💼', label: 'Work', color: '#3B82F6' },
+  ];
+
   return (
-    <ErrorBoundary>
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={8}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-          </Pressable>
-          <Text style={styles.headerTitle}>Relate</Text>
-          <View style={styles.headerRight} />
-        </View>
+    <KeyboardAvoidingView
+      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={0}
+    >
+      {/* Header with gradient accent line */}
+      <View style={styles.header}>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Relate</Text>
+        <View style={styles.headerRight} />
+      </View>
+      <LinearGradient
+        colors={RELATE_GRADIENT}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.headerAccent}
+      />
 
-        <ScrollView 
-          ref={scrollRef}
-          style={styles.scroll} 
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + SPACING.xxl }]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {!result ? (
-            <>
-              {/* Hero */}
-              <AnimatedSection delay={0}>
+      <ScrollView
+        ref={scrollRef}
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {!showResults ? (
+          <>
+            {/* Mode Toggle */}
+            <View style={styles.modeToggle}>
+              <Pressable
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMode('solo'); }}
+                style={[styles.modeBtn, mode === 'solo' && styles.modeBtnActive]}
+              >
+                <Text style={[styles.modeBtnText, mode === 'solo' && styles.modeBtnTextActive]}>
+                  👤 My Profile
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMode('compare'); }}
+                style={[styles.modeBtn, mode === 'compare' && styles.modeBtnActive]}
+              >
+                <Text style={[styles.modeBtnText, mode === 'compare' && styles.modeBtnTextActive]}>
+                  👥 Compare
+                </Text>
+              </Pressable>
+            </View>
+
+            {mode === 'solo' && soloResult ? (
+              <>
+                {/* Solo Profile View - Show user's own personality */}
                 <View style={styles.heroSection}>
-                  <Text style={styles.heroEmoji}>💫</Text>
-                  <Text style={styles.heroTitle}>Understand Anyone</Text>
-                  <Text style={styles.heroSubtitle}>
-                    Enter two birthdays. Discover the dynamic between you.
-                  </Text>
+                  <Text style={styles.heroEmoji}>✨</Text>
+                  <Text style={styles.heroTitle}>{userName || 'Your Profile'}</Text>
+                  <Text style={styles.heroSub}>{soloResult.name}</Text>
                 </View>
-              </AnimatedSection>
 
-              {/* Your Birthday */}
-              <AnimatedSection delay={100}>
-                <Text style={styles.inputLabel}>Your birthday</Text>
+                {/* Personality Card */}
+                <AnimatedCard delay={100}>
+                  <View style={[styles.resultCard, { borderColor: RELATE_ACCENT + '30' }]}>
+                    <Text style={styles.resultCardTitle}>Your Personality</Text>
+                    <Text style={styles.resultMeta}>{soloResult.dateRange}</Text>
+                    
+                    <View style={styles.resultSection}>
+                      <Text style={styles.resultSectionTitle}>🎯 Communication Style</Text>
+                      <Text style={styles.resultText}>{soloResult.communicationStyle}</Text>
+                      <LearnMore id="communicationStyle" expanded={expandedLearn === 'communicationStyle'} onToggle={() => toggleLearn('communicationStyle')} />
+                    </View>
+
+                    <View style={styles.resultSection}>
+                      <Text style={styles.resultSectionTitle}>💪 Your Strengths</Text>
+                      {soloResult.strengths?.map((s: string, i: number) => (
+                        <Text key={i} style={styles.resultBullet}>• {s}</Text>
+                      ))}
+                      <LearnMore id="strengths" expanded={expandedLearn === 'strengths'} onToggle={() => toggleLearn('strengths')} />
+                    </View>
+
+                    <View style={styles.resultSection}>
+                      <Text style={styles.resultSectionTitle}>⚡ Growth Areas</Text>
+                      {soloResult.challenges?.map((c: string, i: number) => (
+                        <Text key={i} style={styles.resultBullet}>• {c}</Text>
+                      ))}
+                      <LearnMore id="challenges" expanded={expandedLearn === 'challenges'} onToggle={() => toggleLearn('challenges')} />
+                    </View>
+
+                    <View style={styles.resultSection}>
+                      <Text style={styles.resultSectionTitle}>😰 Under Stress</Text>
+                      <Text style={styles.resultText}>{soloResult.stressResponse}</Text>
+                      <LearnMore id="stressResponse" expanded={expandedLearn === 'stressResponse'} onToggle={() => toggleLearn('stressResponse')} />
+                    </View>
+
+                    <View style={styles.resultSection}>
+                      <Text style={styles.resultSectionTitle}>💙 What You Need</Text>
+                      {soloResult.needs?.map((n: string, i: number) => (
+                        <Text key={i} style={styles.resultBullet}>• {n}</Text>
+                      ))}
+                      <LearnMore id="needs" expanded={expandedLearn === 'needs'} onToggle={() => toggleLearn('needs')} />
+                    </View>
+                  </View>
+                </AnimatedCard>
+
+                {/* CTA to compare */}
+                <Pressable
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMode('compare'); }}
+                  style={styles.secondaryBtn}
+                >
+                  <Ionicons name="people-outline" size={18} color={RELATE_ACCENT} />
+                  <Text style={styles.secondaryBtnText}>Compare with someone</Text>
+                </Pressable>
+              </>
+            ) : mode === 'solo' && !soloResult ? (
+              <>
+                {/* No birthday - prompt to enter */}
+                <View style={styles.heroSection}>
+                  <Text style={styles.heroEmoji}>🔮</Text>
+                  <Text style={styles.heroTitle}>Discover Yourself</Text>
+                  <Text style={styles.heroSub}>Enter your birthday to see your personality profile</Text>
+                </View>
+
+                <Text style={styles.label}>Your name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder={userName || "Your name"}
+                  placeholderTextColor={COLORS.textMuted}
+                  value={myName}
+                  onChangeText={setMyName}
+                />
+
+                <Text style={styles.label}>Your birthday</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="MM/DD/YYYY"
@@ -228,11 +490,52 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                   keyboardType="number-pad"
                   maxLength={10}
                 />
-              </AnimatedSection>
 
-              {/* Their Info */}
-              <AnimatedSection delay={150}>
-                <Text style={styles.inputLabel}>Their name <Text style={styles.optional}>(optional)</Text></Text>
+                <Pressable
+                  onPress={() => {
+                    const isoDate = parseBirthday(myBirthday);
+                    if (isoDate) {
+                      const personality = getPersonality(isoDate);
+                      if (personality) {
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        setSoloResult(personality);
+                      }
+                    }
+                  }}
+                  disabled={myBirthday.length !== 10}
+                  style={[styles.primaryBtnWrap, myBirthday.length !== 10 && styles.primaryBtnDisabled]}
+                >
+                  <LinearGradient
+                    colors={myBirthday.length === 10 ? RELATE_GRADIENT : ['#3A3A4A', '#3A3A4A']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.primaryBtn}
+                  >
+                    <Text style={styles.primaryBtnText}>See My Profile</Text>
+                  </LinearGradient>
+                </Pressable>
+              </>
+            ) : (
+              <>
+                {/* Compare Mode */}
+                <View style={styles.heroSection}>
+                  <Text style={styles.heroEmoji}>💫</Text>
+                  <Text style={styles.heroTitle}>Understand Anyone</Text>
+                  <Text style={styles.heroSub}>Compare two personalities to discover the dynamic</Text>
+                </View>
+
+                <Text style={styles.label}>Person 1 {userName ? `(${userName})` : ''}</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM/DD/YYYY"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={myBirthday}
+                  onChangeText={(t) => formatBirthday(t, setMyBirthday)}
+                  keyboardType="number-pad"
+                  maxLength={10}
+                />
+
+                <Text style={styles.label}>Person 2 name <Text style={styles.optional}>(optional)</Text></Text>
                 <TextInput
                   style={styles.input}
                   placeholder="e.g. Alex, Mom, my boss"
@@ -240,10 +543,8 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                   value={theirName}
                   onChangeText={setTheirName}
                 />
-              </AnimatedSection>
 
-              <AnimatedSection delay={200}>
-                <Text style={styles.inputLabel}>Their birthday</Text>
+                <Text style={styles.label}>Person 2 birthday</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="MM/DD/YYYY"
@@ -253,498 +554,577 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                   keyboardType="number-pad"
                   maxLength={10}
                 />
-              </AnimatedSection>
+              </>
+            )}
 
-              {/* Relationship Type */}
-              <AnimatedSection delay={250}>
-                <Text style={styles.inputLabel}>What's the relationship?</Text>
-                <View style={styles.relTypeGrid}>
-                  {REL_TYPES.map((r) => (
-                    <Pressable
-                      key={r.type}
-                      style={[
-                        styles.relTypeCard,
-                        relType === r.type && styles.relTypeCardSelected,
-                        relType === r.type && { borderColor: r.color + '60' },
-                      ]}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setRelType(r.type);
-                      }}
-                    >
-                      <Text style={styles.relTypeEmoji}>{r.icon}</Text>
-                      <Text style={[styles.relTypeLabel, relType === r.type && { color: r.color }]}>
-                        {r.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </AnimatedSection>
-
-              {/* Check Button */}
-              <AnimatedSection delay={300}>
+            <Text style={styles.label}>What's the relationship?</Text>
+            <View style={styles.relTypeRow}>
+              {relTypes.map((r) => (
                 <Pressable
-                  style={[styles.primaryBtn, !canCheck && styles.primaryBtnDisabled]}
-                  onPress={handleCheck}
-                  disabled={!canCheck}
+                  key={r.type}
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setRelType(r.type); }}
+                  style={[
+                    styles.relTypeBtn,
+                    relType === r.type && styles.relTypeBtnActive,
+                    relType === r.type && { borderColor: r.color + '60' },
+                  ]}
                 >
-                  <Text style={styles.primaryBtnText}>See the Dynamic</Text>
+                  <Text style={[
+                    styles.relTypeText,
+                    relType === r.type && { color: r.color },
+                  ]}>
+                    {r.icon} {r.label}
+                  </Text>
                 </Pressable>
-              </AnimatedSection>
+              ))}
+            </View>
 
-              {/* Disclaimer */}
-              <AnimatedSection delay={350}>
-                <Text style={styles.disclaimer}>
-                  Personality insights are based on psychological frameworks and increase self-awareness.
-                  They are not deterministic. Your choices and growth matter more than any profile.
-                </Text>
-              </AnimatedSection>
-            </>
-          ) : (
-            <>
-              {/* Results */}
-              <AnimatedSection delay={0}>
-                <View style={styles.resultHeader}>
-                  <Text style={styles.resultTitle}>
-                    You & {theirName.trim() || 'Them'}
-                  </Text>
-                  <Text style={styles.resultSubtitle}>
-                    {result.me.name} + {result.them.name}
-                  </Text>
+            {/* Gradient CTA button */}
+            <Pressable
+              onPress={handleCheck}
+              disabled={!canCheck}
+              style={[styles.primaryBtnWrap, !canCheck && styles.primaryBtnDisabled]}
+            >
+              <LinearGradient
+                colors={canCheck ? RELATE_GRADIENT : ['#3A3A4A', '#3A3A4A']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.primaryBtn}
+              >
+                <Ionicons name="sparkles" size={20} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.primaryBtnText}>See the Dynamic</Text>
+              </LinearGradient>
+            </Pressable>
+
+            <Text style={styles.disclaimer}>
+              Based on Goldschneider's personality research. Increases self-awareness — not deterministic.
+            </Text>
+          </>
+        ) : result && (
+          <>
+            {/* Results Header */}
+            <AnimatedCard delay={0}>
+              <View style={styles.resultHeader}>
+                <Text style={styles.resultEmoji}>✨</Text>
+                <Text style={styles.resultHeaderTitle}>You & {theirName.trim() || 'Them'}</Text>
+                <View style={styles.resultBadgeRow}>
+                  <View style={styles.resultBadge}>
+                    <Text style={styles.resultBadgeText}>{result.me.name}</Text>
+                  </View>
+                  <Text style={styles.resultPlus}>+</Text>
+                  <View style={styles.resultBadge}>
+                    <Text style={styles.resultBadgeText}>{result.them.name}</Text>
+                  </View>
                 </View>
-              </AnimatedSection>
+              </View>
+            </AnimatedCard>
 
-              {/* Their Profile */}
-              <AnimatedSection delay={100}>
-                <View style={styles.profileCard}>
-                  <View style={styles.profileHeader}>
+            {/* YOUR PROFILE */}
+            <AnimatedCard delay={100}>
+              <View style={[styles.profileCard, { borderColor: 'rgba(124,77,255,0.2)' }]}>
+                <LinearGradient
+                  colors={['rgba(124,77,255,0.1)', 'transparent']}
+                  style={styles.cardGlow}
+                />
+                <View style={styles.profileHeaderRow}>
+                  <View style={styles.profileEmojiWrap}>
+                    <Text style={styles.profileEmoji}>🪞</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.profileName}>You</Text>
+                    <Text style={styles.profileType}>{result.me.name}</Text>
+                  </View>
+                </View>
+                
+                <Text style={styles.sectionLabel}>Communication Style</Text>
+                <Text style={styles.sectionText}>{result.me.communicationStyle}</Text>
+                <LearnMore id="communicationStyle" expanded={expandedLearn === 'me-comm'} onToggle={() => toggleLearn('me-comm')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Strengths</Text>
+                <Text style={styles.sectionText}>{result.me.strengths.join(', ')}</Text>
+                <LearnMore id="strengths" expanded={expandedLearn === 'me-str'} onToggle={() => toggleLearn('me-str')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Challenges</Text>
+                <Text style={styles.sectionText}>{result.me.challenges.join(', ')}</Text>
+                <LearnMore id="challenges" expanded={expandedLearn === 'me-chal'} onToggle={() => toggleLearn('me-chal')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Under Stress</Text>
+                <Text style={styles.sectionText}>{result.me.stressResponse}</Text>
+                <LearnMore id="stressResponse" expanded={expandedLearn === 'me-stress'} onToggle={() => toggleLearn('me-stress')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Needs</Text>
+                <Text style={styles.sectionText}>{result.me.needsInRelationships}</Text>
+                <LearnMore id="needs" expanded={expandedLearn === 'me-needs'} onToggle={() => toggleLearn('me-needs')} onLesson={goToLesson} />
+              </View>
+            </AnimatedCard>
+
+            {/* THEIR PROFILE */}
+            <AnimatedCard delay={200}>
+              <View style={[styles.profileCard, { borderColor: 'rgba(20,184,166,0.2)' }]}>
+                <LinearGradient
+                  colors={['rgba(20,184,166,0.1)', 'transparent']}
+                  style={styles.cardGlow}
+                />
+                <View style={styles.profileHeaderRow}>
+                  <View style={[styles.profileEmojiWrap, { backgroundColor: 'rgba(20,184,166,0.1)' }]}>
                     <Text style={styles.profileEmoji}>✨</Text>
-                    <View style={styles.profileInfo}>
-                      <Text style={styles.profileName}>{theirName.trim() || 'Them'}</Text>
-                      <Text style={styles.profileType}>{result.them.name}</Text>
-                    </View>
                   </View>
-                  <Text style={styles.profileStyle}>{result.them.communicationStyle}</Text>
-                  
-                  <View style={styles.profileSection}>
-                    <Text style={styles.profileSectionTitle}>Strengths</Text>
-                    <Text style={styles.profileSectionText}>{result.them.strengths.join(', ')}</Text>
-                  </View>
-                  
-                  <View style={styles.profileSection}>
-                    <Text style={styles.profileSectionTitle}>Under stress</Text>
-                    <Text style={styles.profileSectionText}>{result.them.stressResponse}</Text>
-                  </View>
-                  
-                  <View style={styles.profileSection}>
-                    <Text style={styles.profileSectionTitle}>Needs</Text>
-                    <Text style={styles.profileSectionText}>{result.them.needsInRelationships}</Text>
+                  <View>
+                    <Text style={styles.profileName}>{theirName.trim() || 'Them'}</Text>
+                    <Text style={[styles.profileType, { color: '#14B8A6' }]}>{result.them.name}</Text>
                   </View>
                 </View>
-              </AnimatedSection>
 
-              {/* Dynamic */}
-              {result.dynamic && (
-                <AnimatedSection delay={200}>
-                  <View style={styles.dynamicCard}>
+                <Text style={styles.sectionLabel}>Communication Style</Text>
+                <Text style={styles.sectionText}>{result.them.communicationStyle}</Text>
+                <LearnMore id="communicationStyle" expanded={expandedLearn === 'them-comm'} onToggle={() => toggleLearn('them-comm')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Strengths</Text>
+                <Text style={styles.sectionText}>{result.them.strengths.join(', ')}</Text>
+                <LearnMore id="strengths" expanded={expandedLearn === 'them-str'} onToggle={() => toggleLearn('them-str')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Challenges</Text>
+                <Text style={styles.sectionText}>{result.them.challenges.join(', ')}</Text>
+                <LearnMore id="challenges" expanded={expandedLearn === 'them-chal'} onToggle={() => toggleLearn('them-chal')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Under Stress</Text>
+                <Text style={styles.sectionText}>{result.them.stressResponse}</Text>
+                <LearnMore id="stressResponse" expanded={expandedLearn === 'them-stress'} onToggle={() => toggleLearn('them-stress')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Needs</Text>
+                <Text style={styles.sectionText}>{result.them.needsInRelationships}</Text>
+                <LearnMore id="needs" expanded={expandedLearn === 'them-needs'} onToggle={() => toggleLearn('them-needs')} onLesson={goToLesson} />
+              </View>
+            </AnimatedCard>
+
+            {/* DYNAMIC */}
+            {result.dynamic && (
+              <AnimatedCard delay={300}>
+                <View style={styles.dynamicCard}>
+                  <LinearGradient
+                    colors={['rgba(124,77,255,0.08)', 'transparent']}
+                    style={styles.cardGlow}
+                  />
+                  <View style={styles.dynamicTitleRow}>
+                    <Ionicons name="git-compare-outline" size={22} color={RELATE_ACCENT} />
                     <Text style={styles.dynamicTitle}>Your Dynamic</Text>
-                    
-                    <View style={styles.dynamicSection}>
-                      <View style={styles.dynamicSectionHeader}>
-                        <Ionicons name="checkmark-circle" size={18} color={COLORS.success} />
-                        <Text style={[styles.dynamicSectionTitle, { color: COLORS.success }]}>Strengths</Text>
-                      </View>
-                      {result.dynamic.strengths.map((s: string, i: number) => (
-                        <Text key={i} style={styles.dynamicItem}>• {s}</Text>
-                      ))}
-                    </View>
-                    
-                    <View style={styles.dynamicSection}>
-                      <View style={styles.dynamicSectionHeader}>
-                        <Ionicons name="alert-circle" size={18} color={COLORS.warning} />
-                        <Text style={[styles.dynamicSectionTitle, { color: COLORS.warning }]}>Watch For</Text>
-                      </View>
-                      {result.dynamic.frictionPoints.map((f: string, i: number) => (
-                        <Text key={i} style={styles.dynamicItem}>• {f}</Text>
-                      ))}
-                    </View>
-                    
-                    <View style={styles.dynamicSection}>
-                      <View style={styles.dynamicSectionHeader}>
-                        <Ionicons name="chatbubble" size={18} color={COLORS.info} />
-                        <Text style={[styles.dynamicSectionTitle, { color: COLORS.info }]}>Communication Tip</Text>
-                      </View>
-                      <Text style={styles.dynamicTip}>{result.dynamic.communicationTip}</Text>
-                    </View>
                   </View>
-                </AnimatedSection>
-              )}
 
-              {/* AI Insight */}
-              {loading && (
-                <AnimatedSection delay={0}>
-                  <View style={styles.loadingCard}>
-                    <ActivityIndicator color={RELATE_ACCENT} />
-                    <Text style={styles.loadingText}>Psych is thinking...</Text>
-                  </View>
-                </AnimatedSection>
-              )}
-              
-              {aiInsight && (
-                <AnimatedSection delay={300}>
-                  <View style={styles.insightCard}>
-                    <View style={styles.insightHeader}>
-                      <View style={styles.insightIcon}>
-                        <Ionicons name="sparkles" size={18} color={RELATE_ACCENT} />
-                      </View>
-                      <Text style={styles.insightTitle}>Psych says</Text>
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#10B981' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#10B981' }]}>Strengths</Text>
                     </View>
-                    <Text style={styles.insightText}>{aiInsight}</Text>
+                    {result.dynamic.strengths.map((s: string, i: number) => (
+                      <Text key={i} style={styles.dynamicItem}>• {s}</Text>
+                    ))}
+                    <LearnMore id="dynamicStrengths" expanded={expandedLearn === 'dyn-str'} onToggle={() => toggleLearn('dyn-str')} onLesson={goToLesson} />
                   </View>
-                </AnimatedSection>
-              )}
 
-              {/* Actions */}
-              <AnimatedSection delay={400}>
-                <View style={styles.actionsContainer}>
-                  {theirName.trim().length > 0 && (
-                    <Pressable style={styles.primaryBtn} onPress={handleAddToCircle}>
-                      <Ionicons name="person-add" size={20} color="#FFF" style={{ marginRight: 8 }} />
-                      <Text style={styles.primaryBtnText}>Add {theirName.trim()} to Circle</Text>
-                    </Pressable>
-                  )}
-                  <Pressable style={styles.secondaryBtn} onPress={handleTryAnother}>
-                    <Text style={styles.secondaryBtnText}>Try Another</Text>
-                  </Pressable>
-                  <Pressable style={styles.ghostBtn} onPress={() => router.back()}>
-                    <Text style={styles.ghostBtnText}>Done</Text>
-                  </Pressable>
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#F59E0B' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#F59E0B' }]}>Watch For</Text>
+                    </View>
+                    {result.dynamic.frictionPoints.map((f: string, i: number) => (
+                      <Text key={i} style={styles.dynamicItem}>• {f}</Text>
+                    ))}
+                    <LearnMore id="frictionPoints" expanded={expandedLearn === 'dyn-fric'} onToggle={() => toggleLearn('dyn-fric')} onLesson={goToLesson} />
+                  </View>
+
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#3B82F6' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#3B82F6' }]}>Communication Tip</Text>
+                    </View>
+                    <Text style={styles.dynamicText}>{result.dynamic.communicationTip}</Text>
+                    <LearnMore id="communicationTip" expanded={expandedLearn === 'dyn-comm'} onToggle={() => toggleLearn('dyn-comm')} onLesson={goToLesson} />
+                  </View>
+
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#EC4899' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#EC4899' }]}>Conflict Pattern</Text>
+                    </View>
+                    <Text style={styles.dynamicText}>{result.dynamic.conflictPattern}</Text>
+                    <LearnMore id="conflictPattern" expanded={expandedLearn === 'dyn-conf'} onToggle={() => toggleLearn('dyn-conf')} onLesson={goToLesson} />
+                  </View>
+
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#14B8A6' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#14B8A6' }]}>What {theirName.trim() || 'They'} Need{theirName.trim() ? 's' : ''}</Text>
+                    </View>
+                    <Text style={styles.dynamicText}>{result.dynamic.whatTheyNeed}</Text>
+                    <LearnMore id="whatTheyNeed" expanded={expandedLearn === 'dyn-theyneed'} onToggle={() => toggleLearn('dyn-theyneed')} onLesson={goToLesson} />
+                  </View>
+
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#F59E0B' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#F59E0B' }]}>What You Need</Text>
+                    </View>
+                    <Text style={styles.dynamicText}>{result.dynamic.whatYouNeed}</Text>
+                    <LearnMore id="whatYouNeed" expanded={expandedLearn === 'dyn-youneed'} onToggle={() => toggleLearn('dyn-youneed')} onLesson={goToLesson} />
+                  </View>
                 </View>
-              </AnimatedSection>
-            </>
-          )}
-        </ScrollView>
-      </View>
-    </ErrorBoundary>
+              </AnimatedCard>
+            )}
+
+            {/* AI INSIGHT */}
+            {loading && (
+              <AnimatedCard delay={400}>
+                <View style={styles.loadingCard}>
+                  <ActivityIndicator color={RELATE_ACCENT} size="small" />
+                  <Text style={styles.loadingText}>Gauge is analyzing your dynamic...</Text>
+                </View>
+              </AnimatedCard>
+            )}
+
+            {aiInsight ? (
+              <AnimatedCard delay={450}>
+                <View style={styles.insightCard}>
+                  <LinearGradient
+                    colors={['rgba(124,77,255,0.15)', 'rgba(124,77,255,0.05)']}
+                    style={styles.cardGlow}
+                  />
+                  <View style={styles.insightHeader}>
+                    <View style={styles.insightIconWrap}>
+                      <Ionicons name="sparkles" size={18} color="#fff" />
+                    </View>
+                    <Text style={styles.insightTitle}>Gauge says</Text>
+                  </View>
+                  <Text style={styles.insightText}>{aiInsight}</Text>
+                </View>
+              </AnimatedCard>
+            ) : null}
+
+            {/* ACTIONS */}
+            <AnimatedCard delay={500}>
+              <View style={styles.actions}>
+                {theirName.trim().length > 0 && (
+                  <Pressable onPress={handleAddToCircle} style={styles.addCircleBtn}>
+                    <LinearGradient
+                      colors={['#14B8A6', '#0D9488']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.addCircleBtnInner}
+                    >
+                      <Ionicons name="person-add" size={18} color="#fff" style={{ marginRight: 8 }} />
+                      <Text style={styles.addCircleBtnText}>Add {theirName.trim()} to Circle</Text>
+                    </LinearGradient>
+                  </Pressable>
+                )}
+                <Pressable onPress={handleTryAnother} style={styles.secondaryBtn}>
+                  <Ionicons name="refresh" size={18} color={COLORS.textMuted} style={{ marginRight: 8 }} />
+                  <Text style={styles.secondaryBtnText}>Try Another</Text>
+                </Pressable>
+                <Pressable onPress={() => router.back()} style={styles.ghostBtn}>
+                  <Text style={styles.ghostBtnText}>Done</Text>
+                </Pressable>
+              </View>
+            </AnimatedCard>
+          </>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
+const CARD_BORDER = 'rgba(255,255,255,0.06)';
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
+  container: { flex: 1, backgroundColor: COLORS.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
-  backBtn: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+  headerAccent: {
+    height: 2,
+    width: '100%',
   },
-  headerTitle: {
-    ...TYPOGRAPHY.headlineMd,
-    color: COLORS.text,
+  backBtn: { padding: 8 },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: COLORS.text },
+  headerRight: { width: 40 },
+  scroll: { flex: 1 },
+  scrollContent: { padding: 20, paddingBottom: 40 },
+
+  // Mode Toggle
+  modeToggle: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 24,
   },
-  headerRight: {
-    width: 44,
-  },
-  scroll: {
+  modeBtn: {
     flex: 1,
-  },
-  scrollContent: {
-    padding: SPACING.lg,
-  },
-  
-  // Hero
-  heroSection: {
+    paddingVertical: 12,
     alignItems: 'center',
-    marginBottom: SPACING.xl,
-    paddingVertical: SPACING.md,
+    borderRadius: 10,
   },
-  heroEmoji: {
-    fontSize: 48,
-    marginBottom: SPACING.md,
+  modeBtnActive: {
+    backgroundColor: RELATE_ACCENT + '20',
   },
-  heroTitle: {
-    ...TYPOGRAPHY.displaySm,
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  heroSubtitle: {
-    ...TYPOGRAPHY.bodyMd,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-  },
-  
-  // Inputs
-  inputLabel: {
-    ...TYPOGRAPHY.labelMd,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.sm,
-  },
-  optional: {
-    color: COLORS.textMuted,
-  },
-  input: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.lg,
-    fontSize: 16,
-    color: COLORS.text,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: SPACING.lg,
-  },
-  
-  // Relationship Types
-  relTypeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-    marginBottom: SPACING.xl,
-  },
-  relTypeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    gap: SPACING.sm,
-  },
-  relTypeCardSelected: {
-    backgroundColor: COLORS.accentBg,
-    borderColor: COLORS.borderAccent,
-  },
-  relTypeEmoji: {
-    fontSize: 18,
-  },
-  relTypeLabel: {
-    ...TYPOGRAPHY.labelMd,
-    color: COLORS.textSecondary,
-  },
-  
-  // Buttons
-  primaryBtn: {
-    flexDirection: 'row',
-    backgroundColor: RELATE_ACCENT,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.md,
-  },
-  primaryBtnDisabled: {
-    opacity: 0.5,
-  },
-  primaryBtnText: {
-    ...TYPOGRAPHY.labelLg,
-    color: '#FFF',
+  modeBtnText: {
+    fontSize: 14,
     fontWeight: '600',
-  },
-  secondaryBtn: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.lg,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: SPACING.sm,
-  },
-  secondaryBtnText: {
-    ...TYPOGRAPHY.labelLg,
-    color: COLORS.text,
-  },
-  ghostBtn: {
-    padding: SPACING.md,
-    alignItems: 'center',
-  },
-  ghostBtnText: {
-    ...TYPOGRAPHY.labelMd,
     color: COLORS.textMuted,
   },
-  
-  // Disclaimer
-  disclaimer: {
-    ...TYPOGRAPHY.labelSm,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    marginTop: SPACING.lg,
-    lineHeight: 18,
-  },
-  
-  // Results
-  resultHeader: {
-    alignItems: 'center',
-    marginBottom: SPACING.xl,
-    paddingVertical: SPACING.md,
-  },
-  resultTitle: {
-    ...TYPOGRAPHY.displaySm,
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
-  },
-  resultSubtitle: {
-    ...TYPOGRAPHY.bodyMd,
-    color: COLORS.textSecondary,
-  },
-  
-  // Profile Card
-  profileCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  profileEmoji: {
-    fontSize: 36,
-    marginRight: SPACING.md,
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileName: {
-    ...TYPOGRAPHY.headlineMd,
-    color: COLORS.text,
-  },
-  profileType: {
-    ...TYPOGRAPHY.labelMd,
+  modeBtnTextActive: {
     color: RELATE_ACCENT,
   },
-  profileStyle: {
-    ...TYPOGRAPHY.bodyMd,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.lg,
-    lineHeight: 22,
-  },
-  profileSection: {
-    marginBottom: SPACING.md,
-  },
-  profileSectionTitle: {
-    ...TYPOGRAPHY.labelSm,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.xs,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  profileSectionText: {
-    ...TYPOGRAPHY.bodySm,
-    color: COLORS.text,
-    lineHeight: 20,
-  },
-  
-  // Dynamic Card
-  dynamicCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  dynamicTitle: {
-    ...TYPOGRAPHY.headlineMd,
-    color: COLORS.text,
-    marginBottom: SPACING.lg,
-  },
-  dynamicSection: {
-    marginBottom: SPACING.lg,
-  },
-  dynamicSectionHeader: {
+
+  // Secondary button
+  secondaryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.sm,
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: RELATE_ACCENT + '40',
+    marginTop: 16,
   },
-  dynamicSectionTitle: {
-    ...TYPOGRAPHY.labelMd,
+  secondaryBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: RELATE_ACCENT,
+  },
+
+  // Hero
+  heroSection: { alignItems: 'center', marginBottom: 28, paddingTop: 8 },
+  heroEmoji: { fontSize: 48, marginBottom: 12 },
+  heroTitle: { fontSize: 26, fontWeight: '700', color: COLORS.text, marginBottom: 6 },
+  heroSub: { fontSize: 15, color: COLORS.textSecondary, textAlign: 'center' },
+
+  // Input form
+  label: { fontSize: 13, color: COLORS.textMuted, marginBottom: 8, fontWeight: '500' },
+  optional: { color: COLORS.textMuted, fontWeight: '400' },
+  input: {
+    backgroundColor: COLORS.surface,
+    color: COLORS.text,
+    fontSize: 16,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+
+  // Relationship type buttons
+  relTypeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
+  relTypeBtn: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1.5,
+    borderColor: CARD_BORDER,
+  },
+  relTypeBtnActive: {
+    backgroundColor: 'rgba(124,77,255,0.1)',
+    borderColor: RELATE_ACCENT,
+  },
+  relTypeText: { color: COLORS.textMuted, fontSize: 15, fontWeight: '500' },
+
+  // Primary button with gradient
+  primaryBtnWrap: { borderRadius: 14, overflow: 'hidden' },
+  primaryBtn: {
+    flexDirection: 'row',
+    padding: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryBtnDisabled: { opacity: 0.5 },
+  primaryBtnText: { fontSize: 17, fontWeight: '700', color: '#fff' },
+
+  disclaimer: { fontSize: 12, color: COLORS.textMuted, textAlign: 'center', marginTop: 20, lineHeight: 18 },
+
+  // Results header
+  resultHeader: { alignItems: 'center', marginBottom: 24, paddingVertical: 8 },
+  resultEmoji: { fontSize: 40, marginBottom: 8 },
+  resultHeaderTitle: { fontSize: 24, fontWeight: '700', color: COLORS.text, marginBottom: 12 },
+  resultBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  resultBadge: {
+    backgroundColor: 'rgba(124,77,255,0.15)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(124,77,255,0.3)',
+  },
+  resultBadgeText: { color: RELATE_ACCENT, fontSize: 13, fontWeight: '600' },
+  resultPlus: { color: COLORS.textMuted, fontSize: 18, fontWeight: '300' },
+
+  // Profile cards
+  profileCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1.5,
+    borderColor: CARD_BORDER,
+    overflow: 'hidden',
+  },
+  cardGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+  },
+  profileHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 18, zIndex: 1 },
+  profileEmojiWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(124,77,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileEmoji: { fontSize: 26 },
+  profileName: { fontSize: 18, fontWeight: '700', color: COLORS.text },
+  profileType: { fontSize: 14, color: RELATE_ACCENT, fontWeight: '600', marginTop: 2 },
+  sectionLabel: { 
+    fontSize: 11, 
+    color: COLORS.textMuted, 
+    textTransform: 'uppercase', 
+    letterSpacing: 1, 
+    marginTop: 14, 
+    marginBottom: 6,
     fontWeight: '600',
   },
-  dynamicItem: {
-    ...TYPOGRAPHY.bodySm,
-    color: COLORS.textSecondary,
-    marginLeft: SPACING.xxl,
-    marginBottom: SPACING.xs,
-    lineHeight: 20,
+  sectionText: { fontSize: 14, color: COLORS.text, lineHeight: 21 },
+
+  // Dynamic card
+  dynamicCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(124,77,255,0.15)',
+    overflow: 'hidden',
   },
-  dynamicTip: {
-    ...TYPOGRAPHY.bodyMd,
-    color: COLORS.text,
-    marginLeft: SPACING.xxl,
-    lineHeight: 22,
+  dynamicTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
+  dynamicTitle: { fontSize: 18, fontWeight: '700', color: COLORS.text },
+  dynamicSection: { marginBottom: 18 },
+  dynamicLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+  dynamicDot: { width: 8, height: 8, borderRadius: 4 },
+  dynamicLabel: { fontSize: 14, fontWeight: '700' },
+  dynamicItem: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 21, marginLeft: 16, marginBottom: 3 },
+  dynamicText: { fontSize: 14, color: COLORS.text, lineHeight: 21, marginLeft: 16 },
+
+  // Learn more expandable
+  learnContainer: { marginTop: 10, marginBottom: 4 },
+  learnQuickRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: LEARN_BG,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: LEARN_BORDER,
   },
-  
+  learnQuick: {
+    flex: 1,
+    fontSize: 12,
+    color: RELATE_ACCENT,
+    lineHeight: 17,
+    fontStyle: 'italic',
+  },
+  learnExpanded: {
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(124,77,255,0.04)',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    marginTop: -1,
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderColor: LEARN_BORDER,
+  },
+  learnDeep: { fontSize: 13, color: COLORS.text, lineHeight: 21, marginBottom: 10 },
+  learnSource: { fontSize: 11, color: COLORS.textMuted, fontStyle: 'italic' },
+  lessonLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(124,77,255,0.12)',
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+  },
+  lessonLinkText: { fontSize: 13, color: RELATE_ACCENT, fontWeight: '600' },
+
   // Loading
   loadingCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.xl,
-    marginBottom: SPACING.lg,
-    gap: SPACING.md,
+    borderRadius: 14,
+    padding: 20,
+    gap: 12,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: CARD_BORDER,
   },
-  loadingText: {
-    ...TYPOGRAPHY.bodyMd,
-    color: COLORS.textMuted,
-  },
-  
-  // Insight Card
+  loadingText: { color: COLORS.textMuted, fontSize: 14 },
+
+  // AI insight
   insightCard: {
-    backgroundColor: COLORS.accentBg,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.borderAccent,
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(124,77,255,0.25)',
+    overflow: 'hidden',
   },
-  insightHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-    gap: SPACING.sm,
-  },
-  insightIcon: {
+  insightHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14, zIndex: 1 },
+  insightIconWrap: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: COLORS.accentBgStrong,
+    backgroundColor: RELATE_ACCENT,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  insightTitle: {
-    ...TYPOGRAPHY.labelMd,
-    color: RELATE_ACCENT,
-    fontWeight: '600',
-  },
-  insightText: {
-    ...TYPOGRAPHY.bodyMd,
-    color: COLORS.text,
-    lineHeight: 24,
-  },
-  
+  insightTitle: { fontSize: 15, fontWeight: '700', color: RELATE_ACCENT },
+  insightText: { fontSize: 15, color: COLORS.text, lineHeight: 24, zIndex: 1 },
+
   // Actions
-  actionsContainer: {
-    marginTop: SPACING.md,
+  actions: { marginTop: 8 },
+  addCircleBtn: { borderRadius: 14, overflow: 'hidden', marginBottom: 12 },
+  addCircleBtnInner: {
+    flexDirection: 'row',
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  addCircleBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  secondaryBtn: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    marginBottom: 8,
+  },
+  secondaryBtnText: { fontSize: 16, color: COLORS.textMuted, fontWeight: '500' },
+  ghostBtn: { padding: 14, alignItems: 'center' },
+  ghostBtnText: { fontSize: 15, color: COLORS.textMuted },
 });

@@ -10,7 +10,7 @@ interface GaugeProps {
 
 export function ConnectionGauge({ value, size = 80 }: GaugeProps) {
   const isSet = value >= 0;
-  const color = isSet ? getGaugeColor(value) : '#2A2A3A';
+  const color = isSet ? getGaugeColor(value) : '#5A5A6A';
   const cx = size / 2;
   const cy = size / 2;
   const ringCount = 4;
@@ -30,13 +30,13 @@ export function ConnectionGauge({ value, size = 80 }: GaugeProps) {
               cy={cy}
               r={radius}
               fill="none"
-              stroke={isActive ? color : '#2A2A3A'}
+              stroke={isActive ? color : '#5A5A6A'}
               strokeWidth={isActive ? 2 : 1}
               opacity={isActive ? 0.8 - i * 0.15 : 0.2}
             />
           );
         })}
-        <Circle cx={cx} cy={cy} r={3} fill={isSet ? color : '#2A2A3A'} />
+        <Circle cx={cx} cy={cy} r={3} fill={isSet ? color : '#5A5A6A'} />
       </Svg>
     </View>
   );

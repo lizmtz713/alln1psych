@@ -34,7 +34,7 @@ export default function IndexScreen() {
     return (
       <View style={styles.splash}>
         <Animated.Text style={[styles.splashTitle, { opacity }]}>
-          AllN1 Psych
+          InGauge
         </Animated.Text>
         <Text style={styles.splashSub}>Your space is loading...</Text>
       </View>
