@@ -1,6 +1,6 @@
 /**
  * Relate — Understand anyone through personality dynamics.
- * Info-dense with expandable learning. All the knowledge, 24/7/365.
+ * Demo-ready with animations, polish, and expandable learning.
  */
 import { useState, useEffect, useRef } from 'react';
 import {
@@ -15,10 +15,13 @@ import {
   StyleSheet,
   LayoutAnimation,
   UIManager,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { getPersonality, getRelationshipDynamic } from '../../src/services/personology';
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
@@ -31,14 +34,39 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 type RelType = 'romantic' | 'family' | 'friendship' | 'work';
 
 const RELATE_ACCENT = '#7C4DFF';
+const RELATE_GRADIENT = ['#7C4DFF', '#9C6AFF'];
 const LEARN_BG = 'rgba(124,77,255,0.06)';
 const LEARN_BORDER = 'rgba(124,77,255,0.15)';
+const CARD_GLOW = 'rgba(124,77,255,0.08)';
+
+// Animated card component with staggered entrance
+function AnimatedCard({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: any }) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(24)).current;
+  const scale = useRef(new Animated.Value(0.96)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 400, delay, useNativeDriver: true }),
+      Animated.spring(translateY, { toValue: 0, tension: 50, friction: 8, delay, useNativeDriver: true }),
+      Animated.spring(scale, { toValue: 1, tension: 50, friction: 8, delay, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View style={[{ opacity, transform: [{ translateY }, { scale }] }, style]}>
+      {children}
+    </Animated.View>
+  );
+}
 
 // Educational content for each concept
-const LEARN_CONTENT = {
+const LEARN_CONTENT: Record<string, { quick: string; deep: string; source: string; lessonId?: string }> = {
   communicationStyle: {
     quick: "How someone processes and shares information shapes every interaction.",
     deep: "Communication style isn't about introversion or extroversion — it's about how someone's brain naturally processes information. Some people think out loud (external processors), others need silence to form thoughts (internal processors). Neither is better. Mismatches cause most relationship friction.",
@@ -105,7 +133,7 @@ function LearnMore({
   onToggle,
   onLesson,
 }: { 
-  id: keyof typeof LEARN_CONTENT;
+  id: string;
   expanded: boolean;
   onToggle: () => void;
   onLesson?: (lessonId: string) => void;
@@ -132,7 +160,10 @@ function LearnMore({
           {content.lessonId && onLesson && (
             <Pressable 
               style={styles.lessonLink}
-              onPress={() => onLesson(content.lessonId!)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onLesson(content.lessonId!);
+              }}
             >
               <Ionicons name="book-outline" size={14} color={RELATE_ACCENT} />
               <Text style={styles.lessonLinkText}>Learn more in Human Manual</Text>
@@ -167,10 +198,12 @@ export default function Relate() {
   const [aiInsight, setAiInsight] = useState('');
   const [loading, setLoading] = useState(false);
   const [expandedLearn, setExpandedLearn] = useState<string | null>(null);
+  const [showResults, setShowResults] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
   const toggleLearn = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setExpandedLearn(expandedLearn === id ? null : id);
   };
 
@@ -218,7 +251,7 @@ export default function Relate() {
 
   async function handleCheck() {
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       const myIso = parseBirthday(myBirthday);
       const theirIso = parseBirthday(theirBirthday);
       if (!myIso || !theirIso) return;
@@ -230,6 +263,7 @@ export default function Relate() {
 
       setResult({ me, them, dynamic, myIso, theirIso });
       setExpandedLearn(null);
+      setShowResults(true);
       setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), 100);
 
       setLoading(true);
@@ -271,6 +305,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
 
   function handleTryAnother() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShowResults(false);
     setMyBirthday(userBirthday ? (() => { const d = new Date(userBirthday); return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`; })() : '');
     setTheirBirthday('');
     setTheirName('');
@@ -282,11 +317,11 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
 
   const canCheck = myBirthday.length === 10 && theirBirthday.length === 10 && relType !== null;
 
-  const relTypes: { type: RelType; icon: string; label: string }[] = [
-    { type: 'romantic', icon: '💕', label: 'Romantic' },
-    { type: 'family', icon: '👨‍👩‍👧', label: 'Family' },
-    { type: 'friendship', icon: '🤝', label: 'Friendship' },
-    { type: 'work', icon: '💼', label: 'Work' },
+  const relTypes: { type: RelType; icon: string; label: string; color: string }[] = [
+    { type: 'romantic', icon: '💕', label: 'Romantic', color: '#EC4899' },
+    { type: 'family', icon: '👨‍👩‍👧', label: 'Family', color: '#14B8A6' },
+    { type: 'friendship', icon: '🤝', label: 'Friendship', color: '#F59E0B' },
+    { type: 'work', icon: '💼', label: 'Work', color: '#3B82F6' },
   ];
 
   return (
@@ -295,6 +330,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={0}
     >
+      {/* Header with gradient accent line */}
       <View style={styles.header}>
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
@@ -302,6 +338,12 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
         <Text style={styles.headerTitle}>Relate</Text>
         <View style={styles.headerRight} />
       </View>
+      <LinearGradient
+        colors={RELATE_GRADIENT}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.headerAccent}
+      />
 
       <ScrollView
         ref={scrollRef}
@@ -310,9 +352,14 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {!result ? (
+        {!showResults ? (
           <>
-            <Text style={styles.prompt}>Understand anyone. Just enter two birthdays.</Text>
+            {/* Hero */}
+            <View style={styles.heroSection}>
+              <Text style={styles.heroEmoji}>💫</Text>
+              <Text style={styles.heroTitle}>Understand Anyone</Text>
+              <Text style={styles.heroSub}>Enter two birthdays. Discover the dynamic.</Text>
+            </View>
 
             <Text style={styles.label}>Your birthday</Text>
             <TextInput
@@ -351,275 +398,267 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                 <Pressable
                   key={r.type}
                   onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setRelType(r.type); }}
-                  style={[styles.relTypeBtn, relType === r.type && styles.relTypeBtnActive]}
+                  style={[
+                    styles.relTypeBtn,
+                    relType === r.type && styles.relTypeBtnActive,
+                    relType === r.type && { borderColor: r.color + '60' },
+                  ]}
                 >
-                  <Text style={[styles.relTypeText, relType === r.type && styles.relTypeTextActive]}>
+                  <Text style={[
+                    styles.relTypeText,
+                    relType === r.type && { color: r.color },
+                  ]}>
                     {r.icon} {r.label}
                   </Text>
                 </Pressable>
               ))}
             </View>
 
+            {/* Gradient CTA button */}
             <Pressable
               onPress={handleCheck}
               disabled={!canCheck}
-              style={[styles.primaryBtn, !canCheck && styles.primaryBtnDisabled]}
+              style={[styles.primaryBtnWrap, !canCheck && styles.primaryBtnDisabled]}
             >
-              <Text style={styles.primaryBtnText}>See the Dynamic</Text>
+              <LinearGradient
+                colors={canCheck ? RELATE_GRADIENT : ['#3A3A4A', '#3A3A4A']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.primaryBtn}
+              >
+                <Ionicons name="sparkles" size={20} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.primaryBtnText}>See the Dynamic</Text>
+              </LinearGradient>
             </Pressable>
 
             <Text style={styles.disclaimer}>
               Based on Goldschneider's personality research. Increases self-awareness — not deterministic.
             </Text>
           </>
-        ) : (
+        ) : result && (
           <>
-            {/* Header */}
-            <View style={styles.resultHeader}>
-              <Text style={styles.resultHeaderTitle}>You & {theirName.trim() || 'Them'}</Text>
-              <Text style={styles.resultHeaderSub}>{result.me.name} + {result.them.name}</Text>
-            </View>
+            {/* Results Header */}
+            <AnimatedCard delay={0}>
+              <View style={styles.resultHeader}>
+                <Text style={styles.resultEmoji}>✨</Text>
+                <Text style={styles.resultHeaderTitle}>You & {theirName.trim() || 'Them'}</Text>
+                <View style={styles.resultBadgeRow}>
+                  <View style={styles.resultBadge}>
+                    <Text style={styles.resultBadgeText}>{result.me.name}</Text>
+                  </View>
+                  <Text style={styles.resultPlus}>+</Text>
+                  <View style={styles.resultBadge}>
+                    <Text style={styles.resultBadgeText}>{result.them.name}</Text>
+                  </View>
+                </View>
+              </View>
+            </AnimatedCard>
 
             {/* YOUR PROFILE */}
-            <View style={styles.profileCard}>
-              <View style={styles.profileHeaderRow}>
-                <Text style={styles.profileEmoji}>🪞</Text>
-                <View>
-                  <Text style={styles.profileName}>You</Text>
-                  <Text style={styles.profileType}>{result.me.name}</Text>
+            <AnimatedCard delay={100}>
+              <View style={[styles.profileCard, { borderColor: 'rgba(124,77,255,0.2)' }]}>
+                <LinearGradient
+                  colors={['rgba(124,77,255,0.1)', 'transparent']}
+                  style={styles.cardGlow}
+                />
+                <View style={styles.profileHeaderRow}>
+                  <View style={styles.profileEmojiWrap}>
+                    <Text style={styles.profileEmoji}>🪞</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.profileName}>You</Text>
+                    <Text style={styles.profileType}>{result.me.name}</Text>
+                  </View>
                 </View>
+                
+                <Text style={styles.sectionLabel}>Communication Style</Text>
+                <Text style={styles.sectionText}>{result.me.communicationStyle}</Text>
+                <LearnMore id="communicationStyle" expanded={expandedLearn === 'me-comm'} onToggle={() => toggleLearn('me-comm')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Strengths</Text>
+                <Text style={styles.sectionText}>{result.me.strengths.join(', ')}</Text>
+                <LearnMore id="strengths" expanded={expandedLearn === 'me-str'} onToggle={() => toggleLearn('me-str')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Challenges</Text>
+                <Text style={styles.sectionText}>{result.me.challenges.join(', ')}</Text>
+                <LearnMore id="challenges" expanded={expandedLearn === 'me-chal'} onToggle={() => toggleLearn('me-chal')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Under Stress</Text>
+                <Text style={styles.sectionText}>{result.me.stressResponse}</Text>
+                <LearnMore id="stressResponse" expanded={expandedLearn === 'me-stress'} onToggle={() => toggleLearn('me-stress')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Needs</Text>
+                <Text style={styles.sectionText}>{result.me.needsInRelationships}</Text>
+                <LearnMore id="needs" expanded={expandedLearn === 'me-needs'} onToggle={() => toggleLearn('me-needs')} onLesson={goToLesson} />
               </View>
-              
-              <Text style={styles.sectionLabel}>Communication Style</Text>
-              <Text style={styles.sectionText}>{result.me.communicationStyle}</Text>
-              <LearnMore 
-                id="communicationStyle" 
-                expanded={expandedLearn === 'me-comm'} 
-                onToggle={() => toggleLearn('me-comm')}
-                onLesson={goToLesson}
-              />
-
-              <Text style={styles.sectionLabel}>Strengths</Text>
-              <Text style={styles.sectionText}>{result.me.strengths.join(', ')}</Text>
-              <LearnMore 
-                id="strengths" 
-                expanded={expandedLearn === 'me-str'} 
-                onToggle={() => toggleLearn('me-str')}
-                onLesson={goToLesson}
-              />
-
-              <Text style={styles.sectionLabel}>Challenges</Text>
-              <Text style={styles.sectionText}>{result.me.challenges.join(', ')}</Text>
-              <LearnMore 
-                id="challenges" 
-                expanded={expandedLearn === 'me-chal'} 
-                onToggle={() => toggleLearn('me-chal')}
-                onLesson={goToLesson}
-              />
-
-              <Text style={styles.sectionLabel}>Under Stress</Text>
-              <Text style={styles.sectionText}>{result.me.stressResponse}</Text>
-              <LearnMore 
-                id="stressResponse" 
-                expanded={expandedLearn === 'me-stress'} 
-                onToggle={() => toggleLearn('me-stress')}
-                onLesson={goToLesson}
-              />
-
-              <Text style={styles.sectionLabel}>Needs</Text>
-              <Text style={styles.sectionText}>{result.me.needsInRelationships}</Text>
-              <LearnMore 
-                id="needs" 
-                expanded={expandedLearn === 'me-needs'} 
-                onToggle={() => toggleLearn('me-needs')}
-                onLesson={goToLesson}
-              />
-            </View>
+            </AnimatedCard>
 
             {/* THEIR PROFILE */}
-            <View style={styles.profileCard}>
-              <View style={styles.profileHeaderRow}>
-                <Text style={styles.profileEmoji}>✨</Text>
-                <View>
-                  <Text style={styles.profileName}>{theirName.trim() || 'Them'}</Text>
-                  <Text style={styles.profileType}>{result.them.name}</Text>
+            <AnimatedCard delay={200}>
+              <View style={[styles.profileCard, { borderColor: 'rgba(20,184,166,0.2)' }]}>
+                <LinearGradient
+                  colors={['rgba(20,184,166,0.1)', 'transparent']}
+                  style={styles.cardGlow}
+                />
+                <View style={styles.profileHeaderRow}>
+                  <View style={[styles.profileEmojiWrap, { backgroundColor: 'rgba(20,184,166,0.1)' }]}>
+                    <Text style={styles.profileEmoji}>✨</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.profileName}>{theirName.trim() || 'Them'}</Text>
+                    <Text style={[styles.profileType, { color: '#14B8A6' }]}>{result.them.name}</Text>
+                  </View>
                 </View>
+
+                <Text style={styles.sectionLabel}>Communication Style</Text>
+                <Text style={styles.sectionText}>{result.them.communicationStyle}</Text>
+                <LearnMore id="communicationStyle" expanded={expandedLearn === 'them-comm'} onToggle={() => toggleLearn('them-comm')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Strengths</Text>
+                <Text style={styles.sectionText}>{result.them.strengths.join(', ')}</Text>
+                <LearnMore id="strengths" expanded={expandedLearn === 'them-str'} onToggle={() => toggleLearn('them-str')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Challenges</Text>
+                <Text style={styles.sectionText}>{result.them.challenges.join(', ')}</Text>
+                <LearnMore id="challenges" expanded={expandedLearn === 'them-chal'} onToggle={() => toggleLearn('them-chal')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Under Stress</Text>
+                <Text style={styles.sectionText}>{result.them.stressResponse}</Text>
+                <LearnMore id="stressResponse" expanded={expandedLearn === 'them-stress'} onToggle={() => toggleLearn('them-stress')} onLesson={goToLesson} />
+
+                <Text style={styles.sectionLabel}>Needs</Text>
+                <Text style={styles.sectionText}>{result.them.needsInRelationships}</Text>
+                <LearnMore id="needs" expanded={expandedLearn === 'them-needs'} onToggle={() => toggleLearn('them-needs')} onLesson={goToLesson} />
               </View>
-
-              <Text style={styles.sectionLabel}>Communication Style</Text>
-              <Text style={styles.sectionText}>{result.them.communicationStyle}</Text>
-              <LearnMore 
-                id="communicationStyle" 
-                expanded={expandedLearn === 'them-comm'} 
-                onToggle={() => toggleLearn('them-comm')}
-                onLesson={goToLesson}
-              />
-
-              <Text style={styles.sectionLabel}>Strengths</Text>
-              <Text style={styles.sectionText}>{result.them.strengths.join(', ')}</Text>
-              <LearnMore 
-                id="strengths" 
-                expanded={expandedLearn === 'them-str'} 
-                onToggle={() => toggleLearn('them-str')}
-                onLesson={goToLesson}
-              />
-
-              <Text style={styles.sectionLabel}>Challenges</Text>
-              <Text style={styles.sectionText}>{result.them.challenges.join(', ')}</Text>
-              <LearnMore 
-                id="challenges" 
-                expanded={expandedLearn === 'them-chal'} 
-                onToggle={() => toggleLearn('them-chal')}
-                onLesson={goToLesson}
-              />
-
-              <Text style={styles.sectionLabel}>Under Stress</Text>
-              <Text style={styles.sectionText}>{result.them.stressResponse}</Text>
-              <LearnMore 
-                id="stressResponse" 
-                expanded={expandedLearn === 'them-stress'} 
-                onToggle={() => toggleLearn('them-stress')}
-                onLesson={goToLesson}
-              />
-
-              <Text style={styles.sectionLabel}>Needs</Text>
-              <Text style={styles.sectionText}>{result.them.needsInRelationships}</Text>
-              <LearnMore 
-                id="needs" 
-                expanded={expandedLearn === 'them-needs'} 
-                onToggle={() => toggleLearn('them-needs')}
-                onLesson={goToLesson}
-              />
-            </View>
+            </AnimatedCard>
 
             {/* DYNAMIC */}
             {result.dynamic && (
-              <View style={styles.dynamicCard}>
-                <Text style={styles.dynamicTitle}>Your Dynamic</Text>
-
-                <View style={styles.dynamicSection}>
-                  <View style={styles.dynamicLabelRow}>
-                    <Ionicons name="checkmark-circle" size={16} color="#10B981" />
-                    <Text style={[styles.dynamicLabel, { color: '#10B981' }]}>Strengths</Text>
-                  </View>
-                  {result.dynamic.strengths.map((s: string, i: number) => (
-                    <Text key={i} style={styles.dynamicItem}>• {s}</Text>
-                  ))}
-                  <LearnMore 
-                    id="dynamicStrengths" 
-                    expanded={expandedLearn === 'dyn-str'} 
-                    onToggle={() => toggleLearn('dyn-str')}
-                    onLesson={goToLesson}
+              <AnimatedCard delay={300}>
+                <View style={styles.dynamicCard}>
+                  <LinearGradient
+                    colors={['rgba(124,77,255,0.08)', 'transparent']}
+                    style={styles.cardGlow}
                   />
-                </View>
-
-                <View style={styles.dynamicSection}>
-                  <View style={styles.dynamicLabelRow}>
-                    <Ionicons name="alert-circle" size={16} color="#F59E0B" />
-                    <Text style={[styles.dynamicLabel, { color: '#F59E0B' }]}>Watch For</Text>
+                  <View style={styles.dynamicTitleRow}>
+                    <Ionicons name="git-compare-outline" size={22} color={RELATE_ACCENT} />
+                    <Text style={styles.dynamicTitle}>Your Dynamic</Text>
                   </View>
-                  {result.dynamic.frictionPoints.map((f: string, i: number) => (
-                    <Text key={i} style={styles.dynamicItem}>• {f}</Text>
-                  ))}
-                  <LearnMore 
-                    id="frictionPoints" 
-                    expanded={expandedLearn === 'dyn-fric'} 
-                    onToggle={() => toggleLearn('dyn-fric')}
-                    onLesson={goToLesson}
-                  />
-                </View>
 
-                <View style={styles.dynamicSection}>
-                  <View style={styles.dynamicLabelRow}>
-                    <Ionicons name="chatbubble" size={16} color="#3B82F6" />
-                    <Text style={[styles.dynamicLabel, { color: '#3B82F6' }]}>Communication Tip</Text>
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#10B981' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#10B981' }]}>Strengths</Text>
+                    </View>
+                    {result.dynamic.strengths.map((s: string, i: number) => (
+                      <Text key={i} style={styles.dynamicItem}>• {s}</Text>
+                    ))}
+                    <LearnMore id="dynamicStrengths" expanded={expandedLearn === 'dyn-str'} onToggle={() => toggleLearn('dyn-str')} onLesson={goToLesson} />
                   </View>
-                  <Text style={styles.dynamicText}>{result.dynamic.communicationTip}</Text>
-                  <LearnMore 
-                    id="communicationTip" 
-                    expanded={expandedLearn === 'dyn-comm'} 
-                    onToggle={() => toggleLearn('dyn-comm')}
-                    onLesson={goToLesson}
-                  />
-                </View>
 
-                <View style={styles.dynamicSection}>
-                  <View style={styles.dynamicLabelRow}>
-                    <Ionicons name="flash" size={16} color="#EC4899" />
-                    <Text style={[styles.dynamicLabel, { color: '#EC4899' }]}>Conflict Pattern</Text>
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#F59E0B' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#F59E0B' }]}>Watch For</Text>
+                    </View>
+                    {result.dynamic.frictionPoints.map((f: string, i: number) => (
+                      <Text key={i} style={styles.dynamicItem}>• {f}</Text>
+                    ))}
+                    <LearnMore id="frictionPoints" expanded={expandedLearn === 'dyn-fric'} onToggle={() => toggleLearn('dyn-fric')} onLesson={goToLesson} />
                   </View>
-                  <Text style={styles.dynamicText}>{result.dynamic.conflictPattern}</Text>
-                  <LearnMore 
-                    id="conflictPattern" 
-                    expanded={expandedLearn === 'dyn-conf'} 
-                    onToggle={() => toggleLearn('dyn-conf')}
-                    onLesson={goToLesson}
-                  />
-                </View>
 
-                <View style={styles.dynamicSection}>
-                  <View style={styles.dynamicLabelRow}>
-                    <Ionicons name="heart" size={16} color="#14B8A6" />
-                    <Text style={[styles.dynamicLabel, { color: '#14B8A6' }]}>What {theirName.trim() || 'They'} Need{theirName.trim() ? 's' : ''}</Text>
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#3B82F6' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#3B82F6' }]}>Communication Tip</Text>
+                    </View>
+                    <Text style={styles.dynamicText}>{result.dynamic.communicationTip}</Text>
+                    <LearnMore id="communicationTip" expanded={expandedLearn === 'dyn-comm'} onToggle={() => toggleLearn('dyn-comm')} onLesson={goToLesson} />
                   </View>
-                  <Text style={styles.dynamicText}>{result.dynamic.whatTheyNeed}</Text>
-                  <LearnMore 
-                    id="whatTheyNeed" 
-                    expanded={expandedLearn === 'dyn-theyneed'} 
-                    onToggle={() => toggleLearn('dyn-theyneed')}
-                    onLesson={goToLesson}
-                  />
-                </View>
 
-                <View style={styles.dynamicSection}>
-                  <View style={styles.dynamicLabelRow}>
-                    <Ionicons name="heart-outline" size={16} color="#F59E0B" />
-                    <Text style={[styles.dynamicLabel, { color: '#F59E0B' }]}>What You Need</Text>
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#EC4899' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#EC4899' }]}>Conflict Pattern</Text>
+                    </View>
+                    <Text style={styles.dynamicText}>{result.dynamic.conflictPattern}</Text>
+                    <LearnMore id="conflictPattern" expanded={expandedLearn === 'dyn-conf'} onToggle={() => toggleLearn('dyn-conf')} onLesson={goToLesson} />
                   </View>
-                  <Text style={styles.dynamicText}>{result.dynamic.whatYouNeed}</Text>
-                  <LearnMore 
-                    id="whatYouNeed" 
-                    expanded={expandedLearn === 'dyn-youneed'} 
-                    onToggle={() => toggleLearn('dyn-youneed')}
-                    onLesson={goToLesson}
-                  />
+
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#14B8A6' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#14B8A6' }]}>What {theirName.trim() || 'They'} Need{theirName.trim() ? 's' : ''}</Text>
+                    </View>
+                    <Text style={styles.dynamicText}>{result.dynamic.whatTheyNeed}</Text>
+                    <LearnMore id="whatTheyNeed" expanded={expandedLearn === 'dyn-theyneed'} onToggle={() => toggleLearn('dyn-theyneed')} onLesson={goToLesson} />
+                  </View>
+
+                  <View style={styles.dynamicSection}>
+                    <View style={styles.dynamicLabelRow}>
+                      <View style={[styles.dynamicDot, { backgroundColor: '#F59E0B' }]} />
+                      <Text style={[styles.dynamicLabel, { color: '#F59E0B' }]}>What You Need</Text>
+                    </View>
+                    <Text style={styles.dynamicText}>{result.dynamic.whatYouNeed}</Text>
+                    <LearnMore id="whatYouNeed" expanded={expandedLearn === 'dyn-youneed'} onToggle={() => toggleLearn('dyn-youneed')} onLesson={goToLesson} />
+                  </View>
                 </View>
-              </View>
+              </AnimatedCard>
             )}
 
             {/* AI INSIGHT */}
             {loading && (
-              <View style={styles.loadingCard}>
-                <ActivityIndicator color={RELATE_ACCENT} />
-                <Text style={styles.loadingText}>Psych is thinking...</Text>
-              </View>
+              <AnimatedCard delay={400}>
+                <View style={styles.loadingCard}>
+                  <ActivityIndicator color={RELATE_ACCENT} size="small" />
+                  <Text style={styles.loadingText}>Psych is analyzing your dynamic...</Text>
+                </View>
+              </AnimatedCard>
             )}
 
             {aiInsight ? (
-              <View style={styles.insightCard}>
-                <View style={styles.insightHeader}>
-                  <Ionicons name="sparkles" size={18} color={RELATE_ACCENT} />
-                  <Text style={styles.insightTitle}>Psych says</Text>
+              <AnimatedCard delay={450}>
+                <View style={styles.insightCard}>
+                  <LinearGradient
+                    colors={['rgba(124,77,255,0.15)', 'rgba(124,77,255,0.05)']}
+                    style={styles.cardGlow}
+                  />
+                  <View style={styles.insightHeader}>
+                    <View style={styles.insightIconWrap}>
+                      <Ionicons name="sparkles" size={18} color="#fff" />
+                    </View>
+                    <Text style={styles.insightTitle}>Psych says</Text>
+                  </View>
+                  <Text style={styles.insightText}>{aiInsight}</Text>
                 </View>
-                <Text style={styles.insightText}>{aiInsight}</Text>
-              </View>
+              </AnimatedCard>
             ) : null}
 
             {/* ACTIONS */}
-            <View style={styles.actions}>
-              {theirName.trim().length > 0 && (
-                <Pressable onPress={handleAddToCircle} style={styles.primaryBtn}>
-                  <Ionicons name="person-add" size={18} color="#fff" style={{ marginRight: 8 }} />
-                  <Text style={styles.primaryBtnText}>Add {theirName.trim()} to Circle</Text>
+            <AnimatedCard delay={500}>
+              <View style={styles.actions}>
+                {theirName.trim().length > 0 && (
+                  <Pressable onPress={handleAddToCircle} style={styles.addCircleBtn}>
+                    <LinearGradient
+                      colors={['#14B8A6', '#0D9488']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.addCircleBtnInner}
+                    >
+                      <Ionicons name="person-add" size={18} color="#fff" style={{ marginRight: 8 }} />
+                      <Text style={styles.addCircleBtnText}>Add {theirName.trim()} to Circle</Text>
+                    </LinearGradient>
+                  </Pressable>
+                )}
+                <Pressable onPress={handleTryAnother} style={styles.secondaryBtn}>
+                  <Ionicons name="refresh" size={18} color={COLORS.textMuted} style={{ marginRight: 8 }} />
+                  <Text style={styles.secondaryBtnText}>Try Another</Text>
                 </Pressable>
-              )}
-              <Pressable onPress={handleTryAnother} style={styles.secondaryBtn}>
-                <Text style={styles.secondaryBtnText}>Try Another</Text>
-              </Pressable>
-              <Pressable onPress={() => router.back()} style={styles.ghostBtn}>
-                <Text style={styles.ghostBtnText}>Done</Text>
-              </Pressable>
-            </View>
+                <Pressable onPress={() => router.back()} style={styles.ghostBtn}>
+                  <Text style={styles.ghostBtnText}>Done</Text>
+                </Pressable>
+              </View>
+            </AnimatedCard>
           </>
         )}
       </ScrollView>
@@ -636,123 +675,151 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: CARD_BORDER,
+    paddingVertical: 14,
+  },
+  headerAccent: {
+    height: 2,
+    width: '100%',
   },
   backBtn: { padding: 8 },
-  headerTitle: { ...TYPOGRAPHY.cardTitle, color: COLORS.text },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: COLORS.text },
   headerRight: { width: 40 },
   scroll: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 40 },
+  scrollContent: { padding: 20, paddingBottom: 40 },
+
+  // Hero
+  heroSection: { alignItems: 'center', marginBottom: 28, paddingTop: 8 },
+  heroEmoji: { fontSize: 48, marginBottom: 12 },
+  heroTitle: { fontSize: 26, fontWeight: '700', color: COLORS.text, marginBottom: 6 },
+  heroSub: { fontSize: 15, color: COLORS.textSecondary },
 
   // Input form
-  prompt: { fontSize: 16, color: COLORS.textSecondary, marginBottom: 20, textAlign: 'center' },
-  label: { fontSize: 13, color: COLORS.textMuted, marginBottom: 6 },
-  optional: { color: COLORS.textMuted },
+  label: { fontSize: 13, color: COLORS.textMuted, marginBottom: 8, fontWeight: '500' },
+  optional: { color: COLORS.textMuted, fontWeight: '400' },
   input: {
     backgroundColor: COLORS.surface,
     color: COLORS.text,
     fontSize: 16,
-    padding: 14,
-    borderRadius: BORDER_RADIUS.input,
-    marginBottom: 16,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 18,
     borderWidth: 1,
     borderColor: CARD_BORDER,
   },
 
   // Relationship type buttons
-  relTypeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
+  relTypeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
   relTypeBtn: {
     backgroundColor: COLORS.surface,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1.5,
     borderColor: CARD_BORDER,
   },
   relTypeBtnActive: {
-    backgroundColor: 'rgba(124,77,255,0.15)',
+    backgroundColor: 'rgba(124,77,255,0.1)',
     borderColor: RELATE_ACCENT,
   },
-  relTypeText: { color: COLORS.textMuted, fontSize: 14 },
-  relTypeTextActive: { color: RELATE_ACCENT },
+  relTypeText: { color: COLORS.textMuted, fontSize: 15, fontWeight: '500' },
 
-  // Buttons
+  // Primary button with gradient
+  primaryBtnWrap: { borderRadius: 14, overflow: 'hidden' },
   primaryBtn: {
     flexDirection: 'row',
-    backgroundColor: RELATE_ACCENT,
-    borderRadius: 14,
-    padding: 16,
+    padding: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryBtnDisabled: { opacity: 0.5 },
-  primaryBtnText: { fontSize: 17, fontWeight: '600', color: '#fff' },
-  secondaryBtn: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    padding: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
-    marginTop: 10,
-  },
-  secondaryBtnText: { fontSize: 16, color: COLORS.textMuted },
-  ghostBtn: { padding: 12, alignItems: 'center', marginTop: 4 },
-  ghostBtnText: { fontSize: 14, color: COLORS.textMuted },
+  primaryBtnText: { fontSize: 17, fontWeight: '700', color: '#fff' },
 
-  disclaimer: { fontSize: 11, color: COLORS.textMuted, textAlign: 'center', marginTop: 16, lineHeight: 16 },
+  disclaimer: { fontSize: 12, color: COLORS.textMuted, textAlign: 'center', marginTop: 20, lineHeight: 18 },
 
   // Results header
-  resultHeader: { alignItems: 'center', marginBottom: 20 },
-  resultHeaderTitle: { fontSize: 22, fontWeight: '700', color: COLORS.text },
-  resultHeaderSub: { fontSize: 14, color: COLORS.textSecondary, marginTop: 4 },
+  resultHeader: { alignItems: 'center', marginBottom: 24, paddingVertical: 8 },
+  resultEmoji: { fontSize: 40, marginBottom: 8 },
+  resultHeaderTitle: { fontSize: 24, fontWeight: '700', color: COLORS.text, marginBottom: 12 },
+  resultBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  resultBadge: {
+    backgroundColor: 'rgba(124,77,255,0.15)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(124,77,255,0.3)',
+  },
+  resultBadgeText: { color: RELATE_ACCENT, fontSize: 13, fontWeight: '600' },
+  resultPlus: { color: COLORS.textMuted, fontSize: 18, fontWeight: '300' },
 
   // Profile cards
   profileCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1.5,
     borderColor: CARD_BORDER,
+    overflow: 'hidden',
   },
-  profileHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
-  profileEmoji: { fontSize: 32 },
-  profileName: { fontSize: 18, fontWeight: '600', color: COLORS.text },
-  profileType: { fontSize: 14, color: RELATE_ACCENT, fontWeight: '500' },
-  sectionLabel: { fontSize: 11, color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 12, marginBottom: 4 },
-  sectionText: { fontSize: 14, color: COLORS.text, lineHeight: 20 },
+  cardGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+  },
+  profileHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 18, zIndex: 1 },
+  profileEmojiWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(124,77,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileEmoji: { fontSize: 26 },
+  profileName: { fontSize: 18, fontWeight: '700', color: COLORS.text },
+  profileType: { fontSize: 14, color: RELATE_ACCENT, fontWeight: '600', marginTop: 2 },
+  sectionLabel: { 
+    fontSize: 11, 
+    color: COLORS.textMuted, 
+    textTransform: 'uppercase', 
+    letterSpacing: 1, 
+    marginTop: 14, 
+    marginBottom: 6,
+    fontWeight: '600',
+  },
+  sectionText: { fontSize: 14, color: COLORS.text, lineHeight: 21 },
 
   // Dynamic card
   dynamicCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(124,77,255,0.15)',
+    overflow: 'hidden',
   },
-  dynamicTitle: { fontSize: 18, fontWeight: '700', color: COLORS.text, marginBottom: 16 },
-  dynamicSection: { marginBottom: 16 },
-  dynamicLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
-  dynamicLabel: { fontSize: 13, fontWeight: '600' },
-  dynamicItem: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 20, marginLeft: 22, marginBottom: 2 },
-  dynamicText: { fontSize: 14, color: COLORS.text, lineHeight: 20, marginLeft: 22 },
+  dynamicTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
+  dynamicTitle: { fontSize: 18, fontWeight: '700', color: COLORS.text },
+  dynamicSection: { marginBottom: 18 },
+  dynamicLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
+  dynamicDot: { width: 8, height: 8, borderRadius: 4 },
+  dynamicLabel: { fontSize: 14, fontWeight: '700' },
+  dynamicItem: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 21, marginLeft: 16, marginBottom: 3 },
+  dynamicText: { fontSize: 14, color: COLORS.text, lineHeight: 21, marginLeft: 16 },
 
   // Learn more expandable
-  learnContainer: {
-    marginTop: 8,
-    marginBottom: 4,
-  },
+  learnContainer: { marginTop: 10, marginBottom: 4 },
   learnQuickRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     backgroundColor: LEARN_BG,
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: LEARN_BORDER,
   },
@@ -760,47 +827,34 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12,
     color: RELATE_ACCENT,
-    lineHeight: 16,
+    lineHeight: 17,
     fontStyle: 'italic',
   },
   learnExpanded: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: LEARN_BG,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(124,77,255,0.04)',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
     marginTop: -1,
     borderWidth: 1,
     borderTopWidth: 0,
     borderColor: LEARN_BORDER,
   },
-  learnDeep: {
-    fontSize: 13,
-    color: COLORS.text,
-    lineHeight: 20,
-    marginBottom: 8,
-  },
-  learnSource: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-  },
+  learnDeep: { fontSize: 13, color: COLORS.text, lineHeight: 21, marginBottom: 10 },
+  learnSource: { fontSize: 11, color: COLORS.textMuted, fontStyle: 'italic' },
   lessonLink: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(124,77,255,0.1)',
-    borderRadius: 8,
+    gap: 8,
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(124,77,255,0.12)',
+    borderRadius: 10,
     alignSelf: 'flex-start',
   },
-  lessonLinkText: {
-    fontSize: 12,
-    color: RELATE_ACCENT,
-    fontWeight: '500',
-  },
+  lessonLinkText: { fontSize: 13, color: RELATE_ACCENT, fontWeight: '600' },
 
   // Loading
   loadingCard: {
@@ -811,7 +865,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 20,
     gap: 12,
-    marginBottom: 12,
+    marginBottom: 14,
     borderWidth: 1,
     borderColor: CARD_BORDER,
   },
@@ -819,17 +873,48 @@ const styles = StyleSheet.create({
 
   // AI insight
   insightCard: {
-    backgroundColor: 'rgba(124,77,255,0.08)',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(124,77,255,0.2)',
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(124,77,255,0.25)',
+    overflow: 'hidden',
   },
-  insightHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
-  insightTitle: { fontSize: 14, fontWeight: '600', color: RELATE_ACCENT },
-  insightText: { fontSize: 15, color: COLORS.text, lineHeight: 22 },
+  insightHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14, zIndex: 1 },
+  insightIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: RELATE_ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  insightTitle: { fontSize: 15, fontWeight: '700', color: RELATE_ACCENT },
+  insightText: { fontSize: 15, color: COLORS.text, lineHeight: 24, zIndex: 1 },
 
   // Actions
   actions: { marginTop: 8 },
+  addCircleBtn: { borderRadius: 14, overflow: 'hidden', marginBottom: 12 },
+  addCircleBtnInner: {
+    flexDirection: 'row',
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addCircleBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  secondaryBtn: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    marginBottom: 8,
+  },
+  secondaryBtnText: { fontSize: 16, color: COLORS.textMuted, fontWeight: '500' },
+  ghostBtn: { padding: 14, alignItems: 'center' },
+  ghostBtnText: { fontSize: 15, color: COLORS.textMuted },
 });
