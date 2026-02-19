@@ -25,6 +25,7 @@ const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: strin
   { id: 'replay', emoji: '🔄', title: 'Replay', sub: 'Process what happened with AI', route: '/(modals)/replay' },
   { id: 'decode', emoji: '🔍', title: 'Decode', sub: 'Analyze messages and situations', route: '/(modals)/decode' },
   { id: 'relate', emoji: '💫', title: 'Relate', sub: 'Understand anyone deeply', route: '/(modals)/relate' },
+  { id: 'referee', emoji: '⚖️', title: 'Referee', sub: 'Settle disputes fairly', route: '/(modals)/referee' },
   { id: 'love', emoji: '💕', title: 'Love', sub: 'Love, intimacy, connection', route: '/(modals)/love' },
   { id: 'help-someone', emoji: '🤝', title: 'Help Someone', sub: 'Support someone you care about', route: '/(modals)/help-someone' },
   { id: 'role-play', emoji: '🎭', title: 'Role Play', sub: 'Practice difficult conversations', route: '/(modals)/role-play' },
