@@ -33,7 +33,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-type Mode = 'menu' | 'languages' | 'learn' | 'ask';
+type Mode = 'menu' | 'languages' | 'learn' | 'ask' | 'quiz';
 
 const LOVE_ACCENT = '#EC4899';
 const LOVE_ACCENT_BG = 'rgba(236, 72, 153, 0.12)';
@@ -177,6 +177,95 @@ const TOPICS = [
   { id: 'pleasure', emoji: '🌊', title: 'Pleasure & Connection', desc: 'Beyond the myths' },
   { id: 'recovery', emoji: '💔', title: 'Healing from Heartbreak', desc: 'The science of moving on' },
 ];
+
+// Quick Love Language Quiz (no AI needed)
+const QUIZ_QUESTIONS = [
+  {
+    question: "After a hard day, what would help you feel better?",
+    options: [
+      { text: "Hearing 'I'm proud of you' or 'You handled that well'", language: 'words' },
+      { text: "Someone sitting with you, fully present, just listening", language: 'time' },
+      { text: "A small surprise — coffee, flowers, their favorite snack", language: 'gifts' },
+      { text: "Someone taking something off your plate without asking", language: 'acts' },
+      { text: "A long hug or someone rubbing your back", language: 'touch' },
+    ],
+  },
+  {
+    question: "What makes you feel most appreciated in a relationship?",
+    options: [
+      { text: "When they tell you specifically what they love about you", language: 'words' },
+      { text: "When they put their phone away and give you full attention", language: 'time' },
+      { text: "When they remember something you mentioned and surprise you with it", language: 'gifts' },
+      { text: "When they do chores or tasks without being asked", language: 'acts' },
+      { text: "Casual physical affection throughout the day", language: 'touch' },
+    ],
+  },
+  {
+    question: "What hurts most when it's missing from a relationship?",
+    options: [
+      { text: "Not hearing 'I love you' or compliments", language: 'words' },
+      { text: "Feeling like you never have their undivided attention", language: 'time' },
+      { text: "Forgotten birthdays or no acknowledgment of special moments", language: 'gifts' },
+      { text: "When they don't follow through on things they said they'd do", language: 'acts' },
+      { text: "Lack of physical closeness or affection", language: 'touch' },
+    ],
+  },
+  {
+    question: "How do YOU typically show love to others?",
+    options: [
+      { text: "You give compliments and verbal encouragement freely", language: 'words' },
+      { text: "You make plans and prioritize spending time together", language: 'time' },
+      { text: "You give thoughtful gifts and remember what people like", language: 'gifts' },
+      { text: "You do things for people — cook, help, fix, solve", language: 'acts' },
+      { text: "You're physically affectionate — hugs, hand-holding, closeness", language: 'touch' },
+    ],
+  },
+  {
+    question: "What would make you feel most loved on your birthday?",
+    options: [
+      { text: "A heartfelt card or speech about what you mean to them", language: 'words' },
+      { text: "A whole day planned just for you two, no distractions", language: 'time' },
+      { text: "A gift they clearly put thought into choosing", language: 'gifts' },
+      { text: "Them handling everything so you don't have to lift a finger", language: 'acts' },
+      { text: "Lots of hugs, closeness, and physical celebration", language: 'touch' },
+    ],
+  },
+];
+
+// Pets & Connection Science
+const PETS_CONTENT = {
+  title: "Pets & Connection",
+  emoji: "🐾",
+  intro: "The bond with a pet isn't 'less than' human connection — it's a different kind of love that fulfills real needs.",
+  science: [
+    {
+      title: "The Oxytocin Bond",
+      text: "When you gaze into your dog's eyes, both of your brains release oxytocin — the same 'bonding hormone' released between mothers and infants. This is the ONLY species we've found that does this with humans. Your dog literally loves you back, chemically.",
+      source: "Nagasawa et al., 2015 — Science",
+    },
+    {
+      title: "Touch & Regulation",
+      text: "Petting an animal lowers cortisol (stress hormone) and blood pressure within minutes. For people whose primary love language is Physical Touch, a pet can provide the daily contact their nervous system craves — especially when living alone.",
+      source: "Polyvagal Theory (Porges); Human-Animal Interaction research",
+    },
+    {
+      title: "Unconditional Positive Regard",
+      text: "Pets offer something rare: love without judgment or conditions. They don't care about your job, your looks, or your failures. For people with insecure attachment or low self-worth, this consistent acceptance can be genuinely healing.",
+      source: "Attachment Theory applications (Beck & Madresh, 2008)",
+    },
+    {
+      title: "Routine & Purpose",
+      text: "Pets require care — feeding, walks, attention. This creates structure and a sense of being needed. For people struggling with depression or isolation, having something that depends on you can be the reason to get out of bed.",
+      source: "Clinical Psychology research on behavioral activation",
+    },
+    {
+      title: "Social Bridge",
+      text: "Pets reduce loneliness directly AND indirectly — they're social catalysts. Dog owners have more conversations with strangers. The pet becomes a bridge to human connection, especially for people who find socializing difficult.",
+      source: "Wood et al., 2015 — Social Animals",
+    },
+  ],
+  validation: "If your pet is your primary source of love and connection right now, that's okay. It's real love. It counts. It's not a sign you've failed at human relationships — it might be exactly what your nervous system needs.",
+};
 
 const SYSTEM_PROMPT = `You are Psych in "Love" mode — a warm, knowledgeable friend who talks about love, intimacy, sex, and connection openly and without shame.
 
@@ -340,15 +429,63 @@ export default function LoveScreen() {
   const [loading, setLoading] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [expandedLanguage, setExpandedLanguage] = useState<string | null>(null);
+  const [expandedPets, setExpandedPets] = useState(false);
+  
+  // Quiz state
+  const [quizStep, setQuizStep] = useState(0);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({
+    words: 0, time: 0, gifts: 0, acts: 0, touch: 0
+  });
+  const [quizResult, setQuizResult] = useState<{ primary: string; secondary: string } | null>(null);
 
   const toggleLanguage = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedLanguage(expandedLanguage === id ? null : id);
   };
 
+  const togglePets = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setExpandedPets(!expandedPets);
+  };
+
+  const startQuickQuiz = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setQuizStep(0);
+    setQuizAnswers({ words: 0, time: 0, gifts: 0, acts: 0, touch: 0 });
+    setQuizResult(null);
+    setMode('quiz');
+  };
+
+  const answerQuiz = (language: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const newAnswers = { ...quizAnswers, [language]: quizAnswers[language] + 1 };
+    setQuizAnswers(newAnswers);
+    
+    if (quizStep < QUIZ_QUESTIONS.length - 1) {
+      setQuizStep(quizStep + 1);
+    } else {
+      // Calculate result
+      const sorted = Object.entries(newAnswers).sort((a, b) => b[1] - a[1]);
+      setQuizResult({ primary: sorted[0][0], secondary: sorted[1][0] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  };
+
+  const resetQuiz = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setQuizStep(0);
+    setQuizAnswers({ words: 0, time: 0, gifts: 0, acts: 0, touch: 0 });
+    setQuizResult(null);
+  };
+
   const handleBack = () => {
     if (mode === 'menu') {
       router.back();
+    } else if (mode === 'quiz') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      setMode('menu');
+      resetQuiz();
     } else {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setMode('menu');
@@ -431,6 +568,7 @@ export default function LoveScreen() {
       case 'languages': return 'Your Love Language';
       case 'learn': return TOPICS.find(t => t.id === selectedTopic)?.title ?? 'Learn';
       case 'ask': return 'Ask Anything';
+      case 'quiz': return 'Quick Quiz';
       default: return 'Love';
     }
   };
@@ -492,6 +630,25 @@ export default function LoveScreen() {
             </AnimatedCard>
 
             <AnimatedCard delay={150}>
+              <Pressable style={styles.featuredCard} onPress={startQuickQuiz}>
+                <LinearGradient
+                  colors={['rgba(20, 184, 166, 0.12)', 'transparent']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={[styles.featuredIcon, { backgroundColor: 'rgba(20, 184, 166, 0.15)' }]}>
+                  <Ionicons name="flash" size={24} color="#14B8A6" />
+                </View>
+                <View style={styles.featuredContent}>
+                  <Text style={styles.featuredTitle}>Quick Quiz (5 questions)</Text>
+                  <Text style={styles.featuredDesc}>Instant results — no account needed</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+              </Pressable>
+            </AnimatedCard>
+
+            <AnimatedCard delay={200}>
               <Pressable style={styles.featuredCard} onPress={startAsk}>
                 <LinearGradient
                   colors={[LOVE_ACCENT_BG, 'transparent']}
@@ -550,13 +707,141 @@ export default function LoveScreen() {
               ))}
             </View>
 
-            {/* Disclaimer */}
+            {/* Pets & Connection Section */}
             <AnimatedCard delay={900}>
+              <Pressable 
+                style={[
+                  styles.petsCard, 
+                  expandedPets && styles.petsCardExpanded
+                ]} 
+                onPress={togglePets}
+              >
+                <LinearGradient
+                  colors={['rgba(245, 158, 11, 0.1)', 'transparent']}
+                  style={styles.petsCardGlow}
+                />
+                <View style={styles.petsHeader}>
+                  <View style={styles.petsIcon}>
+                    <Text style={styles.petsEmoji}>{PETS_CONTENT.emoji}</Text>
+                  </View>
+                  <View style={styles.petsHeaderText}>
+                    <Text style={styles.petsTitle}>{PETS_CONTENT.title}</Text>
+                    <Text style={styles.petsIntro}>{PETS_CONTENT.intro}</Text>
+                  </View>
+                  <Ionicons 
+                    name={expandedPets ? "chevron-up" : "chevron-down"} 
+                    size={20} 
+                    color={COLORS.textMuted} 
+                  />
+                </View>
+                
+                {expandedPets && (
+                  <View style={styles.petsExpanded}>
+                    {PETS_CONTENT.science.map((item, i) => (
+                      <View key={i} style={styles.petsSection}>
+                        <Text style={styles.petsSectionTitle}>{item.title}</Text>
+                        <Text style={styles.petsSectionText}>{item.text}</Text>
+                        <Text style={styles.petsSectionSource}>— {item.source}</Text>
+                      </View>
+                    ))}
+                    <View style={styles.petsValidation}>
+                      <Ionicons name="heart" size={16} color="#F59E0B" />
+                      <Text style={styles.petsValidationText}>{PETS_CONTENT.validation}</Text>
+                    </View>
+                  </View>
+                )}
+              </Pressable>
+            </AnimatedCard>
+
+            {/* Disclaimer */}
+            <AnimatedCard delay={950}>
               <Text style={styles.disclaimer}>
                 Science-backed information for education.{'\n'}
                 Not a substitute for professional medical or therapeutic advice.
               </Text>
             </AnimatedCard>
+          </ScrollView>
+        )}
+
+        {/* Quick Quiz Mode */}
+        {mode === 'quiz' && (
+          <ScrollView 
+            style={styles.scroll} 
+            contentContainerStyle={styles.quizContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {!quizResult ? (
+              <>
+                <View style={styles.quizProgress}>
+                  <Text style={styles.quizProgressText}>
+                    Question {quizStep + 1} of {QUIZ_QUESTIONS.length}
+                  </Text>
+                  <View style={styles.quizProgressBar}>
+                    <View 
+                      style={[
+                        styles.quizProgressFill, 
+                        { width: `${((quizStep + 1) / QUIZ_QUESTIONS.length) * 100}%` }
+                      ]} 
+                    />
+                  </View>
+                </View>
+
+                <Text style={styles.quizQuestion}>
+                  {QUIZ_QUESTIONS[quizStep].question}
+                </Text>
+
+                <View style={styles.quizOptions}>
+                  {QUIZ_QUESTIONS[quizStep].options.map((option, i) => (
+                    <Pressable
+                      key={i}
+                      style={({ pressed }) => [
+                        styles.quizOption,
+                        pressed && styles.quizOptionPressed
+                      ]}
+                      onPress={() => answerQuiz(option.language)}
+                    >
+                      <Text style={styles.quizOptionText}>{option.text}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </>
+            ) : (
+              <View style={styles.quizResult}>
+                <Text style={styles.quizResultEmoji}>💕</Text>
+                <Text style={styles.quizResultTitle}>Your Love Language</Text>
+                
+                <View style={styles.quizResultCard}>
+                  <Text style={styles.quizResultPrimary}>
+                    {LOVE_LANGUAGES_CONTENT[quizResult.primary as keyof typeof LOVE_LANGUAGES_CONTENT]?.emoji}{' '}
+                    {LOVE_LANGUAGES_CONTENT[quizResult.primary as keyof typeof LOVE_LANGUAGES_CONTENT]?.name}
+                  </Text>
+                  <Text style={styles.quizResultDesc}>
+                    {LOVE_LANGUAGES_CONTENT[quizResult.primary as keyof typeof LOVE_LANGUAGES_CONTENT]?.quick}
+                  </Text>
+                </View>
+
+                <View style={styles.quizResultSecondary}>
+                  <Text style={styles.quizResultSecondaryLabel}>Secondary:</Text>
+                  <Text style={styles.quizResultSecondaryText}>
+                    {LOVE_LANGUAGES_CONTENT[quizResult.secondary as keyof typeof LOVE_LANGUAGES_CONTENT]?.emoji}{' '}
+                    {LOVE_LANGUAGES_CONTENT[quizResult.secondary as keyof typeof LOVE_LANGUAGES_CONTENT]?.name}
+                  </Text>
+                </View>
+
+                <Text style={styles.quizResultHint}>
+                  Scroll up to learn more about your love language — how it works, how to communicate it, and what to avoid.
+                </Text>
+
+                <Pressable style={styles.quizRetakeBtn} onPress={resetQuiz}>
+                  <Ionicons name="refresh" size={18} color={LOVE_ACCENT} />
+                  <Text style={styles.quizRetakeBtnText}>Retake Quiz</Text>
+                </Pressable>
+
+                <Pressable style={styles.quizDoneBtn} onPress={() => setMode('menu')}>
+                  <Text style={styles.quizDoneBtnText}>Explore Love Languages</Text>
+                </Pressable>
+              </View>
+            )}
           </ScrollView>
         )}
 
@@ -976,5 +1261,233 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.border,
+  },
+
+  // Pets & Connection
+  petsCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    marginTop: SPACING.xl,
+    borderWidth: 1.5,
+    borderColor: 'rgba(245, 158, 11, 0.2)',
+    overflow: 'hidden',
+  },
+  petsCardExpanded: {
+    borderColor: 'rgba(245, 158, 11, 0.4)',
+  },
+  petsCardGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+  },
+  petsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    gap: SPACING.md,
+  },
+  petsIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  petsEmoji: {
+    fontSize: 22,
+  },
+  petsHeaderText: {
+    flex: 1,
+  },
+  petsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#F59E0B',
+    marginBottom: 2,
+  },
+  petsIntro: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  petsExpanded: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.lg,
+  },
+  petsSection: {
+    marginBottom: SPACING.lg,
+  },
+  petsSectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#F59E0B',
+    marginBottom: 6,
+  },
+  petsSectionText: {
+    fontSize: 14,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  petsSectionSource: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+    marginTop: 6,
+  },
+  petsValidation: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    padding: SPACING.md,
+    borderRadius: 12,
+    marginTop: SPACING.sm,
+  },
+  petsValidationText: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.text,
+    lineHeight: 21,
+    fontStyle: 'italic',
+  },
+
+  // Quiz
+  quizContent: {
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xxxl,
+  },
+  quizProgress: {
+    marginBottom: SPACING.xl,
+  },
+  quizProgressText: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  quizProgressBar: {
+    height: 6,
+    backgroundColor: COLORS.surface,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  quizProgressFill: {
+    height: '100%',
+    backgroundColor: LOVE_ACCENT,
+    borderRadius: 3,
+  },
+  quizQuestion: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: COLORS.text,
+    textAlign: 'center',
+    marginBottom: SPACING.xl,
+    lineHeight: 28,
+  },
+  quizOptions: {
+    gap: SPACING.md,
+  },
+  quizOption: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    padding: SPACING.lg,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+  },
+  quizOptionPressed: {
+    backgroundColor: LOVE_ACCENT_BG,
+    borderColor: LOVE_ACCENT,
+  },
+  quizOptionText: {
+    fontSize: 15,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  quizResult: {
+    alignItems: 'center',
+    paddingTop: SPACING.xl,
+  },
+  quizResultEmoji: {
+    fontSize: 56,
+    marginBottom: SPACING.lg,
+  },
+  quizResultTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.xl,
+  },
+  quizResultCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: SPACING.xl,
+    width: '100%',
+    borderWidth: 1.5,
+    borderColor: LOVE_ACCENT + '30',
+    marginBottom: SPACING.lg,
+  },
+  quizResultPrimary: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: LOVE_ACCENT,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+  },
+  quizResultDesc: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 21,
+  },
+  quizResultSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: SPACING.xl,
+  },
+  quizResultSecondaryLabel: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+  },
+  quizResultSecondaryText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  quizResultHint: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginBottom: SPACING.xl,
+    lineHeight: 20,
+  },
+  quizRetakeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+  },
+  quizRetakeBtnText: {
+    fontSize: 15,
+    color: LOVE_ACCENT,
+    fontWeight: '500',
+  },
+  quizDoneBtn: {
+    backgroundColor: LOVE_ACCENT,
+    borderRadius: 14,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.xxl,
+    width: '100%',
+    alignItems: 'center',
+  },
+  quizDoneBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
 });
