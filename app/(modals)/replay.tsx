@@ -279,7 +279,7 @@ export default function ReplayScreen() {
           </Pressable>
           <View style={styles.progressContainer}>
             <StepProgressIndicator 
-              currentStep={['tell', 'mirror', 'decode', 'coach', 'checkout'].indexOf(phase) + 1} 
+              currentStep={Math.max(1, ['tell', 'mirror', 'decode', 'coach', 'checkout'].indexOf(phase) + 1)} 
               totalSteps={5}
               accentColor={ACCENT}
             />
@@ -460,9 +460,9 @@ export default function ReplayScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BG },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: CARD_BORDER },
-  backBtn: { width: 40, padding: 8 },
-  progressContainer: { flex: 1, alignItems: 'center' },
-  closeBtn: { width: 40, alignItems: 'flex-end', padding: 8 },
+  backBtn: { width: 40, padding: 8, justifyContent: 'center' },
+  progressContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  closeBtn: { width: 40, padding: 8, alignItems: 'flex-end', justifyContent: 'center' },
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
   prompt: { fontSize: 18, fontWeight: '500', color: TEXT_PRIMARY, marginBottom: 4 },
