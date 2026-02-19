@@ -198,7 +198,10 @@ export default function Relate() {
   const [person2Name, setPerson2Name] = useState('');
   const [person2Birthday, setPerson2Birthday] = useState('');
   // Legacy aliases for results compatibility
+  const myName = person1Name;
+  const setMyName = setPerson1Name;
   const myBirthday = person1Birthday;
+  const setMyBirthday = setPerson1Birthday;
   const theirBirthday = person2Birthday;
   const theirName = person2Name;
   const [relType, setRelType] = useState<RelType | null>(null);
