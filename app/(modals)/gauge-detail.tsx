@@ -15,6 +15,7 @@ import { GAUGE_CONFIG, getGaugeStatusLabel } from '../../src/utils/gaugeHelpers'
 import { useCircleStore } from '../../src/stores/circleStore';
 import { getDailyFact } from '../../src/data/psychKnowledge';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from '../../src/components/gauges';
+import { ACADEMIC_SOURCES, getInsightsForGauge, type GaugeType } from '../../src/data/academicSources';
 
 const GAUGE_COMPONENTS: Record<string, React.FC<{ value: number; size?: number }>> = {
   body: BodyGauge,
@@ -234,8 +235,42 @@ export default function GaugeDetailScreen() {
           <Text style={styles.cardTitle}>Did you know?</Text>
           <Text style={styles.cardBody}>{content.funFact}</Text>
         </View>
+        
+        {/* 7. THE SCIENCE (Academic Sources) */}
+        {(() => {
+          const sources = ACADEMIC_SOURCES.filter(s => s.primaryGauge === gaugeId);
+          const insights = getInsightsForGauge(gaugeId as GaugeType);
+          if (sources.length === 0) return null;
+          return (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>📚 The Science Behind This</Text>
+              <Text style={[styles.cardBody, { marginBottom: 16 }]}>
+                This gauge is informed by real research. Tap to explore the depth.
+              </Text>
+              {sources.map((source) => (
+                <View key={source.id} style={styles.sourceItem}>
+                  <Text style={styles.sourceAuthor}>{source.author}</Text>
+                  <Text style={styles.sourceTitle}>{source.title}</Text>
+                  <Text style={styles.sourceInsight}>"{source.keyInsight}"</Text>
+                </View>
+              ))}
+              {insights.length > 0 && (
+                <View style={styles.insightsSection}>
+                  <Text style={styles.insightsSectionTitle}>💡 Synthesized Insights</Text>
+                  {insights.slice(0, 3).map((insight) => (
+                    <View key={insight.id} style={styles.insightItem}>
+                      <Text style={styles.insightTitle}>{insight.title}</Text>
+                      <Text style={styles.insightTruth}>{insight.coreTruth}</Text>
+                      <Text style={styles.insightAction}>→ {insight.whatYouCanDo}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          );
+        })()}
 
-        {/* 7. CONNECTION: MY CIRCLE */}
+        {/* 8. CONNECTION: MY CIRCLE */}
         {gaugeId === 'connection' && members.length > 0 && (
           <Pressable
             style={styles.card}
@@ -251,7 +286,7 @@ export default function GaugeDetailScreen() {
           </Pressable>
         )}
 
-        {/* 8. CHECK IN BUTTON */}
+        {/* 9. CHECK IN BUTTON */}
         <Pressable
           style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryBtnPressed]}
           onPress={() => {
@@ -319,4 +354,66 @@ const styles = StyleSheet.create({
   },
   primaryBtnPressed: { opacity: 0.9 },
   primaryBtnText: { fontSize: 17, fontWeight: '600', color: '#fff' },
+  
+  // Academic Sources
+  sourceItem: {
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: CARD_BORDER,
+  },
+  sourceAuthor: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: ACCENT,
+    marginBottom: 2,
+  },
+  sourceTitle: {
+    fontSize: 13,
+    color: TEXT_MUTED,
+    marginBottom: 6,
+  },
+  sourceInsight: {
+    fontSize: 14,
+    color: TEXT_SECONDARY,
+    fontStyle: 'italic',
+    lineHeight: 20,
+  },
+  
+  // Synthesized Insights
+  insightsSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: CARD_BORDER,
+  },
+  insightsSectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: TEXT_PRIMARY,
+    marginBottom: 12,
+  },
+  insightItem: {
+    marginBottom: 16,
+    backgroundColor: 'rgba(124,77,255,0.08)',
+    borderRadius: 12,
+    padding: 14,
+  },
+  insightTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: TEXT_PRIMARY,
+    marginBottom: 8,
+  },
+  insightTruth: {
+    fontSize: 14,
+    color: TEXT_SECONDARY,
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  insightAction: {
+    fontSize: 13,
+    color: ACCENT,
+    fontWeight: '500',
+  },
 });
