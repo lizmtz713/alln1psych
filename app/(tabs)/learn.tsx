@@ -51,6 +51,74 @@ const COLORS = {
   locked: '#3A3A4A',
 };
 
+// The 6 Gauges - Core System Explanation
+const GAUGE_SYSTEM = {
+  intro: "You are not broken. You are a system. And now you have a dashboard.",
+  philosophy: "Most self-help treats you like a problem to fix. InGauge treats you like a machine to understand. These 6 gauges are your operating system — check them regularly, and you'll finally know what's actually going on inside.",
+  gauges: [
+    {
+      id: 'body',
+      emoji: '🫀',
+      name: 'Body',
+      color: '#F87171',
+      tagline: 'The hardware running everything',
+      description: "Sleep, food, water, movement, hormones. Your body is the foundation. When it's depleted, everything else crashes. You can't think clearly when you're dehydrated. You can't regulate emotions on 4 hours of sleep. Fix the body first.",
+      whenLow: "Check basics: When did you last eat? Drink water? Sleep? Move? Your 'emotional problem' might be a blood sugar problem.",
+      science: "Sleep deprivation amplifies amygdala reactivity by 60%. Your brain literally can't regulate emotions properly when tired.",
+    },
+    {
+      id: 'state',
+      emoji: '⚡',
+      name: 'State',
+      color: '#FACC15',
+      tagline: 'Your nervous system right now',
+      description: "Are you activated (fight/flight), calm (rest/digest), or shut down (freeze)? Your state determines how you perceive everything. The same comment from your partner feels fine when you're calm and like an attack when you're activated.",
+      whenLow: "You're either revved up or shut down. Breathing, movement, or being near someone calm can shift your state. You can't think your way out — regulate the body first.",
+      science: "Your nervous system runs faster than thought. That's why 'just calm down' doesn't work. The body must be regulated before the mind can follow.",
+    },
+    {
+      id: 'emotion',
+      emoji: '💜',
+      name: 'Emotion',
+      color: '#A78BFA',
+      tagline: 'What you're actually feeling',
+      description: "Not just 'good' or 'bad' — there are 27+ documented emotions. The more precisely you can name what you feel, the better your brain can process it. Anger usually masks something more vulnerable underneath.",
+      whenLow: "Name it to tame it. Use the emotion wheel. Ask: what's underneath this? Anger often hides hurt, fear, or powerlessness.",
+      science: "Emotional granularity (precise naming) predicts mental health outcomes. People with more emotion words have better regulation.",
+    },
+    {
+      id: 'connection',
+      emoji: '🤝',
+      name: 'Connection',
+      color: '#4ADE80',
+      tagline: 'Your relationship to others',
+      description: "Humans are wired for connection. Loneliness isn't just sad — it's processed by your brain like physical pain. Quality matters more than quantity. One real conversation beats 100 shallow ones.",
+      whenLow: "Reach out to someone. Not a text — a real conversation. Your nervous system literally calms down in the presence of safe others.",
+      science: "Social exclusion activates the same brain regions as physical injury. Connection is a biological need, not a luxury.",
+    },
+    {
+      id: 'direction',
+      emoji: '🧭',
+      name: 'Direction',
+      color: '#38BDF8',
+      tagline: 'Purpose and momentum',
+      description: "Do you know where you're going? Even small progress toward something meaningful changes your brain chemistry. Without direction, even rest feels restless.",
+      whenLow: "You might be lost, not lazy. What's one small step toward something that matters to you? Direction comes from action, not clarity.",
+      science: "Goal pursuit releases dopamine — the momentum molecule. Small wins matter more than big plans.",
+    },
+    {
+      id: 'alignment',
+      emoji: '⚖️',
+      name: 'Alignment',
+      color: '#F472B6',
+      tagline: 'Living your values',
+      description: "Are your actions matching your values? When they don't, you feel it — as guilt, shame, or that vague sense something's off. Alignment isn't perfection; it's honesty about the gap.",
+      whenLow: "Where's the mismatch? What do you value that you're not honoring? Sometimes the stress isn't external — it's internal conflict.",
+      science: "Value-action gaps increase cortisol and reduce wellbeing. Your body knows when you're out of integrity.",
+    },
+  ],
+};
+
 const TOOLKIT_ACTIVITIES = [
   { id: 'talk', emoji: '💬', title: 'Talk to Gauge', sub: 'Your AI companion' },
   { id: 'journal', emoji: '📓', title: 'Journal', sub: 'Write & reflect' },
@@ -249,6 +317,15 @@ export default function LearnScreen() {
   // Track which section filter is active (null = all)
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
 
+  // Gauge system state
+  const [expandedGaugeId, setExpandedGaugeId] = useState<string | null>(null);
+
+  const handleToggleGauge = useCallback((gaugeId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedGaugeId((prev) => (prev === gaugeId ? null : gaugeId));
+  }, []);
+
   // Discovery state
   const initialDiscoveries = useMemo(() => getDiscoveriesForDay(), []);
   const [visibleDiscoveries, setVisibleDiscoveries] = useState<Discovery[]>(initialDiscoveries);
@@ -307,6 +384,63 @@ export default function LearnScreen() {
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>Learn</Text>
           <Text style={styles.heroSubtitle}>Your emotional intelligence journey</Text>
+        </View>
+
+        {/* Meet Your Gauges - THE CORE CONCEPT */}
+        <View style={styles.gaugeSystemSection}>
+          <View style={styles.gaugeSystemHeader}>
+            <Text style={styles.gaugeSystemTitle}>Meet Your Gauges</Text>
+            <Text style={styles.gaugeSystemTagline}>{GAUGE_SYSTEM.intro}</Text>
+          </View>
+          
+          <Text style={styles.gaugeSystemPhilosophy}>{GAUGE_SYSTEM.philosophy}</Text>
+
+          {/* 6 Gauge Cards */}
+          {GAUGE_SYSTEM.gauges.map((gauge) => {
+            const isExpanded = expandedGaugeId === gauge.id;
+            return (
+              <Pressable
+                key={gauge.id}
+                style={styles.gaugeCard}
+                onPress={() => handleToggleGauge(gauge.id)}
+              >
+                <View style={styles.gaugeCardHeader}>
+                  <View style={[styles.gaugeIconWrap, { backgroundColor: gauge.color + '20' }]}>
+                    <Text style={styles.gaugeIcon}>{gauge.emoji}</Text>
+                  </View>
+                  <View style={styles.gaugeCardHeaderText}>
+                    <Text style={[styles.gaugeName, { color: gauge.color }]}>{gauge.name}</Text>
+                    <Text style={styles.gaugeTagline}>{gauge.tagline}</Text>
+                  </View>
+                  <Ionicons
+                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={20}
+                    color={COLORS.textMuted}
+                  />
+                </View>
+
+                {isExpanded && (
+                  <View style={styles.gaugeCardExpanded}>
+                    <Text style={styles.gaugeDescription}>{gauge.description}</Text>
+                    
+                    <View style={[styles.gaugeCallout, { backgroundColor: gauge.color + '15' }]}>
+                      <Text style={[styles.gaugeCalloutTitle, { color: gauge.color }]}>When it's low</Text>
+                      <Text style={styles.gaugeCalloutText}>{gauge.whenLow}</Text>
+                    </View>
+
+                    <View style={styles.gaugeScienceBox}>
+                      <Text style={styles.gaugeScienceTitle}>🧬 The Science</Text>
+                      <Text style={styles.gaugeScienceText}>{gauge.science}</Text>
+                    </View>
+                  </View>
+                )}
+
+                {!isExpanded && (
+                  <Text style={styles.gaugePreview} numberOfLines={2}>{gauge.description}</Text>
+                )}
+              </Pressable>
+            );
+          })}
         </View>
 
         {/* Progress Ring */}
@@ -467,6 +601,115 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textSecondary,
     marginTop: 4,
+  },
+
+  // Gauge System Section
+  gaugeSystemSection: {
+    marginBottom: 32,
+  },
+  gaugeSystemHeader: {
+    marginBottom: 16,
+  },
+  gaugeSystemTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  gaugeSystemTagline: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.accent,
+    fontStyle: 'italic',
+    lineHeight: 26,
+  },
+  gaugeSystemPhilosophy: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    lineHeight: 23,
+    marginBottom: 20,
+  },
+  gaugeCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 12,
+  },
+  gaugeCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  gaugeIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gaugeIcon: {
+    fontSize: 28,
+  },
+  gaugeCardHeaderText: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  gaugeName: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  gaugeTagline: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  gaugePreview: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    lineHeight: 20,
+    marginTop: 12,
+  },
+  gaugeCardExpanded: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  gaugeDescription: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    lineHeight: 23,
+    marginBottom: 16,
+  },
+  gaugeCallout: {
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+  },
+  gaugeCalloutTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  gaugeCalloutText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  gaugeScienceBox: {
+    backgroundColor: COLORS.cardElevated,
+    borderRadius: 12,
+    padding: 14,
+  },
+  gaugeScienceTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    marginBottom: 6,
+  },
+  gaugeScienceText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
   },
 
   // Progress Section
