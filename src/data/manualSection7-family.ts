@@ -544,6 +544,94 @@ Boundaries aren't mean. They're how you protect your system from relationships t
         },
       },
     },
+    {
+      id: 'manual-7-3-2',
+      title: 'Betrayal and Affairs',
+      emoji: '💔',
+      linkedActivity: 'talk',
+      deepDive: `Betrayal is one of the deepest wounds a relationship can inflict. Whether it's a physical affair, an emotional affair, or another form of broken trust, the impact on your gauges is profound and lasting.
+
+**What is an emotional affair?**
+An emotional affair is when someone develops deep emotional intimacy with someone outside their primary relationship — sharing things they don't share with their partner, seeking emotional support elsewhere, creating secrecy. There may be no physical contact, but the betrayal of emotional exclusivity is real. Many people find emotional affairs more devastating than physical ones because of what it says about the connection.
+
+**Why affairs happen (this is not excusing them):**
+- Unmet needs in the primary relationship (often unspoken)
+- Avoidance of difficult conversations
+- Seeking validation or escape
+- Poor boundaries that escalated
+- Personal issues unrelated to the partner
+
+Understanding why doesn't justify the betrayal. It helps make sense of it.
+
+**If you were betrayed:**
+Your gauges are likely tanking across the board. State is activated (hypervigilance, anxiety, anger). Emotion is flooded (hurt, rage, grief, shame). Connection is shattered. Body might be struggling (can't eat, can't sleep). This is betrayal trauma — it's real, it's valid, and you're not overreacting.
+
+**If you betrayed someone:**
+This content isn't to shame you. Shame keeps people stuck. Understanding why you did what you did — without excusing it — is the path to genuine change. What was missing? What were you avoiding? What would repair require?
+
+**Recovery is possible but hard:**
+Some relationships survive affairs. Some shouldn't. The path forward requires honesty, accountability, time, and often professional help. There's no shortcut. And the betrayed partner gets to decide if they want to try — that's not something the betrayer gets to demand.`,
+      realWorld: [
+        "A man discovers his wife has been texting her coworker for months — nothing physical, but deeply intimate conversations she never had with him. The emotional betrayal feels worse than if she'd just had sex. He can't stop checking her phone. His State gauge is wrecked.",
+        "A woman realizes her 'close friendship' has become an emotional affair. She's telling her friend things she should be telling her husband. Nothing physical has happened, but she knows the line is crossed. She has to decide: end the friendship or address what's missing at home.",
+        "A couple in therapy after an affair. The betrayed husband asks 'why wasn't I enough?' The betraying wife realizes she never told him what she needed — she assumed he should just know. The affair was wrong, AND the communication failure was real.",
+        "A man who cheated works to understand why. Not to excuse it. He discovers he was escaping his own depression rather than facing it. The affair was a symptom. The real work is internal.",
+      ],
+      diagnostics: [
+        {
+          symptom: "You just discovered betrayal and can't function",
+          checkFirst: "All gauges — you're in crisis. This is trauma.",
+          possibleCauses: ["Betrayal trauma is real and valid", "Your nervous system is responding to threat", "Everything you believed is destabilized"],
+          tryThis: ["Don't make permanent decisions right now", "Find one safe person to talk to", "Let yourself feel it — suppressing makes it worse", "Professional support is recommended, not optional", "Your reaction isn't crazy — it's appropriate to the wound"],
+        },
+        {
+          symptom: "You can't stop checking their phone/location",
+          checkFirst: "State gauge — hypervigilance is a trauma response",
+          possibleCauses: ["Your brain is trying to prevent future hurt", "Trust was shattered and you're scanning for threat", "This is exhausting but feels necessary"],
+          tryThis: ["This is normal after betrayal but not sustainable", "The checking won't restore trust — only consistent behavior over time will", "Consider: is staying worth this level of suffering?", "Therapy can help you process without surveillance"],
+        },
+        {
+          symptom: "You betrayed someone and feel like a monster",
+          checkFirst: "Alignment gauge — you violated your own values",
+          possibleCauses: ["Shame is keeping you stuck", "You may have been avoiding something hard", "The affair was wrong AND there may be context to understand"],
+          tryThis: ["Shame locks you down; guilt motivates change", "Get honest: what were you avoiding or seeking?", "Take full accountability without excuses", "The repair work is on YOU — it's not your partner's job to comfort you", "Therapy helps you understand without justifying"],
+        },
+      ],
+      tryThis: "If you've experienced betrayal: write what you lost. Not just the relationship — the future you imagined, the trust, the story you believed. Naming the losses is part of grieving them.",
+      connectsTo: ['connection', 'emotion', 'state', 'alignment'],
+      content: {
+        teen: {
+          introduction: "Betrayal happens at any age — a friend who shared your secrets, a partner who cheated, someone you trusted who broke that trust. The wound is real. Understanding why it hurts so much (your brain processes betrayal like physical pain) and how to move through it matters.",
+          keyConcepts: [
+            { title: 'Betrayal trauma is real', explanation: 'When someone you trusted breaks that trust, your brain responds like you\'re in danger. The anxiety, obsessive thoughts, and emotional flooding are your system trying to protect you.' },
+            { title: 'Emotional cheating exists', explanation: 'You don\'t have to kiss or sleep with someone to betray a relationship. Sharing emotional intimacy that belongs in your primary relationship is a form of betrayal.' },
+            { title: 'It\'s not your fault', explanation: 'If someone betrayed you, that\'s their choice. You didn\'t cause it by not being enough. You can\'t control other people\'s behavior.' },
+            { title: 'Healing takes time', explanation: 'You won\'t get over this quickly. That\'s not weakness — it\'s proportional to the wound. Give yourself time.' },
+          ],
+          reflectionPrompt: "Have you ever been betrayed or betrayed someone? What did it teach you about trust?",
+        },
+        adult: {
+          introduction: "Betrayal — whether physical affairs, emotional affairs, or other broken trust — creates profound wounds. Understanding what happened, why it happened, and how to move forward (together or apart) requires honesty, support, and often professional help. This isn't about quick fixes. It's about understanding the wound.",
+          keyConcepts: [
+            { title: 'Emotional affairs are real affairs', explanation: 'Deep emotional intimacy outside your relationship, secrecy, sharing what you don\'t share with your partner — this is betrayal even without physical contact. Many find it more devastating.' },
+            { title: 'Betrayal trauma is clinical', explanation: 'Hypervigilance, intrusive thoughts, inability to eat or sleep, panic attacks — these are trauma responses, not overreactions. Treat them accordingly.' },
+            { title: 'Understanding isn\'t excusing', explanation: 'Why did the affair happen? Unmet needs, avoidance, seeking escape — understanding the context helps make sense of it without justifying the choice.' },
+            { title: 'Recovery requires more than apology', explanation: 'Genuine repair takes accountability, transparency, time, and changed behavior. Words aren\'t enough. And the betrayed partner gets to decide if they want to try.' },
+          ],
+          reflectionPrompt: "If you've been betrayed: what did you lose beyond the relationship? If you betrayed: what were you avoiding or seeking?",
+        },
+        senior: {
+          introduction: "Betrayal can happen at any stage of life — sometimes in long marriages, sometimes in new relationships. Whether you're dealing with fresh wounds or old ones that never fully healed, the principles are the same: this is a real trauma, understanding helps, and you deserve support.",
+          keyConcepts: [
+            { title: 'Long relationships aren\'t immune', explanation: 'Affairs happen in 30-year marriages. The length of the relationship doesn\'t protect against betrayal — and can make it more devastating.' },
+            { title: 'Old wounds can resurface', explanation: 'Betrayals from decades ago can still affect you. If you never fully processed it, it\'s still there. It\'s not too late to heal.' },
+            { title: 'Forgiveness is optional', explanation: 'You don\'t have to forgive to move forward. You can choose peace without absolving. That\'s your decision.' },
+            { title: 'It\'s never too late for honesty', explanation: 'Whether you need to confront old pain, finally tell the truth about something, or seek closure — age doesn\'t disqualify you from doing the work.' },
+          ],
+          reflectionPrompt: "Is there a betrayal — given or received — that you've never fully processed? What would it mean to address it now?",
+        },
+      },
+    },
   ],
 };
 

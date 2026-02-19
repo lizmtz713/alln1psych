@@ -795,6 +795,39 @@ export default function TalkScreen() {
             <Text style={styles.practiceSuggestionLink}>Practice this conversation →</Text>
           </Pressable>
         )}
+
+        {/* Topic Starters - show when conversation is fresh */}
+        {messages.length <= 1 && !isAiTyping && (
+          <View style={styles.topicStartersSection}>
+            <Text style={styles.topicStartersTitle}>Not sure where to start?</Text>
+            <View style={styles.topicStartersGrid}>
+              {[
+                { emoji: '💔', label: 'Betrayal / Trust', prompt: "I'm dealing with betrayal in my relationship. I need to talk through what happened." },
+                { emoji: '😰', label: 'Anxiety', prompt: "I've been feeling really anxious lately and I don't know why." },
+                { emoji: '😢', label: 'Grief / Loss', prompt: "I'm grieving and I need someone to talk to about it." },
+                { emoji: '😤', label: 'Anger', prompt: "I'm really angry about something and I need to process it." },
+                { emoji: '💭', label: 'Relationship Issues', prompt: "I'm having relationship problems and need to talk through them." },
+                { emoji: '😞', label: 'Feeling Low', prompt: "I've been feeling really down lately. Can we talk about it?" },
+                { emoji: '🤯', label: 'Overwhelmed', prompt: "I'm completely overwhelmed right now and don't know where to start." },
+                { emoji: '💬', label: 'Just Vent', prompt: "I just need to vent about something. Can you listen?" },
+              ].map((topic) => (
+                <Pressable
+                  key={topic.label}
+                  style={styles.topicStarterChip}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setTextInput(topic.prompt);
+                    setInputMode('text');
+                    setTimeout(() => textInputRef.current?.focus(), 100);
+                  }}
+                >
+                  <Text style={styles.topicStarterEmoji}>{topic.emoji}</Text>
+                  <Text style={styles.topicStarterLabel}>{topic.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       {/* Bottom input */}
@@ -1233,5 +1266,41 @@ const styles = StyleSheet.create({
   },
   micButtonSmallActive: {
     backgroundColor: COLORS.inputSurface,
+  },
+  // Topic Starters
+  topicStartersSection: {
+    marginTop: 16,
+    paddingHorizontal: 4,
+  },
+  topicStartersTitle: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  topicStartersGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    justifyContent: 'center',
+  },
+  topicStarterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  topicStarterEmoji: {
+    fontSize: 16,
+  },
+  topicStarterLabel: {
+    fontSize: 13,
+    color: COLORS.text,
+    fontWeight: '500',
   },
 });
