@@ -189,17 +189,43 @@ export default function Relate() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ name?: string; birthday?: string }>();
   const userBirthday = useUserStore((s) => s.birthday);
+  const userName = useUserStore((s) => s.name);
 
+  // Mode: 'solo' = just viewing your own profile, 'compare' = comparing two people
+  const [mode, setMode] = useState<'solo' | 'compare'>('solo');
   const [myBirthday, setMyBirthday] = useState('');
+  const [myName, setMyName] = useState('');
   const [theirBirthday, setTheirBirthday] = useState('');
   const [theirName, setTheirName] = useState('');
   const [relType, setRelType] = useState<RelType | null>(null);
   const [result, setResult] = useState<{ me: any; them: any; dynamic: any; myIso: string; theirIso: string } | null>(null);
+  const [soloResult, setSoloResult] = useState<any>(null);
   const [aiInsight, setAiInsight] = useState('');
   const [loading, setLoading] = useState(false);
   const [expandedLearn, setExpandedLearn] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+
+  // Initialize with user's data
+  useEffect(() => {
+    if (userName && !myName) {
+      setMyName(userName);
+    }
+  }, [userName, myName]);
+
+  // Auto-show solo profile if user has birthday
+  useEffect(() => {
+    if (userBirthday && mode === 'solo' && !soloResult) {
+      const d = new Date(userBirthday);
+      if (!isNaN(d.getTime())) {
+        const isoDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const personality = getPersonality(isoDate);
+        if (personality) {
+          setSoloResult(personality);
+        }
+      }
+    }
+  }, [userBirthday, mode, soloResult]);
 
   const toggleLearn = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -354,43 +380,182 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
       >
         {!showResults ? (
           <>
-            {/* Hero */}
-            <View style={styles.heroSection}>
-              <Text style={styles.heroEmoji}>💫</Text>
-              <Text style={styles.heroTitle}>Understand Anyone</Text>
-              <Text style={styles.heroSub}>Enter two birthdays. Discover the dynamic.</Text>
+            {/* Mode Toggle */}
+            <View style={styles.modeToggle}>
+              <Pressable
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMode('solo'); }}
+                style={[styles.modeBtn, mode === 'solo' && styles.modeBtnActive]}
+              >
+                <Text style={[styles.modeBtnText, mode === 'solo' && styles.modeBtnTextActive]}>
+                  👤 My Profile
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMode('compare'); }}
+                style={[styles.modeBtn, mode === 'compare' && styles.modeBtnActive]}
+              >
+                <Text style={[styles.modeBtnText, mode === 'compare' && styles.modeBtnTextActive]}>
+                  👥 Compare
+                </Text>
+              </Pressable>
             </View>
 
-            <Text style={styles.label}>Your birthday</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="MM/DD/YYYY"
-              placeholderTextColor={COLORS.textMuted}
-              value={myBirthday}
-              onChangeText={(t) => formatBirthday(t, setMyBirthday)}
-              keyboardType="number-pad"
-              maxLength={10}
-            />
+            {mode === 'solo' && soloResult ? (
+              <>
+                {/* Solo Profile View - Show user's own personality */}
+                <View style={styles.heroSection}>
+                  <Text style={styles.heroEmoji}>✨</Text>
+                  <Text style={styles.heroTitle}>{userName || 'Your Profile'}</Text>
+                  <Text style={styles.heroSub}>{soloResult.name}</Text>
+                </View>
 
-            <Text style={styles.label}>Their name <Text style={styles.optional}>(optional)</Text></Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. Alex, Mom, my boss"
-              placeholderTextColor={COLORS.textMuted}
-              value={theirName}
-              onChangeText={setTheirName}
-            />
+                {/* Personality Card */}
+                <AnimatedCard delay={100}>
+                  <View style={[styles.resultCard, { borderColor: RELATE_ACCENT + '30' }]}>
+                    <Text style={styles.resultCardTitle}>Your Personality</Text>
+                    <Text style={styles.resultMeta}>{soloResult.dateRange}</Text>
+                    
+                    <View style={styles.resultSection}>
+                      <Text style={styles.resultSectionTitle}>🎯 Communication Style</Text>
+                      <Text style={styles.resultText}>{soloResult.communicationStyle}</Text>
+                      <LearnMore id="communicationStyle" expanded={expandedLearn === 'communicationStyle'} onToggle={() => toggleLearn('communicationStyle')} />
+                    </View>
 
-            <Text style={styles.label}>Their birthday</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="MM/DD/YYYY"
-              placeholderTextColor={COLORS.textMuted}
-              value={theirBirthday}
-              onChangeText={(t) => formatBirthday(t, setTheirBirthday)}
-              keyboardType="number-pad"
-              maxLength={10}
-            />
+                    <View style={styles.resultSection}>
+                      <Text style={styles.resultSectionTitle}>💪 Your Strengths</Text>
+                      {soloResult.strengths?.map((s: string, i: number) => (
+                        <Text key={i} style={styles.resultBullet}>• {s}</Text>
+                      ))}
+                      <LearnMore id="strengths" expanded={expandedLearn === 'strengths'} onToggle={() => toggleLearn('strengths')} />
+                    </View>
+
+                    <View style={styles.resultSection}>
+                      <Text style={styles.resultSectionTitle}>⚡ Growth Areas</Text>
+                      {soloResult.challenges?.map((c: string, i: number) => (
+                        <Text key={i} style={styles.resultBullet}>• {c}</Text>
+                      ))}
+                      <LearnMore id="challenges" expanded={expandedLearn === 'challenges'} onToggle={() => toggleLearn('challenges')} />
+                    </View>
+
+                    <View style={styles.resultSection}>
+                      <Text style={styles.resultSectionTitle}>😰 Under Stress</Text>
+                      <Text style={styles.resultText}>{soloResult.stressResponse}</Text>
+                      <LearnMore id="stressResponse" expanded={expandedLearn === 'stressResponse'} onToggle={() => toggleLearn('stressResponse')} />
+                    </View>
+
+                    <View style={styles.resultSection}>
+                      <Text style={styles.resultSectionTitle}>💙 What You Need</Text>
+                      {soloResult.needs?.map((n: string, i: number) => (
+                        <Text key={i} style={styles.resultBullet}>• {n}</Text>
+                      ))}
+                      <LearnMore id="needs" expanded={expandedLearn === 'needs'} onToggle={() => toggleLearn('needs')} />
+                    </View>
+                  </View>
+                </AnimatedCard>
+
+                {/* CTA to compare */}
+                <Pressable
+                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMode('compare'); }}
+                  style={styles.secondaryBtn}
+                >
+                  <Ionicons name="people-outline" size={18} color={RELATE_ACCENT} />
+                  <Text style={styles.secondaryBtnText}>Compare with someone</Text>
+                </Pressable>
+              </>
+            ) : mode === 'solo' && !soloResult ? (
+              <>
+                {/* No birthday - prompt to enter */}
+                <View style={styles.heroSection}>
+                  <Text style={styles.heroEmoji}>🔮</Text>
+                  <Text style={styles.heroTitle}>Discover Yourself</Text>
+                  <Text style={styles.heroSub}>Enter your birthday to see your personality profile</Text>
+                </View>
+
+                <Text style={styles.label}>Your name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder={userName || "Your name"}
+                  placeholderTextColor={COLORS.textMuted}
+                  value={myName}
+                  onChangeText={setMyName}
+                />
+
+                <Text style={styles.label}>Your birthday</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM/DD/YYYY"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={myBirthday}
+                  onChangeText={(t) => formatBirthday(t, setMyBirthday)}
+                  keyboardType="number-pad"
+                  maxLength={10}
+                />
+
+                <Pressable
+                  onPress={() => {
+                    const isoDate = parseBirthday(myBirthday);
+                    if (isoDate) {
+                      const personality = getPersonality(isoDate);
+                      if (personality) {
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        setSoloResult(personality);
+                      }
+                    }
+                  }}
+                  disabled={myBirthday.length !== 10}
+                  style={[styles.primaryBtnWrap, myBirthday.length !== 10 && styles.primaryBtnDisabled]}
+                >
+                  <LinearGradient
+                    colors={myBirthday.length === 10 ? RELATE_GRADIENT : ['#3A3A4A', '#3A3A4A']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.primaryBtn}
+                  >
+                    <Text style={styles.primaryBtnText}>See My Profile</Text>
+                  </LinearGradient>
+                </Pressable>
+              </>
+            ) : (
+              <>
+                {/* Compare Mode */}
+                <View style={styles.heroSection}>
+                  <Text style={styles.heroEmoji}>💫</Text>
+                  <Text style={styles.heroTitle}>Understand Anyone</Text>
+                  <Text style={styles.heroSub}>Compare two personalities to discover the dynamic</Text>
+                </View>
+
+                <Text style={styles.label}>Person 1 {userName ? `(${userName})` : ''}</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM/DD/YYYY"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={myBirthday}
+                  onChangeText={(t) => formatBirthday(t, setMyBirthday)}
+                  keyboardType="number-pad"
+                  maxLength={10}
+                />
+
+                <Text style={styles.label}>Person 2 name <Text style={styles.optional}>(optional)</Text></Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g. Alex, Mom, my boss"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={theirName}
+                  onChangeText={setTheirName}
+                />
+
+                <Text style={styles.label}>Person 2 birthday</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM/DD/YYYY"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={theirBirthday}
+                  onChangeText={(t) => formatBirthday(t, setTheirBirthday)}
+                  keyboardType="number-pad"
+                  maxLength={10}
+                />
+              </>
+            )}
 
             <Text style={styles.label}>What's the relationship?</Text>
             <View style={styles.relTypeRow}>
@@ -687,11 +852,56 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
 
+  // Mode Toggle
+  modeToggle: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 24,
+  },
+  modeBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  modeBtnActive: {
+    backgroundColor: RELATE_ACCENT + '20',
+  },
+  modeBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  modeBtnTextActive: {
+    color: RELATE_ACCENT,
+  },
+
+  // Secondary button
+  secondaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: RELATE_ACCENT + '40',
+    marginTop: 16,
+  },
+  secondaryBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: RELATE_ACCENT,
+  },
+
   // Hero
   heroSection: { alignItems: 'center', marginBottom: 28, paddingTop: 8 },
   heroEmoji: { fontSize: 48, marginBottom: 12 },
   heroTitle: { fontSize: 26, fontWeight: '700', color: COLORS.text, marginBottom: 6 },
-  heroSub: { fontSize: 15, color: COLORS.textSecondary },
+  heroSub: { fontSize: 15, color: COLORS.textSecondary, textAlign: 'center' },
 
   // Input form
   label: { fontSize: 13, color: COLORS.textMuted, marginBottom: 8, fontWeight: '500' },
