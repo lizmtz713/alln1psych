@@ -1,8 +1,8 @@
 /**
- * Me Tab — Profile, stats, and quick access to tools
- * Premium UI
+ * Me Tab — Profile & Settings (Kohl's/Best Buy style)
+ * Clean grouped sections with list rows
  */
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -11,37 +11,40 @@ import {
   ScrollView,
   RefreshControl,
   Linking,
-  Animated,
+  Switch,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { useUserStore } from '../../src/stores/userStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { useCircleStore } from '../../src/stores/circleStore';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
+import { useEducationStore } from '../../src/stores/educationStore';
 
-function AnimatedSection({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: any }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(16)).current;
-  
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 400, delay, useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: 0, duration: 400, delay, useNativeDriver: true }),
-    ]).start();
-  }, []);
-  
-  return (
-    <Animated.View style={[{ opacity, transform: [{ translateY }] }, style]}>
-      {children}
-    </Animated.View>
-  );
-}
+// Design System
+const COLORS = {
+  bg: '#09090F',
+  card: '#111118',
+  cardElevated: '#18181F',
+  border: 'rgba(255,255,255,0.08)',
+  text: '#F0F0F5',
+  textSecondary: '#A0A0B8',
+  textMuted: '#6B6B80',
+  accent: '#7C4DFF',
+  accentSoft: 'rgba(124,77,255,0.15)',
+  success: '#4ADE80',
+  warning: '#FBBF24',
+  error: '#EF4444',
+  green: '#4ADE80',
+  yellow: '#FBBF24',
+  orange: '#FB923C',
+  red: '#EF4444',
+};
+
+const APP_VERSION = '1.0.0';
 
 export default function MeScreen() {
   const insets = useSafeAreaInsets();
@@ -49,15 +52,25 @@ export default function MeScreen() {
   const { signOut } = useAuth();
   const user = useUserStore();
   const myTemperature = useCircleStore((s) => s.myTemperature);
+  const members = useCircleStore((s) => s.members);
   const getCheckInStreak = useInsightsStore((s) => s.getCheckInStreak);
   const getAchievements = useInsightsStore((s) => s.getAchievements);
+  const completedLessons = useEducationStore((s) => s.completedLessons);
   
   const [refreshing, setRefreshing] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   
   const streak = getCheckInStreak();
   const achievements = getAchievements();
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
   
+  const tempColor = {
+    green: COLORS.green,
+    yellow: COLORS.yellow,
+    orange: COLORS.orange,
+    red: COLORS.red,
+  }[myTemperature] || COLORS.textMuted;
+
   const onRefresh = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
@@ -65,76 +78,46 @@ export default function MeScreen() {
     setRefreshing(false);
   };
 
-  const tempColor = {
-    green: COLORS.temperature.green,
-    yellow: COLORS.temperature.yellow,
-    orange: COLORS.temperature.orange,
-    red: COLORS.temperature.red,
-  }[myTemperature] || COLORS.textMuted;
-
-  const quickActions = [
-    { icon: 'pulse-outline', label: 'Check In', route: '/(modals)/mood-checkin', color: COLORS.accent },
-    { icon: 'create-outline', label: 'Journal', route: '/(modals)/new-journal', color: COLORS.success },
-    { icon: 'flash-outline', label: 'Activity', route: '/(modals)/activity', color: COLORS.warning },
-  ];
-
-  const toolsMenu = [
-    { icon: 'refresh-outline', label: 'Replay', desc: 'Process what happened', route: '/(modals)/replay' },
-    { icon: 'search-outline', label: 'Decode', desc: 'Analyze messages', route: '/(modals)/decode' },
-    { icon: 'heart-circle-outline', label: 'Relate', desc: 'Understand anyone', route: '/(modals)/relate' },
-    { icon: 'heart-half-outline', label: 'Love', desc: 'Love & intimacy', route: '/(modals)/love' },
-    { icon: 'people-outline', label: 'Help', desc: 'Help someone', route: '/(modals)/help-someone' },
-    { icon: 'chatbubbles-outline', label: 'Role Play', desc: 'Practice conversations', route: '/(modals)/role-play' },
-  ];
-
-  const settingsMenu = [
-    { icon: 'settings-outline', label: 'Settings', route: '/(modals)/settings' },
-  ];
+  const navigateTo = (route: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(route as any);
+  };
 
   return (
     <ErrorBoundary>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <ScrollView
-          contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
+          contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />
           }
         >
-          {/* Profile Header */}
-          <AnimatedSection delay={0}>
-            <View style={styles.header}>
-              <View style={styles.avatarContainer}>
-                <LinearGradient
-                  colors={[tempColor + '40', tempColor + '10']}
-                  style={styles.avatarGlow}
-                />
-                <View style={[styles.avatar, { borderColor: tempColor }]}>
-                  <Text style={styles.avatarText}>
-                    {user.name?.charAt(0)?.toUpperCase() || '?'}
-                  </Text>
+          {/* ═══════════════════════════════════════════════════════════
+              HEADER - Greeting + Profile Card
+              ═══════════════════════════════════════════════════════════ */}
+          <View style={styles.headerCard}>
+            <View style={styles.headerTop}>
+              <View>
+                <Text style={styles.greeting}>Hi, {user.name || 'there'}!</Text>
+                <View style={styles.tierBadge}>
+                  <Ionicons name="sparkles" size={12} color={COLORS.accent} />
+                  <Text style={styles.tierText}>Free Plan</Text>
                 </View>
-                <View style={[styles.statusDot, { backgroundColor: tempColor }]} />
               </View>
-              
-              <Text style={styles.name}>{user.name || 'You'}</Text>
-              {user.pronouns && <Text style={styles.pronouns}>{user.pronouns}</Text>}
-              
-              <Pressable
-                style={({ pressed }) => [styles.editProfileButton, pressed && styles.pressed]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push('/(modals)/identity-setup');
-                }}
+              <Pressable 
+                style={[styles.avatar, { borderColor: tempColor }]}
+                onPress={() => navigateTo('/(modals)/identity-setup')}
               >
-                <Text style={styles.editProfileText}>Edit Profile</Text>
+                <Text style={styles.avatarText}>
+                  {user.name?.charAt(0)?.toUpperCase() || '?'}
+                </Text>
+                <View style={[styles.statusDot, { backgroundColor: tempColor }]} />
               </Pressable>
             </View>
-          </AnimatedSection>
 
-          {/* Stats Card */}
-          <AnimatedSection delay={100}>
-            <View style={styles.statsCard}>
+            {/* Stats Row */}
+            <View style={styles.statsRow}>
               <View style={styles.statItem}>
                 <Text style={styles.statValue}>{streak}</Text>
                 <Text style={styles.statLabel}>Day Streak</Text>
@@ -146,361 +129,470 @@ export default function MeScreen() {
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <View style={[styles.tempIndicator, { backgroundColor: tempColor + '20' }]}>
-                  <View style={[styles.tempDot, { backgroundColor: tempColor }]} />
-                </View>
-                <Text style={styles.statLabel}>Status</Text>
+                <Text style={styles.statValue}>{completedLessons?.size || 0}</Text>
+                <Text style={styles.statLabel}>Lessons</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{members?.length || 0}</Text>
+                <Text style={styles.statLabel}>Circle</Text>
               </View>
             </View>
-          </AnimatedSection>
 
-          {/* Quick Actions */}
-          <AnimatedSection delay={200}>
-            <Text style={styles.sectionTitle}>Quick Actions</Text>
-            <View style={styles.quickActionsRow}>
-              {quickActions.map((action) => (
-                <Pressable
-                  key={action.label}
-                  style={({ pressed }) => [styles.quickActionCard, pressed && styles.pressed]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push(action.route as any);
-                  }}
-                >
-                  <View style={[styles.quickActionIcon, { backgroundColor: action.color + '20' }]}>
-                    <Ionicons name={action.icon as any} size={24} color={action.color} />
-                  </View>
-                  <Text style={styles.quickActionLabel}>{action.label}</Text>
-                </Pressable>
-              ))}
-            </View>
-          </AnimatedSection>
-
-          {/* Tools Menu */}
-          <AnimatedSection delay={300}>
-            <Text style={styles.sectionTitle}>Your Tools</Text>
-            <View style={styles.menuCard}>
-              {toolsMenu.map((item, index) => (
-                <Pressable
-                  key={item.label}
-                  style={({ pressed }) => [
-                    styles.menuItem,
-                    index < toolsMenu.length - 1 && styles.menuItemBorder,
-                    pressed && styles.menuItemPressed,
-                  ]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push(item.route as any);
-                  }}
-                >
-                  <View style={styles.menuItemLeft}>
-                    <View style={styles.menuItemIconWrap}>
-                      <Ionicons name={item.icon as any} size={20} color={COLORS.accent} />
-                    </View>
-                    <View>
-                      <Text style={styles.menuItemLabel}>{item.label}</Text>
-                      <Text style={styles.menuItemDesc}>{item.desc}</Text>
-                    </View>
-                  </View>
-                  <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-                </Pressable>
-              ))}
-            </View>
-          </AnimatedSection>
-
-          {/* Settings */}
-          <AnimatedSection delay={400}>
-            <Text style={styles.sectionTitle}>Settings</Text>
-            <View style={styles.menuCard}>
-              <Pressable
-                style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push('/(modals)/settings');
-                }}
-              >
-                <View style={styles.menuItemLeft}>
-                  <View style={styles.menuItemIconWrap}>
-                    <Ionicons name="settings-outline" size={20} color={COLORS.textSecondary} />
-                  </View>
-                  <Text style={styles.menuItemLabel}>Settings</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-              </Pressable>
-            </View>
-          </AnimatedSection>
-
-          {/* Support */}
-          <AnimatedSection delay={500}>
-            <Text style={styles.sectionTitle}>Support</Text>
-            <View style={styles.menuCard}>
-              <Pressable
-                style={({ pressed }) => [styles.menuItem, styles.menuItemBorder, pressed && styles.menuItemPressed]}
-                onPress={() => Linking.openURL('tel:988')}
-              >
-                <View style={styles.menuItemLeft}>
-                  <View style={[styles.menuItemIconWrap, { backgroundColor: COLORS.error + '20' }]}>
-                    <Ionicons name="heart-outline" size={20} color={COLORS.error} />
-                  </View>
-                  <View>
-                    <Text style={styles.menuItemLabel}>Crisis Line (988)</Text>
-                    <Text style={styles.menuItemDesc}>24/7 support</Text>
-                  </View>
-                </View>
-                <Ionicons name="call-outline" size={18} color={COLORS.textMuted} />
-              </Pressable>
-              
-              <Pressable
-                style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push('/(modals)/onboarding');
-                }}
-              >
-                <View style={styles.menuItemLeft}>
-                  <View style={styles.menuItemIconWrap}>
-                    <Ionicons name="refresh-outline" size={20} color={COLORS.textSecondary} />
-                  </View>
-                  <Text style={styles.menuItemLabel}>Redo Onboarding</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-              </Pressable>
-            </View>
-          </AnimatedSection>
-
-          {/* Sign Out */}
-          <AnimatedSection delay={600}>
-            <Pressable
-              style={({ pressed }) => [styles.signOutButton, pressed && styles.pressed]}
-              onPress={async () => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                await signOut();
-              }}
+            {/* Edit Profile Button */}
+            <Pressable 
+              style={styles.editProfileBtn}
+              onPress={() => navigateTo('/(modals)/identity-setup')}
             >
-              <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
-              <Text style={styles.signOutText}>Sign Out</Text>
+              <Ionicons name="create-outline" size={18} color={COLORS.accent} />
+              <Text style={styles.editProfileText}>Edit Profile</Text>
             </Pressable>
-          </AnimatedSection>
+          </View>
+
+          {/* ═══════════════════════════════════════════════════════════
+              MY PROGRESS
+              ═══════════════════════════════════════════════════════════ */}
+          <Text style={styles.sectionHeader}>My Progress</Text>
+          <View style={styles.menuCard}>
+            <MenuItem
+              icon="trophy-outline"
+              label="Awards & Achievements"
+              badge={unlockedCount > 0 ? String(unlockedCount) : undefined}
+              onPress={() => navigateTo('/(modals)/awards')}
+            />
+            <MenuItem
+              icon="analytics-outline"
+              label="Patterns & Insights"
+              onPress={() => navigateTo('/(modals)/patterns')}
+            />
+            <MenuItem
+              icon="time-outline"
+              label="Check-In History"
+              onPress={() => navigateTo('/(modals)/history')}
+              isLast
+            />
+          </View>
+
+          {/* ═══════════════════════════════════════════════════════════
+              MY TOOLS
+              ═══════════════════════════════════════════════════════════ */}
+          <Text style={styles.sectionHeader}>My Tools</Text>
+          <View style={styles.menuCard}>
+            <MenuItem
+              icon="chatbubbles-outline"
+              label="Talk to Gauge"
+              subtitle="Your AI companion"
+              onPress={() => router.push('/(tabs)/talk')}
+            />
+            <MenuItem
+              icon="scale-outline"
+              label="Referee"
+              subtitle="Settle disputes fairly"
+              onPress={() => navigateTo('/(modals)/referee')}
+            />
+            <MenuItem
+              icon="refresh-outline"
+              label="Replay"
+              subtitle="Process what happened"
+              onPress={() => navigateTo('/(modals)/replay')}
+            />
+            <MenuItem
+              icon="search-outline"
+              label="Decode"
+              subtitle="Analyze messages"
+              onPress={() => navigateTo('/(modals)/decode')}
+            />
+            <MenuItem
+              icon="heart-circle-outline"
+              label="Relate"
+              subtitle="Understand anyone"
+              onPress={() => navigateTo('/(modals)/relate')}
+              isLast
+            />
+          </View>
+
+          {/* ═══════════════════════════════════════════════════════════
+              MY ACCOUNT
+              ═══════════════════════════════════════════════════════════ */}
+          <Text style={styles.sectionHeader}>My Account</Text>
+          <View style={styles.menuCard}>
+            <MenuItem
+              icon="diamond-outline"
+              label="Upgrade to Pro"
+              subtitle="Unlimited AI, voice, more"
+              accentColor={COLORS.warning}
+              onPress={() => navigateTo('/(modals)/settings')}
+            />
+            <MenuItem
+              icon="key-outline"
+              label="Bring Your Own Key"
+              subtitle="Use your OpenAI API key"
+              onPress={() => navigateTo('/(modals)/settings')}
+            />
+            <MenuItem
+              icon="person-outline"
+              label="Account Settings"
+              onPress={() => navigateTo('/(modals)/settings')}
+              isLast
+            />
+          </View>
+
+          {/* ═══════════════════════════════════════════════════════════
+              APP SETTINGS
+              ═══════════════════════════════════════════════════════════ */}
+          <Text style={styles.sectionHeader}>App Settings</Text>
+          <View style={styles.menuCard}>
+            <View style={styles.menuItemRow}>
+              <View style={styles.menuItemLeft}>
+                <View style={styles.menuIconWrap}>
+                  <Ionicons name="notifications-outline" size={20} color={COLORS.textSecondary} />
+                </View>
+                <Text style={styles.menuItemLabel}>Push Notifications</Text>
+              </View>
+              <Switch
+                value={notificationsEnabled}
+                onValueChange={setNotificationsEnabled}
+                trackColor={{ false: COLORS.border, true: COLORS.accent }}
+                thumbColor="#fff"
+              />
+            </View>
+            <MenuItem
+              icon="moon-outline"
+              label="Appearance"
+              subtitle="Dark mode"
+              onPress={() => navigateTo('/(modals)/settings')}
+            />
+            <MenuItem
+              icon="shield-checkmark-outline"
+              label="Privacy"
+              onPress={() => navigateTo('/(modals)/settings')}
+              isLast
+            />
+          </View>
+
+          {/* ═══════════════════════════════════════════════════════════
+              HELP & SUPPORT
+              ═══════════════════════════════════════════════════════════ */}
+          <Text style={styles.sectionHeader}>Help & Support</Text>
+          <View style={styles.menuCard}>
+            <MenuItem
+              icon="heart-outline"
+              label="Crisis Support (988)"
+              subtitle="24/7 free support"
+              accentColor={COLORS.error}
+              onPress={() => Linking.openURL('tel:988')}
+              showCall
+            />
+            <MenuItem
+              icon="help-circle-outline"
+              label="Help Center"
+              onPress={() => Linking.openURL('https://docs.getingauge.com')}
+            />
+            <MenuItem
+              icon="chatbox-outline"
+              label="Send Feedback"
+              onPress={() => Linking.openURL('mailto:feedback@getingauge.com')}
+            />
+            <MenuItem
+              icon="refresh-outline"
+              label="Redo Onboarding"
+              onPress={() => navigateTo('/(modals)/onboarding')}
+              isLast
+            />
+          </View>
+
+          {/* ═══════════════════════════════════════════════════════════
+              FOOTER
+              ═══════════════════════════════════════════════════════════ */}
+          <Pressable
+            style={styles.signOutBtn}
+            onPress={async () => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              await signOut();
+            }}
+          >
+            <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
+            <Text style={styles.signOutText}>Sign Out</Text>
+          </Pressable>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerLink}>Terms & Conditions</Text>
+            <Text style={styles.footerDot}>•</Text>
+            <Text style={styles.footerLink}>Privacy Policy</Text>
+          </View>
+          <Text style={styles.versionText}>InGauge v{APP_VERSION}</Text>
         </ScrollView>
       </View>
     </ErrorBoundary>
   );
 }
 
+// Reusable Menu Item Component
+function MenuItem({
+  icon,
+  label,
+  subtitle,
+  badge,
+  accentColor,
+  onPress,
+  isLast,
+  showCall,
+}: {
+  icon: string;
+  label: string;
+  subtitle?: string;
+  badge?: string;
+  accentColor?: string;
+  onPress: () => void;
+  isLast?: boolean;
+  showCall?: boolean;
+}) {
+  return (
+    <Pressable
+      style={[styles.menuItemRow, !isLast && styles.menuItemBorder]}
+      onPress={onPress}
+    >
+      <View style={styles.menuItemLeft}>
+        <View style={[styles.menuIconWrap, accentColor && { backgroundColor: accentColor + '15' }]}>
+          <Ionicons name={icon as any} size={20} color={accentColor || COLORS.textSecondary} />
+        </View>
+        <View>
+          <Text style={styles.menuItemLabel}>{label}</Text>
+          {subtitle && <Text style={styles.menuItemSubtitle}>{subtitle}</Text>}
+        </View>
+      </View>
+      <View style={styles.menuItemRight}>
+        {badge && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{badge}</Text>
+          </View>
+        )}
+        <Ionicons 
+          name={showCall ? 'call-outline' : 'chevron-forward'} 
+          size={18} 
+          color={COLORS.textMuted} 
+        />
+      </View>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.bg,
   },
   content: {
-    padding: SPACING.lg,
+    padding: 20,
   },
-  
-  // Header
-  header: {
+
+  // Header Card
+  headerCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 24,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 6,
+  },
+  tierBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SPACING.xl,
+    backgroundColor: COLORS.accentSoft,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+    alignSelf: 'flex-start',
   },
-  avatarContainer: {
-    position: 'relative',
-    marginBottom: SPACING.md,
-  },
-  avatarGlow: {
-    position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    top: -10,
-    left: -10,
+  tierText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.accent,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: COLORS.surface,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.cardElevated,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
+    borderWidth: 2,
+    position: 'relative',
   },
   avatarText: {
-    fontSize: 40,
+    fontSize: 24,
     fontWeight: '600',
     color: COLORS.text,
   },
   statusDot: {
     position: 'absolute',
-    bottom: 4,
-    right: 4,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 3,
-    borderColor: COLORS.background,
+    bottom: 0,
+    right: 0,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: COLORS.card,
   },
-  name: {
-    ...TYPOGRAPHY.displaySm,
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
-  },
-  pronouns: {
-    ...TYPOGRAPHY.bodyMd,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.md,
-  },
-  editProfileButton: {
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.full,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  editProfileText: {
-    ...TYPOGRAPHY.labelMd,
-    color: COLORS.accent,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  
-  // Stats
-  statsCard: {
+
+  // Stats Row
+  statsRow: {
     flexDirection: 'row',
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    marginBottom: SPACING.xl,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
   },
   statValue: {
-    ...TYPOGRAPHY.displaySm,
+    fontSize: 22,
+    fontWeight: '700',
     color: COLORS.text,
-    marginBottom: SPACING.xs,
   },
   statLabel: {
-    ...TYPOGRAPHY.labelSm,
+    fontSize: 11,
     color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    marginTop: 2,
   },
   statDivider: {
     width: 1,
+    height: 30,
     backgroundColor: COLORS.border,
-    marginHorizontal: SPACING.md,
   },
-  tempIndicator: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
+
+  // Edit Profile Button
+  editProfileBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SPACING.xs,
+    justifyContent: 'center',
+    backgroundColor: COLORS.accentSoft,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
   },
-  tempDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+  editProfileText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.accent,
   },
-  
-  // Section
-  sectionTitle: {
-    ...TYPOGRAPHY.labelMd,
+
+  // Section Header
+  sectionHeader: {
+    fontSize: 13,
+    fontWeight: '600',
     color: COLORS.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: SPACING.md,
-    marginLeft: SPACING.xs,
+    letterSpacing: 1,
+    marginBottom: 10,
+    marginLeft: 4,
   },
-  
-  // Quick Actions
-  quickActionsRow: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-    marginBottom: SPACING.xl,
-  },
-  quickActionCard: {
-    flex: 1,
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  quickActionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: BORDER_RADIUS.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  quickActionLabel: {
-    ...TYPOGRAPHY.labelMd,
-    color: COLORS.text,
-  },
-  
-  // Menu
+
+  // Menu Card
   menuCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    marginBottom: 24,
     overflow: 'hidden',
-    marginBottom: SPACING.xl,
   },
-  menuItem: {
+  menuItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: SPACING.lg,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
   menuItemBorder: {
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  menuItemPressed: {
-    backgroundColor: COLORS.surfaceElevated,
-  },
   menuItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
     flex: 1,
   },
-  menuItemIconWrap: {
+  menuIconWrap: {
     width: 36,
     height: 36,
-    borderRadius: BORDER_RADIUS.sm,
-    backgroundColor: COLORS.accentBg,
-    justifyContent: 'center',
+    borderRadius: 10,
+    backgroundColor: COLORS.cardElevated,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   menuItemLabel: {
-    ...TYPOGRAPHY.bodyMd,
+    fontSize: 16,
     color: COLORS.text,
   },
-  menuItemDesc: {
-    ...TYPOGRAPHY.labelSm,
+  menuItemSubtitle: {
+    fontSize: 13,
     color: COLORS.textMuted,
-    marginTop: 2,
+    marginTop: 1,
   },
-  
+  menuItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  badge: {
+    backgroundColor: COLORS.accent,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    minWidth: 22,
+    alignItems: 'center',
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#fff',
+  },
+
   // Sign Out
-  signOutButton: {
+  signOutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: SPACING.sm,
-    paddingVertical: SPACING.lg,
+    paddingVertical: 16,
+    gap: 8,
   },
   signOutText: {
-    ...TYPOGRAPHY.labelLg,
+    fontSize: 16,
+    fontWeight: '500',
     color: COLORS.error,
+  },
+
+  // Footer
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 8,
+  },
+  footerLink: {
+    fontSize: 13,
+    color: COLORS.accent,
+  },
+  footerDot: {
+    color: COLORS.textMuted,
+  },
+  versionText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginTop: 12,
   },
 });
