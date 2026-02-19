@@ -444,7 +444,7 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
 
             {mode === 'solo' && soloResult ? (
               <>
-                {/* Premium Profile Header - Fortune 500 style */}
+                {/* Compact Profile Header */}
                 <AnimatedCard delay={0}>
                   <View style={styles.profileHeroCard}>
                     <LinearGradient
@@ -458,133 +458,113 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
                     </View>
                     <Text style={styles.profileHeroName}>{userName || 'You'}</Text>
                     <Text style={styles.profileHeroType}>{soloResult.name}</Text>
-                    <Text style={styles.profileHeroDate}>{soloResult.dateRange}</Text>
+                    <Text style={styles.profileHeroDate}>{soloResult.range}</Text>
                   </View>
                 </AnimatedCard>
 
-                {/* Quick Stats Row */}
+                {/* Action Buttons Row */}
                 <AnimatedCard delay={50}>
-                  <View style={styles.statsRow}>
-                    <View style={styles.statBox}>
-                      <Text style={styles.statEmoji}>🎯</Text>
-                      <Text style={styles.statLabel}>Style</Text>
-                      <Text style={styles.statValue} numberOfLines={2}>{soloResult.communicationStyle?.split('.')[0]}</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                      <Text style={styles.statEmoji}>💪</Text>
-                      <Text style={styles.statLabel}>Top Strength</Text>
-                      <Text style={styles.statValue} numberOfLines={2}>{soloResult.strengths?.[0]}</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                      <Text style={styles.statEmoji}>💙</Text>
-                      <Text style={styles.statLabel}>Core Need</Text>
-                      <Text style={styles.statValue} numberOfLines={2}>{soloResult.needs?.[0]}</Text>
-                    </View>
-                  </View>
-                </AnimatedCard>
-
-                {/* Full Bio Section */}
-                <AnimatedCard delay={100}>
-                  {!fullBio && !bioLoading ? (
-                    <Pressable onPress={generateFullBio} style={styles.generateBioBtn}>
-                      <LinearGradient
-                        colors={['rgba(124,77,255,0.15)', 'rgba(124,77,255,0.05)']}
-                        style={StyleSheet.absoluteFill}
-                      />
-                      <View style={styles.generateBioBtnContent}>
-                        <View style={styles.generateBioIcon}>
-                          <Ionicons name="sparkles" size={24} color={RELATE_ACCENT} />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.generateBioTitle}>Generate Full Bio</Text>
-                          <Text style={styles.generateBioSub}>Get an AI-written personality profile</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color={RELATE_ACCENT} />
-                      </View>
+                  <View style={styles.actionButtonsRow}>
+                    <Pressable onPress={generateFullBio} style={styles.actionBtn}>
+                      {bioLoading ? (
+                        <ActivityIndicator color={RELATE_ACCENT} size="small" />
+                      ) : (
+                        <Ionicons name="sparkles" size={22} color={RELATE_ACCENT} />
+                      )}
+                      <Text style={styles.actionBtnText}>{fullBio ? 'Regenerate' : 'Full Bio'}</Text>
                     </Pressable>
-                  ) : bioLoading ? (
-                    <View style={styles.bioLoadingCard}>
-                      <ActivityIndicator color={RELATE_ACCENT} size="small" />
-                      <Text style={styles.bioLoadingText}>Writing your personality bio...</Text>
-                    </View>
-                  ) : fullBio ? (
+                    <Pressable onPress={startCompareWithMe} style={[styles.actionBtn, styles.actionBtnPrimary]}>
+                      <Ionicons name="git-compare-outline" size={22} color="#fff" />
+                      <Text style={styles.actionBtnTextPrimary}>See Dynamic</Text>
+                    </Pressable>
+                  </View>
+                </AnimatedCard>
+
+                {/* Full Bio (if generated) */}
+                {fullBio && (
+                  <AnimatedCard delay={100}>
                     <View style={styles.fullBioCard}>
-                      <View style={styles.fullBioHeader}>
-                        <Ionicons name="document-text" size={20} color={RELATE_ACCENT} />
-                        <Text style={styles.fullBioTitle}>Your Full Profile</Text>
-                      </View>
                       <Text style={styles.fullBioText}>{fullBio}</Text>
-                      <Pressable 
-                        onPress={generateFullBio} 
-                        style={styles.regenerateBtn}
-                      >
-                        <Ionicons name="refresh" size={16} color={COLORS.textMuted} />
-                        <Text style={styles.regenerateBtnText}>Regenerate</Text>
-                      </Pressable>
                     </View>
-                  ) : null}
-                </AnimatedCard>
+                  </AnimatedCard>
+                )}
 
-                {/* See Dynamic CTA - Pre-fills your info */}
-                <AnimatedCard delay={150}>
-                  <Pressable onPress={startCompareWithMe} style={styles.seeDynamicBtn}>
-                    <LinearGradient
-                      colors={RELATE_GRADIENT}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.seeDynamicBtnInner}
+                {/* Collapsible Sections */}
+                <AnimatedCard delay={100}>
+                  <View style={styles.collapsibleContainer}>
+                    {/* Communication */}
+                    <Pressable 
+                      style={styles.collapsibleHeader}
+                      onPress={() => toggleLearn('comm')}
                     >
-                      <Ionicons name="git-compare-outline" size={22} color="#fff" style={{ marginRight: 10 }} />
-                      <View>
-                        <Text style={styles.seeDynamicBtnText}>See Dynamic</Text>
-                        <Text style={styles.seeDynamicBtnSub}>Compare yourself with someone</Text>
+                      <Text style={styles.collapsibleTitle}>🎯 Communication Style</Text>
+                      <Ionicons name={expandedLearn === 'comm' ? 'chevron-up' : 'chevron-down'} size={20} color={COLORS.textMuted} />
+                    </Pressable>
+                    {expandedLearn === 'comm' && (
+                      <View style={styles.collapsibleContent}>
+                        <Text style={styles.collapsibleText}>{soloResult.communicationStyle}</Text>
                       </View>
-                    </LinearGradient>
-                  </Pressable>
-                </AnimatedCard>
+                    )}
 
-                {/* Detailed Sections */}
-                <AnimatedCard delay={200}>
-                  <View style={styles.detailCard}>
-                    <Text style={styles.detailCardTitle}>🎯 Communication Style</Text>
-                    <Text style={styles.detailCardText}>{soloResult.communicationStyle}</Text>
-                    <LearnMore id="communicationStyle" expanded={expandedLearn === 'communicationStyle'} onToggle={() => toggleLearn('communicationStyle')} />
-                  </View>
-                </AnimatedCard>
+                    {/* Strengths */}
+                    <Pressable 
+                      style={styles.collapsibleHeader}
+                      onPress={() => toggleLearn('str')}
+                    >
+                      <Text style={styles.collapsibleTitle}>💪 Strengths</Text>
+                      <Ionicons name={expandedLearn === 'str' ? 'chevron-up' : 'chevron-down'} size={20} color={COLORS.textMuted} />
+                    </Pressable>
+                    {expandedLearn === 'str' && (
+                      <View style={styles.collapsibleContent}>
+                        {soloResult.strengths?.map((s: string, i: number) => (
+                          <Text key={i} style={styles.collapsibleBullet}>• {s}</Text>
+                        ))}
+                      </View>
+                    )}
 
-                <AnimatedCard delay={250}>
-                  <View style={styles.detailCard}>
-                    <Text style={styles.detailCardTitle}>💪 Your Strengths</Text>
-                    {soloResult.strengths?.map((s: string, i: number) => (
-                      <Text key={i} style={styles.detailBullet}>• {s}</Text>
-                    ))}
-                    <LearnMore id="strengths" expanded={expandedLearn === 'strengths'} onToggle={() => toggleLearn('strengths')} />
-                  </View>
-                </AnimatedCard>
+                    {/* Growth Areas */}
+                    <Pressable 
+                      style={styles.collapsibleHeader}
+                      onPress={() => toggleLearn('chal')}
+                    >
+                      <Text style={styles.collapsibleTitle}>⚡ Growth Areas</Text>
+                      <Ionicons name={expandedLearn === 'chal' ? 'chevron-up' : 'chevron-down'} size={20} color={COLORS.textMuted} />
+                    </Pressable>
+                    {expandedLearn === 'chal' && (
+                      <View style={styles.collapsibleContent}>
+                        {soloResult.challenges?.map((c: string, i: number) => (
+                          <Text key={i} style={styles.collapsibleBullet}>• {c}</Text>
+                        ))}
+                      </View>
+                    )}
 
-                <AnimatedCard delay={300}>
-                  <View style={styles.detailCard}>
-                    <Text style={styles.detailCardTitle}>⚡ Growth Areas</Text>
-                    {soloResult.challenges?.map((c: string, i: number) => (
-                      <Text key={i} style={styles.detailBullet}>• {c}</Text>
-                    ))}
-                    <LearnMore id="challenges" expanded={expandedLearn === 'challenges'} onToggle={() => toggleLearn('challenges')} />
-                  </View>
-                </AnimatedCard>
+                    {/* Stress Response */}
+                    <Pressable 
+                      style={styles.collapsibleHeader}
+                      onPress={() => toggleLearn('stress')}
+                    >
+                      <Text style={styles.collapsibleTitle}>😰 Under Stress</Text>
+                      <Ionicons name={expandedLearn === 'stress' ? 'chevron-up' : 'chevron-down'} size={20} color={COLORS.textMuted} />
+                    </Pressable>
+                    {expandedLearn === 'stress' && (
+                      <View style={styles.collapsibleContent}>
+                        <Text style={styles.collapsibleText}>{soloResult.stressResponse}</Text>
+                      </View>
+                    )}
 
-                <AnimatedCard delay={350}>
-                  <View style={styles.detailCard}>
-                    <Text style={styles.detailCardTitle}>😰 Under Stress</Text>
-                    <Text style={styles.detailCardText}>{soloResult.stressResponse}</Text>
-                    <LearnMore id="stressResponse" expanded={expandedLearn === 'stressResponse'} onToggle={() => toggleLearn('stressResponse')} />
-                  </View>
-                </AnimatedCard>
-
-                <AnimatedCard delay={400}>
-                  <View style={styles.detailCard}>
-                    <Text style={styles.detailCardTitle}>💙 What You Need in Relationships</Text>
-                    <Text style={styles.detailCardText}>{soloResult.needsInRelationships}</Text>
-                    <LearnMore id="needs" expanded={expandedLearn === 'needs'} onToggle={() => toggleLearn('needs')} />
+                    {/* Relationship Needs */}
+                    <Pressable 
+                      style={[styles.collapsibleHeader, styles.collapsibleHeaderLast]}
+                      onPress={() => toggleLearn('needs')}
+                    >
+                      <Text style={styles.collapsibleTitle}>💙 Relationship Needs</Text>
+                      <Ionicons name={expandedLearn === 'needs' ? 'chevron-up' : 'chevron-down'} size={20} color={COLORS.textMuted} />
+                    </Pressable>
+                    {expandedLearn === 'needs' && (
+                      <View style={styles.collapsibleContent}>
+                        <Text style={styles.collapsibleText}>{soloResult.needsInRelationships}</Text>
+                      </View>
+                    )}
                   </View>
                 </AnimatedCard>
               </>
@@ -1417,89 +1397,92 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
 
-  // Full Bio Section
-  generateBioBtn: {
+  // Action Buttons Row
+  actionButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    paddingVertical: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(124,77,255,0.3)',
+  },
+  actionBtnPrimary: {
+    backgroundColor: RELATE_ACCENT,
+    borderColor: RELATE_ACCENT,
+  },
+  actionBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: RELATE_ACCENT,
+  },
+  actionBtnTextPrimary: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+
+  // Full Bio Card (compact)
+  fullBioCard: {
     backgroundColor: COLORS.surface,
     borderRadius: 16,
     padding: 18,
     marginBottom: 16,
-    borderWidth: 1.5,
-    borderColor: 'rgba(124,77,255,0.2)',
-    overflow: 'hidden',
-  },
-  generateBioBtnContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-  },
-  generateBioIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(124,77,255,0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  generateBioTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 2,
-  },
-  generateBioSub: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-  },
-  bioLoadingCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 24,
-    gap: 12,
-    marginBottom: 16,
     borderWidth: 1,
     borderColor: CARD_BORDER,
   },
-  bioLoadingText: {
+  fullBioText: {
     fontSize: 14,
-    color: COLORS.textMuted,
+    color: COLORS.text,
+    lineHeight: 22,
   },
-  fullBioCard: {
+
+  // Collapsible Sections
+  collapsibleContainer: {
     backgroundColor: COLORS.surface,
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1.5,
-    borderColor: 'rgba(124,77,255,0.2)',
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    overflow: 'hidden',
   },
-  fullBioHeader: {
+  collapsibleHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 16,
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: CARD_BORDER,
   },
-  fullBioTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: RELATE_ACCENT,
+  collapsibleHeaderLast: {
+    borderBottomWidth: 0,
   },
-  fullBioText: {
+  collapsibleTitle: {
     fontSize: 15,
+    fontWeight: '600',
     color: COLORS.text,
-    lineHeight: 24,
   },
-  regenerateBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    marginTop: 16,
-    paddingVertical: 10,
+  collapsibleContent: {
+    paddingHorizontal: 18,
+    paddingBottom: 16,
+    backgroundColor: 'rgba(124,77,255,0.03)',
   },
-  regenerateBtnText: {
+  collapsibleText: {
     fontSize: 14,
-    color: COLORS.textMuted,
+    color: COLORS.textSecondary,
+    lineHeight: 21,
+  },
+  collapsibleBullet: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
   },
 });
