@@ -140,6 +140,11 @@ export default function LearnScreen() {
     setExpandedGaugeId((prev) => (prev === id ? null : id));
   }, []);
 
+  const openGaugeDetail = useCallback((gaugeId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push(`/(modals)/gauge-detail?gauge=${gaugeId}`);
+  }, [router]);
+
   const loadMoreDiscoveries = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const more = getMoreDiscoveries(visibleDiscoveries.map((d) => d.id), 3);
@@ -226,7 +231,7 @@ export default function LearnScreen() {
                       </View>
                       <View style={styles.gaugeInfo}>
                         <Text style={styles.gaugeName}>{gauge.name}</Text>
-                        <Text style={styles.gaugeQuestion}>{gauge.question}</Text>
+                        <Text style={styles.gaugeTagline}>{gauge.tagline}</Text>
                       </View>
                       <Ionicons 
                         name={isExpanded ? 'chevron-up' : 'chevron-down'} 
@@ -236,17 +241,17 @@ export default function LearnScreen() {
                     </View>
                     {isExpanded && (
                       <View style={styles.gaugeExpanded}>
+                        <Text style={styles.gaugeCoreTruth}>"{gauge.coreTruth}"</Text>
                         <Text style={styles.gaugeDesc}>{gauge.description}</Text>
-                        <View style={styles.gaugeLevels}>
-                          {gauge.levels.map((level, i) => (
-                            <View key={i} style={styles.gaugeLevel}>
-                              <View style={[styles.gaugeLevelDot, { backgroundColor: level.color }]} />
-                              <Text style={styles.gaugeLevelText}>
-                                <Text style={{ fontWeight: '600' }}>{level.label}:</Text> {level.description}
-                              </Text>
-                            </View>
-                          ))}
-                        </View>
+                        
+                        {/* Learn More Button */}
+                        <Pressable 
+                          style={styles.gaugeLearnMoreBtn}
+                          onPress={() => openGaugeDetail(gauge.id)}
+                        >
+                          <Text style={styles.gaugeLearnMoreText}>Learn Everything About {gauge.name}</Text>
+                          <Ionicons name="arrow-forward" size={18} color={COLORS.accent} />
+                        </Pressable>
                       </View>
                     )}
                   </Pressable>
@@ -505,7 +510,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
   },
-  gaugeQuestion: {
+  gaugeTagline: {
     fontSize: 13,
     color: COLORS.textSecondary,
     marginTop: 2,
@@ -516,31 +521,34 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
   },
+  gaugeCoreTruth: {
+    fontSize: 15,
+    fontWeight: '600',
+    fontStyle: 'italic',
+    color: COLORS.accent,
+    marginBottom: 12,
+    lineHeight: 22,
+  },
   gaugeDesc: {
     fontSize: 14,
     color: COLORS.textSecondary,
     lineHeight: 21,
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  gaugeLevels: {
+  gaugeLearnMoreBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.accentSoft,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     gap: 8,
   },
-  gaugeLevel: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  gaugeLevelDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginTop: 5,
-    marginRight: 10,
-  },
-  gaugeLevelText: {
-    flex: 1,
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    lineHeight: 19,
+  gaugeLearnMoreText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.accent,
   },
 
   // Manual Section
