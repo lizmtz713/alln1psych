@@ -668,6 +668,7 @@ export default function OnboardingScreen() {
                       </View>
 
                       <Text style={[styles.fieldLabel, { marginTop: 20 }]}>Cultural Background</Text>
+                      <Text style={styles.fieldHint}>Culture shapes how you see the world</Text>
                       <View style={styles.chipRow}>
                         {CULTURAL_BACKGROUND_OPTIONS.slice(0, 8).map((opt) => {
                           const isSelected = culturalBackground.includes(opt);
@@ -687,6 +688,7 @@ export default function OnboardingScreen() {
                       </View>
 
                       <Text style={[styles.fieldLabel, { marginTop: 20 }]}>Language You Think In</Text>
+                      <Text style={styles.fieldHint}>The voice in your head — it shapes how you process emotions</Text>
                       <TextInput
                         style={styles.input}
                         placeholder="e.g., English, Spanish, Spanglish..."
