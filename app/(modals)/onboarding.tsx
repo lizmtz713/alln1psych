@@ -657,13 +657,8 @@ export default function OnboardingScreen() {
                   You can always change these in Settings later.
                 </Text>
 
-                <Pressable 
-                  style={[styles.primaryBtn, !canProceed() && styles.primaryBtnDisabled]} 
-                  onPress={goNext}
-                  disabled={!canProceed()}
-                >
-                  <Text style={styles.primaryBtnText}>Continue</Text>
-                </Pressable>
+                {/* Spacer for fixed footer */}
+                <View style={{ height: 80 }} />
               </View>
             )}
 
@@ -708,6 +703,19 @@ export default function OnboardingScreen() {
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Fixed Footer - Continue Button (visible on step 2) */}
+      {step === 2 && (
+        <View style={[styles.fixedFooter, { paddingBottom: insets.bottom + 16 }]}>
+          <Pressable 
+            style={[styles.fixedBtn, !canProceed() && styles.fixedBtnDisabled]} 
+            onPress={goNext}
+            disabled={!canProceed()}
+          >
+            <Text style={styles.fixedBtnText}>Continue</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -935,4 +943,25 @@ const styles = StyleSheet.create({
   modalPrimaryBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   modalSecondaryBtn: { paddingVertical: 12 },
   modalSecondaryBtnText: { fontSize: 15, color: COLORS.textMuted },
+
+  // Fixed Footer
+  fixedFooter: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  fixedBtn: {
+    backgroundColor: COLORS.accent,
+    paddingVertical: 18,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  fixedBtnDisabled: { opacity: 0.5 },
+  fixedBtnText: { fontSize: 17, fontWeight: '700', color: '#fff' },
 });
