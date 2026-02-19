@@ -208,6 +208,8 @@ export default function Relate() {
   const [loading, setLoading] = useState(false);
   const [expandedLearn, setExpandedLearn] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [fullBio, setFullBio] = useState<string | null>(null);
+  const [bioLoading, setBioLoading] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
   // Function to pre-fill Person 1 with user data and switch to compare
@@ -224,6 +226,42 @@ export default function Relate() {
       }
     }
     setMode('compare');
+  };
+
+  // Generate full personality bio via AI
+  const generateFullBio = async () => {
+    if (!soloResult || bioLoading) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setBioLoading(true);
+    try {
+      const response = await sendMessageWithSystemPrompt(
+        [{ role: 'user', content: `Generate a full personality profile bio for someone who is "${soloResult.name}" (${soloResult.range}).
+
+Their traits:
+- Strengths: ${soloResult.strengths?.join(', ')}
+- Challenges: ${soloResult.challenges?.join(', ')}
+- Communication style: ${soloResult.communicationStyle}
+- Needs in relationships: ${soloResult.needsInRelationships}
+- Stress response: ${soloResult.stressResponse}
+
+Name: ${userName || 'This person'}` }],
+        `You are a personality psychologist writing a warm, insightful personality bio. Write in second person ("You are..."). 
+
+Structure the bio with these sections:
+1. **Who You Are** (2-3 sentences capturing their essence)
+2. **Your Superpowers** (what they naturally excel at)
+3. **Your Shadow Side** (challenges, written compassionately)
+4. **In Relationships** (how they show up, what they need)
+5. **When Life Gets Hard** (their stress patterns)
+6. **Your Growth Edge** (one key area for development)
+
+Keep it warm, specific, and validating — not generic horoscope fluff. About 250-300 words total. Use their name if provided.`
+      );
+      setFullBio(response ?? null);
+    } catch (e) {
+      setFullBio(null);
+    }
+    setBioLoading(false);
   };
 
   // Auto-show solo profile if user has birthday
@@ -445,8 +483,50 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
                   </View>
                 </AnimatedCard>
 
-                {/* See Dynamic CTA - Pre-fills your info */}
+                {/* Full Bio Section */}
                 <AnimatedCard delay={100}>
+                  {!fullBio && !bioLoading ? (
+                    <Pressable onPress={generateFullBio} style={styles.generateBioBtn}>
+                      <LinearGradient
+                        colors={['rgba(124,77,255,0.15)', 'rgba(124,77,255,0.05)']}
+                        style={StyleSheet.absoluteFill}
+                      />
+                      <View style={styles.generateBioBtnContent}>
+                        <View style={styles.generateBioIcon}>
+                          <Ionicons name="sparkles" size={24} color={RELATE_ACCENT} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.generateBioTitle}>Generate Full Bio</Text>
+                          <Text style={styles.generateBioSub}>Get an AI-written personality profile</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color={RELATE_ACCENT} />
+                      </View>
+                    </Pressable>
+                  ) : bioLoading ? (
+                    <View style={styles.bioLoadingCard}>
+                      <ActivityIndicator color={RELATE_ACCENT} size="small" />
+                      <Text style={styles.bioLoadingText}>Writing your personality bio...</Text>
+                    </View>
+                  ) : fullBio ? (
+                    <View style={styles.fullBioCard}>
+                      <View style={styles.fullBioHeader}>
+                        <Ionicons name="document-text" size={20} color={RELATE_ACCENT} />
+                        <Text style={styles.fullBioTitle}>Your Full Profile</Text>
+                      </View>
+                      <Text style={styles.fullBioText}>{fullBio}</Text>
+                      <Pressable 
+                        onPress={generateFullBio} 
+                        style={styles.regenerateBtn}
+                      >
+                        <Ionicons name="refresh" size={16} color={COLORS.textMuted} />
+                        <Text style={styles.regenerateBtnText}>Regenerate</Text>
+                      </Pressable>
+                    </View>
+                  ) : null}
+                </AnimatedCard>
+
+                {/* See Dynamic CTA - Pre-fills your info */}
+                <AnimatedCard delay={150}>
                   <Pressable onPress={startCompareWithMe} style={styles.seeDynamicBtn}>
                     <LinearGradient
                       colors={RELATE_GRADIENT}
@@ -464,7 +544,7 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
                 </AnimatedCard>
 
                 {/* Detailed Sections */}
-                <AnimatedCard delay={150}>
+                <AnimatedCard delay={200}>
                   <View style={styles.detailCard}>
                     <Text style={styles.detailCardTitle}>🎯 Communication Style</Text>
                     <Text style={styles.detailCardText}>{soloResult.communicationStyle}</Text>
@@ -472,7 +552,7 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
                   </View>
                 </AnimatedCard>
 
-                <AnimatedCard delay={200}>
+                <AnimatedCard delay={250}>
                   <View style={styles.detailCard}>
                     <Text style={styles.detailCardTitle}>💪 Your Strengths</Text>
                     {soloResult.strengths?.map((s: string, i: number) => (
@@ -482,7 +562,7 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
                   </View>
                 </AnimatedCard>
 
-                <AnimatedCard delay={250}>
+                <AnimatedCard delay={300}>
                   <View style={styles.detailCard}>
                     <Text style={styles.detailCardTitle}>⚡ Growth Areas</Text>
                     {soloResult.challenges?.map((c: string, i: number) => (
@@ -492,7 +572,7 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
                   </View>
                 </AnimatedCard>
 
-                <AnimatedCard delay={300}>
+                <AnimatedCard delay={350}>
                   <View style={styles.detailCard}>
                     <Text style={styles.detailCardTitle}>😰 Under Stress</Text>
                     <Text style={styles.detailCardText}>{soloResult.stressResponse}</Text>
@@ -500,12 +580,10 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
                   </View>
                 </AnimatedCard>
 
-                <AnimatedCard delay={350}>
+                <AnimatedCard delay={400}>
                   <View style={styles.detailCard}>
-                    <Text style={styles.detailCardTitle}>💙 What You Need</Text>
-                    {soloResult.needs?.map((n: string, i: number) => (
-                      <Text key={i} style={styles.detailBullet}>• {n}</Text>
-                    ))}
+                    <Text style={styles.detailCardTitle}>💙 What You Need in Relationships</Text>
+                    <Text style={styles.detailCardText}>{soloResult.needsInRelationships}</Text>
                     <LearnMore id="needs" expanded={expandedLearn === 'needs'} onToggle={() => toggleLearn('needs')} />
                   </View>
                 </AnimatedCard>
@@ -1337,5 +1415,91 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 22,
     marginBottom: 2,
+  },
+
+  // Full Bio Section
+  generateBioBtn: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: 'rgba(124,77,255,0.2)',
+    overflow: 'hidden',
+  },
+  generateBioBtnContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  generateBioIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(124,77,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  generateBioTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  generateBioSub: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+  },
+  bioLoadingCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 24,
+    gap: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  bioLoadingText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+  },
+  fullBioCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: 'rgba(124,77,255,0.2)',
+  },
+  fullBioHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 16,
+  },
+  fullBioTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: RELATE_ACCENT,
+  },
+  fullBioText: {
+    fontSize: 15,
+    color: COLORS.text,
+    lineHeight: 24,
+  },
+  regenerateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 16,
+    paddingVertical: 10,
+  },
+  regenerateBtnText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
   },
 });
