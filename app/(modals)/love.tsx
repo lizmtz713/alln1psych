@@ -1,6 +1,6 @@
 /**
  * Love — Understand love, intimacy, and connection through science.
- * Premium UI with Fortune 500 polish.
+ * Premium UI with expandable learning on 5 Love Languages.
  */
 import { useState, useRef, useEffect } from 'react';
 import {
@@ -13,6 +13,9 @@ import {
   ActivityIndicator,
   Animated,
   Dimensions,
+  LayoutAnimation,
+  UIManager,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,7 +24,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { sendMessageWithSystemPrompt, type Message } from '../../src/services/ai';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '../../src/lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -30,14 +38,132 @@ type Mode = 'menu' | 'languages' | 'learn' | 'ask';
 const LOVE_ACCENT = '#EC4899';
 const LOVE_ACCENT_BG = 'rgba(236, 72, 153, 0.12)';
 const LOVE_ACCENT_BORDER = 'rgba(236, 72, 153, 0.25)';
+const LEARN_BG = 'rgba(236, 72, 153, 0.06)';
+const LEARN_BORDER = 'rgba(236, 72, 153, 0.15)';
 
-const LOVE_LANGUAGES = [
-  { id: 'words', emoji: '💬', name: 'Words of Affirmation', desc: 'Verbal compliments, encouragement, appreciation' },
-  { id: 'time', emoji: '⏰', name: 'Quality Time', desc: 'Undivided attention, being fully present' },
-  { id: 'gifts', emoji: '🎁', name: 'Receiving Gifts', desc: 'Thoughtful symbols of love and care' },
-  { id: 'acts', emoji: '🤝', name: 'Acts of Service', desc: 'Actions that show love through doing' },
-  { id: 'touch', emoji: '🤗', name: 'Physical Touch', desc: 'Physical connection and affection' },
-];
+// Educational content for each love language
+const LOVE_LANGUAGES_CONTENT = {
+  words: {
+    id: 'words',
+    emoji: '💬',
+    name: 'Words of Affirmation',
+    color: '#3B82F6',
+    quick: "For this person, words ARE love. A sincere compliment means more than any gift.",
+    signs: [
+      "They light up when you compliment them",
+      "They remember specific things you've said — even years later",
+      "Criticism hits them harder than others",
+      "They give lots of verbal encouragement to people they love",
+      "They save texts, cards, and notes that meant something",
+    ],
+    howToSpeak: [
+      "Be specific: 'I love how you always check on your mom' > 'You're great'",
+      "Say it out loud — thinking it doesn't count for them",
+      "Leave notes, send texts just because",
+      "Verbal appreciation for things they do (even small things)",
+      "Words of encouragement when they're struggling",
+    ],
+    deep: "Words of Affirmation isn't about flattery — it's about being seen. People with this language often grew up either hearing affirming words (and learned that's how love sounds) or NOT hearing them (and craved what was missing). For them, silence isn't neutral; it can feel like rejection. The key insight: your words have disproportionate power with this person. One careless criticism can undo ten compliments.",
+    avoid: "Don't use words as weapons. If you fight dirty with insults, this person will remember them for years. Also avoid empty praise — they can tell when you don't mean it.",
+    source: "Chapman's research (validated by Egbert & Polk, 2006); Attachment Theory",
+  },
+  time: {
+    id: 'time',
+    emoji: '⏰',
+    name: 'Quality Time',
+    color: '#14B8A6',
+    quick: "Presence is love. They don't want your phone — they want your eyes and your attention.",
+    signs: [
+      "They get upset when you're distracted during conversations",
+      "They suggest activities to do together (even mundane ones)",
+      "They feel hurt when plans get canceled",
+      "They remember shared experiences in detail",
+      "They'd rather do something boring with you than something exciting alone",
+    ],
+    howToSpeak: [
+      "Put the phone away — fully away",
+      "Make eye contact when they're talking",
+      "Plan activities, even small ones (coffee, walks, cooking together)",
+      "Don't multitask when you're with them",
+      "Remember: quality > quantity. 20 focused minutes beats 2 distracted hours",
+    ],
+    deep: "Quality Time people are measuring your love by where you put your attention. In a world of infinite distractions, attention is the most valuable currency — and they know it. This language often develops in people who felt overlooked or who had a parent who was physically present but emotionally absent. The insight: when you give them undivided attention, you're saying 'you matter more than everything else right now.' That's what love feels like to them.",
+    avoid: "Phubbing (phone snubbing) is devastating to this person. Being in the same room doesn't count if you're elsewhere mentally. Canceled plans feel like canceled love.",
+    source: "Chapman; Social Psychology research on attention as a social resource (Aronson)",
+  },
+  gifts: {
+    id: 'gifts',
+    emoji: '🎁',
+    name: 'Receiving Gifts',
+    color: '#F59E0B',
+    quick: "It's NOT materialism. The gift is proof you were thinking of them when they weren't there.",
+    signs: [
+      "They keep gifts for years, even small ones",
+      "They notice when you bring them something, even tiny",
+      "They give thoughtful gifts and put effort into choosing them",
+      "They feel hurt when occasions pass without acknowledgment",
+      "The thought behind the gift matters more than the price",
+    ],
+    howToSpeak: [
+      "Bring small things that show you thought of them (their favorite snack, a flower)",
+      "Remember occasions — not just birthdays, but 'I saw this and thought of you' moments",
+      "The gift can be free: a found rock, a photo, a handwritten note",
+      "Be present for important moments (your presence is a gift)",
+      "Put thought into the choosing — they can tell",
+    ],
+    deep: "This is the most misunderstood love language. It's not about materialism or expense — it's about symbolism. The gift is EVIDENCE that you were somewhere, without them, and you thought of them anyway. That's the emotional logic: 'I exist in your mind even when I'm not in front of you.' For this person, a $2 coffee you grabbed because you knew they'd like it can mean more than an expensive but thoughtless gift.",
+    avoid: "Forgetting occasions is forgetting them. Last-minute, no-thought gifts actually hurt. And don't dismiss this language as shallow — that's missing the point entirely.",
+    source: "Chapman; research on symbolic communication in relationships",
+  },
+  acts: {
+    id: 'acts',
+    emoji: '🤝',
+    name: 'Acts of Service',
+    color: '#10B981',
+    quick: "Actions speak louder than words — literally. They feel loved when you DO things for them.",
+    signs: [
+      "They notice when you do tasks without being asked",
+      "They show love by doing things for others (cooking, fixing, helping)",
+      "Broken promises hit hard — you said you'd do it and didn't",
+      "They feel overwhelmed when tasks pile up",
+      "They might struggle to ask for help directly",
+    ],
+    howToSpeak: [
+      "Do things without being asked — notice what needs doing",
+      "Follow through on what you say you'll do",
+      "Offer to take something off their plate when they're stressed",
+      "Help with tasks they find draining",
+      "The effort matters: doing something difficult for them = more love",
+    ],
+    deep: "For Acts of Service people, love is a verb. They learned (often from family modeling) that you SHOW care through what you DO, not what you say. When you do something for them — especially something inconvenient or difficult — you're proving that their wellbeing matters enough to cost you something. The insight: they're often the people doing things for everyone else, and they're quietly keeping track of who reciprocates.",
+    avoid: "Saying you'll do something and not doing it is a betrayal. Making more work for them (messes, broken promises) feels like the opposite of love. And don't keep score out loud — that weaponizes their language.",
+    source: "Chapman; Behavioral expressions of love (Swenson, 1972)",
+  },
+  touch: {
+    id: 'touch',
+    emoji: '🤗',
+    name: 'Physical Touch',
+    color: '#EC4899',
+    quick: "Touch IS communication. A hug says what words can't. Physical presence is irreplaceable.",
+    signs: [
+      "They reach out to touch you naturally (hand on arm, shoulder tap)",
+      "They feel disconnected without physical contact",
+      "They calm down noticeably when held",
+      "Physical rejection (pulling away) hurts disproportionately",
+      "They might not have words for feelings but want to be held",
+    ],
+    howToSpeak: [
+      "Casual touch throughout the day (not just in bed)",
+      "Sit close, hold hands, put your arm around them",
+      "Hug them when they're stressed — sometimes before talking",
+      "Be physically present during hard conversations",
+      "Learn what kinds of touch they find comforting vs. overwhelming",
+    ],
+    deep: "Physical Touch is the most primal love language — it's rooted in our earliest experiences. Babies literally need touch to survive; the brain develops differently without it. For adults with this language, touch is a direct line to the nervous system. A hand on their back can calm them faster than any words. The insight: for this person, physical distance often FEELS like emotional distance, even if that's not your intention.",
+    avoid: "Withholding touch as punishment is devastating. Pulling away during conflict (even if you need space) feels like rejection. Also: learn their touch preferences — not all touch is welcome, and overwhelming them isn't love.",
+    source: "Chapman; Neuroscience of touch (Field, 2010); Polyvagal Theory (Porges)",
+  },
+};
 
 const TOPICS = [
   { id: 'attachment', emoji: '🔗', title: 'Attachment Styles', desc: 'Why you love the way you love' },
@@ -102,6 +228,108 @@ function AnimatedCard({ children, delay = 0, style }: { children: React.ReactNod
   );
 }
 
+// Expandable Love Language Card
+function LoveLanguageCard({ 
+  language, 
+  expanded, 
+  onToggle 
+}: { 
+  language: typeof LOVE_LANGUAGES_CONTENT['words']; 
+  expanded: boolean; 
+  onToggle: () => void;
+}) {
+  return (
+    <Pressable 
+      style={[
+        styles.languageCard, 
+        expanded && styles.languageCardExpanded,
+        { borderColor: language.color + '30' }
+      ]} 
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onToggle();
+      }}
+    >
+      <LinearGradient
+        colors={[language.color + '10', 'transparent']}
+        style={styles.languageCardGlow}
+      />
+      
+      {/* Header */}
+      <View style={styles.languageHeader}>
+        <View style={[styles.languageIcon, { backgroundColor: language.color + '20' }]}>
+          <Text style={styles.languageEmoji}>{language.emoji}</Text>
+        </View>
+        <View style={styles.languageHeaderText}>
+          <Text style={[styles.languageName, { color: language.color }]}>{language.name}</Text>
+          <Text style={styles.languageQuick}>{language.quick}</Text>
+        </View>
+        <Ionicons 
+          name={expanded ? "chevron-up" : "chevron-down"} 
+          size={20} 
+          color={COLORS.textMuted} 
+        />
+      </View>
+
+      {/* Expanded Content */}
+      {expanded && (
+        <View style={styles.languageExpanded}>
+          {/* Signs */}
+          <View style={styles.languageSection}>
+            <View style={styles.languageSectionHeader}>
+              <Ionicons name="eye" size={16} color={language.color} />
+              <Text style={[styles.languageSectionTitle, { color: language.color }]}>
+                Signs Someone Has This Language
+              </Text>
+            </View>
+            {language.signs.map((sign, i) => (
+              <Text key={i} style={styles.languageBullet}>• {sign}</Text>
+            ))}
+          </View>
+
+          {/* How to Speak It */}
+          <View style={styles.languageSection}>
+            <View style={styles.languageSectionHeader}>
+              <Ionicons name="heart" size={16} color={language.color} />
+              <Text style={[styles.languageSectionTitle, { color: language.color }]}>
+                How to Speak This Language
+              </Text>
+            </View>
+            {language.howToSpeak.map((tip, i) => (
+              <Text key={i} style={styles.languageBullet}>• {tip}</Text>
+            ))}
+          </View>
+
+          {/* Deep Dive */}
+          <View style={styles.languageSection}>
+            <View style={styles.languageSectionHeader}>
+              <Ionicons name="bulb" size={16} color={language.color} />
+              <Text style={[styles.languageSectionTitle, { color: language.color }]}>
+                The Psychology Behind It
+              </Text>
+            </View>
+            <Text style={styles.languageDeep}>{language.deep}</Text>
+          </View>
+
+          {/* What to Avoid */}
+          <View style={styles.languageSection}>
+            <View style={styles.languageSectionHeader}>
+              <Ionicons name="warning" size={16} color="#F59E0B" />
+              <Text style={[styles.languageSectionTitle, { color: '#F59E0B' }]}>
+                What to Avoid
+              </Text>
+            </View>
+            <Text style={styles.languageAvoid}>{language.avoid}</Text>
+          </View>
+
+          {/* Source */}
+          <Text style={styles.languageSource}>— {language.source}</Text>
+        </View>
+      )}
+    </Pressable>
+  );
+}
+
 export default function LoveScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -111,6 +339,12 @@ export default function LoveScreen() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [expandedLanguage, setExpandedLanguage] = useState<string | null>(null);
+
+  const toggleLanguage = (id: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedLanguage(expandedLanguage === id ? null : id);
+  };
 
   const handleBack = () => {
     if (mode === 'menu') {
@@ -212,6 +446,12 @@ export default function LoveScreen() {
           <Text style={styles.headerTitle}>{getHeaderTitle()}</Text>
           <View style={styles.headerRight} />
         </View>
+        <LinearGradient
+          colors={[LOVE_ACCENT, '#9333EA']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.headerAccent}
+        />
 
         {mode === 'menu' && (
           <ScrollView 
@@ -270,14 +510,34 @@ export default function LoveScreen() {
               </Pressable>
             </AnimatedCard>
 
-            {/* Topics Section */}
+            {/* 5 Love Languages Section */}
             <AnimatedCard delay={200}>
-              <Text style={styles.sectionTitle}>Learn</Text>
+              <View style={styles.languagesSectionHeader}>
+                <Text style={styles.sectionTitle}>The 5 Love Languages</Text>
+                <Text style={styles.sectionSubtitle}>
+                  Tap any language to learn how it works, how to spot it, and how to speak it.
+                </Text>
+              </View>
+            </AnimatedCard>
+
+            {Object.values(LOVE_LANGUAGES_CONTENT).map((language, index) => (
+              <AnimatedCard key={language.id} delay={250 + index * 50}>
+                <LoveLanguageCard
+                  language={language}
+                  expanded={expandedLanguage === language.id}
+                  onToggle={() => toggleLanguage(language.id)}
+                />
+              </AnimatedCard>
+            ))}
+
+            {/* Topics Section */}
+            <AnimatedCard delay={550}>
+              <Text style={styles.sectionTitle}>Go Deeper</Text>
             </AnimatedCard>
             
             <View style={styles.topicsGrid}>
               {TOPICS.map((topic, index) => (
-                <AnimatedCard key={topic.id} delay={250 + index * 30} style={styles.topicWrapper}>
+                <AnimatedCard key={topic.id} delay={600 + index * 30} style={styles.topicWrapper}>
                   <Pressable
                     style={({ pressed }) => [styles.topicCard, pressed && styles.topicCardPressed]}
                     onPress={() => startTopic(topic.id)}
@@ -290,21 +550,8 @@ export default function LoveScreen() {
               ))}
             </View>
 
-            {/* Love Languages Reference */}
-            <AnimatedCard delay={600}>
-              <Text style={styles.sectionTitle}>The 5 Love Languages</Text>
-              <View style={styles.languagesGrid}>
-                {LOVE_LANGUAGES.map((lang) => (
-                  <View key={lang.id} style={styles.languageChip}>
-                    <Text style={styles.languageEmoji}>{lang.emoji}</Text>
-                    <Text style={styles.languageName}>{lang.name}</Text>
-                  </View>
-                ))}
-              </View>
-            </AnimatedCard>
-
             {/* Disclaimer */}
-            <AnimatedCard delay={700}>
+            <AnimatedCard delay={900}>
               <Text style={styles.disclaimer}>
                 Science-backed information for education.{'\n'}
                 Not a substitute for professional medical or therapeutic advice.
@@ -384,8 +631,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+  },
+  headerAccent: {
+    height: 2,
+    width: '100%',
   },
   backBtn: {
     width: 44,
@@ -472,7 +721,106 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.headlineMd,
     color: COLORS.text,
     marginTop: SPACING.xl,
+    marginBottom: SPACING.sm,
+  },
+  sectionSubtitle: {
+    ...TYPOGRAPHY.bodySm,
+    color: COLORS.textSecondary,
     marginBottom: SPACING.lg,
+  },
+  languagesSectionHeader: {
+    marginTop: SPACING.lg,
+  },
+  
+  // Love Language Cards
+  languageCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    marginBottom: SPACING.md,
+    borderWidth: 1.5,
+    overflow: 'hidden',
+  },
+  languageCardExpanded: {
+    borderColor: LOVE_ACCENT + '40',
+  },
+  languageCardGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+  },
+  languageHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    gap: SPACING.md,
+  },
+  languageIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  languageEmoji: {
+    fontSize: 22,
+  },
+  languageHeaderText: {
+    flex: 1,
+  },
+  languageName: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  languageQuick: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  languageExpanded: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.lg,
+  },
+  languageSection: {
+    marginBottom: SPACING.lg,
+  },
+  languageSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: SPACING.sm,
+  },
+  languageSectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  languageBullet: {
+    fontSize: 14,
+    color: COLORS.text,
+    lineHeight: 22,
+    marginLeft: 24,
+    marginBottom: 4,
+  },
+  languageDeep: {
+    fontSize: 14,
+    color: COLORS.text,
+    lineHeight: 22,
+    marginLeft: 24,
+  },
+  languageAvoid: {
+    fontSize: 14,
+    color: COLORS.text,
+    lineHeight: 22,
+    marginLeft: 24,
+  },
+  languageSource: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+    marginTop: SPACING.md,
+    marginLeft: 24,
   },
   
   // Topics Grid
@@ -480,6 +828,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.md,
+    marginTop: SPACING.md,
   },
   topicWrapper: {
     width: (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.md) / 2,
@@ -508,31 +857,6 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.labelSm,
     color: COLORS.textSecondary,
     lineHeight: 16,
-  },
-  
-  // Languages Reference
-  languagesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-  },
-  languageChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.full,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    gap: SPACING.xs,
-  },
-  languageEmoji: {
-    fontSize: 14,
-  },
-  languageName: {
-    ...TYPOGRAPHY.labelSm,
-    color: COLORS.textSecondary,
   },
   
   // Disclaimer
