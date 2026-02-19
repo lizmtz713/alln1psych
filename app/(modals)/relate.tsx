@@ -1,6 +1,6 @@
 /**
  * Relate — Understand anyone through personality dynamics.
- * Info-dense version with both profiles, full dynamic, and AI insight.
+ * Info-dense with expandable learning. All the knowledge, 24/7/365.
  */
 import { useState, useEffect, useRef } from 'react';
 import {
@@ -13,6 +13,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  LayoutAnimation,
+  UIManager,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,9 +26,123 @@ import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { COLORS, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 type RelType = 'romantic' | 'family' | 'friendship' | 'work';
 
 const RELATE_ACCENT = '#7C4DFF';
+const LEARN_BG = 'rgba(124,77,255,0.06)';
+const LEARN_BORDER = 'rgba(124,77,255,0.15)';
+
+// Educational content for each concept
+const LEARN_CONTENT = {
+  communicationStyle: {
+    quick: "How someone processes and shares information shapes every interaction.",
+    deep: "Communication style isn't about introversion or extroversion — it's about how someone's brain naturally processes information. Some people think out loud (external processors), others need silence to form thoughts (internal processors). Neither is better. Mismatches cause most relationship friction.",
+    source: "Goldschneider, The Secret Language of Relationships",
+  },
+  strengths: {
+    quick: "Knowing someone's natural gifts helps you see them clearly — not who you want them to be.",
+    deep: "We often fall in love with someone's strengths, then spend years trying to fix their challenges. Understanding that strengths and challenges are two sides of the same trait changes everything. Their 'stubbornness' is also their 'loyalty.' Their 'overthinking' is also their 'thoroughness.'",
+    source: "Personality Psychology (Feist & Feist)",
+  },
+  challenges: {
+    quick: "Challenges aren't flaws — they're the shadow side of strengths.",
+    deep: "Every strength has a shadow. The same trait that makes someone 'spontaneous' also makes them 'unreliable' under stress. When you understand this, you stop trying to eliminate their challenges and start managing the conditions that trigger them.",
+    source: "Clinical Psychology (Compas & Gotlib)",
+  },
+  stressResponse: {
+    quick: "Under stress, we all regress to our default wiring. Knowing theirs prevents misreading.",
+    deep: "Stress shrinks the 'window of tolerance' — the range where we can think clearly and respond thoughtfully. Outside that window, we go into fight, flight, freeze, or fawn. Their stress response isn't a choice; it's their nervous system's learned survival pattern. It can be rewired, but not in the moment.",
+    source: "Polyvagal Theory (Stephen Porges); Biopsychology (Pinel)",
+  },
+  needs: {
+    quick: "Unmet needs drive 90% of relationship conflict. Most people can't articulate theirs.",
+    deep: "Behind every complaint is an unmet need. 'You never listen' = need for validation. 'You're always working' = need for presence. When you know someone's core needs, you can meet them directly instead of guessing. And when you know your own, you can ask clearly.",
+    source: "Nonviolent Communication (Rosenberg); Attachment Theory",
+  },
+  dynamicStrengths: {
+    quick: "What works between you isn't luck — it's the fit between your patterns.",
+    deep: "Relationship strengths emerge from complementary patterns. One person's calm balances another's intensity. One's optimism lifts another's realism. These aren't coincidences — they're why you were drawn together. Knowing them helps you lean into what works.",
+    source: "Social Psychology (Aronson)",
+  },
+  frictionPoints: {
+    quick: "Friction isn't failure. It's information about where you need translation.",
+    deep: "Every relationship has predictable friction points based on personality combinations. The goal isn't to eliminate friction — it's to understand it. When you see friction as 'different operating systems' instead of 'they're wrong,' you can build bridges instead of walls.",
+    source: "Gottman Institute Research",
+  },
+  communicationTip: {
+    quick: "Small adjustments in how you say things can completely change how they land.",
+    deep: "Communication isn't just about what you say — it's about matching their processing style. Some people need the headline first ('I need help'), then context. Others need context first, then the ask. Getting the order wrong makes them feel manipulated or confused, even when your intentions are good.",
+    source: "Cognitive Psychology (Matlin)",
+  },
+  conflictPattern: {
+    quick: "Every couple has a conflict pattern. Yours is predictable. That means it's changeable.",
+    deep: "Dr. John Gottman identified four patterns that predict relationship failure: criticism, contempt, defensiveness, stonewalling. But before those, there's a dance — pursue/withdraw, escalate/escalate, avoid/avoid. Knowing your dance lets you change the music.",
+    source: "Gottman Institute; Clinical Psychology",
+    lessonId: "conflict-patterns",
+  },
+  whatTheyNeed: {
+    quick: "Meeting someone's needs isn't about mind-reading — it's about learning their language.",
+    deep: "The 5 Love Languages framework is backed by research: people feel loved differently. Words of affirmation, acts of service, gifts, quality time, physical touch. If you're speaking a different language than they hear, you're both trying hard and both feeling unloved.",
+    source: "Social Psychology (Aronson); Chapman's research",
+    lessonId: "love-languages",
+  },
+  whatYouNeed: {
+    quick: "You can't pour from an empty cup. Knowing your needs lets you ask for them.",
+    deep: "Most people are better at identifying what's wrong than what they need. 'I feel disconnected' is a complaint. 'I need 20 minutes of undivided attention' is a request. Translating feelings into needs is a skill. This section helps you practice.",
+    source: "Clinical Psychology; Emotion-Focused Therapy",
+  },
+};
+
+// Expandable learning component
+function LearnMore({ 
+  id, 
+  expanded, 
+  onToggle,
+  onLesson,
+}: { 
+  id: keyof typeof LEARN_CONTENT;
+  expanded: boolean;
+  onToggle: () => void;
+  onLesson?: (lessonId: string) => void;
+}) {
+  const content = LEARN_CONTENT[id];
+  if (!content) return null;
+
+  return (
+    <View style={styles.learnContainer}>
+      <Pressable onPress={onToggle} style={styles.learnQuickRow}>
+        <Ionicons name="bulb-outline" size={14} color={RELATE_ACCENT} style={{ marginRight: 6 }} />
+        <Text style={styles.learnQuick}>{content.quick}</Text>
+        <Ionicons 
+          name={expanded ? "chevron-up" : "chevron-down"} 
+          size={14} 
+          color={RELATE_ACCENT} 
+          style={{ marginLeft: 4 }}
+        />
+      </Pressable>
+      {expanded && (
+        <View style={styles.learnExpanded}>
+          <Text style={styles.learnDeep}>{content.deep}</Text>
+          <Text style={styles.learnSource}>— {content.source}</Text>
+          {content.lessonId && onLesson && (
+            <Pressable 
+              style={styles.lessonLink}
+              onPress={() => onLesson(content.lessonId!)}
+            >
+              <Ionicons name="book-outline" size={14} color={RELATE_ACCENT} />
+              <Text style={styles.lessonLinkText}>Learn more in Human Manual</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+    </View>
+  );
+}
 
 function isoToMMDDYYYY(iso: string): string {
   if (!iso || iso.length < 10) return '';
@@ -50,7 +166,18 @@ export default function Relate() {
   const [result, setResult] = useState<{ me: any; them: any; dynamic: any; myIso: string; theirIso: string } | null>(null);
   const [aiInsight, setAiInsight] = useState('');
   const [loading, setLoading] = useState(false);
+  const [expandedLearn, setExpandedLearn] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+
+  const toggleLearn = (id: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedLearn(expandedLearn === id ? null : id);
+  };
+
+  const goToLesson = (lessonId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/lesson/${lessonId}`);
+  };
 
   useEffect(() => {
     if (userBirthday && !myBirthday) {
@@ -102,6 +229,7 @@ export default function Relate() {
       if (!me || !them) return;
 
       setResult({ me, them, dynamic, myIso, theirIso });
+      setExpandedLearn(null);
       setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), 100);
 
       setLoading(true);
@@ -149,6 +277,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
     setRelType(null);
     setResult(null);
     setAiInsight('');
+    setExpandedLearn(null);
   }
 
   const canCheck = myBirthday.length === 10 && theirBirthday.length === 10 && relType !== null;
@@ -240,8 +369,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
             </Pressable>
 
             <Text style={styles.disclaimer}>
-              Personality insights are based on psychological frameworks (inspired by Goldschneider).
-              They increase self-awareness but are not deterministic.
+              Based on Goldschneider's personality research. Increases self-awareness — not deterministic.
             </Text>
           </>
         ) : (
@@ -261,15 +389,51 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                   <Text style={styles.profileType}>{result.me.name}</Text>
                 </View>
               </View>
-              <Text style={styles.profileStyle}>{result.me.communicationStyle}</Text>
+              
+              <Text style={styles.sectionLabel}>Communication Style</Text>
+              <Text style={styles.sectionText}>{result.me.communicationStyle}</Text>
+              <LearnMore 
+                id="communicationStyle" 
+                expanded={expandedLearn === 'me-comm'} 
+                onToggle={() => toggleLearn('me-comm')}
+                onLesson={goToLesson}
+              />
+
               <Text style={styles.sectionLabel}>Strengths</Text>
               <Text style={styles.sectionText}>{result.me.strengths.join(', ')}</Text>
+              <LearnMore 
+                id="strengths" 
+                expanded={expandedLearn === 'me-str'} 
+                onToggle={() => toggleLearn('me-str')}
+                onLesson={goToLesson}
+              />
+
               <Text style={styles.sectionLabel}>Challenges</Text>
               <Text style={styles.sectionText}>{result.me.challenges.join(', ')}</Text>
-              <Text style={styles.sectionLabel}>Under stress</Text>
+              <LearnMore 
+                id="challenges" 
+                expanded={expandedLearn === 'me-chal'} 
+                onToggle={() => toggleLearn('me-chal')}
+                onLesson={goToLesson}
+              />
+
+              <Text style={styles.sectionLabel}>Under Stress</Text>
               <Text style={styles.sectionText}>{result.me.stressResponse}</Text>
+              <LearnMore 
+                id="stressResponse" 
+                expanded={expandedLearn === 'me-stress'} 
+                onToggle={() => toggleLearn('me-stress')}
+                onLesson={goToLesson}
+              />
+
               <Text style={styles.sectionLabel}>Needs</Text>
               <Text style={styles.sectionText}>{result.me.needsInRelationships}</Text>
+              <LearnMore 
+                id="needs" 
+                expanded={expandedLearn === 'me-needs'} 
+                onToggle={() => toggleLearn('me-needs')}
+                onLesson={goToLesson}
+              />
             </View>
 
             {/* THEIR PROFILE */}
@@ -281,15 +445,51 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                   <Text style={styles.profileType}>{result.them.name}</Text>
                 </View>
               </View>
-              <Text style={styles.profileStyle}>{result.them.communicationStyle}</Text>
+
+              <Text style={styles.sectionLabel}>Communication Style</Text>
+              <Text style={styles.sectionText}>{result.them.communicationStyle}</Text>
+              <LearnMore 
+                id="communicationStyle" 
+                expanded={expandedLearn === 'them-comm'} 
+                onToggle={() => toggleLearn('them-comm')}
+                onLesson={goToLesson}
+              />
+
               <Text style={styles.sectionLabel}>Strengths</Text>
               <Text style={styles.sectionText}>{result.them.strengths.join(', ')}</Text>
+              <LearnMore 
+                id="strengths" 
+                expanded={expandedLearn === 'them-str'} 
+                onToggle={() => toggleLearn('them-str')}
+                onLesson={goToLesson}
+              />
+
               <Text style={styles.sectionLabel}>Challenges</Text>
               <Text style={styles.sectionText}>{result.them.challenges.join(', ')}</Text>
-              <Text style={styles.sectionLabel}>Under stress</Text>
+              <LearnMore 
+                id="challenges" 
+                expanded={expandedLearn === 'them-chal'} 
+                onToggle={() => toggleLearn('them-chal')}
+                onLesson={goToLesson}
+              />
+
+              <Text style={styles.sectionLabel}>Under Stress</Text>
               <Text style={styles.sectionText}>{result.them.stressResponse}</Text>
+              <LearnMore 
+                id="stressResponse" 
+                expanded={expandedLearn === 'them-stress'} 
+                onToggle={() => toggleLearn('them-stress')}
+                onLesson={goToLesson}
+              />
+
               <Text style={styles.sectionLabel}>Needs</Text>
               <Text style={styles.sectionText}>{result.them.needsInRelationships}</Text>
+              <LearnMore 
+                id="needs" 
+                expanded={expandedLearn === 'them-needs'} 
+                onToggle={() => toggleLearn('them-needs')}
+                onLesson={goToLesson}
+              />
             </View>
 
             {/* DYNAMIC */}
@@ -305,6 +505,12 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                   {result.dynamic.strengths.map((s: string, i: number) => (
                     <Text key={i} style={styles.dynamicItem}>• {s}</Text>
                   ))}
+                  <LearnMore 
+                    id="dynamicStrengths" 
+                    expanded={expandedLearn === 'dyn-str'} 
+                    onToggle={() => toggleLearn('dyn-str')}
+                    onLesson={goToLesson}
+                  />
                 </View>
 
                 <View style={styles.dynamicSection}>
@@ -315,6 +521,12 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                   {result.dynamic.frictionPoints.map((f: string, i: number) => (
                     <Text key={i} style={styles.dynamicItem}>• {f}</Text>
                   ))}
+                  <LearnMore 
+                    id="frictionPoints" 
+                    expanded={expandedLearn === 'dyn-fric'} 
+                    onToggle={() => toggleLearn('dyn-fric')}
+                    onLesson={goToLesson}
+                  />
                 </View>
 
                 <View style={styles.dynamicSection}>
@@ -323,6 +535,12 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                     <Text style={[styles.dynamicLabel, { color: '#3B82F6' }]}>Communication Tip</Text>
                   </View>
                   <Text style={styles.dynamicText}>{result.dynamic.communicationTip}</Text>
+                  <LearnMore 
+                    id="communicationTip" 
+                    expanded={expandedLearn === 'dyn-comm'} 
+                    onToggle={() => toggleLearn('dyn-comm')}
+                    onLesson={goToLesson}
+                  />
                 </View>
 
                 <View style={styles.dynamicSection}>
@@ -331,6 +549,12 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                     <Text style={[styles.dynamicLabel, { color: '#EC4899' }]}>Conflict Pattern</Text>
                   </View>
                   <Text style={styles.dynamicText}>{result.dynamic.conflictPattern}</Text>
+                  <LearnMore 
+                    id="conflictPattern" 
+                    expanded={expandedLearn === 'dyn-conf'} 
+                    onToggle={() => toggleLearn('dyn-conf')}
+                    onLesson={goToLesson}
+                  />
                 </View>
 
                 <View style={styles.dynamicSection}>
@@ -339,6 +563,12 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                     <Text style={[styles.dynamicLabel, { color: '#14B8A6' }]}>What {theirName.trim() || 'They'} Need{theirName.trim() ? 's' : ''}</Text>
                   </View>
                   <Text style={styles.dynamicText}>{result.dynamic.whatTheyNeed}</Text>
+                  <LearnMore 
+                    id="whatTheyNeed" 
+                    expanded={expandedLearn === 'dyn-theyneed'} 
+                    onToggle={() => toggleLearn('dyn-theyneed')}
+                    onLesson={goToLesson}
+                  />
                 </View>
 
                 <View style={styles.dynamicSection}>
@@ -347,6 +577,12 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                     <Text style={[styles.dynamicLabel, { color: '#F59E0B' }]}>What You Need</Text>
                   </View>
                   <Text style={styles.dynamicText}>{result.dynamic.whatYouNeed}</Text>
+                  <LearnMore 
+                    id="whatYouNeed" 
+                    expanded={expandedLearn === 'dyn-youneed'} 
+                    onToggle={() => toggleLearn('dyn-youneed')}
+                    onLesson={goToLesson}
+                  />
                 </View>
               </View>
             )}
@@ -482,12 +718,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: CARD_BORDER,
   },
-  profileHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+  profileHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   profileEmoji: { fontSize: 32 },
   profileName: { fontSize: 18, fontWeight: '600', color: COLORS.text },
   profileType: { fontSize: 14, color: RELATE_ACCENT, fontWeight: '500' },
-  profileStyle: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 20, marginBottom: 12 },
-  sectionLabel: { fontSize: 11, color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 8, marginBottom: 2 },
+  sectionLabel: { fontSize: 11, color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 12, marginBottom: 4 },
   sectionText: { fontSize: 14, color: COLORS.text, lineHeight: 20 },
 
   // Dynamic card
@@ -500,11 +735,72 @@ const styles = StyleSheet.create({
     borderColor: CARD_BORDER,
   },
   dynamicTitle: { fontSize: 18, fontWeight: '700', color: COLORS.text, marginBottom: 16 },
-  dynamicSection: { marginBottom: 14 },
+  dynamicSection: { marginBottom: 16 },
   dynamicLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
   dynamicLabel: { fontSize: 13, fontWeight: '600' },
   dynamicItem: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 20, marginLeft: 22, marginBottom: 2 },
   dynamicText: { fontSize: 14, color: COLORS.text, lineHeight: 20, marginLeft: 22 },
+
+  // Learn more expandable
+  learnContainer: {
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  learnQuickRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: LEARN_BG,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: LEARN_BORDER,
+  },
+  learnQuick: {
+    flex: 1,
+    fontSize: 12,
+    color: RELATE_ACCENT,
+    lineHeight: 16,
+    fontStyle: 'italic',
+  },
+  learnExpanded: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: LEARN_BG,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    marginTop: -1,
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderColor: LEARN_BORDER,
+  },
+  learnDeep: {
+    fontSize: 13,
+    color: COLORS.text,
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  learnSource: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+  },
+  lessonLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(124,77,255,0.1)',
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  lessonLinkText: {
+    fontSize: 12,
+    color: RELATE_ACCENT,
+    fontWeight: '500',
+  },
 
   // Loading
   loadingCard: {
