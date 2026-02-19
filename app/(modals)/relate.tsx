@@ -677,48 +677,53 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
               </>
             )}
 
-            <Text style={styles.label}>What's the relationship?</Text>
-            <View style={styles.relTypeRow}>
-              {relTypes.map((r) => (
+            {/* Only show relationship type selection in Compare mode */}
+            {mode === 'compare' && (
+              <>
+                <Text style={styles.label}>What's the relationship?</Text>
+                <View style={styles.relTypeRow}>
+                  {relTypes.map((r) => (
+                    <Pressable
+                      key={r.type}
+                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setRelType(r.type); }}
+                      style={[
+                        styles.relTypeBtn,
+                        relType === r.type && styles.relTypeBtnActive,
+                        relType === r.type && { borderColor: r.color + '60' },
+                      ]}
+                    >
+                      <Text style={[
+                        styles.relTypeText,
+                        relType === r.type && { color: r.color },
+                      ]}>
+                        {r.icon} {r.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                {/* Gradient CTA button */}
                 <Pressable
-                  key={r.type}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setRelType(r.type); }}
-                  style={[
-                    styles.relTypeBtn,
-                    relType === r.type && styles.relTypeBtnActive,
-                    relType === r.type && { borderColor: r.color + '60' },
-                  ]}
+                  onPress={handleCheck}
+                  disabled={!canCheck}
+                  style={[styles.primaryBtnWrap, !canCheck && styles.primaryBtnDisabled]}
                 >
-                  <Text style={[
-                    styles.relTypeText,
-                    relType === r.type && { color: r.color },
-                  ]}>
-                    {r.icon} {r.label}
-                  </Text>
+                  <LinearGradient
+                    colors={canCheck ? RELATE_GRADIENT : ['#3A3A4A', '#3A3A4A']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.primaryBtn}
+                  >
+                    <Ionicons name="sparkles" size={20} color="#fff" style={{ marginRight: 8 }} />
+                    <Text style={styles.primaryBtnText}>See the Dynamic</Text>
+                  </LinearGradient>
                 </Pressable>
-              ))}
-            </View>
 
-            {/* Gradient CTA button */}
-            <Pressable
-              onPress={handleCheck}
-              disabled={!canCheck}
-              style={[styles.primaryBtnWrap, !canCheck && styles.primaryBtnDisabled]}
-            >
-              <LinearGradient
-                colors={canCheck ? RELATE_GRADIENT : ['#3A3A4A', '#3A3A4A']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.primaryBtn}
-              >
-                <Ionicons name="sparkles" size={20} color="#fff" style={{ marginRight: 8 }} />
-                <Text style={styles.primaryBtnText}>See the Dynamic</Text>
-              </LinearGradient>
-            </Pressable>
-
-            <Text style={styles.disclaimer}>
-              Based on Goldschneider's personality research. Increases self-awareness — not deterministic.
-            </Text>
+                <Text style={styles.disclaimer}>
+                  Based on Goldschneider's personality research. Increases self-awareness — not deterministic.
+                </Text>
+              </>
+            )}
           </>
         ) : result && (
           <>
