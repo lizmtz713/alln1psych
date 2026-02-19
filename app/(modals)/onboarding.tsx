@@ -126,6 +126,9 @@ export default function OnboardingScreen() {
 
   // Expanded sections
   const [expandedSection, setExpandedSection] = useState<string | null>('basic');
+  
+  // Active gauge tab for Step 2
+  const [activeGaugeTab, setActiveGaugeTab] = useState<string>('body');
 
   const [birthdayInput, setBirthdayInput] = useState('');
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
@@ -366,299 +369,335 @@ export default function OnboardingScreen() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                STEP 2: Customize Your Profile (Organized by 6 Gauges)
+                STEP 2: Customize Your Profile (Fortune 500 Tabbed Style)
             ═══════════════════════════════════════════════════════════ */}
             {step === 2 && (
               <View style={styles.step}>
-                <Text style={styles.pageTitle}>Customize Your Profile</Text>
+                <Text style={styles.pageTitle}>Customize</Text>
                 <Text style={styles.pageSubtitle}>
-                  Share as much or as little as you want. Each section helps a different gauge understand you better.
+                  Tap a gauge to add details. Share as much or little as you want.
                 </Text>
 
                 {/* ══════════════════════════════════════════════════════════
-                    BASIC INFO + BIRTHDAY (Always at top)
+                    BASIC INFO CARD (Always visible)
                 ══════════════════════════════════════════════════════════ */}
-                <ProfileSection id="basic" title="Basic Info" emoji="👤" optional={false}>
-                  <Text style={styles.fieldLabel}>What should I call you?</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Your name"
-                    placeholderTextColor={COLORS.textMuted}
-                    value={name}
-                    onChangeText={setName}
-                    autoCapitalize="words"
-                  />
-
-                  <Text style={styles.fieldLabel}>Pronouns</Text>
-                  <View style={styles.chipRow}>
-                    {PRONOUN_OPTIONS.map((opt) => (
-                      <Pressable
-                        key={opt.value}
-                        style={[styles.chip, pronouns === opt.value && styles.chipSelected]}
-                        onPress={() => setPronouns(opt.value)}
-                      >
-                        <Text style={[styles.chipText, pronouns === opt.value && styles.chipTextSelected]}>
-                          {opt.label}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-
-                  <Text style={styles.fieldLabel}>Birthday</Text>
-                  <Text style={styles.fieldHint}>For Personology insights</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="MM/DD/YYYY"
-                    placeholderTextColor={COLORS.textMuted}
-                    value={birthdayInput}
-                    onChangeText={(text) => {
-                      const cleaned = text.replace(/\D/g, '');
-                      if (cleaned.length <= 2) setBirthdayInput(cleaned);
-                      else if (cleaned.length <= 4) setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2));
-                      else setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8));
-                      if (cleaned.length === 8) {
-                        const mm = cleaned.slice(0, 2), dd = cleaned.slice(2, 4), yyyy = cleaned.slice(4, 8);
-                        setBirthday(`${yyyy}-${mm}-${dd}`);
-                        const calcAge = getAgeGroupFromBirthday(`${yyyy}-${mm}-${dd}`);
-                        if (calcAge) setAgeGroup(calcAge);
-                      }
-                    }}
-                    keyboardType="number-pad"
-                    maxLength={10}
-                  />
-                </ProfileSection>
-
-                {/* Gauge Categories Divider */}
-                <View style={styles.gaugeDivider}>
-                  <View style={styles.gaugeDividerLine} />
-                  <Text style={styles.gaugeDividerText}>Customize by Gauge</Text>
-                  <View style={styles.gaugeDividerLine} />
-                </View>
-
-                {/* ══════════════════════════════════════════════════════════
-                    🫀 BODY — Your physical self
-                ══════════════════════════════════════════════════════════ */}
-                <View style={styles.gaugeCategory}>
-                  <View style={styles.gaugeCategoryHeader}>
-                    <View style={[styles.gaugeCategoryIcon, { backgroundColor: '#EF444420' }]}>
-                      <Text style={styles.gaugeCategoryEmoji}>🫀</Text>
+                <View style={styles.basicInfoCard}>
+                  <View style={styles.basicInfoRow}>
+                    <View style={styles.basicInfoAvatar}>
+                      <Text style={styles.basicInfoInitial}>
+                        {name ? name.charAt(0).toUpperCase() : '?'}
+                      </Text>
                     </View>
-                    <Text style={[styles.gaugeCategoryTitle, { color: '#EF4444' }]}>Body</Text>
-                  </View>
-
-                  <ProfileSection id="therapy" title="Therapy Experience" emoji="🛋️">
-                    <Text style={styles.fieldHint}>Helps calibrate how I talk to you about mental health</Text>
-                    <View style={styles.chipRow}>
-                      {THERAPY_OPTIONS.map((opt) => (
-                        <Pressable
-                          key={opt.value}
-                          style={[styles.chip, therapyExp === opt.value && styles.chipSelected]}
-                          onPress={() => setTherapyExp(opt.value)}
+                    <View style={styles.basicInfoFields}>
+                      <TextInput
+                        style={styles.basicNameInput}
+                        placeholder="Your name"
+                        placeholderTextColor={COLORS.textMuted}
+                        value={name}
+                        onChangeText={setName}
+                        autoCapitalize="words"
+                      />
+                      <View style={styles.basicInfoMeta}>
+                        <Pressable 
+                          style={styles.metaPill}
+                          onPress={() => setExpandedSection(expandedSection === 'pronouns' ? null : 'pronouns')}
                         >
-                          <Text style={[styles.chipText, therapyExp === opt.value && styles.chipTextSelected]}>
-                            {opt.label}
-                          </Text>
+                          <Text style={styles.metaPillText}>{pronouns || 'Pronouns'}</Text>
+                          <Ionicons name="chevron-down" size={14} color={COLORS.textMuted} />
                         </Pressable>
-                      ))}
+                        <Pressable 
+                          style={styles.metaPill}
+                          onPress={() => setExpandedSection(expandedSection === 'birthday' ? null : 'birthday')}
+                        >
+                          <Text style={styles.metaPillText}>{birthdayInput || 'Birthday'}</Text>
+                          <Ionicons name="chevron-down" size={14} color={COLORS.textMuted} />
+                        </Pressable>
+                      </View>
                     </View>
-                  </ProfileSection>
-                </View>
-
-                {/* ══════════════════════════════════════════════════════════
-                    ⚡ STATE — Your nervous system
-                ══════════════════════════════════════════════════════════ */}
-                <View style={styles.gaugeCategory}>
-                  <View style={styles.gaugeCategoryHeader}>
-                    <View style={[styles.gaugeCategoryIcon, { backgroundColor: '#F59E0B20' }]}>
-                      <Text style={styles.gaugeCategoryEmoji}>⚡</Text>
-                    </View>
-                    <Text style={[styles.gaugeCategoryTitle, { color: '#F59E0B' }]}>State</Text>
                   </View>
 
-                  <ProfileSection id="sensitive" title="Sensitive Topics" emoji="🩹">
-                    <Text style={styles.fieldHint}>What should I be gentle about? (helps avoid triggers)</Text>
-                    <View style={styles.chipRow}>
-                      {SENSITIVE_TOPIC_OPTIONS.map((opt) => {
-                        const isSelected = sensitiveTopics.includes(opt.value);
-                        return (
+                  {/* Pronouns Dropdown */}
+                  {expandedSection === 'pronouns' && (
+                    <View style={styles.dropdownContent}>
+                      <View style={styles.chipRow}>
+                        {PRONOUN_OPTIONS.map((opt) => (
                           <Pressable
                             key={opt.value}
-                            style={[styles.chip, isSelected && styles.chipSelected]}
-                            onPress={() => {
-                              if (isSelected) setSensitiveTopics(sensitiveTopics.filter((t) => t !== opt.value));
-                              else setSensitiveTopics([...sensitiveTopics, opt.value]);
-                            }}
+                            style={[styles.chip, pronouns === opt.value && styles.chipSelected]}
+                            onPress={() => { setPronouns(opt.value); setExpandedSection(null); }}
                           >
-                            <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt.label}</Text>
+                            <Text style={[styles.chipText, pronouns === opt.value && styles.chipTextSelected]}>
+                              {opt.label}
+                            </Text>
                           </Pressable>
-                        );
-                      })}
+                        ))}
+                      </View>
                     </View>
-                  </ProfileSection>
+                  )}
+
+                  {/* Birthday Dropdown */}
+                  {expandedSection === 'birthday' && (
+                    <View style={styles.dropdownContent}>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="MM/DD/YYYY"
+                        placeholderTextColor={COLORS.textMuted}
+                        value={birthdayInput}
+                        onChangeText={(text) => {
+                          const cleaned = text.replace(/\D/g, '');
+                          if (cleaned.length <= 2) setBirthdayInput(cleaned);
+                          else if (cleaned.length <= 4) setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2));
+                          else setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8));
+                          if (cleaned.length === 8) {
+                            const mm = cleaned.slice(0, 2), dd = cleaned.slice(2, 4), yyyy = cleaned.slice(4, 8);
+                            setBirthday(`${yyyy}-${mm}-${dd}`);
+                            const calcAge = getAgeGroupFromBirthday(`${yyyy}-${mm}-${dd}`);
+                            if (calcAge) setAgeGroup(calcAge);
+                          }
+                        }}
+                        keyboardType="number-pad"
+                        maxLength={10}
+                      />
+                      <Text style={styles.fieldHint}>For Personology insights</Text>
+                    </View>
+                  )}
                 </View>
 
                 {/* ══════════════════════════════════════════════════════════
-                    💜 EMOTION — How you feel & process
+                    GAUGE TABS
                 ══════════════════════════════════════════════════════════ */}
-                <View style={styles.gaugeCategory}>
-                  <View style={styles.gaugeCategoryHeader}>
-                    <View style={[styles.gaugeCategoryIcon, { backgroundColor: '#8B5CF620' }]}>
-                      <Text style={styles.gaugeCategoryEmoji}>💜</Text>
-                    </View>
-                    <Text style={[styles.gaugeCategoryTitle, { color: '#8B5CF6' }]}>Emotion</Text>
-                  </View>
-
-                  <ProfileSection id="lovelang" title="Love Language" emoji="💕">
-                    <Text style={styles.fieldHint}>How do you feel most cared for?</Text>
-                    <View style={styles.chipRow}>
-                      {LOVE_LANGUAGE_OPTIONS.map((opt) => (
-                        <Pressable
-                          key={opt.value}
-                          style={[styles.chip, loveLanguage === opt.value && styles.chipSelected]}
-                          onPress={() => setLoveLanguage(opt.value)}
-                        >
-                          <Text style={[styles.chipText, loveLanguage === opt.value && styles.chipTextSelected]}>
-                            {opt.label}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                    <Pressable onPress={() => Linking.openURL('https://5lovelanguages.com/quizzes/love-language')}>
-                      <Text style={styles.quizLink}>Not sure? Take a 2-min quiz →</Text>
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false} 
+                  style={styles.gaugeTabsScroll}
+                  contentContainerStyle={styles.gaugeTabsContainer}
+                >
+                  {[
+                    { id: 'body', emoji: '🫀', label: 'Body', color: '#EF4444' },
+                    { id: 'state', emoji: '⚡', label: 'State', color: '#F59E0B' },
+                    { id: 'emotion', emoji: '💜', label: 'Emotion', color: '#8B5CF6' },
+                    { id: 'connection', emoji: '💙', label: 'Connection', color: '#3B82F6' },
+                    { id: 'direction', emoji: '🧭', label: 'Direction', color: '#10B981' },
+                    { id: 'alignment', emoji: '✨', label: 'Alignment', color: '#EC4899' },
+                  ].map((tab) => (
+                    <Pressable
+                      key={tab.id}
+                      style={[
+                        styles.gaugeTab,
+                        activeGaugeTab === tab.id && styles.gaugeTabActive,
+                        activeGaugeTab === tab.id && { borderColor: tab.color },
+                      ]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                        setActiveGaugeTab(tab.id);
+                      }}
+                    >
+                      <Text style={styles.gaugeTabEmoji}>{tab.emoji}</Text>
+                      <Text style={[
+                        styles.gaugeTabLabel,
+                        activeGaugeTab === tab.id && { color: tab.color },
+                      ]}>{tab.label}</Text>
                     </Pressable>
-                  </ProfileSection>
-
-                  <ProfileSection id="learning" title="Learning Style" emoji="📚">
-                    <Text style={styles.fieldHint}>How do you process information best?</Text>
-                    <View style={styles.chipRow}>
-                      {LEARNING_STYLE_OPTIONS.map((opt) => (
-                        <Pressable
-                          key={opt.value}
-                          style={[styles.chip, learningStyle === opt.value && styles.chipSelected]}
-                          onPress={() => setLearningStyle(opt.value)}
-                        >
-                          <Text style={[styles.chipText, learningStyle === opt.value && styles.chipTextSelected]}>
-                            {opt.emoji} {opt.label}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </ProfileSection>
-                </View>
+                  ))}
+                </ScrollView>
 
                 {/* ══════════════════════════════════════════════════════════
-                    💙 CONNECTION — Your relationships & roots
+                    GAUGE CONTENT (based on active tab)
                 ══════════════════════════════════════════════════════════ */}
-                <View style={styles.gaugeCategory}>
-                  <View style={styles.gaugeCategoryHeader}>
-                    <View style={[styles.gaugeCategoryIcon, { backgroundColor: '#3B82F620' }]}>
-                      <Text style={styles.gaugeCategoryEmoji}>💙</Text>
-                    </View>
-                    <Text style={[styles.gaugeCategoryTitle, { color: '#3B82F6' }]}>Connection</Text>
-                  </View>
-
-                  <ProfileSection id="upbringing" title="Who Raised You" emoji="👨‍👩‍👧">
-                    <Text style={styles.fieldHint}>Family dynamics shape how we relate</Text>
-                    <View style={styles.chipRow}>
-                      {UPBRINGING_OPTIONS.map((opt) => (
-                        <Pressable
-                          key={opt.value}
-                          style={[styles.chip, upbringing === opt.value && styles.chipSelected]}
-                          onPress={() => setUpbringing(opt.value)}
-                        >
-                          <Text style={[styles.chipText, upbringing === opt.value && styles.chipTextSelected]}>
-                            {opt.label}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </ProfileSection>
-
-                  <ProfileSection id="background" title="Cultural Background" emoji="🌍">
-                    <Text style={styles.fieldHint}>Helps personalize cultural context</Text>
-                    <View style={styles.chipRow}>
-                      {CULTURAL_BACKGROUND_OPTIONS.slice(0, 8).map((opt) => {
-                        const isSelected = culturalBackground.includes(opt);
-                        return (
+                <View style={styles.gaugeContent}>
+                  {/* 🫀 BODY */}
+                  {activeGaugeTab === 'body' && (
+                    <View style={styles.gaugePane}>
+                      <Text style={styles.gaugePaneTitle}>🫀 Body</Text>
+                      <Text style={styles.gaugePaneDesc}>How you care for your physical self</Text>
+                      
+                      <Text style={styles.fieldLabel}>Therapy Experience</Text>
+                      <Text style={styles.fieldHint}>Helps calibrate how I talk about mental health</Text>
+                      <View style={styles.chipRow}>
+                        {THERAPY_OPTIONS.map((opt) => (
                           <Pressable
-                            key={opt}
-                            style={[styles.chip, isSelected && styles.chipSelected]}
-                            onPress={() => {
-                              if (isSelected) setCulturalBackground(culturalBackground.filter((c) => c !== opt));
-                              else setCulturalBackground([...culturalBackground, opt]);
-                            }}
+                            key={opt.value}
+                            style={[styles.chip, therapyExp === opt.value && styles.chipSelected]}
+                            onPress={() => setTherapyExp(opt.value)}
                           >
-                            <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
+                            <Text style={[styles.chipText, therapyExp === opt.value && styles.chipTextSelected]}>
+                              {opt.label}
+                            </Text>
                           </Pressable>
-                        );
-                      })}
+                        ))}
+                      </View>
                     </View>
-                  </ProfileSection>
+                  )}
 
-                  <ProfileSection id="language" title="Language You Think & Feel In" emoji="🗣️">
-                    <Text style={styles.fieldHint}>Gauge can speak your language</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="e.g., English, Spanish, Spanglish..."
-                      placeholderTextColor={COLORS.textMuted}
-                      value={thinkingLanguage}
-                      onChangeText={setThinkingLanguage}
-                    />
-                  </ProfileSection>
-                </View>
-
-                {/* ══════════════════════════════════════════════════════════
-                    🧭 DIRECTION — Where you're headed
-                ══════════════════════════════════════════════════════════ */}
-                <View style={styles.gaugeCategory}>
-                  <View style={styles.gaugeCategoryHeader}>
-                    <View style={[styles.gaugeCategoryIcon, { backgroundColor: '#10B98120' }]}>
-                      <Text style={styles.gaugeCategoryEmoji}>🧭</Text>
+                  {/* ⚡ STATE */}
+                  {activeGaugeTab === 'state' && (
+                    <View style={styles.gaugePane}>
+                      <Text style={styles.gaugePaneTitle}>⚡ State</Text>
+                      <Text style={styles.gaugePaneDesc}>Your nervous system & triggers</Text>
+                      
+                      <Text style={styles.fieldLabel}>Sensitive Topics</Text>
+                      <Text style={styles.fieldHint}>What should I be gentle about?</Text>
+                      <View style={styles.chipRow}>
+                        {SENSITIVE_TOPIC_OPTIONS.map((opt) => {
+                          const isSelected = sensitiveTopics.includes(opt.value);
+                          return (
+                            <Pressable
+                              key={opt.value}
+                              style={[styles.chip, isSelected && styles.chipSelected]}
+                              onPress={() => {
+                                if (isSelected) setSensitiveTopics(sensitiveTopics.filter((t) => t !== opt.value));
+                                else setSensitiveTopics([...sensitiveTopics, opt.value]);
+                              }}
+                            >
+                              <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt.label}</Text>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
                     </View>
-                    <Text style={[styles.gaugeCategoryTitle, { color: '#10B981' }]}>Direction</Text>
-                  </View>
+                  )}
 
-                  <ProfileSection id="lifestage" title="Life Stage" emoji="🌿">
-                    <Text style={styles.fieldHint}>Helps me speak your language and understand your context</Text>
-                    <View style={styles.chipRow}>
-                      {AGE_OPTIONS.map((opt) => (
-                        <Pressable
-                          key={opt.value}
-                          style={[styles.chip, ageGroup === opt.value && styles.chipSelected]}
-                          onPress={() => setAgeGroup(opt.value)}
-                        >
-                          <Text style={[styles.chipText, ageGroup === opt.value && styles.chipTextSelected]}>
-                            {opt.label}
-                          </Text>
-                        </Pressable>
-                      ))}
+                  {/* 💜 EMOTION */}
+                  {activeGaugeTab === 'emotion' && (
+                    <View style={styles.gaugePane}>
+                      <Text style={styles.gaugePaneTitle}>💜 Emotion</Text>
+                      <Text style={styles.gaugePaneDesc}>How you feel & process</Text>
+                      
+                      <Text style={styles.fieldLabel}>Love Language</Text>
+                      <Text style={styles.fieldHint}>How do you feel most cared for?</Text>
+                      <View style={styles.chipRow}>
+                        {LOVE_LANGUAGE_OPTIONS.map((opt) => (
+                          <Pressable
+                            key={opt.value}
+                            style={[styles.chip, loveLanguage === opt.value && styles.chipSelected]}
+                            onPress={() => setLoveLanguage(opt.value)}
+                          >
+                            <Text style={[styles.chipText, loveLanguage === opt.value && styles.chipTextSelected]}>
+                              {opt.label}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                      <Pressable onPress={() => Linking.openURL('https://5lovelanguages.com/quizzes/love-language')}>
+                        <Text style={styles.quizLink}>Not sure? Take a 2-min quiz →</Text>
+                      </Pressable>
+
+                      <Text style={[styles.fieldLabel, { marginTop: 20 }]}>Learning Style</Text>
+                      <Text style={styles.fieldHint}>How do you process information?</Text>
+                      <View style={styles.chipRow}>
+                        {LEARNING_STYLE_OPTIONS.map((opt) => (
+                          <Pressable
+                            key={opt.value}
+                            style={[styles.chip, learningStyle === opt.value && styles.chipSelected]}
+                            onPress={() => setLearningStyle(opt.value)}
+                          >
+                            <Text style={[styles.chipText, learningStyle === opt.value && styles.chipTextSelected]}>
+                              {opt.emoji} {opt.label}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </View>
                     </View>
-                  </ProfileSection>
-                </View>
+                  )}
 
-                {/* ══════════════════════════════════════════════════════════
-                    ✨ ALIGNMENT — What matters to you
-                ══════════════════════════════════════════════════════════ */}
-                <View style={styles.gaugeCategory}>
-                  <View style={styles.gaugeCategoryHeader}>
-                    <View style={[styles.gaugeCategoryIcon, { backgroundColor: '#EC489920' }]}>
-                      <Text style={styles.gaugeCategoryEmoji}>✨</Text>
+                  {/* 💙 CONNECTION */}
+                  {activeGaugeTab === 'connection' && (
+                    <View style={styles.gaugePane}>
+                      <Text style={styles.gaugePaneTitle}>💙 Connection</Text>
+                      <Text style={styles.gaugePaneDesc}>Your relationships & roots</Text>
+                      
+                      <Text style={styles.fieldLabel}>Who Raised You</Text>
+                      <Text style={styles.fieldHint}>Family dynamics shape how we relate</Text>
+                      <View style={styles.chipRow}>
+                        {UPBRINGING_OPTIONS.map((opt) => (
+                          <Pressable
+                            key={opt.value}
+                            style={[styles.chip, upbringing === opt.value && styles.chipSelected]}
+                            onPress={() => setUpbringing(opt.value)}
+                          >
+                            <Text style={[styles.chipText, upbringing === opt.value && styles.chipTextSelected]}>
+                              {opt.label}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </View>
+
+                      <Text style={[styles.fieldLabel, { marginTop: 20 }]}>Cultural Background</Text>
+                      <View style={styles.chipRow}>
+                        {CULTURAL_BACKGROUND_OPTIONS.slice(0, 8).map((opt) => {
+                          const isSelected = culturalBackground.includes(opt);
+                          return (
+                            <Pressable
+                              key={opt}
+                              style={[styles.chip, isSelected && styles.chipSelected]}
+                              onPress={() => {
+                                if (isSelected) setCulturalBackground(culturalBackground.filter((c) => c !== opt));
+                                else setCulturalBackground([...culturalBackground, opt]);
+                              }}
+                            >
+                              <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+
+                      <Text style={[styles.fieldLabel, { marginTop: 20 }]}>Language You Think In</Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="e.g., English, Spanish, Spanglish..."
+                        placeholderTextColor={COLORS.textMuted}
+                        value={thinkingLanguage}
+                        onChangeText={setThinkingLanguage}
+                      />
                     </View>
-                    <Text style={[styles.gaugeCategoryTitle, { color: '#EC4899' }]}>Alignment</Text>
-                  </View>
+                  )}
 
-                  <View style={styles.comingSoonCard}>
-                    <Text style={styles.comingSoonText}>Values & beliefs coming soon</Text>
-                    <Text style={styles.comingSoonHint}>Gauge will learn what matters to you as you talk</Text>
-                  </View>
+                  {/* 🧭 DIRECTION */}
+                  {activeGaugeTab === 'direction' && (
+                    <View style={styles.gaugePane}>
+                      <Text style={styles.gaugePaneTitle}>🧭 Direction</Text>
+                      <Text style={styles.gaugePaneDesc}>Where you're headed in life</Text>
+                      
+                      <Text style={styles.fieldLabel}>Life Stage</Text>
+                      <Text style={styles.fieldHint}>Helps me speak your language</Text>
+                      <View style={styles.chipRow}>
+                        {AGE_OPTIONS.map((opt) => (
+                          <Pressable
+                            key={opt.value}
+                            style={[styles.chip, ageGroup === opt.value && styles.chipSelected]}
+                            onPress={() => setAgeGroup(opt.value)}
+                          >
+                            <Text style={[styles.chipText, ageGroup === opt.value && styles.chipTextSelected]}>
+                              {opt.label}
+                            </Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+
+                  {/* ✨ ALIGNMENT */}
+                  {activeGaugeTab === 'alignment' && (
+                    <View style={styles.gaugePane}>
+                      <Text style={styles.gaugePaneTitle}>✨ Alignment</Text>
+                      <Text style={styles.gaugePaneDesc}>What matters to you</Text>
+                      
+                      <View style={styles.comingSoonCard}>
+                        <Text style={styles.comingSoonEmoji}>🔮</Text>
+                        <Text style={styles.comingSoonText}>Coming soon</Text>
+                        <Text style={styles.comingSoonHint}>Gauge will learn your values as you talk</Text>
+                      </View>
+                    </View>
+                  )}
                 </View>
 
                 <Text style={styles.settingsNote}>
-                  You can always change these in Settings later.
+                  Change anytime in Settings
                 </Text>
 
                 {/* Spacer for fixed footer */}
-                <View style={{ height: 80 }} />
+                <View style={{ height: 100 }} />
               </View>
             )}
 
@@ -820,7 +859,137 @@ const styles = StyleSheet.create({
   chipTextSelected: { color: '#fff', fontWeight: '600' },
   
   quizLink: { fontSize: 14, color: COLORS.accent, marginTop: 8 },
-  settingsNote: { fontSize: 13, color: COLORS.textMuted, textAlign: 'center', marginTop: 16, marginBottom: 8 },
+  settingsNote: { fontSize: 13, color: COLORS.textMuted, textAlign: 'center', marginTop: 24, marginBottom: 8 },
+
+  // Basic Info Card
+  basicInfoCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+  },
+  basicInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  basicInfoAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: COLORS.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  basicInfoInitial: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  basicInfoFields: {
+    flex: 1,
+  },
+  basicNameInput: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  basicInfoMeta: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  metaPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  metaPillText: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+  },
+  dropdownContent: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+
+  // Gauge Tabs
+  gaugeTabsScroll: {
+    marginBottom: 16,
+    marginHorizontal: -20,
+  },
+  gaugeTabsContainer: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  gaugeTab: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    minWidth: 80,
+  },
+  gaugeTabActive: {
+    backgroundColor: COLORS.background,
+  },
+  gaugeTabEmoji: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  gaugeTabLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+
+  // Gauge Content
+  gaugeContent: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 20,
+    padding: 20,
+    minHeight: 280,
+  },
+  gaugePane: {},
+  gaugePaneTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  gaugePaneDesc: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginBottom: 20,
+  },
+
+  // Coming Soon
+  comingSoonCard: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  comingSoonEmoji: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  comingSoonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  comingSoonHint: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginTop: 4,
+  },
 
   // Gauge Categories
   gaugeDivider: {
