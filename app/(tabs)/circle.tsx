@@ -308,6 +308,28 @@ export default function CircleScreen() {
                         </Pressable>
                       )}
 
+                      {/* Personality snippet from DOB */}
+                      {m.birthday && (() => {
+                        const personality = getPersonality(m.birthday);
+                        if (!personality) return null;
+                        return (
+                          <Pressable
+                            onPress={() => {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              router.push({ pathname: '/(modals)/relate', params: { name: m.name, birthday: m.birthday } });
+                            }}
+                            style={{ backgroundColor: COLORS.surface, borderRadius: 12, padding: 12, marginBottom: 12 }}
+                          >
+                            <Text style={{ color: COLORS.textMuted, fontSize: 11, marginBottom: 4 }}>✨ PERSONALITY</Text>
+                            <Text style={{ color: COLORS.accent, fontSize: 15, fontWeight: '600', marginBottom: 4 }}>{personality.name}</Text>
+                            <Text style={{ color: COLORS.textSecondary, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>
+                              {personality.communicationStyle}
+                            </Text>
+                            <Text style={{ color: COLORS.textMuted, fontSize: 12, marginTop: 6 }}>Tap to see full profile →</Text>
+                          </Pressable>
+                        );
+                      })()}
+
                       {/* Love Language */}
                       <View style={{ marginBottom: 12 }}>
                         <Text style={{ color: COLORS.textMuted, fontSize: 12, marginBottom: 6 }}>💜 Love language</Text>
