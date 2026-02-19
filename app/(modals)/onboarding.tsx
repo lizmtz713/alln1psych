@@ -814,8 +814,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  backBtn: { width: 40, padding: 8 },
-  skipBtn: { width: 40, alignItems: 'flex-end', padding: 8 },
+  backBtn: { minWidth: 50, paddingVertical: 8, paddingHorizontal: 4 },
+  skipBtn: { minWidth: 50, alignItems: 'flex-end', paddingVertical: 8, paddingHorizontal: 4 },
   skipBtnText: { fontSize: 15, color: COLORS.accent, fontWeight: '600' },
   // Progress indicator (Mobilize style)
   progressRow: { 
