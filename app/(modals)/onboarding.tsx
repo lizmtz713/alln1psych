@@ -11,6 +11,9 @@ import {
   Modal,
   Animated,
   Linking,
+  Switch,
+  LayoutAnimation,
+  UIManager,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,7 +24,6 @@ import {
   useUserStore,
   type Pronouns,
   type AgeGroup,
-  type CommunicationPreference,
   type LoveLanguage,
   type CircleInvite,
   type LearningStyle,
@@ -37,17 +39,19 @@ import {
 import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
 import {
   CULTURAL_BACKGROUND_OPTIONS,
-  ENVIRONMENT_UPBRINGING_OPTIONS,
-  CULTURAL_VALUES_OPTIONS,
 } from '../../src/lib/culturalOptions';
 
-const TOTAL_STEPS = 7;
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const TOTAL_STEPS = 3;
 
 const LEARNING_STYLE_OPTIONS: { value: LearningStyle; label: string; emoji: string }[] = [
-  { value: 'reading', label: 'Reading — I like to read and reflect', emoji: '📖' },
-  { value: 'listening', label: 'Listening — I learn by hearing', emoji: '🎧' },
-  { value: 'doing', label: 'Doing — I learn by trying things', emoji: '🎮' },
-  { value: 'talking', label: 'Talking — I learn by discussing', emoji: '💬' },
+  { value: 'reading', label: 'Reading', emoji: '📖' },
+  { value: 'listening', label: 'Listening', emoji: '🎧' },
+  { value: 'doing', label: 'Doing', emoji: '🎮' },
+  { value: 'talking', label: 'Talking', emoji: '💬' },
 ];
 
 const PRONOUN_OPTIONS: { value: Pronouns; label: string }[] = [
@@ -56,123 +60,105 @@ const PRONOUN_OPTIONS: { value: Pronouns; label: string }[] = [
   { value: 'they/them', label: 'they/them' },
   { value: 'he/they', label: 'he/they' },
   { value: 'she/they', label: 'she/they' },
-  { value: 'any', label: 'any pronouns' },
+  { value: 'any', label: 'any' },
   { value: 'other', label: 'other' },
 ];
 
-const AGE_OPTIONS: { value: AgeGroup; label: string; emoji: string }[] = [
-  { value: 'under13', label: 'Under 13', emoji: '🌱' },
-  { value: '13-17', label: '13–17', emoji: '✨' },
-  { value: '18-25', label: '18–25', emoji: '🌟' },
-  { value: '26-40', label: '26–40', emoji: '🌿' },
-  { value: '41-60', label: '41–60', emoji: '🌙' },
-  { value: '60+', label: '60+', emoji: '🕯️' },
+const AGE_OPTIONS: { value: AgeGroup; label: string }[] = [
+  { value: 'under13', label: 'Under 13' },
+  { value: '13-17', label: '13–17' },
+  { value: '18-25', label: '18–25' },
+  { value: '26-40', label: '26–40' },
+  { value: '41-60', label: '41–60' },
+  { value: '60+', label: '60+' },
 ];
 
-const LOVE_LANGUAGE_OPTIONS: { value: LoveLanguage; label: string; sublabel: string }[] = [
-  { value: 'words', label: 'Words of encouragement', sublabel: 'Words of Affirmation' },
-  { value: 'quality-time', label: 'Quality time together', sublabel: 'Quality Time' },
-  { value: 'acts-of-service', label: 'Thoughtful gestures', sublabel: 'Acts of Service' },
-  { value: 'physical-touch', label: 'A warm hug', sublabel: 'Physical Touch' },
-  { value: 'gifts', label: 'A small gift or surprise', sublabel: 'Gifts' },
-  { value: 'unknown', label: "Not sure? Skip for now", sublabel: "I'll help you figure it out" },
+const LOVE_LANGUAGE_OPTIONS: { value: LoveLanguage; label: string }[] = [
+  { value: 'words', label: 'Words of Affirmation' },
+  { value: 'quality-time', label: 'Quality Time' },
+  { value: 'acts-of-service', label: 'Acts of Service' },
+  { value: 'physical-touch', label: 'Physical Touch' },
+  { value: 'gifts', label: 'Gifts' },
+  { value: 'unknown', label: 'Not sure yet' },
 ];
 
-const RELATIONSHIP_OPTIONS: { value: CircleInvite['relationship']; label: string }[] = [
-  { value: 'parent', label: 'Parent' },
-  { value: 'sibling', label: 'Sibling' },
-  { value: 'friend', label: 'Friend' },
-  { value: 'partner', label: 'Partner' },
-  { value: 'other', label: 'Other' },
+const THERAPY_OPTIONS = [
+  { value: 'never', label: 'Never been' },
+  { value: 'past', label: 'In the past' },
+  { value: 'current', label: 'Currently in therapy' },
+  { value: 'prefer-not', label: 'Prefer not to say' },
+];
+
+const UPBRINGING_OPTIONS = [
+  { value: 'both-parents', label: 'Both parents' },
+  { value: 'single-mom', label: 'Single mom' },
+  { value: 'single-dad', label: 'Single dad' },
+  { value: 'grandparents', label: 'Grandparents' },
+  { value: 'other-family', label: 'Other family' },
+  { value: 'foster', label: 'Foster care' },
+  { value: 'mixed', label: 'Mixed/complicated' },
+  { value: 'prefer-not', label: 'Prefer not to say' },
 ];
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [justSelected, setJustSelected] = useState(false);
-
   const { user } = useAuth();
+
   const {
-    name,
-    pronouns,
-    customPronouns,
-    ageGroup,
-    communicationPreference,
-    loveLanguage,
-    circleInvite,
-    sensitiveTopics,
-    learningStyle,
-    culturalBackground,
-    environmentUpbringing,
-    culturalValues,
-    setName,
-    setPronouns,
-    setCustomPronouns,
-    setAgeGroup,
-    setCommunicationPreference,
-    setLoveLanguage,
-    setCircleInvite,
-    setSensitiveTopics,
-    setLearningStyle,
-    setCulturalBackground,
-    setEnvironmentUpbringing,
-    setCulturalValues,
-    culturalBackgroundOther,
-    setCulturalBackgroundOther,
+    name, setName,
+    pronouns, setPronouns,
+    customPronouns, setCustomPronouns,
+    ageGroup, setAgeGroup,
+    loveLanguage, setLoveLanguage,
+    sensitiveTopics, setSensitiveTopics,
+    learningStyle, setLearningStyle,
+    culturalBackground, setCulturalBackground,
+    birthday, setBirthday,
     completeOnboarding,
-    birthday,
-    setBirthday,
   } = useUserStore();
 
-  const [inviteName, setInviteName] = useState(circleInvite?.name ?? '');
-  const [inviteRelationship, setInviteRelationship] = useState<CircleInvite['relationship']>(
-    circleInvite?.relationship ?? 'friend'
-  );
-  const [wantsToInvite, setWantsToInvite] = useState<boolean | null>(null);
-  const [nameInputFocused, setNameInputFocused] = useState(false);
-  const [showOptional, setShowOptional] = useState(false);
+  // Additional profile fields (stored locally for now)
+  const [therapyExp, setTherapyExp] = useState<string | null>(null);
+  const [upbringing, setUpbringing] = useState<string | null>(null);
+  const [thinkingLanguage, setThinkingLanguage] = useState('');
+
+  // Expanded sections
+  const [expandedSection, setExpandedSection] = useState<string | null>('basic');
+
   const [birthdayInput, setBirthdayInput] = useState('');
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const setNotificationsCheckIn = useSettingsStore((s) => s.setNotificationsCheckIn);
   const stepOpacity = useRef(new Animated.Value(1)).current;
 
+  const toggleSection = (section: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setExpandedSection(expandedSection === section ? null : section);
+  };
+
   const finishOnboarding = async () => {
-    if (wantsToInvite === true && inviteName.trim()) {
-      setCircleInvite({ name: inviteName.trim(), relationship: inviteRelationship });
-    } else {
-      setCircleInvite(null);
-    }
     if (user?.id) {
       await completeOnboardingDb(user.id, {
         name: name.trim(),
         pronouns: pronouns ?? undefined,
         age_group: ageGroup,
-        communication_preference: communicationPreference,
         love_language: loveLanguage,
       });
     }
     completeOnboarding();
-    router.replace('/(modals)/identity-setup');
+    router.replace('/(tabs)');
   };
 
   const runFadeThen = (next: () => void) => {
-    Animated.timing(stepOpacity, {
-      toValue: 0,
-      duration: 150,
-      useNativeDriver: true,
-    }).start(() => {
+    Animated.timing(stepOpacity, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
       next();
       stepOpacity.setValue(0);
-      Animated.timing(stepOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      Animated.timing(stepOpacity, { toValue: 1, duration: 300, useNativeDriver: true }).start();
     });
   };
 
-  // Calculate age group from birthday
   const getAgeGroupFromBirthday = (bday: string): typeof ageGroup => {
     const d = new Date(bday + 'T12:00:00');
     if (isNaN(d.getTime())) return null;
@@ -193,37 +179,12 @@ export default function OnboardingScreen() {
       setShowNotificationPrompt(true);
       return;
     }
-    
-    // If birthday provided on step 3 (name step), auto-set age group and skip step 4
-    if (step === 3 && birthday) {
-      const calculatedAge = getAgeGroupFromBirthday(birthday);
-      if (calculatedAge) {
-        setAgeGroup(calculatedAge);
-        runFadeThen(() => setStep(5)); // Skip age group step
-        return;
-      }
-    }
-    
     runFadeThen(() => setStep((s) => s + 1));
   };
 
   const goBack = () => {
     if (step <= 1) return;
-    // If going back from step 5 (love language) and birthday exists, skip step 4 (age)
-    if (step === 5 && birthday) {
-      runFadeThen(() => setStep(3));
-      return;
-    }
     runFadeThen(() => setStep((s) => s - 1));
-  };
-
-  const handleChoiceThenNext = (setValue: () => void) => {
-    setValue();
-    setJustSelected(true);
-    setTimeout(() => {
-      setJustSelected(false);
-      goNext();
-    }, 800);
   };
 
   const handleNotificationPromptYes = async () => {
@@ -241,75 +202,87 @@ export default function OnboardingScreen() {
   };
 
   const canProceed = () => {
-    switch (step) {
-      case 1:
-        return true; // welcome
-      case 2:
-        return true; // cockpit intro — just continue
-      case 3:
-        return name.trim().length > 0 && pronouns !== null;
-      case 4:
-        return ageGroup !== null;
-      case 5:
-        return loveLanguage !== null;
-      case 6:
-        return wantsToInvite !== null && (wantsToInvite === false || inviteName.trim().length > 0);
-      case 7:
-        return true; // promise
-      default:
-        return false;
-    }
+    if (step === 2) return name.trim().length > 0;
+    return true;
   };
 
-  const handleSkip = () => {
-    setWantsToInvite(false);
-    setCircleInvite(null);
-    goNext();
+  // Profile Section Component
+  const ProfileSection = ({ 
+    id, 
+    title, 
+    emoji, 
+    children,
+    optional = true,
+  }: { 
+    id: string; 
+    title: string; 
+    emoji: string; 
+    children: React.ReactNode;
+    optional?: boolean;
+  }) => {
+    const isExpanded = expandedSection === id;
+    return (
+      <View style={styles.sectionCard}>
+        <Pressable style={styles.sectionHeader} onPress={() => toggleSection(id)}>
+          <View style={styles.sectionHeaderLeft}>
+            <Text style={styles.sectionEmoji}>{emoji}</Text>
+            <Text style={styles.sectionTitle}>{title}</Text>
+            {optional && <Text style={styles.optionalBadge}>optional</Text>}
+          </View>
+          <Ionicons 
+            name={isExpanded ? 'chevron-up' : 'chevron-down'} 
+            size={20} 
+            color={COLORS.textMuted} 
+          />
+        </Pressable>
+        {isExpanded && (
+          <View style={styles.sectionContent}>
+            {children}
+          </View>
+        )}
+      </View>
+    );
   };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      {/* Notification Prompt Modal */}
       <Modal
         visible={showNotificationPrompt}
         transparent
         animationType="fade"
         onRequestClose={handleNotificationPromptLater}
       >
-        <View style={styles.notificationPromptOverlay}>
-          <View style={styles.notificationPromptCard}>
-            <Text style={styles.notificationPromptTitle}>
-              Can Gauge send you a daily check-in reminder?
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalEmoji}>🔔</Text>
+            <Text style={styles.modalTitle}>Daily check-in reminder?</Text>
+            <Text style={styles.modalSub}>
+              A gentle nudge to check in with yourself. You can change this anytime in settings.
             </Text>
-            <Text style={styles.notificationPromptSub}>
-              It's a gentle nudge to check in with yourself.
-            </Text>
-            <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
-              onPress={handleNotificationPromptYes}
-            >
-              <Text style={styles.primaryButtonText}>Yes, remind me</Text>
+            <Pressable style={styles.modalPrimaryBtn} onPress={handleNotificationPromptYes}>
+              <Text style={styles.modalPrimaryBtnText}>Yes, remind me</Text>
             </Pressable>
-            <Pressable style={styles.skipButton} onPress={handleNotificationPromptLater}>
-              <Text style={styles.skipText}>Maybe later</Text>
+            <Pressable style={styles.modalSecondaryBtn} onPress={handleNotificationPromptLater}>
+              <Text style={styles.modalSecondaryBtnText}>Maybe later</Text>
             </Pressable>
           </View>
         </View>
       </Modal>
 
-      {/* Back + Progress dots + step label */}
-      <View style={styles.progressWrap}>
-        {step > 1 ? (
-          <Pressable onPress={goBack} style={styles.backButton}>
+      {/* Header */}
+      <View style={styles.header}>
+        {step > 1 && (
+          <Pressable onPress={goBack} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={COLORS.accent} />
-            <Text style={styles.backButtonText}>Back</Text>
           </Pressable>
-        ) : null}
+        )}
         <View style={styles.dotsRow}>
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
             <View key={i} style={[styles.dot, i + 1 === step && styles.dotActive]} />
           ))}
         </View>
-        <Text style={styles.stepLabel}>Step {step} of {TOTAL_STEPS}</Text>
+        <View style={{ width: 40 }} />
       </View>
 
       <KeyboardAvoidingView
@@ -323,457 +296,339 @@ export default function OnboardingScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View style={[styles.stepContent, { opacity: stepOpacity }]}>
-            {/* STEP 1 — Welcome */}
+          <Animated.View style={{ opacity: stepOpacity }}>
+            
+            {/* ═══════════════════════════════════════════════════════════
+                STEP 1: Welcome + What Gauge Is (Combined, Informative)
+            ═══════════════════════════════════════════════════════════ */}
             {step === 1 && (
               <View style={styles.step}>
-                <Text style={styles.welcomeTitle}>Welcome to your space.</Text>
-                <Text style={styles.welcomeSub}>
-                  Everything here is private. Everything here is just for you.
+                <Text style={styles.heroTitle}>Welcome to InGauge</Text>
+                <Text style={styles.heroTagline}>Your personal cockpit for emotional intelligence.</Text>
+
+                {/* What it is */}
+                <View style={styles.introCard}>
+                  <Text style={styles.introCardTitle}>You're not a mood. You're a system.</Text>
+                  <Text style={styles.introCardText}>
+                    6 gauges track the parts of you that matter: Body, State, Emotion, Connection, Direction, and Alignment.
+                  </Text>
+                </View>
+
+                {/* 6 Gauges Visual */}
+                <View style={styles.gaugesGrid}>
+                  {[
+                    { emoji: '🫀', label: 'Body', color: '#EF4444' },
+                    { emoji: '⚡', label: 'State', color: '#F59E0B' },
+                    { emoji: '💜', label: 'Emotion', color: '#8B5CF6' },
+                    { emoji: '💙', label: 'Connection', color: '#3B82F6' },
+                    { emoji: '🧭', label: 'Direction', color: '#10B981' },
+                    { emoji: '✨', label: 'Alignment', color: '#EC4899' },
+                  ].map((g) => (
+                    <View key={g.label} style={styles.gaugeItem}>
+                      <View style={[styles.gaugeIcon, { backgroundColor: g.color + '20' }]}>
+                        <Text style={styles.gaugeEmoji}>{g.emoji}</Text>
+                      </View>
+                      <Text style={[styles.gaugeLabel, { color: g.color }]}>{g.label}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                <Text style={styles.introText}>
+                  When one drops, others follow.{'\n'}
+                  When you lift one, others rise.{'\n'}
+                  <Text style={styles.introTextBold}>Everything is connected.</Text>
                 </Text>
-                <Pressable
-                  style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    goNext();
-                  }}
-                >
-                  <Text style={styles.primaryButtonText}>Let's get to know each other</Text>
+
+                {/* What you get */}
+                <View style={styles.featuresList}>
+                  <View style={styles.featureItem}>
+                    <Ionicons name="chatbubbles" size={20} color={COLORS.accent} />
+                    <Text style={styles.featureText}>Talk to Gauge — AI that actually gets you</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Ionicons name="book" size={20} color={COLORS.accent} />
+                    <Text style={styles.featureText}>Human Manual — 48 lessons on how you work</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Ionicons name="people" size={20} color={COLORS.accent} />
+                    <Text style={styles.featureText}>Circle — share your temperature with people who care</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Ionicons name="construct" size={20} color={COLORS.accent} />
+                    <Text style={styles.featureText}>32 tools for processing life's moments</Text>
+                  </View>
+                </View>
+
+                <Pressable style={styles.primaryBtn} onPress={goNext}>
+                  <Text style={styles.primaryBtnText}>Let's set up your profile</Text>
                 </Pressable>
               </View>
             )}
 
-            {/* STEP 2 — Cockpit Introduction */}
+            {/* ═══════════════════════════════════════════════════════════
+                STEP 2: Customize Your Profile (All in one page)
+            ═══════════════════════════════════════════════════════════ */}
             {step === 2 && (
               <View style={styles.step}>
-                <Text style={styles.welcomeTitle}>You're not a mood.{'\n'}You're a system.</Text>
-                <View style={styles.cockpitVisual}>
-                  <View style={styles.cockpitRing}>
-                    <Text style={styles.cockpitBrain}>🧠</Text>
-                  </View>
-                </View>
-                
-                {/* 6 Gauges Display */}
-                <View style={styles.gaugesIntroGrid}>
-                  <View style={styles.gaugeIntroItem}>
-                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
-                      <Text style={styles.gaugeIntroEmoji}>🫀</Text>
-                    </View>
-                    <Text style={[styles.gaugeIntroLabel, { color: '#EF4444' }]}>Body</Text>
-                  </View>
-                  <View style={styles.gaugeIntroItem}>
-                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
-                      <Text style={styles.gaugeIntroEmoji}>⚡</Text>
-                    </View>
-                    <Text style={[styles.gaugeIntroLabel, { color: '#F59E0B' }]}>State</Text>
-                  </View>
-                  <View style={styles.gaugeIntroItem}>
-                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(139, 92, 246, 0.15)' }]}>
-                      <Text style={styles.gaugeIntroEmoji}>💜</Text>
-                    </View>
-                    <Text style={[styles.gaugeIntroLabel, { color: '#8B5CF6' }]}>Emotion</Text>
-                  </View>
-                  <View style={styles.gaugeIntroItem}>
-                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
-                      <Text style={styles.gaugeIntroEmoji}>💙</Text>
-                    </View>
-                    <Text style={[styles.gaugeIntroLabel, { color: '#3B82F6' }]}>Connection</Text>
-                  </View>
-                  <View style={styles.gaugeIntroItem}>
-                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
-                      <Text style={styles.gaugeIntroEmoji}>🧭</Text>
-                    </View>
-                    <Text style={[styles.gaugeIntroLabel, { color: '#10B981' }]}>Direction</Text>
-                  </View>
-                  <View style={styles.gaugeIntroItem}>
-                    <View style={[styles.gaugeIntroIcon, { backgroundColor: 'rgba(236, 72, 153, 0.15)' }]}>
-                      <Text style={styles.gaugeIntroEmoji}>✨</Text>
-                    </View>
-                    <Text style={[styles.gaugeIntroLabel, { color: '#EC4899' }]}>Alignment</Text>
-                  </View>
-                </View>
+                <Text style={styles.pageTitle}>Customize Your Profile</Text>
+                <Text style={styles.pageSubtitle}>
+                  Share as much or as little as you want. The more Gauge knows, the better it can help.
+                </Text>
 
-                <Text style={styles.cockpitIntroText}>
-                  Your body affects your mood.{'\n'}Your mood affects your relationships.{'\n'}Your relationships affect your sense of self.
+                {/* Basic Info - Required */}
+                <ProfileSection id="basic" title="Basic Info" emoji="👤" optional={false}>
+                  <Text style={styles.fieldLabel}>What should I call you?</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Your name"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={name}
+                    onChangeText={setName}
+                    autoCapitalize="words"
+                  />
+
+                  <Text style={styles.fieldLabel}>Pronouns</Text>
+                  <View style={styles.chipRow}>
+                    {PRONOUN_OPTIONS.map((opt) => (
+                      <Pressable
+                        key={opt.value}
+                        style={[styles.chip, pronouns === opt.value && styles.chipSelected]}
+                        onPress={() => setPronouns(opt.value)}
+                      >
+                        <Text style={[styles.chipText, pronouns === opt.value && styles.chipTextSelected]}>
+                          {opt.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </ProfileSection>
+
+                {/* Birthday - For Personology */}
+                <ProfileSection id="birthday" title="Birthday" emoji="🎂">
+                  <Text style={styles.fieldHint}>For more accurate personality insights via Personology</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="MM/DD/YYYY"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={birthdayInput}
+                    onChangeText={(text) => {
+                      const cleaned = text.replace(/\D/g, '');
+                      if (cleaned.length <= 2) setBirthdayInput(cleaned);
+                      else if (cleaned.length <= 4) setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2));
+                      else setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8));
+                      if (cleaned.length === 8) {
+                        const mm = cleaned.slice(0, 2), dd = cleaned.slice(2, 4), yyyy = cleaned.slice(4, 8);
+                        setBirthday(`${yyyy}-${mm}-${dd}`);
+                        const calcAge = getAgeGroupFromBirthday(`${yyyy}-${mm}-${dd}`);
+                        if (calcAge) setAgeGroup(calcAge);
+                      }
+                    }}
+                    keyboardType="number-pad"
+                    maxLength={10}
+                  />
+                </ProfileSection>
+
+                {/* Life Stage */}
+                <ProfileSection id="lifestage" title="Life Stage" emoji="🌿">
+                  <Text style={styles.fieldHint}>Helps me speak your language</Text>
+                  <View style={styles.chipRow}>
+                    {AGE_OPTIONS.map((opt) => (
+                      <Pressable
+                        key={opt.value}
+                        style={[styles.chip, ageGroup === opt.value && styles.chipSelected]}
+                        onPress={() => setAgeGroup(opt.value)}
+                      >
+                        <Text style={[styles.chipText, ageGroup === opt.value && styles.chipTextSelected]}>
+                          {opt.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </ProfileSection>
+
+                {/* Love Language */}
+                <ProfileSection id="lovelang" title="Love Language" emoji="💕">
+                  <Text style={styles.fieldHint}>How do you feel most cared for?</Text>
+                  <View style={styles.chipRow}>
+                    {LOVE_LANGUAGE_OPTIONS.map((opt) => (
+                      <Pressable
+                        key={opt.value}
+                        style={[styles.chip, loveLanguage === opt.value && styles.chipSelected]}
+                        onPress={() => setLoveLanguage(opt.value)}
+                      >
+                        <Text style={[styles.chipText, loveLanguage === opt.value && styles.chipTextSelected]}>
+                          {opt.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                  <Pressable onPress={() => Linking.openURL('https://5lovelanguages.com/quizzes/love-language')}>
+                    <Text style={styles.quizLink}>Not sure? Take a 2-min quiz →</Text>
+                  </Pressable>
+                </ProfileSection>
+
+                {/* Learning Style */}
+                <ProfileSection id="learning" title="Learning Style" emoji="📚">
+                  <Text style={styles.fieldHint}>How do you learn best?</Text>
+                  <View style={styles.chipRow}>
+                    {LEARNING_STYLE_OPTIONS.map((opt) => (
+                      <Pressable
+                        key={opt.value}
+                        style={[styles.chip, learningStyle === opt.value && styles.chipSelected]}
+                        onPress={() => setLearningStyle(opt.value)}
+                      >
+                        <Text style={[styles.chipText, learningStyle === opt.value && styles.chipTextSelected]}>
+                          {opt.emoji} {opt.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </ProfileSection>
+
+                {/* Background */}
+                <ProfileSection id="background" title="Cultural Background" emoji="🌍">
+                  <Text style={styles.fieldHint}>Helps personalize cultural context</Text>
+                  <View style={styles.chipRow}>
+                    {CULTURAL_BACKGROUND_OPTIONS.slice(0, 8).map((opt) => {
+                      const isSelected = culturalBackground.includes(opt);
+                      return (
+                        <Pressable
+                          key={opt}
+                          style={[styles.chip, isSelected && styles.chipSelected]}
+                          onPress={() => {
+                            if (isSelected) setCulturalBackground(culturalBackground.filter((c) => c !== opt));
+                            else setCulturalBackground([...culturalBackground, opt]);
+                          }}
+                        >
+                          <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </ProfileSection>
+
+                {/* Who Raised You */}
+                <ProfileSection id="upbringing" title="Who Raised You" emoji="👨‍👩‍👧">
+                  <Text style={styles.fieldHint}>Family dynamics shape how we relate</Text>
+                  <View style={styles.chipRow}>
+                    {UPBRINGING_OPTIONS.map((opt) => (
+                      <Pressable
+                        key={opt.value}
+                        style={[styles.chip, upbringing === opt.value && styles.chipSelected]}
+                        onPress={() => setUpbringing(opt.value)}
+                      >
+                        <Text style={[styles.chipText, upbringing === opt.value && styles.chipTextSelected]}>
+                          {opt.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </ProfileSection>
+
+                {/* Language You Think In */}
+                <ProfileSection id="language" title="Language You Think & Feel In" emoji="🗣️">
+                  <Text style={styles.fieldHint}>Gauge can speak your language</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g., English, Spanish, Spanglish..."
+                    placeholderTextColor={COLORS.textMuted}
+                    value={thinkingLanguage}
+                    onChangeText={setThinkingLanguage}
+                  />
+                </ProfileSection>
+
+                {/* Therapy Experience */}
+                <ProfileSection id="therapy" title="Therapy Experience" emoji="🛋️">
+                  <Text style={styles.fieldHint}>Helps calibrate how I talk to you</Text>
+                  <View style={styles.chipRow}>
+                    {THERAPY_OPTIONS.map((opt) => (
+                      <Pressable
+                        key={opt.value}
+                        style={[styles.chip, therapyExp === opt.value && styles.chipSelected]}
+                        onPress={() => setTherapyExp(opt.value)}
+                      >
+                        <Text style={[styles.chipText, therapyExp === opt.value && styles.chipTextSelected]}>
+                          {opt.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </ProfileSection>
+
+                {/* Sensitive Topics */}
+                <ProfileSection id="sensitive" title="Sensitive Topics" emoji="🩹">
+                  <Text style={styles.fieldHint}>Anything I should be gentle about?</Text>
+                  <View style={styles.chipRow}>
+                    {SENSITIVE_TOPIC_OPTIONS.map((opt) => {
+                      const isSelected = sensitiveTopics.includes(opt.value);
+                      return (
+                        <Pressable
+                          key={opt.value}
+                          style={[styles.chip, isSelected && styles.chipSelected]}
+                          onPress={() => {
+                            if (isSelected) setSensitiveTopics(sensitiveTopics.filter((t) => t !== opt.value));
+                            else setSensitiveTopics([...sensitiveTopics, opt.value]);
+                          }}
+                        >
+                          <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt.label}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </ProfileSection>
+
+                <Text style={styles.settingsNote}>
+                  You can always change these in Settings later.
                 </Text>
-                <Text style={styles.cockpitTagline}>
-                  Everything is connected. This is your cockpit.
-                </Text>
-                <Pressable
-                  style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    goNext();
-                  }}
+
+                <Pressable 
+                  style={[styles.primaryBtn, !canProceed() && styles.primaryBtnDisabled]} 
+                  onPress={goNext}
+                  disabled={!canProceed()}
                 >
-                  <Text style={styles.primaryButtonText}>Let's go</Text>
+                  <Text style={styles.primaryBtnText}>Continue</Text>
                 </Pressable>
               </View>
             )}
 
-            {/* STEP 3 — Name, Birthday (optional), Pronouns */}
+            {/* ═══════════════════════════════════════════════════════════
+                STEP 3: Our Promise + I'm Ready
+            ═══════════════════════════════════════════════════════════ */}
             {step === 3 && (
               <View style={styles.step}>
-                <Text style={styles.question}>What should I call you?</Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    nameInputFocused && styles.inputFocused,
-                  ]}
-                  placeholder="Your name"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={name}
-                  onChangeText={setName}
-                  onFocus={() => setNameInputFocused(true)}
-                  onBlur={() => setNameInputFocused(false)}
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                />
-                <Text style={[styles.question, styles.questionMargin]}>Birthday (optional)</Text>
-                <Text style={styles.birthdayHint}>Helps personalize insights based on your life stage</Text>
-                <TextInput
-                  style={[styles.input, styles.inputMargin]}
-                  placeholder="MM/DD/YYYY"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={birthdayInput}
-                  onChangeText={(text) => {
-                    const cleaned = text.replace(/\D/g, '');
-                    if (cleaned.length <= 2) setBirthdayInput(cleaned);
-                    else if (cleaned.length <= 4) setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2));
-                    else setBirthdayInput(cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4) + '/' + cleaned.slice(4, 8));
-                    if (cleaned.length === 8) {
-                      const mm = cleaned.slice(0, 2), dd = cleaned.slice(2, 4), yyyy = cleaned.slice(4, 8);
-                      setBirthday(`${yyyy}-${mm}-${dd}`);
-                    } else {
-                      setBirthday(null);
-                    }
-                  }}
-                  keyboardType="number-pad"
-                  maxLength={10}
-                />
-                <Text style={[styles.question, styles.questionMargin]}>And your pronouns?</Text>
-                <View style={styles.chipRow}>
-                  {PRONOUN_OPTIONS.map((opt) => (
-                    <Pressable
-                      key={opt.value}
-                      style={[
-                        styles.chip,
-                        pronouns === opt.value && styles.chipSelected,
-                      ]}
-                      onPress={() => setPronouns(opt.value)}
-                    >
-                      <Text
-                        style={[
-                          styles.chipText,
-                          pronouns === opt.value && styles.chipTextSelected,
-                        ]}
-                      >
-                        {opt.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-                {pronouns === 'other' && (
-                  <TextInput
-                    style={[styles.input, styles.inputMargin]}
-                    placeholder="Type your pronouns (e.g. ze/zir)"
-                    placeholderTextColor={COLORS.textMuted}
-                    value={customPronouns}
-                    onChangeText={setCustomPronouns}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                  />
-                )}
+                <Text style={styles.pageTitle}>Our Promise to You</Text>
 
-                {/* Optional: Go deeper or skip */}
-                <Pressable
-                  style={styles.optionalToggle}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setShowOptional(!showOptional);
-                  }}
-                >
-                  <Text style={styles.optionalToggleText}>
-                    {showOptional ? '▼ Less' : '▶ Want to go deeper?'}
+                <View style={styles.promiseCard}>
+                  <Text style={styles.promiseLine}>🔒 I'll never share what you tell me.</Text>
+                  <Text style={styles.promiseLine}>💜 I'll never judge you.</Text>
+                  <Text style={styles.promiseLine}>🤝 I'll always be here when you need me.</Text>
+                  <Text style={[styles.promiseLine, styles.promiseHighlight]}>You are not alone.</Text>
+                </View>
+
+                <View style={styles.legalSection}>
+                  <Text style={styles.legalText}>
+                    InGauge is an emotional wellness tool, not a medical device. It does not diagnose, treat, or cure any mental health condition.
                   </Text>
-                  {!showOptional && (
-                    <Text style={styles.optionalToggleHint}>Or skip — you can always add this later in Settings</Text>
-                  )}
-                </Pressable>
-
-                {showOptional && (
-                  <View style={styles.optionalSection}>
-                    {/* Sensitive Topics */}
-                    <Text style={styles.optionalLabel}>Anything I should be gentle about?</Text>
-                    <Text style={styles.optionalHint}>This helps me be more thoughtful. Select any that apply, or skip.</Text>
-                    <View style={styles.sensitiveGrid}>
-                      {SENSITIVE_TOPIC_OPTIONS.map((opt) => {
-                        const isSelected = sensitiveTopics.includes(opt.value);
-                        return (
-                          <Pressable
-                            key={opt.value}
-                            style={[styles.sensitiveChip, isSelected && styles.sensitiveChipSelected]}
-                            onPress={() => {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                              if (isSelected) setSensitiveTopics(sensitiveTopics.filter((t) => t !== opt.value));
-                              else setSensitiveTopics([...sensitiveTopics, opt.value]);
-                            }}
-                          >
-                            {isSelected && <Ionicons name="checkmark-circle" size={16} color={COLORS.accent} style={{ marginRight: 6 }} />}
-                            <Text style={[styles.sensitiveChipText, isSelected && styles.sensitiveChipTextSelected]}>{opt.label}</Text>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-
-                    {/* Cultural Background */}
-                    <Text style={[styles.optionalLabel, { marginTop: 16 }]}>Cultural background?</Text>
-                    <View style={styles.chipRow}>
-                      {CULTURAL_BACKGROUND_OPTIONS.slice(0, 6).map((opt) => {
-                        const isSelected = culturalBackground.includes(opt);
-                        return (
-                          <Pressable
-                            key={opt}
-                            style={[styles.chip, isSelected && styles.chipSelected]}
-                            onPress={() => {
-                              if (isSelected) setCulturalBackground(culturalBackground.filter((c) => c !== opt));
-                              else setCulturalBackground([...culturalBackground, opt]);
-                            }}
-                          >
-                            <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>{opt}</Text>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-
-                    {/* Learning Style */}
-                    <Text style={[styles.optionalLabel, { marginTop: 16 }]}>How do you learn best?</Text>
-                    <View style={styles.chipRow}>
-                      {LEARNING_STYLE_OPTIONS.map((opt) => (
-                        <Pressable
-                          key={opt.value}
-                          style={[styles.chip, learningStyle === opt.value && styles.chipSelected]}
-                          onPress={() => setLearningStyle(opt.value)}
-                        >
-                          <Text style={[styles.chipText, learningStyle === opt.value && styles.chipTextSelected]}>
-                            {opt.emoji} {opt.label.split(' — ')[0]}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </View>
-                )}
-
-                <Text style={styles.pronounHint}>You can change all of this in settings.</Text>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.primaryButton,
-                    pressed && styles.primaryButtonPressed,
-                    !canProceed() && styles.primaryButtonDisabled,
-                  ]}
-                  onPress={goNext}
-                  disabled={!canProceed()}
-                >
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                </Pressable>
-              </View>
-            )}
-
-            {/* STEP 4 — Age Group */}
-            {step === 4 && (
-              <View style={styles.step}>
-                <Text style={styles.question}>What stage of life are you in?</Text>
-                <Text style={styles.explain}>This helps me speak your language.</Text>
-                <View style={styles.cardGrid}>
-                  {AGE_OPTIONS.map((opt) => (
-                    <Pressable
-                      key={opt.value}
-                      style={[
-                        styles.ageCard,
-                        ageGroup === opt.value && styles.ageCardSelected,
-                      ]}
-                      onPress={() => handleChoiceThenNext(() => setAgeGroup(opt.value))}
-                    >
-                      <Text style={styles.ageEmoji}>{opt.emoji}</Text>
-                      <Text
-                        style={[
-                          styles.ageLabel,
-                          ageGroup === opt.value && styles.ageLabelSelected,
-                        ]}
-                      >
-                        {opt.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {/* STEP 5 — Love Language */}
-            {step === 5 && (
-              <View style={styles.step}>
-                <Text style={styles.question}>How do you feel most cared for?</Text>
-                <View style={styles.loveCardList}>
-                  {LOVE_LANGUAGE_OPTIONS.map((opt) => (
-                    <Pressable
-                      key={opt.value}
-                      style={[
-                        styles.loveCard,
-                        loveLanguage === opt.value && styles.loveCardSelected,
-                      ]}
-                      onPress={() => handleChoiceThenNext(() => setLoveLanguage(opt.value))}
-                    >
-                      <Text
-                        style={[
-                          styles.loveCardLabel,
-                          loveLanguage === opt.value && styles.loveCardLabelSelected,
-                        ]}
-                      >
-                        {opt.label}
-                      </Text>
-                      {opt.sublabel ? (
-                        <Text style={styles.loveCardSublabel}>{opt.sublabel}</Text>
-                      ) : null}
-                    </Pressable>
-                  ))}
-                </View>
-                <Pressable onPress={() => Linking.openURL('https://5lovelanguages.com/quizzes/love-language')}>
-                  <Text style={styles.loveLanguageQuizLink}>
-                    Don't know yours? Take a 2-min quiz →
+                  <Text style={styles.legalText}>
+                    If you are in crisis, please contact <Text style={styles.legalBold}>988</Text> (Suicide & Crisis Lifeline), text HOME to <Text style={styles.legalBold}>741741</Text>, or call <Text style={styles.legalBold}>911</Text>.
                   </Text>
-                </Pressable>
-                <Text style={styles.loveLanguageNote}>
-                  No worries — I'll learn what makes you feel cared for as we talk.
-                </Text>
-              </View>
-            )}
-
-            {/* STEP 6 — First Connection */}
-            {step === 6 && (
-              <View style={styles.step}>
-                <Text style={styles.question}>
-                  Would you like to connect someone who cares about you?
-                </Text>
-                <Text style={styles.explain}>
-                  They'll see how you're doing (green / yellow / orange / red) but NEVER what
-                  you've said here. You control everything.
-                </Text>
-                <View style={styles.twoOptions}>
-                  <Pressable
-                    style={[
-                      styles.optionCard,
-                      wantsToInvite === true && styles.optionCardSelected,
-                    ]}
-                    onPress={() => setWantsToInvite(true)}
-                  >
-                    <Text
-                      style={[
-                        styles.optionCardText,
-                        wantsToInvite === true && styles.optionCardTextSelected,
-                      ]}
-                    >
-                      Yes, invite someone
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    style={[
-                      styles.optionCard,
-                      wantsToInvite === false && styles.optionCardSelected,
-                    ]}
-                    onPress={() => handleChoiceThenNext(() => {
-                      setWantsToInvite(false);
-                      setCircleInvite(null);
-                    })}
-                  >
-                    <Text
-                      style={[
-                        styles.optionCardText,
-                        wantsToInvite === false && styles.optionCardTextSelected,
-                      ]}
-                    >
-                      Maybe later
-                    </Text>
-                  </Pressable>
-                </View>
-                {wantsToInvite === true && (
-                  <View style={styles.inviteFields}>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Their name"
-                      placeholderTextColor={COLORS.textMuted}
-                      value={inviteName}
-                      onChangeText={setInviteName}
-                    />
-                    <Text style={styles.smallLabel}>Relationship</Text>
-                    <View style={styles.chipRow}>
-                      {RELATIONSHIP_OPTIONS.map((opt) => (
-                        <Pressable
-                          key={opt.value}
-                          style={[
-                            styles.chip,
-                            inviteRelationship === opt.value && styles.chipSelected,
-                          ]}
-                          onPress={() => setInviteRelationship(opt.value)}
-                        >
-                          <Text
-                            style={[
-                              styles.chipText,
-                              inviteRelationship === opt.value && styles.chipTextSelected,
-                            ]}
-                          >
-                            {opt.label}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </View>
-                )}
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.primaryButton,
-                    pressed && styles.primaryButtonPressed,
-                    !canProceed() && styles.primaryButtonDisabled,
-                  ]}
-                  onPress={goNext}
-                  disabled={!canProceed()}
-                >
-                  <Text style={styles.primaryButtonText}>Continue</Text>
-                </Pressable>
-                <Pressable style={styles.skipButton} onPress={handleSkip}>
-                  <Text style={styles.skipText}>Skip for now</Text>
-                </Pressable>
-              </View>
-            )}
-
-            {/* STEP 7 — Promise (last step: open notification modal directly) */}
-            {step === 7 && (
-              <View style={styles.step}>
-                <Text style={styles.question}>Here's my promise to you:</Text>
-                <View style={styles.promiseList}>
-                  <Text style={styles.promiseLine}>I'll never judge you.</Text>
-                  <Text style={styles.promiseLine}>I'll never share what you tell me.</Text>
-                  <Text style={styles.promiseLine}>I'll always be here when you need me.</Text>
-                  <Text style={[styles.promiseLine, styles.promiseLast]}>
-                    You are not alone.
+                  <Text style={styles.legalText}>
+                    By using this app, you agree to our{' '}
+                    <Text style={styles.legalLink} onPress={() => Linking.openURL('https://alln1network.com/terms')}>Terms of Service</Text>
+                    {' '}and{' '}
+                    <Text style={styles.legalLink} onPress={() => Linking.openURL('https://alln1network.com/privacy')}>Privacy Policy</Text>.
+                  </Text>
+                  <Text style={styles.legalText}>
+                    Your data is encrypted and only you can access it. We never sell individual data. Export or delete anytime from Settings.
                   </Text>
                 </View>
-                <Text style={styles.disclaimerText}>
-                  InGauge is an emotional wellness tool, not a medical device. It does not diagnose, treat, or cure any mental health condition. If you are in crisis, please contact 988 (Suicide & Crisis Lifeline), text HOME to 741741, or call 911. By using this app, you agree to our{' '}
-                  <Text style={styles.disclaimerLink} onPress={() => Linking.openURL('https://alln1network.com/terms')}>Terms of Service</Text>
-                  {' '}and{' '}
-                  <Text style={styles.disclaimerLink} onPress={() => Linking.openURL('https://alln1network.com/privacy')}>Privacy Policy</Text>.
-                </Text>
-                <Text style={styles.dataRetentionText}>
-                  Your conversations and data are stored securely and encrypted. Only you can access your personal data. We never sell individual data. You can export or delete your data anytime from Settings.
-                </Text>
-                <Pressable
-                  style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
-                  onPress={() => setShowNotificationPrompt(true)}
-                >
-                  <Text style={styles.primaryButtonText}>I'm ready</Text>
+
+                <Pressable style={styles.primaryBtn} onPress={goNext}>
+                  <Text style={styles.primaryBtnText}>I'm Ready</Text>
                 </Pressable>
               </View>
             )}
+
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -782,486 +637,162 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
+  container: { flex: 1, backgroundColor: COLORS.background },
   flex: { flex: 1 },
-  progressWrap: {
+  
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    paddingHorizontal: 8,
   },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    marginBottom: 8,
-    gap: 4,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: COLORS.accent,
-    fontWeight: '500',
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
-  },
-  stepLabel: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.surface,
-  },
-  dotActive: {
-    backgroundColor: COLORS.accent,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
+  backBtn: { width: 40, padding: 8 },
+  dotsRow: { flexDirection: 'row', gap: 8 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.surface },
+  dotActive: { backgroundColor: COLORS.accent, width: 24 },
+  
   scroll: { flex: 1 },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 40,
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
+  step: { paddingTop: 8 },
+
+  // Step 1 - Hero
+  heroTitle: { fontSize: 32, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
+  heroTagline: { fontSize: 17, color: COLORS.textSecondary, marginBottom: 24, lineHeight: 24 },
+  
+  introCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
   },
-  stepContent: {
-    minHeight: 400,
-  },
-  step: {
-    paddingTop: 8,
-  },
-  welcomeTitle: {
-    ...TYPOGRAPHY.displayMd,
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  welcomeSub: {
-    ...TYPOGRAPHY.bodyLg,
-    color: COLORS.textSecondary,
-    lineHeight: 26,
-    marginBottom: SPACING.xxxl,
-  },
-  cockpitIntroText: {
-    ...TYPOGRAPHY.bodyLg,
-    color: COLORS.textSecondary,
-    lineHeight: 26,
-    marginBottom: SPACING.md,
-    textAlign: 'center',
-  },
-  cockpitHighlight: {
-    color: COLORS.text,
-    fontWeight: '600',
-  },
-  cockpitVisual: {
-    alignItems: 'center',
-    marginVertical: SPACING.xl,
-  },
-  cockpitRing: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 4,
-    borderColor: COLORS.accent,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-    shadowColor: COLORS.accent,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  cockpitBrain: {
-    fontSize: 40,
-  },
-  cockpitDotsRow: {
-    flexDirection: 'row',
-    gap: 16,
-    marginVertical: 4,
-  },
-  cockpitDot: {
-    width: 14,
-    height: 14,
-  },
-  gaugesIntroGrid: {
+  introCardTitle: { fontSize: 18, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
+  introCardText: { fontSize: 15, color: COLORS.textSecondary, lineHeight: 22 },
+  
+  gaugesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 12,
-    marginBottom: SPACING.xl,
-    paddingHorizontal: SPACING.md,
+    marginBottom: 20,
   },
-  gaugeIntroItem: {
+  gaugeItem: { alignItems: 'center', width: 80 },
+  gaugeIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  gaugeEmoji: { fontSize: 24 },
+  gaugeLabel: { fontSize: 12, fontWeight: '600' },
+  
+  introText: { fontSize: 16, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 26, marginBottom: 24 },
+  introTextBold: { color: COLORS.text, fontWeight: '600' },
+  
+  featuresList: { gap: 12, marginBottom: 32 },
+  featureItem: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  featureText: { fontSize: 15, color: COLORS.text, flex: 1 },
+
+  // Step 2 - Profile
+  pageTitle: { fontSize: 28, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
+  pageSubtitle: { fontSize: 15, color: COLORS.textSecondary, lineHeight: 22, marginBottom: 24 },
+  
+  sectionCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    width: 90,
+    justifyContent: 'space-between',
+    padding: 16,
   },
-  gaugeIntroIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  gaugeIntroEmoji: {
-    fontSize: 22,
-  },
-  gaugeIntroLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    borderRadius: 7,
-    shadowColor: '#fff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  cockpitTagline: {
-    ...TYPOGRAPHY.bodyLg,
-    color: COLORS.text,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-  primaryButton: {
-    backgroundColor: COLORS.accent,
-    paddingVertical: SPACING.lg,
-    borderRadius: BORDER_RADIUS.md,
-    alignItems: 'center',
-    marginTop: SPACING.xl,
-  },
-  primaryButtonPressed: { opacity: 0.9 },
-  primaryButtonDisabled: { opacity: 0.5 },
-  primaryButtonText: {
-    ...TYPOGRAPHY.labelLg,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  question: {
-    ...TYPOGRAPHY.headlineLg,
-    color: COLORS.text,
-    marginBottom: SPACING.lg,
-  },
-  questionMargin: { marginTop: 28, marginBottom: 12 },
-  birthdayHint: {
-    ...TYPOGRAPHY.bodySm,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.sm,
-  },
+  sectionHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  sectionEmoji: { fontSize: 20 },
+  sectionTitle: { fontSize: 16, fontWeight: '600', color: COLORS.text },
+  optionalBadge: { fontSize: 11, color: COLORS.textMuted, backgroundColor: COLORS.background, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
+  sectionContent: { paddingHorizontal: 16, paddingBottom: 16 },
+  
+  fieldLabel: { fontSize: 14, fontWeight: '600', color: COLORS.text, marginBottom: 8, marginTop: 8 },
+  fieldHint: { fontSize: 13, color: COLORS.textMuted, marginBottom: 12 },
+  
   input: {
-    backgroundColor: COLORS.inputSurface,
-    borderRadius: BORDER_RADIUS.input,
+    backgroundColor: COLORS.background,
+    borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    fontSize: 17,
+    paddingVertical: 14,
+    fontSize: 16,
     color: COLORS.text,
-    borderWidth: 2,
-    borderColor: 'transparent',
+    marginBottom: 12,
   },
-  inputFocused: {
-    borderColor: COLORS.accent,
-  },
-  inputMargin: { marginTop: 12, marginBottom: 4 },
-  pronounHint: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    marginBottom: 16,
-  },
-  optionalToggle: {
-    marginTop: 20,
-    marginBottom: 8,
-    paddingVertical: 12,
-  },
-  optionalToggleText: {
-    fontSize: 15,
-    color: COLORS.accent,
-    fontWeight: '600',
-  },
-  optionalToggleHint: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    marginTop: 4,
-  },
-  optionalSection: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
-  optionalLabel: {
-    ...TYPOGRAPHY.headlineSm,
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
-  },
-  optionalHint: {
-    ...TYPOGRAPHY.bodySm,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.lg,
-    lineHeight: 20,
-  },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
+  
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
   chip: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    borderRadius: BORDER_RADIUS.full,
-    backgroundColor: COLORS.surface,
-  },
-  chipSelected: {
-    backgroundColor: COLORS.accent,
-  },
-  chipText: {
-    ...TYPOGRAPHY.labelMd,
-    color: COLORS.textMuted,
-  },
-  chipTextSelected: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  sensitiveGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-    marginBottom: SPACING.lg,
-  },
-  sensitiveChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
     backgroundColor: COLORS.background,
   },
-  sensitiveChipSelected: {
-    backgroundColor: COLORS.accentBg,
-  },
-  sensitiveChipText: {
-    ...TYPOGRAPHY.labelSm,
-    color: COLORS.textSecondary,
-  },
-  sensitiveChipTextSelected: {
-    color: COLORS.accent,
-    fontWeight: '600',
-  },
-  cardGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 16,
-  },
-  ageCard: {
-    width: '30%',
-    minWidth: 100,
+  chipSelected: { backgroundColor: COLORS.accent },
+  chipText: { fontSize: 14, color: COLORS.textMuted },
+  chipTextSelected: { color: '#fff', fontWeight: '600' },
+  
+  quizLink: { fontSize: 14, color: COLORS.accent, marginTop: 8 },
+  settingsNote: { fontSize: 13, color: COLORS.textMuted, textAlign: 'center', marginTop: 16, marginBottom: 8 },
+
+  // Step 3 - Promise
+  promiseCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 16,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  ageCardSelected: {
-    borderColor: COLORS.accent,
-    backgroundColor: COLORS.inputSurface,
-  },
-  ageEmoji: {
-    fontSize: 28,
-    marginBottom: 8,
-  },
-  ageLabel: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-  },
-  ageLabelSelected: {
-    color: COLORS.text,
-    fontWeight: '500',
-  },
-  commCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 20,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  commCardSelected: {
-    borderColor: COLORS.accent,
-    backgroundColor: COLORS.inputSurface,
-  },
-  commCardText: {
-    fontSize: 16,
-    color: COLORS.textMuted,
-    flex: 1,
-  },
-  commCardTextSelected: {
-    color: COLORS.text,
-    fontWeight: '500',
-  },
-  note: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  loveCardList: { gap: 10, marginBottom: 12 },
-  loveLanguageNote: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    lineHeight: 20,
-    marginBottom: 16,
-    fontStyle: 'italic',
-  },
-  loveLanguageQuizLink: {
-    fontSize: 14,
-    color: COLORS.accent,
-    textAlign: 'center',
-    marginBottom: 12,
-    textDecorationLine: 'underline',
-  },
-  loveCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 18,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  loveCardSelected: {
-    borderColor: COLORS.accent,
-    backgroundColor: COLORS.inputSurface,
-  },
-  loveCardLabel: {
-    fontSize: 16,
-    color: COLORS.text,
-    fontWeight: '500',
-  },
-  loveCardLabelSelected: {
-    color: COLORS.accentMuted,
-  },
-  loveCardSublabel: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  explain: {
-    fontSize: 15,
-    color: COLORS.textMuted,
-    lineHeight: 22,
+    borderRadius: 16,
+    padding: 24,
     marginBottom: 24,
   },
-  twoOptions: { gap: 12, marginBottom: 20 },
-  optionCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  optionCardSelected: {
-    borderColor: COLORS.accent,
-    backgroundColor: COLORS.inputSurface,
-  },
-  optionCardText: {
-    fontSize: 17,
-    color: COLORS.textMuted,
-  },
-  optionCardTextSelected: {
-    color: COLORS.text,
-    fontWeight: '600',
-  },
-  inviteFields: {
-    marginBottom: 24,
-  },
-  smallLabel: {
-    fontSize: 14,
-    color: COLORS.textMuted,
+  promiseLine: { fontSize: 17, color: COLORS.text, lineHeight: 32 },
+  promiseHighlight: { fontSize: 20, fontWeight: '700', color: COLORS.accent, marginTop: 12 },
+  
+  legalSection: { marginBottom: 24 },
+  legalText: { fontSize: 13, color: COLORS.textMuted, lineHeight: 20, marginBottom: 12 },
+  legalBold: { fontWeight: '600', color: COLORS.text },
+  legalLink: { color: COLORS.accent, textDecorationLine: 'underline' },
+
+  // Buttons
+  primaryBtn: {
+    backgroundColor: COLORS.accent,
+    paddingVertical: 18,
+    borderRadius: 14,
+    alignItems: 'center',
     marginTop: 16,
-    marginBottom: 8,
   },
-  skipButton: {
-    alignSelf: 'center',
-    marginTop: 20,
-    paddingVertical: 12,
-  },
-  skipText: {
-    fontSize: 15,
-    color: COLORS.textMuted,
-  },
-  notificationPromptOverlay: {
+  primaryBtnDisabled: { opacity: 0.5 },
+  primaryBtnText: { fontSize: 17, fontWeight: '700', color: '#fff' },
+
+  // Modal
+  modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.9)',
+    backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: SPACING.xl,
+    padding: 24,
   },
-  notificationPromptCard: {
+  modalCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.xl,
+    borderRadius: 20,
+    padding: 28,
     width: '100%',
     maxWidth: 340,
+    alignItems: 'center',
   },
-  notificationPromptTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: COLORS.text,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  notificationPromptSub: {
-    fontSize: 16,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  promiseList: {
-    marginBottom: 40,
-  },
-  promiseLine: {
-    fontSize: 18,
-    color: COLORS.text,
-    lineHeight: 28,
+  modalEmoji: { fontSize: 48, marginBottom: 16 },
+  modalTitle: { fontSize: 20, fontWeight: '700', color: COLORS.text, textAlign: 'center', marginBottom: 8 },
+  modalSub: { fontSize: 15, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 22, marginBottom: 24 },
+  modalPrimaryBtn: {
+    backgroundColor: COLORS.accent,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    width: '100%',
+    alignItems: 'center',
     marginBottom: 12,
   },
-  promiseLast: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: COLORS.accentMuted,
-    marginTop: 8,
-    marginBottom: 0,
-  },
-  disclaimerText: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    lineHeight: 18,
-    marginTop: 24,
-    marginBottom: 12,
-  },
-  disclaimerLink: {
-    color: COLORS.accent,
-    textDecorationLine: 'underline',
-  },
-  dataRetentionText: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    lineHeight: 18,
-    marginBottom: 24,
-  },
+  modalPrimaryBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  modalSecondaryBtn: { paddingVertical: 12 },
+  modalSecondaryBtnText: { fontSize: 15, color: COLORS.textMuted },
 });
