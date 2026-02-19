@@ -51,7 +51,7 @@ const COLORS = {
   locked: '#3A3A4A',
 };
 
-// The 6 Gauges - Core System Explanation
+// The 6 Gauges - Core System Explanation (THE REAL JUICE)
 const GAUGE_SYSTEM = {
   intro: "You are not broken. You are a system. And now you have a dashboard.",
   philosophy: "Most self-help treats you like a problem to fix. InGauge treats you like a machine to understand. These 6 gauges are your operating system — check them regularly, and you'll finally know what's actually going on inside.",
@@ -62,9 +62,28 @@ const GAUGE_SYSTEM = {
       name: 'Body',
       color: '#F87171',
       tagline: 'The hardware running everything',
-      description: "Sleep, food, water, movement, hormones. Your body is the foundation. When it's depleted, everything else crashes. You can't think clearly when you're dehydrated. You can't regulate emotions on 4 hours of sleep. Fix the body first.",
-      whenLow: "Check basics: When did you last eat? Drink water? Sleep? Move? Your 'emotional problem' might be a blood sugar problem.",
-      science: "Sleep deprivation amplifies amygdala reactivity by 60%. Your brain literally can't regulate emotions properly when tired.",
+      description: "Your body isn't separate from your mind — it IS your mind's infrastructure. Every thought you think, every emotion you feel, runs on physical hardware: neurons that need glucose, neurotransmitters that need amino acids from protein, a prefrontal cortex that goes offline without sleep. When people say 'it's all in your head,' they're accidentally right — your head runs on a body.",
+      sections: [
+        {
+          title: "Why Body Comes First",
+          content: "You cannot think clearly when dehydrated — your brain is 75% water. You cannot regulate emotions on 4 hours of sleep — your amygdala becomes 60% more reactive. You cannot make good decisions with low blood sugar — your prefrontal cortex literally loses power. This isn't weakness. This is physics. The most sophisticated emotional intelligence in the world won't help if the hardware is failing."
+        },
+        {
+          title: "The Big 5 Body Inputs",
+          content: "Sleep: 7-9 hours for adults. Less than 6 hours = cognitive impairment equivalent to being legally drunk. Your brain consolidates emotional memories during REM — skip it and yesterday's stress carries into today.\n\nFood: Your brain burns 20% of your calories. Low blood sugar mimics anxiety symptoms identically — racing heart, sweaty palms, dread. Eat protein with every meal; it stabilizes glucose.\n\nWater: 1-2% dehydration impairs cognition and mood. By the time you feel thirsty, you're already there. Most people walk around chronically dehydrated.\n\nMovement: Exercise releases BDNF — fertilizer for your brain. A 20-minute walk changes your neurochemistry. Sitting for 8+ hours increases anxiety and depression risk.\n\nHormones: Cortisol, estrogen, testosterone, thyroid — these invisible chemicals shape your mood more than your circumstances do. Menstrual cycles, stress responses, and aging all shift the chemical soup you're swimming in."
+        },
+        {
+          title: "The Body-Emotion Loop",
+          content: "Here's what most people miss: emotions aren't just mental — they're physical events. Anxiety is a racing heart, shallow breathing, and muscle tension. Sadness is heaviness, low energy, and slowed movement. You can't separate the feeling from the body sensation. This is why body-based interventions (breathing, movement, cold water) work when 'thinking positive' fails. You're not going around the emotion — you're addressing it at the source."
+        }
+      ],
+      whenLow: "Before diagnosing yourself with depression or anxiety, check: When did you last eat something with protein? How much water today? How many hours of sleep last night? When did you last move your body for 20+ minutes? Your 'emotional problem' might be a blood sugar problem wearing an emotional costume.",
+      realWorld: [
+        "A mother snaps at her kids every evening at 5pm. She thinks she has an anger problem. She actually has a blood sugar problem — she hasn't eaten since noon. A snack at 3:30pm changes her entire evening.",
+        "A college student can't focus or regulate emotions on Sunday nights. It's not just Monday dread — his weekend sleep schedule (up until 3am) has disrupted his circadian rhythm. Fix the sleep, fix the scaries.",
+        "Someone feels 'randomly anxious' every afternoon. When they track it, it correlates perfectly with skipping lunch. The anxiety wasn't random — it was hunger in disguise."
+      ],
+      science: "Sleep deprivation amplifies amygdala reactivity by 60% (Walker, 2017). Dehydration of just 1-2% impairs cognitive function and elevates anxiety (Biopsychology, Pinel). The gut produces 95% of the body's serotonin — digestive health directly impacts mood (gut-brain axis research). Exercise increases BDNF, promoting neuroplasticity and reducing depression symptoms as effectively as medication in some studies.",
     },
     {
       id: 'state',
@@ -72,19 +91,61 @@ const GAUGE_SYSTEM = {
       name: 'State',
       color: '#FACC15',
       tagline: 'Your nervous system right now',
-      description: "Are you activated (fight/flight), calm (rest/digest), or shut down (freeze)? Your state determines how you perceive everything. The same comment from your partner feels fine when you're calm and like an attack when you're activated.",
-      whenLow: "You're either revved up or shut down. Breathing, movement, or being near someone calm can shift your state. You can't think your way out — regulate the body first.",
-      science: "Your nervous system runs faster than thought. That's why 'just calm down' doesn't work. The body must be regulated before the mind can follow.",
+      description: "Your autonomic nervous system has three modes, not two. Fight-or-flight (sympathetic activation) is the gas pedal — heart racing, muscles tense, ready for action. Rest-and-digest (parasympathetic) is the brake — calm, present, able to think. But there's a third: freeze/shutdown (dorsal vagal) — when the system gets SO overwhelmed it just... stops. Numbness, disconnection, can't move. That's not laziness. That's your oldest survival system.",
+      sections: [
+        {
+          title: "The Three States",
+          content: "Sympathetic (Fight/Flight): Pupils dilate, heart races, blood flows to muscles, digestion stops, thinking narrows to threat. Good for escaping danger. Terrible for having a nuanced conversation or making complex decisions. When you're here, everything looks like a threat.\n\nParasympathetic (Rest/Digest): Heart slows, muscles relax, digestion works, prefrontal cortex comes online. This is where you can think clearly, connect with others, and make good choices. This is where you want to be for most of life.\n\nDorsal Vagal (Freeze/Shutdown): When threat is overwhelming and you can't fight or flee, the system shuts down. Numbness, dissociation, collapse, 'playing dead.' This isn't a choice — it's an ancient mammalian response. Depression often has freeze-state components."
+        },
+        {
+          title: "Why State Changes Everything",
+          content: "Here's the key insight: your nervous system state determines how you perceive reality. The same comment from your partner feels like helpful feedback when you're regulated and like a vicious attack when you're activated. You're not being dramatic — your threat-detection system is running hot, so it finds threats.\n\nThis is why arguments escalate. Person A says something slightly edgy. Person B, already activated, perceives it as an attack and responds defensively. Person A, now activated by the defensive response, escalates. Neither person is 'wrong' — both nervous systems are in threat mode, co-creating conflict."
+        },
+        {
+          title: "You Can't Think Your Way Out",
+          content: "Your autonomic nervous system runs faster than thought. By the time you're aware you're upset, your body has already flooded with cortisol and adrenaline. That's why 'just calm down' and 'be rational' don't work — you're asking the thinking brain to override a system that's been online for millions of years.\n\nThe only way out is through the body. Slow exhales activate the parasympathetic system (the vagus nerve responds to breathing patterns). Cold water on the face triggers the dive reflex. Movement discharges the activation energy. Presence of a calm person regulates you through co-regulation."
+        }
+      ],
+      whenLow: "If you're activated (anxious, angry, reactive): Box breathing — 4 counts in, 4 hold, 4 out, 4 hold. Repeat 4+ times. Cold water on face. Walk around the block. Don't try to 'think through' the issue until your body calms first.\n\nIf you're in freeze (numb, can't move, dissociated): Gentle movement. Shake your hands. Push against a wall. Hum or sing (activates vagus nerve). Don't force yourself to 'snap out of it' — invite your system back slowly.",
+      realWorld: [
+        "A person in an argument says something they regret. In the moment, their amygdala was running the show. After 90 seconds and some deep breaths, the prefrontal cortex could have chosen a different response. They're not 'bad' — their nervous system was in survival mode.",
+        "Someone who 'can't get off the couch' isn't lazy — they're in freeze. Telling them to 'just do it' increases shame without addressing the nervous system state. Gentle activation (stretching, music) works better than willpower.",
+        "A parent yells at their kids when stressed. They know they shouldn't. But in that moment, their window of tolerance closed and their survival brain took over. Expanding that window requires nervous system training, not just good intentions."
+      ],
+      science: "Polyvagal Theory (Stephen Porges) identifies three branches of the autonomic nervous system and how they shape perception and behavior. The amygdala can trigger a threat response in 12 milliseconds — before conscious awareness. Co-regulation is documented: a calm person's presence measurably affects another's heart rate variability. The vagus nerve, activated by slow exhales, is the body's primary brake on stress response.",
     },
     {
       id: 'emotion',
       emoji: '💜',
       name: 'Emotion',
       color: '#A78BFA',
-      tagline: 'What you're actually feeling',
-      description: "Not just 'good' or 'bad' — there are 27+ documented emotions. The more precisely you can name what you feel, the better your brain can process it. Anger usually masks something more vulnerable underneath.",
-      whenLow: "Name it to tame it. Use the emotion wheel. Ask: what's underneath this? Anger often hides hurt, fear, or powerlessness.",
-      science: "Emotional granularity (precise naming) predicts mental health outcomes. People with more emotion words have better regulation.",
+      tagline: 'What you\'re actually feeling',
+      description: "Emotions are data, not directives. They're your brain's assessment of how things are going relative to your goals and needs. Fear says 'threat detected.' Anger says 'boundary violated.' Sadness says 'loss registered.' They're not good or bad — they're information. The problem isn't having emotions; it's not knowing what they're telling you.",
+      sections: [
+        {
+          title: "More Than Happy, Sad, Mad",
+          content: "Research identifies at least 27 distinct emotions — not just the 5-7 most people use. The difference between 'frustrated' and 'disappointed' matters. The difference between 'anxious' and 'excited' matters (they feel nearly identical in the body). The difference between 'sad' and 'lonely' determines what you need.\n\nThis is called emotional granularity, and it predicts mental health outcomes better than almost any other single factor. People who can precisely name what they feel regulate better, have fewer depression symptoms, and recover from setbacks faster. It's not about being 'emotional' — it's about being emotionally literate."
+        },
+        {
+          title: "Primary vs. Secondary Emotions",
+          content: "Anger is almost never the primary emotion. It's the bodyguard — it shows up to protect something more vulnerable underneath. Under anger, you'll usually find hurt (they didn't care about my feelings), fear (I might lose this relationship), or powerlessness (I can't control this situation).\n\nAnxiety often masks grief, excitement, or unprocessed old fear. 'Laziness' often masks overwhelm, depression, or freeze state. 'Fine' almost always masks something else entirely.\n\nThe therapeutic question is always: 'What's underneath this?' Keep asking until you hit something that resonates."
+        },
+        {
+          title: "Emotions Are Physical Events",
+          content: "Every emotion has a body signature. Anxiety: tight chest, shallow breathing, racing heart. Sadness: heaviness, low energy, throat tightness. Shame: heat in face, desire to curl inward, can't make eye contact. Joy: expansion, lightness, upward energy.\n\nThis is why you can't 'think' your way out of an emotion — it's not just in your head. It's in your body. And it's why body-based approaches (feeling into the sensation, breathing into the tightness) often work when cognitive approaches fail."
+        },
+        {
+          title: "Name It to Tame It",
+          content: "Brain imaging shows that simply naming an emotion (affect labeling) reduces amygdala activation. Putting words to feelings moves processing from the emotional brain to the prefrontal cortex. You're not wallowing — you're literally helping your brain process.\n\nBut the label has to be accurate. Calling everything 'stressed' doesn't help. Saying 'I'm anxious about the presentation, disappointed in myself for procrastinating, and honestly a little excited underneath' — that gives your brain specific information to work with."
+        }
+      ],
+      whenLow: "Pause and actually name what you feel — precisely. Use an emotion wheel if needed. Ask: what's underneath this? What does this emotion need? Sometimes it needs expression (talk, write, move). Sometimes it needs action. Sometimes it just needs to be witnessed. Don't try to fix it until you've understood it.",
+      realWorld: [
+        "A person who always says 'I'm fine' when they're not is often suppressing — which research shows increases internal stress and cortisol. The brave face doesn't help; it costs more. When they finally name the feeling (overwhelmed, lonely, scared), it becomes manageable.",
+        "A manager snaps at his team every Monday morning. He thinks he has an anger problem. Underneath: dread of the week ahead and fear of underperforming. Once he names the fear, the anger loses its grip.",
+        "Someone feels 'anxious' before every date. When they get granular: nervous about rejection, excited about possibility, and worried they'll be boring. Three different feelings, three different needs, three different responses."
+      ],
+      science: "Emotional granularity predicts mental health outcomes (Lisa Feldman Barrett). Affect labeling reduces amygdala activation in brain imaging studies (Lieberman et al.). Suppression of emotions increases sympathetic nervous system activation and impairs memory. There are documented physiological signatures for distinct emotions across cultures (Ekman, Levenson).",
     },
     {
       id: 'connection',
@@ -92,9 +153,32 @@ const GAUGE_SYSTEM = {
       name: 'Connection',
       color: '#4ADE80',
       tagline: 'Your relationship to others',
-      description: "Humans are wired for connection. Loneliness isn't just sad — it's processed by your brain like physical pain. Quality matters more than quantity. One real conversation beats 100 shallow ones.",
-      whenLow: "Reach out to someone. Not a text — a real conversation. Your nervous system literally calms down in the presence of safe others.",
-      science: "Social exclusion activates the same brain regions as physical injury. Connection is a biological need, not a luxury.",
+      description: "Humans are not solo creatures who sometimes socialize. We're social creatures who sometimes need solitude. Our nervous systems were designed to be regulated by other nervous systems. Loneliness isn't just emotionally painful — your brain processes it in the same regions as physical pain. Connection isn't a nice-to-have. It's a biological requirement.",
+      sections: [
+        {
+          title: "Wired for Connection",
+          content: "Babies who are fed but not held fail to thrive and can literally die — a phenomenon called 'failure to thrive.' Adults who are socially isolated have mortality risks comparable to smoking 15 cigarettes a day. Your immune system weakens. Your blood pressure rises. Your cognitive function declines.\n\nThis isn't because connection feels nice. It's because your body treats isolation as a threat state. Evolutionarily, a human alone was a human about to die. Your biology still operates on that assumption."
+        },
+        {
+          title: "Quality Over Quantity",
+          content: "It's not about having lots of friends. It's about having relationships where you feel seen, safe, and able to be yourself. One deep friendship beats 50 surface-level connections. One conversation where you feel truly heard beats a month of small talk.\n\nThe key variable is whether you can be authentic. If you have to perform, mask, or manage impression constantly, the connection doesn't 'count' neurologically. Your nervous system knows the difference between real and performed connection."
+        },
+        {
+          title: "Co-Regulation Is Real",
+          content: "When you're dysregulated and a calm person sits with you, your nervous system starts matching theirs. This isn't metaphor — heart rate variability actually synchronizes between people in close proximity. Babies learn to regulate through their caregiver's nervous system. Adults still benefit from this, though we forget.\n\nThis is why being around anxious people makes you anxious and being around calm people calms you down. It's why calling a friend when you're spiraling helps even if they don't say anything brilliant. Presence is medicine."
+        },
+        {
+          title: "Attachment Patterns",
+          content: "How you connected (or didn't) with early caregivers shapes how you connect now. Secure attachment: comfortable with intimacy and independence. Anxious attachment: fear of abandonment, need for reassurance. Avoidant attachment: discomfort with closeness, valuing independence to a fault. Disorganized: mixed signals, often from early trauma.\n\nThese aren't destiny. They're starting points. Understanding your pattern helps you work with it rather than being run by it."
+        }
+      ],
+      whenLow: "Reach out to someone — and be real with them. Not a performative text. An actual conversation where you say how you're actually doing. If you don't have that person, consider: what pattern might be blocking connection? And start small — a genuine interaction with a barista counts more than a fake interaction with a 'friend.'",
+      realWorld: [
+        "A man has lots of friends and still feels lonely. He never lets any of them see him struggle. The quantity is there; the depth isn't. When he finally shares something vulnerable with one friend, the loneliness breaks.",
+        "A woman feels anxious every evening. She lives alone and works from home. Her nervous system is spending 23 hours a day without co-regulation. She starts working from coffee shops occasionally. Anxiety decreases without 'treating' it directly.",
+        "A teenager feels disconnected despite constant texting. There's contact but no connection. One real, face-to-face conversation with a friend changes how they feel more than 100 texts."
+      ],
+      science: "Social exclusion activates the dorsal anterior cingulate cortex — the same region involved in physical pain (Eisenberger et al.). Loneliness increases mortality risk by 26% (Holt-Lunstad meta-analysis). Heart rate variability synchronizes between people in close interaction (interpersonal physiology research). Secure attachment in adulthood is associated with better stress regulation, immune function, and relationship satisfaction (attachment theory research).",
     },
     {
       id: 'direction',
@@ -102,9 +186,32 @@ const GAUGE_SYSTEM = {
       name: 'Direction',
       color: '#38BDF8',
       tagline: 'Purpose and momentum',
-      description: "Do you know where you're going? Even small progress toward something meaningful changes your brain chemistry. Without direction, even rest feels restless.",
-      whenLow: "You might be lost, not lazy. What's one small step toward something that matters to you? Direction comes from action, not clarity.",
-      science: "Goal pursuit releases dopamine — the momentum molecule. Small wins matter more than big plans.",
+      description: "Direction isn't about having your whole life figured out. It's about having something to move toward — even if it's small, even if it changes. Humans are meaning-making creatures. Without purpose, even pleasure feels empty. With purpose, even hard work feels meaningful. The question isn't 'what's my passion?' It's 'what's one thing that matters enough to keep moving toward?'",
+      sections: [
+        {
+          title: "The Dopamine of Progress",
+          content: "Your brain releases dopamine not when you achieve a goal, but when you're making progress toward it. This is why the pursuit often feels better than the achievement. It's also why having nothing to pursue feels so bad — your dopamine system goes quiet.\n\nSmall wins matter more than big plans. Completing a small task releases dopamine. Making progress on something meaningful releases dopamine. This isn't about toxic productivity — it's about understanding that your brain needs something to move toward."
+        },
+        {
+          title: "Meaning vs. Happiness",
+          content: "Research distinguishes between hedonic wellbeing (pleasure, comfort) and eudaimonic wellbeing (meaning, purpose). They're both important, but they're not the same. You can have pleasure without meaning (empty enjoyment) and meaning without pleasure (hard but worthwhile work).\n\nPeople with high meaning and low happiness actually have better long-term outcomes than people with high happiness and low meaning. Meaning provides resilience. Comfort alone does not."
+        },
+        {
+          title: "Lost, Not Lazy",
+          content: "When direction is low, it looks like laziness, depression, or apathy. But often it's disorientation — not knowing what matters or which way to go. The solution isn't 'try harder.' It's 'get oriented.'\n\nYou don't need to find your capital-P Purpose. You need to find something — one thing — worth getting out of bed for. It can be small. It can change. But there needs to be something pulling you forward, or your psychology stagnates."
+        },
+        {
+          title: "Values as Compass",
+          content: "Direction comes from values — what matters to you independent of outcome. If you value creativity, you have direction when you're creating, regardless of external success. If you value connection, you have direction when you're building relationships.\n\nThe trap is living by someone else's values (parents, society, Instagram) and wondering why success feels empty. Direction has to be yours."
+        }
+      ],
+      whenLow: "Ask: what's one small thing that would make today feel like it mattered? It doesn't have to be big or impressive. It just has to be real. Write it down. Do it. Direction comes from action, not from waiting for clarity. Clarity comes after you start moving.",
+      realWorld: [
+        "A person quits their high-paying job and feels lost. The paycheck was high but the meaning was low. They felt successful and empty at the same time. Finding work that aligned with their values paid less but filled the direction tank.",
+        "A retiree becomes depressed after leaving work. It wasn't the work itself — it was having something to do each day. They start volunteering. The depression lifts. The structure and purpose were what mattered.",
+        "A student can't motivate themselves to study. They're not lazy — they're not connected to why the degree matters. When they connect the coursework to something they actually care about, energy appears."
+      ],
+      science: "Dopamine is released during goal pursuit, not just achievement (reward prediction error research). Eudaimonic wellbeing (meaning) predicts health outcomes beyond hedonic wellbeing (pleasure) — including gene expression patterns (Fredrickson et al.). Having purpose in life is associated with reduced mortality risk, better sleep, and lower rates of Alzheimer's disease (longevity research).",
     },
     {
       id: 'alignment',
@@ -112,9 +219,32 @@ const GAUGE_SYSTEM = {
       name: 'Alignment',
       color: '#F472B6',
       tagline: 'Living your values',
-      description: "Are your actions matching your values? When they don't, you feel it — as guilt, shame, or that vague sense something's off. Alignment isn't perfection; it's honesty about the gap.",
-      whenLow: "Where's the mismatch? What do you value that you're not honoring? Sometimes the stress isn't external — it's internal conflict.",
-      science: "Value-action gaps increase cortisol and reduce wellbeing. Your body knows when you're out of integrity.",
+      description: "Alignment is the match — or mismatch — between what you value and how you're living. When actions match values, there's integrity, coherence, peace. When they don't, there's friction — guilt, shame, anxiety, that nagging sense something's off. You don't have to be perfect. You have to be honest about the gap.",
+      sections: [
+        {
+          title: "The Value-Action Gap",
+          content: "Most people can articulate their values if asked: honesty, family, health, growth. But how we spend our time and energy often doesn't match. We value health but don't sleep. We value family but cancel on them for work. We value honesty but avoid hard conversations.\n\nThis gap isn't hypocrisy — it's the normal human condition. But the gap has costs. Your body registers it as stress, even if you don't consciously acknowledge it. That background unease is often misalignment showing up."
+        },
+        {
+          title: "Integrity as Integration",
+          content: "The word 'integrity' comes from 'integer' — whole, undivided. Alignment is integration: your inner values and outer actions pointing the same direction. When you're integrated, you don't have to manage separate versions of yourself. Energy isn't wasted on internal conflict.\n\nMisalignment is disintegration: pieces of you pulling different directions. Part of you wants to speak up; part suppresses. Part of you believes in honesty; part is maintaining a lie. This uses enormous psychological resources."
+        },
+        {
+          title: "Boundaries as Alignment",
+          content: "Boundaries aren't about keeping others out — they're about staying true to what matters. When you say yes to something you want to say no to, that's a values violation. When you tolerate treatment that conflicts with your self-respect, that's misalignment.\n\nEvery boundary is a statement about what you value. Setting them isn't selfish — it's aligning your external life with your internal compass."
+        },
+        {
+          title: "The Discomfort Is Information",
+          content: "When alignment is low, you feel it. Guilt says 'I acted against what I believe.' Shame says 'I am not who I want to be.' Resentment says 'I'm not honoring my needs.' These aren't just uncomfortable emotions — they're alignment signals.\n\nThe goal isn't to make these feelings disappear. It's to listen to what they're pointing at and take honest inventory. Sometimes the answer is changing behavior. Sometimes it's updating the value. But the first step is always acknowledging the gap."
+        }
+      ],
+      whenLow: "Ask: Where am I saying one thing and doing another? What value am I betraying in how I'm living today? Sometimes it's small (I value rest but I'm doom-scrolling). Sometimes it's big (I value honesty but I'm hiding something). The alignment gauge doesn't expect perfection — it expects honesty. Name the gap. Then decide if you want to close it.",
+      realWorld: [
+        "A person feels constantly anxious but 'has no reason to be.' Turns out they're maintaining a version of themselves that isn't real — for their family, their job, their partner. The anxiety is the misalignment signal. When they start being more authentic, the anxiety decreases.",
+        "Someone keeps agreeing to things they don't want to do, then feeling resentful. The resentment is the signal: their actions aren't matching their values around self-care. Learning to say no isn't selfish — it's alignment.",
+        "A professional works at a company whose practices conflict with their ethics. They can't name why they're unhappy — good salary, decent hours. But the values mismatch creates constant low-grade dissonance. Leaving for an aligned role changes everything."
+      ],
+      science: "Cognitive dissonance (Festinger) describes the psychological tension of holding conflicting beliefs or acting against one's beliefs — and the mental effort required to resolve it. Self-determination theory identifies authenticity as a core psychological need. Value-action discrepancy is associated with increased cortisol and decreased wellbeing in longitudinal research. Moral injury — acting against deeply held values — is a predictor of PTSD beyond trauma exposure alone.",
     },
   ],
 };
@@ -399,46 +529,70 @@ export default function LearnScreen() {
           {GAUGE_SYSTEM.gauges.map((gauge) => {
             const isExpanded = expandedGaugeId === gauge.id;
             return (
-              <Pressable
-                key={gauge.id}
-                style={styles.gaugeCard}
-                onPress={() => handleToggleGauge(gauge.id)}
-              >
-                <View style={styles.gaugeCardHeader}>
-                  <View style={[styles.gaugeIconWrap, { backgroundColor: gauge.color + '20' }]}>
-                    <Text style={styles.gaugeIcon}>{gauge.emoji}</Text>
+              <View key={gauge.id} style={styles.gaugeCard}>
+                <Pressable
+                  style={styles.gaugeCardTouchable}
+                  onPress={() => handleToggleGauge(gauge.id)}
+                >
+                  <View style={styles.gaugeCardHeader}>
+                    <View style={[styles.gaugeIconWrap, { backgroundColor: gauge.color + '20' }]}>
+                      <Text style={styles.gaugeIcon}>{gauge.emoji}</Text>
+                    </View>
+                    <View style={styles.gaugeCardHeaderText}>
+                      <Text style={[styles.gaugeName, { color: gauge.color }]}>{gauge.name}</Text>
+                      <Text style={styles.gaugeTagline}>{gauge.tagline}</Text>
+                    </View>
+                    <Ionicons
+                      name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                      size={20}
+                      color={COLORS.textMuted}
+                    />
                   </View>
-                  <View style={styles.gaugeCardHeaderText}>
-                    <Text style={[styles.gaugeName, { color: gauge.color }]}>{gauge.name}</Text>
-                    <Text style={styles.gaugeTagline}>{gauge.tagline}</Text>
-                  </View>
-                  <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={20}
-                    color={COLORS.textMuted}
-                  />
-                </View>
+
+                  {!isExpanded && (
+                    <Text style={styles.gaugePreview} numberOfLines={2}>{gauge.description}</Text>
+                  )}
+                </Pressable>
 
                 {isExpanded && (
                   <View style={styles.gaugeCardExpanded}>
+                    {/* Core description */}
                     <Text style={styles.gaugeDescription}>{gauge.description}</Text>
                     
+                    {/* Deep dive sections */}
+                    {gauge.sections?.map((section, idx) => (
+                      <View key={idx} style={styles.gaugeSection}>
+                        <Text style={styles.gaugeSectionTitle}>{section.title}</Text>
+                        <Text style={styles.gaugeSectionContent}>{section.content}</Text>
+                      </View>
+                    ))}
+                    
+                    {/* When it's low - actionable advice */}
                     <View style={[styles.gaugeCallout, { backgroundColor: gauge.color + '15' }]}>
-                      <Text style={[styles.gaugeCalloutTitle, { color: gauge.color }]}>When it's low</Text>
+                      <Text style={[styles.gaugeCalloutTitle, { color: gauge.color }]}>⚡ When It's Low</Text>
                       <Text style={styles.gaugeCalloutText}>{gauge.whenLow}</Text>
                     </View>
 
+                    {/* Real world examples */}
+                    {gauge.realWorld && gauge.realWorld.length > 0 && (
+                      <View style={styles.gaugeRealWorld}>
+                        <Text style={styles.gaugeRealWorldTitle}>📍 Real World</Text>
+                        {gauge.realWorld.map((example, idx) => (
+                          <View key={idx} style={styles.gaugeExample}>
+                            <Text style={styles.gaugeExampleText}>{example}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+
+                    {/* Science */}
                     <View style={styles.gaugeScienceBox}>
                       <Text style={styles.gaugeScienceTitle}>🧬 The Science</Text>
                       <Text style={styles.gaugeScienceText}>{gauge.science}</Text>
                     </View>
                   </View>
                 )}
-
-                {!isExpanded && (
-                  <Text style={styles.gaugePreview} numberOfLines={2}>{gauge.description}</Text>
-                )}
-              </Pressable>
+              </View>
             );
           })}
         </View>
@@ -632,8 +786,11 @@ const styles = StyleSheet.create({
   gaugeCard: {
     backgroundColor: COLORS.card,
     borderRadius: 20,
-    padding: 20,
     marginBottom: 12,
+    overflow: 'hidden',
+  },
+  gaugeCardTouchable: {
+    padding: 20,
   },
   gaugeCardHeader: {
     flexDirection: 'row',
@@ -669,47 +826,83 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   gaugeCardExpanded: {
-    marginTop: 16,
-    paddingTop: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
   },
   gaugeDescription: {
     fontSize: 15,
+    color: COLORS.text,
+    lineHeight: 24,
+    marginTop: 16,
+    marginBottom: 20,
+  },
+  gaugeSection: {
+    marginBottom: 20,
+  },
+  gaugeSectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  gaugeSectionContent: {
+    fontSize: 15,
     color: COLORS.textSecondary,
-    lineHeight: 23,
-    marginBottom: 16,
+    lineHeight: 24,
   },
   gaugeCallout: {
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
   },
   gaugeCalloutTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 6,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 8,
   },
   gaugeCalloutText: {
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.textSecondary,
-    lineHeight: 20,
+    lineHeight: 23,
   },
-  gaugeScienceBox: {
+  gaugeRealWorld: {
+    marginBottom: 16,
+  },
+  gaugeRealWorldTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 12,
+  },
+  gaugeExample: {
     backgroundColor: COLORS.cardElevated,
     borderRadius: 12,
     padding: 14,
+    marginBottom: 10,
+  },
+  gaugeExampleText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 21,
+    fontStyle: 'italic',
+  },
+  gaugeScienceBox: {
+    backgroundColor: COLORS.accentSoft,
+    borderRadius: 16,
+    padding: 16,
   },
   gaugeScienceTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textMuted,
-    marginBottom: 6,
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.accent,
+    marginBottom: 8,
   },
   gaugeScienceText: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    lineHeight: 20,
+    lineHeight: 21,
   },
 
   // Progress Section
