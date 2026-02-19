@@ -77,6 +77,18 @@ const TOOL_CATEGORIES = [
       { id: 'talk', icon: 'chatbubbles', title: 'Talk', color: '#7C4DFF' },
       { id: 'referee', icon: 'scale', title: 'Referee', color: '#F59E0B' },
       { id: 'journal', icon: 'journal', title: 'Journal', color: '#EC4899' },
+      { id: 'replay', icon: 'refresh', title: 'Replay', color: '#14B8A6' },
+      { id: 'decode', icon: 'search', title: 'Decode', color: '#3B82F6' },
+    ],
+  },
+  {
+    id: 'connect',
+    title: 'Connect',
+    tools: [
+      { id: 'relate', icon: 'heart-circle', title: 'Relate', color: '#EC4899' },
+      { id: 'love', icon: 'heart-half', title: 'Love', color: '#F43F5E' },
+      { id: 'help-someone', icon: 'hand-left', title: 'Help', color: '#8B5CF6' },
+      { id: 'role-play', icon: 'people-circle', title: 'Role Play', color: '#F59E0B' },
     ],
   },
   {
@@ -128,9 +140,17 @@ export default function LearnScreen() {
 
   const openTool = useCallback((id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Direct route tools
     if (id === 'talk') return router.push('/(tabs)/talk');
     if (id === 'journal') return router.push('/(modals)/new-journal');
     if (id === 'referee') return router.push('/(modals)/referee');
+    if (id === 'replay') return router.push('/(modals)/replay');
+    if (id === 'decode') return router.push('/(modals)/decode');
+    if (id === 'relate') return router.push('/(modals)/relate');
+    if (id === 'love') return router.push('/(modals)/love');
+    if (id === 'help-someone') return router.push('/(modals)/help-someone');
+    if (id === 'role-play') return router.push('/(modals)/role-play');
+    // Activity-based tools
     router.push(`/(modals)/activity?id=${id}`);
   }, [router]);
 
