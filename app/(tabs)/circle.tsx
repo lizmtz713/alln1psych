@@ -621,11 +621,14 @@ const styles = StyleSheet.create({
   memberGauge: {
     alignItems: 'center',
     marginRight: 12,
+    width: 80,
   },
   memberLabel: {
     fontSize: 11,
     color: COLORS.textMuted,
     marginTop: 2,
+    textAlign: 'center',
+    width: '100%',
   },
   memberExpand: {
     marginTop: 14,
