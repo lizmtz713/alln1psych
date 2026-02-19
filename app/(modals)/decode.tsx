@@ -23,7 +23,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { COLORS } from '../../src/lib/constants';
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
-import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 
 const BG = '#09090F';
 const CARD_BG = '#111118';
@@ -246,18 +245,10 @@ export default function DecodeScreen() {
       >
         <View style={styles.header}>
           <Pressable style={styles.backBtn} onPress={goBack}>
-            <Ionicons name="arrow-back" size={24} color={ACCENT} />
+            <Ionicons name="arrow-back" size={24} color={TEXT_PRIMARY} />
           </Pressable>
-          <View style={styles.progressContainer}>
-            <StepProgressIndicator 
-              currentStep={Math.max(1, ['paste', 'analysis', 'intent', 'respond'].indexOf(phase) + 1)} 
-              totalSteps={4}
-              accentColor={ACCENT}
-            />
-          </View>
-          <Pressable style={styles.closeBtn} onPress={() => router.back()}>
-            <Ionicons name="close" size={24} color={TEXT_SECONDARY} />
-          </Pressable>
+          <Text style={styles.headerTitle}>Decode</Text>
+          <View style={styles.headerRight} />
         </View>
 
         <ScrollView
@@ -374,9 +365,9 @@ export default function DecodeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BG },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: CARD_BORDER },
-  backBtn: { width: 40, padding: 8, justifyContent: 'center' },
-  progressContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  closeBtn: { width: 40, padding: 8, alignItems: 'flex-end', justifyContent: 'center' },
+  backBtn: { padding: 8 },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY },
+  headerRight: { width: 40 },
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
   prompt: { fontSize: 18, fontWeight: '500', color: TEXT_PRIMARY, marginBottom: 16 },
