@@ -22,6 +22,7 @@ import * as Haptics from 'expo-haptics';
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
+import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 
 type Phase = 'input' | 'clarify' | 'verdict';
 
@@ -225,16 +226,18 @@ ${clarifyAnswers.trim() || '(No additional context provided)'}`;
         {/* Header */}
         <View style={styles.header}>
           <Pressable style={styles.backBtn} onPress={goBack} hitSlop={8}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+            <Ionicons name="arrow-back" size={24} color={REFEREE_ACCENT} />
           </Pressable>
-          <Text style={styles.headerTitle}>{getHeaderTitle()}</Text>
-          <View style={styles.headerRight}>
-            {phase !== 'input' && (
-              <Pressable onPress={startOver} hitSlop={8}>
-                <Ionicons name="refresh" size={22} color={COLORS.textMuted} />
-              </Pressable>
-            )}
+          <View style={styles.progressContainer}>
+            <StepProgressIndicator 
+              currentStep={['input', 'clarify', 'verdict'].indexOf(phase) + 1} 
+              totalSteps={3}
+              accentColor={REFEREE_ACCENT}
+            />
           </View>
+          <Pressable style={styles.closeBtn} onPress={() => router.back()} hitSlop={8}>
+            <Ionicons name="close" size={24} color={COLORS.textMuted} />
+          </Pressable>
         </View>
 
         <ScrollView
@@ -492,13 +495,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  headerTitle: {
-    ...TYPOGRAPHY.headlineMd,
-    color: COLORS.text,
+  progressContainer: { 
+    flex: 1, 
+    alignItems: 'center' 
   },
-  headerRight: {
+  closeBtn: {
     width: 44,
+    height: 44,
     alignItems: 'flex-end',
+    justifyContent: 'center',
   },
   scroll: {
     flex: 1,

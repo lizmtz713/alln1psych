@@ -37,6 +37,8 @@ import { PremiumGate, AIUsageIndicator } from '../../src/components/PremiumGate'
 import { usePremiumStore } from '../../src/stores/premiumStore';
 import { useHealthStore } from '../../src/stores/healthStore';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
+import { ShareInsight } from '../../src/features/share-insight';
+import { buildAIResponseShareContent } from '../../src/features/share-insight';
 
 const MIC_BUTTON_SIZE = 80;
 const MIC_BUTTON_SIZE_SMALL = 48;
@@ -744,6 +746,22 @@ export default function TalkScreen() {
                   )}
                 </View>
                 <Text style={styles.timestamp}>{formatTime(msg.timestamp)}</Text>
+                {msg.role === 'assistant' && msg.content.length > 100 && (
+                  <ShareInsight
+                    content={buildAIResponseShareContent(
+                      'ai_response',
+                      'Insight from Gauge',
+                      msg.content,
+                      'Talk to Psych'
+                    )}
+                    trigger={(onPress) => (
+                      <Pressable style={styles.shareInsightBtn} onPress={onPress}>
+                        <Ionicons name="share-outline" size={14} color={COLORS.accent} />
+                        <Text style={styles.shareInsightText}>Share</Text>
+                      </Pressable>
+                    )}
+                  />
+                )}
               </View>
             </View>
           </AnimatedMessageRow>
@@ -1110,6 +1128,20 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.textMuted,
     marginTop: 6,
+  },
+  shareInsightBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  shareInsightText: {
+    fontSize: 12,
+    color: COLORS.accent,
+    fontWeight: '500',
   },
   typingBubble: {
     paddingVertical: 16,

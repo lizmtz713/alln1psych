@@ -23,6 +23,7 @@ import { hasOpenAIKey } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useUsageStore } from '../../src/stores/usageStore';
+import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 
 const ROLE_PLAY_ACCENT = COLORS.rolePlayAccent;
 
@@ -397,7 +398,13 @@ export default function RolePlayScreen() {
     return (
       <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Debrief</Text>
+          <View style={{ width: 40 }} />
+          <View style={styles.progressContainer}>
+            <StepProgressIndicator currentStep={3} totalSteps={3} accentColor={ROLE_PLAY_ACCENT} />
+          </View>
+          <Pressable style={styles.headerClose} onPress={() => router.back()}>
+            <Ionicons name="close" size={24} color={COLORS.textMuted} />
+          </Pressable>
         </View>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
           {session.debrief && (
@@ -445,9 +452,15 @@ export default function RolePlayScreen() {
         keyboardVerticalOffset={0}
       >
         <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.headerTitle} numberOfLines={1}>Practicing: {summary}</Text>
+          <Pressable style={styles.headerBack} onPress={handleNewScenario}>
+            <Ionicons name="arrow-back" size={24} color={ROLE_PLAY_ACCENT} />
+          </Pressable>
+          <View style={styles.progressContainer}>
+            <StepProgressIndicator currentStep={2} totalSteps={3} accentColor={ROLE_PLAY_ACCENT} />
           </View>
+          <Pressable style={styles.headerClose} onPress={() => router.back()}>
+            <Ionicons name="close" size={24} color={COLORS.textMuted} />
+          </Pressable>
         </View>
         <ScrollView
           ref={scrollRef}
@@ -553,15 +566,20 @@ export default function RolePlayScreen() {
   }
 
   return (
-    <ScrollView
-      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-      contentContainerStyle={styles.setupContent}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Pressable onPress={() => router.back()} style={styles.cancelRow}>
-        <Ionicons name="arrow-back" size={24} color="#fff" />
-        <Text style={styles.cancelText}>Cancel</Text>
-      </Pressable>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <View style={styles.header}>
+        <View style={{ width: 40 }} />
+        <View style={styles.progressContainer}>
+          <StepProgressIndicator currentStep={1} totalSteps={3} accentColor={ROLE_PLAY_ACCENT} />
+        </View>
+        <Pressable style={styles.headerClose} onPress={() => router.back()}>
+          <Ionicons name="close" size={24} color={COLORS.textMuted} />
+        </Pressable>
+      </View>
+      <ScrollView
+        contentContainerStyle={styles.setupContent}
+        keyboardShouldPersistTaps="handled"
+      >
       <Text style={styles.setupTitle}>Practice a conversation</Text>
       <Text style={styles.setupSubtitle}>Pick a scenario or create your own</Text>
 
@@ -670,10 +688,8 @@ export default function RolePlayScreen() {
         <Text style={styles.startButtonText}>Start Practice</Text>
       </Pressable>
 
-      <Pressable onPress={() => router.back()} style={styles.cancelLink}>
-        <Text style={styles.cancelLinkText}>Cancel</Text>
-      </Pressable>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -688,7 +704,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: COLORS.surface,
   },
-  headerBack: { padding: 8 },
+  headerBack: { width: 40, padding: 8 },
+  headerClose: { width: 40, alignItems: 'flex-end', padding: 8 },
+  progressContainer: { flex: 1, alignItems: 'center' },
   headerLeft: { flex: 1 },
   headerTitle: {
     fontSize: 16,

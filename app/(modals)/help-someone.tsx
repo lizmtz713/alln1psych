@@ -27,6 +27,7 @@ import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useUsageStore } from '../../src/stores/usageStore';
 import { useJournalStore } from '../../src/stores/journalStore';
 import { scheduleCheckInReminder } from '../../src/services/notifications';
+import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 
 const RELATIONSHIP_OPTIONS = [
   'Partner',
@@ -412,16 +413,24 @@ Keep it practical and warm. No extra preamble.`;
       keyboardVerticalOffset={0}
     >
       <View style={styles.header}>
-        {step !== 1 ? (
-          <Text style={styles.headerTitle}>
-            {step === 2 && "What's happening?"}
-            {step === 3 && 'Coaching'}
-            {step === 4 && 'Action plan'}
-          </Text>
-        ) : null}
-        <View style={{ flex: 1 }} />
+        {step > 1 ? (
+          <Pressable 
+            style={styles.backBtn} 
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setStep((s) => Math.max(1, s - 1) as 1 | 2 | 3 | 4);
+            }}
+          >
+            <Ionicons name="arrow-back" size={24} color={COLORS.accent} />
+          </Pressable>
+        ) : (
+          <View style={{ width: 40 }} />
+        )}
+        <View style={styles.progressContainer}>
+          <StepProgressIndicator currentStep={step} totalSteps={4} />
+        </View>
         <Pressable style={styles.closeBtn} onPress={cancelAndBack}>
-          <Ionicons name="close" size={28} color={COLORS.text} />
+          <Ionicons name="close" size={24} color={COLORS.textMuted} />
         </Pressable>
       </View>
 
@@ -683,6 +692,16 @@ Keep it practical and warm. No extra preamble.`;
             <Ionicons name="share-outline" size={22} color={COLORS.accent} />
             <Text style={styles.secondaryButtonText}>Share crisis resources with {currentSession.personName}</Text>
           </Pressable>
+          <Pressable 
+            style={styles.secondaryButton} 
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setStep(3);
+            }}
+          >
+            <Ionicons name="chatbubble-outline" size={22} color={COLORS.accent} />
+            <Text style={styles.secondaryButtonText}>Continue conversation</Text>
+          </Pressable>
           <Pressable style={styles.primaryButton} onPress={closeAndSaveSession}>
             <Text style={styles.primaryButtonText}>Done</Text>
           </Pressable>
@@ -697,12 +716,15 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: COLORS.surface,
   },
-  closeBtn: { padding: 8, marginRight: 8 },
+  backBtn: { width: 40, padding: 8 },
+  progressContainer: { flex: 1, alignItems: 'center' },
+  closeBtn: { width: 40, alignItems: 'flex-end', padding: 8 },
   cancelBottom: {
     alignSelf: 'center',
     paddingVertical: 16,

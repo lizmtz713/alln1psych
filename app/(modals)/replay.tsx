@@ -23,6 +23,9 @@ import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import * as Voice from '../../src/services/voice';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
+import { ShareInsight } from '../../src/features/share-insight';
+import { buildReplayShareContent } from '../../src/features/share-insight';
+import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 
 const BG = '#09090F';
 const CARD_BG = '#111118';
@@ -272,10 +275,18 @@ export default function ReplayScreen() {
       >
         <View style={styles.header}>
           <Pressable style={styles.backBtn} onPress={goBack}>
-            <Ionicons name="arrow-back" size={24} color={TEXT_PRIMARY} />
+            <Ionicons name="arrow-back" size={24} color={ACCENT} />
           </Pressable>
-          <Text style={styles.headerTitle}>Replay</Text>
-          <View style={styles.headerRight} />
+          <View style={styles.progressContainer}>
+            <StepProgressIndicator 
+              currentStep={['tell', 'mirror', 'decode', 'coach', 'checkout'].indexOf(phase) + 1} 
+              totalSteps={5}
+              accentColor={ACCENT}
+            />
+          </View>
+          <Pressable style={styles.closeBtn} onPress={() => router.back()}>
+            <Ionicons name="close" size={24} color={TEXT_SECONDARY} />
+          </Pressable>
         </View>
 
         <ScrollView
@@ -418,6 +429,26 @@ export default function ReplayScreen() {
               >
                 <Text style={styles.primaryBtnText}>Done</Text>
               </Pressable>
+
+              {/* Share option after processing */}
+              {(mirrorResponse || decodeResponse || coachResponse) && (
+                <ShareInsight
+                  content={buildReplayShareContent(
+                    'What I Processed',
+                    [
+                      ...(mirrorResponse ? [{ phase: 'What Happened', content: mirrorResponse }] : []),
+                      ...(decodeResponse ? [{ phase: 'The Decode', content: decodeResponse }] : []),
+                      ...(coachResponse ? [{ phase: 'The Coach', content: coachResponse }] : []),
+                    ]
+                  )}
+                  trigger={(onPress) => (
+                    <Pressable style={styles.shareBtn} onPress={onPress}>
+                      <Ionicons name="share-outline" size={16} color={ACCENT} />
+                      <Text style={styles.shareBtnText}>Share what I learned</Text>
+                    </Pressable>
+                  )}
+                />
+              )}
             </>
           )}
         </ScrollView>
@@ -429,9 +460,9 @@ export default function ReplayScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BG },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: CARD_BORDER },
-  backBtn: { padding: 8 },
-  headerTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY },
-  headerRight: { width: 40 },
+  backBtn: { width: 40, padding: 8 },
+  progressContainer: { flex: 1, alignItems: 'center' },
+  closeBtn: { width: 40, alignItems: 'flex-end', padding: 8 },
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
   prompt: { fontSize: 18, fontWeight: '500', color: TEXT_PRIMARY, marginBottom: 4 },
@@ -457,6 +488,21 @@ const styles = StyleSheet.create({
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 8 },
   chip: { backgroundColor: CARD_BG, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: CARD_BORDER },
   chipSelected: { borderColor: ACCENT, backgroundColor: 'rgba(124,77,255,0.1)' },
+  shareBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: CARD_BORDER,
+  },
+  shareBtnText: {
+    fontSize: 14,
+    color: ACCENT,
+    fontWeight: '500',
+  },
   chipText: { fontSize: 15, color: TEXT_PRIMARY },
   chipTextSelected: { color: ACCENT },
 });

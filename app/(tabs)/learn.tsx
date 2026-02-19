@@ -37,6 +37,9 @@ import {
   GAUGES,
   GAUGE_SYSTEM_INTRO,
 } from '../../src/data/gaugeSystem';
+import { ShareInsight } from '../../src/features/share-insight';
+import { buildDiscoveryShareContent } from '../../src/features/share-insight';
+import { useUserStore } from '../../src/stores/userStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -433,6 +436,23 @@ export default function LearnScreen() {
                     {!isExpanded && (
                       <Text style={styles.discoveryTap}>Tap to learn more</Text>
                     )}
+                    {isExpanded && (
+                      <ShareInsight
+                        content={buildDiscoveryShareContent(discovery)}
+                        trigger={(onPress) => (
+                          <Pressable
+                            style={styles.discoveryShareBtn}
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              onPress();
+                            }}
+                          >
+                            <Ionicons name="share-outline" size={16} color={COLORS.accent} />
+                            <Text style={styles.discoveryShareText}>Share this</Text>
+                          </Pressable>
+                        )}
+                      />
+                    )}
                   </Pressable>
                 );
               })}
@@ -753,6 +773,20 @@ const styles = StyleSheet.create({
     color: COLORS.accent,
     fontWeight: '500',
     marginTop: 12,
+  },
+  discoveryShareBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  discoveryShareText: {
+    fontSize: 14,
+    color: COLORS.accent,
+    fontWeight: '500',
   },
 
   // Load More

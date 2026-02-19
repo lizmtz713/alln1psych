@@ -2,7 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { Ionicons } from '@expo/vector-icons';
 import { useUserStore, type AgeRange, type TherapyExperience, type Pronouns } from '../../src/stores/userStore';
+import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 
 const ALL_STEP_INDICES = [0, 1, 2, 3, 4, 5, 6, 7] as const; // name, age, pronouns, culture, family, language, strength, therapy
 
@@ -179,16 +181,16 @@ export default function IdentitySetupScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#09090F' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
-        <Pressable onPress={handleBack} hitSlop={12}>
-          <Text style={{ color: '#8888A0', fontSize: 16 }}>← Back</Text>
+        <Pressable onPress={handleBack} hitSlop={12} style={{ width: 40, padding: 8 }}>
+          <Ionicons name="arrow-back" size={24} color="#7C4DFF" />
         </Pressable>
-        <View style={{ flexDirection: 'row', gap: 6 }}>
-          {totalVisibleSteps > 0 && Array.from({ length: totalVisibleSteps }).map((_, i) => (
-            <View key={i} style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: i === step ? '#7C4DFF' : 'rgba(255,255,255,0.2)' }} />
-          ))}
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          {totalVisibleSteps > 0 && (
+            <StepProgressIndicator currentStep={step + 1} totalSteps={totalVisibleSteps} accentColor="#7C4DFF" />
+          )}
         </View>
-        <Pressable onPress={handleSkip} hitSlop={12}>
-          <Text style={{ color: '#8888A0', fontSize: 16 }}>Skip</Text>
+        <Pressable onPress={handleSkip} hitSlop={12} style={{ width: 40, alignItems: 'flex-end', padding: 8 }}>
+          <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600' }}>Skip</Text>
         </Pressable>
       </View>
 

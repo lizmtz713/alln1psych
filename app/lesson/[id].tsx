@@ -39,6 +39,7 @@ import {
   contentAgeToManualAge,
   type ManualLesson,
 } from '../../src/data/manualContent';
+import { ShareInsightButton, type ShareableContent } from '../../src/features/share-insight';
 
 function renderBody(text: string): React.ReactNode[] {
   const lines = text.split(/\n\n+/);
@@ -319,6 +320,21 @@ export default function LessonScreen() {
                 ) : null}
               </View>
             )}
+            
+            {/* Share Insight Button */}
+            <ShareInsightButton
+              content={{
+                type: 'manual_lesson',
+                id: lesson.id,
+                title: lesson.title,
+                summary: displayIntro,
+                keyPoints: mc.keyConcepts.map(kc => `${kc.title}: ${kc.explanation}`),
+                deepContent: (lesson as ManualLesson).deepDive,
+                realWorldExamples: (lesson as ManualLesson).realWorld,
+                tryThis: (lesson as ManualLesson).tryThis,
+                sourceLabel: 'Human Manual',
+              }}
+            />
             
             <View style={styles.reflection}>
               <Text style={styles.reflectionQuestion}>{mc.reflectionPrompt}</Text>

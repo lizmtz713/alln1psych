@@ -28,6 +28,8 @@ import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { COLORS, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
+import { ShareInsight } from '../../src/features/share-insight';
+import { buildRelateShareContent } from '../../src/features/share-insight';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -912,6 +914,18 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
                     <Text style={styles.insightTitle}>Gauge says</Text>
                   </View>
                   <Text style={styles.insightText}>{aiInsight}</Text>
+                  <ShareInsight
+                    content={buildRelateShareContent(
+                      person2Name.trim() || 'this relationship',
+                      aiInsight
+                    )}
+                    trigger={(onPress) => (
+                      <Pressable style={styles.shareInsightBtn} onPress={onPress}>
+                        <Ionicons name="share-outline" size={14} color={RELATE_ACCENT} />
+                        <Text style={styles.shareInsightText}>Share this insight</Text>
+                      </Pressable>
+                    )}
+                  />
                 </View>
               </AnimatedCard>
             ) : null}
@@ -1219,6 +1233,21 @@ const styles = StyleSheet.create({
   },
   insightTitle: { fontSize: 15, fontWeight: '700', color: RELATE_ACCENT },
   insightText: { fontSize: 15, color: COLORS.text, lineHeight: 24, zIndex: 1 },
+  shareInsightBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+    zIndex: 1,
+  },
+  shareInsightText: {
+    fontSize: 13,
+    color: RELATE_ACCENT,
+    fontWeight: '500',
+  },
 
   // Actions
   actions: { marginTop: 8 },

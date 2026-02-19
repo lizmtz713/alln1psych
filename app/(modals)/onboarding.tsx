@@ -275,17 +275,57 @@ export default function OnboardingScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        {step > 1 && (
+        {step > 1 ? (
           <Pressable onPress={goBack} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={COLORS.accent} />
           </Pressable>
+        ) : (
+          <View style={{ width: 40 }} />
         )}
-        <View style={styles.dotsRow}>
-          {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-            <View key={i} style={[styles.dot, i + 1 === step && styles.dotActive]} />
-          ))}
+        <View style={styles.progressRow}>
+          {Array.from({ length: TOTAL_STEPS }).map((_, i) => {
+            const stepNum = i + 1;
+            const isCompleted = stepNum < step;
+            const isCurrent = stepNum === step;
+            return (
+              <View key={i} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View 
+                  style={[
+                    styles.progressStep,
+                    isCompleted && styles.progressStepCompleted,
+                    isCurrent && styles.progressStepCurrent,
+                    !isCompleted && !isCurrent && styles.progressStepUpcoming,
+                  ]}
+                >
+                  {isCompleted ? (
+                    <Ionicons name="checkmark" size={18} color="#fff" />
+                  ) : (
+                    <Text 
+                      style={[
+                        styles.progressStepText,
+                        isCurrent && styles.progressStepTextCurrent,
+                        !isCurrent && styles.progressStepTextUpcoming,
+                      ]}
+                    >
+                      {stepNum}
+                    </Text>
+                  )}
+                </View>
+                {i < TOTAL_STEPS - 1 && (
+                  <View 
+                    style={[
+                      styles.progressLine,
+                      stepNum < step ? styles.progressLineCompleted : styles.progressLineUpcoming,
+                    ]} 
+                  />
+                )}
+              </View>
+            );
+          })}
         </View>
-        <View style={{ width: 40 }} />
+        <Pressable onPress={() => setShowNotificationPrompt(true)} style={styles.skipBtn}>
+          <Text style={styles.skipBtnText}>Skip</Text>
+        </Pressable>
       </View>
 
       <KeyboardAvoidingView
@@ -772,9 +812,56 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   backBtn: { width: 40, padding: 8 },
-  dotsRow: { flexDirection: 'row', gap: 8 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.surface },
-  dotActive: { backgroundColor: COLORS.accent, width: 24 },
+  skipBtn: { width: 40, alignItems: 'flex-end', padding: 8 },
+  skipBtnText: { fontSize: 15, color: COLORS.accent, fontWeight: '600' },
+  // Progress indicator (Mobilize style)
+  progressRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  progressStep: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+  },
+  progressStepCompleted: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+  progressStepCurrent: {
+    backgroundColor: 'transparent',
+    borderColor: COLORS.accent,
+  },
+  progressStepUpcoming: {
+    backgroundColor: 'transparent',
+    borderColor: COLORS.textMuted + '40',
+  },
+  progressStepText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  progressStepTextCurrent: {
+    color: COLORS.accent,
+  },
+  progressStepTextUpcoming: {
+    color: COLORS.textMuted,
+  },
+  progressLine: {
+    width: 32,
+    height: 2,
+    marginHorizontal: 4,
+  },
+  progressLineCompleted: {
+    backgroundColor: COLORS.accent,
+  },
+  progressLineUpcoming: {
+    backgroundColor: COLORS.textMuted + '40',
+  },
   
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },

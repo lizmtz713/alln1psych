@@ -22,6 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { getGaugeColor } from '../../src/utils/gaugeHelpers';
+import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -225,7 +226,7 @@ export default function CockpitCheckinScreen() {
   return (
     <ErrorBoundary>
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      {/* Header: Back, progress dots, Skip */}
+      {/* Header: Back, progress indicator, Skip */}
       <View style={styles.header}>
         <Pressable
           style={styles.backBtn}
@@ -237,15 +238,10 @@ export default function CockpitCheckinScreen() {
             } else router.back();
           }}
         >
-          <Ionicons name="arrow-back" size={24} color={TEXT_PRIMARY} />
+          <Ionicons name="arrow-back" size={24} color={ACCENT} />
         </Pressable>
-        <View style={styles.dots}>
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <View
-              key={i}
-              style={[styles.dot, i <= step ? styles.dotFilled : styles.dotEmpty]}
-            />
-          ))}
+        <View style={styles.progressContainer}>
+          <StepProgressIndicator currentStep={step + 1} totalSteps={6} accentColor={ACCENT} />
         </View>
         <Pressable style={styles.skipBtn} onPress={handleSkip}>
           <Text style={styles.skipText}>{step === 5 ? 'Done' : 'Skip'}</Text>
@@ -463,12 +459,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: CARD_BORDER,
   },
-  backBtn: { padding: 8 },
-  dots: { flexDirection: 'row', gap: 6 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  dotFilled: { backgroundColor: ACCENT },
-  dotEmpty: { backgroundColor: TEXT_MUTED },
-  skipBtn: { padding: 8 },
+  backBtn: { width: 40, padding: 8 },
+  progressContainer: { flex: 1, alignItems: 'center' },
+  skipBtn: { width: 40, alignItems: 'flex-end', padding: 8 },
   skipText: { fontSize: 15, color: TEXT_SECONDARY },
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
