@@ -192,11 +192,15 @@ export default function Relate() {
   const userName = useUserStore((s) => s.name);
 
   // Mode: 'solo' = just viewing your own profile, 'compare' = comparing two people
-  const [mode, setMode] = useState<'solo' | 'compare'>('solo');
-  const [myBirthday, setMyBirthday] = useState('');
-  const [myName, setMyName] = useState('');
-  const [theirBirthday, setTheirBirthday] = useState('');
-  const [theirName, setTheirName] = useState('');
+  const [mode, setMode] = useState<'solo' | 'compare'>('compare'); // Default to compare
+  const [person1Name, setPerson1Name] = useState('');
+  const [person1Birthday, setPerson1Birthday] = useState('');
+  const [person2Name, setPerson2Name] = useState('');
+  const [person2Birthday, setPerson2Birthday] = useState('');
+  // Legacy aliases for results compatibility
+  const myBirthday = person1Birthday;
+  const theirBirthday = person2Birthday;
+  const theirName = person2Name;
   const [relType, setRelType] = useState<RelType | null>(null);
   const [result, setResult] = useState<{ me: any; them: any; dynamic: any; myIso: string; theirIso: string } | null>(null);
   const [soloResult, setSoloResult] = useState<any>(null);
@@ -206,12 +210,21 @@ export default function Relate() {
   const [showResults, setShowResults] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
-  // Initialize with user's data
-  useEffect(() => {
-    if (userName && !myName) {
-      setMyName(userName);
+  // Function to pre-fill Person 1 with user data and switch to compare
+  const startCompareWithMe = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (userName) setPerson1Name(userName);
+    if (userBirthday) {
+      const d = new Date(userBirthday);
+      if (!isNaN(d.getTime())) {
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        setPerson1Birthday(`${mm}/${dd}/${yyyy}`);
+      }
     }
-  }, [userName, myName]);
+    setMode('compare');
+  };
 
   // Auto-show solo profile if user has birthday
   useEffect(() => {
@@ -238,23 +251,12 @@ export default function Relate() {
     router.push(`/lesson/${lessonId}`);
   };
 
+  // Handle deep link params for Person 2
   useEffect(() => {
-    if (userBirthday && !myBirthday) {
-      const d = new Date(userBirthday);
-      if (!isNaN(d.getTime())) {
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        const yyyy = d.getFullYear();
-        setMyBirthday(`${mm}/${dd}/${yyyy}`);
-      }
-    }
-  }, [userBirthday, myBirthday]);
-
-  useEffect(() => {
-    if (params.name && params.name !== theirName) setTheirName(params.name);
+    if (params.name && params.name !== person2Name) setPerson2Name(params.name);
     if (params.birthday) {
       const display = isoToMMDDYYYY(params.birthday);
-      if (display && display !== theirBirthday) setTheirBirthday(display);
+      if (display && display !== person2Birthday) setPerson2Birthday(display);
     }
   }, [params.name, params.birthday]);
 
@@ -278,25 +280,26 @@ export default function Relate() {
   async function handleCheck() {
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      const myIso = parseBirthday(myBirthday);
-      const theirIso = parseBirthday(theirBirthday);
-      if (!myIso || !theirIso) return;
+      const person1Iso = parseBirthday(person1Birthday);
+      const person2Iso = parseBirthday(person2Birthday);
+      if (!person1Iso || !person2Iso) return;
 
-      const me = getPersonality(myIso);
-      const them = getPersonality(theirIso);
-      const dynamic = getRelationshipDynamic(myIso, theirIso);
+      const me = getPersonality(person1Iso);
+      const them = getPersonality(person2Iso);
+      const dynamic = getRelationshipDynamic(person1Iso, person2Iso);
       if (!me || !them) return;
 
-      setResult({ me, them, dynamic, myIso, theirIso });
+      setResult({ me, them, dynamic, myIso: person1Iso, theirIso: person2Iso });
       setExpandedLearn(null);
       setShowResults(true);
       setTimeout(() => scrollRef.current?.scrollTo({ y: 0, animated: true }), 100);
 
       setLoading(true);
       try {
-        const name = theirName.trim() || 'them';
+        const name1 = person1Name.trim() || 'Person 1';
+        const name2 = person2Name.trim() || 'Person 2';
         const response = await sendMessageWithSystemPrompt(
-          [{ role: 'user', content: `My personality: ${me.name} (${me.communicationStyle}). Their personality: ${them.name} (${them.communicationStyle}). Relationship: ${relType}. Their name: ${name}. Give me a relationship insight.` }],
+          [{ role: 'user', content: `${name1}'s personality: ${me.name} (${me.communicationStyle}). ${name2}'s personality: ${them.name} (${them.communicationStyle}). Relationship: ${relType}. Give a relationship insight.` }],
           `You are Gauge, a relationship intelligence companion. Based on two personality profiles and their relationship type, give a warm, specific, insightful reading.
 
 For ROMANTIC: Chemistry, communication differences, what makes them click, what could pull them apart, one tip for long-term success.
@@ -304,7 +307,7 @@ For FAMILY: Generational dynamics, communication gaps, unspoken expectations, ho
 For FRIENDSHIP: What drew them together, what keeps it strong, what could cause drift, how to maintain it.
 For WORK: Professional communication styles, collaboration strengths, potential friction, how to get the best from each other.
 
-Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences. End with one surprising insight they probably have not considered. Be warm and real, not clinical.`
+Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it 4-6 sentences. End with one surprising insight they probably have not considered. Be warm and real, not clinical.`
         );
         setAiInsight(response ?? '');
       } catch (e) {
@@ -332,16 +335,17 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
   function handleTryAnother() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setShowResults(false);
-    setMyBirthday(userBirthday ? (() => { const d = new Date(userBirthday); return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`; })() : '');
-    setTheirBirthday('');
-    setTheirName('');
+    setPerson1Name('');
+    setPerson1Birthday('');
+    setPerson2Name('');
+    setPerson2Birthday('');
     setRelType(null);
     setResult(null);
     setAiInsight('');
     setExpandedLearn(null);
   }
 
-  const canCheck = myBirthday.length === 10 && theirBirthday.length === 10 && relType !== null;
+  const canCheck = person1Birthday.length === 10 && person2Birthday.length === 10 && relType !== null;
 
   const relTypes: { type: RelType; icon: string; label: string; color: string }[] = [
     { type: 'romantic', icon: '💕', label: 'Romantic', color: '#EC4899' },
@@ -402,65 +406,109 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
 
             {mode === 'solo' && soloResult ? (
               <>
-                {/* Solo Profile View - Show user's own personality */}
-                <View style={styles.heroSection}>
-                  <Text style={styles.heroEmoji}>✨</Text>
-                  <Text style={styles.heroTitle}>{userName || 'Your Profile'}</Text>
-                  <Text style={styles.heroSub}>{soloResult.name}</Text>
-                </View>
-
-                {/* Personality Card */}
-                <AnimatedCard delay={100}>
-                  <View style={[styles.resultCard, { borderColor: RELATE_ACCENT + '30' }]}>
-                    <Text style={styles.resultCardTitle}>Your Personality</Text>
-                    <Text style={styles.resultMeta}>{soloResult.dateRange}</Text>
-                    
-                    <View style={styles.resultSection}>
-                      <Text style={styles.resultSectionTitle}>🎯 Communication Style</Text>
-                      <Text style={styles.resultText}>{soloResult.communicationStyle}</Text>
-                      <LearnMore id="communicationStyle" expanded={expandedLearn === 'communicationStyle'} onToggle={() => toggleLearn('communicationStyle')} />
+                {/* Premium Profile Header - Fortune 500 style */}
+                <AnimatedCard delay={0}>
+                  <View style={styles.profileHeroCard}>
+                    <LinearGradient
+                      colors={['rgba(124,77,255,0.15)', 'transparent']}
+                      style={styles.profileHeroGlow}
+                    />
+                    <View style={styles.profileHeroAvatar}>
+                      <Text style={styles.profileHeroInitial}>
+                        {(userName || 'Y').charAt(0).toUpperCase()}
+                      </Text>
                     </View>
+                    <Text style={styles.profileHeroName}>{userName || 'You'}</Text>
+                    <Text style={styles.profileHeroType}>{soloResult.name}</Text>
+                    <Text style={styles.profileHeroDate}>{soloResult.dateRange}</Text>
+                  </View>
+                </AnimatedCard>
 
-                    <View style={styles.resultSection}>
-                      <Text style={styles.resultSectionTitle}>💪 Your Strengths</Text>
-                      {soloResult.strengths?.map((s: string, i: number) => (
-                        <Text key={i} style={styles.resultBullet}>• {s}</Text>
-                      ))}
-                      <LearnMore id="strengths" expanded={expandedLearn === 'strengths'} onToggle={() => toggleLearn('strengths')} />
+                {/* Quick Stats Row */}
+                <AnimatedCard delay={50}>
+                  <View style={styles.statsRow}>
+                    <View style={styles.statBox}>
+                      <Text style={styles.statEmoji}>🎯</Text>
+                      <Text style={styles.statLabel}>Style</Text>
+                      <Text style={styles.statValue} numberOfLines={2}>{soloResult.communicationStyle?.split('.')[0]}</Text>
                     </View>
-
-                    <View style={styles.resultSection}>
-                      <Text style={styles.resultSectionTitle}>⚡ Growth Areas</Text>
-                      {soloResult.challenges?.map((c: string, i: number) => (
-                        <Text key={i} style={styles.resultBullet}>• {c}</Text>
-                      ))}
-                      <LearnMore id="challenges" expanded={expandedLearn === 'challenges'} onToggle={() => toggleLearn('challenges')} />
+                    <View style={styles.statBox}>
+                      <Text style={styles.statEmoji}>💪</Text>
+                      <Text style={styles.statLabel}>Top Strength</Text>
+                      <Text style={styles.statValue} numberOfLines={2}>{soloResult.strengths?.[0]}</Text>
                     </View>
-
-                    <View style={styles.resultSection}>
-                      <Text style={styles.resultSectionTitle}>😰 Under Stress</Text>
-                      <Text style={styles.resultText}>{soloResult.stressResponse}</Text>
-                      <LearnMore id="stressResponse" expanded={expandedLearn === 'stressResponse'} onToggle={() => toggleLearn('stressResponse')} />
-                    </View>
-
-                    <View style={styles.resultSection}>
-                      <Text style={styles.resultSectionTitle}>💙 What You Need</Text>
-                      {soloResult.needs?.map((n: string, i: number) => (
-                        <Text key={i} style={styles.resultBullet}>• {n}</Text>
-                      ))}
-                      <LearnMore id="needs" expanded={expandedLearn === 'needs'} onToggle={() => toggleLearn('needs')} />
+                    <View style={styles.statBox}>
+                      <Text style={styles.statEmoji}>💙</Text>
+                      <Text style={styles.statLabel}>Core Need</Text>
+                      <Text style={styles.statValue} numberOfLines={2}>{soloResult.needs?.[0]}</Text>
                     </View>
                   </View>
                 </AnimatedCard>
 
-                {/* CTA to compare */}
-                <Pressable
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMode('compare'); }}
-                  style={styles.secondaryBtn}
-                >
-                  <Ionicons name="people-outline" size={18} color={RELATE_ACCENT} />
-                  <Text style={styles.secondaryBtnText}>Compare with someone</Text>
-                </Pressable>
+                {/* See Dynamic CTA - Pre-fills your info */}
+                <AnimatedCard delay={100}>
+                  <Pressable onPress={startCompareWithMe} style={styles.seeDynamicBtn}>
+                    <LinearGradient
+                      colors={RELATE_GRADIENT}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.seeDynamicBtnInner}
+                    >
+                      <Ionicons name="git-compare-outline" size={22} color="#fff" style={{ marginRight: 10 }} />
+                      <View>
+                        <Text style={styles.seeDynamicBtnText}>See Dynamic</Text>
+                        <Text style={styles.seeDynamicBtnSub}>Compare yourself with someone</Text>
+                      </View>
+                    </LinearGradient>
+                  </Pressable>
+                </AnimatedCard>
+
+                {/* Detailed Sections */}
+                <AnimatedCard delay={150}>
+                  <View style={styles.detailCard}>
+                    <Text style={styles.detailCardTitle}>🎯 Communication Style</Text>
+                    <Text style={styles.detailCardText}>{soloResult.communicationStyle}</Text>
+                    <LearnMore id="communicationStyle" expanded={expandedLearn === 'communicationStyle'} onToggle={() => toggleLearn('communicationStyle')} />
+                  </View>
+                </AnimatedCard>
+
+                <AnimatedCard delay={200}>
+                  <View style={styles.detailCard}>
+                    <Text style={styles.detailCardTitle}>💪 Your Strengths</Text>
+                    {soloResult.strengths?.map((s: string, i: number) => (
+                      <Text key={i} style={styles.detailBullet}>• {s}</Text>
+                    ))}
+                    <LearnMore id="strengths" expanded={expandedLearn === 'strengths'} onToggle={() => toggleLearn('strengths')} />
+                  </View>
+                </AnimatedCard>
+
+                <AnimatedCard delay={250}>
+                  <View style={styles.detailCard}>
+                    <Text style={styles.detailCardTitle}>⚡ Growth Areas</Text>
+                    {soloResult.challenges?.map((c: string, i: number) => (
+                      <Text key={i} style={styles.detailBullet}>• {c}</Text>
+                    ))}
+                    <LearnMore id="challenges" expanded={expandedLearn === 'challenges'} onToggle={() => toggleLearn('challenges')} />
+                  </View>
+                </AnimatedCard>
+
+                <AnimatedCard delay={300}>
+                  <View style={styles.detailCard}>
+                    <Text style={styles.detailCardTitle}>😰 Under Stress</Text>
+                    <Text style={styles.detailCardText}>{soloResult.stressResponse}</Text>
+                    <LearnMore id="stressResponse" expanded={expandedLearn === 'stressResponse'} onToggle={() => toggleLearn('stressResponse')} />
+                  </View>
+                </AnimatedCard>
+
+                <AnimatedCard delay={350}>
+                  <View style={styles.detailCard}>
+                    <Text style={styles.detailCardTitle}>💙 What You Need</Text>
+                    {soloResult.needs?.map((n: string, i: number) => (
+                      <Text key={i} style={styles.detailBullet}>• {n}</Text>
+                    ))}
+                    <LearnMore id="needs" expanded={expandedLearn === 'needs'} onToggle={() => toggleLearn('needs')} />
+                  </View>
+                </AnimatedCard>
               </>
             ) : mode === 'solo' && !soloResult ? (
               <>
@@ -517,43 +565,54 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
               </>
             ) : (
               <>
-                {/* Compare Mode */}
+                {/* Compare Mode - Two people side by side */}
                 <View style={styles.heroSection}>
                   <Text style={styles.heroEmoji}>💫</Text>
                   <Text style={styles.heroTitle}>Understand Anyone</Text>
                   <Text style={styles.heroSub}>Compare two personalities to discover the dynamic</Text>
                 </View>
 
-                <Text style={styles.label}>Person 1 {userName ? `(${userName})` : ''}</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="MM/DD/YYYY"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={myBirthday}
-                  onChangeText={(t) => formatBirthday(t, setMyBirthday)}
-                  keyboardType="number-pad"
-                  maxLength={10}
-                />
+                {/* Person 1 */}
+                <View style={styles.personSection}>
+                  <Text style={styles.personLabel}>👤 Person 1</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Name (optional)"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={person1Name}
+                    onChangeText={setPerson1Name}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Birthday (MM/DD/YYYY)"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={person1Birthday}
+                    onChangeText={(t) => formatBirthday(t, setPerson1Birthday)}
+                    keyboardType="number-pad"
+                    maxLength={10}
+                  />
+                </View>
 
-                <Text style={styles.label}>Person 2 name <Text style={styles.optional}>(optional)</Text></Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. Alex, Mom, my boss"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={theirName}
-                  onChangeText={setTheirName}
-                />
-
-                <Text style={styles.label}>Person 2 birthday</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="MM/DD/YYYY"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={theirBirthday}
-                  onChangeText={(t) => formatBirthday(t, setTheirBirthday)}
-                  keyboardType="number-pad"
-                  maxLength={10}
-                />
+                {/* Person 2 */}
+                <View style={styles.personSection}>
+                  <Text style={styles.personLabel}>👤 Person 2</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Name (optional)"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={person2Name}
+                    onChangeText={setPerson2Name}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Birthday (MM/DD/YYYY)"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={person2Birthday}
+                    onChangeText={(t) => formatBirthday(t, setPerson2Birthday)}
+                    keyboardType="number-pad"
+                    maxLength={10}
+                  />
+                </View>
               </>
             )}
 
@@ -606,7 +665,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
             <AnimatedCard delay={0}>
               <View style={styles.resultHeader}>
                 <Text style={styles.resultEmoji}>✨</Text>
-                <Text style={styles.resultHeaderTitle}>You & {theirName.trim() || 'Them'}</Text>
+                <Text style={styles.resultHeaderTitle}>{person1Name.trim() || 'Person 1'} & {person2Name.trim() || 'Person 2'}</Text>
                 <View style={styles.resultBadgeRow}>
                   <View style={styles.resultBadge}>
                     <Text style={styles.resultBadgeText}>{result.me.name}</Text>
@@ -619,7 +678,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
               </View>
             </AnimatedCard>
 
-            {/* YOUR PROFILE */}
+            {/* PERSON 1 PROFILE */}
             <AnimatedCard delay={100}>
               <View style={[styles.profileCard, { borderColor: 'rgba(124,77,255,0.2)' }]}>
                 <LinearGradient
@@ -631,7 +690,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                     <Text style={styles.profileEmoji}>🪞</Text>
                   </View>
                   <View>
-                    <Text style={styles.profileName}>You</Text>
+                    <Text style={styles.profileName}>{person1Name.trim() || 'Person 1'}</Text>
                     <Text style={styles.profileType}>{result.me.name}</Text>
                   </View>
                 </View>
@@ -658,7 +717,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
               </View>
             </AnimatedCard>
 
-            {/* THEIR PROFILE */}
+            {/* PERSON 2 PROFILE */}
             <AnimatedCard delay={200}>
               <View style={[styles.profileCard, { borderColor: 'rgba(20,184,166,0.2)' }]}>
                 <LinearGradient
@@ -670,7 +729,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                     <Text style={styles.profileEmoji}>✨</Text>
                   </View>
                   <View>
-                    <Text style={styles.profileName}>{theirName.trim() || 'Them'}</Text>
+                    <Text style={styles.profileName}>{person2Name.trim() || 'Person 2'}</Text>
                     <Text style={[styles.profileType, { color: '#14B8A6' }]}>{result.them.name}</Text>
                   </View>
                 </View>
@@ -753,7 +812,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                   <View style={styles.dynamicSection}>
                     <View style={styles.dynamicLabelRow}>
                       <View style={[styles.dynamicDot, { backgroundColor: '#14B8A6' }]} />
-                      <Text style={[styles.dynamicLabel, { color: '#14B8A6' }]}>What {theirName.trim() || 'They'} Need{theirName.trim() ? 's' : ''}</Text>
+                      <Text style={[styles.dynamicLabel, { color: '#14B8A6' }]}>What {person2Name.trim() || 'Person 2'} Needs</Text>
                     </View>
                     <Text style={styles.dynamicText}>{result.dynamic.whatTheyNeed}</Text>
                     <LearnMore id="whatTheyNeed" expanded={expandedLearn === 'dyn-theyneed'} onToggle={() => toggleLearn('dyn-theyneed')} onLesson={goToLesson} />
@@ -762,7 +821,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                   <View style={styles.dynamicSection}>
                     <View style={styles.dynamicLabelRow}>
                       <View style={[styles.dynamicDot, { backgroundColor: '#F59E0B' }]} />
-                      <Text style={[styles.dynamicLabel, { color: '#F59E0B' }]}>What You Need</Text>
+                      <Text style={[styles.dynamicLabel, { color: '#F59E0B' }]}>What {person1Name.trim() || 'Person 1'} Needs</Text>
                     </View>
                     <Text style={styles.dynamicText}>{result.dynamic.whatYouNeed}</Text>
                     <LearnMore id="whatYouNeed" expanded={expandedLearn === 'dyn-youneed'} onToggle={() => toggleLearn('dyn-youneed')} onLesson={goToLesson} />
@@ -802,7 +861,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
             {/* ACTIONS */}
             <AnimatedCard delay={500}>
               <View style={styles.actions}>
-                {theirName.trim().length > 0 && (
+                {person2Name.trim().length > 0 && (
                   <Pressable onPress={handleAddToCircle} style={styles.addCircleBtn}>
                     <LinearGradient
                       colors={['#14B8A6', '#0D9488']}
@@ -811,7 +870,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                       style={styles.addCircleBtnInner}
                     >
                       <Ionicons name="person-add" size={18} color="#fff" style={{ marginRight: 8 }} />
-                      <Text style={styles.addCircleBtnText}>Add {theirName.trim()} to Circle</Text>
+                      <Text style={styles.addCircleBtnText}>Add {person2Name.trim()} to Circle</Text>
                     </LinearGradient>
                   </Pressable>
                 )}
@@ -1127,4 +1186,156 @@ const styles = StyleSheet.create({
   secondaryBtnText: { fontSize: 16, color: COLORS.textMuted, fontWeight: '500' },
   ghostBtn: { padding: 14, alignItems: 'center' },
   ghostBtnText: { fontSize: 15, color: COLORS.textMuted },
+
+  // Person Section (Compare mode)
+  personSection: {
+    marginBottom: 20,
+    padding: 16,
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  personLabel: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 14,
+  },
+
+  // Premium Profile Hero (My Profile tab)
+  profileHeroCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    overflow: 'hidden',
+  },
+  profileHeroGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 120,
+  },
+  profileHeroAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: RELATE_ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    zIndex: 1,
+  },
+  profileHeroInitial: {
+    fontSize: 36,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  profileHeroName: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 4,
+    zIndex: 1,
+  },
+  profileHeroType: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: RELATE_ACCENT,
+    marginBottom: 4,
+    zIndex: 1,
+  },
+  profileHeroDate: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    zIndex: 1,
+  },
+
+  // Stats Row
+  statsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: 14,
+    padding: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  statEmoji: {
+    fontSize: 24,
+    marginBottom: 8,
+  },
+  statLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 12,
+    color: COLORS.text,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+
+  // See Dynamic CTA
+  seeDynamicBtn: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  seeDynamicBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 18,
+  },
+  seeDynamicBtnText: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  seeDynamicBtnSub: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 2,
+  },
+
+  // Detail Cards
+  detailCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  detailCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 10,
+  },
+  detailCardText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 21,
+  },
+  detailBullet: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
+    marginBottom: 2,
+  },
 });
