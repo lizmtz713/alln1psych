@@ -8,7 +8,9 @@
  */
 
 // TESTING MODE — remove before App Store submission
-const TESTING_MODE = true;
+// When true: all users get Pro features, paywalls are bypassed
+// Set to false before App Store submission
+export const TESTING_MODE = true;
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';

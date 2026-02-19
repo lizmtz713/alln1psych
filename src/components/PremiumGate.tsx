@@ -2,15 +2,12 @@
  * PremiumGate — Shows upsell when user hits free tier limits
  */
 
-// TESTING MODE — remove before App Store submission
-const TESTING_MODE = true;
-
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLORS, BORDER_RADIUS } from '../lib/constants';
-import { usePremiumStore } from '../stores/premiumStore';
+import { usePremiumStore, TESTING_MODE } from '../stores/premiumStore';
 
 interface PremiumGateProps {
   visible: boolean;
