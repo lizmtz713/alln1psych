@@ -1,7 +1,12 @@
 /**
  * Human Owner's Manual — car maintenance metaphor.
- * Section 1: Know Your Machine (full). Sections 2–4 TBD.
+ * Complete PHOSM: Internal system + External life domains
  */
+
+// Import new sections (School, Work, Family)
+import { MANUAL_SECTION_5 } from './manualSection5-school';
+import { MANUAL_SECTION_6 } from './manualSection6-work';
+import { MANUAL_SECTION_7 } from './manualSection7-family';
 
 export interface LessonContent {
   introduction: string;
@@ -1497,6 +1502,10 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       section4Module5,
     ],
   },
+  // NEW: External Life Domains (completing PHOSM)
+  MANUAL_SECTION_5,  // School
+  MANUAL_SECTION_6,  // Work
+  MANUAL_SECTION_7,  // Family & Relationships
 ];
 
 /** All manual lesson IDs for progress and lookup */
