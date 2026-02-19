@@ -10,7 +10,6 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
-  Dimensions,
 } from 'react-native';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -20,7 +19,6 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useEducationStore } from '../../src/stores/educationStore';
@@ -28,6 +26,7 @@ import {
   MANUAL_SECTIONS,
   getAllManualLessonIds,
   type ManualSection,
+  type ManualLesson,
 } from '../../src/data/manualContent';
 import {
   type Discovery,
@@ -40,16 +39,16 @@ import {
 const COLORS = {
   bg: '#09090F',
   card: '#111118',
-  cardHover: '#16161F',
+  cardElevated: '#18181F',
   border: 'rgba(255,255,255,0.06)',
-  borderLight: 'rgba(255,255,255,0.12)',
   text: '#F0F0F5',
   textSecondary: '#A0A0B8',
   textMuted: '#6B6B80',
   accent: '#7C4DFF',
-  accentSoft: 'rgba(124,77,255,0.15)',
+  accentSoft: 'rgba(124,77,255,0.12)',
   success: '#4ADE80',
   successSoft: 'rgba(74,222,128,0.15)',
+  locked: '#3A3A4A',
 };
 
 const TOOLKIT_ACTIVITIES = [
@@ -67,31 +66,138 @@ const TOOLKIT_ACTIVITIES = [
   { id: 'mood-patterns', emoji: '📊', title: 'Mood Intel', sub: 'Spot trends' },
 ];
 
-function getSectionProgress(section: ManualSection, isLessonCompleted: (id: string) => boolean) {
-  let total = 0, completed = 0;
-  section.modules.forEach((m) => m.lessons.forEach((l) => {
-    total++;
-    if (isLessonCompleted(l.id)) completed++;
-  }));
-  return { completed, total };
+// Flatten all lessons for card-based display
+function getAllLessons(): { lesson: ManualLesson; section: ManualSection; moduleTitle: string }[] {
+  const result: { lesson: ManualLesson; section: ManualSection; moduleTitle: string }[] = [];
+  MANUAL_SECTIONS.forEach((section) => {
+    section.modules.forEach((module) => {
+      module.lessons.forEach((lesson) => {
+        result.push({ lesson, section, moduleTitle: module.title });
+      });
+    });
+  });
+  return result;
 }
 
-// Premium Discovery Card
+// Lesson Card Component - the core of the new design
+function LessonCard({
+  lesson,
+  section,
+  moduleTitle,
+  isCompleted,
+  isExpanded,
+  onToggle,
+  onOpenFull,
+}: {
+  lesson: ManualLesson;
+  section: ManualSection;
+  moduleTitle: string;
+  isCompleted: boolean;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onOpenFull: () => void;
+}) {
+  const intro = lesson.content.adult.introduction;
+  const shortIntro = intro.length > 120 ? intro.slice(0, 120) + '...' : intro;
+
+  return (
+    <View style={[styles.lessonCard, isCompleted && styles.lessonCardCompleted]}>
+      {/* Status indicator */}
+      <View style={[styles.lessonStatus, isCompleted && styles.lessonStatusDone]}>
+        {isCompleted ? (
+          <Ionicons name="checkmark" size={14} color="#fff" />
+        ) : (
+          <View style={styles.lessonStatusLocked} />
+        )}
+      </View>
+
+      <Pressable style={styles.lessonCardMain} onPress={onToggle}>
+        {/* Big Emoji */}
+        <Text style={styles.lessonEmoji}>{lesson.emoji}</Text>
+
+        {/* Title + Module tag */}
+        <View style={styles.lessonCardHeader}>
+          <Text style={styles.lessonCardCategory}>{moduleTitle}</Text>
+          <Text style={styles.lessonCardTitle}>{lesson.title}</Text>
+        </View>
+
+        {/* One-liner preview */}
+        {!isExpanded && (
+          <Text style={styles.lessonCardPreview} numberOfLines={2}>
+            {shortIntro}
+          </Text>
+        )}
+      </Pressable>
+
+      {/* Expanded content */}
+      {isExpanded && (
+        <View style={styles.lessonExpanded}>
+          {/* Full introduction */}
+          <Text style={styles.lessonExpandedIntro}>{intro}</Text>
+
+          {/* Key Concepts */}
+          {lesson.content.adult.keyConcepts.length > 0 && (
+            <View style={styles.conceptsSection}>
+              <Text style={styles.conceptsTitle}>Key Concepts</Text>
+              {lesson.content.adult.keyConcepts.map((concept, i) => (
+                <View key={i} style={styles.conceptItem}>
+                  <Text style={styles.conceptName}>{concept.title}</Text>
+                  <Text style={styles.conceptExplanation}>{concept.explanation}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Deep Dive preview */}
+          {lesson.deepDive && (
+            <View style={styles.deepDiveSection}>
+              <Text style={styles.deepDiveTitle}>Deep Dive</Text>
+              <Text style={styles.deepDiveText} numberOfLines={4}>
+                {lesson.deepDive}
+              </Text>
+            </View>
+          )}
+
+          {/* Try This */}
+          {lesson.tryThis && (
+            <View style={styles.tryThisSection}>
+              <Text style={styles.tryThisTitle}>✨ Try This</Text>
+              <Text style={styles.tryThisText}>{lesson.tryThis}</Text>
+            </View>
+          )}
+
+          {/* Action button */}
+          <Pressable style={styles.lessonAction} onPress={onOpenFull}>
+            <Text style={styles.lessonActionText}>Open Full Lesson</Text>
+            <Ionicons name="arrow-forward" size={16} color={COLORS.accent} />
+          </Pressable>
+        </View>
+      )}
+
+      {/* Tap hint */}
+      {!isExpanded && (
+        <Pressable style={styles.tapHint} onPress={onToggle}>
+          <Ionicons name="chevron-down" size={18} color={COLORS.textMuted} />
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
+// Discovery Card
 function DiscoveryCard({
   discovery,
   showLearnMore,
   onToggleLearnMore,
   onDismiss,
-  onAskGauge,
 }: {
   discovery: Discovery;
   showLearnMore: boolean;
   onToggleLearnMore: () => void;
   onDismiss: () => void;
-  onAskGauge?: () => void;
 }) {
   const translateX = useState(() => new Animated.Value(0))[0];
-  
+
   const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => false,
     onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 8,
@@ -107,31 +213,24 @@ function DiscoveryCard({
 
   return (
     <Animated.View style={[styles.discoveryCard, { transform: [{ translateX }] }]} {...panResponder.panHandlers}>
-      <View style={styles.discoveryHeader}>
-        <Text style={styles.discoveryEmoji}>{discovery.emoji}</Text>
-        <Text style={styles.discoveryCategory}>{getCategoryTag(discovery.category)}</Text>
-      </View>
-      <Text style={styles.discoveryTitle}>{discovery.title}</Text>
-      <Text style={styles.discoveryContent}>{discovery.content}</Text>
-      
-      {showLearnMore && discovery.expanded && (
-        <View style={styles.discoveryExpandedWrap}>
-          <Text style={styles.discoveryExpanded}>{discovery.expanded}</Text>
+      <Pressable onPress={onToggleLearnMore}>
+        <View style={styles.discoveryHeader}>
+          <Text style={styles.discoveryEmoji}>{discovery.emoji}</Text>
+          <Text style={styles.discoveryCategory}>{getCategoryTag(discovery.category)}</Text>
         </View>
-      )}
-      
-      <View style={styles.discoveryActions}>
-        <Pressable style={styles.discoveryAction} onPress={onToggleLearnMore}>
-          <Text style={styles.discoveryActionText}>
-            {showLearnMore ? 'Less' : 'More'}
-          </Text>
-        </Pressable>
-        {onAskGauge && (
-          <Pressable style={styles.discoveryAction} onPress={onAskGauge}>
-            <Text style={styles.discoveryActionText}>Ask Gauge</Text>
-          </Pressable>
+        <Text style={styles.discoveryTitle}>{discovery.title}</Text>
+        <Text style={styles.discoveryContent}>{discovery.content}</Text>
+
+        {showLearnMore && discovery.expanded && (
+          <View style={styles.discoveryExpandedWrap}>
+            <Text style={styles.discoveryExpanded}>{discovery.expanded}</Text>
+          </View>
         )}
-      </View>
+
+        <Text style={styles.discoveryTap}>
+          {showLearnMore ? 'Tap to collapse' : 'Tap to learn more'}
+        </Text>
+      </Pressable>
     </Animated.View>
   );
 }
@@ -140,13 +239,44 @@ export default function LearnScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const isLessonCompleted = useEducationStore((s) => s.isLessonCompleted);
-  const [expandedSectionId, setExpandedSectionId] = useState<string | null>(null);
 
+  // Get all lessons flattened
+  const allLessonsData = useMemo(() => getAllLessons(), []);
+
+  // Track which lesson card is expanded
+  const [expandedLessonId, setExpandedLessonId] = useState<string | null>(null);
+
+  // Track which section filter is active (null = all)
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+
+  // Discovery state
   const initialDiscoveries = useMemo(() => getDiscoveriesForDay(), []);
   const [visibleDiscoveries, setVisibleDiscoveries] = useState<Discovery[]>(initialDiscoveries);
   const [learnMoreDiscoveryId, setLearnMoreDiscoveryId] = useState<string | null>(null);
-
   const shownDiscoveryIds = useMemo(() => new Set(visibleDiscoveries.map((d) => d.id)), [visibleDiscoveries]);
+
+  // Filter lessons by section
+  const filteredLessons = useMemo(() => {
+    if (!activeSectionId) return allLessonsData;
+    return allLessonsData.filter((l) => l.section.id === activeSectionId);
+  }, [allLessonsData, activeSectionId]);
+
+  // Progress
+  const allManualIds = getAllManualLessonIds();
+  const totalManualLessons = allManualIds.length;
+  const completedManualCount = allManualIds.filter((id) => isLessonCompleted(id)).length;
+  const progressPercent = totalManualLessons ? Math.round((completedManualCount / totalManualLessons) * 100) : 0;
+
+  const handleToggleLesson = useCallback((lessonId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedLessonId((prev) => (prev === lessonId ? null : lessonId));
+  }, []);
+
+  const handleOpenLesson = useCallback((lessonId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push(`/lesson/${lessonId}` as const);
+  }, [router]);
 
   const handleShowMoreDiscoveries = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -159,28 +289,12 @@ export default function LearnScreen() {
     setVisibleDiscoveries((prev) => prev.filter((d) => d.id !== id));
   }, []);
 
-  const allManualIds = getAllManualLessonIds();
-  const totalManualLessons = allManualIds.length;
-  const completedManualCount = allManualIds.filter((id) => isLessonCompleted(id)).length;
-  const progressPercent = totalManualLessons ? Math.round((completedManualCount / totalManualLessons) * 100) : 0;
-
-  const handleOpenLesson = (lessonId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push(`/lesson/${lessonId}` as const);
-  };
-
-  const toggleSection = (sectionId: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedSectionId((prev) => (prev === sectionId ? null : sectionId));
-  };
-
-  const openActivity = (id: string) => {
+  const openActivity = useCallback((id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (id === 'talk') return router.push('/(tabs)/talk');
     if (id === 'journal') return router.push('/(modals)/new-journal');
     router.push(`/(modals)/activity?id=${id}`);
-  };
+  }, [router]);
 
   return (
     <ErrorBoundary>
@@ -189,95 +303,84 @@ export default function LearnScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Section */}
+        {/* Hero */}
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>Learn</Text>
           <Text style={styles.heroSubtitle}>Your emotional intelligence journey</Text>
         </View>
 
-        {/* Progress Card */}
-        <View style={styles.progressCard}>
-          <View style={styles.progressHeader}>
-            <View>
-              <Text style={styles.progressLabel}>Human Manual</Text>
-              <Text style={styles.progressStats}>{completedManualCount} of {totalManualLessons} lessons</Text>
-            </View>
-            <View style={styles.progressPercent}>
-              <Text style={styles.progressPercentText}>{progressPercent}%</Text>
-            </View>
+        {/* Progress Ring */}
+        <View style={styles.progressSection}>
+          <View style={styles.progressRing}>
+            <Text style={styles.progressNumber}>{progressPercent}</Text>
+            <Text style={styles.progressPercent}>%</Text>
           </View>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
+          <View style={styles.progressInfo}>
+            <Text style={styles.progressTitle}>Human Manual</Text>
+            <Text style={styles.progressSubtitle}>
+              {completedManualCount} of {totalManualLessons} lessons unlocked
+            </Text>
           </View>
         </View>
 
-        {/* Manual Sections */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>The Human Manual</Text>
-          <Text style={styles.sectionSubtitle}>Everything they should have taught you</Text>
-          
-          {MANUAL_SECTIONS.map((section) => {
-            const { completed, total } = getSectionProgress(section, isLessonCompleted);
-            const isExpanded = expandedSectionId === section.id;
-            const progressPct = total ? Math.round((completed / total) * 100) : 0;
-            
-            return (
-              <View key={section.id} style={styles.manualCard}>
-                <Pressable
-                  style={styles.manualHeader}
-                  onPress={() => toggleSection(section.id)}
-                >
-                  <View style={[styles.manualIconWrap, { backgroundColor: section.color + '20' }]}>
-                    <Text style={styles.manualIcon}>{section.emoji}</Text>
-                  </View>
-                  <View style={styles.manualHeaderText}>
-                    <Text style={styles.manualTitle}>{section.title}</Text>
-                    <Text style={styles.manualSubtitle}>{section.subtitle}</Text>
-                    <View style={styles.manualMiniProgress}>
-                      <View style={styles.manualMiniBar}>
-                        <View style={[styles.manualMiniFill, { width: `${progressPct}%`, backgroundColor: section.color }]} />
-                      </View>
-                      <Text style={styles.manualMiniText}>{completed}/{total}</Text>
-                    </View>
-                  </View>
-                  <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={20}
-                    color={COLORS.textMuted}
-                  />
-                </Pressable>
+        {/* Section Filter Pills */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterScroll}
+          contentContainerStyle={styles.filterContainer}
+        >
+          <Pressable
+            style={[styles.filterPill, !activeSectionId && styles.filterPillActive]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setActiveSectionId(null);
+            }}
+          >
+            <Text style={[styles.filterPillText, !activeSectionId && styles.filterPillTextActive]}>
+              All
+            </Text>
+          </Pressable>
+          {MANUAL_SECTIONS.map((section) => (
+            <Pressable
+              key={section.id}
+              style={[styles.filterPill, activeSectionId === section.id && styles.filterPillActive]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setActiveSectionId(section.id);
+              }}
+            >
+              <Text style={styles.filterPillEmoji}>{section.emoji}</Text>
+              <Text style={[styles.filterPillText, activeSectionId === section.id && styles.filterPillTextActive]}>
+                {section.title}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
 
-                {isExpanded && (
-                  <View style={styles.modulesContainer}>
-                    {section.modules.map((module) => (
-                      <View key={module.id} style={styles.moduleBlock}>
-                        <Text style={styles.moduleHeader}>{module.emoji} {module.title}</Text>
-                        {module.lessons.map((lesson, idx) => {
-                          const done = isLessonCompleted(lesson.id);
-                          return (
-                            <Pressable
-                              key={lesson.id}
-                              style={[styles.lessonRow, idx === module.lessons.length - 1 && styles.lessonRowLast]}
-                              onPress={() => handleOpenLesson(lesson.id)}
-                            >
-                              <View style={[styles.lessonStatus, done && styles.lessonStatusDone]}>
-                                {done && <Ionicons name="checkmark" size={12} color="#fff" />}
-                              </View>
-                              <Text style={styles.lessonEmoji}>{lesson.emoji}</Text>
-                              <Text style={[styles.lessonTitle, done && styles.lessonTitleDone]} numberOfLines={2}>
-                                {lesson.title}
-                              </Text>
-                              <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
-                            </Pressable>
-                          );
-                        })}
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            );
-          })}
+        {/* Lesson Cards */}
+        <View style={styles.lessonsSection}>
+          <Text style={styles.sectionTitle}>
+            {activeSectionId
+              ? MANUAL_SECTIONS.find((s) => s.id === activeSectionId)?.title
+              : 'All Lessons'}
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            {filteredLessons.length} lessons • Tap to reveal
+          </Text>
+
+          {filteredLessons.map(({ lesson, section, moduleTitle }) => (
+            <LessonCard
+              key={lesson.id}
+              lesson={lesson}
+              section={section}
+              moduleTitle={moduleTitle}
+              isCompleted={isLessonCompleted(lesson.id)}
+              isExpanded={expandedLessonId === lesson.id}
+              onToggle={() => handleToggleLesson(lesson.id)}
+              onOpenFull={() => handleOpenLesson(lesson.id)}
+            />
+          ))}
         </View>
 
         {/* Discovery Section */}
@@ -334,7 +437,7 @@ export default function LearnScreen() {
           </View>
         </View>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: 120 }} />
       </ScrollView>
     </ErrorBoundary>
   );
@@ -352,7 +455,7 @@ const styles = StyleSheet.create({
   // Hero
   hero: {
     paddingTop: 16,
-    paddingBottom: 24,
+    paddingBottom: 20,
   },
   heroTitle: {
     fontSize: 34,
@@ -366,53 +469,245 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // Progress Card
-  progressCard: {
+  // Progress Section
+  progressSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: COLORS.card,
     borderRadius: 20,
     padding: 20,
-    marginBottom: 32,
+    marginBottom: 20,
   },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  progressRing: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: COLORS.accentSoft,
     alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: 'center',
+    flexDirection: 'row',
   },
-  progressLabel: {
-    fontSize: 17,
+  progressNumber: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: COLORS.accent,
+  },
+  progressPercent: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.accent,
+    marginTop: 4,
+  },
+  progressInfo: {
+    marginLeft: 20,
+    flex: 1,
+  },
+  progressTitle: {
+    fontSize: 18,
     fontWeight: '600',
     color: COLORS.text,
   },
-  progressStats: {
+  progressSubtitle: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    marginTop: 2,
+    marginTop: 4,
   },
-  progressPercent: {
+
+  // Filter Pills
+  filterScroll: {
+    marginBottom: 20,
+    marginHorizontal: -20,
+  },
+  filterContainer: {
+    paddingHorizontal: 20,
+    gap: 10,
+  },
+  filterPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    gap: 6,
+  },
+  filterPillActive: {
     backgroundColor: COLORS.accentSoft,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
   },
-  progressPercentText: {
+  filterPillEmoji: {
+    fontSize: 16,
+  },
+  filterPillText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.textSecondary,
+  },
+  filterPillTextActive: {
+    color: COLORS.accent,
+  },
+
+  // Lessons Section
+  lessonsSection: {
+    marginBottom: 32,
+  },
+
+  // Lesson Card
+  lessonCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    marginBottom: 16,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  lessonCardCompleted: {
+    borderWidth: 1,
+    borderColor: COLORS.successSoft,
+  },
+  lessonStatus: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.locked,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  lessonStatusDone: {
+    backgroundColor: COLORS.success,
+  },
+  lessonStatusLocked: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.textMuted,
+  },
+  lessonCardMain: {
+    padding: 20,
+    paddingRight: 56,
+  },
+  lessonEmoji: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  lessonCardHeader: {
+    marginBottom: 8,
+  },
+  lessonCardCategory: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  lessonCardTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.text,
+    lineHeight: 26,
+  },
+  lessonCardPreview: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
+  },
+  tapHint: {
+    alignItems: 'center',
+    paddingBottom: 12,
+  },
+
+  // Expanded Lesson Content
+  lessonExpanded: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  lessonExpandedIntro: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    lineHeight: 23,
+    marginBottom: 20,
+  },
+  conceptsSection: {
+    marginBottom: 20,
+  },
+  conceptsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  conceptItem: {
+    backgroundColor: COLORS.cardElevated,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+  },
+  conceptName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  conceptExplanation: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  deepDiveSection: {
+    backgroundColor: COLORS.accentSoft,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 20,
+  },
+  deepDiveTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.accent,
+    marginBottom: 8,
+  },
+  deepDiveText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  tryThisSection: {
+    backgroundColor: COLORS.successSoft,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 20,
+  },
+  tryThisTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.success,
+    marginBottom: 8,
+  },
+  tryThisText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  lessonAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.accentSoft,
+    borderRadius: 12,
+    paddingVertical: 14,
+    gap: 8,
+  },
+  lessonActionText: {
     fontSize: 15,
     fontWeight: '600',
     color: COLORS.accent,
   },
-  progressBar: {
-    height: 6,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: COLORS.accent,
-    borderRadius: 3,
-  },
 
-  // Sections
+  // Section Shared
   section: {
     marginBottom: 32,
   },
@@ -437,125 +732,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
 
-  // Manual Cards
-  manualCard: {
-    backgroundColor: COLORS.card,
-    borderRadius: 16,
-    marginBottom: 12,
-    overflow: 'hidden',
-  },
-  manualHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-  },
-  manualIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  manualIcon: {
-    fontSize: 24,
-  },
-  manualHeaderText: {
-    flex: 1,
-    marginLeft: 14,
-  },
-  manualTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  manualSubtitle: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  manualMiniProgress: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    gap: 8,
-  },
-  manualMiniBar: {
-    flex: 1,
-    height: 4,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  manualMiniFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  manualMiniText: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    fontWeight: '500',
-  },
-
-  // Modules & Lessons
-  modulesContainer: {
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  moduleBlock: {
-    paddingTop: 16,
-  },
-  moduleHeader: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-    marginBottom: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  lessonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  lessonRowLast: {
-    borderBottomWidth: 0,
-  },
-  lessonStatus: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: COLORS.textMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  lessonStatusDone: {
-    backgroundColor: COLORS.success,
-    borderColor: COLORS.success,
-  },
-  lessonEmoji: {
-    fontSize: 18,
-    marginRight: 10,
-  },
-  lessonTitle: {
-    flex: 1,
-    fontSize: 15,
-    color: COLORS.text,
-    lineHeight: 20,
-  },
-  lessonTitleDone: {
-    color: COLORS.textMuted,
-  },
-
   // Discovery Cards
   discoveryCard: {
     backgroundColor: COLORS.card,
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 20,
     marginBottom: 12,
   },
@@ -566,7 +746,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   discoveryEmoji: {
-    fontSize: 32,
+    fontSize: 36,
   },
   discoveryCategory: {
     fontSize: 11,
@@ -598,18 +778,11 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 21,
   },
-  discoveryActions: {
-    flexDirection: 'row',
-    marginTop: 16,
-    gap: 16,
-  },
-  discoveryAction: {
-    paddingVertical: 8,
-  },
-  discoveryActionText: {
-    fontSize: 14,
-    fontWeight: '600',
+  discoveryTap: {
+    fontSize: 13,
     color: COLORS.accent,
+    fontWeight: '500',
+    marginTop: 14,
   },
 
   // Show More
