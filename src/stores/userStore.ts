@@ -18,7 +18,7 @@ export type LoveLanguage =
   | 'gifts'
   | 'unknown';
 
-export type LearningStyle = 'reading' | 'listening' | 'doing' | 'talking';
+export type LearningStyle = 'reading' | 'listening' | 'doing' | 'talking' | 'unknown';
 
 export type Pronouns =
   | 'she/her'

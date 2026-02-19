@@ -52,6 +52,7 @@ const LEARNING_STYLE_OPTIONS: { value: LearningStyle; label: string; emoji: stri
   { value: 'listening', label: 'Listening', emoji: '🎧' },
   { value: 'doing', label: 'Doing', emoji: '🎮' },
   { value: 'talking', label: 'Talking', emoji: '💬' },
+  { value: 'unknown', label: 'Not sure yet', emoji: '🤔' },
 ];
 
 const PRONOUN_OPTIONS: { value: Pronouns; label: string }[] = [
