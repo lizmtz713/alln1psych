@@ -260,12 +260,31 @@ export default function LearnScreen() {
 
   // Gauge system state
   const [expandedGaugeId, setExpandedGaugeId] = useState<string | null>(null);
+  const [expandedGaugeSections, setExpandedGaugeSections] = useState<Record<string, Set<string>>>({});
 
   const handleToggleGauge = useCallback((gaugeId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedGaugeId((prev) => (prev === gaugeId ? null : gaugeId));
   }, []);
+
+  const handleToggleGaugeSection = useCallback((gaugeId: string, sectionKey: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedGaugeSections((prev) => {
+      const gaugeSet = new Set(prev[gaugeId] || []);
+      if (gaugeSet.has(sectionKey)) {
+        gaugeSet.delete(sectionKey);
+      } else {
+        gaugeSet.add(sectionKey);
+      }
+      return { ...prev, [gaugeId]: gaugeSet };
+    });
+  }, []);
+
+  const isGaugeSectionExpanded = useCallback((gaugeId: string, sectionKey: string) => {
+    return expandedGaugeSections[gaugeId]?.has(sectionKey) || false;
+  }, [expandedGaugeSections]);
 
   // Discovery state
   const initialDiscoveries = useMemo(() => getDiscoveriesForDay(), []);
@@ -368,6 +387,8 @@ export default function LearnScreen() {
 
                 {isExpanded && (
                   <View style={styles.gaugeCardExpanded}>
+                    {/* === THE BANG - Always visible === */}
+                    
                     {/* Core Truth */}
                     {gauge.coreTruth && (
                       <View style={[styles.gaugeTruthBox, { borderLeftColor: gauge.color }]}>
@@ -375,143 +396,219 @@ export default function LearnScreen() {
                       </View>
                     )}
 
-                    {/* Core description */}
-                    <Text style={styles.gaugeDescription}>{gauge.description}</Text>
-
-                    {/* What it FEELS like - Sensory Experience */}
+                    {/* What it FEELS like when LOW - THE HOOK */}
                     {gauge.whenLow && typeof gauge.whenLow === 'object' && (
                       <View style={styles.gaugeSensorySection}>
-                        <Text style={styles.gaugeSensoryTitle}>👁️ When It's Low — What You Experience</Text>
-                        
-                        <View style={styles.gaugeSensoryItem}>
-                          <Text style={styles.gaugeSensoryLabel}>Feels like:</Text>
-                          <Text style={styles.gaugeSensoryText}>{gauge.whenLow.feel}</Text>
-                        </View>
-                        
-                        <View style={styles.gaugeSensoryItem}>
-                          <Text style={styles.gaugeSensoryLabel}>Looks like:</Text>
-                          <Text style={styles.gaugeSensoryText}>{gauge.whenLow.look}</Text>
-                        </View>
-                        
-                        <View style={styles.gaugeSensoryItem}>
-                          <Text style={styles.gaugeSensoryLabel}>Sounds like:</Text>
-                          <Text style={styles.gaugeSensoryText}>"{gauge.whenLow.sound}"</Text>
-                        </View>
-                        
-                        <View style={styles.gaugeSensoryItem}>
-                          <Text style={styles.gaugeSensoryLabel}>Tastes like:</Text>
-                          <Text style={styles.gaugeSensoryText}>{gauge.whenLow.taste}</Text>
-                        </View>
+                        <Text style={styles.gaugeSensoryTitle}>👁️ When It's Low</Text>
+                        <Text style={styles.gaugeSensoryText}>{gauge.whenLow.feel}</Text>
+                        <Text style={[styles.gaugeSensoryText, { marginTop: 8, fontStyle: 'italic', color: COLORS.textMuted }]}>
+                          "{gauge.whenLow.sound}"
+                        </Text>
                       </View>
                     )}
 
-                    {/* When it's HEALTHY - Sensory Experience */}
-                    {gauge.whenHealthy && typeof gauge.whenHealthy === 'object' && (
-                      <View style={[styles.gaugeSensorySection, { backgroundColor: COLORS.successSoft }]}>
-                        <Text style={[styles.gaugeSensoryTitle, { color: COLORS.success }]}>✨ When It's Healthy — What You Experience</Text>
-                        
-                        <View style={styles.gaugeSensoryItem}>
-                          <Text style={styles.gaugeSensoryLabel}>Feels like:</Text>
-                          <Text style={styles.gaugeSensoryText}>{gauge.whenHealthy.feel}</Text>
-                        </View>
-                        
-                        <View style={styles.gaugeSensoryItem}>
-                          <Text style={styles.gaugeSensoryLabel}>Looks like:</Text>
-                          <Text style={styles.gaugeSensoryText}>{gauge.whenHealthy.look}</Text>
-                        </View>
-                        
-                        <View style={styles.gaugeSensoryItem}>
-                          <Text style={styles.gaugeSensoryLabel}>Sounds like:</Text>
-                          <Text style={styles.gaugeSensoryText}>"{gauge.whenHealthy.sound}"</Text>
-                        </View>
-                        
-                        <View style={styles.gaugeSensoryItem}>
-                          <Text style={styles.gaugeSensoryLabel}>Tastes like:</Text>
-                          <Text style={styles.gaugeSensoryText}>{gauge.whenHealthy.taste}</Text>
-                        </View>
-                      </View>
-                    )}
-
-                    {/* The Good and The Bad */}
-                    {gauge.theGood && gauge.theGood.length > 0 && (
-                      <View style={styles.gaugeGoodBadSection}>
-                        <View style={styles.gaugeGoodBox}>
-                          <Text style={styles.gaugeGoodTitle}>✅ The Good</Text>
-                          {gauge.theGood.map((item, idx) => (
-                            <Text key={idx} style={styles.gaugeGoodItem}>• {item}</Text>
-                          ))}
-                        </View>
-                        
-                        {gauge.theBad && gauge.theBad.length > 0 && (
-                          <View style={styles.gaugeBadBox}>
-                            <Text style={styles.gaugeBadTitle}>⚠️ The Bad</Text>
-                            {gauge.theBad.map((item, idx) => (
-                              <Text key={idx} style={styles.gaugeBadItem}>• {item}</Text>
-                            ))}
-                          </View>
-                        )}
-                      </View>
-                    )}
-                    
-                    {/* Deep dive sections */}
-                    {gauge.sections?.map((section, idx) => (
-                      <View key={idx} style={styles.gaugeSection}>
-                        <Text style={styles.gaugeSectionTitle}>{section.title}</Text>
-                        <Text style={styles.gaugeSectionContent}>{section.content}</Text>
-                      </View>
-                    ))}
-
-                    {/* Check In */}
-                    {gauge.checkIn && (
-                      <View style={[styles.gaugeCallout, { backgroundColor: gauge.color + '15' }]}>
-                        <Text style={[styles.gaugeCalloutTitle, { color: gauge.color }]}>🔍 Check In Right Now</Text>
-                        <Text style={styles.gaugeCalloutText}>{gauge.checkIn}</Text>
-                      </View>
-                    )}
-
-                    {/* Quick Fixes */}
+                    {/* Quick Fixes - Immediate value */}
                     {gauge.quickFixes && gauge.quickFixes.length > 0 && (
-                      <View style={styles.gaugeQuickFixes}>
-                        <Text style={styles.gaugeQuickFixesTitle}>⚡ Quick Fixes</Text>
-                        {gauge.quickFixes.map((fix, idx) => (
+                      <View style={[styles.gaugeCallout, { backgroundColor: gauge.color + '15' }]}>
+                        <Text style={[styles.gaugeCalloutTitle, { color: gauge.color }]}>⚡ Quick Fixes</Text>
+                        {gauge.quickFixes.slice(0, 3).map((fix, idx) => (
                           <Text key={idx} style={styles.gaugeQuickFixItem}>• {fix}</Text>
                         ))}
                       </View>
                     )}
 
-                    {/* Deep Work */}
-                    {gauge.deepWork && (
-                      <View style={styles.gaugeDeepWork}>
-                        <Text style={styles.gaugeDeepWorkTitle}>🏋️ Deep Work</Text>
-                        <Text style={styles.gaugeDeepWorkText}>{gauge.deepWork}</Text>
-                      </View>
-                    )}
+                    {/* === COLLAPSIBLE SECTIONS === */}
+                    <View style={styles.gaugeCollapsibleContainer}>
+                      
+                      {/* When Healthy */}
+                      {gauge.whenHealthy && typeof gauge.whenHealthy === 'object' && (
+                        <View style={styles.gaugeCollapsible}>
+                          <Pressable 
+                            style={styles.gaugeCollapsibleHeader}
+                            onPress={() => handleToggleGaugeSection(gauge.id, 'healthy')}
+                          >
+                            <Text style={styles.gaugeCollapsibleTitle}>✨ When It's Healthy</Text>
+                            <Ionicons 
+                              name={isGaugeSectionExpanded(gauge.id, 'healthy') ? 'chevron-up' : 'chevron-down'} 
+                              size={18} 
+                              color={COLORS.textMuted} 
+                            />
+                          </Pressable>
+                          {isGaugeSectionExpanded(gauge.id, 'healthy') && (
+                            <View style={styles.gaugeCollapsibleContent}>
+                              <Text style={styles.gaugeSensoryText}>{gauge.whenHealthy.feel}</Text>
+                              <Text style={[styles.gaugeSensoryText, { marginTop: 8, fontStyle: 'italic', color: COLORS.textMuted }]}>
+                                "{gauge.whenHealthy.sound}"
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      )}
 
-                    {/* Real world examples */}
-                    {gauge.realWorld && gauge.realWorld.length > 0 && (
-                      <View style={styles.gaugeRealWorld}>
-                        <Text style={styles.gaugeRealWorldTitle}>📍 Real World</Text>
-                        {gauge.realWorld.map((example, idx) => (
-                          <View key={idx} style={styles.gaugeExample}>
-                            <Text style={styles.gaugeExampleText}>{example}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    )}
+                      {/* The Good & Bad */}
+                      {gauge.theGood && gauge.theGood.length > 0 && (
+                        <View style={styles.gaugeCollapsible}>
+                          <Pressable 
+                            style={styles.gaugeCollapsibleHeader}
+                            onPress={() => handleToggleGaugeSection(gauge.id, 'goodbad')}
+                          >
+                            <Text style={styles.gaugeCollapsibleTitle}>✅ The Good & ⚠️ The Bad</Text>
+                            <Ionicons 
+                              name={isGaugeSectionExpanded(gauge.id, 'goodbad') ? 'chevron-up' : 'chevron-down'} 
+                              size={18} 
+                              color={COLORS.textMuted} 
+                            />
+                          </Pressable>
+                          {isGaugeSectionExpanded(gauge.id, 'goodbad') && (
+                            <View style={styles.gaugeCollapsibleContent}>
+                              <Text style={[styles.gaugeSensoryLabel, { color: COLORS.success }]}>The Good:</Text>
+                              {gauge.theGood.map((item, idx) => (
+                                <Text key={idx} style={styles.gaugeGoodItem}>• {item}</Text>
+                              ))}
+                              {gauge.theBad && gauge.theBad.length > 0 && (
+                                <>
+                                  <Text style={[styles.gaugeSensoryLabel, { color: '#F87171', marginTop: 12 }]}>The Bad:</Text>
+                                  {gauge.theBad.map((item, idx) => (
+                                    <Text key={idx} style={styles.gaugeBadItem}>• {item}</Text>
+                                  ))}
+                                </>
+                              )}
+                            </View>
+                          )}
+                        </View>
+                      )}
 
-                    {/* Science */}
-                    <View style={styles.gaugeScienceBox}>
-                      <Text style={styles.gaugeScienceTitle}>🧬 The Science</Text>
-                      <Text style={styles.gaugeScienceText}>{gauge.science}</Text>
+                      {/* Deep Dive */}
+                      {gauge.sections && gauge.sections.length > 0 && (
+                        <View style={styles.gaugeCollapsible}>
+                          <Pressable 
+                            style={styles.gaugeCollapsibleHeader}
+                            onPress={() => handleToggleGaugeSection(gauge.id, 'deepdive')}
+                          >
+                            <Text style={styles.gaugeCollapsibleTitle}>📚 Deep Dive</Text>
+                            <Ionicons 
+                              name={isGaugeSectionExpanded(gauge.id, 'deepdive') ? 'chevron-up' : 'chevron-down'} 
+                              size={18} 
+                              color={COLORS.textMuted} 
+                            />
+                          </Pressable>
+                          {isGaugeSectionExpanded(gauge.id, 'deepdive') && (
+                            <View style={styles.gaugeCollapsibleContent}>
+                              <Text style={styles.gaugeDescription}>{gauge.description}</Text>
+                              {gauge.sections.map((section, idx) => (
+                                <View key={idx} style={styles.gaugeSection}>
+                                  <Text style={styles.gaugeSectionTitle}>{section.title}</Text>
+                                  <Text style={styles.gaugeSectionContent}>{section.content}</Text>
+                                </View>
+                              ))}
+                            </View>
+                          )}
+                        </View>
+                      )}
+
+                      {/* Check In & Deep Work */}
+                      {(gauge.checkIn || gauge.deepWork) && (
+                        <View style={styles.gaugeCollapsible}>
+                          <Pressable 
+                            style={styles.gaugeCollapsibleHeader}
+                            onPress={() => handleToggleGaugeSection(gauge.id, 'work')}
+                          >
+                            <Text style={styles.gaugeCollapsibleTitle}>🏋️ Check In & Deep Work</Text>
+                            <Ionicons 
+                              name={isGaugeSectionExpanded(gauge.id, 'work') ? 'chevron-up' : 'chevron-down'} 
+                              size={18} 
+                              color={COLORS.textMuted} 
+                            />
+                          </Pressable>
+                          {isGaugeSectionExpanded(gauge.id, 'work') && (
+                            <View style={styles.gaugeCollapsibleContent}>
+                              {gauge.checkIn && (
+                                <>
+                                  <Text style={styles.gaugeSensoryLabel}>🔍 Check In Right Now:</Text>
+                                  <Text style={[styles.gaugeSensoryText, { marginBottom: 16 }]}>{gauge.checkIn}</Text>
+                                </>
+                              )}
+                              {gauge.deepWork && (
+                                <>
+                                  <Text style={styles.gaugeSensoryLabel}>🏋️ Deep Work:</Text>
+                                  <Text style={styles.gaugeSensoryText}>{gauge.deepWork}</Text>
+                                </>
+                              )}
+                            </View>
+                          )}
+                        </View>
+                      )}
+
+                      {/* Real World */}
+                      {gauge.realWorld && gauge.realWorld.length > 0 && (
+                        <View style={styles.gaugeCollapsible}>
+                          <Pressable 
+                            style={styles.gaugeCollapsibleHeader}
+                            onPress={() => handleToggleGaugeSection(gauge.id, 'realworld')}
+                          >
+                            <Text style={styles.gaugeCollapsibleTitle}>📍 Real World Examples</Text>
+                            <Ionicons 
+                              name={isGaugeSectionExpanded(gauge.id, 'realworld') ? 'chevron-up' : 'chevron-down'} 
+                              size={18} 
+                              color={COLORS.textMuted} 
+                            />
+                          </Pressable>
+                          {isGaugeSectionExpanded(gauge.id, 'realworld') && (
+                            <View style={styles.gaugeCollapsibleContent}>
+                              {gauge.realWorld.map((example, idx) => (
+                                <View key={idx} style={styles.gaugeExample}>
+                                  <Text style={styles.gaugeExampleText}>{example}</Text>
+                                </View>
+                              ))}
+                            </View>
+                          )}
+                        </View>
+                      )}
+
+                      {/* Science */}
+                      {gauge.science && (
+                        <View style={styles.gaugeCollapsible}>
+                          <Pressable 
+                            style={styles.gaugeCollapsibleHeader}
+                            onPress={() => handleToggleGaugeSection(gauge.id, 'science')}
+                          >
+                            <Text style={styles.gaugeCollapsibleTitle}>🧬 The Science</Text>
+                            <Ionicons 
+                              name={isGaugeSectionExpanded(gauge.id, 'science') ? 'chevron-up' : 'chevron-down'} 
+                              size={18} 
+                              color={COLORS.textMuted} 
+                            />
+                          </Pressable>
+                          {isGaugeSectionExpanded(gauge.id, 'science') && (
+                            <View style={styles.gaugeCollapsibleContent}>
+                              <Text style={styles.gaugeScienceText}>{gauge.science}</Text>
+                            </View>
+                          )}
+                        </View>
+                      )}
+
+                      {/* Ripple Effect */}
+                      {gauge.rippleEffect && (
+                        <View style={styles.gaugeCollapsible}>
+                          <Pressable 
+                            style={styles.gaugeCollapsibleHeader}
+                            onPress={() => handleToggleGaugeSection(gauge.id, 'ripple')}
+                          >
+                            <Text style={styles.gaugeCollapsibleTitle}>🌊 The Ripple Effect</Text>
+                            <Ionicons 
+                              name={isGaugeSectionExpanded(gauge.id, 'ripple') ? 'chevron-up' : 'chevron-down'} 
+                              size={18} 
+                              color={COLORS.textMuted} 
+                            />
+                          </Pressable>
+                          {isGaugeSectionExpanded(gauge.id, 'ripple') && (
+                            <View style={styles.gaugeCollapsibleContent}>
+                              <Text style={styles.gaugeRippleText}>{gauge.rippleEffect}</Text>
+                            </View>
+                          )}
+                        </View>
+                      )}
                     </View>
-
-                    {/* Ripple Effect */}
-                    {gauge.rippleEffect && (
-                      <View style={styles.gaugeRippleBox}>
-                        <Text style={styles.gaugeRippleTitle}>🌊 The Ripple Effect</Text>
-                        <Text style={styles.gaugeRippleText}>{gauge.rippleEffect}</Text>
-                      </View>
-                    )}
                   </View>
                 )}
               </View>
@@ -961,6 +1058,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     lineHeight: 21,
+  },
+  
+  // Collapsible sections
+  gaugeCollapsibleContainer: {
+    marginTop: 16,
+  },
+  gaugeCollapsible: {
+    backgroundColor: COLORS.cardElevated,
+    borderRadius: 12,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  gaugeCollapsibleHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 14,
+  },
+  gaugeCollapsibleTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  gaugeCollapsibleContent: {
+    paddingHorizontal: 14,
+    paddingBottom: 14,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    paddingTop: 14,
   },
 
   // Progress Section
