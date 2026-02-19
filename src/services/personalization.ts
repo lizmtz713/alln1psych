@@ -64,7 +64,7 @@ export async function generateDailyContent(userContext: DailyContentContext): Pr
     return getStaticDefaults(userContext.name);
   }
 
-  const prompt = `You are Psych, an emotional intelligence companion. Based on this user's recent history, generate personalized daily content.
+  const prompt = `You are Gauge, an emotional intelligence companion. Based on this user's recent history, generate personalized daily content.
 
 USER: ${userContext.name}, age group: ${userContext.ageGroup}
 RECENT MOODS (last 7 days): ${(userContext.recentMoods ?? []).join(', ') || 'No check-ins yet'}

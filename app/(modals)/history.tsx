@@ -26,7 +26,7 @@ export default function HistoryScreen() {
     try {
       await Share.share({
         message: `${title}\n\n${summary}${insights ? `\n\nInsights: ${insights}` : ''}`,
-        title: 'Conversation with Psych',
+        title: 'Conversation with Gauge',
       });
     } catch (_) {}
   };
@@ -42,7 +42,7 @@ export default function HistoryScreen() {
       </View>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {summaries.length === 0 ? (
-          <Text style={styles.empty}>No conversations yet. Chat with Psych to see summaries here.</Text>
+          <Text style={styles.empty}>No conversations yet. Chat with Gauge to see summaries here.</Text>
         ) : (
           summaries.map((s) => (
             <Pressable

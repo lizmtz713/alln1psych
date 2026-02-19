@@ -150,7 +150,7 @@ export default function MeScreen() {
   const prevUnlockedIds = useRef<Set<string>>(new Set());
 
   const LEGAL_DISCLAIMER =
-    'AllN1 Psych is an emotional wellness tool, not a medical device. It does not diagnose, treat, or cure any mental health condition. If you are in crisis, please contact 988 (Suicide & Crisis Lifeline), text HOME to 741741, or call 911. By using this app, you agree to our Terms of Service and Privacy Policy.';
+    'InGauge is an emotional wellness tool, not a medical device. It does not diagnose, treat, or cure any mental health condition. If you are in crisis, please contact 988 (Suicide & Crisis Lifeline), text HOME to 741741, or call 911. By using this app, you agree to our Terms of Service and Privacy Policy.';
   const DATA_RETENTION_NOTICE =
     'Your conversations and data are stored securely and encrypted. Only you can access your personal data. We never sell individual data. You can export or delete your data anytime from Settings.';
   const TERMS_URL = 'https://alln1network.com/terms';
@@ -526,7 +526,7 @@ export default function MeScreen() {
         )}
         {summaryGroups.length === 0 ? (
           <Text style={styles.emptyText}>
-            After you talk with Psych, short summaries will appear here. Have 3+ messages and leave the Talk tab or tap "End conversation" to save.
+            After you talk with Gauge, short summaries will appear here. Have 3+ messages and leave the Talk tab or tap "End conversation" to save.
           </Text>
         ) : (
           summaryGroups.map((group) => (
@@ -607,7 +607,7 @@ export default function MeScreen() {
             {streak > 0 && (
               <Text style={styles.insightStreak}>You've checked in {streak} days in a row</Text>
             )}
-            <Text style={styles.insightText}>Conversations with Psych: {conversationCount}</Text>
+            <Text style={styles.insightText}>Conversations with Gauge: {conversationCount}</Text>
             <Text style={styles.insightText}>Lessons completed: {lessonsCount}</Text>
           </View>
         )}
@@ -707,7 +707,7 @@ export default function MeScreen() {
                           <Text style={styles.debriefLabel}>Conversation</Text>
                           {session.messages.map((m, i) => (
                             <View key={i} style={styles.practiceBubbleWrap}>
-                              <Text style={styles.practiceBubbleLabel}>{m.role === 'user' ? 'You' : 'Psych'}</Text>
+                              <Text style={styles.practiceBubbleLabel}>{m.role === 'user' ? 'You' : 'Gauge'}</Text>
                               <Text style={styles.practiceBubbleText}>{m.content}</Text>
                             </View>
                           ))}
@@ -825,7 +825,7 @@ export default function MeScreen() {
 
         <View style={styles.settingsCard}>
           <Text style={styles.settingLabel}>Emergency contacts</Text>
-          <Text style={styles.settingHint}>Add up to 3 people Psych can help you reach in a crisis.</Text>
+          <Text style={styles.settingHint}>Add up to 3 people Gauge can help you reach in a crisis.</Text>
           {[0, 1, 2].map((i) => {
             const contacts = contactsEditing ? editingContacts : user.emergencyContacts;
             const c = contacts[i] ?? { name: '', phone: '' };
@@ -881,7 +881,7 @@ export default function MeScreen() {
           <Pressable style={styles.modalOverlay} onPress={() => setShowSensitiveModal(false)}>
             <Pressable style={styles.sensitiveModalCard} onPress={() => {}}>
               <Text style={styles.sensitiveModalTitle}>Sensitive topics</Text>
-              <Text style={styles.settingHint}>Psych will handle these with extra care. Toggle any that apply.</Text>
+              <Text style={styles.settingHint}>Gauge will handle these with extra care. Toggle any that apply.</Text>
               <ScrollView style={styles.sensitiveChipScroll}>
                 {SENSITIVE_TOPICS_TOGGLES.map((topic) => {
                   const userSensitiveTopics = user.sensitiveTopics ?? [];
@@ -916,7 +916,7 @@ export default function MeScreen() {
           <Pressable style={styles.modalOverlay} onPress={() => setShowCulturalModal(false)}>
             <Pressable style={styles.sensitiveModalCard} onPress={() => {}}>
               <Text style={styles.sensitiveModalTitle}>Cultural context</Text>
-              <Text style={styles.settingHint}>This helps Psych understand your world better. You can change this anytime.</Text>
+              <Text style={styles.settingHint}>This helps Gauge understand your world better. You can change this anytime.</Text>
               <ScrollView style={styles.sensitiveChipScroll}>
                 <Text style={styles.smallLabel}>Which of these feel like part of your identity?</Text>
                 <View style={styles.chipRow}>
@@ -1074,7 +1074,7 @@ export default function MeScreen() {
             <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
           </Pressable>
           <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
-            <Text style={styles.settingMuted}>AllN1 Psych v{APP_VERSION}</Text>
+            <Text style={styles.settingMuted}>InGauge v{APP_VERSION}</Text>
           </View>
         </View>
 

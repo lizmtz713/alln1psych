@@ -271,7 +271,7 @@ export default function Relate() {
         const name = theirName.trim() || 'them';
         const response = await sendMessageWithSystemPrompt(
           [{ role: 'user', content: `My personality: ${me.name} (${me.communicationStyle}). Their personality: ${them.name} (${them.communicationStyle}). Relationship: ${relType}. Their name: ${name}. Give me a relationship insight.` }],
-          `You are Psych, a relationship intelligence companion. Based on two personality profiles and their relationship type, give a warm, specific, insightful reading.
+          `You are Gauge, a relationship intelligence companion. Based on two personality profiles and their relationship type, give a warm, specific, insightful reading.
 
 For ROMANTIC: Chemistry, communication differences, what makes them click, what could pull them apart, one tip for long-term success.
 For FAMILY: Generational dynamics, communication gaps, unspoken expectations, how to bridge differences.
@@ -611,7 +611,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
               <AnimatedCard delay={400}>
                 <View style={styles.loadingCard}>
                   <ActivityIndicator color={RELATE_ACCENT} size="small" />
-                  <Text style={styles.loadingText}>Psych is analyzing your dynamic...</Text>
+                  <Text style={styles.loadingText}>Gauge is analyzing your dynamic...</Text>
                 </View>
               </AnimatedCard>
             )}
@@ -627,7 +627,7 @@ Be specific to THEIR combination. Use "you" and "${name}". Keep it 4-6 sentences
                     <View style={styles.insightIconWrap}>
                       <Ionicons name="sparkles" size={18} color="#fff" />
                     </View>
-                    <Text style={styles.insightTitle}>Psych says</Text>
+                    <Text style={styles.insightTitle}>Gauge says</Text>
                   </View>
                   <Text style={styles.insightText}>{aiInsight}</Text>
                 </View>

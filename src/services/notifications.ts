@@ -76,7 +76,7 @@ export async function scheduleEveningReflection(hour: number = 21, minute: numbe
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'How was your day? 🌙',
-      body: 'Psych is here if you want to talk about it.',
+      body: 'Gauge is here if you want to talk about it.',
       data: { type: 'evening-reflection' },
     },
     trigger: { type: 'daily', hour, minute } as Notifications.NotificationTriggerInput,

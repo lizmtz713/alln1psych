@@ -222,7 +222,7 @@ export default function SignUpScreen() {
           <Text style={styles.ageLabel}>I confirm I am 13 years of age or older</Text>
         </Pressable>
         {!ageConfirm && (
-          <Text style={styles.ageHint}>AllN1 Psych is available for users 13 and older. We're working on a family plan for younger users.</Text>
+          <Text style={styles.ageHint}>InGauge is available for users 13 and older. We're working on a family plan for younger users.</Text>
         )}
 
         <Pressable

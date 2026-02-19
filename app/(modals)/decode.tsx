@@ -34,7 +34,7 @@ const AI_HEADER = '#7C4DFF';
 const AI_BODY = '#E0E0E0';
 const LOADING_TEXT = '#8888A0';
 
-const DECODE_ANALYSIS_SYSTEM = `You are Psych in AllN1 Psych "Decode" mode. The user pasted a message someone sent them. Analyze it.
+const DECODE_ANALYSIS_SYSTEM = `You are Gauge in InGauge "Decode" mode. The user pasted a message someone sent them. Analyze it.
 
 Respond with these sections (use ALL CAPS for section headers):
 
@@ -45,7 +45,7 @@ RED FLAGS — If anything feels manipulative, guilt-trippy, or off; otherwise sa
 
 Be direct, warm, and concise. 2-4 sentences per section.`;
 
-const DECODE_RESPOND_SYSTEM = `You are Psych. The user received a message, saw your analysis, and chose an intent. Now give them a response guide.
+const DECODE_RESPOND_SYSTEM = `You are Gauge. The user received a message, saw your analysis, and chose an intent. Now give them a response guide.
 
 Include these sections (ALL CAPS headers):
 
@@ -289,7 +289,7 @@ export default function DecodeScreen() {
               {loading ? (
                 <View style={styles.loadingWrap}>
                   <ActivityIndicator size="small" color={ACCENT} />
-                  <Text style={styles.loadingText}>Psych is thinking...</Text>
+                  <Text style={styles.loadingText}>Gauge is thinking...</Text>
                 </View>
               ) : (
                 <Pressable
@@ -314,7 +314,7 @@ export default function DecodeScreen() {
               {loading ? (
                 <View style={styles.loadingWrap}>
                   <ActivityIndicator size="small" color={ACCENT} />
-                  <Text style={styles.loadingText}>Psych is thinking...</Text>
+                  <Text style={styles.loadingText}>Gauge is thinking...</Text>
                 </View>
               ) : null}
             </>
@@ -326,7 +326,7 @@ export default function DecodeScreen() {
               {loading ? (
                 <View style={styles.loadingWrap}>
                   <ActivityIndicator size="small" color={ACCENT} />
-                  <Text style={styles.loadingText}>Psych is thinking...</Text>
+                  <Text style={styles.loadingText}>Gauge is thinking...</Text>
                 </View>
               ) : (
                 <>

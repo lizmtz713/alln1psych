@@ -18,12 +18,12 @@ interface PremiumGateProps {
 const FEATURE_COPY = {
   ai: {
     title: "You've used your 3 free chats today",
-    subtitle: 'Psych is here whenever you need — upgrade for unlimited conversations.',
+    subtitle: 'Gauge is here whenever you need — upgrade for unlimited conversations.',
     icon: 'chatbubbles',
   },
   voice: {
     title: 'Voice mode is a premium feature',
-    subtitle: 'Hear Psych speak back to you with natural voice responses.',
+    subtitle: 'Hear Gauge speak back to you with natural voice responses.',
     icon: 'mic',
   },
   circle: {
@@ -40,7 +40,7 @@ const FEATURE_COPY = {
 
 const PREMIUM_FEATURES = [
   { icon: 'chatbubbles', text: 'Unlimited AI conversations' },
-  { icon: 'mic', text: 'Voice mode — hear Psych speak' },
+  { icon: 'mic', text: 'Voice mode — hear Gauge speak' },
   { icon: 'people', text: 'Unlimited Circle connections' },
   { icon: 'refresh', text: 'Unlimited Replay sessions' },
   { icon: 'star', text: 'Early access to new features' },

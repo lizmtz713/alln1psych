@@ -884,7 +884,7 @@ export default function SettingsScreen() {
                   </View>
                 )}
               </View>
-              <Text style={styles.rowHint}>Psych speaks back with voice</Text>
+              <Text style={styles.rowHint}>Gauge speaks back with voice</Text>
             </View>
             <Switch
               value={settings.aiVoiceEnabled && usePremiumStore.getState().isPremium()}
@@ -962,7 +962,7 @@ export default function SettingsScreen() {
           <View style={styles.row}>
             <View>
               <Text style={styles.rowLabel}>Sensitive topics</Text>
-              <Text style={styles.rowHint}>Psych will be extra thoughtful about these</Text>
+              <Text style={styles.rowHint}>Gauge will be extra thoughtful about these</Text>
             </View>
           </View>
           {SENSITIVE_TOPIC_OPTIONS.filter(opt => opt.value !== 'none').map((opt, idx) => {

@@ -34,12 +34,12 @@ const AI_HEADER = '#7C4DFF';
 const AI_BODY = '#E0E0E0';
 const LOADING_TEXT = '#8888A0';
 
-const REPLAY_MIRROR_SYSTEM = `You are Psych, an emotional intelligence companion. The user just told you something that happened to them. Your job in this phase is ONLY to mirror it back accurately.
+const REPLAY_MIRROR_SYSTEM = `You are Gauge, an emotional intelligence companion. The user just told you something that happened to them. Your job in this phase is ONLY to mirror it back accurately.
 Restate what happened in clear, organized language. Use this format:
 "Here's what I heard: [restate the situation]. [Restate what they felt]. [Restate what they needed]. Did I get that right?"
 Be accurate. Don't interpret yet. Don't give advice yet. Just mirror. If details are unclear, ask ONE clarifying question.`;
 
-const REPLAY_DECODE_SYSTEM = `You are Psych. The user confirmed their story. Now do THREE things in your response, clearly separated:
+const REPLAY_DECODE_SYSTEM = `You are Gauge. The user confirmed their story. Now do THREE things in your response, clearly separated:
 
 DECODE THEIR FEELINGS
 Start with "What you're feeling:" — Name the surface emotion they expressed. Then go deeper. What's underneath? If they said angry, it might be hurt, fear of rejection, or feeling unseen. If they said fine, they might be numbing. Be specific to THEIR story. Use language like "The anger makes sense. But underneath it, there might be..."
@@ -52,7 +52,7 @@ Start with "What your system is telling you:" — Connect this to their cockpit 
 
 Be warm, specific, and direct. Never generic. Every sentence should reference THEIR specific situation.`;
 
-const REPLAY_COACH_SYSTEM = `You are Psych. The user has heard the decode. Now coach them. Provide:
+const REPLAY_COACH_SYSTEM = `You are Gauge. The user has heard the decode. Now coach them. Provide:
 
 WHAT TO SAY — Give them 2-3 actual response options they could use with the other person. Not generic. Specific to their situation. For each option, briefly explain what it prioritizes (honesty, preservation, boundary-setting, etc.)
 WHAT NOT TO SAY — One thing they should avoid and why.
@@ -314,7 +314,7 @@ export default function ReplayScreen() {
                 {loading ? (
                   <>
                     <ActivityIndicator size="small" color="#fff" />
-                    <Text style={styles.primaryBtnText}>Psych is thinking...</Text>
+                    <Text style={styles.primaryBtnText}>Gauge is thinking...</Text>
                   </>
                 ) : (
                   <Text style={styles.primaryBtnText}>Next</Text>
@@ -328,7 +328,7 @@ export default function ReplayScreen() {
               {loading ? (
                 <View style={styles.loadingWrap}>
                   <ActivityIndicator size="small" color={ACCENT} />
-                  <Text style={styles.loadingText}>Psych is thinking...</Text>
+                  <Text style={styles.loadingText}>Gauge is thinking...</Text>
                 </View>
               ) : (
                 <View style={styles.responseCard}>
@@ -353,7 +353,7 @@ export default function ReplayScreen() {
               {loading ? (
                 <View style={styles.loadingWrap}>
                   <ActivityIndicator size="small" color={ACCENT} />
-                  <Text style={styles.loadingText}>Psych is thinking...</Text>
+                  <Text style={styles.loadingText}>Gauge is thinking...</Text>
                 </View>
               ) : (
                 decodeResponse ? renderDecodeContent() : null

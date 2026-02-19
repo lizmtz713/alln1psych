@@ -278,7 +278,7 @@ export default function OnboardingScreen() {
         <View style={styles.notificationPromptOverlay}>
           <View style={styles.notificationPromptCard}>
             <Text style={styles.notificationPromptTitle}>
-              Can Psych send you a daily check-in reminder?
+              Can Gauge send you a daily check-in reminder?
             </Text>
             <Text style={styles.notificationPromptSub}>
               It's a gentle nudge to check in with yourself.
@@ -758,7 +758,7 @@ export default function OnboardingScreen() {
                   </Text>
                 </View>
                 <Text style={styles.disclaimerText}>
-                  AllN1 Psych is an emotional wellness tool, not a medical device. It does not diagnose, treat, or cure any mental health condition. If you are in crisis, please contact 988 (Suicide & Crisis Lifeline), text HOME to 741741, or call 911. By using this app, you agree to our{' '}
+                  InGauge is an emotional wellness tool, not a medical device. It does not diagnose, treat, or cure any mental health condition. If you are in crisis, please contact 988 (Suicide & Crisis Lifeline), text HOME to 741741, or call 911. By using this app, you agree to our{' '}
                   <Text style={styles.disclaimerLink} onPress={() => Linking.openURL('https://alln1network.com/terms')}>Terms of Service</Text>
                   {' '}and{' '}
                   <Text style={styles.disclaimerLink} onPress={() => Linking.openURL('https://alln1network.com/privacy')}>Privacy Policy</Text>.

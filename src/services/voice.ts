@@ -169,7 +169,7 @@ export function hasVoiceSupport(): boolean {
   return true;
 }
 
-/** Play AI response using OpenAI TTS (Psych's voice). Uses fetch + blob + FileReader for reliable binary in RN. */
+/** Play AI response using OpenAI TTS (Gauge's voice). Uses fetch + blob + FileReader for reliable binary in RN. */
 export async function speakWithOpenAI(text: string): Promise<void> {
   try {
     const apiKey = await getOpenAIKey();

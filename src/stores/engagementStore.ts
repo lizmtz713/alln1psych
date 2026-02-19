@@ -10,7 +10,7 @@ const DAILY_CHALLENGES = [
   { text: 'Step outside for 2 minutes', emoji: '🌿' },
   { text: 'Compliment yourself — out loud', emoji: '🪞' },
   { text: 'Put your phone down for 10 minutes', emoji: '📵' },
-  { text: "Tell Psych about the best part of your day", emoji: '⭐' },
+  { text: "Tell Gauge about the best part of your day", emoji: '⭐' },
   { text: 'Drink a glass of water right now', emoji: '💧' },
   { text: 'Stretch for 30 seconds', emoji: '🧘' },
   { text: 'Forgive yourself for one thing today', emoji: '🕊️' },

@@ -317,7 +317,7 @@ const PETS_CONTENT = {
   validation: "If your pet is your primary source of love and connection right now, that's okay. It's real love. It counts. It's not a sign you've failed at human relationships — it might be exactly what your nervous system needs.",
 };
 
-const SYSTEM_PROMPT = `You are Psych in "Love" mode — a warm, knowledgeable friend who talks about love, intimacy, sex, and connection openly and without shame.
+const SYSTEM_PROMPT = `You are Gauge in "Love" mode — a warm, knowledgeable friend who talks about love, intimacy, sex, and connection openly and without shame.
 
 Your foundation is REAL SCIENCE:
 - Biological Psychology by James W. Kalat
@@ -341,7 +341,7 @@ Your role:
 
 Never be preachy. Never be judgmental. Be warm, real, and helpful.`;
 
-const LANGUAGES_QUIZ_PROMPT = `You are Psych helping someone discover their love language. Ask them 5 quick questions (one at a time) to understand how they prefer to give and receive love. After their answers, tell them:
+const LANGUAGES_QUIZ_PROMPT = `You are Gauge helping someone discover their love language. Ask them 5 quick questions (one at a time) to understand how they prefer to give and receive love. After their answers, tell them:
 1. Their primary love language (with confidence %)
 2. Their secondary love language
 3. How this shows up in relationships

@@ -38,8 +38,8 @@ export interface Message {
   content: string;
 }
 
-const SYSTEM_PROMPT_TEMPLATE = `You are the AI companion inside AllN1 Psych, an emotional intelligence app.
-Your name is simply "Psych."
+const SYSTEM_PROMPT_TEMPLATE = `You are the AI companion inside InGauge, an emotional intelligence app.
+Your name is Gauge.
 
 YOUR PERSONALITY:
 - You are warm, patient, and genuinely caring
@@ -123,7 +123,7 @@ WHAT YOU NEVER DO:
 - Never share medical advice
 - Never claim to replace therapy or professional help
 - Never use clinical/medical jargon unless the user does first
-- Never start with "As an AI..." — you are Psych, their companion
+- Never start with "As an AI..." — you are Gauge, their companion
 
 REPLAY AND DECODE MODES:
 - If the user describes something that already happened and wants to process it, suggest: "It sounds like you want to replay something that happened. Want to use Replay mode? It walks you through understanding the situation step by step." But don't force it — if they want to just talk, let them talk.
@@ -588,10 +588,10 @@ export async function generateConversationSummary(
   if (!apiKey) throw new Error('OpenAI API key not configured');
 
   const conversationText = messages
-    .map((m) => `${m.role === 'user' ? 'User' : 'Psych'}: ${m.content}`)
+    .map((m) => `${m.role === 'user' ? 'User' : 'Gauge'}: ${m.content}`)
     .join('\n');
 
-  const prompt = `Summarize this conversation between a user and their AI companion Psych.
+  const prompt = `Summarize this conversation between a user and their AI companion Gauge.
 
 CONVERSATION:
 ${conversationText}

@@ -27,7 +27,7 @@ interface PaywallModalProps {
 
 const PRO_FEATURES = [
   { icon: 'infinite', text: 'Unlimited AI conversations', highlight: true },
-  { icon: 'mic', text: 'Voice responses from Psych' },
+  { icon: 'mic', text: 'Voice responses from Gauge' },
   { icon: 'people', text: 'Full Circle features' },
   { icon: 'finger-print', text: 'Personology deep dives' },
   { icon: 'construct', text: 'All 7 AI tools unlocked' },

@@ -24,7 +24,7 @@ import {
 } from '../../src/data/discoveries';
 
 const TOOLKIT_ACTIVITIES: { id: string; emoji: string; title: string; sub: string }[] = [
-  { id: 'talk', emoji: '💬', title: 'Talk to Psych', sub: 'Open conversation with your AI companion' },
+  { id: 'talk', emoji: '💬', title: 'Talk to Gauge', sub: 'Open conversation with your AI companion' },
   { id: 'journal', emoji: '📓', title: 'Journal', sub: 'Write and reflect' },
   { id: 'breathing', emoji: '🫁', title: 'Breathing Reset', sub: 'Regulate your nervous system in 2 minutes' },
   { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Decoder', sub: "Identify what you're actually feeling" },
@@ -57,7 +57,7 @@ function DiscoveryCard({
   onToggleExpand,
   onToggleLearnMore,
   onDismiss,
-  onAskPsych,
+  onAskGauge,
 }: {
   discovery: Discovery;
   expanded: boolean;
@@ -65,7 +65,7 @@ function DiscoveryCard({
   onToggleExpand: () => void;
   onToggleLearnMore: () => void;
   onDismiss: () => void;
-  onAskPsych?: () => void;
+  onAskGauge?: () => void;
 }) {
   const translateX = useState(() => new Animated.Value(0))[0];
   const panResponder = useMemo(
@@ -113,9 +113,9 @@ function DiscoveryCard({
             {discovery.expanded ?? 'More coming soon.'}
           </Text>
         )}
-        {onAskPsych && (
-          <Pressable style={styles.askPsychBtn} onPress={(e) => { e.stopPropagation(); onAskPsych(); }}>
-            <Text style={styles.askPsychBtnText}>Ask Psych about this</Text>
+        {onAskGauge && (
+          <Pressable style={styles.askGaugeBtn} onPress={(e) => { e.stopPropagation(); onAskGauge(); }}>
+            <Text style={styles.askGaugeBtnText}>Ask Gauge about this</Text>
           </Pressable>
         )}
       </Pressable>
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderRadius: 8,
   },
-  askPsychBtn: {
+  askGaugeBtn: {
     marginTop: 12,
     paddingVertical: 8,
     paddingHorizontal: 12,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.input,
     alignSelf: 'flex-start',
   },
-  askPsychBtnText: { fontSize: 13, color: ACCENT },
+  askGaugeBtnText: { fontSize: 13, color: ACCENT },
   showMoreBtn: {
     alignSelf: 'center',
     paddingVertical: 12,

@@ -64,7 +64,7 @@ interface InsightsState {
   getConversationCountThisWeek: () => number;
   getLessonsCompletedThisWeek: () => number;
   getMostCommonMoodThisWeek: () => string | null;
-  getPsychSays: (engagementStreak: number) => string;
+  getGaugeSays: (engagementStreak: number) => string;
   getWeeklySummary: () => { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null;
   reset: () => void;
 }
@@ -158,7 +158,7 @@ export const useInsightsStore = create<InsightsState>(() => ({
     return mood;
   },
 
-  getPsychSays: (engagementStreak: number): string => {
+  getGaugeSays: (engagementStreak: number): string => {
     const trend = useInsightsStore.getState().getWeeklyMoodTrend();
     const greenCount = trend.filter((t: { mood: string }) => t.mood === 'green').length;
     const lastMood = trend.length > 0 ? trend[0].mood : null;

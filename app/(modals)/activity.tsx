@@ -38,7 +38,7 @@ import { useEducationStore } from '../../src/stores/educationStore';
 type BreathPhase = 'inhale' | 'hold' | 'exhale';
 const BOX_BREATH = { inhale: 4, hold: 4, exhale: 4, holdAfter: 4 };
 
-const THOUGHT_CHALLENGER_SYSTEM = `You are a cognitive behavioral thought challenger inside AllN1 Psych. The user will share a negative or distressing thought. Your job:
+const THOUGHT_CHALLENGER_SYSTEM = `You are a cognitive behavioral thought challenger inside InGauge. The user will share a negative or distressing thought. Your job:
 
 1. First, identify the cognitive distortion (all-or-nothing, catastrophizing, mind reading, emotional reasoning, should statements, personalization, filtering, overgeneralization, jumping to conclusions, labeling). Name it in simple, non-clinical language.
 
@@ -840,7 +840,7 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
         encouragement: tmAiResult?.encouragement,
       });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Saved', 'Trigger saved. Psych can reference it in conversation.');
+      Alert.alert('Saved', 'Trigger saved. Gauge can reference it in conversation.');
       resetTriggerMap();
     };
 
@@ -1168,7 +1168,7 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
                 <Text style={styles.thermoActionText}>✍️ Write it out</Text>
               </Pressable>
               <Pressable style={styles.thermoActionBtn} onPress={() => { router.back(); router.push('/(tabs)/talk'); }}>
-                <Text style={styles.thermoActionText}>💬 Talk to Psych</Text>
+                <Text style={styles.thermoActionText}>💬 Talk to Gauge</Text>
               </Pressable>
               <Text style={[styles.detailLabel, { marginTop: 12 }]}>What's raising your temperature?</Text>
               <TextInput style={styles.thoughtInput} placeholder="Optional..." placeholderTextColor={COLORS.textMuted} value={stressNote} onChangeText={setStressNote} />
@@ -1187,7 +1187,7 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
                 <Text style={styles.thermoActionText}>🌬️ Emergency breathe</Text>
               </Pressable>
               <Pressable style={styles.thermoActionBtn} onPress={() => { router.back(); router.push('/(tabs)/talk'); }}>
-                <Text style={styles.thermoActionText}>💬 Talk to Psych now</Text>
+                <Text style={styles.thermoActionText}>💬 Talk to Gauge now</Text>
               </Pressable>
               <Pressable style={styles.thermoActionBtn} onPress={() => emergencyContacts[0] && Linking.openURL(`tel:${emergencyContacts[0].phone.replace(/\D/g, '')}`)}>
                 <Text style={styles.thermoActionText}>👤 Call someone</Text>
@@ -1220,7 +1220,7 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
                 <Text style={styles.thermoActionText}>🚨 Call 911</Text>
               </Pressable>
               <Pressable style={styles.thermoActionBtn} onPress={() => { router.back(); router.push('/(tabs)/talk'); }}>
-                <Text style={styles.thermoActionText}>I want to talk to Psych</Text>
+                <Text style={styles.thermoActionText}>I want to talk to Gauge</Text>
               </Pressable>
               <Text style={[styles.detailLabel, { marginTop: 12 }]}>What's going on?</Text>
               <TextInput style={styles.thoughtInput} placeholder="Optional..." placeholderTextColor={COLORS.textMuted} value={stressNote} onChangeText={setStressNote} />

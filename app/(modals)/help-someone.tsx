@@ -58,7 +58,7 @@ function buildCoachingSystemPrompt(
   concerns: string[]
 ): string {
   const concernsList = concerns.length ? concerns.join('\n- ') : 'None specified';
-  return `You are Psych, an AI emotional intelligence coach. The user is trying to help someone they care about who is struggling.
+  return `You are Gauge, an AI emotional intelligence coach. The user is trying to help someone they care about who is struggling.
 
 IMPORTANT RULES:
 - Focus on the SITUATION and the OTHER PERSON, not the user's feelings
@@ -325,7 +325,7 @@ export default function HelpSomeoneScreen() {
     if (!currentSession || !canEndSession) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setSummaryLoading(true);
-    const systemPrompt = `You are Psych. The user just had a coaching session about helping someone named ${currentSession.personName}. Generate a concise action plan summary.
+    const systemPrompt = `You are Gauge. The user just had a coaching session about helping someone named ${currentSession.personName}. Generate a concise action plan summary.
 
 Format your response as:
 1. "Here's your action plan for helping [name]:"
@@ -569,7 +569,7 @@ Keep it practical and warm. No extra preamble.`;
                 {msg.role === 'assistant' && (
                   <View style={styles.psychLabel}>
                     <View style={styles.psychDot} />
-                    <Text style={styles.psychLabelText}>Psych</Text>
+                    <Text style={styles.psychLabelText}>Gauge</Text>
                   </View>
                 )}
                 <View style={[styles.bubble, msg.role === 'user' ? styles.bubbleUser : styles.bubbleAi]}>
@@ -581,7 +581,7 @@ Keep it practical and warm. No extra preamble.`;
               <View style={[styles.bubbleWrap, styles.bubbleWrapAi]}>
                 <View style={styles.psychLabel}>
                   <View style={styles.psychDot} />
-                  <Text style={styles.psychLabelText}>Psych</Text>
+                  <Text style={styles.psychLabelText}>Gauge</Text>
                 </View>
                 <View style={[styles.bubble, styles.bubbleAi]}>
                   <ActivityIndicator size="small" color={COLORS.accent} />

@@ -550,7 +550,7 @@ export default function TalkScreen() {
     if (status !== 'granted') {
       Alert.alert(
         'Microphone access needed',
-        'Go to Settings > AllN1 Psych to enable it.',
+        'Go to Settings > InGauge to enable it.',
         [{ text: 'OK' }]
       );
       return;
@@ -583,7 +583,7 @@ export default function TalkScreen() {
         if (e instanceof Error && e.message === 'Microphone permission not granted') {
           Alert.alert(
             'Microphone access needed',
-            'Go to Settings > AllN1 Psych to enable it.',
+            'Go to Settings > InGauge to enable it.',
             [{ text: 'OK' }]
           );
         }
@@ -622,7 +622,7 @@ export default function TalkScreen() {
       {/* Header with session controls */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <Text style={{ color: '#F0F0F5', fontSize: 18, fontWeight: '600' }}>Talk to Psych</Text>
+          <Text style={{ color: '#F0F0F5', fontSize: 18, fontWeight: '600' }}>Talk to Gauge</Text>
           <AIUsageIndicator />
         </View>
         <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -728,7 +728,7 @@ export default function TalkScreen() {
             {msg.role === 'assistant' && (
               <View style={styles.psychLabel}>
                 <View style={styles.psychDot} />
-                <Text style={styles.psychLabelText}>Psych</Text>
+                <Text style={styles.psychLabelText}>Gauge</Text>
               </View>
             )}
             <View style={[styles.bubbleWrap, msg.role === 'user' ? styles.bubbleWrapUser : styles.bubbleWrapAi]}>
@@ -752,7 +752,7 @@ export default function TalkScreen() {
           <View style={[styles.messageRow, styles.messageRowAi]}>
             <View style={styles.psychLabel}>
               <View style={styles.psychDot} />
-              <Text style={styles.psychLabelText}>Psych</Text>
+              <Text style={styles.psychLabelText}>Gauge</Text>
             </View>
             <View style={[styles.bubbleWrap, styles.bubbleWrapAi]}>
             <View style={[styles.bubble, styles.bubbleAi, styles.typingBubble]}>

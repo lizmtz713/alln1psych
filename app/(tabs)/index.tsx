@@ -39,7 +39,7 @@ const ALL_ACTIVITIES: ActivitySuggestion[] = [
   { id: 'body-scan', emoji: '🧍', title: 'Body Check', sub: 'Tap where you feel tension. Connect body and emotions.' },
   { id: 'mood-patterns', emoji: '📊', title: 'Your Patterns', sub: 'See your mood calendar and AI insights.' },
   { id: 'stress-thermo', emoji: '🌡️', title: 'Stress Check', sub: 'Rate your stress and get support that fits.' },
-  { id: 'thought-challenger', emoji: '💭', title: 'Thought Challenger', sub: 'Challenge a tough thought with Psych.' },
+  { id: 'thought-challenger', emoji: '💭', title: 'Thought Challenger', sub: 'Challenge a tough thought with Gauge.' },
   { id: 'emotion-wheel', emoji: '🎯', title: 'Emotion Explorer', sub: 'Name your feelings with precision.' },
 ];
 
@@ -144,7 +144,7 @@ export default function HomeScreen() {
   useConversationStore((s) => (s.messages ?? []).length);
   useJournalStore((s) => (s.entries ?? []).length);
   const getEngagementStreak = useInsightsStore((s) => s.getEngagementStreak);
-  const getPsychSays = useInsightsStore((s) => s.getPsychSays);
+  const getGaugeSays = useInsightsStore((s) => s.getGaugeSays);
   const getWeeklySummary = useInsightsStore((s) => s.getWeeklySummary);
   const getNextLesson = useEducationStore((s) => s.getNextLesson);
   const { getTodayChallenge, isTodayChallengeDone, completeTodayChallenge } = useEngagementStore();
@@ -196,7 +196,7 @@ export default function HomeScreen() {
   let summaryCount = 0;
   let greetingLine = getDynamicGreeting(user?.name ?? 'you');
   let affirmation = "You're doing better than you think.";
-  let psychSays = "You're doing better than you think.";
+  let gaugeSays = "You're doing better than you think.";
   let todayChallenge: { text: string; emoji: string } = { text: 'Take 5 deep breaths right now', emoji: '🌬️' };
   let challengeDone = false;
   let challengeText = 'Take 5 deep breaths right now';
@@ -214,7 +214,7 @@ export default function HomeScreen() {
     // Always use current time for greeting (don't cache the time-of-day part)
     greetingLine = getDynamicGreeting(user?.name ?? 'you');
     affirmation = dailyContent?.affirmation ?? "You're doing better than you think.";
-    psychSays = dailyContent?.insight ?? (typeof getPsychSays === 'function' ? getPsychSays(streak) : "You're doing better than you think.");
+    gaugeSays = dailyContent?.insight ?? (typeof getGaugeSays === 'function' ? getGaugeSays(streak) : "You're doing better than you think.");
     todayChallenge = (typeof getTodayChallenge === 'function' ? getTodayChallenge() : null) ?? todayChallenge;
     challengeDone = typeof isTodayChallengeDone === 'function' ? isTodayChallengeDone() : false;
     challengeText = dailyContent?.challengeSuggestion ?? (todayChallenge?.text ?? challengeText);
@@ -337,7 +337,7 @@ export default function HomeScreen() {
   });
 
   const needsCheckInToday = overall < 0 || activeGaugeCount < 3;
-  const psychSaysContent = showInsight && crossSystemInsight ? crossSystemInsight : psychSays;
+  const gaugeSaysContent = showInsight && crossSystemInsight ? crossSystemInsight : gaugeSays;
 
   // Quick actions for horizontal scroll
   const quickActions = [
@@ -449,8 +449,8 @@ export default function HomeScreen() {
           ═══════════════════════════════════════════════════════════════ */}
       {!showInsight && (
         <Animated.View style={[styles.card, styles.psychCard, slideY(card2)]}>
-          <Text style={styles.psychLabel}>Psych says...</Text>
-          <Text style={styles.psychText}>{psychSays}</Text>
+          <Text style={styles.psychLabel}>Gauge says...</Text>
+          <Text style={styles.psychText}>{gaugeSays}</Text>
         </Animated.View>
       )}
 

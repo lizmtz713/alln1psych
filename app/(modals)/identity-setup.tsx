@@ -226,7 +226,7 @@ export default function IdentitySetupScreen() {
         {totalVisibleSteps > 0 && realStep === 1 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 8 }}>
-              So Psych can speak your language —
+              So Gauge can speak your language —
             </Text>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 16 }}>
               What stage of life are you in?
@@ -249,7 +249,7 @@ export default function IdentitySetupScreen() {
         {totalVisibleSteps > 0 && realStep === 2 && (
           <>
             <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '600', marginBottom: 16 }}>
-              What pronouns should Psych use for you?
+              What pronouns should Gauge use for you?
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
               {PRONOUN_OPTIONS.map((opt) => (
@@ -277,7 +277,7 @@ export default function IdentitySetupScreen() {
                 onChangeText={setPronounsCustom}
               />
             )}
-            <Text style={{ color: '#8888A0', fontSize: 13, marginTop: 8 }}>This helps Psych talk to you naturally.</Text>
+            <Text style={{ color: '#8888A0', fontSize: 13, marginTop: 8 }}>This helps Gauge talk to you naturally.</Text>
           </>
         )}
 
@@ -297,7 +297,7 @@ export default function IdentitySetupScreen() {
               value={culturalBackgroundText}
               onChangeText={setLocalCultural}
             />
-            <Text style={{ color: '#8888A0', fontSize: 13 }}>You can be as specific or general as you want. This helps Psych understand your world.</Text>
+            <Text style={{ color: '#8888A0', fontSize: 13 }}>You can be as specific or general as you want. This helps Gauge understand your world.</Text>
           </>
         )}
 
@@ -351,7 +351,7 @@ export default function IdentitySetupScreen() {
               />
             )}
             <Text style={{ color: '#8888A0', fontSize: 13, marginTop: 8 }}>
-              Bilingual people often process emotions differently in each language. This helps Psych understand which words actually land for you.
+              Bilingual people often process emotions differently in each language. This helps Gauge understand which words actually land for you.
             </Text>
           </>
         )}
@@ -374,7 +374,7 @@ export default function IdentitySetupScreen() {
               ))}
             </View>
             <Text style={{ color: '#8888A0', fontSize: 13 }}>
-              There's no right answer. This helps Psych understand what you were taught — so we can figure out what actually works for YOU.
+              There's no right answer. This helps Gauge understand what you were taught — so we can figure out what actually works for YOU.
             </Text>
           </>
         )}
@@ -397,7 +397,7 @@ export default function IdentitySetupScreen() {
               ))}
             </View>
             <Text style={{ color: '#8888A0', fontSize: 13 }}>
-              No judgment either way. This helps Psych know how to talk to you — whether to explain basics or go deeper.
+              No judgment either way. This helps Gauge know how to talk to you — whether to explain basics or go deeper.
             </Text>
           </>
         )}
