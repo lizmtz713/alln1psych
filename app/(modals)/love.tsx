@@ -237,56 +237,6 @@ const PETS_CONTENT = {
   title: "Pets & Connection",
   emoji: "🐾",
   intro: "The bond with a pet isn't 'less than' human connection — it's a different kind of love that fulfills real needs.",
-  gauges: [
-    {
-      gauge: "Body",
-      emoji: "🫀",
-      color: "#EF4444",
-      effect: "Lower blood pressure, reduced cortisol, better heart health",
-      detail: "Pet owners have measurably lower blood pressure and heart rate. Dog owners who walk their dogs get 30+ more minutes of physical activity daily. Petting an animal for just 10 minutes significantly reduces cortisol levels.",
-      source: "American Heart Association; Levine et al., 2013",
-    },
-    {
-      gauge: "State",
-      emoji: "⚡",
-      color: "#F59E0B",
-      effect: "Nervous system regulation, reduced anxiety, calmer baseline",
-      detail: "Pets activate the parasympathetic nervous system (rest & digest). The rhythmic act of petting, the warmth of their body, and their steady breathing all signal safety to your nervous system. For people with PTSD or anxiety, this can be more effective than medication.",
-      source: "Polyvagal Theory (Porges); O'Haire et al., 2015",
-    },
-    {
-      gauge: "Emotion",
-      emoji: "💜",
-      color: "#8B5CF6",
-      effect: "Increased positive emotions, buffer against depression",
-      detail: "Interacting with pets increases serotonin and dopamine — the 'feel good' neurotransmitters. Pet owners report fewer depressive symptoms. The simple act of coming home to something happy to see you creates a reliable positive emotional anchor in each day.",
-      source: "Odendaal & Meintjes, 2003; Clinical Psychology research",
-    },
-    {
-      gauge: "Connection",
-      emoji: "💙",
-      color: "#3B82F6",
-      effect: "Secure attachment figure, social catalyst, reduced loneliness",
-      detail: "Pets fulfill attachment needs — they're a secure base you can return to. They also make you more approachable; dog owners have 3x more conversations with strangers. For people who find human connection difficult, a pet can be the bridge back.",
-      source: "Beck & Madresh, 2008; Wood et al., 2015",
-    },
-    {
-      gauge: "Direction",
-      emoji: "🧭",
-      color: "#10B981",
-      effect: "Daily structure, sense of purpose, reason to get up",
-      detail: "Pets need feeding, walking, attention — on a schedule. This creates external structure when internal motivation is low. For people with depression, having something that depends on you can be the difference between staying in bed and getting up.",
-      source: "Behavioral Activation research; Brooks et al., 2018",
-    },
-    {
-      gauge: "Alignment",
-      emoji: "✨",
-      color: "#EC4899",
-      effect: "Unconditional acceptance, authenticity, being fully yourself",
-      detail: "Pets don't care about your job title, your weight, or your mistakes. They love you exactly as you are. For people who mask or perform for others, time with a pet is time being completely authentic — no performance required.",
-      source: "Humanistic Psychology; Human-Animal Bond research",
-    },
-  ],
   science: [
     {
       title: "The Oxytocin Bond",
@@ -787,24 +737,6 @@ export default function LoveScreen() {
                 
                 {expandedPets && (
                   <View style={styles.petsExpanded}>
-                    {/* How Pets Help Each Gauge */}
-                    <Text style={styles.petsGaugesTitle}>How Pets Help Your 6 Gauges</Text>
-                    <View style={styles.petsGaugesGrid}>
-                      {PETS_CONTENT.gauges.map((g, i) => (
-                        <View key={i} style={[styles.petsGaugeCard, { borderColor: g.color + '30' }]}>
-                          <View style={styles.petsGaugeHeader}>
-                            <Text style={styles.petsGaugeEmoji}>{g.emoji}</Text>
-                            <Text style={[styles.petsGaugeName, { color: g.color }]}>{g.gauge}</Text>
-                          </View>
-                          <Text style={styles.petsGaugeEffect}>{g.effect}</Text>
-                          <Text style={styles.petsGaugeDetail}>{g.detail}</Text>
-                          <Text style={styles.petsGaugeSource}>— {g.source}</Text>
-                        </View>
-                      ))}
-                    </View>
-
-                    {/* Deep Science */}
-                    <Text style={styles.petsScienceTitle}>The Science of Human-Animal Bonding</Text>
                     {PETS_CONTENT.science.map((item, i) => (
                       <View key={i} style={styles.petsSection}>
                         <Text style={styles.petsSectionTitle}>{item.title}</Text>
@@ -1384,58 +1316,6 @@ const styles = StyleSheet.create({
   petsExpanded: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.lg,
-  },
-  petsGaugesTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  petsGaugesGrid: {
-    gap: SPACING.md,
-    marginBottom: SPACING.xl,
-  },
-  petsGaugeCard: {
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    borderRadius: 12,
-    padding: SPACING.md,
-    borderWidth: 1,
-  },
-  petsGaugeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
-  },
-  petsGaugeEmoji: {
-    fontSize: 18,
-  },
-  petsGaugeName: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  petsGaugeEffect: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 6,
-  },
-  petsGaugeDetail: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    lineHeight: 19,
-  },
-  petsGaugeSource: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-    marginTop: 6,
-  },
-  petsScienceTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: SPACING.md,
   },
   petsSection: {
     marginBottom: SPACING.lg,
