@@ -36,10 +36,27 @@ import {
 import {
   GAUGES,
   GAUGE_SYSTEM_INTRO,
+  SELF_INGAUGED,
 } from '../../src/data/gaugeSystem';
 import { ShareInsight } from '../../src/features/share-insight';
 import { buildDiscoveryShareContent } from '../../src/features/share-insight';
 import { useUserStore } from '../../src/stores/userStore';
+import { 
+  ACADEMIC_SOURCES, 
+  SYNTHESIZED_INSIGHTS,
+  getInsightsForGauge,
+  type GaugeType,
+} from '../../src/data/academicSources';
+
+// Academic disciplines that inform InGauge
+const DISCIPLINES = [
+  { id: 'psych', emoji: '🧠', name: 'Psychology', desc: 'How your mind works' },
+  { id: 'neuro', emoji: '⚡', name: 'Neuroscience', desc: 'How your brain works' },
+  { id: 'bio', emoji: '🧬', name: 'Biology', desc: 'How your body works' },
+  { id: 'soc', emoji: '👥', name: 'Sociology', desc: 'How groups shape you' },
+  { id: 'anthro', emoji: '🌍', name: 'Anthropology', desc: 'How culture shapes you' },
+  { id: 'polisci', emoji: '⚖️', name: 'Political Science', desc: 'How power shapes you' },
+];
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -274,16 +291,33 @@ export default function LearnScreen() {
               ═══════════════════════════════════════════════════════════ */}
           {activeTab === 'gauges' && (
             <View>
-              {/* Intro Card */}
-              <View style={styles.introCard}>
-                <Text style={styles.introEmoji}>🎛️</Text>
-                <Text style={styles.introTitle}>{GAUGE_SYSTEM_INTRO.headline}</Text>
-                <Text style={styles.introText}>{GAUGE_SYSTEM_INTRO.subhead}</Text>
+              {/* Hero Intro */}
+              <View style={styles.heroCard}>
+                <Text style={styles.heroTitle}>{GAUGE_SYSTEM_INTRO.headline}</Text>
+                <Text style={styles.heroSubtitle}>{GAUGE_SYSTEM_INTRO.subhead}</Text>
+                
+                {/* Disciplines Row */}
+                <View style={styles.disciplinesRow}>
+                  {DISCIPLINES.map((d) => (
+                    <View key={d.id} style={styles.disciplineChip}>
+                      <Text style={styles.disciplineEmoji}>{d.emoji}</Text>
+                      <Text style={styles.disciplineName}>{d.name}</Text>
+                    </View>
+                  ))}
+                </View>
+                
+                <Text style={styles.heroDepthText}>
+                  Everything here comes from real research — psychology, neuroscience, sociology, and more. 
+                  Tap any gauge to go deeper. It's all here when you're ready.
+                </Text>
               </View>
 
               {/* Gauge Cards */}
               {GAUGES.map((gauge) => {
                 const isExpanded = expandedGaugeId === gauge.id;
+                const gaugeInsights = getInsightsForGauge(gauge.id as GaugeType);
+                const relevantSources = ACADEMIC_SOURCES.filter(s => s.primaryGauge === gauge.id);
+                
                 return (
                   <Pressable
                     key={gauge.id}
@@ -309,19 +343,49 @@ export default function LearnScreen() {
                         <Text style={styles.gaugeCoreTruth}>"{gauge.coreTruth}"</Text>
                         <Text style={styles.gaugeDesc}>{gauge.description}</Text>
                         
+                        {/* Academic Sources */}
+                        {relevantSources.length > 0 && (
+                          <View style={styles.sourcesSection}>
+                            <Text style={styles.sourcesSectionTitle}>📚 The Science Behind This</Text>
+                            {relevantSources.slice(0, 3).map((source) => (
+                              <View key={source.id} style={styles.sourceRow}>
+                                <Text style={styles.sourceAuthor}>{source.author}</Text>
+                                <Text style={styles.sourceInsight}>{source.keyInsight}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+                        
+                        {/* Key Insights Preview */}
+                        {gaugeInsights.length > 0 && (
+                          <View style={styles.insightsPreview}>
+                            <Text style={styles.insightsPreviewTitle}>💡 Key Insights</Text>
+                            {gaugeInsights.slice(0, 2).map((insight) => (
+                              <Text key={insight.id} style={styles.insightPreviewItem}>• {insight.title}</Text>
+                            ))}
+                          </View>
+                        )}
+                        
                         {/* Learn More Button */}
                         <Pressable 
                           style={styles.gaugeLearnMoreBtn}
                           onPress={() => openGaugeDetail(gauge.id)}
                         >
-                          <Text style={styles.gaugeLearnMoreText}>Learn Everything About {gauge.name}</Text>
-                          <Ionicons name="arrow-forward" size={18} color={COLORS.accent} />
+                          <Text style={styles.gaugeLearnMoreText}>Go Deeper →</Text>
                         </Pressable>
                       </View>
                     )}
                   </Pressable>
                 );
               })}
+              
+              {/* Self InGauged Card */}
+              <View style={styles.selfIngaugedCard}>
+                <Text style={styles.selfIngaugedTitle}>🎯 {SELF_INGAUGED.title}</Text>
+                <Text style={styles.selfIngaugedText}>{SELF_INGAUGED.meaning}</Text>
+                <View style={styles.selfIngaugedDivider} />
+                <Text style={styles.selfIngaugedTagline}>{SELF_INGAUGED.theMovement.tagline}</Text>
+              </View>
             </View>
           )}
 
@@ -330,9 +394,19 @@ export default function LearnScreen() {
               ═══════════════════════════════════════════════════════════ */}
           {activeTab === 'manual' && (
             <View>
-              <Text style={styles.sectionIntro}>
-                48 lessons to understand yourself better. Tap to explore.
-              </Text>
+              {/* Manual Intro */}
+              <View style={styles.manualIntroCard}>
+                <Text style={styles.manualIntroTitle}>The Human Manual</Text>
+                <Text style={styles.manualIntroText}>
+                  This isn't self-help fluff. These 48 lessons distill real research into knowledge you can actually use.
+                </Text>
+                <View style={styles.manualSourcesRow}>
+                  <Ionicons name="library-outline" size={16} color={COLORS.textMuted} />
+                  <Text style={styles.manualSourcesText}>
+                    Grounded in psychology, neuroscience, sociology, and more
+                  </Text>
+                </View>
+              </View>
 
               {MANUAL_SECTIONS.map((section) => (
                 <View key={section.id} style={styles.manualSection}>
@@ -552,6 +626,163 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  
+  // Hero Card (Gauges Tab)
+  heroCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 20,
+  },
+  heroTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  heroSubtitle: {
+    fontSize: 17,
+    color: COLORS.textSecondary,
+    marginBottom: 20,
+  },
+  disciplinesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  disciplineChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.cardElevated,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+  },
+  disciplineEmoji: {
+    fontSize: 14,
+  },
+  disciplineName: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  heroDepthText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    lineHeight: 20,
+  },
+  
+  // Sources Section (in expanded gauge)
+  sourcesSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  sourcesSectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 12,
+  },
+  sourceRow: {
+    marginBottom: 12,
+  },
+  sourceAuthor: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.accent,
+    marginBottom: 2,
+  },
+  sourceInsight: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  
+  // Insights Preview
+  insightsPreview: {
+    marginTop: 16,
+    backgroundColor: COLORS.accentSoft,
+    borderRadius: 12,
+    padding: 14,
+  },
+  insightsPreviewTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.accent,
+    marginBottom: 8,
+  },
+  insightPreviewItem: {
+    fontSize: 13,
+    color: COLORS.text,
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  
+  // Self InGauged Card
+  selfIngaugedCard: {
+    backgroundColor: COLORS.accentSoft,
+    borderRadius: 20,
+    padding: 24,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: COLORS.accent + '30',
+  },
+  selfIngaugedTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 12,
+  },
+  selfIngaugedText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
+  },
+  selfIngaugedDivider: {
+    height: 1,
+    backgroundColor: COLORS.accent + '30',
+    marginVertical: 16,
+  },
+  selfIngaugedTagline: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.accent,
+    textAlign: 'center',
+  },
+  
+  // Manual Intro Card
+  manualIntroCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+  },
+  manualIntroTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  manualIntroText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  manualSourcesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  manualSourcesText: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    flex: 1,
   },
 
   // Section Intro
