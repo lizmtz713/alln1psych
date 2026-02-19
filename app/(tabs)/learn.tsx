@@ -354,7 +354,30 @@ export default function LearnScreen() {
             <Text style={styles.gaugeSystemSubhead}>{GAUGE_SYSTEM_INTRO.subhead}</Text>
           </View>
           
-          <Text style={styles.gaugeSystemPhilosophy}>{GAUGE_SYSTEM_INTRO.philosophy}</Text>
+          {/* Collapsible philosophy - short by default */}
+          <Pressable 
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setExpandedGaugeId(expandedGaugeId === 'philosophy' ? null : 'philosophy');
+            }}
+            style={styles.philosophyToggle}
+          >
+            {expandedGaugeId === 'philosophy' ? (
+              <>
+                <Text style={styles.gaugeSystemPhilosophy}>{GAUGE_SYSTEM_INTRO.philosophy}</Text>
+                <View style={styles.philosophyToggleRow}>
+                  <Text style={styles.philosophyToggleText}>Show less</Text>
+                  <Ionicons name="chevron-up" size={16} color={COLORS.textMuted} />
+                </View>
+              </>
+            ) : (
+              <View style={styles.philosophyToggleRow}>
+                <Text style={styles.philosophyToggleText}>What does this mean?</Text>
+                <Ionicons name="chevron-down" size={16} color={COLORS.textMuted} />
+              </View>
+            )}
+          </Pressable>
 
           {/* 6 Gauge Cards */}
           {GAUGES.map((gauge) => {
@@ -800,7 +823,22 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.textSecondary,
     lineHeight: 23,
+    marginBottom: 12,
+  },
+  philosophyToggle: {
     marginBottom: 20,
+  },
+  philosophyToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+  },
+  philosophyToggleText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    fontWeight: '500',
   },
   gaugeCard: {
     backgroundColor: COLORS.card,
