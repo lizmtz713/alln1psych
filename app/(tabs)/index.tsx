@@ -28,6 +28,7 @@ import { generateDailyContent } from '../../src/services/personalization';
 import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import type { Lesson } from '../../src/data/educationContent';
 import { Ionicons } from '@expo/vector-icons';
+import { CrisisPipelineAlert, useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
 
@@ -174,6 +175,9 @@ export default function HomeScreen() {
         );
 
   const [insightFetched, setInsightFetched] = useState(false);
+  
+  // Crisis Pipeline - monitors gauge persistence for safety alerts
+  const { showAlert: showCrisisAlert, setShowAlert: setShowCrisisAlert, hasAlert: hasCrisisAlert } = useCrisisPipelineCheck();
 
   useEffect(() => {
     useCockpitStore.getState().runDailyDecayIfNeeded();
@@ -571,6 +575,12 @@ export default function HomeScreen() {
         </Pressable>
       </Modal>
     </ScrollView>
+    
+    {/* Crisis Pipeline Alert - shows when persistent crisis patterns detected */}
+    <CrisisPipelineAlert 
+      visible={showCrisisAlert} 
+      onDismiss={() => setShowCrisisAlert(false)} 
+    />
     </ErrorBoundary>
   );
 }
