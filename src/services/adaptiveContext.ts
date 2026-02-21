@@ -13,6 +13,7 @@
 
 import { useUserStore } from '../stores/userStore';
 import { useCockpitStore, type GaugeKey } from '../stores/cockpitStore';
+import { getCachedPatternSync, formatPatternForAI } from './systemicDrift';
 
 type SystemMode = 
   | 'regulated'      // All gauges okay
@@ -321,6 +322,12 @@ export function buildAdaptiveContext(): string {
       context += `• ${insight}\n`;
     });
     context += `\nUse these insights naturally. Don't quote them back verbatim — weave them into your understanding of who this person is.\n`;
+  }
+
+  // Add Systemic Drift Patterns — recurring patterns in their gauge history
+  const driftPatterns = getCachedPatternSync();
+  if (driftPatterns.length > 0) {
+    context += formatPatternForAI(driftPatterns);
   }
 
   return context;

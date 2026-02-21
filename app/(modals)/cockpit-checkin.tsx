@@ -108,6 +108,7 @@ export default function CockpitCheckinScreen() {
   const updateDirection = useCockpitStore((s) => s.updateDirection);
   const updateAlignment = useCockpitStore((s) => s.updateAlignment);
   const setLastCheckInDate = useCockpitStore((s) => s.setLastCheckInDate);
+  const recordGaugesForDrift = useCockpitStore((s) => s.recordGaugesForDrift);
 
   const a = answersRef.current;
   void formVersion;
@@ -122,12 +123,14 @@ export default function CockpitCheckinScreen() {
     setStep((prev) => {
       if (prev >= TOTAL_STEPS - 1) {
         setLastCheckInDate(new Date().toISOString().slice(0, 10));
+        // Record gauges for systemic drift analysis
+        recordGaugesForDrift().catch(() => {});
         setTimeout(() => router.back(), 0);
         return prev;
       }
       return prev + 1;
     });
-  }, [setLastCheckInDate, router]);
+  }, [setLastCheckInDate, recordGaugesForDrift, router]);
 
   const handleNext = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

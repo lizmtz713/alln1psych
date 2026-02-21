@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { generateCrossSystemInsight } from '../services/cockpitAI';
+import { recordGaugeEvent, refreshDriftCache } from '../services/systemicDrift';
 
 export interface GaugeState {
   value: number; // 0-100, -1 = unset/dim
@@ -36,6 +37,8 @@ interface CockpitState {
   addLessonBonus: () => void;
   runDailyDecayIfNeeded: () => void;
   setLastCheckInDate: (date: string) => void;
+  /** Record gauges for systemic drift analysis */
+  recordGaugesForDrift: () => Promise<void>;
   /** Sync Body gauge from Apple Health data */
   syncBodyFromHealth: () => void;
   reset: () => void;
@@ -259,6 +262,29 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
   },
 
   setLastCheckInDate: (date) => set({ lastCheckInDate: date }),
+
+  /** Record current gauges for systemic drift analysis. Call after check-ins. */
+  recordGaugesForDrift: async () => {
+    const s = useCockpitStore.getState();
+    const gauges: Array<{ key: GaugeKey; value: number }> = [
+      { key: 'body', value: s.body.value },
+      { key: 'state', value: s.state.value },
+      { key: 'emotion', value: s.emotion.value },
+      { key: 'connection', value: s.connection.value },
+      { key: 'direction', value: s.direction.value },
+      { key: 'alignment', value: s.alignment.value },
+    ];
+    
+    // Record each active gauge
+    for (const g of gauges) {
+      if (g.value >= 0) {
+        await recordGaugeEvent(g.key, g.value);
+      }
+    }
+    
+    // Refresh drift analysis cache
+    await refreshDriftCache();
+  },
 
   /** Add a small bonus (+5) to all gauges that are already set. Call after completing a lesson. */
   addLessonBonus: () => {
