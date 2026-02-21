@@ -389,7 +389,59 @@ function buildSystemPrompt(ctx: UserContext): string {
         gaugePrompt += `\n- ${label}: ${value}/100`;
         if (value !== undefined && value < 40) gaugePrompt += ' ⚠️ LOW';
       });
-      gaugePrompt += '\n\nLook for patterns: Low Body often pulls down State. Low Connection affects Emotion. When multiple gauges are low, acknowledge the compound effect.';
+      
+      // Cross-system validation logic (from PHOSM directive)
+      gaugePrompt += '\n\nCROSS-SYSTEM VALIDATION — READ MULTIPLE GAUGES TOGETHER:';
+      gaugePrompt += '\nWhen someone presents with an emotion, CHECK if it\'s actually sourced from another gauge:';
+      
+      const body = g.body;
+      const state = g.state;
+      const emotion = g.emotion;
+      const connection = g.connection;
+      const direction = g.direction;
+      const alignment = g.alignment;
+      
+      // Body + State pattern (biological constraint on emotional regulation)
+      if (body !== undefined && body < 40 && state !== undefined && state < 50) {
+        gaugePrompt += '\n\n⚠️ BIOLOGICAL MAINTENANCE MODE: Body is depleted while State is activated.';
+        gaugePrompt += '\nVALIDATION: "Your anxiety might be a body problem, not an emotion problem. When the hardware is struggling, everything feels harder. Let\'s address the physical foundation first."';
+        gaugePrompt += '\nPRIORITY: Pivot from coaching to biological basics — sleep, food, water, movement. The emotion work can\'t land on depleted hardware.';
+      }
+      
+      // Body + Emotion pattern
+      if (body !== undefined && body < 40 && emotion !== undefined) {
+        gaugePrompt += '\n\n⚠️ BODY-EMOTION LINK: Low Body gauge affects emotional regulation capacity.';
+        gaugePrompt += '\nVALIDATION: "Your emotions feel bigger right now partly because your body is running low. Same situation, different body state = completely different emotional experience."';
+      }
+      
+      // Connection + Emotion pattern
+      if (connection !== undefined && connection < 40 && emotion !== undefined && emotion < 50) {
+        gaugePrompt += '\n\n⚠️ CONNECTION-EMOTION LINK: Low Connection is likely amplifying emotional distress.';
+        gaugePrompt += '\nVALIDATION: "What you\'re feeling might be a connection problem wearing an anxiety costume. Isolation amplifies everything. Your brain processes loneliness as physical pain."';
+      }
+      
+      // State + Emotion pattern (nervous system driving emotions)
+      if (state !== undefined && state < 30) {
+        gaugePrompt += '\n\n⚠️ STATE OVERRIDE: Nervous system is in survival mode.';
+        gaugePrompt += '\nVALIDATION: "Right now your nervous system is running the show. The emotions are real, but they\'re being filtered through a threat-detection lens. Same situation when you\'re regulated would feel completely different."';
+        gaugePrompt += '\nPRIORITY: Regulate the nervous system BEFORE trying to process the emotion. Breath first, feelings second.';
+      }
+      
+      // Direction + Alignment pattern (existential load)
+      if (direction !== undefined && direction < 40 && alignment !== undefined && alignment < 40) {
+        gaugePrompt += '\n\n⚠️ EXISTENTIAL LOAD: Both Direction and Alignment are low.';
+        gaugePrompt += '\nVALIDATION: "This might feel like depression, but it\'s often a navigation problem — not knowing where you\'re going AND feeling like you\'re not living your values. Let\'s untangle which one to address first."';
+      }
+      
+      // Multiple gauges red (system overwhelm)
+      const lowGauges = activeGauges.filter(([_, v]) => v !== undefined && v < 40);
+      if (lowGauges.length >= 3) {
+        gaugePrompt += '\n\n⚠️ SYSTEM OVERWHELM: Multiple gauges in red zone.';
+        gaugePrompt += '\nVALIDATION: "When this many systems are struggling at once, the feeling can be overwhelming — but it\'s not one big problem. It\'s several smaller ones compounding. We\'ll take them one at a time, starting with the foundation."';
+        gaugePrompt += '\nPRIORITY: Body first, then State, then address the others. Don\'t try to solve everything at once.';
+      }
+      
+      gaugePrompt += '\n\nALWAYS: Name the cross-system pattern out loud. Help them see that what feels like one overwhelming emotion is often multiple systems talking at once. This is the power of the cockpit — seeing the whole dashboard, not just one gauge.';
     }
   }
   
