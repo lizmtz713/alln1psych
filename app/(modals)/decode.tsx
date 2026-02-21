@@ -39,12 +39,17 @@ RESPONSE OPTIONS — Give 3 brief response options with different tones:
 • Option B (Boundaried): [response that protects their needs while staying respectful]  
 • Option C (Minimal): [brief acknowledgment if they need time]
 
-TRAJECTORY FORECAST — For each option above, predict how it's likely to land:
-• Option A likely leads to: [e.g., "Opens dialogue but may require emotional labor"]
-• Option B likely leads to: [e.g., "May feel cold initially but establishes clarity"]
-• Option C likely leads to: [e.g., "Buys time but doesn't resolve tension"]
+TRAJECTORY FORECAST — For each option, predict the GAUGE IMPACT using this format:
+• Option A: Alignment [+/-X] | Connection [+/-X] — [brief explanation]
+• Option B: Alignment [+/-X] | Connection [+/-X] — [brief explanation]
+• Option C: Alignment [+/-X] | Connection [+/-X] — [brief explanation]
 
-Base trajectory on: the sender's apparent emotional state, the relationship dynamic, and whether the sender seems to need validation vs. space.
+Scale: -20 (major damage) to +20 (major boost). Consider:
+- Alignment = integrity, honesty, values congruence
+- Connection = belonging, closeness, relationship warmth
+- The sender's current emotional state (if activated, honest responses may land harder)
+
+Example: "Option A: Alignment +15 | Connection -10 — Sets clear boundary but may feel cold while they're activated"
 
 Be direct, warm, concise.`;
 
@@ -67,12 +72,17 @@ RESPONSE OPTIONS — Give 3 brief response options with different tones:
 • Option B (Boundaried): [response that protects their needs while staying respectful]
 • Option C (Minimal): [brief acknowledgment if they need time]
 
-TRAJECTORY FORECAST — For each option above, predict how it's likely to land:
-• Option A likely leads to: [predicted outcome]
-• Option B likely leads to: [predicted outcome]
-• Option C likely leads to: [predicted outcome]
+TRAJECTORY FORECAST — For each option, predict the GAUGE IMPACT using this format:
+• Option A: Alignment [+/-X] | Connection [+/-X] — [brief explanation]
+• Option B: Alignment [+/-X] | Connection [+/-X] — [brief explanation]
+• Option C: Alignment [+/-X] | Connection [+/-X] — [brief explanation]
 
-Base trajectory on: the sender's apparent emotional state, the relationship dynamic, and whether the sender seems to need validation vs. space.
+Scale: -20 (major damage) to +20 (major boost). Consider:
+- Alignment = integrity, honesty, values congruence
+- Connection = belonging, closeness, relationship warmth
+- The sender's current emotional state (if activated, honest responses may land harder)
+
+Example: "Option A: Alignment +15 | Connection -10 — Sets clear boundary but may feel cold while they're activated"
 
 Be direct, warm, concise.`;
 
