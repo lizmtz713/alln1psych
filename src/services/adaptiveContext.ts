@@ -5,10 +5,187 @@
  * Adapts the AI's language, examples, tone, and assumptions based on
  * who the user is — their age, culture, family background, and experience.
  *
+ * INTERFERENCE LOGIC: Also analyzes gauge correlations to determine
+ * intervention priority (somatic vs. cognitive vs. social).
+ *
  * This is what makes Gauge feel like it was built for YOU.
  */
 
 import { useUserStore } from '../stores/userStore';
+import { useCockpitStore, type GaugeKey } from '../stores/cockpitStore';
+
+type SystemMode = 
+  | 'regulated'      // All gauges okay
+  | 'power-save'     // Low Body + low State = system conserving energy
+  | 'survival'       // Low Body + high State = running on fumes, hyperactivated
+  | 'disconnected'   // Low Connection = isolation mode
+  | 'misaligned'     // Low Alignment = living against values
+  | 'adrift'         // Low Direction = no anchor
+  | 'flooded';       // Multiple gauges red = system overwhelmed
+
+interface GaugeReading {
+  key: GaugeKey;
+  value: number;      // 0-5 scale
+  label: string;      // 'red' | 'orange' | 'yellow' | 'green'
+}
+
+function getGaugeReadings(): GaugeReading[] {
+  const cockpit = useCockpitStore.getState();
+  const gaugeKeys: GaugeKey[] = ['body', 'state', 'emotion', 'connection', 'direction', 'alignment'];
+  
+  return gaugeKeys.map(key => {
+    const gauge = cockpit[key];
+    const value = gauge.value ?? -1;
+    let label = 'unknown';
+    if (value >= 4) label = 'green';
+    else if (value >= 3) label = 'yellow';
+    else if (value >= 2) label = 'orange';
+    else if (value >= 0) label = 'red';
+    return { key, value, label };
+  }).filter(g => g.value >= 0); // Only include gauges that have been set
+}
+
+function analyzeSystemMode(readings: GaugeReading[]): SystemMode {
+  if (readings.length === 0) return 'regulated';
+  
+  const body = readings.find(r => r.key === 'body');
+  const state = readings.find(r => r.key === 'state');
+  const connection = readings.find(r => r.key === 'connection');
+  const alignment = readings.find(r => r.key === 'alignment');
+  const direction = readings.find(r => r.key === 'direction');
+  
+  const redCount = readings.filter(r => r.label === 'red').length;
+  
+  // Multiple red = flooded
+  if (redCount >= 3) return 'flooded';
+  
+  // Body + State correlations (Polyvagal-informed)
+  if (body && state) {
+    // Low body + activated state = survival mode (running on adrenaline)
+    if (body.value <= 2 && state.value <= 2) return 'survival';
+    // Low body + low activation = power save (dorsal vagal shutdown)
+    if (body.value <= 2 && state.value >= 3) return 'power-save';
+  }
+  
+  // Isolation detection
+  if (connection && connection.value <= 1) return 'disconnected';
+  
+  // Values conflict
+  if (alignment && alignment.value <= 1) return 'misaligned';
+  
+  // Purpose void
+  if (direction && direction.value <= 1) return 'adrift';
+  
+  return 'regulated';
+}
+
+function buildInterferenceGuidance(mode: SystemMode, readings: GaugeReading[]): string {
+  let guidance = '\n\nSYSTEM STATE ANALYSIS:\n';
+  
+  // Show current readings
+  if (readings.length > 0) {
+    guidance += `Current gauges: ${readings.map(r => `${r.key}=${r.value}/5`).join(', ')}.\n`;
+  }
+  
+  guidance += `System mode: ${mode.toUpperCase()}.\n`;
+  
+  switch (mode) {
+    case 'survival':
+      guidance += `
+INTERVENTION PRIORITY: SOMATIC FIRST.
+The user's Body gauge is depleted while their nervous system is activated. They're running on adrenaline with no fuel. Cognitive interventions will NOT land right now — their prefrontal cortex is offline.
+
+DO THIS:
+1. Acknowledge their state: "Your system is running on empty right now."
+2. Prioritize immediate regulation: breathing, water, food, rest.
+3. Do NOT ask them to analyze their feelings yet.
+4. Keep responses short — they can't process much.
+
+SCRIPT: "Before we go deeper — when did you last eat? Sleep? Your body is signaling it needs something basic first. Let's stabilize the foundation, then we can think clearly."
+`;
+      break;
+      
+    case 'power-save':
+      guidance += `
+INTERVENTION PRIORITY: GENTLE ACTIVATION.
+The user's system has gone into conservation mode (dorsal vagal). Low energy, possibly numbness or shutdown. Don't push too hard — meet them where they are.
+
+DO THIS:
+1. Validate the shutdown: "Sometimes our system just... stops. That's protective."
+2. Suggest micro-movements, not big actions.
+3. Don't ask "what do you need?" — they may not know.
+4. Offer gentle sensory engagement: warmth, texture, gentle movement.
+
+SCRIPT: "It sounds like your system went into power-save mode. That's not laziness — that's your body saying 'too much.' What's one tiny thing that might feel okay right now? Even just standing up for a second?"
+`;
+      break;
+      
+    case 'flooded':
+      guidance += `
+INTERVENTION PRIORITY: CONTAINMENT.
+Multiple systems are overwhelmed. The user cannot think clearly right now. Do NOT try to solve problems — just help them get through the next few minutes.
+
+DO THIS:
+1. Slow everything down. Short sentences.
+2. Ground them in the present moment.
+3. One thing at a time. Don't offer choices.
+4. Validate without amplifying.
+
+SCRIPT: "That's a lot hitting at once. Let's just focus on right now. Take a breath with me. You don't have to figure anything out in the next five minutes."
+`;
+      break;
+      
+    case 'disconnected':
+      guidance += `
+INTERVENTION PRIORITY: CONNECTION REPAIR.
+The user's Connection gauge is critically low. Isolation amplifies every other problem. Before working on anything else, address the aloneness.
+
+DO THIS:
+1. Be extra present in your responses.
+2. Ask about their support system without judgment.
+3. Acknowledge that isolation is painful, not just inconvenient.
+4. Suggest one small connection action, not "go make friends."
+
+SCRIPT: "When Connection runs low, everything else feels harder. Who knows what you're going through right now? Even one person?"
+`;
+      break;
+      
+    case 'misaligned':
+      guidance += `
+INTERVENTION PRIORITY: VALUES CLARITY.
+The user is experiencing cognitive dissonance — acting against their own values. This creates a specific type of stress that won't resolve with relaxation techniques.
+
+DO THIS:
+1. Help them name the specific value being violated.
+2. Explore the constraint: why are they acting against it?
+3. Don't judge — there's usually a reason.
+4. Find the smallest alignment step they can take.
+
+SCRIPT: "It sounds like something is bumping up against what you believe in. What value feels like it's being compromised right now?"
+`;
+      break;
+      
+    case 'adrift':
+      guidance += `
+INTERVENTION PRIORITY: ANCHOR POINT.
+The user's Direction gauge is low — they may feel purposeless or lost. Don't try to give them purpose. Help them find one anchor point.
+
+DO THIS:
+1. Normalize direction loss — it's developmental, not failure.
+2. Look for what DOES matter, even small things.
+3. Don't ask "what's your purpose?" — too big.
+4. Focus on "what's one thing worth doing today?"
+
+SCRIPT: "When Direction feels unclear, the whole dashboard can feel off. You don't need to find your life purpose right now. What's one thing that feels worth doing today — even something small?"
+`;
+      break;
+      
+    default: // regulated
+      guidance += `System is relatively stable. Proceed with standard support.\n`;
+  }
+  
+  return guidance;
+}
 
 export function buildAdaptiveContext(): string {
   const state = useUserStore.getState();
@@ -127,6 +304,13 @@ export function buildAdaptiveContext(): string {
   }
 
   context += `\nREMEMBER: You are not a generic AI. You are Gauge — built specifically for THIS person. Every response should feel like it was written by someone who gets their world, their culture, their generation, and their experience. If you default to generic wellness advice that could come from any app, you've failed.\n`;
+
+  // Add interference logic based on current gauge states
+  const readings = getGaugeReadings();
+  if (readings.length > 0) {
+    const mode = analyzeSystemMode(readings);
+    context += buildInterferenceGuidance(mode, readings);
+  }
 
   return context;
 }
