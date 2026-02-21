@@ -312,5 +312,16 @@ export function buildAdaptiveContext(): string {
     context += buildInterferenceGuidance(mode, readings);
   }
 
+  // Add Human Fingerprint — insights learned from lesson reflections
+  const fingerprint = state.humanFingerprint ?? {};
+  const fingerprintEntries = Object.values(fingerprint).filter(Boolean);
+  if (fingerprintEntries.length > 0) {
+    context += `\n\nHUMAN FINGERPRINT™ (Insights learned about this person from their lesson reflections — reference these to personalize your responses):\n`;
+    fingerprintEntries.forEach((insight, i) => {
+      context += `• ${insight}\n`;
+    });
+    context += `\nUse these insights naturally. Don't quote them back verbatim — weave them into your understanding of who this person is.\n`;
+  }
+
   return context;
 }

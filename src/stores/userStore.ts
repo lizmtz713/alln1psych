@@ -149,6 +149,13 @@ interface UserState {
   strengthMeaning: string;
   therapyExperience: TherapyExperience | null;
 
+  /** 
+   * Human Fingerprint™ — Insights learned from lesson reflections
+   * Format: { lessonId: "insight text", ... }
+   * These get injected into AI context for personalization
+   */
+  humanFingerprint: Record<string, string>;
+
   setName: (name: string) => void;
   addTriggerMap: (entry: Omit<TriggerMapEntry, 'id' | 'createdAt'>) => void;
   setPronouns: (pronouns: Pronouns | null) => void;
@@ -171,6 +178,8 @@ interface UserState {
   setLanguageOfEmotion: (v: string) => void;
   setStrengthMeaning: (v: string) => void;
   setTherapyExperience: (v: TherapyExperience | null) => void;
+  /** Add a lesson insight to the Human Fingerprint */
+  addHumanFingerprintInsight: (lessonId: string, insight: string) => void;
   /** Athlete mode */
   setAthleteMode: (v: boolean) => void;
   setAthleteModeSettings: (v: Partial<AthleteModeSettings>) => void;
@@ -225,6 +234,7 @@ const initialState = {
   languageOfEmotion: '',
   strengthMeaning: '',
   therapyExperience: null as TherapyExperience | null,
+  humanFingerprint: {} as Record<string, string>,
   // Specialized modes
   athleteMode: false,
   athleteModeSettings: { ...defaultAthleteModeSettings } as AthleteModeSettings,
@@ -256,6 +266,11 @@ export const useUserStore = create<UserState>((set) => ({
   setLanguageOfEmotion: (languageOfEmotion) => set({ languageOfEmotion }),
   setStrengthMeaning: (strengthMeaning) => set({ strengthMeaning }),
   setTherapyExperience: (therapyExperience) => set({ therapyExperience }),
+  // Human Fingerprint — lesson insights
+  addHumanFingerprintInsight: (lessonId, insight) =>
+    set((state) => ({
+      humanFingerprint: { ...state.humanFingerprint, [lessonId]: insight },
+    })),
   // Athlete mode
   setAthleteMode: (athleteMode) => set({ athleteMode }),
   setAthleteModeSettings: (settings) =>

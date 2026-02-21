@@ -160,11 +160,27 @@ export default function LessonScreen() {
       setCompletionLoading(true);
       setCompletionAiResponse('');
       try {
+        // Generate personalized insight AND extract a fingerprint tag
         const response = await sendMessageWithSystemPrompt(
-          [{ role: 'user', content: `I just completed a lesson called "${lesson.title}". Here's what I reflected on: "${reflectionText}". Give me a brief, personalized insight connecting what I shared to the lesson. Be warm, specific to what I said. 2-3 sentences.` }],
-          'You are Gauge, an emotional intelligence companion. Give a brief personalized insight based on their reflection. Be warm and specific. Never generic.'
+          [{ role: 'user', content: `I just completed a lesson called "${lesson.title}". Here's what I reflected on: "${reflectionText}". 
+
+Do two things:
+1. Give me a brief, personalized insight connecting what I shared to the lesson. Be warm, specific to what I said. 2-3 sentences.
+2. At the end, add a line starting with "FINGERPRINT:" followed by a single sentence capturing a key insight about me that should inform future conversations. Example: "FINGERPRINT: Struggles with setting boundaries because family equated boundaries with rejection."` }],
+          'You are Gauge, an emotional intelligence companion. Give a brief personalized insight based on their reflection. Be warm and specific. Never generic. Always include the FINGERPRINT line at the end.'
         );
-        setCompletionAiResponse(response ?? '');
+        
+        // Extract fingerprint if present
+        const fullResponse = response ?? '';
+        const fingerprintMatch = fullResponse.match(/FINGERPRINT:\s*(.+)/i);
+        if (fingerprintMatch?.[1]) {
+          // Save to human fingerprint
+          useUserStore.getState().addHumanFingerprintInsight(lesson.id, fingerprintMatch[1].trim());
+        }
+        
+        // Remove fingerprint line from displayed response
+        const displayResponse = fullResponse.replace(/\n*FINGERPRINT:.+/i, '').trim();
+        setCompletionAiResponse(displayResponse);
       } catch (e) {
         if (__DEV__) console.warn('Lesson AI response failed:', e);
         setCompletionAiResponse('');
