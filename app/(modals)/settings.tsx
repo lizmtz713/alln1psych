@@ -1069,6 +1069,56 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
+        {/* Safety & Ethics */}
+        <Text style={styles.sectionTitle}>Safety & Ethics</Text>
+        <View style={styles.card}>
+          <View style={styles.disclaimerBox}>
+            <Text style={styles.disclaimerTitle}>What InGauge Is</Text>
+            <Text style={styles.disclaimerText}>
+              InGauge is a self-awareness tool — an instrument panel for understanding your own system. 
+              It observes and reflects, never judges or diagnoses.
+            </Text>
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.disclaimerBox}>
+            <Text style={styles.disclaimerTitle}>What InGauge Is Not</Text>
+            <Text style={styles.disclaimerText}>
+              • Not a medical device or diagnostic tool{'\n'}
+              • Not a replacement for therapy or professional care{'\n'}
+              • Not able to predict outcomes or prescribe treatments{'\n'}
+              • Patterns are observations, not certainties
+            </Text>
+          </View>
+          <View style={styles.divider} />
+          <Pressable
+            style={styles.row}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              Alert.alert(
+                'Crisis Resources',
+                '988 Suicide & Crisis Lifeline\nCall or text 988\n\nCrisis Text Line\nText HOME to 741741\n\nTrans Lifeline\n877-565-8860\n\nTrevor Project (LGBTQ+ youth)\n1-866-488-7386\n\nThese resources are free and available 24/7.',
+                [{ text: 'OK' }]
+              );
+            }}
+          >
+            <View>
+              <Text style={styles.rowLabel}>🆘 Crisis Resources</Text>
+              <Text style={styles.rowHint}>Free 24/7 support lines</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={TEXT_DIM} />
+          </Pressable>
+          <View style={styles.divider} />
+          <View style={styles.disclaimerBox}>
+            <Text style={styles.disclaimerTitle}>Your Data</Text>
+            <Text style={styles.disclaimerText}>
+              • Stays on your device and your private account{'\n'}
+              • Never sold or used for ads{'\n'}
+              • Shared snapshots contain summaries only{'\n'}
+              • You can delete everything anytime
+            </Text>
+          </View>
+        </View>
+
         {/* About */}
         <Text style={styles.sectionTitle}>About</Text>
         <View style={styles.card}>
@@ -1190,5 +1240,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#fff',
+  },
+  // Disclaimer styles
+  disclaimerBox: {
+    padding: 16,
+  },
+  disclaimerTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: TEXT,
+    marginBottom: 8,
+  },
+  disclaimerText: {
+    fontSize: 13,
+    color: TEXT_MUTED,
+    lineHeight: 20,
   },
 });
