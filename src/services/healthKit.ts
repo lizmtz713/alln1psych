@@ -536,3 +536,40 @@ class HealthKitService {
 }
 
 export const healthKitService = new HealthKitService();
+
+// ============ Convenience Functions ============
+
+/**
+ * Check if HealthKit is available on this device
+ */
+export async function isHealthKitAvailable(): Promise<boolean> {
+  return await healthKitService.initialize();
+}
+
+/**
+ * Request HealthKit permissions
+ */
+export async function requestHealthKitPermissions(): Promise<boolean> {
+  const available = await healthKitService.initialize();
+  if (!available) return false;
+  return await healthKitService.requestAuthorization();
+}
+
+/**
+ * Get current health snapshot
+ */
+export async function getHealthSnapshot(): Promise<HealthSnapshot | null> {
+  try {
+    return await healthKitService.getFullSnapshot();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Calculate Body gauge score from health data
+ */
+export function calculateBodyScore(snapshot: HealthSnapshot | null): number | null {
+  if (!snapshot) return null;
+  return healthKitService.calculateBodyScore(snapshot);
+}
