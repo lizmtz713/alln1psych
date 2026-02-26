@@ -24,6 +24,8 @@ import * as Voice from '../../src/services/voice';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useUsageStore } from '../../src/stores/usageStore';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
+import { useCockpitStore } from '../../src/stores/cockpitStore';
+import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
 
 const ROLE_PLAY_ACCENT = COLORS.rolePlayAccent;
 
@@ -84,6 +86,12 @@ export default function RolePlayScreen() {
   const [liveTranscript, setLiveTranscript] = useState('');
   const [useWhisperFallback, setUseWhisperFallback] = useState(false);
   const lastOnDeviceResultRef = useRef('');
+  
+  // Stabilization mode
+  const systemMode = useCockpitStore((s) => s.systemMode);
+  const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers);
+  const [showCaution, setShowCaution] = useState(systemMode === 'stabilization');
+  const isStabilization = systemMode === 'stabilization';
 
   useEffect(() => {
     hasOpenAIKey().then(setHasApiKey);
@@ -566,8 +574,21 @@ export default function RolePlayScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      <View style={styles.header}>
+    <>
+      {/* Stabilization Mode Caution */}
+      <ToolCautionModal
+        visible={showCaution && isStabilization}
+        toolName="Role Play"
+        triggers={stabilizationTriggers}
+        onContinue={() => setShowCaution(false)}
+        onQuickReset={() => {
+          setShowCaution(false);
+          router.replace('/(modals)/cockpit-checkin');
+        }}
+      />
+      
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <View style={styles.header}>
         <View style={{ width: 40 }} />
         <View style={styles.progressContainer}>
           <StepProgressIndicator currentStep={1} totalSteps={3} accentColor={ROLE_PLAY_ACCENT} />
@@ -687,9 +708,13 @@ export default function RolePlayScreen() {
       >
         <Text style={styles.startButtonText}>Start Practice</Text>
       </Pressable>
+      
+      {/* Stabilization footer hint */}
+      {isStabilization && <StabilizationFooter />}
 
       </ScrollView>
     </View>
+    </>
   );
 }
 

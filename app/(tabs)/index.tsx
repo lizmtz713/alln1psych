@@ -29,6 +29,7 @@ import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import type { Lesson } from '../../src/data/educationContent';
 import { Ionicons } from '@expo/vector-icons';
 import { CrisisPipelineAlert, useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
+import { StabilizationBanner } from '../../src/components/StabilizationBanner';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
 
@@ -163,6 +164,9 @@ export default function HomeScreen() {
   const directionVal = useCockpitStore((s) => s.direction.value);
   const alignmentVal = useCockpitStore((s) => s.alignment.value);
   const crossSystemInsight = useCockpitStore((s) => s.crossSystemInsight);
+  const systemMode = useCockpitStore((s) => s.systemMode);
+  const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers);
+  const computeSystemMode = useCockpitStore((s) => s.computeSystemMode);
 
   const activeGaugeCount = [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal].filter((v) => v >= 0).length;
   const overall =
@@ -182,6 +186,13 @@ export default function HomeScreen() {
   useEffect(() => {
     useCockpitStore.getState().runDailyDecayIfNeeded();
   }, []);
+
+  // Compute system mode whenever gauges change
+  useEffect(() => {
+    if (activeGaugeCount > 0) {
+      computeSystemMode();
+    }
+  }, [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal, activeGaugeCount, computeSystemMode]);
 
   useEffect(() => {
     if (activeGaugeCount >= 3 && !insightFetched) {
@@ -381,6 +392,22 @@ export default function HomeScreen() {
           </View>
         )}
       </Animated.View>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          STABILIZATION BANNER — Shown when system is under strain
+          ═══════════════════════════════════════════════════════════════ */}
+      {systemMode === 'stabilization' && stabilizationTriggers.length > 0 && (
+        <Animated.View style={slideY(card0)}>
+          <StabilizationBanner
+            triggers={stabilizationTriggers}
+            onQuickReset={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              // Navigate to a quick regulation exercise
+              router.push('/(modals)/cockpit-checkin');
+            }}
+          />
+        </Animated.View>
+      )}
 
       {/* ═══════════════════════════════════════════════════════════════
           2. COCKPIT CLUSTER — Center ring + 6 gauges in hex pattern

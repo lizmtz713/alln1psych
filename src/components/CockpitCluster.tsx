@@ -13,6 +13,10 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from './gauges';
 import { getGaugeColor, getOverallStatusLabel, GAUGE_CONFIG } from '../utils/gaugeHelpers';
+import { useCockpitStore, type GaugeKey } from '../stores/cockpitStore';
+
+const AMBER = '#F59E0B';
+const AMBER_GLOW = 'rgba(245, 158, 11, 0.25)';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -112,8 +116,18 @@ export function CockpitCluster({
   const router = useRouter();
   const centerPulse = useRef(new Animated.Value(1)).current;
   
-  const overallLabel = getOverallStatusLabel(overall);
-  const ringColor = overall < 0 ? (TEXT_MUTED + '90') : getGaugeColor(overall);
+  // Get system mode for highlighting triggered gauges
+  const systemMode = useCockpitStore((s) => s.systemMode);
+  const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers);
+  const centerScore = useCockpitStore((s) => s.centerScore);
+  
+  // Use weighted center score when available, fall back to simple average
+  const displayScore = centerScore >= 0 ? centerScore : overall;
+  const overallLabel = getOverallStatusLabel(displayScore);
+  const isStabilization = systemMode === 'stabilization';
+  const ringColor = isStabilization 
+    ? AMBER 
+    : (displayScore < 0 ? (TEXT_MUTED + '90') : getGaugeColor(displayScore));
   const activeCount = Object.values(gaugeValues).filter(v => v >= 0).length;
   
   // Subtle breathing animation for center ring
@@ -165,10 +179,12 @@ export function CockpitCluster({
         ]}
         onPress={handleCenterPress}
       >
-        {overall >= 0 ? (
+        {displayScore >= 0 ? (
           <>
-            <Text style={[styles.centerValue, { color: ringColor }]}>{overall}</Text>
-            <Text style={styles.centerLabel}>{overallLabel}</Text>
+            <Text style={[styles.centerValue, { color: ringColor }]}>{displayScore}</Text>
+            <Text style={styles.centerLabel}>
+              {isStabilization ? 'Stabilizing' : overallLabel}
+            </Text>
           </>
         ) : (
           <>
@@ -184,6 +200,10 @@ export function CockpitCluster({
         const GaugeComponent = GAUGE_COMPONENTS[key];
         const config = GAUGE_CONFIG[key as keyof typeof GAUGE_CONFIG];
         const gaugeColor = gaugeValue >= 0 ? getGaugeColor(gaugeValue) : '#E0E0E0';
+        
+        // Check if this gauge is a stabilization trigger
+        const isTriggered = stabilizationTriggers.includes(key as GaugeKey);
+        const displayColor = isTriggered ? AMBER : gaugeColor;
         
         // Calculate position
         const radians = (angle * Math.PI) / 180;
@@ -203,16 +223,32 @@ export function CockpitCluster({
               justifyContent: 'center',
             }}
           >
+            {/* Amber glow for triggered gauges */}
+            {isTriggered && (
+              <View
+                style={{
+                  position: 'absolute',
+                  width: GAUGE_SIZE + 24,
+                  height: GAUGE_SIZE + 24,
+                  borderRadius: (GAUGE_SIZE + 24) / 2,
+                  backgroundColor: AMBER_GLOW,
+                  borderWidth: 2,
+                  borderColor: AMBER,
+                }}
+              />
+            )}
+            
             {/* Glow layer */}
-            <GaugeGlow color={gaugeColor} intensity={gaugeValue} size={GAUGE_SIZE} />
+            <GaugeGlow color={displayColor} intensity={gaugeValue} size={GAUGE_SIZE} />
             
             {/* Gauge bubble */}
             <Pressable
               style={({ pressed }) => [
                 styles.gaugeBubble,
                 {
-                  borderColor: gaugeValue >= 0 ? gaugeColor : 'rgba(255,255,255,0.3)',
-                  shadowColor: gaugeColor,
+                  borderColor: gaugeValue >= 0 ? displayColor : 'rgba(255,255,255,0.3)',
+                  borderWidth: isTriggered ? 2 : 2,
+                  shadowColor: displayColor,
                   shadowOpacity: gaugeValue >= 0 ? 0.5 : 0,
                   shadowRadius: 10,
                 },
@@ -222,7 +258,7 @@ export function CockpitCluster({
             >
               {/* Emoji icon for visibility */}
               <Text style={styles.gaugeEmoji}>{config.icon}</Text>
-              <Text style={[styles.gaugeLabel, { color: gaugeValue >= 0 ? gaugeColor : '#888' }]}>
+              <Text style={[styles.gaugeLabel, { color: gaugeValue >= 0 ? displayColor : '#888' }]}>
                 {config.label.toUpperCase()}
               </Text>
             </Pressable>
@@ -232,9 +268,11 @@ export function CockpitCluster({
 
       {/* Status hint below */}
       <View style={styles.hintContainer}>
-        <Text style={styles.hintText}>
-          {overall >= 0 
-            ? `${activeCount}/6 online • ${overallLabel}`
+        <Text style={[styles.hintText, isStabilization && { color: AMBER }]}>
+          {displayScore >= 0 
+            ? isStabilization
+              ? `${activeCount}/6 online • Foundation needs attention`
+              : `${activeCount}/6 online • ${overallLabel}`
             : 'Tap center to check in'
           }
         </Text>

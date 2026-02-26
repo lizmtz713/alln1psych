@@ -26,6 +26,7 @@ import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ShareInsight } from '../../src/features/share-insight';
 import { buildReplayShareContent } from '../../src/features/share-insight';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
+import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
 
 const BG = '#09090F';
 const CARD_BG = '#111118';
@@ -105,6 +106,8 @@ export default function ReplayScreen() {
 
   const updateEmotion = useCockpitStore((s) => s.updateEmotion);
   const updateConnection = useCockpitStore((s) => s.updateConnection);
+  const systemMode = useCockpitStore((s) => s.systemMode);
+  const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers);
 
   const [phase, setPhase] = useState<Phase>('tell');
   const [story, setStory] = useState('');
@@ -117,6 +120,10 @@ export default function ReplayScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
   const lastResultRef = useRef('');
+  
+  // Stabilization mode caution
+  const [showCaution, setShowCaution] = useState(systemMode === 'stabilization');
+  const isStabilization = systemMode === 'stabilization';
 
   const runPhase = async (sysPrompt: string, userContent: string, setResult: (s: string) => void, nextPhase: Phase) => {
     if (!userContent.trim()) return;
@@ -281,6 +288,18 @@ export default function ReplayScreen() {
 
   return (
     <ErrorBoundary>
+      {/* Stabilization Mode Caution */}
+      <ToolCautionModal
+        visible={showCaution && isStabilization}
+        toolName="Replay"
+        triggers={stabilizationTriggers}
+        onContinue={() => setShowCaution(false)}
+        onQuickReset={() => {
+          setShowCaution(false);
+          router.replace('/(modals)/cockpit-checkin');
+        }}
+      />
+      
       <KeyboardAvoidingView
         style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -464,6 +483,9 @@ export default function ReplayScreen() {
               )}
             </>
           )}
+          
+          {/* Stabilization footer hint */}
+          {isStabilization && <StabilizationFooter />}
         </ScrollView>
       </KeyboardAvoidingView>
     </ErrorBoundary>

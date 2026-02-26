@@ -28,6 +28,8 @@ import {
   type ResponseIntent,
   type PartnerState 
 } from '../../src/services/socialPhysics';
+import { useCockpitStore } from '../../src/stores/cockpitStore';
+import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
 
 const DECODE_SYSTEM = `You are Gauge in InGauge "Decode" mode. The user pasted a message someone sent them.
 
@@ -94,6 +96,12 @@ export default function DecodeScreen() {
   const [loading, setLoading] = useState(false);
   const [selectedIntent, setSelectedIntent] = useState<ResponseIntent | null>(null);
   const [partnerState, setPartnerState] = useState<PartnerState>({});
+  
+  // Stabilization mode
+  const systemMode = useCockpitStore((s) => s.systemMode);
+  const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers);
+  const [showCaution, setShowCaution] = useState(systemMode === 'stabilization');
+  const isStabilization = systemMode === 'stabilization';
 
   const pickImage = async () => {
     try {
@@ -180,10 +188,23 @@ export default function DecodeScreen() {
   const trajectory = selectedIntent ? calculateTrajectory(selectedIntent, partnerState) : null;
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <>
+      {/* Stabilization Mode Caution */}
+      <ToolCautionModal
+        visible={showCaution && isStabilization}
+        toolName="Decode"
+        triggers={stabilizationTriggers}
+        onContinue={() => setShowCaution(false)}
+        onQuickReset={() => {
+          setShowCaution(false);
+          router.replace('/(modals)/cockpit-checkin');
+        }}
+      />
+      
+      <KeyboardAvoidingView
+        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       <View style={styles.header}>
         <Pressable style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#F0F0F5" />
@@ -350,8 +371,12 @@ export default function DecodeScreen() {
             </Pressable>
           </>
         )}
+        
+        {/* Stabilization footer hint */}
+        {isStabilization && <StabilizationFooter />}
       </ScrollView>
     </KeyboardAvoidingView>
+    </>
   );
 }
 
