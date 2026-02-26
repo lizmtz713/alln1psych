@@ -30,6 +30,10 @@ import type { Lesson } from '../../src/data/educationContent';
 import { Ionicons } from '@expo/vector-icons';
 import { CrisisPipelineAlert, useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
 import { StabilizationBanner } from '../../src/components/StabilizationBanner';
+import JustInTimeCard from '../../src/components/JustInTimeCard';
+import PredictiveWarningBanner from '../../src/components/PredictiveWarningBanner';
+import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
+import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
 
@@ -180,6 +184,12 @@ export default function HomeScreen() {
 
   const [insightFetched, setInsightFetched] = useState(false);
   
+  // Just-in-Time Learning & Predictive Warnings
+  const [jitLessons, setJitLessons] = useState<JustInTimeLesson[]>([]);
+  const [predictiveWarning, setPredictiveWarning] = useState<PredictiveWarning | null>(null);
+  const [dismissedJitIds, setDismissedJitIds] = useState<string[]>([]);
+  const [dismissedWarning, setDismissedWarning] = useState(false);
+  
   // Crisis Pipeline - monitors gauge persistence for safety alerts
   const { showAlert: showCrisisAlert, setShowAlert: setShowCrisisAlert, hasAlert: hasCrisisAlert } = useCrisisPipelineCheck();
 
@@ -193,6 +203,43 @@ export default function HomeScreen() {
       computeSystemMode();
     }
   }, [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal, activeGaugeCount, computeSystemMode]);
+
+  // Load Just-in-Time lessons and Predictive Warnings when gauges change
+  useEffect(() => {
+    if (activeGaugeCount >= 3) {
+      const gauges = {
+        body: bodyVal >= 0 ? bodyVal : 50,
+        state: stateVal >= 0 ? stateVal : 50,
+        emotion: emotionVal >= 0 ? emotionVal : 50,
+        connection: connectionVal >= 0 ? connectionVal : 50,
+        direction: directionVal >= 0 ? directionVal : 50,
+        alignment: alignmentVal >= 0 ? alignmentVal : 50,
+      };
+      
+      // Get JIT lessons
+      getJustInTimeLessons(gauges, systemMode).then(lessons => {
+        const filtered = lessons.filter(l => !dismissedJitIds.includes(l.lessonId));
+        setJitLessons(filtered);
+      });
+      
+      // Get predictive warning
+      getMostUrgentWarning().then(warning => {
+        if (!dismissedWarning) {
+          setPredictiveWarning(warning);
+        }
+      });
+    }
+  }, [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal, systemMode, activeGaugeCount, dismissedJitIds, dismissedWarning]);
+
+  const handleDismissJitLesson = (lessonId: string) => {
+    setDismissedJitIds(prev => [...prev, lessonId]);
+    setJitLessons(prev => prev.filter(l => l.lessonId !== lessonId));
+  };
+
+  const handleDismissWarning = () => {
+    setDismissedWarning(true);
+    setPredictiveWarning(null);
+  };
 
   useEffect(() => {
     if (activeGaugeCount >= 3 && !insightFetched) {
@@ -449,6 +496,26 @@ export default function HomeScreen() {
           </View>
           <Text style={styles.insightText}>{crossSystemInsight}</Text>
         </Animated.View>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          4b. PREDICTIVE WARNING — Trajectory alerts
+          ═══════════════════════════════════════════════════════════════ */}
+      {predictiveWarning && !dismissedWarning && (
+        <PredictiveWarningBanner 
+          warning={predictiveWarning} 
+          onDismiss={handleDismissWarning}
+        />
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          4c. JUST-IN-TIME LESSONS — Contextual learning
+          ═══════════════════════════════════════════════════════════════ */}
+      {jitLessons.length > 0 && (
+        <JustInTimeCard 
+          lesson={jitLessons[0]} 
+          onDismiss={() => handleDismissJitLesson(jitLessons[0].lessonId)}
+        />
       )}
 
       {/* ═══════════════════════════════════════════════════════════════

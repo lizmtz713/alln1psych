@@ -1005,8 +1005,63 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Apple Health Integration */}
+        {/* Health Integrations */}
+        <Text style={styles.sectionTitle}>Health Integrations</Text>
+        <View style={styles.card}>
+          <Pressable 
+            style={styles.row} 
+            onPress={() => router.push('/(modals)/health-connections')}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#7C4DFF22', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+                <Text style={{ fontSize: 18 }}>💍</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowLabel}>Oura Ring</Text>
+                <Text style={styles.rowHint}>Connect for auto Body gauge</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={TEXT_DIM} />
+          </Pressable>
+        </View>
+        
         <HealthConnectionCard />
+
+        {/* Insights & Reports */}
+        <Text style={styles.sectionTitle}>Insights & Reports</Text>
+        <View style={styles.card}>
+          <Pressable 
+            style={styles.row} 
+            onPress={() => router.push('/(modals)/sovereignty-report')}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#4CAF5022', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+                <Ionicons name="analytics" size={20} color="#4CAF50" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowLabel}>Monthly Report</Text>
+                <Text style={styles.rowHint}>Your sovereignty score & patterns</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={TEXT_DIM} />
+          </Pressable>
+          <View style={styles.divider} />
+          <Pressable 
+            style={styles.row} 
+            onPress={() => router.push('/(modals)/patterns')}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#FF980022', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+                <Ionicons name="trending-up" size={20} color="#FF9800" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowLabel}>Pattern Detection</Text>
+                <Text style={styles.rowHint}>Lead/lag indicators & trends</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={TEXT_DIM} />
+          </Pressable>
+        </View>
 
         {/* Spotify Integration */}
         <SpotifyConnectionCard />

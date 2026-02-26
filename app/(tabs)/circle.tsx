@@ -223,6 +223,21 @@ export default function CircleScreen() {
         <Text style={styles.hint}>Your circle can see this. Tap to change anytime.</Text>
       </View>
 
+      {/* RELATIONAL BRIDGE */}
+      <Pressable 
+        style={styles.bridgeCard} 
+        onPress={() => router.push('/(modals)/relational-bridge')}
+      >
+        <View style={styles.bridgeIcon}>
+          <Text style={{ fontSize: 24 }}>🌉</Text>
+        </View>
+        <View style={styles.bridgeText}>
+          <Text style={styles.bridgeTitle}>Relational Bridge</Text>
+          <Text style={styles.bridgeSubtitle}>Navigate conflict with someone in your Circle</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#888" />
+      </Pressable>
+
       {/* YOUR CIRCLE */}
       <View style={styles.section}>
         <View style={styles.sectionRow}>
@@ -508,6 +523,38 @@ const styles = StyleSheet.create({
   },
   container: { flex: 1, backgroundColor: COLORS.background },
   content: { paddingHorizontal: 24, paddingBottom: 40 },
+  bridgeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: COLORS.accent + '33',
+  },
+  bridgeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: COLORS.accent + '22',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  bridgeText: {
+    flex: 1,
+  },
+  bridgeTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  bridgeSubtitle: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+  },
   demoBadge: {
     alignSelf: 'flex-end',
     backgroundColor: COLORS.surface,
