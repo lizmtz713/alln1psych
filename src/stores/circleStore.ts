@@ -61,6 +61,8 @@ function genId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+const DEMO_MEMBER_IDS = ['demo-mom', 'demo-sarah', 'demo-dad'];
+
 const DEMO_MEMBERS: CircleMember[] = [
   {
     id: 'demo-mom',
@@ -154,7 +156,12 @@ export const useCircleStore = create<CircleState>((set) => ({
       lastUpdated: now,
       addedAt: now,
     };
-    set((state) => ({ members: [...state.members, newMember] }));
+    // Clear demo data when adding first real member
+    set((state) => {
+      const isDemoOnly = state.members.every(m => DEMO_MEMBER_IDS.includes(m.id));
+      const newMembers = isDemoOnly ? [newMember] : [...state.members, newMember];
+      return { members: newMembers };
+    });
     if (userId) {
       database
         .addCircleMember(userId, {

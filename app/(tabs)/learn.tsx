@@ -106,6 +106,7 @@ const TOOL_CATEGORIES = [
     title: 'Connect',
     tools: [
       { id: 'relate', icon: 'heart-circle', title: 'Relate', color: '#EC4899' },
+      { id: 'relational-bridge', icon: 'git-merge', title: 'Bridge', color: '#FF9800' },
       { id: 'love', icon: 'heart-half', title: 'Love', color: '#F43F5E' },
       { id: 'help-someone', icon: 'hand-left', title: 'Help', color: '#8B5CF6' },
       { id: 'role-play', icon: 'people-circle', title: 'Role Play', color: '#F59E0B' },
@@ -124,9 +125,11 @@ const TOOL_CATEGORIES = [
     id: 'regulate',
     title: 'Regulate',
     tools: [
+      { id: 'quick-reset', icon: 'flash', title: 'Quick Reset', color: '#14B8A6' },
       { id: 'breathing', icon: 'fitness', title: 'Breathe', color: '#14B8A6' },
       { id: 'body-scan', icon: 'body', title: 'Body Scan', color: '#8B5CF6' },
       { id: 'stress-thermo', icon: 'thermometer', title: 'Stress', color: '#EF4444' },
+      { id: 'crisis-resources', icon: 'heart', title: 'Crisis Help', color: '#EF4444' },
     ],
   },
   {
@@ -431,7 +434,7 @@ export default function LearnScreen() {
                             style={[styles.lessonCard, completed && styles.lessonCardDone]}
                             onPress={() => {
                               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                              router.push(`/(modals)/activity?lesson=${lesson.id}`);
+                              router.push(`/lesson/${lesson.id}`);
                             }}
                           >
                             {completed && (
