@@ -24,6 +24,7 @@ import { useWeatherStore } from '../../src/stores/weatherStore';
 import { useHealthStore } from '../../src/stores/healthStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { getEnvironmentContext, getMoonPhase, getTimeContext } from '../../src/services/environment';
+import { analyzePatterns, formatConfidence, type NarrativePattern, type PatternAnalysis } from '../../src/services/patternEngine';
 
 const BG = COLORS.background;
 const CARD_BG = COLORS.surface;
@@ -121,10 +122,70 @@ function PatternCard({
   );
 }
 
+// Narrative Pattern Card (data-grounded, probabilistic language)
+function NarrativePatternCard({ pattern }: { pattern: NarrativePattern }) {
+  const confidenceColors = {
+    early_signal: '#F59E0B',  // amber
+    emerging: '#A78BFA',      // purple
+    established: '#4ADE80',   // green
+  };
+  
+  const typeEmojis = {
+    feedback_loop: '🔄',
+    correlation: '🔗',
+    trend: '📈',
+    trigger: '⚡',
+  };
+
+  return (
+    <View style={styles.narrativeCard}>
+      <View style={styles.narrativeHeader}>
+        <Text style={styles.narrativeEmoji}>{typeEmojis[pattern.type]}</Text>
+        <View style={[styles.confidenceBadge, { backgroundColor: confidenceColors[pattern.confidence] + '20' }]}>
+          <Text style={[styles.confidenceText, { color: confidenceColors[pattern.confidence] }]}>
+            {formatConfidence(pattern.confidence)}
+          </Text>
+        </View>
+      </View>
+      <Text style={styles.narrativeText}>{pattern.narrative}</Text>
+      {pattern.actionable && (
+        <Text style={styles.actionableText}>💡 {pattern.actionable}</Text>
+      )}
+    </View>
+  );
+}
+
+// Insufficient Data Card
+function InsufficientDataCard({ message, uniqueDays }: { message: string; uniqueDays: number }) {
+  return (
+    <View style={styles.insufficientCard}>
+      <Text style={styles.insufficientEmoji}>🌱</Text>
+      <Text style={styles.insufficientTitle}>Patterns emerge with time</Text>
+      <Text style={styles.insufficientText}>{message}</Text>
+      <View style={styles.progressDots}>
+        {[...Array(7)].map((_, i) => (
+          <View 
+            key={i} 
+            style={[
+              styles.progressDot, 
+              i < uniqueDays && styles.progressDotFilled
+            ]} 
+          />
+        ))}
+      </View>
+      <Text style={styles.progressLabel}>{uniqueDays}/7 days</Text>
+    </View>
+  );
+}
+
 export default function PatternsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Narrative patterns from pattern engine
+  const [patternAnalysis, setPatternAnalysis] = useState<PatternAnalysis | null>(null);
+  const [patternsLoading, setPatternsLoading] = useState(true);
 
   // Gauge data
   const body = useCockpitStore((s) => s.body.value);
@@ -157,6 +218,22 @@ export default function PatternsScreen() {
 
   useEffect(() => {
     setEnv(getEnvironmentContext());
+  }, []);
+
+  // Load narrative patterns on mount
+  useEffect(() => {
+    const loadPatterns = async () => {
+      setPatternsLoading(true);
+      try {
+        const analysis = await analyzePatterns();
+        setPatternAnalysis(analysis);
+      } catch (e) {
+        console.error('Pattern analysis error:', e);
+      } finally {
+        setPatternsLoading(false);
+      }
+    };
+    loadPatterns();
   }, []);
 
   const onRefresh = async () => {
@@ -354,10 +431,38 @@ export default function PatternsScreen() {
           <GaugeBar label="Alignment" value={alignment} emoji="⚖️" />
         </View>
 
-        {/* Patterns Detected */}
+        {/* LONGITUDINAL PATTERNS - Narrative-first, data-grounded */}
+        <Text style={styles.sectionTitle}>Cross-Gauge Patterns</Text>
+        {patternsLoading ? (
+          <View style={styles.card}>
+            <Text style={styles.loadingText}>Analyzing your history...</Text>
+          </View>
+        ) : patternAnalysis && !patternAnalysis.hasMinimumData ? (
+          <InsufficientDataCard 
+            message={patternAnalysis.insufficientDataMessage || 'Keep checking in to reveal patterns.'} 
+            uniqueDays={patternAnalysis.uniqueDays}
+          />
+        ) : patternAnalysis && patternAnalysis.patterns.length > 0 ? (
+          <View style={styles.narrativeSection}>
+            <Text style={styles.narrativeIntro}>
+              Based on {patternAnalysis.dataPoints} check-ins over {patternAnalysis.uniqueDays} days:
+            </Text>
+            {patternAnalysis.patterns.map((pattern, i) => (
+              <NarrativePatternCard key={pattern.id || i} pattern={pattern} />
+            ))}
+          </View>
+        ) : (
+          <View style={styles.card}>
+            <Text style={styles.noPatternsText}>
+              No strong patterns detected yet. Keep checking in — patterns reveal themselves over time.
+            </Text>
+          </View>
+        )}
+
+        {/* Today's Context (real-time patterns) */}
         {patterns.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>Patterns Detected</Text>
+            <Text style={styles.sectionTitle}>Today's Context</Text>
             <View style={styles.card}>
               {patterns.map((p, i) => (
                 <PatternCard key={i} {...p} />
@@ -723,5 +828,113 @@ const styles = StyleSheet.create({
   connectMoreText: {
     fontSize: 14,
     color: ACCENT,
+  },
+
+  // Narrative patterns (longitudinal, data-grounded)
+  narrativeSection: {
+    marginBottom: 20,
+  },
+  narrativeIntro: {
+    fontSize: 13,
+    color: TEXT_DIM,
+    marginBottom: 12,
+    fontStyle: 'italic',
+  },
+  narrativeCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  narrativeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 10,
+  },
+  narrativeEmoji: {
+    fontSize: 20,
+  },
+  confidenceBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  confidenceText: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  narrativeText: {
+    fontSize: 15,
+    color: TEXT,
+    lineHeight: 22,
+  },
+  actionableText: {
+    fontSize: 13,
+    color: ACCENT,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+  },
+  loadingText: {
+    fontSize: 14,
+    color: TEXT_DIM,
+    textAlign: 'center',
+    padding: 20,
+  },
+  noPatternsText: {
+    fontSize: 14,
+    color: TEXT_MUTED,
+    textAlign: 'center',
+    padding: 8,
+  },
+
+  // Insufficient data card
+  insufficientCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: 24,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    alignItems: 'center',
+  },
+  insufficientEmoji: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
+  insufficientTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: TEXT,
+    marginBottom: 8,
+  },
+  insufficientText: {
+    fontSize: 14,
+    color: TEXT_MUTED,
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  progressDots: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
+  },
+  progressDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  progressDotFilled: {
+    backgroundColor: ACCENT,
+  },
+  progressLabel: {
+    fontSize: 12,
+    color: TEXT_DIM,
   },
 });
