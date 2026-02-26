@@ -583,7 +583,7 @@ export default function RolePlayScreen() {
         onContinue={() => setShowCaution(false)}
         onQuickReset={() => {
           setShowCaution(false);
-          router.replace('/(modals)/cockpit-checkin');
+          router.replace('/(modals)/quick-reset');
         }}
       />
       

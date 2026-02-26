@@ -402,8 +402,8 @@ export default function HomeScreen() {
             triggers={stabilizationTriggers}
             onQuickReset={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              // Navigate to a quick regulation exercise
-              router.push('/(modals)/cockpit-checkin');
+              // Navigate to 2-minute regulation reset
+              router.push('/(modals)/quick-reset');
             }}
           />
         </Animated.View>
