@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
+import { ManualSearch } from '../../src/components/ManualSearch';
 import { useEducationStore } from '../../src/stores/educationStore';
 import {
   MANUAL_SECTIONS,
@@ -399,6 +400,9 @@ export default function LearnScreen() {
               ═══════════════════════════════════════════════════════════ */}
           {activeTab === 'manual' && (
             <View>
+              {/* Search Bar */}
+              <ManualSearch />
+              
               {/* Manual Intro */}
               <View style={styles.manualIntroCard}>
                 <Text style={styles.manualIntroTitle}>The Human Manual</Text>
