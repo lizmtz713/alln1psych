@@ -1256,6 +1256,1128 @@ The timeline is longer than you want. Research suggests 2-5 years for full adjus
     ],
     relatedLessons: ['hm-trans-divorce', 'hm-trans-grief-all-kinds', 'hm-trans-starting-over'],
   },
+  {
+    id: 'hm-rel-narcissistic-parents',
+    title: 'Narcissistic Parents: Growing Up Unseen',
+    category: 'relationships',
+    duration: 10,
+    emoji: '🪞',
+    content: {
+      introduction: `Growing up with a narcissistic parent means growing up as an extension of someone else rather than as your own person. Narcissistic parents view their children as sources of narcissistic supply — vehicles for admiration, accomplishment, and validation — rather than as separate individuals with their own needs, feelings, and identities.
+
+The impact is profound and often invisible until adulthood. You may have been the "golden child" — idealized and pressured to reflect well on the parent — or the "scapegoat" — blamed for family dysfunction and treated as defective. Sometimes children alternate between roles, never knowing which version of the parent they'll encounter. This unpredictability creates hypervigilance that persists long after childhood.
+
+Children of narcissistic parents often struggle with core questions: Am I allowed to have needs? Are my feelings real? Am I good enough? These questions arise because narcissistic parents systematically invalidate their children's inner experiences. Your feelings were wrong, inconvenient, or about them. Your needs were selfish. Your accomplishments were either co-opted or minimized. The real you was never quite acceptable.
+
+Recovery involves grieving the parent you needed but didn't have, learning to trust your own perceptions after years of gaslighting, and developing a sense of self that wasn't allowed to form naturally. This is hard, long work — but it's possible.`,
+      keyInsights: [
+        { 
+          title: 'You were a mirror, not a person', 
+          explanation: 'Narcissistic parents need their children to reflect well on them. Your job was to be an extension of their ego — accomplishing what they wanted, feeling what was convenient for them, never outshining or embarrassing them. Your authentic self wasn\'t wanted.' 
+        },
+        { 
+          title: 'Golden child vs. scapegoat', 
+          explanation: 'Narcissistic family systems often split children into roles. The golden child is idealized but burdened with impossible expectations. The scapegoat carries the family\'s dysfunction. Both are harmed — just differently.' 
+        },
+        { 
+          title: 'Emotional attunement was missing', 
+          explanation: 'Healthy parents attune to their children\'s emotional states. Narcissistic parents expect children to attune to THEM. You learned to read the room, manage their emotions, and suppress your own. This became your relationship template.' 
+        },
+        { 
+          title: 'The wound often surfaces in adulthood', 
+          explanation: 'Many children of narcissists don\'t realize what happened until their 30s, 40s, or later. Therapy, books, or hearing others\' stories suddenly name what was always wrong but unidentifiable.' 
+        },
+        {
+          title: 'Love-bombing and withdrawal created confusion',
+          explanation: 'Narcissistic parents often alternate between excessive attention and cold withdrawal. This intermittent reinforcement creates trauma bonds and makes you question whether your perception of abuse is valid.'
+        }
+      ],
+      whatHelps: [
+        'Learn about narcissistic personality patterns — naming it helps',
+        'Find validation: support groups, therapy, books (try "Adult Children of Emotionally Immature Parents")',
+        'Practice trusting your own perceptions — they were systematically invalidated',
+        'Grieve the parent you deserved but didn\'t get',
+        'Set boundaries — narcissistic parents rarely respect them, so enforce consequences',
+        'Consider low contact or no contact if the relationship continues to harm you',
+      ],
+      professionalNote: 'Therapists familiar with narcissistic abuse and complex trauma (C-PTSD) can help you process these dynamics and rebuild a healthy sense of self.'
+    },
+    reflectionQuestions: [
+      'How did your parent respond when you had needs or feelings that were inconvenient for them?',
+      'Were you the golden child, the scapegoat, or did you alternate? How did that shape you?',
+      'What parts of yourself did you suppress to survive your childhood?',
+    ],
+    relatedLessons: ['hm-rel-family-wounds', 'hm-rel-emotionally-immature-parents', 'hm-rel-estrangement'],
+  },
+  {
+    id: 'hm-rel-enmeshment',
+    title: 'Enmeshment: When Families Have No Boundaries',
+    category: 'relationships',
+    duration: 9,
+    emoji: '🕸️',
+    content: {
+      introduction: `In enmeshed families, boundaries between members are blurred or nonexistent. Individuality is threatening. Separation is betrayal. Family therapist Salvador Minuchin, who identified this pattern, described enmeshed families as systems where everyone feels everyone else's feelings, where privacy is suspicious, and where differentiation is punished.
+
+Enmeshment often masquerades as closeness. "We're just a really close family" can mean genuine intimacy — or it can mean nobody is allowed to have their own feelings, opinions, or life. The difference is whether separation and individuality are possible without guilt, punishment, or family crisis.
+
+Children raised in enmeshed families struggle to develop a coherent sense of self. They may not know what they actually feel versus what they're supposed to feel. They may experience intense guilt around normal developmental milestones like dating, moving out, or making independent choices. Success and happiness separate from the family can feel like betrayal.
+
+Differentiation — developing a clear sense of where you end and others begin — is the antidote to enmeshment. This doesn't mean becoming cold or distant. It means being able to stay connected while also being yourself.`,
+      keyInsights: [
+        { 
+          title: 'Closeness vs. enmeshment', 
+          explanation: 'Close families support individuality while staying connected. Enmeshed families require sameness and punish differentiation. If having your own feelings, opinions, or life choices triggers family crisis, that\'s enmeshment.' 
+        },
+        { 
+          title: 'Emotional contagion', 
+          explanation: 'In enmeshed families, one person\'s mood affects everyone. You may have learned to constantly monitor family members\' emotional states and adjust yourself accordingly. Your mood was never fully your own.' 
+        },
+        { 
+          title: 'Privacy is suspicious', 
+          explanation: 'Enmeshed families often treat privacy as secrecy, secrecy as betrayal. Locked doors, unshared information, or having experiences without the family can trigger accusations of disloyalty.' 
+        },
+        { 
+          title: 'Separation guilt', 
+          explanation: 'Moving out, prioritizing your partner, having success the family can\'t share — these normal milestones can trigger overwhelming guilt and family retaliation. The message: your separate existence is a wound to us.' 
+        },
+        {
+          title: 'Enmeshment replicates in other relationships',
+          explanation: 'You may recreate enmeshment in friendships and romantic relationships — losing yourself in others, struggling with boundaries, feeling responsible for others\' emotions.'
+        }
+      ],
+      whatHelps: [
+        'Learn about differentiation (Murray Bowen\'s family systems theory)',
+        'Practice tolerating the discomfort of disappointing family to be yourself',
+        'Start small: have one opinion that differs from the family, maintain one boundary',
+        'Notice when you\'re feeling others\' feelings instead of your own',
+        'Find relationships outside the family system',
+        'Therapy can provide a space where your individuality is supported',
+      ],
+      professionalNote: 'Family systems therapy, particularly Bowen\'s approach, specifically addresses enmeshment and helps with differentiation of self.'
+    },
+    reflectionQuestions: [
+      'Can you disagree with your family without it becoming a crisis? How do they respond to your independent choices?',
+      'Do you know what you actually feel, or do you feel what you\'re supposed to feel?',
+      'What would happen if you set a boundary your family didn\'t like?',
+    ],
+    relatedLessons: ['hm-rel-family-wounds', 'hm-rel-boundaries-protect', 'hm-rel-codependency'],
+  },
+  {
+    id: 'hm-rel-codependency',
+    title: 'Codependency: Losing Yourself in Others',
+    category: 'relationships',
+    duration: 9,
+    emoji: '🎭',
+    content: {
+      introduction: `Codependency is when your sense of self becomes dependent on managing, helping, or controlling someone else. It often develops in families with addiction, mental illness, or dysfunction — where children learn to focus outward on others' needs because their own needs weren't safe to have. You became the caretaker, the fixer, the one who holds everything together.
+
+The codependent person's identity revolves around being needed. Their self-worth depends on being helpful, self-sacrificing, and essential to others. This sounds noble, but it comes at a devastating cost: you may have no idea who you are outside of your relationships. Your feelings, needs, and preferences became secondary so long ago that you may not know what they are.
+
+Codependency creates relationships that look like love but function like addiction. You're drawn to people who need fixing because that's where you feel valuable. You may stay in harmful relationships because leaving feels like abandoning your purpose. You give and give until you're empty, then feel resentful — but can't stop giving.
+
+Recovery from codependency involves turning the caretaking energy inward. Learning to have needs. Tolerating the anxiety of not being needed. Discovering who you are when you're not managing someone else's life.`,
+      keyInsights: [
+        { 
+          title: 'Caretaking as identity', 
+          explanation: 'Your worth became tied to being helpful, essential, the one who saves others. When you\'re not in that role, you may feel purposeless, anxious, or worthless.' 
+        },
+        { 
+          title: 'Attracted to dysfunction', 
+          explanation: 'Codependents are often drawn to partners with addiction, mental illness, or immaturity — people who need the help that defines the codependent\'s identity. Healthy partners can feel boring or uncomfortable.' 
+        },
+        { 
+          title: 'Control disguised as care', 
+          explanation: 'Codependency often involves controlling others "for their own good." Managing their lives, advice-giving, and monitoring can be ways of reducing the codependent\'s anxiety rather than genuinely helping.' 
+        },
+        { 
+          title: 'Self-abandonment', 
+          explanation: 'You learned to abandon yourself to focus on others. Your needs, feelings, and preferences were submerged so long ago you may not know what they are.' 
+        },
+        {
+          title: 'Boundaries feel selfish',
+          explanation: 'Having limits, saying no, and prioritizing your own wellbeing can feel deeply wrong, even cruel. This guilt is a symptom of codependency, not a sign that boundaries are wrong.'
+        }
+      ],
+      whatHelps: [
+        'Codependents Anonymous (CoDA) provides community and a framework for recovery',
+        'Therapy focused on self-worth and differentiation',
+        'Practice identifying what YOU want (start small: what do you want for dinner?)',
+        'Notice when helping is about reducing your own anxiety vs. genuine service',
+        'Set boundaries even when they feel "selfish"',
+        'Develop identity outside of caretaking roles',
+      ],
+      professionalNote: 'Melody Beattie\'s "Codependent No More" is a foundational resource. Look for therapists familiar with codependency patterns and attachment work.'
+    },
+    reflectionQuestions: [
+      'Who were you taking care of as a child? What did you learn about whose needs mattered?',
+      'Outside of your relationships and roles, who are you? What do YOU want?',
+      'What happens inside you when someone doesn\'t need your help?',
+    ],
+    relatedLessons: ['hm-rel-enmeshment', 'hm-rel-boundaries-protect', 'hm-rel-addiction-family'],
+  },
+  {
+    id: 'hm-rel-emotional-abuse',
+    title: 'Emotional Abuse: The Invisible Wounds',
+    category: 'relationships',
+    duration: 10,
+    emoji: '🩹',
+    content: {
+      introduction: `Emotional abuse doesn't leave bruises, which makes it easier to deny, minimize, and doubt. But research is clear: psychological abuse can be as damaging as physical abuse, sometimes more so. It attacks your sense of reality, self-worth, and trust in your own perceptions. The wounds are invisible but deep.
+
+Emotional abuse takes many forms: constant criticism, humiliation, threats, isolation from friends and family, controlling behaviors, manipulation, gaslighting, withholding affection as punishment, explosive rage, and chronic invalidation. The common thread is that the abuser systematically undermines the victim's sense of self, autonomy, and connection to others.
+
+Recognizing emotional abuse is hard when you're in it. Abusers don't abuse constantly — they intersperse cruelty with kindness, keeping you off-balance and hoping. They often present a different face to the outside world, making you doubt whether anyone would believe you. And they frequently convince you that you're the problem, that if you were just better, the abuse would stop.
+
+The damage extends beyond the relationship. Survivors often struggle with trust, self-worth, and forming healthy attachments. They may repeat the pattern or swing to the opposite extreme. Recovery requires recognizing what happened, processing the trauma, and rebuilding a sense of self that was systematically dismantled.`,
+      keyInsights: [
+        { 
+          title: 'Invisible doesn\'t mean less harmful', 
+          explanation: 'Research shows emotional abuse has long-term effects comparable to physical abuse: depression, anxiety, PTSD, difficulty trusting. The absence of physical marks doesn\'t minimize the damage.' 
+        },
+        { 
+          title: 'The cycle keeps you trapped', 
+          explanation: 'Abuse typically cycles through tension building, incident, reconciliation/honeymoon, and calm — then repeats. The good periods make you doubt your perception and hope things will change.' 
+        },
+        { 
+          title: 'Isolation is strategic', 
+          explanation: 'Abusers often isolate victims from friends, family, and outside perspective. Without reality checks, the victim becomes dependent on the abuser\'s version of reality.' 
+        },
+        { 
+          title: 'You become the identified problem', 
+          explanation: 'Abusers are skilled at making victims feel like the cause of the abuse. "Look what you made me do." "If you weren\'t so [sensitive/stupid/etc], I wouldn\'t have to..." This gaslighting compounds the damage.' 
+        },
+        {
+          title: 'Trauma bonds form',
+          explanation: 'The intermittent reinforcement of abuse followed by kindness creates powerful trauma bonds — attachments that feel like love but function like addiction. Leaving can feel impossible even when you know it\'s necessary.'
+        }
+      ],
+      whatHelps: [
+        'Name it: "This is abuse" is a powerful and necessary statement',
+        'Break isolation: reconnect with friends, family, or a therapist',
+        'Document incidents — for your own clarity if nothing else',
+        'Safety planning if you\'re preparing to leave',
+        'National Domestic Violence Hotline: 1-800-799-7233',
+        'Trauma-informed therapy to process the experience and rebuild',
+      ],
+      warningSign: 'If you\'re in an abusive relationship and considering leaving, the most dangerous time is around separation. Create a safety plan with professional support.'
+    },
+    reflectionQuestions: [
+      'Have you been told your perception of events is wrong, crazy, or too sensitive? By whom?',
+      'Who would you talk to about what\'s happening? If no one, why?',
+      'What would you tell a friend who described your relationship to you?',
+    ],
+    relatedLessons: ['hm-rel-gaslighting', 'hm-rel-when-to-leave', 'hm-mh-trauma-basics'],
+  },
+  {
+    id: 'hm-rel-gaslighting',
+    title: 'Gaslighting: When Your Reality Is Denied',
+    category: 'relationships',
+    duration: 8,
+    emoji: '🔦',
+    content: {
+      introduction: `Gaslighting is a form of psychological manipulation where someone makes you question your own perception of reality. The term comes from a 1944 film where a husband manipulates his wife into believing she's going insane. It's not just disagreeing with you — it's systematically undermining your trust in your own mind.
+
+Common gaslighting tactics include: denying events that happened ("That never happened"), minimizing your feelings ("You're overreacting"), shifting blame ("You made me do it"), countering your memory ("You're remembering it wrong"), trivializing your concerns ("You're too sensitive"), and using others against you ("Everyone thinks you're crazy").
+
+The insidious power of gaslighting is that it attacks your most fundamental tool for navigating reality: your own perception. When someone persistently tells you that what you see, hear, feel, and remember isn't real, you begin to doubt yourself. This doubt is the point. It makes you easier to control and harder to leave.
+
+Recovery from gaslighting requires rebuilding trust in yourself — which is exactly what was targeted. This often needs outside support: people who validate your reality, therapists who help you distinguish between your perceptions and the gaslighter's version, and time away from the person who scrambled your sense of self.`,
+      keyInsights: [
+        { 
+          title: 'It attacks your reality testing', 
+          explanation: 'Your ability to trust what you perceive and remember is foundational to functioning. Gaslighting directly targets this capacity, making you dependent on the gaslighter\'s version of events.' 
+        },
+        { 
+          title: 'It\'s intentional but may not be conscious', 
+          explanation: 'Some gaslighters knowingly manipulate. Others do it automatically, having learned the pattern from their own upbringing. Intention doesn\'t change impact, but it affects whether the person can change.' 
+        },
+        { 
+          title: 'Documentation helps', 
+          explanation: 'When you can\'t trust your memory, writing things down creates an external record. Journaling events as they happen can be a lifeline when your perception is being systematically undermined.' 
+        },
+        { 
+          title: 'Outside perspective is essential', 
+          explanation: 'Isolation enables gaslighting. Connection with people outside the relationship who validate your perception is crucial for maintaining and rebuilding your sense of reality.' 
+        },
+      ],
+      whatHelps: [
+        'Write things down — create external records when your memory is being questioned',
+        'Seek outside perspectives from people you trust',
+        'Learn the tactics — being able to name "that\'s gaslighting" reduces its power',
+        'Limit contact with the gaslighter if possible',
+        'Therapy to rebuild trust in your own perceptions',
+        'Practice phrases like "I know what I saw" and "My feelings are valid"',
+      ],
+      professionalNote: 'Rebuilding after gaslighting often requires trauma-informed therapy. The goal is restoring trust in yourself, which takes time and support.'
+    },
+    reflectionQuestions: [
+      'Who in your life makes you feel crazy or doubt your own memory and perception?',
+      'Do you find yourself apologizing for things you don\'t think you did wrong? Why?',
+      'What would you think if you heard your own story from someone else?',
+    ],
+    relatedLessons: ['hm-rel-emotional-abuse', 'hm-rel-narcissistic-parents', 'hm-mh-trauma-basics'],
+  },
+  {
+    id: 'hm-rel-estrangement',
+    title: 'Parent-Child Estrangement: When Cutting Contact Is Necessary',
+    category: 'relationships',
+    duration: 10,
+    emoji: '🚪',
+    content: {
+      introduction: `Estrangement from family — particularly from parents — is one of the most stigmatized choices a person can make. Society assumes that family bonds are sacred and permanent. "But they're your parents" is offered as if it ends all discussion. What this ignores is that some family relationships are so harmful that maintaining them requires ongoing self-destruction.
+
+The decision to go no-contact or low-contact with a parent is rarely made lightly. Most adult children who estrange have tried repeatedly to make the relationship work. They've set boundaries that were ignored, communicated needs that were dismissed, and endured ongoing harm while hoping things would change. Estrangement is usually a last resort, not a first reaction.
+
+The grief of estrangement is complex and often unrecognized. You grieve the parent you needed but didn't have. You grieve the relationship that could have been. You may grieve when they die, realizing that change is now truly impossible. And you do this grieving while society tells you you're wrong, selfish, or unforgiving.
+
+Research on estrangement is growing. Studies show that most people who estrange from family members report improved wellbeing after the initial grief and adjustment. This doesn't mean it's easy or painless — it means sometimes it's necessary.`,
+      keyInsights: [
+        { 
+          title: 'Estrangement is often a last resort', 
+          explanation: 'Most adult children who cut contact have tried everything else first. Years of attempts at communication, boundary-setting, and hoping for change typically precede the decision.' 
+        },
+        { 
+          title: 'Blood doesn\'t override harm', 
+          explanation: 'The cultural belief that family bonds override everything enables ongoing abuse. If a non-family member treated you the way your family does, would you stay in that relationship?' 
+        },
+        { 
+          title: 'Grief is complex and ongoing', 
+          explanation: 'Estrangement means grieving while the person is alive. You grieve the relationship you needed, the parent they couldn\'t be, and the fantasy of eventual reconciliation. This grief may resurface throughout life.' 
+        },
+        { 
+          title: 'Wellbeing often improves', 
+          explanation: 'Despite social stigma and grief, research shows most people who estrange report better mental health and life satisfaction after adjustment. Sometimes distance is health.' 
+        },
+        {
+          title: 'You can still love them',
+          explanation: 'Estrangement doesn\'t mean you don\'t love your parent. It means you\'ve accepted that loving them can\'t coexist with protecting yourself. Both things can be true.'
+        }
+      ],
+      whatHelps: [
+        'Trust your own experience — you know what you lived',
+        'Find support from people who understand (estrangement forums, therapists who don\'t pathologize your choice)',
+        'Prepare responses for social situations where family is assumed',
+        'Allow yourself to grieve fully — this is a major loss',
+        'Be prepared for family members to pressure you to reconcile',
+        'Consider low contact as an option if full estrangement feels too extreme',
+      ],
+      professionalNote: 'Not all therapists understand estrangement as a valid choice. Look for ones who don\'t automatically push reconciliation without understanding your history.'
+    },
+    reflectionQuestions: [
+      'What have you already tried to make this relationship work? What were the results?',
+      'How would your life be different without this person\'s influence?',
+      'What grief would you need to process to make peace with estrangement?',
+    ],
+    relatedLessons: ['hm-rel-narcissistic-parents', 'hm-rel-boundaries-protect', 'hm-trans-grief-all-kinds'],
+  },
+  {
+    id: 'hm-rel-lgbtq-family-rejection',
+    title: 'LGBTQ+ Family Rejection: Surviving Non-Acceptance',
+    category: 'relationships',
+    duration: 10,
+    emoji: '🏳️‍🌈',
+    content: {
+      introduction: `Coming out to family as LGBTQ+ can result in acceptance, rejection, or something complicated in between. For those who face rejection — ranging from subtle withdrawal to explicit disownment — the pain is profound. The people who were supposed to love you unconditionally have made that love conditional on being someone you're not.
+
+The impact of family rejection on LGBTQ+ youth is well-documented and severe. Research shows dramatically increased rates of depression, suicidality, substance abuse, and homelessness among rejected LGBTQ+ young people. But family rejection doesn't only affect youth — adults who come out later also face this pain, sometimes losing decades-long relationships.
+
+Some families need time to adjust. Their initial rejection softens as they process, learn, and adjust their expectations. For these families, patience, education, and continued presence can lead to eventual acceptance. Other families never come around. Knowing which situation you're in — and how long to wait for possible change — is one of the hardest judgments to make.
+
+The concept of "chosen family" becomes essential for many LGBTQ+ people. When biological family fails, community becomes family. The connections formed in LGBTQ+ spaces, with partners, with accepting friends — these relationships can provide the belonging and support that family of origin couldn't give.`,
+      keyInsights: [
+        { 
+          title: 'Conditional vs. unconditional love', 
+          explanation: 'Rejection reveals that family love was conditional on meeting certain expectations. This is a profound wound — the realization that being yourself makes you unacceptable to those who should accept you most.' 
+        },
+        { 
+          title: 'Grief upon grief', 
+          explanation: 'You may grieve the relationship, the family you thought you had, the fantasy of full acceptance, and the future events without family support (weddings, children, milestones). Each loss deserves acknowledgment.' 
+        },
+        { 
+          title: 'Some families evolve, some don\'t', 
+          explanation: 'Initial rejection isn\'t always permanent. Some families need time and exposure to overcome their conditioning. But others remain entrenched. Knowing when to keep trying and when to protect yourself is difficult.' 
+        },
+        { 
+          title: 'Chosen family is real family', 
+          explanation: 'The LGBTQ+ community has a long tradition of chosen family — relationships built on acceptance and mutual support when biological family fails. These bonds can be just as deep and valid.' 
+        },
+        {
+          title: 'Internalized shame requires attention',
+          explanation: 'Family rejection can reinforce internalized homophobia, transphobia, or shame about your identity. Processing these internalized messages is part of healing.'
+        }
+      ],
+      whatHelps: [
+        'Connect with LGBTQ+ community and chosen family',
+        'Organizations like PFLAG can help educate families who are willing to learn',
+        'Therapy with an LGBTQ+-affirming provider',
+        'Set boundaries with family members who are harmful while determining next steps',
+        'Process internalized shame separately from family relationships',
+        'The Trevor Project (866-488-7386) provides crisis support for LGBTQ+ young people',
+      ],
+      warningSign: 'If you\'re a young person facing family rejection and don\'t feel safe, please reach out to The Trevor Project (call, text, or chat) for support.',
+      professionalNote: 'Look for therapists who are LGBTQ+-affirming (check their profiles) and have experience with family rejection and chosen family building.'
+    },
+    reflectionQuestions: [
+      'What has your family\'s response to your identity been? How has it affected you?',
+      'Who in your life accepts you fully? How can you strengthen those connections?',
+      'What messages about your identity did you internalize from your family that may need examining?',
+    ],
+    relatedLessons: ['hm-rel-estrangement', 'hm-rel-gender-identity', 'hm-world-minority-stress'],
+  },
+  {
+    id: 'hm-rel-divorce-impact-adults',
+    title: 'Divorce Impact on Adult Children',
+    category: 'relationships',
+    duration: 8,
+    emoji: '💔',
+    content: {
+      introduction: `We often focus on how divorce affects children, but parents divorcing when you're an adult brings its own pain — pain that's often minimized or ignored. "At least you were grown" misses that your family of origin dissolving shakes your foundation regardless of age. The family you knew no longer exists. The story you told about your childhood is rewritten.
+
+Adult children of divorce face unique challenges. You may be triangulated into parental conflicts, asked to take sides, or treated as a therapist for one or both parents. You may have to navigate holidays, weddings, and family events where your parents can't be in the same room. You may learn things about your parents' marriage that shift your understanding of your entire childhood.
+
+Perhaps hardest is the retroactive questioning. If they were unhappy for decades, what was real? Were the family memories genuine? Were you living in a lie? This destabilization of your history can shake your sense of reality and trust in your own perception of relationships.
+
+Your feelings about your parents' divorce are valid even if you're 25, 35, or 55. Grief doesn't require youth. The loss of the intact family, however imperfect it was, deserves acknowledgment.`,
+      keyInsights: [
+        { 
+          title: 'Age doesn\'t eliminate impact', 
+          explanation: 'Being an adult doesn\'t protect you from grief when your family structure dissolves. The belief that adults are "past" being affected by parental divorce minimizes legitimate pain.' 
+        },
+        { 
+          title: 'Triangulation is common', 
+          explanation: 'Adult children often get pulled into parental conflicts, used as messengers, therapists, or allies. Setting boundaries around these roles is essential but difficult.' 
+        },
+        { 
+          title: 'History gets rewritten', 
+          explanation: 'Learning about infidelity, unhappiness, or deception can retroactively change how you understand your entire childhood. This is disorienting and requires its own processing.' 
+        },
+        { 
+          title: 'Practical complications abound', 
+          explanation: 'Holidays, weddings, grandchildren, family gatherings — all become logistical and emotional minefields when parents can\'t be together. The burden often falls on adult children to manage.' 
+        },
+      ],
+      whatHelps: [
+        'Give yourself permission to grieve, regardless of your age',
+        'Set boundaries: "I won\'t be a messenger" or "I won\'t discuss the other parent"',
+        'Resist taking sides — your relationship with each parent is separate',
+        'Seek your own therapy rather than becoming a parent\'s emotional support',
+        'Find siblings or others who share this experience',
+        'Accept that holidays and events may need new structures',
+      ],
+    },
+    reflectionQuestions: [
+      'How has your parents\' divorce affected your view of relationships and marriage?',
+      'Have you been placed in the middle of their conflicts? How did you handle it?',
+      'What grief about your family\'s dissolution have you not fully allowed yourself to feel?',
+    ],
+    relatedLessons: ['hm-rel-family-wounds', 'hm-rel-boundaries-protect', 'hm-trans-divorce'],
+  },
+  {
+    id: 'hm-rel-blended-families',
+    title: 'Blended Families: Navigating Complex Loyalties',
+    category: 'relationships',
+    duration: 9,
+    emoji: '👨‍👩‍👧‍👦',
+    content: {
+      introduction: `Blended families — families formed by remarriage or partnership when one or both partners have children from previous relationships — are increasingly common and perpetually challenging. The fantasy of seamlessly merging into one happy family rarely matches reality. Real blending involves divided loyalties, resentment, jealousy, competing parenting styles, and the ongoing presence of ex-partners.
+
+For children, a stepparent can feel like an intruder, a replacement for a beloved parent, or a symbol of family upheaval they didn't choose. Resistance to stepparents isn't necessarily defiance — it's often loyalty to the biological parent (even an absent or difficult one) and grief about the original family's dissolution.
+
+For stepparents, the role is uniquely challenging. You're expected to parent children who may not want your parenting, love children who may not love you back, and navigate a co-parenting relationship with someone who may view you as an enemy. The biological parent is caught in the middle, often trying to please everyone and succeeding with no one.
+
+Research shows blended families typically take 5-7 years to feel genuinely integrated. Expecting instant bonding or harmony creates failure. What works is patience, realistic expectations, and allowing relationships to develop naturally rather than forcing them.`,
+      keyInsights: [
+        { 
+          title: 'Loyalty binds are real', 
+          explanation: 'Children often feel that accepting a stepparent means betraying their biological parent. This is especially powerful if the biological parent reinforces this guilt. These binds aren\'t manipulative — they\'re developmentally normal.' 
+        },
+        { 
+          title: 'Stepparents shouldn\'t rush to parent', 
+          explanation: 'Research consistently shows that stepparents who move slowly — acting as "friendly adult" rather than "new parent" — have better outcomes. Discipline should remain with biological parents for a long time.' 
+        },
+        { 
+          title: 'The couple relationship is foundational', 
+          explanation: 'Blended families work better when the couple relationship is strong. This doesn\'t mean prioritizing partner over children, but investing in that bond provides stability for the whole system.' 
+        },
+        { 
+          title: 'Integration takes years, not months', 
+          explanation: 'Family researchers estimate 5-7 years for blended families to feel cohesive. Expecting instant bonding creates unnecessary pressure and disappointment.' 
+        },
+        {
+          title: 'Ex-partner relationships affect everything',
+          explanation: 'High conflict with ex-partners reverberates through the blended family. When possible, reducing this conflict (through boundaries, parallel parenting, or acceptance) benefits everyone.'
+        }
+      ],
+      whatHelps: [
+        'Lower expectations for immediate bonding',
+        'Stepparents: focus on building friendship before authority',
+        'Biological parents: don\'t force children to love your new partner',
+        'Maintain one-on-one time between biological parents and children',
+        'Develop consistent household rules while respecting differences',
+        'Consider family therapy with someone experienced in blended family dynamics',
+      ],
+    },
+    reflectionQuestions: [
+      'If you\'re a stepparent: what expectations about bonding have you had to revise?',
+      'What loyalty conflicts exist in your blended family? How might they be eased?',
+      'What would "success" look like for your blended family — realistically?',
+    ],
+    relatedLessons: ['hm-rel-divorce-impact-adults', 'hm-rel-boundaries-protect', 'hm-rel-difficult-people'],
+  },
+  {
+    id: 'hm-rel-adoption-wounds',
+    title: 'Adoption & Abandonment Wounds: The Primal Experience',
+    category: 'relationships',
+    duration: 10,
+    emoji: '🔗',
+    content: {
+      introduction: `Adoption, regardless of circumstances, begins with a loss. Before any love from adoptive parents, before any positive outcomes, there is the foundational experience of separation from birth parents. Psychologist Nancy Verrier calls this "the primal wound" — a pre-verbal, body-level experience of abandonment that shapes development in ways often invisible but profound.
+
+This doesn't mean adoption is bad or that adoptees are damaged. It means that adoption involves complexity that is often minimized or denied. The cultural narrative of the "chosen child" who should feel grateful can silence the legitimate grief, confusion, and questions about identity and belonging that many adoptees experience.
+
+Adoptees may struggle with issues of identity, belonging, and fear of abandonment throughout life. They may idealize birth parents or feel rage toward them. They may feel guilty for searching for birth family, as if it betrays adoptive parents. They may struggle to trust that people won't leave. These aren't universal experiences, but they're common enough to deserve recognition.
+
+The adoptee experience exists on a spectrum. Some feel deeply secure and have no interest in birth family. Others feel unmoored and desperate to find their origins. Most fall somewhere in between, and their feelings may shift throughout life. All of these experiences are valid.`,
+      keyInsights: [
+        { 
+          title: 'The primal wound is pre-verbal', 
+          explanation: 'Separation from birth mother happens before language, before conscious memory. But the nervous system registers it. This may manifest as deep-seated abandonment fears without clear origin.' 
+        },
+        { 
+          title: 'Gratitude narratives can silence pain', 
+          explanation: '"You\'re so lucky to be adopted" pressures adoptees to perform gratitude while suppressing legitimate grief and questions. Being adopted and having complicated feelings about it aren\'t mutually exclusive.' 
+        },
+        { 
+          title: 'Identity questions are normal', 
+          explanation: 'Who am I? Where do I come from? Why was I placed? These questions don\'t mean adoptive parents failed — they mean the adoptee is grappling with a complex reality.' 
+        },
+        { 
+          title: 'Search doesn\'t mean rejection', 
+          explanation: 'Wanting to know about or meet birth family isn\'t a betrayal of adoptive family. It\'s seeking understanding of one\'s origin. Adoptive parents who support this generally have better relationships with adult adoptees.' 
+        },
+        {
+          title: 'Attachment patterns may be affected',
+          explanation: 'Early separation can affect attachment development. Adoptees may be more prone to anxious or avoidant attachment patterns, particularly if there were multiple placements or early institutional care.'
+        }
+      ],
+      whatHelps: [
+        'Find community with other adoptees who understand without explanation',
+        'Therapy with someone trained in adoption issues and attachment',
+        'Books and resources specifically for adoptees (try "The Primal Wound" by Nancy Verrier)',
+        'Give yourself permission to have complicated feelings about adoption',
+        'If searching for birth family: prepare emotionally for various outcomes',
+        'If you\'re an adoptive parent: make space for your child\'s full experience',
+      ],
+      professionalNote: 'Look for therapists with specific training in adoption issues. Many therapists don\'t understand the complexity and may minimize adoption-related pain.'
+    },
+    reflectionQuestions: [
+      'What messages did you receive about how you should feel about being adopted?',
+      'How has your adoption experience affected your relationships and sense of security?',
+      'What questions about your origins, if any, remain unresolved?',
+    ],
+    relatedLessons: ['hm-rel-attachment-styles', 'hm-rel-family-wounds', 'hm-growth-inner-child'],
+  },
+  {
+    id: 'hm-rel-only-child',
+    title: 'Only Child Dynamics: Unique Patterns',
+    category: 'relationships',
+    duration: 7,
+    emoji: '👤',
+    content: {
+      introduction: `Only children occupy a unique position in family dynamics — no siblings to share parental attention, no peers in the household to socialize with, no buffer between themselves and parental focus. The stereotypes (spoiled, lonely, socially awkward) are largely myths disproven by research. But being an only child does create distinct experiences worth understanding.
+
+Only children often develop advanced verbal skills and comfort with adults from spending more time in adult company. They may be more comfortable with solitude and have rich inner lives. They may also carry the full weight of parental expectations, involvement, and anxiety with no siblings to distribute it among.
+
+The concentrated parental attention can be nurturing or overwhelming — sometimes both. When parents are healthy and attuned, only children often thrive with abundant resources and attention. When parents are anxious, controlling, or have unmet needs, only children have no escape from that intensity and no sibling to reality-check with.
+
+As adults, only children face the prospect of sole responsibility for aging parents — a practical and emotional burden that siblings share. They also navigate adulthood without the sibling relationships that serve as lifelong peers for others. This isn't tragedy — just difference worth acknowledging.`,
+      keyInsights: [
+        { 
+          title: 'Stereotypes aren\'t supported by research', 
+          explanation: 'Studies consistently fail to show that only children are more selfish, lonely, or maladjusted than those with siblings. The "spoiled only child" is a cultural myth more than empirical reality.' 
+        },
+        { 
+          title: 'Parental intensity has no dilution', 
+          explanation: 'All parental attention — positive and negative, nurturing and anxious — focuses on one child. This can mean more resources and support, but also more pressure and enmeshment potential.' 
+        },
+        { 
+          title: 'Comfort with solitude and adults', 
+          explanation: 'Only children often develop comfortable relationships with solitude and with adult conversation. These aren\'t deficits — they\'re adaptations that can serve well in certain contexts.' 
+        },
+        { 
+          title: 'No sibling buffer or reality-check', 
+          explanation: 'In dysfunctional families, siblings can validate each other\'s experience ("yes, that was weird"). Only children must evaluate family dynamics alone, which can be isolating.' 
+        },
+      ],
+      whatHelps: [
+        'Recognize your comfort with solitude as strength, not deficiency',
+        'If parental attention was overwhelming, practice boundary-setting',
+        'Build peer relationships that provide sibling-like support',
+        'Plan early for aging parent care given you\'ll carry it alone',
+        'Challenge internalized stereotypes about only children',
+        'If your family was dysfunctional, seek outside validation of your experience',
+      ],
+    },
+    reflectionQuestions: [
+      'How did being an only child shape your comfort with solitude versus social situations?',
+      'What was the quality of parental attention you received — nurturing, overwhelming, or both?',
+      'How are you preparing for the reality of sole responsibility for aging parents?',
+    ],
+    relatedLessons: ['hm-rel-enmeshment', 'hm-rel-family-wounds', 'hm-rel-boundaries-protect'],
+  },
+  {
+    id: 'hm-rel-eldest-child-parentification',
+    title: 'Eldest Child & Parentification: When Kids Raise Kids',
+    category: 'relationships',
+    duration: 9,
+    emoji: '👑',
+    content: {
+      introduction: `Eldest children often carry burdens invisible to the rest of the family. Expected to be responsible, to model good behavior, to help with younger siblings, to understand when parents are stressed — they learn early that their job is to be dependable. For some, this extends into parentification: taking on caregiving responsibilities that should belong to adults.
+
+Parentification isn't just helping out. It's when a child becomes functionally responsible for the emotional or practical wellbeing of siblings or parents. The parentified child may manage household tasks, care for siblings while parents work or are impaired, mediate parental conflicts, serve as emotional support for a parent, or hold the family together through crisis. They're children doing adult jobs.
+
+The cost comes due later. Parentified children often become hyper-responsible adults who don't know how to let others care for them. They may feel compelled to fix everyone's problems while neglecting their own needs. They may struggle to play, relax, or not be useful. Achievement may feel mandatory rather than optional. Asking for help may feel impossible.
+
+Recovery involves grieving the childhood that was lost to premature responsibility, learning to have needs without shame, and releasing the pattern of over-functioning that felt essential for survival but now limits life.`,
+      keyInsights: [
+        { 
+          title: 'Emotional vs. instrumental parentification', 
+          explanation: 'Instrumental parentification is taking on physical tasks (household management, sibling care). Emotional parentification is becoming a parent\'s confidant, therapist, or emotional support. Both steal childhood; emotional parentification often leaves deeper wounds.' 
+        },
+        { 
+          title: 'It felt normal at the time', 
+          explanation: 'Parentified children often don\'t realize their experience was unusual until adulthood. "I just helped out" minimizes the reality that they were carrying adult weight on child shoulders.' 
+        },
+        { 
+          title: 'Hyper-responsibility persists', 
+          explanation: 'The parentified child becomes an adult who can\'t stop being responsible. Relaxation feels lazy. Having needs feels weak. Not fixing problems feels negligent. The pattern served survival but now creates exhaustion.' 
+        },
+        { 
+          title: 'Receiving care feels foreign', 
+          explanation: 'If you never experienced being cared for, receiving care as an adult can feel uncomfortable, suspicious, or even threatening. Learning to receive is part of healing.' 
+        },
+        {
+          title: 'Grief for lost childhood',
+          explanation: 'You can\'t get those years back. The carefree childhood that others had, the freedom from responsibility, the experience of being taken care of — grieving this loss is essential for moving forward.'
+        }
+      ],
+      whatHelps: [
+        'Name what happened: "I was parentified" is a powerful recognition',
+        'Practice not being useful sometimes — rest isn\'t earned',
+        'Learn to receive care without immediately reciprocating',
+        'Set boundaries with family who still expect over-functioning from you',
+        'Grieve the childhood you deserved but didn\'t get',
+        'Therapy focused on childhood roles and adult patterns',
+      ],
+    },
+    reflectionQuestions: [
+      'What responsibilities did you carry as a child that in retrospect seem too much for your age?',
+      'How does the hyper-responsible pattern show up in your adult life?',
+      'When someone offers to help or care for you, what happens inside?',
+    ],
+    relatedLessons: ['hm-rel-codependency', 'hm-rel-family-wounds', 'hm-growth-reparenting'],
+  },
+  {
+    id: 'hm-rel-middle-child',
+    title: 'Middle Child Invisibility: Finding Your Place',
+    category: 'relationships',
+    duration: 7,
+    emoji: '🙈',
+    content: {
+      introduction: `Middle children exist in a unique structural position: neither the trailblazing eldest nor the babied youngest. Research on "middle child syndrome" is mixed, but the lived experience of many middle children includes feeling overlooked, having to fight harder for attention, and developing particular strengths from that position.
+
+The potential positives: middle children often become skilled negotiators and peacemakers, having spent childhood navigating between older and younger siblings. They may be more independent, having received less direct parental attention. They often develop strong peer relationships to compensate for less family centrality.
+
+The potential challenges: feeling invisible in the family, having to create an identity distinct from siblings, receiving less parental investment (photographs, attention, resources), and the sense that their needs were squeezed out by more demanding siblings.
+
+As adults, middle children may continue patterns from childhood — being the mediator, downplaying their needs, or feeling overlooked in groups. Or they may have developed a strong independent identity precisely because they weren't as closely monitored. The experience varies widely based on family dynamics, gender, and the specific siblings involved.`,
+      keyInsights: [
+        { 
+          title: 'The squeeze is real', 
+          explanation: 'Eldest children get parental attention through novelty and high expectations. Youngest get it through being the baby. Middle children must compete for attention without built-in structural advantages.' 
+        },
+        { 
+          title: 'Peacemaker/negotiator skills', 
+          explanation: 'Many middle children become skilled at reading rooms, mediating conflicts, and seeing multiple perspectives. These are genuine strengths developed from navigating sibling dynamics.' 
+        },
+        { 
+          title: 'Independence through necessity', 
+          explanation: 'Less parental hovering can mean more freedom to self-direct. Middle children often develop independence and self-reliance because no one was watching as closely.' 
+        },
+        { 
+          title: 'Identity carved out, not given', 
+          explanation: 'Unlike eldest or youngest, middle children don\'t have a built-in identity. They often work harder to define who they are distinct from siblings.' 
+        },
+      ],
+      whatHelps: [
+        'Recognize strengths that came from your position (negotiation, independence)',
+        'Notice if you\'re still downplaying your needs in adult relationships',
+        'Practice taking up space — your needs matter even if you learned to minimize them',
+        'Let go of resentment toward siblings for dynamics none of you chose',
+        'Build relationships where you\'re central, not peripheral',
+      ],
+    },
+    reflectionQuestions: [
+      'How visible did you feel in your family compared to your siblings?',
+      'What strengths do you have that might have developed from your middle position?',
+      'Do you still minimize your needs in groups or relationships?',
+    ],
+    relatedLessons: ['hm-rel-sibling-wounds', 'hm-rel-family-wounds', 'hm-rel-boundaries-protect'],
+  },
+  {
+    id: 'hm-rel-youngest-child',
+    title: 'Youngest Child: Forever the Baby',
+    category: 'relationships',
+    duration: 7,
+    emoji: '🍼',
+    content: {
+      introduction: `The youngest child in a family occupies a special position — they're the "baby" who may never quite outgrow that role, regardless of how many decades pass. Parents are often more relaxed by the last child, having learned from previous kids. But the youngest also inherits a permanent identity that can be hard to escape.
+
+The benefits of youngest-child status often include more relaxed parenting, extended childhood in some ways, and multiple older people invested in their wellbeing. Youngest children are often charming, creative, and skilled at getting attention and navigating social dynamics.
+
+The challenges include being taken less seriously, having achievements minimized ("the oldest did it first"), struggling to establish adult identity within the family, and potentially being overprotected or babied well into adulthood. The youngest may also carry grief about the family's "golden age" — they missed the years when siblings were all home, when parents were younger, when the family was more intact.
+
+As adults, youngest children may rebel against the baby role or unconsciously continue it. They may seek partners who take care of them or compensate by becoming fiercely independent. Understanding how birth order shaped you is the first step to choosing whether to continue those patterns.`,
+      keyInsights: [
+        { 
+          title: 'The baby label persists', 
+          explanation: 'Family systems tend to freeze people in their childhood roles. The youngest may be 45 and still treated as the baby who can\'t be trusted with serious matters.' 
+        },
+        { 
+          title: 'Relaxed parenting can mean less attention', 
+          explanation: 'By the youngest child, parents are often less anxious but also may be less invested. Photo albums get sparser. Milestones get less fanfare. This has its own impact.' 
+        },
+        { 
+          title: 'Achievement in shadows', 
+          explanation: 'Whatever the youngest does, older siblings likely did first. This can mean both less pressure and less recognition. Forging a distinct identity may require extra effort.' 
+        },
+        { 
+          title: 'The family\'s golden era was before you', 
+          explanation: 'Youngest children hear stories of "before you were born" — the more complete family, the younger parents, the years of togetherness they missed. This creates a subtle outsider feeling.' 
+        },
+      ],
+      whatHelps: [
+        'Practice being taken seriously — assert adult identity in family contexts',
+        'Notice if you\'re playing "cute" to get needs met instead of asking directly',
+        'Develop competencies that feel distinctly yours, not hand-me-downs',
+        'Resist the urge to rebel against or fully embrace the baby role — find your middle ground',
+        'Address any grief about what you missed before you arrived',
+      ],
+    },
+    reflectionQuestions: [
+      'How does your family still treat you as "the baby"? How does this affect you?',
+      'What unique identity have you carved out distinct from your siblings?',
+      'Do you find yourself wanting to be taken care of, or fiercely resisting that?',
+    ],
+    relatedLessons: ['hm-rel-sibling-wounds', 'hm-rel-family-wounds', 'hm-rel-enmeshment'],
+  },
+  {
+    id: 'hm-rel-addiction-family',
+    title: 'Addiction in the Family: The Whole System Is Sick',
+    category: 'relationships',
+    duration: 10,
+    emoji: '🌀',
+    content: {
+      introduction: `Addiction isn't an individual disease — it's a family disease. When one person is addicted, the entire family system reorganizes around that addiction. Roles shift, communication becomes distorted, emotions get suppressed or amplified, and everyone develops survival strategies that may not serve them outside the addicted system.
+
+Family systems theory identifies common roles in addicted families: the Hero (often the eldest, who achieves to provide good news), the Scapegoat (who acts out and draws attention away from addiction), the Lost Child (who disappears and asks for nothing), the Mascot (who uses humor to defuse tension), and the Enabler (who protects the addict from consequences). These roles serve the dysfunctional system but create lasting patterns.
+
+Growing up in an addicted family teaches you unreliable lessons: that promises can't be trusted, that feelings must be managed or hidden, that crises are normal, that you're responsible for others' behavior. You may have learned hypervigilance, emotional numbing, people-pleasing, or your own addictive patterns. These adaptations made sense then; they may create problems now.
+
+Recovery from family addiction isn't just about the addicted person getting sober. It's about the entire family learning healthier patterns — which is why Al-Anon, Adult Children of Alcoholics, and family therapy exist. The family members need recovery too.`,
+      keyInsights: [
+        { 
+          title: 'Addiction reorganizes the family', 
+          explanation: 'The addicted person becomes the center around which everything revolves — schedules, finances, emotions, decisions. Even when trying to ignore the addiction, the family is shaped by it.' 
+        },
+        { 
+          title: 'Roles persist into adulthood', 
+          explanation: 'The role you played in your addicted family (hero, scapegoat, lost child, mascot, enabler) often continues in adult relationships and workplaces. These patterns feel natural because they\'re familiar.' 
+        },
+        { 
+          title: 'Broken trust is foundational', 
+          explanation: 'Addicts make and break promises constantly. Growing up with this teaches that people can\'t be trusted, that words don\'t match actions. This affects all future relationships.' 
+        },
+        { 
+          title: 'You may carry addiction risk', 
+          explanation: 'Both genetics and learned coping patterns increase addiction risk in children of addicts. Being aware of this isn\'t fatalistic — it\'s protective.' 
+        },
+        {
+          title: 'The whole family needs recovery',
+          explanation: 'Even if the addicted person gets sober (or doesn\'t), family members have their own recovery work. Al-Anon, ACA (Adult Children of Alcoholics), and therapy address the family members\' patterns.'
+        }
+      ],
+      whatHelps: [
+        'Al-Anon or ACA (Adult Children of Alcoholics/Dysfunctional Families) meetings',
+        'Therapy focused on family-of-origin issues and codependency',
+        'Identify what role you played in the addicted system',
+        'Learn what normal, healthy family functioning looks like',
+        'Set boundaries with actively addicted family members',
+        'Watch your own relationship with substances or addictive behaviors',
+      ],
+      professionalNote: 'Al-Anon is for family members of alcoholics (current or past, living or dead). ACA is specifically for adults who grew up in addicted or dysfunctional families. Both are free and widely available.'
+    },
+    reflectionQuestions: [
+      'What role did you play in your addicted family system? Does that role continue?',
+      'What did you learn about trust, emotions, and stability from your family?',
+      'How has your family member\'s addiction affected your own relationship with substances?',
+    ],
+    relatedLessons: ['hm-rel-codependency', 'hm-rel-family-wounds', 'hm-mh-addiction-spectrum'],
+  },
+  {
+    id: 'hm-rel-mentally-ill-parent',
+    title: 'Growing Up with a Mentally Ill Parent',
+    category: 'relationships',
+    duration: 10,
+    emoji: '🎭',
+    content: {
+      introduction: `Growing up with a parent who has mental illness — depression, bipolar disorder, schizophrenia, severe anxiety, personality disorders — creates a childhood marked by unpredictability and often by role reversal. You may have been caring for your parent rather than being cared for. You may have grown up fast, learned to read moods hypervigilantly, and developed survival skills that now feel like personality traits.
+
+The impact depends on many factors: which illness, how severe, whether treated, whether the other parent was present and stable, and whether anyone explained what was happening. Children often don't have words for what they're experiencing — they just know that their parent is different, unavailable, frightening, or that they must walk on eggshells.
+
+Without explanation, children often blame themselves. "If I were a better kid, mom wouldn't be sad." They may also develop a distorted sense of what's normal: if your parent had paranoid delusions, you may have normalized suspiciousness; if they were severely depressed, you may have normalized emotional unavailability. These calibrations need recalibrating.
+
+Compassion for your parent and acknowledgment of your own wounds can coexist. Mental illness isn't a parent's fault, but its impact on you wasn't your fault either. Both are true.`,
+      keyInsights: [
+        { 
+          title: 'Children become caretakers', 
+          explanation: 'When a parent is impaired, children often step into caregiving roles — emotional support, practical management, monitoring for crisis. This parentification has lasting effects.' 
+        },
+        { 
+          title: 'Hypervigilance as adaptation', 
+          explanation: 'Reading moods, predicting episodes, scanning for signs of decompensation — these become automatic when your safety depends on your parent\'s mental state.' 
+        },
+        { 
+          title: 'Self-blame is common', 
+          explanation: 'Children naturally center themselves. Without adult explanation, they often conclude they caused or should be able to fix their parent\'s illness.' 
+        },
+        { 
+          title: 'Your risk and your choices', 
+          explanation: 'Many mental illnesses have genetic components. This isn\'t determinism — it\'s information. Knowing your family history supports your own mental health management.' 
+        },
+        {
+          title: 'Grief for what you didn\'t get',
+          explanation: 'Your parent may have loved you deeply but been unable to be fully present due to their illness. Grieving the parent you needed while understanding why they couldn\'t be that is complex healing work.'
+        }
+      ],
+      whatHelps: [
+        'Learn about your parent\'s illness — understanding reduces confusion and self-blame',
+        'Recognize that their illness wasn\'t your fault and wasn\'t yours to fix',
+        'Identify caregiving patterns that may persist in adult relationships',
+        'NAMI (National Alliance on Mental Illness) has family support groups and education',
+        'Monitor your own mental health given genetic and environmental factors',
+        'Therapy to process childhood experience and current impacts',
+      ],
+      professionalNote: 'NAMI Family-to-Family is a free educational program for families of people with mental illness. Support groups specifically for adult children of mentally ill parents exist in some areas.'
+    },
+    reflectionQuestions: [
+      'What did you understand about your parent\'s mental illness as a child? What do you understand now?',
+      'How did you adapt to your parent\'s condition? Do those adaptations persist?',
+      'What would you need to grieve about your childhood to feel more complete?',
+    ],
+    relatedLessons: ['hm-rel-family-wounds', 'hm-rel-eldest-child-parentification', 'hm-mh-depression-truth'],
+  },
+  {
+    id: 'hm-rel-emotionally-immature-parents',
+    title: 'Emotionally Immature Parents: Adults Who Never Grew Up',
+    category: 'relationships',
+    duration: 9,
+    emoji: '🧸',
+    content: {
+      introduction: `Psychologist Lindsay Gibson's concept of "emotionally immature parents" describes adults who, regardless of biological age, never developed the emotional capacities necessary for healthy parenting. They may be self-involved, rigid, unpredictable, or simply emotionally absent — unable to attune to their children's inner worlds because they never developed that capacity in themselves.
+
+Emotionally immature parents come in different flavors: the emotional parent (reactive, unstable, self-centered), the driven parent (perfectionistic, controlling, focused on achievement over connection), the passive parent (disengaged, uninvolved, defers to the other parent), and the rejecting parent (dismissive, hostile, contemptuous). What they share is an inability to see their children as separate people with valid inner experiences.
+
+Children of emotionally immature parents often develop into what Gibson calls "internalizers" — people who blame themselves for relationship problems, try to please others at their own expense, and struggle to identify and assert their own needs. They learned early that their role was to accommodate the parent, not the reverse.
+
+The term "emotionally immature" can feel kinder than "narcissistic" or "abusive" while still capturing real harm. These parents may have loved their children genuinely while being constitutionally unable to provide the emotional attunement children need. Naming this helps adult children understand their experience without requiring the parent to be a villain.`,
+      keyInsights: [
+        { 
+          title: 'Emotional immaturity isn\'t about intelligence', 
+          explanation: 'These parents may be successful, intelligent adults who simply lack emotional development. Emotional intelligence is a separate capacity that some adults never develop.' 
+        },
+        { 
+          title: 'You weren\'t seen', 
+          explanation: 'Emotionally immature parents can\'t truly see their children as separate people with valid inner worlds. Your job was to orbit them, not to be yourself.' 
+        },
+        { 
+          title: 'Healing loneliness', 
+          explanation: 'Children of emotionally immature parents often experienced profound emotional loneliness even in the midst of family. No one was genuinely interested in their inner experience.' 
+        },
+        { 
+          title: 'The internalizer pattern', 
+          explanation: 'You may have become highly attuned to others\' emotions while disconnected from your own. You blame yourself for relationship problems and work hard to please while neglecting yourself.' 
+        },
+        {
+          title: 'You can still love them',
+          explanation: 'Understanding your parent\'s limitations doesn\'t require hating them. You can love an emotionally immature parent while also protecting yourself from ongoing harm.'
+        }
+      ],
+      whatHelps: [
+        'Read "Adult Children of Emotionally Immature Parents" by Lindsay Gibson',
+        'Learn to identify your own emotions and needs — they were suppressed early',
+        'Practice "maturity awareness" — recognize emotional immaturity in others to calibrate expectations',
+        'Reduce emotional investment in getting what the parent can\'t give',
+        'Build relationships with emotionally mature people who can model attunement',
+        'Therapy focused on recovering authentic self beneath accommodations',
+      ],
+    },
+    reflectionQuestions: [
+      'Which type of emotionally immature parent resonates most with your experience?',
+      'When you were upset as a child, how did your parents respond? Did you feel seen?',
+      'What parts of yourself did you suppress to accommodate your parents\' limitations?',
+    ],
+    relatedLessons: ['hm-rel-narcissistic-parents', 'hm-rel-family-wounds', 'hm-growth-reparenting'],
+  },
+  {
+    id: 'hm-rel-cultural-religious-pressure',
+    title: 'Cultural & Religious Family Pressure: Self vs. Duty',
+    category: 'relationships',
+    duration: 9,
+    emoji: '🙏',
+    content: {
+      introduction: `For many people, family identity is inseparable from cultural or religious identity. Your family's expectations aren't just personal preferences — they're tied to generations of tradition, community belonging, and deeply held beliefs about right and wrong. Navigating between your authentic self and these expectations is one of the most complex challenges humans face.
+
+The pressure manifests in many areas: who you can marry (same culture/religion), career expectations (certain professions bring honor, others shame), gender roles (how a "proper" daughter or son behaves), religious practice (attending services, observing traditions), and life choices (when to marry, whether to have children). Deviation doesn't just disappoint your family — it threatens their standing in community and their sense of successful parenting.
+
+The bind is real: rejecting family expectations can mean losing community, disappointing people you love, and grieving the belonging you'd have if you fit. But suppressing yourself to meet expectations means living inauthentically, building resentment, and potentially passing the same pressures to your own children.
+
+There's no easy answer. Some people find ways to honor cultural roots while carving out space for authentic expression. Others must choose, grieving what they lose either way. What helps is recognizing this as a genuine dilemma, not a simple matter of "just be yourself" or "respect your elders."`,
+      keyInsights: [
+        { 
+          title: 'Expectations are tied to survival', 
+          explanation: 'In many cultures, family expectations aren\'t arbitrary preferences — they evolved to ensure survival, community cohesion, and intergenerational continuity. This doesn\'t make them right for you, but it contextualizes their intensity.' 
+        },
+        { 
+          title: 'Shame is the enforcement mechanism', 
+          explanation: 'Collectivist cultures often use shame — not just guilt — to maintain conformity. You don\'t just feel bad for disappointing family; you feel you ARE bad. Disentangling identity from family approval is core work.' 
+        },
+        { 
+          title: 'Immigration compounds complexity', 
+          explanation: 'If your parents immigrated, they may hold tighter to traditions as identity anchors in a foreign land. Your assimilation can feel like betrayal of their sacrifices.' 
+        },
+        { 
+          title: 'Religion adds supernatural weight', 
+          explanation: 'When expectations are framed as God\'s will, rejection feels like not just family disappointment but cosmic wrongness. Leaving or modifying religious practice often involves existential grief.' 
+        },
+        {
+          title: 'The third way',
+          explanation: 'It\'s not always all-or-nothing. Some people find ways to maintain meaningful cultural/religious connection while creating space for authenticity. This requires negotiation, not total compliance or rejection.'
+        }
+      ],
+      whatHelps: [
+        'Disentangle what you value from what was imposed — what do YOU actually believe?',
+        'Find community with others navigating the same cultural tensions',
+        'Therapy with a culturally competent provider who understands your specific context',
+        'Determine which expectations are negotiable and which are non-negotiable for your family',
+        'Mourn what you\'ll lose either way — full belonging or authentic self-expression',
+        'Consider how to maintain connection to heritage while making your own choices',
+      ],
+      professionalNote: 'Look for therapists with specific cultural competence in your background. Generic Western therapy may not understand the weight of collectivist family dynamics.'
+    },
+    reflectionQuestions: [
+      'Which family/cultural expectations are most difficult for you to meet or reject?',
+      'What would you lose if you fully followed your own path? What do you lose by not following it?',
+      'Is there a "third way" that honors your heritage and your authenticity?',
+    ],
+    relatedLessons: ['hm-rel-enmeshment', 'hm-rel-lgbtq-family-rejection', 'hm-trans-identity-shifts'],
+  },
+  {
+    id: 'hm-rel-intercultural-relationships',
+    title: 'Interracial & Intercultural Relationships: Navigating Differences',
+    category: 'relationships',
+    duration: 9,
+    emoji: '🌍',
+    content: {
+      introduction: `Love doesn't care about cultural lines — but families, communities, and society often do. Interracial and intercultural relationships involve navigating not just two individuals but two sets of cultural expectations, potential family disapproval, and social dynamics that monocultural couples never face.
+
+Cultural differences show up everywhere: communication styles (direct vs. indirect), family involvement (nuclear vs. extended family centrality), gender role expectations, attitudes toward money, parenting approaches, religious practices, food, holidays, and countless daily negotiations. What feels normal to one partner may feel foreign to the other. Neither is wrong — they're just different.
+
+Beyond internal differences, couples often face external challenges: family members who oppose the relationship, microaggressions from strangers, having to navigate each other's cultural contexts as an outsider, and for interracial couples, having children whose racial identity requires thoughtful navigation.
+
+Successful intercultural relationships require curiosity over judgment, ongoing communication about cultural differences, willingness to create a new shared culture rather than one partner assimilating entirely, and strategies for handling external opposition. The work is real — but so are the rewards of building a bridge between worlds.`,
+      keyInsights: [
+        { 
+          title: 'Communication styles differ culturally', 
+          explanation: 'What counts as polite, how direct to be, what\'s said explicitly vs. implied, emotional expression norms — all differ by culture. Misunderstandings often aren\'t personal; they\'re cultural.' 
+        },
+        { 
+          title: 'Family involvement expectations vary', 
+          explanation: 'Some cultures emphasize nuclear family independence; others expect extended family involvement in major decisions. Clashing expectations here cause significant conflict.' 
+        },
+        { 
+          title: 'Neither culture is "default"', 
+          explanation: 'Problems arise when one partner\'s cultural norms are treated as normal and the other\'s as exotic or wrong. Both cultures are equally valid frameworks for living.' 
+        },
+        { 
+          title: 'Children bring new questions', 
+          explanation: 'Raising children across cultures requires deciding which traditions to pass on, how to handle racial identity (for interracial families), and how to make children feel whole rather than caught between worlds.' 
+        },
+        {
+          title: 'External opposition is real',
+          explanation: 'Not everyone will support your relationship. Strategies for handling family disapproval, social judgment, and microaggressions should be part of the couple\'s toolkit.'
+        }
+      ],
+      whatHelps: [
+        'Approach differences with curiosity rather than judgment',
+        'Learn about each other\'s cultures deeply, not superficially',
+        'Discuss how to handle family opposition as a team',
+        'Create your own "third culture" that blends elements from both',
+        'For raising children: actively cultivate connection to both heritages',
+        'Develop responses to microaggressions and opposition you\'ll face together',
+      ],
+    },
+    reflectionQuestions: [
+      'What cultural differences between you and your partner require ongoing negotiation?',
+      'How do you handle family or social opposition to your relationship?',
+      'What "third culture" are you creating together, blending your backgrounds?',
+    ],
+    relatedLessons: ['hm-rel-cultural-religious-pressure', 'hm-rel-family-dislikes-partner', 'hm-world-minority-stress'],
+  },
+  {
+    id: 'hm-rel-family-dislikes-partner',
+    title: 'When Your Family Doesn\'t Like Your Partner',
+    category: 'relationships',
+    duration: 8,
+    emoji: '😬',
+    content: {
+      introduction: `Few situations are more uncomfortable than realizing your family dislikes your partner. Family gatherings become minefields. You feel caught between people you love. You may start wondering if your family sees something you don't — or resenting them for not supporting your choice. This is genuinely hard, and there's no simple answer.
+
+First, assess whether the concern has merit. Sometimes families see red flags love is blinding you to. If multiple people who love you have reservations, at least consider why. Are there concerning patterns they're noticing? Substance use? Controlling behavior? Fundamental incompatibility you're minimizing? Families aren't always right, but they're not always wrong either.
+
+Sometimes the issue isn't the partner but the family. Families with enmeshment issues may reject anyone who isn't sufficiently deferential. Families with control dynamics may oppose any partner who threatens their influence over you. And families with explicit or implicit biases (racial, religious, class-based) may reject partners who don't fit their picture of acceptable.
+
+The goal isn't necessarily getting your family to love your partner or ditching the partner to please your family. It's understanding the actual dynamics at play and making conscious choices about how to navigate them.`,
+      keyInsights: [
+        { 
+          title: 'Consider the feedback', 
+          explanation: 'When multiple people who love you have concerns about your relationship, it\'s worth examining why. This doesn\'t mean they\'re right — but reflexively dismissing all feedback isn\'t wise either.' 
+        },
+        { 
+          title: 'The problem might be the family', 
+          explanation: 'Some families oppose any partner because of their own dysfunction: enmeshment, control, bias. If the concern is "they\'re taking you away from us," that\'s about the family, not the partner.' 
+        },
+        { 
+          title: 'Your partner is your choice', 
+          explanation: 'Ultimately, who you partner with is your decision. You can listen to family input while still making your own choice. They don\'t have to approve; they have to be respectful.' 
+        },
+        { 
+          title: 'Set expectations, not ultimatums', 
+          explanation: 'You can require your family to be civil without requiring them to be enthusiastic. "You don\'t have to like them, but you do have to be respectful" is a reasonable standard.' 
+        },
+      ],
+      whatHelps: [
+        'Honestly evaluate: could the concerns have merit? What would your best friend say?',
+        'Identify what specifically bothers your family — articulated reasons can be addressed',
+        'Determine if the issue is partner-specific or if they\'d reject anyone',
+        'Set clear expectations: respect is required, enthusiasm is preferred but optional',
+        'Don\'t triangulate — don\'t vent about your partner to family or vice versa',
+        'Accept that some families will never come around, and that\'s not your failure',
+      ],
+    },
+    reflectionQuestions: [
+      'What specifically does your family object to about your partner?',
+      'Is there any validity to their concerns? What would an objective observer say?',
+      'What would your family need to see to accept your partner — and is that reasonable to ask of your partner?',
+    ],
+    relatedLessons: ['hm-rel-enmeshment', 'hm-rel-intercultural-relationships', 'hm-rel-boundaries-protect'],
+  },
+  {
+    id: 'hm-rel-toxic-family-holidays',
+    title: 'Surviving Toxic Family Gatherings',
+    category: 'relationships',
+    duration: 7,
+    emoji: '🎄',
+    content: {
+      introduction: `For people from difficult families, holidays and family gatherings aren't joyful reunions — they're emotional endurance tests. The pressure to perform family harmony, the regression to childhood dynamics, the proximity to people who harm you, the impossible expectations — it's no wonder so many people dread what's supposed to be "the happiest time of year."
+
+The first step is releasing the fantasy. If your family has never been functional during gatherings, this year won't magically be different. Hoping for warmth when history predicts conflict only sets you up for disappointment. Managing expectations isn't pessimism — it's protection.
+
+You have more options than you might realize. You can limit the duration of visits. You can stay in a hotel instead of the family home. You can decide which gatherings to attend and which to skip. You can bring a supportive partner or friend as buffer. You can plan self-care before, during, and after. You can, if necessary, create your own traditions with people who actually feel like family.
+
+The guilt will likely come. "But it's family." "But it's Christmas." The guilt is part of the dysfunction, not evidence that you're wrong. Protecting yourself from predictable harm isn't betrayal — it's survival.`,
+      keyInsights: [
+        { 
+          title: 'Holidays amplify existing dynamics', 
+          explanation: 'Whatever issues exist in your family get intensified by holiday pressure, alcohol, close quarters, and expectations of forced joy. If gatherings are hard, holidays are harder.' 
+        },
+        { 
+          title: 'You regress', 
+          explanation: 'Family systems pull you back into old roles. The boundaries you\'ve built as an adult can dissolve when you\'re back at your childhood table. This regression is normal — and you can prepare for it.' 
+        },
+        { 
+          title: 'Obligation isn\'t the same as desire', 
+          explanation: 'Attending because you "have to" breeds resentment. If you go, make it a conscious choice with clear self-protection strategies. If attending causes significant harm, you can choose not to.' 
+        },
+        { 
+          title: 'You can create new traditions', 
+          explanation: 'Chosen family, solo time, volunteering, traveling — there are many ways to spend holidays that don\'t involve subjecting yourself to dysfunction.' 
+        },
+      ],
+      whatHelps: [
+        'Lower expectations: don\'t hope this time will be different if history says otherwise',
+        'Plan logistics that give you control: your own transportation, hotel option, set departure time',
+        'Identify a support person to debrief with during or after',
+        'Prepare responses for predictable difficult conversations or comments',
+        'Have a self-care plan: walks, breaks, early bedtime, whatever helps you regulate',
+        'Give yourself permission to skip, limit, or modify participation',
+      ],
+    },
+    reflectionQuestions: [
+      'What makes family gatherings difficult for you specifically?',
+      'What boundaries or logistics could make gatherings more bearable?',
+      'If you could redesign holidays to actually suit you, what would that look like?',
+    ],
+    relatedLessons: ['hm-rel-difficult-people', 'hm-rel-boundaries-protect', 'hm-rel-enmeshment'],
+  },
+  {
+    id: 'hm-rel-reproductive-coercion',
+    title: 'Family Pressure About Children: To Have or Not Have',
+    category: 'relationships',
+    duration: 8,
+    emoji: '👶',
+    content: {
+      introduction: `"When are you having kids?" may be the most invasive question people ask casually, as if it's their business. For people who are childfree by choice, struggling with infertility, not financially or emotionally ready, or ambivalent, this pressure from family and society is exhausting. Your reproductive choices are yours — but family often doesn't see it that way.
+
+Childfree people face persistent assumptions that they'll change their minds, that they're selfish, or that their lives are incomplete. This dismissal of a legitimate life choice reflects pronatalist cultural bias more than reality. Research shows childfree people are no less happy than parents — often happier, by some measures.
+
+For those struggling with infertility, family pressure adds injury to injury. The questions remind you of painful reality. The suggestions ("just relax," "have you tried...") minimize the complexity. The assumption that of course you want children forces you to either disclose private medical struggles or absorb assumptions about your choices.
+
+Setting boundaries about reproductive topics is challenging when family feels entitled to weigh in. But your reproductive life — whether you have children, when, how many, through what means — is fundamentally not their decision.`,
+      keyInsights: [
+        { 
+          title: 'Reproductive choices are personal', 
+          explanation: 'Who has children and how many is not a family decision, a cultural obligation, or open for debate. It\'s a deeply personal choice belonging to the individuals involved.' 
+        },
+        { 
+          title: 'Childfree is a valid choice', 
+          explanation: 'Not wanting children isn\'t a phase, selfishness, or something you\'ll regret. It\'s one legitimate way to live. Studies show childfree people aren\'t less fulfilled than parents.' 
+        },
+        { 
+          title: 'Pressure compounds struggle', 
+          explanation: 'For those facing infertility, loss, or ambivalence, family pressure doesn\'t motivate — it wounds. Every "when are you having kids?" is a reminder of something painful.' 
+        },
+        { 
+          title: 'Boundaries may require firmness', 
+          explanation: 'Because family often feels entitled to this information, polite deflection may not work. Firm boundaries ("I won\'t discuss this topic") may be necessary.' 
+        },
+      ],
+      whatHelps: [
+        'Prepare responses: "We won\'t be discussing that" or a subject change',
+        'Decide how much to share — you don\'t owe anyone your medical history',
+        'Find community: childfree groups or infertility support as relevant',
+        'Challenge internalized pronatalist messaging — one life path isn\'t superior',
+        'Recognize when family pressure crosses into coercion and name it',
+        'Therapy can help process ambivalence, grief, or external pressure',
+      ],
+    },
+    reflectionQuestions: [
+      'What pressure do you feel from family about children? How does it affect you?',
+      'What do YOU actually want, separate from family/social expectations?',
+      'What boundaries do you need to set to protect yourself around this topic?',
+    ],
+    relatedLessons: ['hm-rel-boundaries-protect', 'hm-rel-cultural-religious-pressure', 'hm-trans-identity-shifts'],
+  },
 ];
 
 // ============================================================================
