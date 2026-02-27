@@ -22,7 +22,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { ManualSearch } from '../../src/components/ManualSearch';
-import { SuggestedLessons } from '../../src/components/SuggestedLessons';
 import { useEducationStore } from '../../src/stores/educationStore';
 import {
   MANUAL_SECTIONS,
