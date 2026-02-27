@@ -14,11 +14,9 @@ import type {
   LessonInsight,
   DiscoveryInsight,
   PersonologyInsight,
-  OperatingSnapshotInsight,
   GaugeReading,
 } from '../services/shareInsight';
 import type { GaugeKey } from '../stores/cockpitStore';
-import OperatingSnapshotCard from './OperatingSnapshotCard';
 
 // ============================================
 // Props
@@ -79,8 +77,6 @@ export default function ShareInsightCard({ insight, compact = false }: Props) {
       return <DiscoveryCard insight={insight} compact={compact} />;
     case 'personology':
       return <PersonologyCard insight={insight} compact={compact} />;
-    case 'operating-snapshot':
-      return <OperatingSnapshotCard insight={insight} compact={compact} />;
     default:
       return null;
   }
