@@ -24,8 +24,7 @@ import { useWeatherStore } from '../../src/stores/weatherStore';
 import { useHealthStore } from '../../src/stores/healthStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { getEnvironmentContext, getMoonPhase, getTimeContext } from '../../src/services/environment';
-import { analyzePatterns, analyzeDirectionCorrelations, formatConfidence, type NarrativePattern, type PatternAnalysis, type DirectionInsights } from '../../src/services/patternEngine';
-import PurposeThroughPattern from '../../src/components/PurposeThroughPattern';
+import { analyzePatterns, formatConfidence, type NarrativePattern, type PatternAnalysis } from '../../src/services/patternEngine';
 import { usePatternReadiness } from '../../src/hooks/usePatternReadiness';
 import { PatternsBuildingState } from '../../src/components/PatternsBuildingState';
 

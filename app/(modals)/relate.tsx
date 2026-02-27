@@ -29,7 +29,6 @@ import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
-import { PreConversationButton } from '../../src/components/PreConversationButton';
 import { COLORS, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 
 // Enable LayoutAnimation on Android
