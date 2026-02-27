@@ -1602,6 +1602,775 @@ The counterintuitive solution: let the thoughts come without fighting them. Noti
     ],
     relatedLessons: ['hm-mh-anxiety-types', 'hm-growth-self-compassion'],
   },
+  {
+    id: 'hm-mh-ptsd-vs-cptsd',
+    title: 'PTSD vs Complex PTSD: Different Wounds, Different Healing',
+    category: 'mental-health',
+    duration: 10,
+    emoji: '🌊',
+    content: {
+      introduction: `Post-Traumatic Stress Disorder (PTSD) and Complex PTSD (C-PTSD) both emerge from trauma, but they're different conditions requiring different approaches. Understanding which you're dealing with matters because the wrong treatment can be ineffective or even harmful.
+
+PTSD typically develops from single-incident traumas: accidents, assaults, disasters, combat events — experiences that were overwhelming but had clear beginnings and endings. The hallmarks are intrusive re-experiencing (flashbacks, nightmares), avoidance of reminders, hypervigilance, and negative changes in mood and cognition. The treatment is well-established: trauma-focused therapies like EMDR and Prolonged Exposure that help process the specific traumatic memory.
+
+Complex PTSD, recognized by the WHO's ICD-11, develops from prolonged, repeated trauma — typically during childhood, in captivity, or in situations where escape wasn't possible. It includes everything in PTSD plus three additional features: difficulties regulating emotions, persistent negative self-concept ("I'm fundamentally damaged"), and disturbances in relationships. C-PTSD shapes who you believe you are and how you relate to others at a foundational level.
+
+The distinction matters because C-PTSD requires more than processing memories. It requires rebuilding a sense of self, learning emotional regulation skills that weren't developed in childhood, and slowly creating new templates for safe connection. This is longer, deeper work — often measured in years rather than months.`,
+      keyInsights: [
+        { 
+          title: 'PTSD: an event that overwhelmed you', 
+          explanation: 'PTSD forms around specific traumatic events. The memory got stuck and keeps intruding. Treatment focuses on processing that memory until it becomes a regular memory instead of a live wound.' 
+        },
+        { 
+          title: 'C-PTSD: an environment that shaped you', 
+          explanation: 'C-PTSD comes from chronic, inescapable trauma — often in childhood. It\'s not just a stuck memory; it\'s a stuck sense of self. You internalized that the world is dangerous and you are broken.' 
+        },
+        { 
+          title: 'The three additions in C-PTSD', 
+          explanation: 'Emotional dysregulation (intense, hard-to-control emotions), negative self-concept (deep shame, feeling fundamentally defective), and relationship difficulties (trouble trusting, patterns of unhealthy relationships).' 
+        },
+        { 
+          title: 'Different treatment needs', 
+          explanation: 'PTSD can often be treated in 12-16 sessions of trauma-focused therapy. C-PTSD usually requires phased treatment: stabilization first, then trauma processing, then integration. Jumping to trauma processing too fast can destabilize.' 
+        },
+        {
+          title: 'You can have both',
+          explanation: 'Someone with C-PTSD might also have PTSD from a specific event layered on top. Treatment needs to address both the developmental trauma and the specific incident.'
+        }
+      ],
+      whatHelps: [
+        'Get proper assessment — which kind of trauma response are you dealing with?',
+        'For PTSD: evidence-based trauma therapies (EMDR, CPT, PE)',
+        'For C-PTSD: phased treatment starting with safety and stabilization',
+        'Learn emotional regulation skills before diving into trauma processing',
+        'Work with a therapist trained in complex trauma (look for training in IFS, NARM, or similar)',
+        'Be patient — C-PTSD took years to develop and takes time to heal',
+      ],
+      warningSign: 'If you\'re experiencing severe dissociation, self-harm urges, or suicidal thoughts, please prioritize safety and reach out to a crisis line or mental health professional before beginning trauma processing.',
+      professionalNote: 'Judith Herman\'s book "Trauma and Recovery" is foundational reading on C-PTSD. Look for therapists trained in complex trauma who understand phased treatment — not all trauma therapists specialize in this.'
+    },
+    reflectionQuestions: [
+      'Is your trauma more like a specific event that overwhelmed you, or an environment that shaped who you are?',
+      'Do you struggle with emotional regulation, negative self-image, and relationship patterns in addition to trauma symptoms?',
+      'What phase of healing do you think you\'re in — still needing stabilization, or ready to process?',
+    ],
+    relatedLessons: ['hm-mh-trauma-basics', 'hm-mh-dissociation', 'hm-mh-developmental-trauma'],
+  },
+  {
+    id: 'hm-mh-childhood-emotional-neglect',
+    title: 'Childhood Emotional Neglect: The Invisible Wound',
+    category: 'mental-health',
+    duration: 9,
+    emoji: '👻',
+    content: {
+      introduction: `Childhood Emotional Neglect (CEN) is what didn't happen. Not abuse — absence. Not violence — void. It's growing up with parents who failed to notice, respond to, or validate your emotional experience. They might have been loving in other ways. They might have provided everything material. But your emotions were consistently unwitnessed, dismissed, or simply not seen.
+
+CEN is particularly insidious because there's nothing to point to. No bruises, no obvious dysfunction, often no intention to harm. Your parents might have done their best — and still left you emotionally alone. This makes it hard to recognize: "My childhood was fine, so why do I feel this way?" The answer is that something crucial was missing, not that something was added.
+
+The effects are profound. As Dr. Jonice Webb's research shows, CEN adults often feel empty, disconnected, self-blaming, and fundamentally different from others. They struggle to identify and express emotions, have difficulty with self-care and self-compassion, and often feel like something is wrong with them without knowing what. They learned their emotions don't matter — so they stopped trusting them.
+
+The healing path involves learning what was supposed to happen: that emotions are valid information, that your needs matter, that you deserve attunement. This is essentially reparenting yourself — giving your emotional self what it never received. It's learnable, but it takes time to rewire what decades of neglect installed.`,
+      keyInsights: [
+        { 
+          title: 'Absence is hard to see', 
+          explanation: 'You can\'t remember what didn\'t happen. This is why CEN survivors often say "my childhood was fine" while carrying deep wounds. The absence of attunement leaves no explicit memory, just a persistent sense of something missing.' 
+        },
+        { 
+          title: 'Well-meaning parents can still neglect', 
+          explanation: 'CEN often isn\'t intentional. Parents may have been dealing with their own issues, working long hours, emotionally unavailable due to their own wounds. Understanding this doesn\'t erase your wound — it just explains it.' 
+        },
+        { 
+          title: 'You learned emotions don\'t matter', 
+          explanation: 'When your emotions were consistently unnoticed, you internalized that they\'re not important. This leads to alexithymia (difficulty identifying emotions), ignoring your own needs, and poor self-care.' 
+        },
+        { 
+          title: 'The fatal flaw feeling', 
+          explanation: 'CEN often creates a persistent sense that something is fundamentally wrong with you — without being able to name what. This vague brokenness is actually the absence of emotional validation leaving its mark.' 
+        },
+      ],
+      whatHelps: [
+        'Recognize it: naming CEN is often the first breakthrough',
+        'Learn to identify emotions — start with basic feeling wheels and body sensations',
+        'Practice self-compassion — treat yourself as you would a dear friend',
+        'Ask "what do I need?" regularly and actually respond',
+        'Seek out attuned relationships — experiences of being seen and validated',
+        'Read "Running on Empty" by Jonice Webb for deep understanding',
+      ],
+      professionalNote: 'Therapists trained in attachment, emotion-focused work, or reparenting approaches can help heal CEN. The therapy relationship itself becomes a corrective emotional experience.'
+    },
+    reflectionQuestions: [
+      'When you were upset as a child, what happened? Were your emotions noticed, validated, helped?',
+      'Do you struggle to know what you\'re feeling or what you need?',
+      'Do you carry a sense that something is wrong with you, without being able to name what?',
+    ],
+    relatedLessons: ['hm-rel-family-wounds', 'hm-growth-reparenting', 'hm-mh-developmental-trauma'],
+  },
+  {
+    id: 'hm-mh-developmental-trauma',
+    title: 'Developmental Trauma: When Childhood Wasn\'t Safe',
+    category: 'mental-health',
+    duration: 10,
+    emoji: '🧒',
+    content: {
+      introduction: `Developmental trauma occurs when chronic adversity happens during the formative years of brain development — roughly ages 0-25, with the most sensitive periods in early childhood. Unlike single-event trauma, developmental trauma shapes the brain's architecture itself. It doesn't just create memories; it creates neural pathways, stress response patterns, and attachment templates that become the foundation for everything else.
+
+Dr. Bruce Perry's neurosequential model shows how trauma affects the brain differently depending on when it occurs. Trauma in infancy affects the brainstem (regulation, arousal). Trauma in early childhood affects the limbic system (relationships, emotional regulation). Trauma in later childhood affects the cortex (thinking, learning, self-reflection). The earlier the trauma, the more fundamental the impact.
+
+What constitutes developmental trauma? Abuse (physical, emotional, sexual). Neglect. Witnessing violence. Unpredictable caregiving. Loss of primary caregivers. Household dysfunction (mental illness, addiction, incarceration, domestic violence). Medical procedures. Bullying. Immigration and displacement. Poverty. Discrimination. The ACE (Adverse Childhood Experiences) research documented how common these experiences are and how profoundly they affect lifelong health.
+
+The good news: the brain remains plastic throughout life. Developmental trauma can be healed — not erased, but rewired. It requires experiences of safety, regulation, and connection that were missing in childhood. The brain that was shaped by adversity can be reshaped by corrective experiences. This is the science of hope.`,
+      keyInsights: [
+        { 
+          title: 'It shapes the architecture', 
+          explanation: 'Developmental trauma doesn\'t just create bad memories — it shapes how the brain develops. Stress responses, attachment patterns, and emotional regulation capacities are built differently when safety is absent.' 
+        },
+        { 
+          title: 'Earlier = deeper', 
+          explanation: 'Trauma before age 3 often has no explicit memory but profound impacts on regulation and attachment. You might not remember, but your body does.' 
+        },
+        { 
+          title: 'ACEs are incredibly common', 
+          explanation: 'The ACE study found nearly two-thirds of adults have at least one adverse childhood experience. You\'re not alone, and this isn\'t rare.' 
+        },
+        { 
+          title: 'Healing requires relational experiences', 
+          explanation: 'Because developmental trauma happens in relationship, it heals in relationship. Therapy, attuned relationships, and corrective experiences literally change neural pathways.' 
+        },
+        {
+          title: 'The body remembers what the mind forgets',
+          explanation: 'Pre-verbal trauma lives in the body and nervous system. This is why talk therapy alone often isn\'t enough — somatic approaches help access what words can\'t reach.'
+        }
+      ],
+      whatHelps: [
+        'Learn about your history through the ACE framework',
+        'Somatic therapies (Somatic Experiencing, sensorimotor psychotherapy) for body-held trauma',
+        'Attachment-focused therapy for relational wounds',
+        'Polyvagal-informed approaches for nervous system regulation',
+        'Consistent, safe relationships that provide corrective experiences',
+        'Be patient — this is rewiring, not quick fixes',
+      ],
+      professionalNote: 'Look for therapists trained in developmental trauma specifically. "Developmental Trauma Disorder" isn\'t in the DSM yet, but specialists understand this framework. Dr. Bessel van der Kolk\'s "The Body Keeps the Score" is essential reading.'
+    },
+    reflectionQuestions: [
+      'What was the emotional environment of your earliest years, as much as you know?',
+      'How many ACEs do you have? What impact might they have had?',
+      'What experiences of safety, regulation, and connection have been corrective for you?',
+    ],
+    relatedLessons: ['hm-mh-trauma-basics', 'hm-mh-childhood-emotional-neglect', 'hm-rel-attachment-styles'],
+  },
+  {
+    id: 'hm-mh-sexual-trauma',
+    title: 'Sexual Trauma: The Body Keeps the Score',
+    category: 'mental-health',
+    duration: 11,
+    emoji: '💜',
+    content: {
+      introduction: `Sexual trauma — assault, abuse, coercion, violations of consent — leaves marks that extend beyond memory into the body itself. This is where van der Kolk's phrase "the body keeps the score" is most viscerally true. Survivors often experience bodily intrusions: sensations, tension patterns, reactions during intimacy, and physical symptoms that seem disconnected from conscious memory but are deeply connected to what the body endured.
+
+The spectrum of sexual trauma is wide: childhood sexual abuse, rape, date rape, coerced sex in relationships, unwanted sexual contact, sexual harassment, and violations that may not fit neat categories but still left wounds. The impact doesn't always correlate with the "severity" of the event — what matters is how your system experienced it. A "minor" incident can be deeply traumatic; a "major" one might be processed with less lasting impact. Your response is valid regardless.
+
+Sexual trauma often creates complex relationships with the body, sexuality, and intimacy. Some survivors disconnect from their bodies entirely. Some experience compulsive sexuality. Some freeze during intimate moments. Some find certain touches, positions, or situations triggering decades later. These are not dysfunction — they are the body's memory and protection system.
+
+Healing is possible, but it requires approaches that include the body, not just the mind. Talk therapy alone often can't reach what is held somatically. The body needs to complete the defensive responses it couldn't complete during the trauma. It needs to learn safety again through experience, not just understanding.`,
+      keyInsights: [
+        { 
+          title: 'The body holds what the mind may not remember', 
+          explanation: 'Sexual trauma often involves dissociation during the event, meaning explicit memory may be fragmented or absent while the body stores the experience in sensations, tension, and reflexive responses.' 
+        },
+        { 
+          title: 'Response during trauma isn\'t choice', 
+          explanation: 'Freeze responses, submission, even physical arousal during assault are automatic nervous system responses — not consent or enjoyment. This confusion adds to shame, but your body was doing what it had to do to survive.' 
+        },
+        { 
+          title: 'Impacts on sexuality vary widely', 
+          explanation: 'Some survivors lose interest in sex; others become hypersexual. Some can\'t tolerate certain acts; others reenact trauma. There\'s no "right" response — all are ways the psyche tries to cope.' 
+        },
+        { 
+          title: 'Triggers can be very specific', 
+          explanation: 'A scent, a position, a phrase, a touch — the body may react to things that consciously seem unrelated to the trauma. These are body memories, not irrationality.' 
+        },
+        {
+          title: 'Relationships require special navigation',
+          explanation: 'Intimacy with partners requires communication, patience, and understanding. Safe partners learn what helps and what doesn\'t. Healing often happens through experiences of safe, boundaried intimacy.'
+        }
+      ],
+      whatHelps: [
+        'Somatic therapies (Somatic Experiencing, EMDR) that address the body\'s experience',
+        'Trauma-sensitive yoga and movement practices',
+        'Therapists specializing in sexual trauma specifically',
+        'Take back your body: practices that help you feel embodied and in control',
+        'Communicate with partners about triggers and needs',
+        'Go at your own pace — you get to decide when, how, and if you address this',
+      ],
+      warningSign: 'If you\'re experiencing severe dissociation, self-harm, eating disorders, or substance use connected to sexual trauma, please seek specialized support. RAINN (1-800-656-4673) offers confidential support.',
+      professionalNote: 'Seek therapists with specific training in sexual trauma. General trauma training isn\'t always sufficient. Organizations like RAINN can help connect you with specialized resources.'
+    },
+    reflectionQuestions: [
+      'How does your body respond during intimacy or when triggered? What might it be trying to tell you?',
+      'What beliefs about yourself, your worth, or your body came from this experience?',
+      'What does safety in your body feel like? When have you experienced it?',
+    ],
+    relatedLessons: ['hm-mh-trauma-basics', 'hm-mh-dissociation', 'hm-mh-freeze-response'],
+  },
+  {
+    id: 'hm-mh-medical-trauma',
+    title: 'Medical Trauma: When Healthcare Hurts',
+    category: 'mental-health',
+    duration: 8,
+    emoji: '🏥',
+    content: {
+      introduction: `Medical trauma is a paradox: the systems designed to help can also wound. Invasive procedures, lack of informed consent, dismissal of pain, medical emergencies, life-threatening diagnoses, procedures done without adequate anesthesia, traumatic births, ICU stays, chronic illness management — all of these can leave lasting psychological marks.
+
+What makes medical trauma particularly complex is that it often involves well-meaning people doing necessary things. The surgery that saved your life also traumatized you. The procedure that was medically routine was experienced by your nervous system as assault. This creates cognitive dissonance: how can you be grateful AND traumatized? The answer is: both are true simultaneously.
+
+Medical trauma is often unrecognized because we frame healthcare as inherently good. Patients who are traumatized may be seen as "difficult" or "overreacting." The medical system itself may not acknowledge its capacity to harm even while helping. This lack of recognition compounds the trauma — you can't heal what isn't acknowledged.
+
+The impacts include healthcare avoidance (which can endanger health), panic during procedures, chronic mistrust of providers, PTSD symptoms triggered by medical settings, and complicated relationships with your own body and its vulnerabilities. Understanding medical trauma helps you advocate for trauma-informed care and process experiences that have been affecting you.`,
+      keyInsights: [
+        { 
+          title: 'Healing and harming can coexist', 
+          explanation: 'A medically necessary procedure can still be psychologically traumatic. Being grateful for the outcome doesn\'t erase the distress of the experience. Both truths can exist.' 
+        },
+        { 
+          title: 'Your nervous system doesn\'t know "it\'s for your own good"', 
+          explanation: 'The body responds to threat. Invasive procedures, pain, loss of control, and vulnerability trigger survival responses regardless of the intent behind them.' 
+        },
+        { 
+          title: 'Healthcare avoidance makes sense', 
+          explanation: 'If medical settings became associated with trauma, avoidance is your nervous system protecting you. It\'s problematic for health but understandable as a trauma response.' 
+        },
+        { 
+          title: 'Dismissal compounds trauma', 
+          explanation: 'Being told "it wasn\'t that bad" or having pain minimized adds another layer. Not being believed is traumatic on top of whatever happened.' 
+        },
+      ],
+      whatHelps: [
+        'Name it — medical trauma is real and valid',
+        'Request trauma-informed care (explain your history, ask for accommodations)',
+        'Bring support people to appointments',
+        'Request pause words or signals during procedures',
+        'Therapy to process specific medical experiences',
+        'Gradual exposure to medical settings if avoidance is severe',
+        'Find providers who take time and believe you',
+      ],
+      professionalNote: 'Trauma-informed healthcare is growing as a movement. You can ask providers if they have training in this area. Your trauma history is relevant medical information.'
+    },
+    reflectionQuestions: [
+      'Have medical experiences left you with lasting fear or avoidance?',
+      'What would you need from healthcare providers to feel safe?',
+      'What accommodations might help you get necessary care despite medical trauma?',
+    ],
+    relatedLessons: ['hm-mh-trauma-basics', 'hm-body-chronic', 'hm-mh-birth-trauma'],
+  },
+  {
+    id: 'hm-mh-birth-trauma',
+    title: 'Birth Trauma: For Parents and Babies',
+    category: 'mental-health',
+    duration: 9,
+    emoji: '👶',
+    content: {
+      introduction: `Birth can be traumatic — for the person giving birth, for partners who witness it, and even for infants. This reality gets buried under cultural expectations that birth is "natural" and new parenthood is "the happiest time." When the experience is terrifying, painful, out of control, or life-threatening, the gap between expectation and reality compounds the wound.
+
+For birthing parents, trauma can stem from: emergency procedures, loss of control or autonomy, severe pain inadequately managed, feeling unheard by providers, fearing for your life or your baby's life, physical injury, and the cascade of interventions that can feel violating. Even births that end with healthy babies can be traumatic — outcome doesn't determine experience.
+
+Partners and support people can be traumatized too. Witnessing someone you love in danger, feeling helpless, making terrifying decisions, holding fear alone — these leave marks. Partner trauma often goes unrecognized because focus is on the birthing person and baby.
+
+Infants can experience birth trauma, especially with complicated deliveries. While they don't form explicit memories, the nervous system records the experience. Some practitioners believe early intervention can help, though this is a specialized field.
+
+Postpartum PTSD is estimated to affect 4-6% of births, with higher rates for complicated deliveries. It often gets misdiagnosed as postpartum depression or anxiety, meaning proper treatment is delayed. Birth trauma deserves recognition and specialized support.`,
+      keyInsights: [
+        { 
+          title: 'Healthy baby doesn\'t mean healthy experience', 
+          explanation: '"All that matters is a healthy baby" dismisses the birthing person\'s experience. You can be grateful for your baby AND traumatized by how they arrived.' 
+        },
+        { 
+          title: 'Loss of control is central', 
+          explanation: 'Many birth traumas involve feeling out of control, unheard, or like things were done TO you rather than WITH you. Informed consent and autonomy matter.' 
+        },
+        { 
+          title: 'Partners are affected too', 
+          explanation: 'The person who watched their partner almost die, who held fear while trying to stay strong, who felt helpless — they need support and acknowledgment too.' 
+        },
+        { 
+          title: 'It can affect bonding', 
+          explanation: 'Trauma can complicate bonding with the baby. This is a symptom, not a character flaw. Addressing the trauma can help the relationship.' 
+        },
+      ],
+      whatHelps: [
+        'Tell your birth story — to a therapist, support group, or trusted person',
+        'EMDR and other trauma therapies work for birth trauma',
+        'Birth trauma support groups (Postpartum Support International)',
+        'If bonding is affected, address it directly — attachment can be repaired',
+        'Include partners in healing — their experience matters too',
+        'For future births: create a trauma-informed birth plan, work with providers who understand',
+      ],
+      warningSign: 'If you\'re having intrusive thoughts of harm to yourself or your baby, please reach out immediately to Postpartum Support International (1-800-944-4773) or your healthcare provider.',
+      professionalNote: 'Look for therapists specializing in perinatal mental health. Birth trauma treatment is a specialty, and generalists may not have the training needed.'
+    },
+    reflectionQuestions: [
+      'If you experienced a traumatic birth, have you been able to tell your story fully?',
+      'What did you need during birth that you didn\'t receive?',
+      'If bonding has been affected, what support might help?',
+    ],
+    relatedLessons: ['hm-mh-medical-trauma', 'hm-mh-trauma-basics', 'hm-trans-new-parent'],
+  },
+  {
+    id: 'hm-mh-religious-spiritual-trauma',
+    title: 'Religious/Spiritual Trauma: When Faith Wounds',
+    category: 'mental-health',
+    duration: 10,
+    emoji: '⛪',
+    content: {
+      introduction: `Religious trauma occurs when religious teachings, practices, communities, or leaders cause lasting psychological harm. This can range from subtle (chronic shame, fear of questioning) to severe (spiritual abuse, cult involvement, religiously-justified physical or sexual abuse). For those raised in high-control religions, leaving can feel like death — the death of your worldview, community, identity, and sometimes family relationships.
+
+The concept of Religious Trauma Syndrome (RTS), developed by Dr. Marlene Winell, describes a set of symptoms common among people leaving authoritarian religious environments: cognitive difficulties (black-and-white thinking, difficulty with decisions), emotional challenges (anxiety, depression, grief, anger), social impacts (loss of community, family rupture), and identity confusion (who am I outside this system?).
+
+What makes religious trauma uniquely complex is that it often involves total worldview collapse. When your religion was the framework for understanding reality — morality, meaning, your place in the universe — losing it means rebuilding from the ground up. This is disorienting at a level that other traumas rarely reach.
+
+Additionally, religious trauma often carries spiritual wounds: damage to the capacity for transcendence, meaning, wonder, and connection to something larger. For some, this means permanent atheism. For others, it means slowly finding new spiritual paths. Either is valid. What matters is reclaiming your own relationship with meaning, rather than having one imposed.`,
+      keyInsights: [
+        { 
+          title: 'It\'s not just leaving a belief system', 
+          explanation: 'Religious trauma involves losing community, family, identity, meaning-making framework, social network, and certainty — often all at once. The losses are compounded.' 
+        },
+        { 
+          title: 'Authoritarian religion leaves specific marks', 
+          explanation: 'Black-and-white thinking, difficulty trusting your own judgment, chronic guilt, fear of punishment, and trouble making decisions without external authority — these are common effects of high-control religious environments.' 
+        },
+        { 
+          title: 'Spiritual wounds are real', 
+          explanation: 'Having your capacity for wonder, meaning, and connection co-opted and distorted is its own kind of harm. Reclaiming authentic spirituality (or choosing none) is part of healing.' 
+        },
+        { 
+          title: 'The community loss is devastating', 
+          explanation: 'Leaving often means losing everyone you know. This isolation compounds the psychological harm and makes recovery harder.' 
+        },
+      ],
+      whatHelps: [
+        'Find ex-community spaces (online groups for people who\'ve left your specific tradition)',
+        'Read others\' exit stories — you\'re not alone',
+        'Therapy with someone who understands religious trauma (not all do)',
+        'Rebuild community outside the religion',
+        'Give yourself permission to grieve, rage, and question',
+        'Go slowly — you don\'t have to figure out what you believe immediately',
+        'Consider books like "Leaving the Fold" by Marlene Winell',
+      ],
+      professionalNote: 'Look for therapists who specifically mention religious trauma or spiritual abuse in their specialties. Well-meaning therapists who don\'t understand this can inadvertently cause more harm.'
+    },
+    reflectionQuestions: [
+      'What beliefs from your religious upbringing still affect you, even if you\'ve left?',
+      'What did you lose when you left (or when you realized you\'d been harmed)?',
+      'What relationship do you want with spirituality or meaning now?',
+    ],
+    relatedLessons: ['hm-mh-trauma-basics', 'hm-trans-identity-shifts', 'hm-world-disillusionment'],
+  },
+  {
+    id: 'hm-mh-workplace-trauma',
+    title: 'Workplace Trauma & Harassment',
+    category: 'mental-health',
+    duration: 8,
+    emoji: '💼',
+    content: {
+      introduction: `The workplace can be a site of significant trauma. Sexual harassment, bullying, discrimination, hostile work environments, witnessing or experiencing violence, catastrophic failures, and toxic leadership can all leave lasting psychological wounds. And because we spend so much of our lives at work, workplace trauma often receives repeated exposure — you can't just "walk away" without losing your livelihood.
+
+Workplace trauma is complicated by power dynamics. Reporting can mean retaliation. Speaking up can mean losing your job. The person harming you may control your performance reviews, raises, and career advancement. This trapped quality — needing to stay for economic survival while being harmed — echoes the dynamics of other captivity traumas.
+
+The gaslighting that often accompanies workplace harm compounds the wound. "You're being too sensitive." "That's just how he is." "You must have misunderstood." When entire cultures normalize abuse, individuals start doubting their own perceptions. You're not crazy — you're in a crazy-making environment.
+
+The impacts extend beyond the workplace: sleep disruption, relationship strain, anxiety that persists after leaving, difficulty trusting future employers, and sometimes full PTSD. Workplace trauma is often minimized because "it's just work" — but there's no "just" about spending 40+ hours a week in a threatening environment.`,
+      keyInsights: [
+        { 
+          title: 'Economic coercion creates captivity', 
+          explanation: 'When you can\'t leave without losing your income, you\'re in a trapped situation. This changes the trauma dynamic — you\'re enduring ongoing harm without escape.' 
+        },
+        { 
+          title: 'Systemic protection often fails', 
+          explanation: 'HR exists to protect the company, not employees. Reporting can lead to retaliation. This lack of recourse intensifies the harm.' 
+        },
+        { 
+          title: 'Cultures can normalize abuse', 
+          explanation: 'When toxic behavior is "how it\'s always been done," individuals are gaslit into thinking they\'re the problem. Trust your perception — even if the culture tells you you\'re wrong.' 
+        },
+        { 
+          title: 'Leaving doesn\'t end it', 
+          explanation: 'The effects persist after you leave the job. Hypervigilance with new employers, difficulty trusting authority, anxiety about performance reviews — the body remembers.' 
+        },
+      ],
+      whatHelps: [
+        'Document everything (times, dates, witnesses, exact quotes)',
+        'Find allies — you\'re probably not the only one',
+        'Consult employment law resources for your options',
+        'Therapy to process while still in the situation AND after leaving',
+        'Set the boundaries you can while protecting your position',
+        'Make an exit plan — sometimes leaving is the only solution',
+        'Remember: it\'s not about you, even when it feels personal',
+      ],
+      warningSign: 'If workplace trauma is leading to severe depression, anxiety, or thoughts of self-harm, please reach out for support. Your job is never worth your life.',
+      professionalNote: 'Therapists who understand occupational stress and trauma can help you navigate while still employed and process afterward. Employment lawyers can help you understand your rights and options.'
+    },
+    reflectionQuestions: [
+      'Is your workplace causing harm? What would need to change for it to be sustainable?',
+      'What has workplace trauma cost you — in health, relationships, self-trust?',
+      'What would it take for you to leave, and what\'s preventing it?',
+    ],
+    relatedLessons: ['hm-mh-trauma-basics', 'hm-stress-burnout', 'hm-work-boundaries'],
+  },
+  {
+    id: 'hm-mh-racial-trauma',
+    title: 'Racial Trauma: The Weight of Constant Threat',
+    category: 'mental-health',
+    duration: 10,
+    emoji: '✊',
+    content: {
+      introduction: `Racial trauma, also called race-based traumatic stress, is the psychological and emotional injury caused by encounters with racial discrimination, racism, and hate crimes. For people of color, this is not occasional — it is constant, cumulative, and often begins in childhood. It is both the acute incidents (being called a slur, being profiled, witnessing violence against people who look like you) and the chronic weight of navigating a world that sees you as threat or lesser.
+
+Dr. Robert Carter's research established that racism can meet clinical definitions of trauma, producing PTSD-like symptoms. But racial trauma differs from single-incident trauma because it is ongoing, inescapable, and often unacknowledged by the dominant culture. There is no "post" in post-traumatic when the threat continues.
+
+The lived experience includes: hypervigilance (constantly assessing safety), exhaustion from code-switching and performing non-threatening, the psychological burden of having your reality denied or gaslit, grief after each publicized act of racial violence, and the intergenerational transmission of trauma from ancestors who endured slavery, colonization, genocide, or displacement.
+
+Healing racial trauma requires both individual psychological work AND collective, community-based healing. Individual therapy helps, but it can't resolve systemic oppression. Community, activism, cultural connection, and spaces where your experience is understood without explanation are equally essential.`,
+      keyInsights: [
+        { 
+          title: 'It\'s cumulative, not single-incident', 
+          explanation: 'Each microaggression, each act of discrimination, each news story of racist violence adds to the load. It\'s death by a thousand cuts, not one wound.' 
+        },
+        { 
+          title: 'Hypervigilance is adaptive', 
+          explanation: 'Being constantly alert to threat is exhausting, but it\'s a reasonable response to an environment that has proven dangerous. This isn\'t pathology; it\'s survival.' 
+        },
+        { 
+          title: 'Gaslighting compounds the harm', 
+          explanation: '"You\'re imagining it." "Race has nothing to do with it." "It\'s not that bad." Having your reality denied adds psychological injury to the original harm.' 
+        },
+        { 
+          title: 'Intergenerational trauma is real', 
+          explanation: 'Trauma can be transmitted across generations through epigenetics, family patterns, and cultural memory. The wounds of slavery, genocide, and colonization echo in descendants who never directly experienced them.' 
+        },
+        {
+          title: 'Healing happens in community',
+          explanation: 'Individual therapy matters, but healing racial trauma also requires collective spaces: community, cultural connection, activism, and environments where you don\'t have to explain or prove your experience.'
+        }
+      ],
+      whatHelps: [
+        'Name it — racial trauma is legitimate trauma',
+        'Find therapists of your own background who understand (BIPOC therapist directories exist)',
+        'Community connection — be with people who share your experience',
+        'Cultural practices and ancestral connection',
+        'Boundaries around news and social media exposure',
+        'Activism (for those who find empowerment in it — not an obligation)',
+        'Rest as resistance — you don\'t have to constantly educate or fight',
+      ],
+      professionalNote: 'If seeking therapy, consider finding a therapist who shares your racial/ethnic background or has specific training in racial trauma. Clinicians without this lens can inadvertently cause more harm.'
+    },
+    reflectionQuestions: [
+      'How has your experience of race-based stress been dismissed or minimized?',
+      'What does your nervous system need that it hasn\'t been getting?',
+      'Where do you find community, cultural connection, and spaces to just be?',
+    ],
+    relatedLessons: ['hm-world-minority-stress', 'hm-world-generational', 'hm-mh-trauma-basics'],
+  },
+  {
+    id: 'hm-mh-vicarious-trauma',
+    title: 'Vicarious/Secondary Trauma: Absorbing Others\' Pain',
+    category: 'mental-health',
+    duration: 8,
+    emoji: '🪞',
+    content: {
+      introduction: `You don't have to directly experience trauma to be traumatized by it. Vicarious trauma (also called secondary traumatic stress) occurs when you're exposed to others' traumatic experiences — as a helper, witness, or empathic listener. Therapists, healthcare workers, first responders, journalists, social workers, and anyone who regularly absorbs others' suffering can develop trauma symptoms themselves.
+
+This isn't about being "too sensitive." The capacity for empathy that makes you good at helping also makes you vulnerable to absorbing pain. Mirror neurons, emotional attunement, and deep listening mean you're not just hearing about trauma — you're partially experiencing it. Over time, this accumulates.
+
+The symptoms mirror PTSD: intrusive images (of clients' stories, not your own experiences), hypervigilance, avoidance, emotional numbing, changes in worldview (the world seems more dangerous), and disrupted spirituality or meaning. You might also experience compassion fatigue — the gradual erosion of your ability to care.
+
+What makes vicarious trauma insidious is that helpers often ignore their own needs. There's a professional or moral imperative to keep showing up, to prioritize others' suffering over your own. But you cannot pour from an empty cup, and untreated vicarious trauma makes you less effective at the work you're trying to do.`,
+      keyInsights: [
+        { 
+          title: 'Empathy has a cost', 
+          explanation: 'The same attunement that makes you helpful makes you vulnerable. Being present to others\' pain means your nervous system responds as if the danger were your own.' 
+        },
+        { 
+          title: 'It\'s occupational but not just occupational', 
+          explanation: 'Caregivers for sick family members, parents absorbing children\'s trauma, even friends who are always the "safe person" to confide in — vicarious trauma happens outside professional roles too.' 
+        },
+        { 
+          title: 'Worldview shifts are common', 
+          explanation: 'Repeated exposure to others\' trauma changes how you see the world. You may lose trust in humanity, become hyperaware of danger, or struggle with the meaning of life.' 
+        },
+        { 
+          title: 'Prevention is essential', 
+          explanation: 'Once vicarious trauma is established, recovery is harder. Regular practices that process and discharge absorbed pain are not luxury — they\'re necessity.' 
+        },
+      ],
+      whatHelps: [
+        'Regular supervision/consultation (for professionals)',
+        'Clear boundaries between helping time and personal time',
+        'Somatic discharge practices: shake, move, exercise after heavy exposure',
+        'Conscious transition rituals between work and home',
+        'Limit exposure when possible (news, extra caseload)',
+        'Personal therapy — helpers need help too',
+        'Community with others who understand the work',
+      ],
+      professionalNote: 'If you\'re in a helping profession, vicarious trauma is an occupational hazard, not a personal failure. Seek out training, supervision, and support specifically for this. Organizations should build prevention into the culture.'
+    },
+    reflectionQuestions: [
+      'Whose pain have you been carrying that isn\'t yours?',
+      'What do you do to discharge absorbed trauma after exposure?',
+      'Has your worldview changed from exposure to others\' suffering?',
+    ],
+    relatedLessons: ['hm-stress-burnout', 'hm-mh-trauma-basics', 'hm-stress-chronic'],
+  },
+  {
+    id: 'hm-mh-trauma-bonding',
+    title: 'Trauma Bonding: Why You Stay',
+    category: 'mental-health',
+    duration: 9,
+    emoji: '⛓️',
+    content: {
+      introduction: `Trauma bonding is the powerful emotional attachment that forms between an abused person and their abuser. It's the reason people stay in dangerous relationships, return after leaving, defend their abusers, and feel genuinely attached despite the harm. It's not weakness, stupidity, or masochism — it's a neurobiological response to cycles of abuse.
+
+The pattern works like this: periods of abuse alternate with periods of kindness, remorse, or normalcy. This intermittent reinforcement is the most powerful conditioning schedule known to psychology — more powerful than consistent reward. The unpredictability creates hope: maybe this time will be different. The kindness feels more intense against the backdrop of abuse. You become addicted to the relationship's highs because they contrast so sharply with the lows.
+
+Your attachment system becomes weaponized against you. The very person who is your source of fear becomes your source of comfort when the fear temporarily subsides. This creates a bond that is paradoxically strengthened by the abuse itself. The more intense the cycles, the stronger the bond.
+
+Understanding trauma bonding is essential for self-compassion. If you've struggled to leave, gone back, or found yourself defending someone who hurt you — this isn't a character flaw. It's how human psychology responds to this particular pattern of abuse. Breaking the bond requires understanding it, not just willpower.`,
+      keyInsights: [
+        { 
+          title: 'Intermittent reinforcement is addictive', 
+          explanation: 'The unpredictable alternation between abuse and kindness creates a psychological hook stronger than consistent treatment would. You become conditioned to chase the good times.' 
+        },
+        { 
+          title: 'The cycle bonds you to the abuser', 
+          explanation: 'Fear → relief → hope → attachment. When the person who terrorizes you also comforts you, your attachment system gets hijacked. This is by design (consciously or unconsciously) in abusive relationships.' 
+        },
+        { 
+          title: 'Love and fear aren\'t mutually exclusive', 
+          explanation: 'You can genuinely love someone who is hurting you. The attachment is real, even though the relationship is harmful. This makes leaving infinitely more complicated.' 
+        },
+        { 
+          title: 'Breaking the bond takes time and support', 
+          explanation: 'Leaving isn\'t enough. The pull back is neurobiological. Healing requires understanding the bond, grieving it, and building new attachments and self-worth.' 
+        },
+      ],
+      whatHelps: [
+        'Learn about trauma bonding — understanding breaks the spell',
+        'Build support outside the relationship before leaving',
+        'No contact after leaving (if possible) — contact reinforces the bond',
+        'Expect intense withdrawal symptoms — the brain is addicted',
+        'Work with a therapist who understands abusive relationship dynamics',
+        'Connect with others who\'ve been through it (support groups)',
+        'Be patient — breaking the bond takes time, and setbacks are common',
+      ],
+      warningSign: 'If you\'re in danger, please contact the National Domestic Violence Hotline: 1-800-799-7233. Safety planning with experts can help you leave more safely.',
+      professionalNote: 'Therapists trained in domestic violence and abusive relationships understand trauma bonding. Avoid therapists who suggest couples counseling with your abuser — this is contraindicated and dangerous.'
+    },
+    reflectionQuestions: [
+      'Do you recognize the intermittent reinforcement cycle in any of your relationships?',
+      'What keeps you attached to someone who has harmed you?',
+      'What support would you need to break a trauma bond?',
+    ],
+    relatedLessons: ['hm-rel-when-to-leave', 'hm-mh-trauma-basics', 'hm-rel-toxic-patterns'],
+  },
+  {
+    id: 'hm-mh-freeze-response',
+    title: 'The Freeze Response Deep Dive: Shutdown Explained',
+    category: 'mental-health',
+    duration: 8,
+    emoji: '🧊',
+    content: {
+      introduction: `You've heard of fight-or-flight, but freeze is the response that often carries the most shame. It's the immobility that takes over when your nervous system decides that fighting and fleeing won't work — when threat is inescapable. Polyvagal theory, developed by Dr. Stephen Porges, calls this "dorsal vagal shutdown": the most primitive survival response, shared with reptiles, involving immobility and metabolic conservation.
+
+Freeze isn't a choice. It's not cowardice. It's an automatic nervous system response that happens faster than conscious thought. When your amygdala perceives overwhelming threat, it can bypass the cortex entirely and trigger freeze before you have any chance to decide otherwise. The survivor who froze during assault, who went numb during abuse, who couldn't speak up during harassment — their body made that "decision" without them.
+
+The aftermath of freeze often includes profound shame. "Why didn't I fight back? Why didn't I run? Why did I just... stop?" Understanding freeze neurobiology can help release this shame. You didn't choose to freeze — your nervous system chose for you, based on an instant assessment that freezing gave you the best chance of survival.
+
+Chronic freeze states are also possible. People with extensive trauma may live in a low-grade freeze: depressed, unmotivated, disconnected, feeling "dead inside." This is the nervous system stuck in dorsal vagal shutdown. Coming out requires slowly building a sense of safety, not demanding the body "just snap out of it."`,
+      keyInsights: [
+        { 
+          title: 'Freeze is automatic and protective', 
+          explanation: 'Your nervous system\'s job is survival, not dignity. Freeze reduces injury, decreases attention from predators, and conserves resources. It\'s ancient, adaptive, and not a reflection of your character.' 
+        },
+        { 
+          title: 'Tonic immobility is a freeze variant', 
+          explanation: 'During assault, some people experience tonic immobility: complete physical paralysis with full consciousness. This is well-documented in trauma research and is never consent or compliance.' 
+        },
+        { 
+          title: 'Shame about freeze is common and cruel', 
+          explanation: 'The cultural narrative is "fight or flight." When your response was "freeze," you may believe you failed. But freeze isn\'t failure — it\'s neurobiology. Releasing this shame is essential for healing.' 
+        },
+        { 
+          title: 'Coming out of freeze requires safety signals', 
+          explanation: 'You can\'t force yourself out of freeze. The nervous system needs to perceive safety before it will release. Warmth, gentle movement, safe presence, and time are the medicine — not willpower.' 
+        },
+      ],
+      whatHelps: [
+        'Psychoeducation — understanding freeze releases shame',
+        'Somatic therapies help unfreeze the body gently',
+        'Titrated (small, gradual) exposure to movement and activation',
+        'Co-regulation with safe, calm people',
+        'Avoid re-traumatization by forcing yourself to "just move"',
+        'Self-compassion: your freeze was protection, not failure',
+      ],
+      professionalNote: 'Somatic Experiencing, developed by Dr. Peter Levine, specifically addresses freeze and incomplete survival responses. Look for practitioners trained in polyvagal-informed approaches.'
+    },
+    reflectionQuestions: [
+      'Have you blamed yourself for freezing when something bad happened?',
+      'What would change if you understood freeze as protection rather than failure?',
+      'Do you experience chronic freeze — feeling stuck, numb, or shut down?',
+    ],
+    relatedLessons: ['hm-stress-freeze-response', 'hm-stress-nervous-system', 'hm-mh-dissociation'],
+  },
+  {
+    id: 'hm-mh-dissociation',
+    title: 'Dissociation: When You Leave Your Body',
+    category: 'mental-health',
+    duration: 9,
+    emoji: '🌫️',
+    content: {
+      introduction: `Dissociation is a disconnection from yourself, your body, your surroundings, or your sense of reality. It ranges from common experiences (highway hypnosis, daydreaming, feeling unreal when exhausted) to severe clinical conditions (dissociative identity disorder). In trauma contexts, dissociation is your mind's protective exit when physical escape isn't possible.
+
+During overwhelming experiences, dissociation serves as psychological anesthesia. If you can't flee the situation, you flee within — disconnecting from the body that's being harmed, floating away from the present moment, or splitting off the part of you that's experiencing this. It's brilliant survival strategy in the moment. The problem is when it persists.
+
+Trauma-related dissociation includes: depersonalization (feeling detached from yourself, like watching yourself from outside), derealization (the world feeling unreal, dreamlike, or foggy), emotional numbing (inability to feel emotions), gaps in memory (dissociative amnesia), and in severe cases, identity fragmentation (distinct self-states or alters).
+
+Dissociation often goes unrecognized because it's subtle. You might not realize you're "gone" — you just notice gaps in memory, feeling spacey, or others saying you seemed "checked out." Chronic dissociation can feel normal because it's been your default for so long. Recognition is the first step toward learning to stay present — slowly, carefully, and with support.`,
+      keyInsights: [
+        { 
+          title: 'It\'s a creative survival strategy', 
+          explanation: 'Dissociation allowed you to survive what might otherwise have been unsurvivable. It\'s not dysfunction — it\'s an adaptation that worked. The question is whether it still serves you.' 
+        },
+        { 
+          title: 'It exists on a spectrum', 
+          explanation: 'From common (zoning out while driving) to severe (losing time, identity fragmentation). Trauma-related dissociation falls somewhere in this range depending on severity and frequency.' 
+        },
+        { 
+          title: 'You might not know you\'re dissociating', 
+          explanation: 'Dissociation can be so familiar that it feels normal. Other people might notice before you do. Learning your signs (glazed eyes, forgetting conversations, sudden fatigue) helps.' 
+        },
+        { 
+          title: 'Grounding is the antidote', 
+          explanation: 'Dissociation is leaving; grounding is returning. Sensory input, physical presence, and body awareness help pull you back. These are learnable skills.' 
+        },
+      ],
+      whatHelps: [
+        'Grounding techniques: 5-4-3-2-1 (five senses), cold water, strong scents, physical pressure',
+        'Notice your triggers — what causes you to check out?',
+        'Practice staying present in small doses, building tolerance',
+        'EMDR and other trauma therapies help process what\'s triggering dissociation',
+        'Work with a dissociation-informed therapist if symptoms are severe',
+        'Be gentle — trying to force presence can backfire',
+      ],
+      warningSign: 'If you\'re experiencing significant time gaps, discovering actions you don\'t remember, or distinct self-states, please see a specialist in dissociative disorders. This requires specialized treatment.',
+      professionalNote: 'Dissociation requires careful handling in therapy. Processing trauma too fast can increase dissociation. Look for therapists trained in phased treatment and dissociation specifically.'
+    },
+    reflectionQuestions: [
+      'When do you notice yourself "checking out" or feeling unreal?',
+      'What grounding techniques work for you, or what might you try?',
+      'What was dissociation protecting you from, originally?',
+    ],
+    relatedLessons: ['hm-mh-trauma-basics', 'hm-mh-freeze-response', 'hm-stress-nervous-system'],
+  },
+  {
+    id: 'hm-mh-flashbacks-triggers',
+    title: 'Flashbacks & Triggers: Understanding the Alarm System',
+    category: 'mental-health',
+    duration: 8,
+    emoji: '⚡',
+    content: {
+      introduction: `Flashbacks are time machines of the worst kind. A smell, a sound, a phrase, a situation — and suddenly you're not just remembering the past, you're reliving it. Your body responds as if the threat is happening now. Your heart races, your muscles tense, emotions flood you. This isn't a normal memory; it's trauma memory intruding into the present.
+
+The neuroscience: traumatic memories are stored differently. Normally, the hippocampus processes memories with time stamps — you know the memory is in the past. But during overwhelming trauma, the hippocampus goes offline, and memories are stored raw in the amygdala without proper time-coding. When triggered, these memories emerge without the "this was then, I'm safe now" context. Your brain and body literally don't know it's a memory.
+
+Triggers are the cues that set off this alarm system. They're often sensory: a particular cologne, the quality of light, a sound, a texture. They can be contextual: locations, relationship dynamics, power differentials. They can be emotional: feeling trapped, helpless, or criticized. Triggers are personal — what activates one person's trauma may mean nothing to another.
+
+Understanding triggers and flashbacks is the first step to managing them. You can learn to recognize you're being triggered, use grounding to anchor in the present, and over time, with treatment, reduce the intensity and frequency of these intrusions.`,
+      keyInsights: [
+        { 
+          title: 'Flashbacks aren\'t memories — they\'re re-experiencing', 
+          explanation: 'Your brain doesn\'t know it\'s past. The emotional and physical responses are happening NOW as far as your nervous system is concerned. This is why "just don\'t think about it" doesn\'t work.' 
+        },
+        { 
+          title: 'Triggers are often subtle', 
+          explanation: 'The thing that triggered you might seem unrelated to the trauma. Your subconscious made connections your conscious mind didn\'t. A tone of voice, a pattern of light, a power dynamic — triggers can be obscure.' 
+        },
+        { 
+          title: 'The window between trigger and response', 
+          explanation: 'With practice, you can learn to notice "I\'m being triggered" before full flashback response. This window is where intervention is possible. It widens with treatment and practice.' 
+        },
+        { 
+          title: 'Triggers diminish with proper treatment', 
+          explanation: 'Trauma therapy helps the brain properly process and "time-stamp" the memory. When this happens, triggers lose their power. They may never fully disappear, but they can become manageable.' 
+        },
+      ],
+      whatHelps: [
+        'Grounding: "I am [name], I am [age], I am in [place], today is [date], I am safe"',
+        'Sensory grounding: cold water, strong scent, textured object',
+        'Name it: "I\'m having a flashback. This is a memory, not now."',
+        'Orient to the present: look around, name what you see',
+        'Dual awareness practice: "I am here AND I feel the memory"',
+        'Trauma therapy (EMDR, CPT, PE) to process the underlying memory',
+      ],
+      professionalNote: 'Frequent or severe flashbacks warrant professional treatment. Trauma-focused therapies have excellent success rates for reducing intrusive symptoms. You don\'t have to live with constant triggers.'
+    },
+    reflectionQuestions: [
+      'What triggers you? Can you identify patterns in situations, sensations, or emotional states?',
+      'When you\'re triggered, how do you currently respond? Does it help?',
+      'What grounding techniques might you try to stay connected to the present?',
+    ],
+    relatedLessons: ['hm-mh-trauma-basics', 'hm-mh-dissociation', 'hm-stress-nervous-system'],
+  },
+  {
+    id: 'hm-mh-post-traumatic-growth',
+    title: 'Post-Traumatic Growth: How People Transform Pain',
+    category: 'mental-health',
+    duration: 9,
+    emoji: '🌱',
+    content: {
+      introduction: `Post-Traumatic Growth (PTG) is the positive psychological change that can emerge from struggling with highly challenging life circumstances. It's not that trauma is "good" or that suffering is necessary for growth — it's that humans have a remarkable capacity to find meaning, develop strength, and transform even in the aftermath of terrible experiences.
+
+Researchers Richard Tedeschi and Lawrence Calhoun identified five domains of PTG: Greater appreciation of life, new possibilities, increased personal strength, improved relationships, and spiritual or existential change. Trauma survivors often report that they value life more, discovered abilities they didn't know they had, deepened relationships, opened new paths, and revised their understanding of life's meaning.
+
+Crucial clarification: PTG is not about finding a silver lining or claiming trauma was "worth it." It's not about toxic positivity or pressure to grow. It's about acknowledging that some people, through the struggle to rebuild after trauma, develop in ways they wouldn't have otherwise. Growth and pain coexist; one doesn't cancel the other.
+
+PTG is also not universal or guaranteed. Some people don't experience significant growth, and that's okay. Growth is not a measure of your worth or your effort. It emerges from particular conditions: supportive relationships, deliberate rumination (making meaning), narrative development (creating a story), and often from the shattering of previous assumptions that creates space for new understandings.`,
+      keyInsights: [
+        { 
+          title: 'Growth doesn\'t mean trauma was good', 
+          explanation: 'Most people would trade the growth to not have experienced the trauma. PTG acknowledges transformation without glorifying suffering or demanding it.' 
+        },
+        { 
+          title: 'Struggle is the catalyst', 
+          explanation: 'Growth comes not from the trauma itself but from the struggle to rebuild afterward. It\'s the effortful engagement with rebuilding that creates change.' 
+        },
+        { 
+          title: 'Shattering assumptions creates space', 
+          explanation: 'Trauma often shatters assumptions about safety, meaning, and self. This is devastating — but the rebuilding can create new, more resilient structures. The cracks let light in.' 
+        },
+        { 
+          title: 'PTG and PTSD can coexist', 
+          explanation: 'You can experience growth in some areas while still struggling with symptoms. Growth doesn\'t mean you\'re "over it." Complexity is normal.' 
+        },
+        {
+          title: 'Support and meaning-making matter',
+          explanation: 'PTG is more likely with supportive relationships, space for deliberate reflection, and opportunities to create narrative meaning from the experience. These can be cultivated.'
+        }
+      ],
+      whatHelps: [
+        'Deliberate rumination: intentional reflection on how you\'ve changed',
+        'Narrative development: writing or telling your story',
+        'Supportive relationships that can hold both pain and growth',
+        'Finding meaning or purpose connected to the experience',
+        'Patience — PTG often takes years to emerge',
+        'Releasing pressure — growth isn\'t a requirement or measure of success',
+      ],
+      professionalNote: 'Therapists trained in meaning-making approaches, narrative therapy, and existential frameworks can support PTG. But growth shouldn\'t be rushed or demanded — it emerges when ready.'
+    },
+    reflectionQuestions: [
+      'Have you noticed any unexpected growth or change following difficult experiences?',
+      'What have you learned about yourself through struggle that you couldn\'t have learned otherwise?',
+      'How has your sense of what matters shifted?',
+    ],
+    relatedLessons: ['hm-mh-trauma-basics', 'hm-growth-meaning', 'hm-trans-grief-all-kinds'],
+  },
 ];
 
 // ============================================================================
@@ -2882,7 +3651,837 @@ The identity shift of parenthood is permanent. You will never not be a parent ag
     reflectionQuestions: [
       'What parts of your pre-parent identity are you mourning?',
       'What would you admit about parenthood that you don\'t usually say out loud?',
+    ],
     relatedLessons: ['hm-trans-identity-shifts', 'hm-mh-depression-truth'],
+  },
+  {
+    id: 'hm-trans-infertility-loss',
+    title: 'Infertility & Pregnancy Loss: Grief Often Minimized',
+    category: 'life-transitions',
+    duration: 9,
+    emoji: '🥀',
+    content: {
+      introduction: `Infertility and pregnancy loss are among the most isolating forms of grief because they're so often minimized, hidden, or misunderstood. "At least you can try again." "It wasn't meant to be." "You're still young." These well-meaning phrases communicate something devastating: your loss doesn't count.
+
+But it does count. A miscarriage is the loss of a hoped-for child, a future you'd already begun imagining, a family that won't exist as planned. Infertility is a series of losses — each month, each failed treatment, each time someone asks when you're having kids. These are real griefs that deserve real acknowledgment.
+
+The physical experience compounds the emotional one. Pregnancy loss is a bodily trauma. Infertility treatments are invasive, hormonal, and exhausting. Your body, which you may have trusted, becomes a site of failure and betrayal. The disconnect between what your body is supposed to do and what it's doing creates a particular kind of anguish.
+
+Relationships are tested. Partners may grieve differently, creating distance when you need closeness. Friends with children become painful to be around. Baby showers and pregnancy announcements feel like personal attacks even though they're not. The isolation grows because talking about it feels like burdening others with something they can't fix.
+
+Healing doesn't require "getting over it" or finding the silver lining. It requires having your loss witnessed, your grief validated, and your experience recognized as significant. Because it is.`,
+      keyInsights: [
+        { 
+          title: 'This is real loss', 
+          explanation: 'You\'re grieving a person who existed in hope, a future that won\'t happen, a version of yourself as a parent. The loss being invisible to others doesn\'t make it less real to you.' 
+        },
+        { 
+          title: 'Disenfranchised grief is particularly painful', 
+          explanation: 'When others minimize your loss ("at least it was early"), you may feel you don\'t have permission to grieve. You do. Their discomfort with your pain doesn\'t determine its validity.' 
+        },
+        { 
+          title: 'Body and emotions are intertwined', 
+          explanation: 'Pregnancy loss and infertility are physical experiences. Hormones, physical pain, bodily changes — the grief isn\'t just emotional. Your body is grieving too.' 
+        },
+        { 
+          title: 'Each person grieves differently', 
+          explanation: 'Partners often have different grieving styles and timelines. This doesn\'t mean one cares more. But it can create painful disconnection when you most need support.' 
+        },
+        {
+          title: 'Secondary losses compound the primary one',
+          explanation: 'You may also lose your sense of control, trust in your body, ease around pregnant friends, financial stability (if treatments are involved), and the assumed future you\'d planned. Each of these is its own grief.'
+        }
+      ],
+      whatHelps: [
+        'Name your loss — give yourself permission to grieve what you\'re actually grieving',
+        'Find people who understand — support groups, online communities, others who\'ve been through it',
+        'Create rituals to honor your loss (naming, memorial, marking anniversaries)',
+        'Communicate with your partner about what you each need',
+        'Set boundaries around triggering situations (baby showers, family gatherings)',
+        'Allow the grief to be as big as it is — don\'t minimize it to make others comfortable',
+        'Consider therapy with someone specializing in perinatal loss',
+      ],
+      warningSign: 'If grief becomes all-consuming, if you\'re having thoughts of self-harm, or if you\'re unable to function for extended periods, please reach out for professional support. This is a significant trauma that sometimes requires professional help to process.',
+      professionalNote: 'Therapists specializing in perinatal loss understand this particular grief. RESOLVE: The National Infertility Association and pregnancy loss organizations offer support groups and resources.'
+    },
+    reflectionQuestions: [
+      'What losses are you grieving that others might not see or understand?',
+      'What do you need from others that you\'re not getting? Can you ask for it directly?',
+      'How has this experience changed your relationship with your body?',
+    ],
+    relatedLessons: ['hm-trans-grief-all-kinds', 'hm-trans-becoming-parent', 'hm-body-chronic'],
+  },
+  {
+    id: 'hm-trans-chronic-pain',
+    title: 'Chronic Pain: When Your Body Won\'t Stop Hurting',
+    category: 'life-transitions',
+    duration: 9,
+    emoji: '🔥',
+    content: {
+      introduction: `Living with chronic pain means waking up each day to a body that won't stop signaling danger. It's exhausting in a way that people without chronic pain can't fully understand — not just the pain itself, but the relentlessness of it, the way it colors every moment, the mental energy required just to function.
+
+Chronic pain changes everything. It changes your capabilities, your relationships, your work, your mood, your sense of self. Activities you once did without thinking become calculations: Is this worth the pain it will cost? Will I pay for this tomorrow? The constant negotiation with your body is draining.
+
+Adding to the burden is how often chronic pain is dismissed or disbelieved. "Have you tried yoga?" "It's probably stress." "You don't look sick." When medical professionals and loved ones don't believe your pain, you start doubting yourself. Gaslighting about your own body is its own form of trauma.
+
+Pain science has evolved significantly. We now understand that chronic pain involves changes in the nervous system — the pain is real, even when scans show nothing. The brain's pain processing has become sensitized. This isn't "all in your head" in the dismissive sense — it's in your nervous system, which is very real and very physical.
+
+Living well with chronic pain isn't about pretending it doesn't exist. It's about building a life that acknowledges the pain while not letting it define everything. This is incredibly hard, and anyone doing it deserves recognition for fighting a battle others can't see.`,
+      keyInsights: [
+        { 
+          title: 'Chronic pain is exhausting beyond the pain itself', 
+          explanation: 'The constant negotiation, the mental energy of coping, the grief for what you\'ve lost — fatigue is a central feature of chronic pain, not a separate problem.' 
+        },
+        { 
+          title: 'The pain is real, even without visible cause', 
+          explanation: 'Modern pain science confirms that nervous system sensitization creates real pain that doesn\'t always show on scans. "We can\'t find anything" doesn\'t mean "nothing\'s wrong."' 
+        },
+        { 
+          title: 'Grief is appropriate', 
+          explanation: 'You\'ve lost capabilities, spontaneity, your old body, your old life. Grieving these losses isn\'t weakness — it\'s a normal response to real loss.' 
+        },
+        { 
+          title: 'Medical gaslighting is a trauma', 
+          explanation: 'Being disbelieved by doctors, told it\'s stress, having your experience minimized — this is its own wound that compounds the pain experience.' 
+        },
+        {
+          title: 'Boom-bust cycles make things worse',
+          explanation: 'Overdoing it on good days and crashing for days after is common but counterproductive. Pacing — doing less than you could on good days — helps prevent flares but feels frustratingly limiting.'
+        }
+      ],
+      whatHelps: [
+        'Find healthcare providers who believe you and specialize in chronic pain',
+        'Learn about pain science — understanding the nervous system can reduce fear',
+        'Pacing: doing less on good days to avoid crashes',
+        'Pain management approaches: PT, gentle movement, stress reduction, sleep optimization',
+        'Connect with others who understand — chronic pain communities',
+        'Grief work for the life and body you\'ve lost',
+        'Set boundaries around unsolicited advice',
+        'Mental health support — chronic pain and depression/anxiety often co-occur',
+      ],
+      warningSign: 'Chronic pain significantly increases risk for depression and suicidal thoughts. If you\'re struggling to see a way forward, please reach out to a mental health professional or crisis line.',
+      professionalNote: 'Multidisciplinary pain programs, when available, combine medical, psychological, and physical approaches and have the best evidence for chronic pain management.'
+    },
+    reflectionQuestions: [
+      'What have you lost to chronic pain that you haven\'t fully grieved?',
+      'Where have you felt disbelieved, and how has that affected you?',
+      'What does a "good life" look like with your current body — not the one you wish you had?',
+    ],
+    relatedLessons: ['hm-trans-grief-all-kinds', 'hm-trans-chronic-illness', 'hm-trans-disability'],
+  },
+  {
+    id: 'hm-trans-disability',
+    title: 'Disability: Visible and Invisible',
+    category: 'life-transitions',
+    duration: 10,
+    emoji: '♿',
+    content: {
+      introduction: `Disability affects how you move through the world — not just physically or cognitively, but socially, economically, and psychologically. Whether your disability is visible (using a wheelchair, having a visible difference) or invisible (chronic illness, learning disabilities, mental health conditions), it shapes your daily experience in ways non-disabled people rarely understand.
+
+The social model of disability distinguishes between impairment (the condition itself) and disability (the barriers society creates). Much of what makes disability hard isn't the condition — it's the stairs without ramps, the websites without accessibility, the jobs that won't accommodate, the assumptions that you're less capable. Disability is as much about how society is designed as about your body or mind.
+
+Invisible disabilities carry their own challenges. You may "look fine," leading others to doubt your experience. You have to decide constantly whether to disclose — and face either disbelief or discrimination either way. The energy spent managing others' perceptions is exhausting.
+
+Identity around disability is complex. Some people embrace disability identity and find community in disability culture. Others resist the label or grieve the life they expected. Many feel both. Your relationship to your disability can change over time, and there's no "right" way to feel about it.
+
+What's true across the spectrum: disabled people deserve full participation in life, not charity. Accessibility isn't a special favor — it's equity. And the lived expertise of disabled people about their own experience matters more than what non-disabled "experts" assume.`,
+      keyInsights: [
+        { 
+          title: 'The social model of disability', 
+          explanation: 'Much of disability is socially created through inaccessible environments, discrimination, and exclusion. The problem isn\'t your body/mind — it\'s a society designed for a narrow range of bodies and minds.' 
+        },
+        { 
+          title: 'Invisible disabilities are real disabilities', 
+          explanation: 'You don\'t need to look disabled to be disabled. Chronic illness, chronic pain, mental health conditions, learning disabilities — these are real even when others can\'t see them.' 
+        },
+        { 
+          title: 'Disclosure is a constant calculation', 
+          explanation: 'To disclose or not: risk disbelief and minimization, or risk being seen as hiding something. Either way, you bear the burden of managing others\' perceptions.' 
+        },
+        { 
+          title: 'Identity is personal and can change', 
+          explanation: 'Some people proudly claim disability identity. Others prefer "person with a disability" or resist labels entirely. Your feelings about your disability may evolve. All of this is valid.' 
+        },
+        {
+          title: 'Accommodation isn\'t special treatment',
+          explanation: 'Accommodations create equity, not advantage. A ramp isn\'t a favor to wheelchair users — it\'s removing a barrier that shouldn\'t exist. The same applies to workplace accommodations, extra time, or other supports.'
+        }
+      ],
+      whatHelps: [
+        'Know your rights — disability discrimination is illegal; accommodations are owed, not favors',
+        'Connect with disability community — others who truly understand',
+        'Allow yourself whatever feelings you have about your disability, including grief',
+        'Develop language for disclosure that feels comfortable to you',
+        'Advocate for accessibility — you have expertise others lack',
+        'Set boundaries around inspiration porn and unsolicited advice',
+        'Find healthcare providers who listen and don\'t dismiss',
+      ],
+      professionalNote: 'Many therapists lack training in disability issues and may hold ableist assumptions. Seek out disability-affirming providers or those with lived experience. Disability advocacy organizations can provide referrals.'
+    },
+    reflectionQuestions: [
+      'What barriers do you face that are about how society is designed rather than your condition?',
+      'How do you feel about disability as an identity? Has that changed over time?',
+      'Where do you need to advocate for yourself more, and what makes that hard?',
+    ],
+    relatedLessons: ['hm-trans-chronic-pain', 'hm-trans-chronic-illness', 'hm-trans-identity-shifts'],
+  },
+  {
+    id: 'hm-trans-sandwich-generation',
+    title: 'Caring for Aging Parents: The Sandwich Generation',
+    category: 'life-transitions',
+    duration: 8,
+    emoji: '🥪',
+    content: {
+      introduction: `The "sandwich generation" refers to adults caught between caring for aging parents and raising their own children — squeezed from both directions at once. But even without kids, caring for aging parents is one of life's most challenging transitions. The role reversal alone is disorienting: the people who once took care of you now depend on you.
+
+This transition often happens gradually, then suddenly. First it's helping with bills or driving to appointments. Then it's managing medications, navigating healthcare systems, making difficult decisions about living situations. You may find yourself becoming a nurse, care coordinator, financial manager, and emotional support — roles you never trained for.
+
+The emotional complexity is immense. You're grieving your parent's decline while they're still alive. You may feel guilty for resenting the burden, for not doing enough, for having a life of your own. Old family dynamics resurface under stress. Siblings may not share the load equally, creating conflict. You're mourning the relationship you had and the parent you're losing, even as they're physically present.
+
+Self-sacrifice is not sustainable. The cultural expectation that you should give everything — your time, your finances, your health — to caregiving is a setup for burnout and resentment. Caring for yourself isn't selfish; it's how you stay capable of caring for anyone.`,
+      keyInsights: [
+        { 
+          title: 'Role reversal is disorienting', 
+          explanation: 'Becoming the caretaker for someone who raised you scrambles the fundamental order of your relationship. Grief, resistance, and confusion are all normal responses.' 
+        },
+        { 
+          title: 'Anticipatory grief is real', 
+          explanation: 'You\'re grieving before death — grieving the decline, the lost abilities, the relationship you used to have. This is exhausting and valid.' 
+        },
+        { 
+          title: 'Family dynamics intensify under stress', 
+          explanation: 'Old patterns, rivalries, and wounds often resurface during parent care. Siblings who never communicated well don\'t suddenly start now.' 
+        },
+        { 
+          title: 'You cannot pour from an empty cup', 
+          explanation: 'Self-sacrifice isn\'t noble when it leads to burnout. Your wellbeing matters — not just for you, but for your ability to care for anyone.' 
+        },
+        {
+          title: 'The system is not designed to help',
+          explanation: 'Navigating healthcare, insurance, Medicare, assisted living, and home care is bewildering. The burden of coordination falls on family, with little support. This is a systemic failure, not your personal incompetence.'
+        }
+      ],
+      whatHelps: [
+        'Set boundaries — you cannot do everything and shouldn\'t try',
+        'Accept help — let others contribute, hire help if possible',
+        'Have difficult conversations early about wishes, finances, and care',
+        'Communicate with siblings about division of responsibilities (get specific)',
+        'Use respite care — breaks are essential, not optional',
+        'Join a caregiver support group — others understand',
+        'Grieve openly — this is a loss even while your parent is alive',
+        'Protect your own health — schedule your own checkups, maintain your own life',
+      ],
+      professionalNote: 'Geriatric care managers can help navigate complex care decisions. Social workers at hospitals or senior centers can connect you with resources. Caregiver burnout is real — therapy can help.'
+    },
+    reflectionQuestions: [
+      'What boundaries do you need to set to protect your own wellbeing?',
+      'What are you grieving about your parent that you haven\'t acknowledged?',
+      'Who else can share this responsibility, and what\'s getting in the way of asking?',
+    ],
+    relatedLessons: ['hm-trans-caregiver-burnout', 'hm-trans-grief-all-kinds', 'hm-stress-overwhelm'],
+  },
+  {
+    id: 'hm-trans-caregiver-burnout',
+    title: 'Caregiver Burnout: You Can\'t Pour From Empty',
+    category: 'life-transitions',
+    duration: 8,
+    emoji: '🪫',
+    content: {
+      introduction: `Caregiving — whether for a child with special needs, a sick partner, an aging parent, or anyone who depends on you — is one of the most demanding roles a person can occupy. It's also one of the most isolating, because the needs of the person you're caring for often eclipse your own until there's nothing left.
+
+Caregiver burnout isn't just being tired. It's a state of physical, emotional, and mental exhaustion that comes from prolonged caregiving without adequate support. Signs include feeling overwhelmed, hopeless, resentful toward the person you're caring for, withdrawn from others, unable to relax even when you have a break, physically ill more often, and finding no joy in things that used to matter.
+
+The cruel irony is that the most dedicated caregivers are most vulnerable to burnout. The ones who give everything, who never take breaks, who feel guilty for having any needs of their own — they're the ones who crash hardest. And in the crash, they often become unable to provide care at all, which is exactly what they were trying to prevent.
+
+Society romanticizes selfless caregiving while providing almost no support for caregivers. The expectation that you should sacrifice your health, career, relationships, and identity on the altar of caregiving is not noble — it's unsustainable and unfair. Caring for yourself is not a betrayal of the person you're caring for. It's what makes continued caregiving possible.`,
+      keyInsights: [
+        { 
+          title: 'Burnout is a state, not a character flaw', 
+          explanation: 'You\'re not burned out because you\'re weak. You\'re burned out because the demands exceeded the resources for too long. It\'s physics, not moral failure.' 
+        },
+        { 
+          title: 'Resentment is a warning signal', 
+          explanation: 'Feeling resentful toward the person you\'re caring for — or toward those who aren\'t helping — is a sign you\'ve given too much without replenishment. It\'s information, not a character defect.' 
+        },
+        { 
+          title: 'Guilt is the enforcer of unsustainability', 
+          explanation: 'Guilt keeps you giving past your limits. But guilt-driven caregiving leads to burnout, which helps no one. Healthy limits aren\'t abandonment.' 
+        },
+        { 
+          title: 'Self-care isn\'t selfish — it\'s infrastructure', 
+          explanation: 'You are the infrastructure of care. If you collapse, the care collapses. Maintaining yourself is part of maintaining care.' 
+        },
+        {
+          title: 'Society\'s failure becomes your burden',
+          explanation: 'Inadequate healthcare systems, lack of affordable long-term care, minimal respite options — caregivers bear the cost of systemic failures. Your exhaustion is not just personal; it\'s political.'
+        }
+      ],
+      whatHelps: [
+        'Acknowledge burnout without shame — it means you\'ve been giving a lot',
+        'Accept help — any help, even imperfect help',
+        'Schedule regular respite — put it on the calendar like a medical appointment',
+        'Maintain at least one thing that\'s yours: a friendship, a hobby, something',
+        'Caregiver support groups — others who understand without explanation',
+        'Set minimum standards for your own care: sleep, food, one break per week',
+        'Explore options you\'ve dismissed: professional care, family help, programs',
+        'Therapy or counseling — you need someone focused on YOU',
+      ],
+      warningSign: 'If you\'re having thoughts of harming yourself or the person you\'re caring for, please reach out immediately. This is a sign of severe burnout that requires urgent support.',
+      professionalNote: 'Therapists, social workers, and geriatric care managers can help identify resources. Many communities have caregiver support services that are underutilized because caregivers don\'t know about them or don\'t feel they deserve help.'
+    },
+    reflectionQuestions: [
+      'On a scale of 1-10, how burned out are you? What evidence supports your answer?',
+      'What help have you refused that you could reconsider accepting?',
+      'What would caring for yourself as well as you care for others actually look like?',
+    ],
+    relatedLessons: ['hm-trans-sandwich-generation', 'hm-stress-burnout', 'hm-mh-depression-truth'],
+  },
+  {
+    id: 'hm-trans-empty-nest',
+    title: 'Empty Nest: When Kids Leave',
+    category: 'life-transitions',
+    duration: 7,
+    emoji: '🪹',
+    content: {
+      introduction: `For years or decades, your identity has been intertwined with being a parent. The rhythm of daily life revolved around your children — their needs, their schedules, their presence. And then, gradually or suddenly, the house is quiet. They're gone. And you're left wondering who you are now.
+
+Empty nest syndrome isn't a clinical diagnosis, but the experience is real: grief, loneliness, loss of purpose, even depression when children leave home. It can feel like losing your job, your meaning, and your closest daily companions all at once. The absence is physical — empty rooms, quiet dinners — and existential: what am I for now?
+
+This transition is complicated by conflicting emotions. You might feel proud of raising independent humans, relieved to have more freedom, and devastated by the loss all at the same time. You might feel guilty for struggling when you're "supposed" to be happy for them. You might grieve the daily connection while genuinely wanting them to thrive independently.
+
+The task of this transition is reinvention. Who are you when you're not actively parenting? What does your relationship with your partner look like now? What interests did you set aside that you could reclaim? The nest is empty, but that's not the end — it's a new beginning that requires intentional creation.`,
+      keyInsights: [
+        { 
+          title: 'This is real grief', 
+          explanation: 'You\'re grieving a role that defined you, daily presence you relied on, a phase of life that\'s over. The fact that it\'s developmentally normal doesn\'t make it less painful.' 
+        },
+        { 
+          title: 'Conflicting feelings are normal', 
+          explanation: 'Pride and grief, relief and loneliness, joy for their independence and sadness for your loss — these coexist. You don\'t have to choose one feeling.' 
+        },
+        { 
+          title: 'Your relationship with your partner may need renegotiating', 
+          explanation: 'If kids were the focus, you may barely know who you are as a couple anymore. This requires deliberate attention — some couples thrive, others realize they\'ve grown apart.' 
+        },
+        { 
+          title: 'Identity reconstruction is the task', 
+          explanation: 'This isn\'t just about filling time. It\'s about discovering or rediscovering who you are beyond the parent role. This takes intentional exploration.' 
+        },
+      ],
+      whatHelps: [
+        'Allow yourself to grieve — don\'t minimize this as no big deal',
+        'Resist the urge to fill the void immediately — sit with the emptiness first',
+        'Reconnect with your partner — date again, have conversations you couldn\'t with kids around',
+        'Revisit interests you set aside during intensive parenting years',
+        'Develop new routines — the old structure is gone, create a new one',
+        'Stay connected to your kids in new ways — the relationship evolves, it doesn\'t end',
+        'Consider what you want this next chapter to be about',
+      ],
+    },
+    reflectionQuestions: [
+      'What parts of yourself did you set aside during active parenting that you\'d like to reclaim?',
+      'How has your relationship with your partner been affected? What does it need?',
+      'What would make this next chapter meaningful to you?',
+    ],
+    relatedLessons: ['hm-trans-identity-shifts', 'hm-trans-retirement-identity', 'hm-trans-grief-all-kinds'],
+  },
+  {
+    id: 'hm-trans-retirement-identity',
+    title: 'Retirement Identity: Who Am I Without Work?',
+    category: 'life-transitions',
+    duration: 8,
+    emoji: '🏖️',
+    content: {
+      introduction: `Retirement is sold as the golden finish line — rest, freedom, endless vacation. But for many people, it triggers an identity crisis. When your work was not just what you did but who you were, leaving it creates a void that golf and grandchildren may not fill.
+
+In our culture, "What do you do?" is how we introduce ourselves. Your work provided structure, purpose, social connection, intellectual stimulation, and a sense of contribution. Remove all of that at once, and the freedom that sounded wonderful can feel like formlessness. The relief of no longer working can coexist with the loss of everything work provided.
+
+This is particularly acute for people whose identity was deeply tied to their profession: doctors, executives, teachers, anyone who answered "I am a ___" rather than "I work as a ___." The title wasn't just a job — it was a self-concept. Without it, you may feel you've lost not just your schedule but your significance.
+
+Successful retirement isn't about doing nothing — it's about finding new sources of the things work provided: structure, purpose, connection, contribution, and identity. This requires active creation, not passive waiting. The retirees who thrive are those who approach retirement as a new chapter to author, not just an ending to endure.`,
+      keyInsights: [
+        { 
+          title: 'Work provides more than money', 
+          explanation: 'Structure, identity, social connection, purpose, intellectual engagement — work provides many things besides income. Retirement removes all of them simultaneously.' 
+        },
+        { 
+          title: 'Loss of identity is a grief process', 
+          explanation: 'If you were your job, retirement is a kind of death. The grieving is appropriate and necessary before rebuilding.' 
+        },
+        { 
+          title: 'Freedom can feel like emptiness', 
+          explanation: 'Unstructured time sounds wonderful until you have endless amounts of it. Humans need structure; creating your own requires effort.' 
+        },
+        { 
+          title: 'Significance must be recreated', 
+          explanation: 'If your sense of mattering came from work, you need new ways to feel significant. Volunteering, mentoring, creative pursuits, relationships — these can provide meaning, but you have to build them.' 
+        },
+        {
+          title: 'Relationships shift',
+          explanation: 'Daily proximity to your partner increases dramatically. Work friendships may fade without the workplace. New social structures need to be consciously created.'
+        }
+      ],
+      whatHelps: [
+        'Expect an adjustment period — it takes 1-2 years for most people to find their footing',
+        'Create structure — have reasons to get up, places to be, regular rhythms',
+        'Find new sources of purpose — volunteering, mentoring, creating, contributing',
+        'Maintain and build social connections — loneliness is a major risk',
+        'Explore new identities — what might you become now?',
+        'Give yourself permission to not be productive — rest is allowed',
+        'Address practical concerns: finances, health insurance, healthcare',
+        'Consider part-time work or consulting if full retirement feels like too much too fast',
+      ],
+      professionalNote: 'Depression in retirement is common but often unrecognized. If the adjustment period extends beyond a year or two with persistent low mood, consider talking to a mental health professional.'
+    },
+    reflectionQuestions: [
+      'If you\'re not your job title, who are you? What else defines you?',
+      'What did work provide that you need to find elsewhere?',
+      'What does a meaningful retirement look like for you specifically — not the cultural script?',
+    ],
+    relatedLessons: ['hm-trans-identity-shifts', 'hm-trans-empty-nest', 'hm-work-job-identity'],
+  },
+  {
+    id: 'hm-trans-midlife-crisis',
+    title: 'Midlife Crisis: The Reevaluation',
+    category: 'life-transitions',
+    duration: 8,
+    emoji: '🔄',
+    content: {
+      introduction: `The term "midlife crisis" has become a punchline — the sports car, the affair, the desperate grasp at youth. But beneath the clichés is a legitimate psychological experience: a profound reassessment of life that often happens somewhere between 40 and 60, when mortality becomes real and the question "Is this all there is?" demands an answer.
+
+At midlife, you've lived long enough to see what choices led where. Dreams pursued and dreams abandoned. Relationships that worked and ones that didn't. A career that fulfilled or one that just paid bills. You may have achieved what you thought you wanted and found it hollow, or failed to achieve it and faced the grief of closed doors. Either way, the question of meaning becomes urgent.
+
+This is actually developmentally normal. Erik Erikson called the midlife task "generativity vs. stagnation" — the need to contribute something that outlasts you, to matter beyond yourself. When that need isn't met, or when you realize your life hasn't matched your values, crisis emerges.
+
+The "crisis" can be destructive — impulsive decisions that blow up your life without addressing the underlying questions. Or it can be generative — a genuine reassessment that leads to more authentic living. The difference is whether you react impulsively to escape the discomfort, or sit with the questions long enough to find real answers.`,
+      keyInsights: [
+        { 
+          title: 'The crisis is a question, not a diagnosis', 
+          explanation: '"Is this life worth living? Is this who I want to be? What do I want my remaining years to mean?" These are legitimate questions that deserve serious engagement.' 
+        },
+        { 
+          title: 'Mortality becomes real', 
+          explanation: 'At midlife, death stops being abstract. You may have more years behind you than ahead. This awareness can be terrifying or clarifying — often both.' 
+        },
+        { 
+          title: 'Impulsive decisions are reactions, not answers', 
+          explanation: 'The sports car, the affair, the sudden career change — these often attempt to escape the questions rather than answer them. Temporary relief, lasting regret.' 
+        },
+        { 
+          title: 'Values realignment is the work', 
+          explanation: 'The real task of midlife is aligning how you live with what actually matters to you. This may require changes, but they should be thoughtful, not reactive.' 
+        },
+        {
+          title: 'Grief is part of the process',
+          explanation: 'You may need to grieve roads not taken, younger selves who had more options, dreams that won\'t happen now. This grief is necessary for moving forward.'
+        }
+      ],
+      whatHelps: [
+        'Take the questions seriously — don\'t dismiss or suppress them',
+        'Slow down before making major decisions — urgency often leads to regret',
+        'Examine your values: What actually matters to you? Is your life reflecting that?',
+        'Grieve what needs grieving — lost youth, closed doors, unlived lives',
+        'Seek meaning through generativity — what can you contribute that outlasts you?',
+        'Therapy or coaching can help navigate without blowing things up',
+        'Talk to others in midlife — you\'re not alone in this questioning',
+      ],
+      professionalNote: 'Existential therapy is specifically designed for questions of meaning, mortality, freedom, and isolation that arise at midlife. Not all therapists are trained in this approach — seek one who is if these questions are central.'
+    },
+    reflectionQuestions: [
+      'What questions about your life have you been avoiding?',
+      'If you knew you had 20 good years left, what would you change about how you\'re living?',
+      'What would you regret not doing or being if your life ended today?',
+    ],
+    relatedLessons: ['hm-trans-identity-shifts', 'hm-trans-aging-mortality', 'hm-work-job-identity'],
+  },
+  {
+    id: 'hm-trans-aging-mortality',
+    title: 'Aging & Mortality: Facing the End',
+    category: 'life-transitions',
+    duration: 9,
+    emoji: '🕯️',
+    content: {
+      introduction: `Death is the one certainty we spend most of our lives avoiding. But as you age — as your body changes, as friends and family members die, as your own mortality becomes undeniable — the avoidance becomes impossible. Facing death is perhaps the most profound psychological task a human can undertake.
+
+Existentialists suggest that death awareness can either paralyze us with anxiety or liberate us to live more fully. When you truly accept that your time is limited, trivial concerns fall away. What matters becomes clear. Many people report that confronting mortality — through illness, loss, or simply aging — fundamentally reorients their priorities toward what's actually meaningful.
+
+But getting to that clarity often requires passing through terror. The fear of non-existence, of leaving loved ones, of suffering, of the unknown — these are universal human fears that become more present as death becomes more proximate. There's no shame in fearing death. The question is whether fear will dominate your remaining life or whether you can find a way to hold it while still living fully.
+
+Preparation matters — not just the practical kind (wills, advance directives) but the psychological kind. Processing your relationship to death, having conversations with loved ones, deciding how you want to live in whatever time remains. These are not morbid preoccupations but essential preparations for the one experience no one escapes.`,
+      keyInsights: [
+        { 
+          title: 'Death awareness clarifies life', 
+          explanation: 'Paradoxically, accepting mortality often improves quality of life. When time is clearly finite, priorities become clear and trivial concerns diminish.' 
+        },
+        { 
+          title: 'Fear is normal but not final', 
+          explanation: 'Terror of death is a universal human experience. It doesn\'t have to be overcome to live well — it can be acknowledged and coexisted with.' 
+        },
+        { 
+          title: 'Legacy is a fundamental need', 
+          explanation: 'Most people want to matter beyond their death — through children, work, impact, memory. Addressing this need directly can reduce death anxiety.' 
+        },
+        { 
+          title: 'Conversations about death are gifts', 
+          explanation: 'Talking with loved ones about death — your wishes, fears, and what you want them to know — is uncomfortable but precious. These conversations often become treasured after you\'re gone.' 
+        },
+        {
+          title: 'Practical preparation reduces anxiety',
+          explanation: 'Having your affairs in order — will, advance directive, expressed wishes — provides relief. Knowing your loved ones won\'t have to guess reduces burden on everyone.'
+        }
+      ],
+      whatHelps: [
+        'Allow yourself to think about death — avoidance increases anxiety long-term',
+        'Have conversations with loved ones about death and wishes',
+        'Complete practical preparations: will, advance directive, organized documents',
+        'Consider what legacy means to you — not just material, but impact, memory, meaning',
+        'Practice mindfulness or contemplation to build comfort with impermanence',
+        'Connect with community around aging and mortality — churches, groups, hospice volunteers',
+        'Consider what "a good death" means to you and communicate it',
+      ],
+      professionalNote: 'Existential therapy specifically addresses death anxiety. Palliative care teams include social workers and chaplains who help with psychological and spiritual aspects of facing death. Hospice philosophy emphasizes living fully until death.'
+    },
+    reflectionQuestions: [
+      'What would you do differently if you truly accepted that your time is limited?',
+      'What conversations do you need to have with people you love before it\'s too late?',
+      'What would constitute a "good death" for you? A "good life" in whatever time remains?',
+    ],
+    relatedLessons: ['hm-trans-aging', 'hm-trans-midlife-crisis', 'hm-trans-grief-all-kinds'],
+  },
+  {
+    id: 'hm-trans-poverty',
+    title: 'Poverty & Financial Insecurity: Survival Mode',
+    category: 'life-transitions',
+    duration: 9,
+    emoji: '💸',
+    content: {
+      introduction: `Poverty is not a moral failing. It's a circumstance that affects every dimension of life — not just your bank account, but your health, relationships, mental state, and opportunities. Living in financial insecurity means living in survival mode, where the cognitive load of constant scarcity makes everything else harder.
+
+Research shows that poverty taxes cognitive bandwidth. When you're worried about whether you can pay rent or buy groceries, there's less mental capacity for anything else. This isn't a character defect — it's a predictable effect of scarcity on the brain. Poor people aren't worse at decisions; they're making decisions under conditions that make everyone worse at decisions.
+
+The stress of financial insecurity is chronic and relentless. It's not knowing if you'll have enough this month. It's choosing between medications and heat. It's the shame when you can't give your kids what others have. It's being one emergency away from disaster. This constant stress has documented effects on physical health, mental health, and relationships.
+
+Society often blames individuals for poverty while ignoring systemic causes: wage stagnation, housing costs, healthcare costs, lack of social safety nets. The narrative that anyone can make it with hard work ignores that many people work extremely hard and still can't get ahead. Understanding poverty as a systemic issue, not a personal failing, is essential for both policy change and self-compassion.`,
+      keyInsights: [
+        { 
+          title: 'Poverty is cognitively expensive', 
+          explanation: 'Scarcity consumes mental bandwidth. The constant calculations, trade-offs, and worry leave less capacity for other decisions. This is neuroscience, not laziness.' 
+        },
+        { 
+          title: 'Chronic stress has health consequences', 
+          explanation: 'Living in financial insecurity keeps your stress system activated long-term. This contributes to heart disease, weakened immunity, depression, and other health problems.' 
+        },
+        { 
+          title: 'Shame compounds the problem', 
+          explanation: 'In a culture that equates wealth with worth, poverty carries stigma. This shame adds psychological burden and can prevent people from seeking help.' 
+        },
+        { 
+          title: 'Systemic causes matter', 
+          explanation: 'Poverty is often blamed on individual choices while ignoring stagnant wages, housing costs, healthcare costs, and inadequate safety nets. Personal responsibility exists within systems that constrain options.' 
+        },
+        {
+          title: 'Survival mode limits long-term thinking',
+          explanation: 'When you\'re focused on making it through today, it\'s hard to plan for next year. This isn\'t shortsightedness — it\'s an appropriate response to immediate survival needs.'
+        }
+      ],
+      whatHelps: [
+        'Release shame — poverty is a circumstance, not a character judgment',
+        'Access every resource available — you\'ve paid into these systems; use them',
+        'Connect with others in similar situations — community reduces isolation',
+        'Prioritize ruthlessly when you can\'t do everything',
+        'Protect mental health as much as possible given constraints',
+        'Advocate for systemic change — your experience gives you expertise',
+        'Make plans, even small ones — agency helps even when options are limited',
+      ],
+      professionalNote: 'Financial counseling, social workers, and community organizations can help navigate resources. Many mental health services offer sliding scale fees. 211 is a resource line that can connect you with local assistance.'
+    },
+    reflectionQuestions: [
+      'How has financial stress affected your mental and physical health?',
+      'What shame messages about poverty have you internalized that you could challenge?',
+      'What resources might be available that you haven\'t accessed?',
+    ],
+    relatedLessons: ['hm-trans-housing-instability', 'hm-stress-overwhelm', 'hm-mh-depression-truth'],
+  },
+  {
+    id: 'hm-trans-housing-instability',
+    title: 'Homelessness & Housing Instability',
+    category: 'life-transitions',
+    duration: 9,
+    emoji: '🏚️',
+    content: {
+      introduction: `Housing instability exists on a spectrum — from living in shelters or on the street, to couch surfing with friends, to constantly fearing eviction. All forms of housing insecurity create profound stress and make every other aspect of life harder. A stable address is the foundation that most other stability builds on.
+
+Homelessness is dehumanizing in ways that are hard to understand without experiencing it. The lack of privacy, the constant vulnerability, the way people look through you or around you, the impossibility of doing basic things like showering or storing belongings. The message from society is clear: you don't matter. Fighting against that message while trying to survive is exhausting.
+
+The causes of homelessness are complex: mental illness, addiction, job loss, domestic violence, lack of affordable housing, medical bankruptcy, and more. But whatever the pathway into homelessness, the experience itself creates additional trauma and barriers to escape. It's hard to get a job without an address. It's hard to stay sober without stability. The system creates obstacles at every turn.
+
+Recovery from housing instability is not just about getting a roof overhead — it's about recovering from the trauma of instability itself. The hypervigilance, the shame, the grief for what was lost, and the difficulty trusting stability when you've learned that security can vanish. These psychological wounds need attention alongside practical housing solutions.`,
+      keyInsights: [
+        { 
+          title: 'Housing is foundation', 
+          explanation: 'Without stable housing, almost nothing else is possible. Job searching, medical care, mental health, relationships — all require a foundation of secure housing.' 
+        },
+        { 
+          title: 'Homelessness is traumatic', 
+          explanation: 'The experience of being unhoused is itself a trauma, creating hypervigilance, shame, and psychological wounds that persist even after housing is obtained.' 
+        },
+        { 
+          title: 'The system creates barriers', 
+          explanation: 'Need ID to get housing, need address to get ID. Need work history for jobs, need address for work history. The system is designed in ways that make escape difficult.' 
+        },
+        { 
+          title: 'Multiple causes, one result', 
+          explanation: 'Mental illness, addiction, job loss, medical crisis, domestic violence, rising rents — many paths lead to homelessness. Assuming any single cause is a mistake.' 
+        },
+        {
+          title: 'Recovery includes psychological healing',
+          explanation: 'Getting housed is just the first step. The trauma of instability, the difficulty trusting security, the lingering hypervigilance — these need processing too.'
+        }
+      ],
+      whatHelps: [
+        'Access every available resource: shelters, housing programs, social services',
+        'Protect important documents — ID, Social Security card, any records',
+        'Connect with case workers who can help navigate systems',
+        'Maintain connections — isolation is dangerous physically and psychologically',
+        'Once housed: expect adjustment period; instability leaves marks',
+        'Seek trauma-informed support for the experience of homelessness itself',
+        'Advocate: your lived experience is expertise that policymakers need',
+      ],
+      warningSign: 'Homelessness dramatically increases risk for assault, illness, and death. If you\'re currently unhoused, please prioritize physical safety and accessing any available shelter or services.',
+      professionalNote: 'Many organizations provide services specifically for people experiencing homelessness. The National Alliance to End Homelessness and local 211 lines can connect you with resources.'
+    },
+    reflectionQuestions: [
+      'If you\'ve experienced housing instability, what wounds from that experience haven\'t fully healed?',
+      'What barriers in the system have you encountered, and how might they be challenged?',
+      'What would true stability feel like in your body, and what makes that hard to trust?',
+    ],
+    relatedLessons: ['hm-trans-poverty', 'hm-mh-trauma-basics', 'hm-stress-overwhelm'],
+  },
+  {
+    id: 'hm-trans-immigration',
+    title: 'Immigration & Cultural Displacement',
+    category: 'life-transitions',
+    duration: 10,
+    emoji: '🌍',
+    content: {
+      introduction: `Immigration is one of the most profound upheavals a person can experience. Whether you left by choice seeking opportunity, or by necessity fleeing danger, you've been uprooted from everything familiar — language, culture, relationships, landscapes, foods, the way things work. You're building a new life while grieving the old one, navigating a foreign system while processing loss.
+
+The stress of immigration goes beyond practical challenges. There's the grief of leaving home, family, and everything you knew. The disorientation of existing in a culture you don't fully understand. The exhaustion of everything requiring extra effort — simple tasks become complicated when you don't know the language, the systems, the unwritten rules. And often, the experience of being treated as "other" in ways that range from subtle to dangerous.
+
+For refugees and asylum seekers, trauma precedes and compounds the immigration stress. You may be processing violence, persecution, loss of family members, dangerous journeys — all while trying to establish yourself in a new country that may not welcome you. The cumulative burden is immense.
+
+Cultural identity becomes complicated. You may feel caught between cultures — not fully belonging to your homeland anymore, but not fully belonging to the new country either. Your children may assimilate faster than you, creating family tension. The question "Where are you from?" has no simple answer when home is complicated.
+
+Despite all this, immigrants demonstrate remarkable resilience. Building a life in a new country while carrying all this weight is an enormous achievement, even when it doesn't feel like one.`,
+      keyInsights: [
+        { 
+          title: 'Immigration is multiple losses at once', 
+          explanation: 'You\'ve lost home, culture, language community, extended family, professional status, the comfort of knowing how things work. Each loss deserves grief.' 
+        },
+        { 
+          title: 'Everything is harder', 
+          explanation: 'Tasks that were automatic become effortful. The cognitive and emotional load of operating in a foreign culture is exhausting, even when things are going well.' 
+        },
+        { 
+          title: 'Identity becomes complicated', 
+          explanation: 'You may feel between cultures — no longer fully belonging to your homeland, but not fully belonging here either. This in-between space is disorienting but can also be generative.' 
+        },
+        { 
+          title: 'Generational tension is common', 
+          explanation: 'Children often assimilate faster, creating family conflict. They may reject heritage culture; you may feel you\'re losing them to a foreign culture. This tension is painful for everyone.' 
+        },
+        {
+          title: 'Resilience is the story, not just struggle',
+          explanation: 'Immigration requires extraordinary courage and adaptability. The focus on challenges shouldn\'t overshadow the strength it takes to build a life in a new country.'
+        }
+      ],
+      whatHelps: [
+        'Grieve what you\'ve lost — homeland, relationships, your previous life',
+        'Connect with cultural community — others who share your background and understand',
+        'Maintain cultural practices that matter to you — food, language, traditions',
+        'Learn about the new culture while protecting your own',
+        'Access immigrant-specific resources — legal help, community organizations, ESL',
+        'Be patient with yourself — adjustment takes years, not months',
+        'Address trauma if applicable — immigration may have followed or included traumatic experiences',
+      ],
+      professionalNote: 'Culturally competent therapists who understand immigration stress — ideally from similar backgrounds or with specific training — can make a significant difference. Many communities have immigrant-serving organizations with mental health resources.'
+    },
+    reflectionQuestions: [
+      'What have you lost in immigration that you haven\'t fully grieved?',
+      'How do you experience the tension between cultures? Where does it cause the most pain?',
+      'What aspects of your heritage are most important to maintain, and how can you protect them?',
+    ],
+    relatedLessons: ['hm-trans-grief-all-kinds', 'hm-trans-identity-shifts', 'hm-world-minority-stress'],
+  },
+  {
+    id: 'hm-trans-military-veteran',
+    title: 'Military/Veteran Transition',
+    category: 'life-transitions',
+    duration: 9,
+    emoji: '🎖️',
+    content: {
+      introduction: `Military service creates a unique identity — one built on structure, mission, brotherhood and sisterhood, physical challenge, and a clear sense of purpose. Transitioning out of the military means losing all of that simultaneously. The question "Who am I as a civilian?" can feel impossible to answer after years of being defined by service.
+
+The military provided total structure: when to wake, what to wear, where to be, what to do. It provided purpose: a mission larger than yourself. It provided belonging: the intense bonds formed under shared hardship. Civilian life offers none of this automatically. You're suddenly responsible for creating your own structure, finding your own purpose, and building connections without the accelerant of shared service.
+
+For many veterans, the transition involves processing experiences that civilians can't understand. Combat, moral injury, loss of fellow service members, things witnessed or done — these experiences may have been compartmentalized during service and emerge during transition. The isolation of being unable to share these experiences with civilians who weren't there compounds the difficulty.
+
+Mental health challenges are common: PTSD, depression, anxiety, substance use, and tragically, suicide. These aren't weaknesses — they're predictable responses to extraordinary experiences and a difficult transition. Seeking help is not failure; it's the same mission adaptation that got you through service.
+
+The transition is not just leaving a job — it's leaving an identity, a community, and a way of being in the world. Treating it as a profound life transition, rather than just a career change, is essential.`,
+      keyInsights: [
+        { 
+          title: 'It\'s an identity crisis, not just job change', 
+          explanation: 'Military service becomes who you are, not just what you do. Leaving it creates a vacuum of identity, purpose, and belonging that civilian employment doesn\'t automatically fill.' 
+        },
+        { 
+          title: 'Structure must be rebuilt from scratch', 
+          explanation: 'The military provided total structure. Civilian life requires creating your own — and the absence of external structure can be disorienting rather than freeing.' 
+        },
+        { 
+          title: 'The bonds are irreplaceable', 
+          explanation: 'Relationships forged under fire have an intensity that civilian friendships rarely match. Grieving that level of connection while building new relationships is part of the process.' 
+        },
+        { 
+          title: 'Processing may be delayed', 
+          explanation: 'Experiences compartmentalized during service often surface during transition. What you didn\'t have time to process while deployed may demand attention now.' 
+        },
+        {
+          title: 'Seeking help is mission-appropriate',
+          explanation: 'In service, you were trained to adapt, overcome, and use available resources. Mental health support is a resource. Using it is adaptation, not weakness.'
+        }
+      ],
+      whatHelps: [
+        'Connect with other veterans — they understand without explanation',
+        'Create structure deliberately — your own schedule, routines, responsibilities',
+        'Find new purpose — what mission can your skills serve now?',
+        'Translate your skills — you have valuable capabilities, even if civilian employers don\'t immediately recognize them',
+        'Access veteran-specific resources: VA, veteran service organizations, veteran employment programs',
+        'Address mental health: PTSD treatment, grief for fallen friends, moral injury processing',
+        'Be patient — transition takes years, not months',
+      ],
+      warningSign: 'Veteran suicide is a crisis. If you\'re struggling with suicidal thoughts, please reach out: Veterans Crisis Line: 988 (press 1) or text 838255. You served; now let others serve you.',
+      professionalNote: 'Many VA and veteran-serving mental health providers specialize in transition challenges, PTSD, and military-specific experiences. Evidence-based treatments like CPT and PE for PTSD are effective.'
+    },
+    reflectionQuestions: [
+      'What did military service provide that civilian life doesn\'t? How can you find those things in new ways?',
+      'What experiences from service have you not fully processed?',
+      'What would maintaining the best of your service identity look like in civilian life?',
+    ],
+    relatedLessons: ['hm-trans-identity-shifts', 'hm-mh-trauma-basics', 'hm-trans-retirement-identity'],
+  },
+  {
+    id: 'hm-trans-incarceration',
+    title: 'Incarceration Impact: On Individuals and Families',
+    category: 'life-transitions',
+    duration: 10,
+    emoji: '🔒',
+    content: {
+      introduction: `Incarceration doesn't just affect the person behind bars — it ripples through families, communities, and generations. Whether you've been incarcerated yourself or you're dealing with the incarceration of a family member, the impacts are profound, lasting, and often invisible to those who haven't experienced them.
+
+For those who've been incarcerated: The experience is traumatic. The loss of freedom, the violence and dehumanization of the prison environment, the separation from everyone you love. And then reentry compounds the trauma with impossible obstacles: employment discrimination, housing restrictions, probation requirements, lost relationships, and a society that treats "ex-con" as a permanent identity. The barriers to rebuilding a life are systemic and relentless.
+
+For families: The incarceration of a parent, partner, child, or sibling creates cascading crises. Financial hardship from lost income and costs of maintaining contact. Children's trauma from parental separation and stigma. Relationship strain from enforced distance and the changes that occur on both sides. The grief of losing someone who's still alive but inaccessible. And the stigma — the way society treats families of incarcerated people as tainted by association.
+
+Mass incarceration is a public health crisis, not just a criminal justice issue. The trauma, family disruption, community destruction, and intergenerational effects are massive. Understanding incarceration as a life circumstance that affects whole systems — not just individuals who "deserve" it — is essential for healing.`,
+      keyInsights: [
+        { 
+          title: 'Incarceration is trauma', 
+          explanation: 'The prison environment itself is traumatizing: violence, dehumanization, powerlessness, separation from loved ones. PTSD and other trauma responses are common and expected.' 
+        },
+        { 
+          title: 'Reentry barriers are systemic', 
+          explanation: 'Employment discrimination, housing restrictions, loss of benefits, voting rights — the system creates obstacles to rebuilding life at every turn. This isn\'t paranoia; it\'s policy.' 
+        },
+        { 
+          title: 'Families are co-victims', 
+          explanation: 'Children, partners, and parents of incarcerated people suffer trauma, stigma, financial hardship, and grief — often with no recognition or support.' 
+        },
+        { 
+          title: 'Stigma is lifelong', 
+          explanation: 'Society treats a felony record as a permanent identity marker. The assumption that you\'re defined forever by your worst moment (or worst accusation) is dehumanizing and counterproductive.' 
+        },
+        {
+          title: 'Intergenerational impact is documented',
+          explanation: 'Children of incarcerated parents have higher rates of trauma, mental health challenges, poverty, and incarceration themselves. The cycle perpetuates unless actively interrupted.'
+        }
+      ],
+      whatHelps: [
+        'For those incarcerated or formerly incarcerated:',
+        'Access reentry services: housing, employment, mental health, case management',
+        'Connect with others who understand — reentry programs, support groups',
+        'Address trauma from incarceration itself — it was traumatic, regardless of why you were there',
+        'Know your rights regarding disclosure, expungement, restoration',
+        'For families:',
+        'Maintain connection during incarceration as much as possible',
+        'Access family support services — they exist, though often under-publicized',
+        'Explain to children in age-appropriate ways; secrets and shame worsen trauma',
+        'Allow yourself to grieve — this is a loss, even if temporary',
+        'Seek therapy for yourself and children to process the trauma',
+      ],
+      professionalNote: 'Trauma-informed care that understands incarceration is essential. Many reentry programs include mental health services. Organizations like the National Institute of Corrections and Vera Institute provide resources.'
+    },
+    reflectionQuestions: [
+      'If you\'ve been incarcerated: What trauma from that experience still needs processing?',
+      'If a family member has been incarcerated: How has that affected you, and where has that impact been invisible to others?',
+      'What barriers to rebuilding are systemic vs. personal? How does distinguishing them help?',
+    ],
+    relatedLessons: ['hm-mh-trauma-basics', 'hm-trans-identity-shifts', 'hm-trans-poverty'],
+  },
+  {
+    id: 'hm-trans-chronic-illness',
+    title: 'Living with a Chronic Illness Diagnosis',
+    category: 'life-transitions',
+    duration: 9,
+    emoji: '💊',
+    content: {
+      introduction: `A chronic illness diagnosis divides your life into before and after. Before, you could take your health for granted, make plans without considering your body's limitations, assume that wellness was your default state. After, everything requires recalibration. Your body is no longer a reliable partner but something that needs constant management, monitoring, and accommodation.
+
+The grief is enormous and ongoing. You grieve the healthy self you were. You grieve the future you expected. You grieve spontaneity, energy, the ability to do what others do without thinking. And because you're still alive, people may not recognize this as grief. "At least you're not dying." But living with chronic illness is its own kind of loss that deserves acknowledgment.
+
+Chronic illness affects every domain of life: work (can you still do your job? will your employer accommodate?), relationships (will people stay? can you be the partner/parent/friend you want to be?), finances (medical costs, reduced work capacity), identity (who are you if not the active/healthy/productive person you were?), and daily existence (medication schedules, symptom management, good days and bad days).
+
+The uncertainty is particularly hard. Will it progress? Are these symptoms normal or concerning? Can you commit to plans when you don't know how you'll feel? Living with uncertainty while also trying to build a meaningful life is an ongoing challenge that healthy people rarely appreciate.`,
+      keyInsights: [
+        { 
+          title: 'This is a major life transition', 
+          explanation: 'Chronic illness diagnosis is not just a medical event — it\'s a before/after divide in your life that affects identity, relationships, work, and purpose.' 
+        },
+        { 
+          title: 'Grief is ongoing, not one-time', 
+          explanation: 'Each new limitation, each flare, each thing you can no longer do — these are new losses to grieve. The grief doesn\'t end; you learn to carry it.' 
+        },
+        { 
+          title: 'Invisibility creates its own burden', 
+          explanation: 'Many chronic illnesses are invisible. You don\'t look sick, so people don\'t understand why you can\'t do things. Managing others\' perceptions becomes another exhausting task.' 
+        },
+        { 
+          title: 'Your relationship with your body changes', 
+          explanation: 'Your body may feel like a betrayer, an unreliable machine, or a fragile vessel. Rebuilding relationship with your body — neither ignoring it nor resenting it — is part of adaptation.' 
+        },
+        {
+          title: 'Medical trauma is common',
+          explanation: 'The healthcare system can be retraumatizing: not being believed, harmful treatments, depersonalization. Many chronically ill people develop medical trauma on top of the illness itself.'
+        }
+      ],
+      whatHelps: [
+        'Grieve fully — this is a real loss and deserves real grief',
+        'Find your people — online communities, support groups, others with your condition',
+        'Pace yourself — learn your limits and respect them (even when you hate them)',
+        'Advocate in healthcare — you\'re the expert on your body',
+        'Communicate with loved ones about what you need and what\'s changed',
+        'Adapt identity — find who you are now, not who you were',
+        'Practice self-compassion — you\'re doing something hard',
+        'Address mental health — chronic illness and depression/anxiety often co-occur',
+      ],
+      professionalNote: 'Many therapists specialize in chronic illness or health psychology. Support groups, both in-person and online, can provide validation and practical knowledge that professionals lack.'
+    },
+    reflectionQuestions: [
+      'What have you lost to this illness that you haven\'t fully grieved?',
+      'How has your relationship with your body changed since diagnosis?',
+      'What would a meaningful life look like given your current reality — not the one you wish you had?',
+    ],
+    relatedLessons: ['hm-trans-grief-all-kinds', 'hm-trans-chronic-pain', 'hm-trans-disability'],
   },
 ];
 
