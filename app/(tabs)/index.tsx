@@ -25,7 +25,13 @@ import { useDailyContentStore } from '../../src/stores/dailyContentStore';
 import { generateDailyContent } from '../../src/services/personalization';
 import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import { Ionicons } from '@expo/vector-icons';
-import { WeeklyInsightCard } from '../../src/components/WeeklyInsightCard';
+import { CrisisPipelineAlert, useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
+import { StabilizationBanner } from '../../src/components/StabilizationBanner';
+import { SystemModeBanner } from '../../src/components/SystemModeBanner';
+import JustInTimeCard from '../../src/components/JustInTimeCard';
+import PredictiveWarningBanner from '../../src/components/PredictiveWarningBanner';
+import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
+import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
 
@@ -387,21 +393,113 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
     >
-      {/* 1. Quick Action Pills — very top, no header */}
-      <View style={styles.quickActionsWrap}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
-          {(() => {
-            const quickActions = [
-              { label: 'Prompts', icon: 'sparkles', route: '/(modals)/prompt-generator' as const, iconIsEmoji: false as const },
-              { label: 'Patterns', icon: 'analytics', route: '/(modals)/patterns' as const, iconIsEmoji: false as const },
-              { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const, iconIsEmoji: false as const },
-              { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const, iconIsEmoji: false as const },
-              { label: 'Relate', icon: 'heart-circle', route: '/(modals)/relate' as const, iconIsEmoji: false as const },
-              { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const, iconIsEmoji: false as const },
-              { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const, iconIsEmoji: false as const },
-              { label: 'Help', icon: 'heart', route: '/(modals)/help-someone' as const, iconIsEmoji: false as const },
-            ];
-            return quickActions.map((action) => (
+      {/* ═══════════════════════════════════════════════════════════════
+          1. GREETING + STREAK — Personal anchor at TOP
+          ═══════════════════════════════════════════════════════════════ */}
+      <Animated.View style={[styles.greetingSection, slideY(card0)]}>
+        {dailyContentLoading ? (
+          <Text style={styles.greetingText}>Loading...</Text>
+        ) : (
+          <Text style={styles.greetingText}>{greetingLine} 💜</Text>
+        )}
+        {streak > 0 && (
+          <View style={styles.streakBadge}>
+            <Text style={styles.streakEmoji}>🔥</Text>
+            <Text style={styles.streakText}>{streak}-day streak</Text>
+          </View>
+        )}
+      </Animated.View>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SYSTEM MODE BANNER — Shows stability status with smooth animation
+          Capacity Mode: Purple/green, "Your system is stable"
+          Stabilization Mode: Amber, "Focus on [triggers]"
+          ═══════════════════════════════════════════════════════════════ */}
+      <Animated.View style={slideY(card0)}>
+        <SystemModeBanner
+          mode={systemMode}
+          triggers={stabilizationTriggers}
+          hidden={activeGaugeCount < 1}
+          onQuickReset={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            // Navigate to 2-minute regulation reset
+            router.push('/(modals)/quick-reset');
+          }}
+        />
+      </Animated.View>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          2. COCKPIT CLUSTER — Center ring + 6 gauges in hex pattern
+          ═══════════════════════════════════════════════════════════════ */}
+      <Animated.View style={[styles.cockpitSection, slideY(card0)]}>
+        <View style={styles.cockpitHeader}>
+          <Text style={styles.cockpitTitle}>Your Cockpit</Text>
+          <Pressable
+            style={styles.gaugeInfoButton}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowGaugeInfo(true);
+            }}
+          >
+            <Ionicons name="information-circle-outline" size={20} color={TEXT_SECONDARY} />
+          </Pressable>
+        </View>
+        <CockpitCluster
+          gaugeValues={{
+            body: bodyVal,
+            state: stateVal,
+            emotion: emotionVal,
+            connection: connectionVal,
+            direction: directionVal,
+            alignment: alignmentVal,
+          }}
+          overall={overall}
+        />
+      </Animated.View>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          4. AI CROSS-SYSTEM INSIGHT — The magic
+          ═══════════════════════════════════════════════════════════════ */}
+      {showInsight && crossSystemInsight && (
+        <Animated.View style={[styles.insightCard, slideY(card1)]}>
+          <View style={styles.insightHeader}>
+            <Ionicons name="bulb" size={18} color={ACCENT} />
+            <Text style={styles.insightLabel}>Cross-System Insight</Text>
+          </View>
+          <Text style={styles.insightText}>{crossSystemInsight}</Text>
+        </Animated.View>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          4b. PREDICTIVE WARNING — Trajectory alerts
+          ═══════════════════════════════════════════════════════════════ */}
+      {predictiveWarning && !dismissedWarning && (
+        <PredictiveWarningBanner 
+          warning={predictiveWarning} 
+          onDismiss={handleDismissWarning}
+        />
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          4c. JUST-IN-TIME LESSONS — Contextual learning
+          ═══════════════════════════════════════════════════════════════ */}
+      {jitLessons.length > 0 && (
+        <JustInTimeCard 
+          lesson={jitLessons[0]} 
+          onDismiss={() => handleDismissJitLesson(jitLessons[0].lessonId)}
+        />
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          5. QUICK ACTIONS — Horizontal scroll (secondary to gauges)
+          ═══════════════════════════════════════════════════════════════ */}
+      <Animated.View style={[styles.actionsSection, slideY(card2)]}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.actionsScroll}
+        >
+          {quickActions.map((action) => (
             <Pressable
               key={action.label}
               style={({ pressed }) => [styles.quickActionPill, pressed && styles.quickActionPressed]}

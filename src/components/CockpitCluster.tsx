@@ -13,7 +13,11 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from './gauges';
 import { getGaugeColor, getOverallStatusLabel, GAUGE_CONFIG } from '../utils/gaugeHelpers';
-import { BiometricIndicator, type BiometricSource } from './BiometricIndicator';
+import { useCockpitStore, type GaugeKey } from '../stores/cockpitStore';
+import { COLORS } from '../lib/constants';
+
+const AMBER = COLORS.amber;
+const AMBER_GLOW = COLORS.amberGlow;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
