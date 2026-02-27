@@ -3,7 +3,7 @@
  * Supports text paste OR screenshot attachment.
  * Includes Social Physics trajectory predictions.
  */
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,16 +20,28 @@ import {
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
 import { sendMessageWithSystemPrompt, analyzeImageWithVision } from '../../src/services/ai';
 import { 
-  calculateTrajectory, 
-  formatImpact, 
+  calculateTrajectory,
   type ResponseIntent,
   type PartnerState 
 } from '../../src/services/socialPhysics';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
+
+// Lazy load ImagePicker to prevent crash on component mount
+let ImagePickerModule: typeof import('expo-image-picker') | null = null;
+const getImagePicker = async () => {
+  if (!ImagePickerModule) {
+    try {
+      ImagePickerModule = await import('expo-image-picker');
+    } catch (e) {
+      console.warn('ImagePicker not available:', e);
+      return null;
+    }
+  }
+  return ImagePickerModule;
+};
 
 const DECODE_SYSTEM = `You are Gauge in InGauge "Decode" mode. The user pasted a message someone sent them.
 
@@ -96,15 +108,34 @@ export default function DecodeScreen() {
   const [loading, setLoading] = useState(false);
   const [selectedIntent, setSelectedIntent] = useState<ResponseIntent | null>(null);
   const [partnerState, setPartnerState] = useState<PartnerState>({});
+  const [error, setError] = useState<string | null>(null);
+  const [imagePickerAvailable, setImagePickerAvailable] = useState(true);
   
-  // Stabilization mode
-  const systemMode = useCockpitStore((s) => s.systemMode);
-  const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers);
+  // Stabilization mode - hooks must be called unconditionally (Rules of Hooks)
+  const systemMode = useCockpitStore((s) => s.systemMode) ?? 'capacity';
+  const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers) ?? [];
+  
   const [showCaution, setShowCaution] = useState(systemMode === 'stabilization');
   const isStabilization = systemMode === 'stabilization';
 
-  const pickImage = async () => {
+  // Check if ImagePicker is available on mount
+  useEffect(() => {
+    getImagePicker().then((picker) => {
+      setImagePickerAvailable(picker !== null);
+    }).catch(() => {
+      setImagePickerAvailable(false);
+    });
+  }, []);
+
+  const pickImage = useCallback(async () => {
+    setError(null);
     try {
+      const ImagePicker = await getImagePicker();
+      if (!ImagePicker) {
+        Alert.alert('Not available', 'Photo library is not available. Please paste the text instead.');
+        return;
+      }
+
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (!permissionResult.granted) {
@@ -121,32 +152,42 @@ export default function DecodeScreen() {
 
       if (!result.canceled && result.assets?.[0]) {
         const asset = result.assets[0];
-        setImageUri(asset.uri);
+        setImageUri(asset.uri ?? null);
         setImageBase64(asset.base64 ?? null);
         setMessage('');
       }
-    } catch (error) {
-      console.warn('Image picker error:', error);
+    } catch (err) {
+      console.warn('Image picker error:', err);
       Alert.alert('Error', 'Could not access photos. Try pasting the text instead.');
     }
-  };
+  }, []);
 
   const removeImage = () => {
     setImageUri(null);
     setImageBase64(null);
   };
 
-  const onDecode = async () => {
+  const onDecode = useCallback(async () => {
     if (loading) return;
     if (!imageBase64 && message.trim().length < 3) return;
 
     setLoading(true);
+    setError(null);
+    
     try {
       let result: string | null = null;
 
       if (imageBase64) {
         const prompt = `Analyze this screenshot of a message I received.${sender ? ` It's from: ${sender}` : ''}`;
-        result = await analyzeImageWithVision(imageBase64, prompt, DECODE_VISION_SYSTEM);
+        try {
+          result = await analyzeImageWithVision(imageBase64, prompt, DECODE_VISION_SYSTEM);
+        } catch (visionErr) {
+          console.warn('Vision API error:', visionErr);
+          // Fall back to text-only if vision fails
+          setError('Could not analyze image. Please paste the text instead.');
+          setLoading(false);
+          return;
+        }
       } else {
         result = await sendMessageWithSystemPrompt(
           [{ role: 'user', content: `Message: "${message}"\n\nFrom: ${sender || 'someone'}` }],
@@ -157,22 +198,30 @@ export default function DecodeScreen() {
       const fullResponse = result?.trim() ?? 'Could not analyze. Try again.';
       setResponse(fullResponse);
 
-      // Detect sender state from response
-      const activatedMatch = fullResponse.match(/SENDER STATE[:\s]*ACTIVATED/i);
-      const shutdownMatch = fullResponse.match(/SENDER STATE[:\s]*SHUTDOWN/i);
-      setPartnerState({
-        isActivated: !!activatedMatch,
-        isShutdown: !!shutdownMatch,
-      });
+      // Detect sender state from response (safely)
+      try {
+        const activatedMatch = fullResponse.match(/SENDER STATE[:\s]*ACTIVATED/i);
+        const shutdownMatch = fullResponse.match(/SENDER STATE[:\s]*SHUTDOWN/i);
+        setPartnerState({
+          isActivated: !!activatedMatch,
+          isShutdown: !!shutdownMatch,
+        });
+      } catch (parseErr) {
+        // Non-critical - just skip state detection
+        console.warn('State detection failed:', parseErr);
+      }
 
-    } catch (error) {
-      console.warn('Decode error:', error);
-      setResponse('Something went wrong. Try again in a moment.');
+    } catch (err) {
+      console.warn('Decode error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Something went wrong: ${errorMessage}`);
+      setResponse('');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [loading, imageBase64, message, sender]);
 
-  const onReset = () => {
+  const onReset = useCallback(() => {
     setMessage('');
     setSender('');
     setImageUri(null);
@@ -180,12 +229,29 @@ export default function DecodeScreen() {
     setResponse('');
     setSelectedIntent(null);
     setPartnerState({});
-  };
+    setError(null);
+  }, []);
 
   const canDecode = imageBase64 || message.trim().length >= 3;
 
-  // Calculate trajectory for selected intent
-  const trajectory = selectedIntent ? calculateTrajectory(selectedIntent, partnerState) : null;
+  // Calculate trajectory for selected intent (wrapped for safety)
+  let trajectory = null;
+  try {
+    trajectory = selectedIntent ? calculateTrajectory(selectedIntent, partnerState) : null;
+  } catch (e) {
+    console.warn('Trajectory calculation error:', e);
+  }
+
+  // Safe navigation to quick-reset
+  const handleQuickReset = useCallback(() => {
+    setShowCaution(false);
+    try {
+      router.replace('/(modals)/quick-reset');
+    } catch (navErr) {
+      console.warn('Navigation error:', navErr);
+      router.back();
+    }
+  }, [router]);
 
   return (
     <>
@@ -195,10 +261,7 @@ export default function DecodeScreen() {
         toolName="Decode"
         triggers={stabilizationTriggers}
         onContinue={() => setShowCaution(false)}
-        onQuickReset={() => {
-          setShowCaution(false);
-          router.replace('/(modals)/quick-reset');
-        }}
+        onQuickReset={handleQuickReset}
       />
       
       <KeyboardAvoidingView
