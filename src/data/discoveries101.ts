@@ -511,13 +511,6 @@ export const DISCOVERIES_101: Discovery101[] = [
     source: 'Klimecki, O. et al. (2014). Cerebral Cortex',
     category: 'Connection',
   },
-  {
-    code: 'D102',
-    title: 'How You Respond to Good News',
-    insight: 'How you respond to good news matters more than how you respond to bad news. Enthusiastic engagement that asks questions ("That\'s amazing! Tell me more!") builds intimacy. Passive acknowledgment ("That\'s nice") actually erodes connection over time.',
-    source: 'Gable, S. et al. (2004). What Do You Do When Things Go Right? Journal of Personality and Social Psychology',
-    category: 'Connection',
-  },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // DIRECTION (D069-D085) - Purpose, goals, motivation, meaning
