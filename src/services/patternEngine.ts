@@ -116,9 +116,9 @@ function detectBodyStateLoop(history: GaugeSnapshot[]): NarrativePattern | null 
       type: 'feedback_loop',
       confidence,
       gauges: ['body', 'state'],
-      narrative: `In your recent data: When your Body dropped below 40, your State followed within 24 hours — this happened ${ratio}. Your system may have a Body → State feedback loop.`,
+      narrative: `In your data: When your Body dropped below 40, your State often followed within 24 hours — ${ratio}. Your system tends to have a Body → State feedback loop.`,
       frequency: ratio,
-      actionable: 'When Body runs low, proactively regulate State before it drops.',
+      actionable: 'When your Body runs low, consider regulating your State proactively.',
       dataPoints: history.length,
     };
   }
@@ -148,8 +148,8 @@ function detectConnectionSustained(history: GaugeSnapshot[]): NarrativePattern |
       type: 'trend',
       confidence: getConfidence(history.length),
       gauges: ['connection'],
-      narrative: `In your recent data: Your Connection gauge has been below 40 for ${days} days. Sustained isolation tends to pull other gauges down over time.`,
-      actionable: 'Even one real conversation can shift this. Who could you reach out to?',
+      narrative: `In your last ${days} days: Your Connection has stayed below 40. For your system, sustained isolation often pulls other gauges down.`,
+      actionable: 'Even one real conversation can shift this. Who might you reach out to?',
       dataPoints: history.length,
     };
   }
@@ -179,9 +179,9 @@ function detectStateEmotionCorrelation(history: GaugeSnapshot[]): NarrativePatte
       type: 'correlation',
       confidence: getConfidence(history.length),
       gauges: ['state', 'emotion'],
-      narrative: `In your recent data: When your State was activated (below 40), your Emotion clarity also dropped — ${ratio}. This suggests your emotional processing works better when your nervous system is regulated.`,
+      narrative: `In your data: When your State dropped below 40, your Emotion clarity also tended to fall — ${ratio}. Your emotional processing seems to work better when your nervous system is regulated.`,
       frequency: ratio,
-      actionable: 'Regulate State before trying to process emotions.',
+      actionable: 'Consider regulating your State before processing difficult emotions.',
       dataPoints: history.length,
     };
   }
@@ -208,8 +208,8 @@ function detectDirectionAlignmentCorrelation(history: GaugeSnapshot[]): Narrativ
       type: 'correlation',
       confidence: getConfidence(history.length),
       gauges: ['direction', 'alignment'],
-      narrative: `In your recent data: Direction and Alignment tend to move together for you. When purpose feels unclear, living your values also feels harder — and vice versa.`,
-      actionable: 'These gauges are connected. Addressing one often helps the other.',
+      narrative: `In your data: Direction and Alignment tend to move together. When your sense of purpose is unclear, living your values also seems harder — and the reverse appears true too.`,
+      actionable: 'For you, these gauges seem connected. Addressing one may help the other.',
       dataPoints: history.length,
     };
   }
@@ -245,7 +245,7 @@ function detectGaugeTrend(history: GaugeSnapshot[], gauge: GaugeKey): NarrativeP
       type: 'trend',
       confidence: getConfidence(history.length),
       gauges: [gauge],
-      narrative: `In your recent data: Your ${label} gauge has been trending upward. Whatever you're doing is working.`,
+      narrative: `In your recent check-ins: Your ${label} has been trending upward. Whatever you're doing seems to be working.`,
       dataPoints: history.length,
     };
   }
@@ -256,7 +256,7 @@ function detectGaugeTrend(history: GaugeSnapshot[], gauge: GaugeKey): NarrativeP
       type: 'trend',
       confidence: getConfidence(history.length),
       gauges: [gauge],
-      narrative: `In your recent data: Your ${label} gauge has been trending downward. This might be worth attention.`,
+      narrative: `In your recent check-ins: Your ${label} has been trending downward. This might be worth your attention.`,
       dataPoints: history.length,
     };
   }
@@ -329,10 +329,10 @@ export async function analyzePatterns(): Promise<PatternAnalysis> {
 export function formatConfidence(confidence: PatternConfidence): string {
   switch (confidence) {
     case 'early_signal':
-      return 'Early signal (not enough data to confirm)';
+      return 'Early signal';
     case 'emerging':
       return 'Emerging pattern';
     case 'established':
-      return 'Established pattern';
+      return 'Established in your data';
   }
 }

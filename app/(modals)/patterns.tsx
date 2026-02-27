@@ -25,6 +25,8 @@ import { useHealthStore } from '../../src/stores/healthStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { getEnvironmentContext, getMoonPhase, getTimeContext } from '../../src/services/environment';
 import { analyzePatterns, formatConfidence, type NarrativePattern, type PatternAnalysis } from '../../src/services/patternEngine';
+import { usePatternReadiness } from '../../src/hooks/usePatternReadiness';
+import { PatternsBuildingState } from '../../src/components/PatternsBuildingState';
 
 const BG = COLORS.background;
 const CARD_BG = COLORS.surface;
@@ -182,6 +184,16 @@ export default function PatternsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Pattern readiness check (minimum data gate)
+  const {
+    loading: readinessLoading,
+    isReady: patternsReady,
+    checkInCount,
+    neededForPatterns,
+    progressPercent,
+    message: readinessMessage,
+  } = usePatternReadiness();
   
   // Narrative patterns from pattern engine
   const [patternAnalysis, setPatternAnalysis] = useState<PatternAnalysis | null>(null);
@@ -433,19 +445,22 @@ export default function PatternsScreen() {
 
         {/* LONGITUDINAL PATTERNS - Narrative-first, data-grounded */}
         <Text style={styles.sectionTitle}>Cross-Gauge Patterns</Text>
-        {patternsLoading ? (
+        {readinessLoading || patternsLoading ? (
           <View style={styles.card}>
             <Text style={styles.loadingText}>Analyzing your history...</Text>
           </View>
-        ) : patternAnalysis && !patternAnalysis.hasMinimumData ? (
-          <InsufficientDataCard 
-            message={patternAnalysis.insufficientDataMessage || 'Keep checking in to reveal patterns.'} 
-            uniqueDays={patternAnalysis.uniqueDays}
+        ) : !patternsReady ? (
+          /* Pattern minimum data gate - show encouraging building state */
+          <PatternsBuildingState
+            checkInCount={checkInCount}
+            neededForPatterns={neededForPatterns}
+            progressPercent={progressPercent}
+            message={readinessMessage}
           />
         ) : patternAnalysis && patternAnalysis.patterns.length > 0 ? (
           <View style={styles.narrativeSection}>
             <Text style={styles.narrativeIntro}>
-              Based on {patternAnalysis.dataPoints} check-ins over {patternAnalysis.uniqueDays} days:
+              In your last {patternAnalysis.uniqueDays} days of check-ins:
             </Text>
             {patternAnalysis.patterns.map((pattern, i) => (
               <NarrativePatternCard key={pattern.id || i} pattern={pattern} />
@@ -454,7 +469,7 @@ export default function PatternsScreen() {
         ) : (
           <View style={styles.card}>
             <Text style={styles.noPatternsText}>
-              No strong patterns detected yet. Keep checking in — patterns reveal themselves over time.
+              No strong patterns detected yet in your data. Your gauges tend to vary — which can be a good thing. Keep checking in to see if patterns emerge.
             </Text>
           </View>
         )}

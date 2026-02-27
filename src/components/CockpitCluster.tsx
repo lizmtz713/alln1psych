@@ -14,9 +14,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from './gauges';
 import { getGaugeColor, getOverallStatusLabel, GAUGE_CONFIG } from '../utils/gaugeHelpers';
 import { useCockpitStore, type GaugeKey } from '../stores/cockpitStore';
+import { COLORS } from '../lib/constants';
 
-const AMBER = '#F59E0B';
-const AMBER_GLOW = 'rgba(245, 158, 11, 0.25)';
+const AMBER = COLORS.amber;
+const AMBER_GLOW = COLORS.amberGlow;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 

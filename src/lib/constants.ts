@@ -51,6 +51,12 @@ export const COLORS = {
   error: '#F87171',
   info: '#60A5FA',
   
+  // System mode colors
+  amber: '#F59E0B',
+  amberBg: 'rgba(245, 158, 11, 0.08)',
+  amberBorder: 'rgba(245, 158, 11, 0.20)',
+  amberGlow: 'rgba(245, 158, 11, 0.25)',
+  
   // Tool-specific accents
   rolePlayAccent: '#FFB74D',
   loveAccent: '#EC4899',

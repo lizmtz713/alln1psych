@@ -27,6 +27,8 @@ import { getPersonality, getRelationshipDynamic } from '../../src/services/perso
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
+import { useCockpitStore } from '../../src/stores/cockpitStore';
+import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
 import { COLORS, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 
 // Enable LayoutAnimation on Android
@@ -215,6 +217,12 @@ export default function Relate() {
   const [bioLoading, setBioLoading] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
 
+  // Stabilization mode
+  const systemMode = useCockpitStore((s) => s.systemMode) ?? 'capacity';
+  const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers) ?? [];
+  const [showCaution, setShowCaution] = useState(systemMode === 'stabilization');
+  const isStabilization = systemMode === 'stabilization';
+
   // Function to pre-fill Person 1 with user data and switch to compare
   const startCompareWithMe = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -395,26 +403,42 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
     { type: 'work', icon: '💼', label: 'Work', color: '#3B82F6' },
   ];
 
+  // Handle quick reset navigation
+  const handleQuickReset = () => {
+    setShowCaution(false);
+    router.replace('/(modals)/quick-reset');
+  };
+
   return (
-    <KeyboardAvoidingView
-      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={0}
-    >
-      {/* Header with gradient accent line */}
-      <View style={styles.header}>
-        <Pressable style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Relate</Text>
-        <View style={styles.headerRight} />
-      </View>
-      <LinearGradient
-        colors={RELATE_GRADIENT}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.headerAccent}
+    <>
+      {/* Stabilization Mode Caution */}
+      <ToolCautionModal
+        visible={showCaution && isStabilization}
+        toolName="Relate"
+        triggers={stabilizationTriggers}
+        onContinue={() => setShowCaution(false)}
+        onQuickReset={handleQuickReset}
       />
+      
+      <KeyboardAvoidingView
+        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={0}
+      >
+        {/* Header with gradient accent line */}
+        <View style={styles.header}>
+          <Pressable style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Relate</Text>
+          <View style={styles.headerRight} />
+        </View>
+        <LinearGradient
+          colors={RELATE_GRADIENT}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.headerAccent}
+        />
 
       <ScrollView
         ref={scrollRef}
@@ -951,8 +975,12 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
             </AnimatedCard>
           </>
         )}
+        
+        {/* Stabilization footer hint */}
+        {isStabilization && <StabilizationFooter />}
       </ScrollView>
     </KeyboardAvoidingView>
+    </>
   );
 }
 

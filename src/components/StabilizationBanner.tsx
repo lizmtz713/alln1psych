@@ -17,9 +17,9 @@ import * as Haptics from 'expo-haptics';
 import { GaugeKey, GAUGE_TIERS } from '../stores/cockpitStore';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../lib/constants';
 
-const AMBER = '#F59E0B';
-const AMBER_BG = 'rgba(245, 158, 11, 0.08)';
-const AMBER_BORDER = 'rgba(245, 158, 11, 0.20)';
+const AMBER = COLORS.amber;
+const AMBER_BG = COLORS.amberBg;
+const AMBER_BORDER = COLORS.amberBorder;
 
 interface StabilizationBannerProps {
   triggers: GaugeKey[];

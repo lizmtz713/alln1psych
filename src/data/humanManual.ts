@@ -30,6 +30,12 @@ export interface HumanManualLesson {
   };
   reflectionQuestions: string[];
   relatedLessons?: string[];
+  /** Gauges that can trigger this lesson as contextual suggestion */
+  triggerGauges?: ('body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment')[];
+  /** Threshold below which the lesson is suggested (default 40) */
+  triggerThreshold?: number;
+  /** When to suggest: 'stabilization' = only when system in stabilization mode, 'any' = anytime gauges match */
+  triggerMode?: 'stabilization' | 'any';
 }
 
 export interface HumanManualCategory {
@@ -192,6 +198,9 @@ And sometimes the hardest part is grieving the friendships that didn't survive t
       'Is there a friendship you need to grieve instead of trying to revive?',
     ],
     relatedLessons: ['hm-trans-identity-shifts', 'hm-stress-overwhelm'],
+    triggerGauges: ['connection'],
+    triggerThreshold: 45,
+    triggerMode: 'any',
   },
   {
     id: 'hm-rel-boundaries-protect',
@@ -334,6 +343,9 @@ The solution isn't just "put yourself out there." It's recognizing that the lone
       'What keeps you from reaching out when you\'re lonely?',
     ],
     relatedLessons: ['hm-rel-adult-friendships', 'hm-mh-depression-truth'],
+    triggerGauges: ['connection'],
+    triggerThreshold: 30,
+    triggerMode: 'any',
   },
   {
     id: 'hm-rel-difficult-people',
@@ -1304,6 +1316,9 @@ Treatment works for most people. Medication helps many. Therapy helps many. The 
       'What\'s one small action you could take today, even if you don\'t feel like it?',
     ],
     relatedLessons: ['hm-mh-suicidal-thoughts', 'hm-body-medication-stigma', 'hm-stress-burnout'],
+    triggerGauges: ['emotion', 'direction'],
+    triggerThreshold: 35,
+    triggerMode: 'any',
   },
   {
     id: 'hm-mh-anxiety-types',
@@ -1354,6 +1369,9 @@ The good news: anxiety is highly treatable. Exposure therapy, cognitive behavior
       'Where do you feel anxiety in your body? Can you notice it without trying to fix it?',
     ],
     relatedLessons: ['hm-mh-panic-attacks', 'hm-stress-nervous-system', 'hm-body-chronic'],
+    triggerGauges: ['state'],
+    triggerThreshold: 40,
+    triggerMode: 'any',
   },
   {
     id: 'hm-mh-suicidal-thoughts',
@@ -1505,6 +1523,9 @@ The good news: trauma is one of the most treatable conditions we know how to tre
       'What would healing look like for you — not erasing the past, but integrating it?',
     ],
     relatedLessons: ['hm-rel-family-wounds', 'hm-stress-freeze-response', 'hm-world-generational'],
+    triggerGauges: ['state', 'emotion'],
+    triggerThreshold: 35,
+    triggerMode: 'stabilization',
   },
   {
     id: 'hm-mh-medication-misconceptions',
@@ -2426,6 +2447,9 @@ Recovery requires more than vacation. Vacation helps symptoms but doesn't addres
       'What would have to change for your current situation to be sustainable?',
     ],
     relatedLessons: ['hm-work-job-identity', 'hm-mh-depression-truth', 'hm-stress-overwhelm'],
+    triggerGauges: ['body', 'state'],
+    triggerThreshold: 40,
+    triggerMode: 'any',
   },
   {
     id: 'hm-stress-freeze-response',
@@ -2523,6 +2547,9 @@ Most overwhelm is also a boundaries problem. If you're constantly overwhelmed, s
       'What\'s one thing you could say no to or delegate?',
     ],
     relatedLessons: ['hm-stress-burnout', 'hm-work-boundaries'],
+    triggerGauges: ['body', 'state', 'emotion'],
+    triggerThreshold: 35,
+    triggerMode: 'stabilization',
   },
   {
     id: 'hm-stress-nervous-system',
@@ -2573,6 +2600,9 @@ Understanding your nervous system helps you work with it instead of against it. 
       'Whose presence helps regulate your nervous system?',
     ],
     relatedLessons: ['hm-stress-freeze-response', 'hm-mh-anxiety-types', 'hm-mh-panic-attacks'],
+    triggerGauges: ['state', 'body'],
+    triggerThreshold: 45,
+    triggerMode: 'any',
   },
   {
     id: 'hm-stress-chronic',
@@ -2866,6 +2896,9 @@ You have options: find meaning in the work differently, find meaning outside wor
       'What would you do if money weren\'t a constraint?',
     ],
     relatedLessons: ['hm-stress-burnout', 'hm-work-job-identity', 'hm-trans-starting-over'],
+    triggerGauges: ['direction', 'alignment'],
+    triggerThreshold: 40,
+    triggerMode: 'any',
   },
 ];
 
@@ -3262,6 +3295,9 @@ Protecting sleep is often the highest-leverage mental health intervention availa
       'What would you need to change to protect your sleep?',
     ],
     relatedLessons: ['hm-mh-depression-truth', 'hm-mh-anxiety-types', 'hm-stress-chronic'],
+    triggerGauges: ['body'],
+    triggerThreshold: 45,
+    triggerMode: 'any',
   },
   {
     id: 'hm-body-movement-mood',
@@ -4536,6 +4572,9 @@ The critic in your head probably believes it's helping. It's not. Research consi
       'What would you say to yourself right now if you were your own best friend?',
     ],
     relatedLessons: ['hm-mh-depression-truth', 'hm-work-imposter'],
+    triggerGauges: ['emotion', 'alignment'],
+    triggerThreshold: 40,
+    triggerMode: 'any',
   },
   {
     id: 'hm-growth-reparenting',
@@ -5369,6 +5408,9 @@ Clarifying values doesn't mean you'll always live them perfectly. It means you h
       'Where is your life currently misaligned with what you actually care about?',
     ],
     relatedLessons: ['hm-work-meaning', 'hm-trans-identity-shifts', 'hm-id-questioning-identity'],
+    triggerGauges: ['direction', 'alignment'],
+    triggerThreshold: 35,
+    triggerMode: 'any',
   },
 ];
 

@@ -22,6 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { ManualSearch } from '../../src/components/ManualSearch';
+import { SuggestedLessons } from '../../src/components/SuggestedLessons';
 import { useEducationStore } from '../../src/stores/educationStore';
 import {
   MANUAL_SECTIONS,
@@ -416,6 +417,9 @@ export default function LearnScreen() {
                   </Text>
                 </View>
               </View>
+
+              {/* Contextual Suggestions based on gauge state */}
+              <SuggestedLessons />
 
               {MANUAL_SECTIONS.map((section) => (
                 <View key={section.id} style={styles.manualSection}>

@@ -30,6 +30,7 @@ import type { Lesson } from '../../src/data/educationContent';
 import { Ionicons } from '@expo/vector-icons';
 import { CrisisPipelineAlert, useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
 import { StabilizationBanner } from '../../src/components/StabilizationBanner';
+import { SystemModeBanner } from '../../src/components/SystemModeBanner';
 import JustInTimeCard from '../../src/components/JustInTimeCard';
 import PredictiveWarningBanner from '../../src/components/PredictiveWarningBanner';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
@@ -441,20 +442,22 @@ export default function HomeScreen() {
       </Animated.View>
 
       {/* ═══════════════════════════════════════════════════════════════
-          STABILIZATION BANNER — Shown when system is under strain
+          SYSTEM MODE BANNER — Shows stability status with smooth animation
+          Capacity Mode: Purple/green, "Your system is stable"
+          Stabilization Mode: Amber, "Focus on [triggers]"
           ═══════════════════════════════════════════════════════════════ */}
-      {systemMode === 'stabilization' && stabilizationTriggers.length > 0 && (
-        <Animated.View style={slideY(card0)}>
-          <StabilizationBanner
-            triggers={stabilizationTriggers}
-            onQuickReset={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              // Navigate to 2-minute regulation reset
-              router.push('/(modals)/quick-reset');
-            }}
-          />
-        </Animated.View>
-      )}
+      <Animated.View style={slideY(card0)}>
+        <SystemModeBanner
+          mode={systemMode}
+          triggers={stabilizationTriggers}
+          hidden={activeGaugeCount < 1}
+          onQuickReset={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            // Navigate to 2-minute regulation reset
+            router.push('/(modals)/quick-reset');
+          }}
+        />
+      </Animated.View>
 
       {/* ═══════════════════════════════════════════════════════════════
           2. COCKPIT CLUSTER — Center ring + 6 gauges in hex pattern
