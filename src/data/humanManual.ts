@@ -383,6 +383,113 @@ Your energy is finite. Difficult people often consume disproportionate amounts o
     ],
     relatedLessons: ['hm-rel-boundaries-protect', 'hm-stress-overwhelm'],
   },
+  {
+    id: 'hm-rel-sibling-wounds',
+    title: 'Sibling Relationships: The Longest Ties',
+    category: 'relationships',
+    duration: 9,
+    emoji: '👫',
+    content: {
+      introduction: `Sibling relationships are the longest relationships most people will ever have — longer than friendships, longer than marriages, longer than parent-child bonds. And yet we often underestimate how profoundly these relationships shape us. Your siblings witnessed your childhood. They were there for the family dysfunction you might still be processing. They hold memories no one else has.
+
+Sibling relationships can be sources of deep love and support, or lasting wounds and rivalry. Often, they're both. The dynamics you developed as children — the golden child and the scapegoat, the caretaker and the baby, the peacemaker and the troublemaker — tend to persist into adulthood unless actively examined.
+
+Sibling rivalry isn't childish. It often reflects real competition for limited parental attention, approval, or resources. If your parents explicitly or implicitly compared you to your siblings, that wound runs deep. If one sibling was favored, the others carry that rejection. If one sibling was parentified (made responsible for the others), that shapes every relationship that follows.
+
+Adult sibling relationships require renegotiation. You're not the same people you were at 8 or 15. But many siblings never update their perception of each other, still relating through the roles assigned in childhood. Healing sibling relationships — or accepting they can't be healed — is part of adult growth.`,
+      keyInsights: [
+        { 
+          title: 'Childhood roles persist', 
+          explanation: 'The "responsible one," the "problem child," the "favorite" — these labels often stick into adulthood unless deliberately examined. You may still be playing out dynamics from 20 years ago.' 
+        },
+        { 
+          title: 'Parental comparison creates lasting wounds', 
+          explanation: '"Why can\'t you be more like your sister?" is a wound that echoes for decades. Being compared unfavorably to siblings shapes self-worth at its foundation.' 
+        },
+        { 
+          title: 'Grief for the sibling relationship you didn\'t have', 
+          explanation: 'Some siblings become best friends. Others become strangers. If you didn\'t get the sibling relationship you wanted or needed, that\'s a legitimate loss to grieve.' 
+        },
+        { 
+          title: 'Estrangement is sometimes necessary', 
+          explanation: 'Not all sibling relationships can or should be maintained. Cutting contact with a toxic sibling isn\'t failure — it\'s protection.' 
+        },
+        {
+          title: 'Adult siblings must renegotiate',
+          explanation: 'You\'re not 12 anymore. The relationship needs updating to reflect who you both are now, not who you were in childhood. This requires both people to be willing.'
+        }
+      ],
+      whatHelps: [
+        'Examine the roles: What role were you assigned in your family? Are you still playing it?',
+        'Separate your sibling from your parents\' favoritism — they didn\'t choose to be favored',
+        'Have direct conversations about childhood dynamics (if safe)',
+        'Accept that not all sibling relationships can be close',
+        'Grieve the relationship you wished you had',
+        'Set boundaries as you would with any adult relationship',
+      ],
+      professionalNote: 'If sibling relationships were abusive or involved parentification, trauma-informed therapy can help process these complex dynamics.'
+    },
+    reflectionQuestions: [
+      'What role were you assigned in your sibling group? Are you still playing it?',
+      'How did your parents\' treatment of your siblings affect your relationship with them?',
+      'What would you need from your sibling(s) to feel closer? Is that realistic to expect?',
+    ],
+    relatedLessons: ['hm-rel-family-wounds', 'hm-growth-reparenting', 'hm-rel-boundaries-protect'],
+  },
+  {
+    id: 'hm-rel-gender-identity',
+    title: 'Gender Identity and Coming Out',
+    category: 'relationships',
+    duration: 10,
+    emoji: '🏳️‍⚧️',
+    content: {
+      introduction: `Gender identity — your internal sense of your own gender — is one of the most fundamental aspects of who you are. For cisgender people (those whose gender identity matches their sex assigned at birth), this usually goes unexamined. For transgender, non-binary, and gender-diverse people, understanding and expressing your true gender can be a lifelong journey.
+
+Coming out as trans or non-binary is not a single event but an ongoing process. You may come out to yourself first, then to close friends, family, coworkers, and the world — each step carrying its own risks and rewards. Some people will embrace you. Others will struggle. Some relationships will deepen. Others will end. This is profoundly unfair, but it's the reality many trans people navigate.
+
+Gender dysphoria — the distress caused by the mismatch between your gender identity and your body or how others perceive you — can range from mild discomfort to severe anguish. Not all trans people experience dysphoria, and the absence of dysphoria doesn't make someone "less trans." Gender euphoria — the joy of being seen and expressed as your true gender — is equally valid as an indicator.
+
+Transition looks different for everyone. Social transition (name, pronouns, presentation), medical transition (hormones, surgeries), or no medical transition at all — there's no "right" way to be trans. What matters is living authentically.`,
+      keyInsights: [
+        { 
+          title: 'Gender identity is internal and real', 
+          explanation: 'Your gender is not determined by your body, your chromosomes, or what others think. It\'s an internal reality that only you can know. Science supports the existence and validity of transgender identities.' 
+        },
+        { 
+          title: 'Coming out is ongoing', 
+          explanation: 'You don\'t come out once. You come out again and again — to new friends, new jobs, new doctors, new situations. Each time requires assessing safety and energy.' 
+        },
+        { 
+          title: 'Grief is part of transition', 
+          explanation: 'Even positive change involves loss — loss of relationships that couldn\'t adapt, loss of the life you might have had, loss of safety or privilege. This grief is valid alongside the joy.' 
+        },
+        { 
+          title: 'Not everyone will understand', 
+          explanation: 'Some people will never fully get it. You can\'t educate everyone. Protecting your energy sometimes means accepting that some people will stay ignorant.' 
+        },
+        {
+          title: 'Community is essential',
+          explanation: 'Finding other trans and gender-diverse people — online or in person — provides validation, practical knowledge, and the relief of being understood without explanation.'
+        }
+      ],
+      whatHelps: [
+        'Connect with trans community (online spaces, support groups, chosen family)',
+        'Find trans-affirming healthcare providers (WPATH guidelines)',
+        'Set boundaries with people who refuse to respect your identity',
+        'Document your journey if helpful (some find this affirming)',
+        'Move at your own pace — there\'s no timeline for transition',
+        'Access mental health support from a gender-affirming therapist',
+      ],
+      warningSign: 'If you\'re experiencing severe dysphoria, self-harm urges, or suicidal thoughts, please reach out to trans-specific crisis lines like Trans Lifeline (877-565-8860) or the 988 Suicide & Crisis Lifeline.',
+      professionalNote: 'Gender-affirming care is evidence-based healthcare. Look for providers who follow WPATH Standards of Care and approach gender diversity with affirmation, not gatekeeping.'
+    },
+    reflectionQuestions: [
+      'When did you first notice your gender identity didn\'t fit expectations? How did you cope?',
+      'Who in your life has been affirming? Who has been harmful?',
+      'What does living authentically as your gender look like for you?',
+    ],
+    relatedLessons: ['hm-world-minority-stress', 'hm-trans-identity-shifts', 'hm-rel-boundaries-protect'],
+  },
 ];
 
 // ============================================================================
