@@ -490,6 +490,760 @@ Transition looks different for everyone. Social transition (name, pronouns, pres
     ],
     relatedLessons: ['hm-world-minority-stress', 'hm-trans-identity-shifts', 'hm-rel-boundaries-protect'],
   },
+  {
+    id: 'hm-rel-attachment-styles',
+    title: 'Attachment Styles Deep Dive',
+    category: 'relationships',
+    duration: 10,
+    emoji: '🔗',
+    content: {
+      introduction: `Your attachment style is the operating system running beneath all your relationships. Developed in the first years of life based on how your caregivers responded to your needs, it shapes how you experience intimacy, handle conflict, and interpret your partner's behavior. Understanding it is like finally reading the manual for your relationship brain.
+
+There are four main attachment styles: Secure attachment develops when caregivers were consistently responsive and attuned — you learned that your needs matter and others can be trusted. Anxious attachment forms when caregiving was inconsistent — sometimes responsive, sometimes not — creating hypervigilance about the relationship and fear of abandonment. Avoidant attachment develops when emotional needs were dismissed or punished — you learned to suppress needs and maintain distance. Disorganized attachment emerges from frightening or abusive caregiving — the person who was supposed to be your safe haven was also your source of fear, creating a "come here, go away" pattern.
+
+Your attachment style isn't your destiny. Research by Dr. Sue Johnson and others shows that attachment can change through corrective emotional experiences — either in therapy or in relationships with securely attached partners. The brain that learned insecure patterns can learn new ones. But first, you have to see the pattern.
+
+About 50% of the population is securely attached. The rest are split between anxious, avoidant, and disorganized. If you're reading this, you're probably trying to understand your own patterns. That awareness itself is the first step toward change.`,
+      keyInsights: [
+        { 
+          title: 'Secure attachment: the gold standard', 
+          explanation: 'Securely attached people are comfortable with intimacy and independence. They communicate needs directly, handle conflict constructively, and trust that the relationship can survive disagreement. They\'re not perfect — they just have a fundamental belief that they\'re worthy of love and others can be relied upon.' 
+        },
+        { 
+          title: 'Anxious attachment: the pursuit of closeness', 
+          explanation: 'Anxiously attached people crave intimacy but fear abandonment. They\'re hypervigilant to signs of rejection, may become preoccupied with the relationship, need frequent reassurance, and can appear "needy" or "clingy." Their nervous system is constantly scanning for threats to the connection.' 
+        },
+        { 
+          title: 'Avoidant attachment: the fortress of independence', 
+          explanation: 'Avoidantly attached people value independence over intimacy. They suppress emotional needs, pull away when things get close, may feel "suffocated" by partners, and often don\'t understand why others need so much connection. They learned early that depending on others leads to disappointment.' 
+        },
+        { 
+          title: 'Disorganized attachment: the impossible bind', 
+          explanation: 'Disorganized attachment combines anxious and avoidant patterns chaotically. These individuals want closeness but fear it, approach intimacy then flee, and may have contradictory behaviors that confuse partners and themselves. Often rooted in early trauma where caregivers were both the source of comfort and fear.' 
+        },
+        {
+          title: 'Attachment can change',
+          explanation: 'While patterns are ingrained, they\'re not permanent. "Earned secure" attachment — developing security through therapy, self-work, or relationships with secure partners — is well-documented. It requires awareness, consistent effort, and often professional support.'
+        }
+      ],
+      whatHelps: [
+        'Identify your attachment style through reflection, quizzes, or therapy',
+        'Learn your triggers — what activates your attachment fears?',
+        'Communicate your needs explicitly rather than expecting partners to read your mind',
+        'Notice when you\'re reacting from old patterns vs. present reality',
+        'Seek out secure relationships (romantic and platonic) as corrective experiences',
+        'Consider attachment-focused therapy (EFT, AEDP) if patterns are causing significant problems',
+      ],
+      professionalNote: 'Emotionally Focused Therapy (EFT), developed by Dr. Sue Johnson, is specifically designed to address attachment wounds in relationships. For individual work, AEDP and other attachment-focused approaches can help.'
+    },
+    reflectionQuestions: [
+      'What was the emotional climate of your childhood home? How did caregivers respond when you were upset or needy?',
+      'Which attachment style resonates most with your experience in romantic relationships?',
+      'What would it look like to respond from secure attachment instead of your default pattern?',
+    ],
+    relatedLessons: ['hm-rel-family-wounds', 'hm-rel-anxious-avoidant', 'hm-rel-emotional-unavailability'],
+  },
+  {
+    id: 'hm-rel-anxious-avoidant',
+    title: 'The Anxious-Avoidant Trap',
+    category: 'relationships',
+    duration: 9,
+    emoji: '🎭',
+    content: {
+      introduction: `It's almost magnetic: the anxiously attached person who craves closeness pairs with the avoidantly attached person who needs space. This isn't coincidence — it's a trap built from complementary wounds that initially feel like perfect fit but become exhausting cycles of pursuit and withdrawal.
+
+The dynamic works like this: The anxious partner seeks reassurance and connection. The avoidant partner, feeling pressured, withdraws. The withdrawal activates the anxious partner's abandonment fears, intensifying pursuit. This intensified pursuit triggers the avoidant partner's suffocation fears, deepening withdrawal. Each person's coping strategy triggers the other's wound. Both feel terrible. Neither feels heard. The relationship becomes a painful dance that neither consciously chose.
+
+What makes this pairing so common? Anxious and avoidant partners each validate the other's worldview. The avoidant's distance confirms the anxious partner's belief that they're too much and will be abandoned. The anxious partner's pursuit confirms the avoidant's belief that intimacy is overwhelming and people are too needy. Both get to be "right" about relationships — and miserable.
+
+Breaking this cycle requires both partners to recognize their part. The anxious partner must learn to self-soothe and tolerate uncertainty without pursuing. The avoidant partner must learn to move toward connection even when uncomfortable. Both must understand that their instincts are relics of childhood that no longer serve them.`,
+      keyInsights: [
+        { 
+          title: 'The protest behavior trap', 
+          explanation: 'Anxious partners often engage in "protest behaviors" — excessive texting, accusations, threats to leave — hoping to get a response and reassurance. These behaviors consistently backfire with avoidant partners, pushing them further away. What feels like reaching out feels like attack to the other person.' 
+        },
+        { 
+          title: 'Deactivation as protection', 
+          explanation: 'Avoidant partners "deactivate" their attachment system by focusing on partner flaws, emphasizing independence, or numbing emotions. This isn\'t manipulation — it\'s their nervous system\'s learned way of managing overwhelm. Understanding this doesn\'t make it okay, but it makes it comprehensible.' 
+        },
+        { 
+          title: 'Both feel like the victim', 
+          explanation: 'The anxious partner feels abandoned and desperate. The avoidant partner feels suffocated and trapped. Both believe they\'re responding reasonably to an unreasonable partner. In truth, both are acting out childhood programming.' 
+        },
+        { 
+          title: 'The fantasy bond', 
+          explanation: 'Sometimes this dynamic stabilizes into a "fantasy bond" — the illusion of connection without real intimacy. The couple maintains the form of a relationship while both remain protected behind their defenses. It looks like a relationship from outside but feels hollow inside.' 
+        },
+      ],
+      whatHelps: [
+        'Name the cycle: "We\'re doing the thing again — I\'m pursuing, you\'re withdrawing"',
+        'Anxious partner: practice self-soothing before reaching out; ask yourself "is this really about right now?"',
+        'Avoidant partner: practice staying present even when uncomfortable; notice the urge to flee',
+        'Communicate about attachment needs directly: "I need reassurance" or "I need space"',
+        'Set time-limited space: "I need an hour" is better than indefinite withdrawal',
+        'Consider couples therapy with an EFT-trained therapist who understands this dynamic',
+      ],
+    },
+    reflectionQuestions: [
+      'In your relationships, are you usually the pursuer or the withdrawer?',
+      'What childhood experience taught you this pattern? What were you protecting yourself from?',
+      'What would happen if you did the opposite of your instinct during conflict?',
+    ],
+    relatedLessons: ['hm-rel-attachment-styles', 'hm-rel-stonewalling', 'hm-rel-healthy-conflict'],
+  },
+  {
+    id: 'hm-rel-emotional-unavailability',
+    title: 'Emotional Unavailability',
+    category: 'relationships',
+    duration: 8,
+    emoji: '🚪',
+    content: {
+      introduction: `Emotional unavailability is the inability or unwillingness to connect on an emotional level. It can show up as avoiding deep conversations, being physically present but emotionally absent, prioritizing everything over the relationship, or being unable to provide emotional support. And the hardest truth: sometimes the emotionally unavailable person is you.
+
+Recognizing emotional unavailability in a partner is painful. You're in a relationship but feel alone. You share a life but not your inner worlds. You've tried everything to reach them — being patient, being demanding, being perfect, being less — and nothing works. Because you can't create emotional availability in another person. They have to develop it themselves.
+
+Recognizing emotional unavailability in yourself is harder. Maybe you're proud of being "low-maintenance" and "not needy." Maybe intimacy makes you uncomfortable but you don't know why. Maybe you've been told by multiple partners that you're distant, walled-off, or hard to reach. These patterns usually trace back to early experiences where emotional openness wasn't safe.
+
+Emotional availability is a skill that can be developed, but only by the person who's unavailable. If you're with someone emotionally unavailable, you can't fix them. If you're the unavailable one, you can do the work — but only if you genuinely want to, not just to keep a partner from leaving.`,
+      keyInsights: [
+        { 
+          title: 'Signs of emotional unavailability', 
+          explanation: 'Difficulty discussing feelings, deflecting with humor or logic, being secretive about inner life, avoiding commitment, prioritizing work/hobbies over connection, being present only when it\'s easy, shutting down during conflict. The common thread: intimacy is kept at arm\'s length.' 
+        },
+        { 
+          title: 'Emotional unavailability as protection', 
+          explanation: 'Most emotionally unavailable people aren\'t intentionally withholding — they\'re protecting themselves from vulnerability that felt dangerous earlier in life. Understanding this doesn\'t excuse the impact, but it explains the mechanism.' 
+        },
+        { 
+          title: 'You can\'t love someone into availability', 
+          explanation: 'One of the most painful truths: your love, patience, and understanding cannot make someone emotionally available. You can create conditions that support their growth, but they have to choose to grow.' 
+        },
+        { 
+          title: 'Choosing unavailable partners is a pattern', 
+          explanation: 'If you repeatedly end up with emotionally unavailable people, examine why. Sometimes it\'s because available intimacy feels scary, and unavailable partners are "safe." Sometimes it\'s reenacting childhood dynamics. The pattern is worth exploring.' 
+        },
+      ],
+      whatHelps: [
+        'If your partner is unavailable: decide what you can actually accept vs. what you\'re hoping will change',
+        'If you\'re unavailable: therapy to explore the roots of your protective distance',
+        'Practice small vulnerabilities — sharing feelings in low-stakes moments',
+        'Notice what happens in your body when intimacy approaches — that\'s data',
+        'Be honest about what you can offer rather than making promises you can\'t keep',
+        'Recognize that availability requires ongoing practice, not a one-time decision',
+      ],
+    },
+    reflectionQuestions: [
+      'In your closest relationships, who pursues emotional connection more?',
+      'What happens inside you when someone wants to get emotionally close?',
+      'If you\'ve dated emotionally unavailable people repeatedly, what might be drawing you to them?',
+    ],
+    relatedLessons: ['hm-rel-attachment-styles', 'hm-rel-toxic-patterns', 'hm-rel-when-to-leave'],
+  },
+  {
+    id: 'hm-rel-love-bombing',
+    title: 'Love Bombing & Idealization',
+    category: 'relationships',
+    duration: 7,
+    emoji: '💐',
+    content: {
+      introduction: `In the beginning, it feels like a dream. Constant attention, overwhelming affection, declarations of love within weeks, making you feel like the most special person in the world. They "just know" you're the one. They've never felt this way before. It's intoxicating — and it's a red flag.
+
+Love bombing is excessive attention and affection early in a relationship, often used (consciously or unconsciously) to fast-forward intimacy and create emotional dependence before you've had time to truly know each other. It feels like being chosen, but it's actually being captured. The intensity isn't about you — it's about their need to secure attachment quickly.
+
+The problem becomes clear later: the person who loved you intensely often becomes the person who devalues you just as intensely. The pedestals built during idealization inevitably crumble. No human can sustain the projected perfection, and the fall is devastating. This cycle of idealize-devalue-discard is particularly associated with narcissistic relationship patterns.
+
+Normal healthy love builds gradually. It includes curiosity about who you actually are (not just projections), respect for boundaries and pacing, and room for you to be a complex human with flaws. It might feel less exciting than being love bombed — but it's sustainable.`,
+      keyInsights: [
+        { 
+          title: 'Intensity isn\'t intimacy', 
+          explanation: 'True intimacy develops over time through shared experiences, demonstrated reliability, and gradually increasing vulnerability. Intensity is a feeling that can be manufactured quickly. They\'re not the same thing.' 
+        },
+        { 
+          title: 'Watch for boundary disregard', 
+          explanation: 'Love bombers often push past boundaries early: wanting constant contact, moving too fast, being hurt by your need for space. What feels like passion is actually a warning sign about their ability to respect your autonomy.' 
+        },
+        { 
+          title: 'The idealization must end', 
+          explanation: 'No one can maintain perfection. When the love bomber realizes you\'re a normal human with flaws, the devaluation often begins. The same intensity that elevated you can be turned against you.' 
+        },
+        { 
+          title: 'Your vulnerability to love bombing', 
+          explanation: 'If you\'ve been lonely, have low self-worth, or are recovering from rejection, love bombing is especially seductive. Knowing your vulnerable states helps you recognize when you\'re being manipulated.' 
+        },
+      ],
+      whatHelps: [
+        'Pace the relationship — resist pressure to accelerate commitment',
+        'Notice how they respond to "no" or "slow down" — healthy people respect boundaries',
+        'Watch for a pattern: are they this intense with everything? Do they have stable long-term relationships?',
+        'Ask yourself: do they actually know me, or are they in love with who they want me to be?',
+        'Trust the people in your life who express concern — outside perspective matters',
+        'Remember: sustainable love doesn\'t need to rush',
+      ],
+      warningSign: 'If you\'ve experienced the idealize-devalue-discard cycle repeatedly with this person, and they promise change but the pattern continues, you may be dealing with narcissistic abuse. Consider consulting with a therapist who specializes in these dynamics.'
+    },
+    reflectionQuestions: [
+      'Looking back, can you identify times you were love bombed? What made you vulnerable to it?',
+      'How do you typically respond to intense early attention from someone new?',
+      'What would healthy pacing look like for you in a new relationship?',
+    ],
+    relatedLessons: ['hm-rel-toxic-patterns', 'hm-rel-boundaries-protect', 'hm-rel-when-to-leave'],
+  },
+  {
+    id: 'hm-rel-healthy-conflict',
+    title: 'Healthy Conflict: How Secure Couples Fight',
+    category: 'relationships',
+    duration: 8,
+    emoji: '⚖️',
+    content: {
+      introduction: `Conflict is inevitable in intimate relationships. The question isn't whether you'll disagree — it's how you'll handle it. Dr. John Gottman's research, spanning decades and thousands of couples, shows that the difference between couples who thrive and those who divorce isn't the amount of conflict — it's how they fight.
+
+Healthy conflict has a pattern: soft startup, accepting influence, repair attempts, and compromise. Toxic conflict has a different pattern: harsh startup, defensiveness, contempt, and stonewalling. The first predicts relationship success. The second predicts divorce with over 90% accuracy.
+
+Secure couples fight about the same things everyone fights about: money, sex, chores, in-laws, parenting. But they do it differently. They start gently instead of attacking. They take responsibility instead of deflecting. They de-escalate when things get heated. They prioritize the relationship over winning the argument. And crucially: they repair quickly after ruptures.
+
+Learning to fight well is a skill. Most of us were never taught — we just absorbed whatever our parents modeled. The good news: these are learnable patterns. The bad news: they require both partners to be willing to learn.`,
+      keyInsights: [
+        { 
+          title: 'The soft startup', 
+          explanation: 'How you bring up an issue predicts how the conversation will go. "I feel overwhelmed with the dishes" lands differently than "You never help around here." Starting gentle — with "I" statements, without blame — sets up repair rather than escalation.' 
+        },
+        { 
+          title: 'Accepting influence', 
+          explanation: 'Secure partners can be influenced by each other. They hear complaints without becoming defensive. They consider their partner\'s perspective as valid. Refusing to accept influence — always needing to be right — is toxic to relationships.' 
+        },
+        { 
+          title: 'Repair attempts', 
+          explanation: 'These are any attempts to de-escalate during conflict: humor, affection, apology, taking a break. Research shows successful couples make and accept repair attempts. Failed couples miss them or reject them.' 
+        },
+        { 
+          title: 'The 5:1 ratio', 
+          explanation: 'Gottman\'s research found stable couples have at least 5 positive interactions for every negative one during conflict. This doesn\'t mean avoiding hard conversations — it means maintaining a foundation of positivity that can absorb occasional friction.' 
+        },
+        {
+          title: 'Physiological flooding',
+          explanation: 'When heart rate exceeds ~100 BPM during conflict, productive conversation becomes impossible. The brain shifts to fight-or-flight. Secure couples recognize flooding and take breaks — returning when calm, not avoiding the issue.'
+        }
+      ],
+      whatHelps: [
+        'Start with how you feel and what you need, not with accusations',
+        'Take a 20-minute break when flooded — but commit to returning to the conversation',
+        'Look for the valid point in your partner\'s complaint, even if delivery was poor',
+        'Make repair attempts: "Can we start over?" "I know we\'re on the same team"',
+        'Accept influence: being persuaded isn\'t losing, it\'s collaborating',
+        'Apologize for your part, even if they were also wrong',
+      ],
+      professionalNote: 'Gottman Method Couples Therapy is specifically designed to replace toxic patterns with healthy ones. If you recognize destructive patterns in your conflicts, a trained therapist can help.'
+    },
+    reflectionQuestions: [
+      'What did conflict look like in your family growing up? What patterns did you absorb?',
+      'When you\'re in conflict with your partner, what\'s your usual pattern — attack, withdraw, or something else?',
+      'What repair attempts might your partner be making that you\'re not recognizing?',
+    ],
+    relatedLessons: ['hm-rel-stonewalling', 'hm-rel-contempt', 'hm-rel-anxious-avoidant'],
+  },
+  {
+    id: 'hm-rel-stonewalling',
+    title: 'Stonewalling & Shutting Down',
+    category: 'relationships',
+    duration: 7,
+    emoji: '🧱',
+    content: {
+      introduction: `They go silent. They won't look at you. They leave the room. They give one-word answers. You're trying to talk about something important, and they've turned to stone. This is stonewalling — one of the "Four Horsemen" that predict relationship failure — and it's devastating to be on the receiving end.
+
+But here's what the stonewaller is experiencing: flooding. Their heart rate has exceeded 100 beats per minute, stress hormones are coursing through their system, and their capacity for productive conversation has shut down. They're not choosing to be cruel — they're physiologically overwhelmed and their nervous system has hit the emergency brake.
+
+This doesn't excuse stonewalling, but it explains it. The stonewaller isn't consciously thinking "I'll hurt them by ignoring them." They're thinking — or more accurately, not thinking clearly at all — something like "I can't handle this, I need out." Their withdrawal feels like self-protection to them, even as it feels like abandonment to you.
+
+The solution isn't for the stonewaller to "just stay and talk" — that's often impossible when flooded. It's for both partners to recognize when flooding is happening, take a structured break, and return to the conversation when both nervous systems have calmed down. Stonewalling only becomes toxic when the conversation never resumes.`,
+      keyInsights: [
+        { 
+          title: 'Flooding vs. choosing to stonewall', 
+          explanation: 'True stonewalling usually involves physiological flooding — the person literally cannot process language well or regulate emotions. This is different from deliberately withholding as punishment, though both feel similar to the other partner.' 
+        },
+        { 
+          title: 'The partner\'s experience', 
+          explanation: 'Being stonewalled activates abandonment fears. It feels like being deemed unworthy of response, invisible, and alone in the relationship. The pursuer often escalates, which increases the stonewaller\'s flooding. It\'s a terrible cycle.' 
+        },
+        { 
+          title: 'Gender patterns', 
+          explanation: 'Research shows men are more likely to stonewall, possibly due to physiological differences in how they experience flooding. This isn\'t an excuse — it\'s information that can help both partners understand what\'s happening.' 
+        },
+        { 
+          title: 'The break that works', 
+          explanation: 'An effective break is structured: "I\'m flooded and need 30 minutes. I\'m not abandoning this conversation — I\'ll be back." Then actually coming back. Unstructured withdrawal ("I\'m done talking") damages trust.' 
+        },
+      ],
+      whatHelps: [
+        'If you stonewall: learn to recognize flooding early and call a structured timeout before you shut down',
+        'If you\'re stonewalled: recognize this as flooding, not rejection — and don\'t pursue harder',
+        'Agree on a signal for "I\'m flooded and need a break" before conflicts happen',
+        'During breaks: do something self-soothing (walk, music, breathing) — don\'t rehearse arguments',
+        'Set a specific time to return: "Let\'s come back to this in an hour"',
+        'When you return, start gently — both people\'s nervous systems are still tender',
+      ],
+    },
+    reflectionQuestions: [
+      'Do you tend to stonewall, or are you usually the one being stonewalled?',
+      'What happens in your body when conflict escalates? Can you identify the moment before shutdown?',
+      'What would a healthy break look like for you and your partner?',
+    ],
+    relatedLessons: ['hm-rel-healthy-conflict', 'hm-rel-contempt', 'hm-rel-anxious-avoidant'],
+  },
+  {
+    id: 'hm-rel-contempt',
+    title: 'Contempt: The Relationship Killer',
+    category: 'relationships',
+    duration: 7,
+    emoji: '🗡️',
+    content: {
+      introduction: `Of all the toxic relationship patterns, contempt is the most destructive. It's the single greatest predictor of divorce. It's eye-rolls and sneers, mockery and ridicule, name-calling and hostile humor. It's not just being angry at something your partner did — it's communicating disgust at who they are.
+
+Contempt comes from a position of superiority. It says: "You're beneath me. You're stupid, worthless, incompetent." It might be obvious ("You're such an idiot") or subtle (sighing heavily, mimicking mockingly). Either way, it treats your partner not as someone you disagree with, but as someone deserving of scorn.
+
+Dr. Gottman's research shows that couples with high levels of contempt have worse physical health outcomes — including weakened immune systems. Contempt literally makes you sick, on top of destroying your relationship.
+
+The antidote to contempt is building a culture of appreciation. This doesn't mean ignoring problems — it means approaching your partner's flaws from a place of understanding rather than superiority, and actively nurturing respect even during disagreement. If contempt has become your norm, the relationship needs immediate intervention.`,
+      keyInsights: [
+        { 
+          title: 'Contempt vs. criticism', 
+          explanation: 'Criticism attacks behavior: "You forgot to take out the trash again." Contempt attacks character: "You\'re so lazy and thoughtless, I can\'t believe I married you." The second is far more damaging because it denies the person\'s worth.' 
+        },
+        { 
+          title: 'Contempt poisons the container', 
+          explanation: 'Relationships need a foundation of mutual respect to handle conflict. Contempt destroys that foundation. Once contempt is present, even neutral interactions get filtered through disgust.' 
+        },
+        { 
+          title: 'The breeding ground', 
+          explanation: 'Contempt grows from long-standing, unresolved negative thoughts about your partner. If you\'ve been cataloging their failures and building a case against them, contempt is the eventual expression.' 
+        },
+        { 
+          title: 'It affects the contemptuous person too', 
+          explanation: 'Being contemptuous doesn\'t just hurt your partner — it corrodes your own wellbeing. Living in a state of disgust toward someone you share life with is exhausting and isolating.' 
+        },
+      ],
+      whatHelps: [
+        'Build culture of appreciation: express genuine gratitude and admiration regularly',
+        'Catch contemptuous thoughts and challenge them: is this the whole picture?',
+        'Address issues when they\'re small, before resentment builds into contempt',
+        'Remember their humanity — they\'re struggling too, not your enemy',
+        'If contempt is established, get professional help immediately — this is a relationship emergency',
+        'Consider whether the contempt reveals that the relationship should end',
+      ],
+      warningSign: 'If contempt has become your baseline way of relating to your partner — or theirs toward you — the relationship is in crisis. This requires immediate professional intervention or a serious conversation about whether to continue.'
+    },
+    reflectionQuestions: [
+      'Have you experienced contempt in your relationship — giving or receiving?',
+      'What unresolved resentments might be building toward contempt?',
+      'What do you genuinely appreciate about your partner that you haven\'t expressed lately?',
+    ],
+    relatedLessons: ['hm-rel-healthy-conflict', 'hm-rel-stonewalling', 'hm-rel-when-to-leave'],
+  },
+  {
+    id: 'hm-rel-rebuilding-trust',
+    title: 'Rebuilding Trust After Betrayal',
+    category: 'relationships',
+    duration: 10,
+    emoji: '🔨',
+    content: {
+      introduction: `Trust is like a bone: it can heal after being broken, but it takes time, proper care, and it's never quite the same. Rebuilding trust after betrayal — whether from an affair, lies, or other violations — is one of the hardest things a couple can do. It's not impossible, but it requires both people fully committed to a long, painful process.
+
+The betrayed partner didn't choose this. They're now expected to do the hard work of healing from something that was done to them. This is profoundly unfair. The betraying partner may be eager to "move on" while the betrayed is still processing. Understanding that recovery takes years, not months, is essential.
+
+True reconciliation requires the betraying partner to tolerate the betrayed partner's pain without defensiveness — for a long time. It requires full honesty about what happened (trickle truth extends trauma). It requires demonstrated change, not just promises. And it requires the betrayed partner to eventually make the choice to trust again, knowing that trust can never be fully guaranteed.
+
+Some relationships don't survive betrayal, and that's okay. Choosing not to reconcile is valid. But for those who choose to try, research shows many couples emerge with relationships that are different but can be deeply satisfying.`,
+      keyInsights: [
+        { 
+          title: 'Full disclosure is essential', 
+          explanation: 'Research by Dr. Shirley Glass and others shows that trickle truth — revealing information bit by bit — prolongs trauma. Full, honest disclosure (ideally with a therapist\'s guidance) is the foundation of rebuilding.' 
+        },
+        { 
+          title: 'Healing isn\'t linear', 
+          explanation: 'Good days don\'t mean it\'s over. Bad days don\'t mean no progress. The betrayed partner will have triggers for years. The betraying partner must understand that this is the cost of betrayal, not unreasonable behavior.' 
+        },
+        { 
+          title: 'The relationship doesn\'t go back', 
+          explanation: 'You\'re not returning to the old relationship — it\'s gone. You\'re building a new one between the same people. This new relationship can be good, but it will never be the same as before.' 
+        },
+        { 
+          title: 'Accountability vs. endless punishment', 
+          explanation: 'The betraying partner must be accountable — but that\'s different from being punished indefinitely. At some point, if true accountability has been demonstrated, the betrayed partner must choose whether to stay and genuinely try to rebuild, or leave.' 
+        },
+        {
+          title: 'Trust is rebuilt through behavior, not words',
+          explanation: 'Promises mean nothing. Transparency, consistency, and demonstrated change over time are what rebuild trust. The betraying partner must be willing to be radically transparent for however long it takes.'
+        }
+      ],
+      whatHelps: [
+        'Work with a therapist specializing in affair recovery or betrayal trauma',
+        'Full disclosure with professional guidance on how to do it well',
+        'Betraying partner: tolerate partner\'s pain without defensiveness; show consistency over time',
+        'Betrayed partner: be honest about what you need; allow yourself to feel everything',
+        'Set realistic timelines — this is a 2-5 year process minimum',
+        'Regularly check in about the process itself — how is the rebuilding going?',
+      ],
+      professionalNote: 'Affair recovery specialists and therapists trained in betrayal trauma can guide this process. DIY often fails because the emotions are too intense to navigate without support.'
+    },
+    reflectionQuestions: [
+      'If you\'ve been betrayed: what would you need to see to begin trusting again?',
+      'If you betrayed: can you genuinely commit to the long accountability process this requires?',
+      'What would the new relationship — different from the old one — need to include?',
+    ],
+    relatedLessons: ['hm-rel-affairs-betrayal', 'hm-rel-when-to-leave', 'hm-rel-healthy-conflict'],
+  },
+  {
+    id: 'hm-rel-emotional-physical-intimacy',
+    title: 'Emotional vs Physical Intimacy',
+    category: 'relationships',
+    duration: 7,
+    emoji: '💞',
+    content: {
+      introduction: `Emotional intimacy and physical intimacy are two different needs that often get confused. You can have one without the other. You can crave one and fear the other. Many relationship struggles stem from partners having different relationships to each type — or not realizing they're even different things.
+
+Emotional intimacy is the experience of being fully known and accepted. It's sharing your inner world — fears, dreams, wounds, joys — and having someone receive that with care. It develops through conversation, time, and consistent emotional availability. For many people, emotional intimacy must come before physical intimacy feels safe or meaningful.
+
+Physical intimacy is connection through the body. Sex is part of it, but not all of it — touch, affection, physical presence, and sexual connection all contribute. Some people feel most connected through physical intimacy; for them, it's their primary language of love and a precondition for emotional openness.
+
+Problems arise when partners have different needs or different orders of operation. "I need emotional connection before I want sex" meets "I feel emotionally connected through sex." Neither is wrong, but without understanding, both feel rejected. The work is translating between these languages.`,
+      keyInsights: [
+        { 
+          title: 'Different access points to the same place', 
+          explanation: 'Some people need emotional safety before physical connection feels good. Others feel emotionally close through physical touch. Neither path is better — they\'re different wiring.' 
+        },
+        { 
+          title: 'The rejection loop', 
+          explanation: 'One partner needs emotional connection first, so they pull back physically. The other needs physical connection first, so they feel rejected and emotionally withdraw. Both end up starving.' 
+        },
+        { 
+          title: 'Intimacy isn\'t just sex', 
+          explanation: 'Physical intimacy includes non-sexual touch: holding hands, hugs, cuddling, physical affection. Some couples lose all physical connection when sex becomes fraught. Rebuilding non-sexual touch can help.' 
+        },
+        { 
+          title: 'Both needs are valid', 
+          explanation: 'The partner who needs emotional connection isn\'t being withholding. The partner who needs physical connection isn\'t being shallow. Framing either need as inferior damages the relationship.' 
+        },
+      ],
+      whatHelps: [
+        'Communicate explicitly about what makes you feel connected — don\'t assume they know',
+        'Identify your access point: do you need to feel emotionally close before physical intimacy? Or vice versa?',
+        'If you\'re in the rejection loop: the solution is going first in your partner\'s language, not demanding they go first in yours',
+        'Rebuild non-sexual physical affection if it\'s been lost',
+        'Address underlying issues (resentment, trauma, medical factors) that may be blocking intimacy',
+        'Consider sex therapy for deeper disconnects',
+      ],
+    },
+    reflectionQuestions: [
+      'What makes you feel genuinely intimate with someone — emotional sharing, physical touch, or both equally?',
+      'In your relationship, who needs what first? How does this create friction?',
+      'What forms of physical intimacy besides sex feel connecting to you?',
+    ],
+    relatedLessons: ['hm-rel-libido-differences', 'hm-rel-attachment-styles', 'hm-rel-emotional-unavailability'],
+  },
+  {
+    id: 'hm-rel-libido-differences',
+    title: 'Desire Differences: When Partners Don\'t Match',
+    category: 'relationships',
+    duration: 8,
+    emoji: '🔥',
+    content: {
+      introduction: `In almost every long-term relationship, there's a higher-desire partner and a lower-desire partner. This is normal. The problem isn't that desire differs — it's how couples handle the difference. When managed poorly, desire discrepancy leads to one partner feeling rejected and undesirable while the other feels pressured and inadequate. Both suffer.
+
+Desire is complex and influenced by many factors: hormones, stress, relationship satisfaction, individual sexuality, life stage, medication, health, and more. Labeling the lower-desire partner as "the problem" misses this complexity — and usually makes things worse by adding shame to already challenged intimacy.
+
+Researcher Emily Nagoski distinguishes between "spontaneous" desire (desire that arises out of nowhere) and "responsive" desire (desire that emerges in response to arousal). Many people, especially women, have primarily responsive desire — they don't feel sexual until something gets them started. This isn't low desire; it's a different pathway to desire that requires different conditions.
+
+Working with desire differences requires both partners to take responsibility: the higher-desire partner for creating conditions that nurture their partner's desire rather than pressuring, and the lower-desire partner for actively engaging with their own sexuality rather than avoiding it entirely.`,
+      keyInsights: [
+        { 
+          title: 'Context matters enormously', 
+          explanation: 'Stress, exhaustion, relationship resentment, body image issues, and feeling unsexy all suppress desire. Addressing these contexts often matters more than any sexual technique.' 
+        },
+        { 
+          title: 'Responsive vs. spontaneous desire', 
+          explanation: 'If you rarely feel randomly horny but can get into it once things start, you likely have responsive desire. This is normal, not broken. Your partner needs to understand this isn\'t rejection.' 
+        },
+        { 
+          title: 'Pressure kills desire', 
+          explanation: 'The more the higher-desire partner pressures, criticizes, or pouts, the more the lower-desire partner\'s sexuality shuts down. Feeling obligated to have sex is the opposite of desiring it.' 
+        },
+        { 
+          title: 'Both partners need to stretch', 
+          explanation: 'The higher-desire partner must learn to tolerate not getting sex every time they want it. The lower-desire partner must actively engage with their sexuality rather than hoping the issue disappears.' 
+        },
+      ],
+      whatHelps: [
+        'Remove pressure and obligation — these are desire killers',
+        'Address contextual factors (stress, resentment, exhaustion) that suppress desire',
+        'If you have responsive desire: create conditions for it to emerge (what turns you ON?)',
+        'Schedule intimacy — sounds unromantic, but anticipation can build desire',
+        'Expand definition of sex beyond penetration — what kinds of physical intimacy work for both?',
+        'Consider sex therapy if stuck — this is a common specialty with good results',
+      ],
+      professionalNote: 'Sex therapists (look for AASECT certification) specialize in desire discrepancy and can help couples navigate these issues without shame.'
+    },
+    reflectionQuestions: [
+      'In your relationship, who has higher desire? How has this difference been handled?',
+      'What context do you need to feel desire? What shuts it down?',
+      'What beliefs about sex and desire might be getting in the way?',
+    ],
+    relatedLessons: ['hm-rel-emotional-physical-intimacy', 'hm-rel-porn-intimacy', 'hm-body-chronic'],
+  },
+  {
+    id: 'hm-rel-porn-intimacy',
+    title: 'Porn & Intimacy: The Complicated Impact',
+    category: 'relationships',
+    duration: 8,
+    emoji: '📱',
+    content: {
+      introduction: `Pornography is the elephant in many bedrooms. Some couples watch it together with no issues. Others are destroyed by it. Some individuals use it casually; others feel enslaved by it. The research is contested, the cultural narratives are polarized, and the truth is: it's complicated.
+
+Potential issues with porn are real: it can create unrealistic expectations about sex, contribute to erectile dysfunction in young men (porn-induced ED), reduce desire for real partners, and become compulsive in ways that feel like addiction. For some, it represents betrayal; for others, it's a healthy outlet. Context and use patterns matter enormously.
+
+At the same time, catastrophizing about porn isn't helpful either. Occasional use doesn't automatically mean addiction. Masturbation is normal. And shame-based approaches tend to make compulsive use worse, not better. The question isn't "is porn good or bad" — it's "what role is it playing in this specific person's life and this specific relationship?"
+
+If porn is causing problems — impacting your relationship, escalating to concerning content, feeling out of control — it's worth addressing. If both partners are comfortable with how it's used and it's not interfering with real intimacy, moral panic isn't necessary. Honest conversation between partners is essential.`,
+      keyInsights: [
+        { 
+          title: 'Impact varies widely', 
+          explanation: 'For some, porn enhances their sex life. For others, it replaces it. For some, it\'s casual entertainment. For others, it becomes compulsive. Individual differences, relationship context, and use patterns all matter.' 
+        },
+        { 
+          title: 'Porn-induced sexual dysfunction', 
+          explanation: 'Some heavy porn users develop erectile dysfunction with partners while functioning fine with porn. This appears related to the dopamine conditioning of porn use. Recovery often requires extended abstinence from porn.' 
+        },
+        { 
+          title: 'The comparison problem', 
+          explanation: 'Porn creates impossible standards for bodies and performance. Partners can feel inadequate competing with an endless stream of performed perfection. This affects both men and women in different ways.' 
+        },
+        { 
+          title: 'Secrecy is often the biggest problem', 
+          explanation: 'Sometimes the issue isn\'t the porn itself — it\'s the secrecy. Hidden sexual behavior creates a wall between partners. Whatever the content, honesty matters.' 
+        },
+        {
+          title: 'Escalation can be concerning',
+          explanation: 'Needing more extreme content to get the same response may indicate problematic use patterns. This doesn\'t happen to everyone, but it\'s worth noticing.'
+        }
+      ],
+      whatHelps: [
+        'Have honest conversations with your partner about porn — what\'s okay, what isn\'t?',
+        'If use feels compulsive: consider a "reset" period without porn to see how it affects you',
+        'Address underlying issues (loneliness, anxiety, boredom) that may drive compulsive use',
+        'If porn-induced ED: abstinence from porn (not from partnered sex) often helps',
+        'Avoid shame-based approaches — they tend to increase compulsive behavior',
+        'Seek help from a sex therapist if porn is causing significant relationship or personal problems',
+      ],
+    },
+    reflectionQuestions: [
+      'What role does porn play in your life? Does it enhance or interfere with real intimacy?',
+      'Have you had honest conversations with your partner about porn use?',
+      'Do you feel in control of your porn use, or does it sometimes feel compulsive?',
+    ],
+    relatedLessons: ['hm-rel-libido-differences', 'hm-rel-emotional-physical-intimacy', 'hm-rel-affairs-betrayal'],
+  },
+  {
+    id: 'hm-rel-polyamory',
+    title: 'Polyamory & Non-Monogamy: Different Structures',
+    category: 'relationships',
+    duration: 8,
+    emoji: '💜',
+    content: {
+      introduction: `Not all relationships are monogamous, and that doesn't make them less valid. Consensual non-monogamy — including polyamory, open relationships, and other structures — works well for some people and relationships. The key word is consensual: all involved parties know about and agree to the arrangement.
+
+Polyamory specifically refers to having multiple romantic relationships simultaneously with the knowledge and consent of everyone involved. It's different from cheating (which involves deception) and different from casual non-monogamy (which may not involve emotional relationships). Other structures include open relationships (primary partnership with outside sexual connections), relationship anarchy (rejecting hierarchy in all relationships), and various other arrangements.
+
+Common misconceptions: that poly people can't commit, that they're afraid of intimacy, that it's just an excuse to cheat, or that someone is always secretly jealous. Research shows that polyamorous relationships can be as satisfying and stable as monogamous ones — when they fit the people involved and are practiced ethically.
+
+That said, non-monogamy isn't for everyone. It requires excellent communication, emotional regulation, and security. It's not a fix for relationship problems — it tends to amplify whatever dynamics already exist. And it takes significant time and energy to maintain multiple relationships well.`,
+      keyInsights: [
+        { 
+          title: 'Structure diversity', 
+          explanation: 'Non-monogamy includes many structures: hierarchical polyamory (primary partner with secondaries), non-hierarchical polyamory, open relationships, swinging, relationship anarchy, and more. Different structures suit different people.' 
+        },
+        { 
+          title: 'Jealousy exists but isn\'t fatal', 
+          explanation: 'Poly people aren\'t immune to jealousy. They\'ve learned to work with it: communicate about it, examine what it\'s really about, and not treat it as a reason to control partners. Jealousy can even provide useful information.' 
+        },
+        { 
+          title: 'Communication requirements are intense', 
+          explanation: 'Ethical non-monogamy requires constant, clear communication about boundaries, feelings, needs, and schedules. Couples who can\'t talk openly won\'t survive it.' 
+        },
+        { 
+          title: 'It\'s not an upgrade or downgrade', 
+          explanation: 'Non-monogamy isn\'t morally superior or inferior to monogamy. It\'s a different relationship structure that suits some people better. Neither is more "evolved."' 
+        },
+      ],
+      whatHelps: [
+        'If curious: read extensively before acting (books like "The Ethical Slut," "Polysecure")',
+        'If considering opening: get the primary relationship stable first — don\'t open to fix problems',
+        'Communicate explicitly about boundaries, expectations, and agreements',
+        'Expect that structure may need adjustment as you learn what actually works',
+        'Find community — navigating non-monogamy without support is much harder',
+        'If one partner wants non-monogamy and the other doesn\'t: this is a compatibility issue, not a negotiation',
+      ],
+      professionalNote: 'Therapists who are poly-friendly (look for listings on Psychology Today or Polyfriendly.org) can help navigate non-monogamy without pathologizing it.'
+    },
+    reflectionQuestions: [
+      'What draws you to or away from non-monogamy? What fears or attractions arise?',
+      'What would you need (from yourself and partners) to feel secure in a non-monogamous arrangement?',
+      'If you\'re in a monogamous relationship and considering opening: is this about expansion or escape?',
+    ],
+    relatedLessons: ['hm-rel-attachment-styles', 'hm-rel-boundaries-protect', 'hm-rel-healthy-conflict'],
+  },
+  {
+    id: 'hm-rel-long-distance',
+    title: 'Long-Distance Relationships: Maintaining Connection',
+    category: 'relationships',
+    duration: 7,
+    emoji: '🌍',
+    content: {
+      introduction: `Long-distance relationships get a bad reputation, but research shows they can be just as satisfying as geographically close ones — sometimes more so. What makes the difference isn't distance; it's how couples manage communication, trust, and the unique challenges distance creates.
+
+LDR couples often develop stronger communication skills out of necessity. Without physical presence, you must articulate feelings and needs more explicitly. You can't rely on physical touch to smooth over conflicts or express love. This forced verbal intimacy can become a relationship strength.
+
+The hardest parts: loneliness, jealousy, FOMO on each other's lives, lack of physical intimacy, and the uncertainty about when it will end. Distance is usually sustainable when there's a light at the end of the tunnel — a plan to eventually be together. Indefinite long-distance, with no end date, strains most relationships past their limits.
+
+Making it work requires intentionality: scheduled communication that you both protect, visits that you prioritize, honest conversations about fears and needs, and creative ways to maintain connection across miles. It also requires trust — long-distance amplifies insecurity, and constant checking or jealousy will destroy it.`,
+      keyInsights: [
+        { 
+          title: 'Quality over quantity in communication', 
+          explanation: 'Some LDR couples burn out on constant texting. What matters more is having meaningful conversations where you actually connect — not just checking in or performing availability.' 
+        },
+        { 
+          title: 'You need an end date', 
+          explanation: 'Most successful LDRs have a plan for eventually being in the same place. Open-ended distance — "maybe someday" — is very hard to sustain long-term.' 
+        },
+        { 
+          title: 'Trust is non-negotiable', 
+          explanation: 'You cannot verify what your partner is doing at all times. Requiring constant proof of fidelity or monitoring their activities will strangle the relationship. You either trust them or you don\'t.' 
+        },
+        { 
+          title: 'Visits have a rhythm', 
+          explanation: 'Many LDR couples notice a pattern: excitement before the visit, honeymoon period during, grief and adjustment after. Understanding this rhythm helps navigate the emotional rollercoaster.' 
+        },
+      ],
+      whatHelps: [
+        'Establish communication rhythms that work for both — and honor them',
+        'Have an end-date conversation: when will you be in the same place, and how will you get there?',
+        'Create shared experiences: watch movies "together," play games, have dinner over video',
+        'Prioritize visits — they\'re not optional, they\'re relationship maintenance',
+        'Talk about fears and jealousy rather than acting them out with controlling behavior',
+        'Maintain your own life — being miserable until the next visit isn\'t sustainable',
+      ],
+    },
+    reflectionQuestions: [
+      'If you\'re in an LDR: what\'s your plan for eventually being together? If you don\'t have one, why not?',
+      'What do you need from communication to feel connected across distance?',
+      'What insecurities does distance activate for you, and how are you managing them?',
+    ],
+    relatedLessons: ['hm-rel-attachment-styles', 'hm-rel-emotional-unavailability', 'hm-rel-anxious-avoidant'],
+  },
+  {
+    id: 'hm-rel-when-to-leave',
+    title: 'When to Leave: Recognizing It\'s Over',
+    category: 'relationships',
+    duration: 9,
+    emoji: '🚶',
+    content: {
+      introduction: `Knowing when to leave a relationship is one of the hardest calls in human experience. Stay too long and you waste years in misery. Leave too soon and you might abandon something that could have been repaired. There's no formula, but there are indicators worth examining.
+
+Some things are clear: violence, abuse, chronic infidelity with no real accountability, addiction with no genuine recovery effort. These are reasons to leave regardless of love, history, or hope. Your safety and wellbeing are not negotiable.
+
+The harder cases: relationships that aren't abusive but aren't good either. Chronic disconnection. Growing in different directions. Persistent unhappiness despite efforts. Incompatible visions for the future. The resentment that won't dissolve. These require honest assessment of whether the relationship is worth saving and whether both people are genuinely working to save it.
+
+Staying for the wrong reasons — fear of being alone, guilt, financial dependence, the kids — creates its own suffering. So does leaving for the wrong reasons — conflict avoidance, grass-is-greener fantasy, or running from intimacy. The question is: given who you both are and where you're headed, is this relationship a yes, a no, or a maybe that deserves more effort?`,
+      keyInsights: [
+        { 
+          title: 'Clear reasons to leave', 
+          explanation: 'Physical violence, emotional abuse, active addiction without recovery, repeated betrayal without real change — these override everything else. No amount of love makes staying okay when your wellbeing is at stake.' 
+        },
+        { 
+          title: 'The contempt signal', 
+          explanation: 'If you feel contempt for your partner — not occasional frustration but pervasive disgust — this is a powerful signal. Contempt is very hard to come back from and predicts relationship failure.' 
+        },
+        { 
+          title: 'Both must be willing', 
+          explanation: 'Relationships can survive almost anything if both people are genuinely committed to repair. If only one person is working, it can\'t succeed. You can\'t save a relationship alone.' 
+        },
+        { 
+          title: 'The grief of leaving vs. the grief of staying', 
+          explanation: 'Both options involve grief. Leaving means grieving the loss of the relationship and the future you imagined. Staying means grieving the relationship you wished you had. Either way, there is grief.' 
+        },
+        {
+          title: 'Your future self',
+          explanation: 'Project yourself five years forward. If nothing changes, will you regret staying or leaving more? Sometimes imagining your future self clarifies the present choice.'
+        }
+      ],
+      whatHelps: [
+        'Get outside perspective — friends, therapist, someone who can see what you can\'t',
+        'Write down what you\'ve tried and what results you\'ve seen — is effort being matched?',
+        'Imagine your best friend describing this relationship — what would you tell them?',
+        'Distinguish between normal relationship problems and fundamental incompatibility',
+        'If considering leaving: can you identify what would need to change for you to stay? Is that realistic?',
+        'If you\'ve already decided: start making practical plans while processing emotions',
+      ],
+      warningSign: 'If there is any physical violence or safety concern, please prioritize safety over relationship repair. The National Domestic Violence Hotline: 1-800-799-7233.'
+    },
+    reflectionQuestions: [
+      'What would need to be true for you to stay? Is that genuinely possible?',
+      'What are you most afraid of about leaving? Is that fear based on reality?',
+      'If you imagine your life five years from now — staying vs. leaving — which version do you want?',
+    ],
+    relatedLessons: ['hm-rel-contempt', 'hm-rel-rebuilding-trust', 'hm-trans-divorce'],
+  },
+  {
+    id: 'hm-rel-divorce-recovery',
+    title: 'Divorce Recovery: Rebuilding After Ending',
+    category: 'relationships',
+    duration: 9,
+    emoji: '🌱',
+    content: {
+      introduction: `Divorce or the end of a long-term relationship is one of the most stressful life events humans experience — ranking near death of a loved one. And yet, people are expected to keep functioning: show up at work, care for children, make major decisions about housing and finances. All while your heart is shattered and your identity is in flux.
+
+The loss isn't just the person — it's the future you planned, the daily routines, the shared history, the identity of being part of a "we." You're grieving multiple losses simultaneously while being forced to build a new life structure. This is brutal, and there's no shortcut through it.
+
+Recovery happens in stages, though not linearly. There's the acute crisis — the immediate aftermath with its shock, pain, and survival mode. Then the middle phase — where you're functioning but still processing, having good days and bad. Finally, integration — where the divorce becomes part of your story rather than the whole story, and you've built a life that feels genuinely yours.
+
+The timeline is longer than you want. Research suggests 2-5 years for full adjustment. Rushing recovery, immediately dating to avoid pain, or refusing to grieve all extend the process rather than shortening it.`,
+      keyInsights: [
+        { 
+          title: 'Multiple losses compound', 
+          explanation: 'You\'re not just losing a partner. You may be losing your home, daily contact with kids, financial security, mutual friends, a vision of your future. Each loss deserves acknowledgment.' 
+        },
+        { 
+          title: 'Identity reconstruction takes time', 
+          explanation: 'Who are you outside this relationship? That question can\'t be answered quickly. Give yourself time to figure out who you are now, not just who you were or who you were with them.' 
+        },
+        { 
+          title: 'The urge to rush is common and counterproductive', 
+          explanation: 'Jumping into a new relationship, making major life changes while in crisis, wanting to "just be over it" — these impulses are understandable but usually extend suffering rather than ending it.' 
+        },
+        { 
+          title: 'Relief and grief coexist', 
+          explanation: 'You can be glad the marriage ended AND grieving simultaneously. These aren\'t contradictory — they\'re the complexity of real life.' 
+        },
+        {
+          title: 'Growth is possible but not guaranteed',
+          explanation: 'Many people eventually report that divorce led to personal growth. But this isn\'t automatic — it comes from doing the work of processing, learning, and rebuilding intentionally.'
+        }
+      ],
+      whatHelps: [
+        'Allow the grief — fighting it extends it',
+        'Build support: friends, family, therapist, divorce support groups',
+        'Protect basics: sleep, food, movement, connection — even minimal versions',
+        'Delay major decisions when possible — your judgment is compromised',
+        'Resist rebound relationships — being alone with your feelings is part of healing',
+        'Be patient — 2-5 years is normal, and rushing doesn\'t help',
+        'Eventually: focus on who you want to become, not just who you lost',
+      ],
+      professionalNote: 'Divorce support groups and therapists specializing in divorce recovery can provide structured support during this transition. You don\'t have to navigate this alone.'
+    },
+    reflectionQuestions: [
+      'What are all the losses you\'re grieving — not just the obvious ones?',
+      'What do you need from others during this time that you haven\'t asked for?',
+      'When you imagine who you want to be on the other side of this — who is that person?',
+    ],
+    relatedLessons: ['hm-trans-divorce', 'hm-trans-grief-all-kinds', 'hm-trans-starting-over'],
+  },
 ];
 
 // ============================================================================
@@ -2128,6 +2882,977 @@ The identity shift of parenthood is permanent. You will never not be a parent ag
     reflectionQuestions: [
       'What parts of your pre-parent identity are you mourning?',
       'What would you admit about parenthood that you don\'t usually say out loud?',
-      'What support do you need that you\'re not currently getting?',
+    relatedLessons: ['hm-trans-identity-shifts', 'hm-mh-depression-truth'],
+  },
+];
+
+// ============================================================================
+// CATEGORY 8: GROWTH & HEALING
+// ============================================================================
+
+const growthHealingLessons: HumanManualLesson[] = [
+  {
+    id: 'hm-growth-self-compassion',
+    title: 'Self-Compassion: Not Self-Indulgence',
+    category: 'growth-healing',
+    duration: 7,
+    emoji: '💚',
+    content: {
+      introduction: `Self-compassion is treating yourself with the same kindness you'd offer a good friend who was struggling. It's not self-pity, self-indulgence, or letting yourself off the hook. Research by Dr. Kristin Neff shows it's actually associated with greater motivation, resilience, and wellbeing than self-criticism.
+
+Most of us are far harsher with ourselves than we'd ever be with someone we care about. We say things to ourselves we'd never say to a friend. We hold ourselves to standards we'd recognize as unreasonable for anyone else. This isn't motivating — it's demoralizing.
+
+Self-compassion has three components: self-kindness (being gentle rather than harsh with yourself), common humanity (recognizing that suffering and imperfection are part of the shared human experience), and mindfulness (being aware of pain without over-identifying with it).
+
+The critic in your head probably believes it's helping. It's not. Research consistently shows that self-compassion leads to better outcomes than self-criticism: more motivation, less anxiety, greater resilience, and improved mental health.`,
+      keyInsights: [
+        { 
+          title: 'It\'s not soft or weak', 
+          explanation: 'Self-compassion is associated with greater resilience, not less. People who practice it bounce back from failure faster and are more willing to try again.' 
+        },
+        { 
+          title: 'The inner critic isn\'t helping', 
+          explanation: 'You may believe harsh self-talk motivates you. Research says otherwise: self-criticism is associated with depression, anxiety, and less motivation.' 
+        },
+        { 
+          title: 'Common humanity matters', 
+          explanation: 'Suffering feels isolating. Recognizing that imperfection and struggle are universal — not unique to you — reduces shame and loneliness.' 
+        },
+        { 
+          title: 'You can\'t hate yourself into change', 
+          explanation: 'Self-criticism doesn\'t produce lasting change. Self-compassion creates the safety needed to honestly assess yourself and grow.' 
+        },
+      ],
+      whatHelps: [
+        'Notice your self-talk — would you say this to a friend?',
+        'Practice self-compassion phrases: "This is hard. Everyone struggles. May I be kind to myself."',
+        'When you fail: acknowledge the pain, remind yourself it\'s human, offer yourself kindness',
+        'Write a compassionate letter to yourself',
+        'Research: Kristin Neff\'s self-compassion exercises at self-compassion.org',
+      ],
+    },
+    reflectionQuestions: [
+      'How do you talk to yourself when you make a mistake? How would you talk to a friend?',
+      'What would change if you treated yourself with compassion instead of criticism?',
+      'What would you say to yourself right now if you were your own best friend?',
     ],
-    relatedLessons: ['hm-trans-identity-shifts', 'hm-
+    relatedLessons: ['hm-mh-depression-truth', 'hm-work-imposter'],
+  },
+  {
+    id: 'hm-growth-reparenting',
+    title: 'Reparenting: Giving Yourself What You Didn\'t Get',
+    category: 'growth-healing',
+    duration: 8,
+    emoji: '🌱',
+    content: {
+      introduction: `Reparenting is the practice of consciously providing for yourself the emotional needs that weren't met in childhood. If you didn't receive consistent love, validation, boundaries, or safety from your caregivers, you can learn to give these things to yourself as an adult.
+
+This isn't about blaming your parents or dwelling in victimhood. It's about recognizing that some needs went unmet — for whatever reason — and taking responsibility for meeting them now. You can't change the past, but you can change what happens from here.
+
+Reparenting involves developing an "inner nurturing parent" — a part of you that can offer comfort, set healthy boundaries, provide encouragement, and offer the unconditional regard you may have missed. This takes practice because you're building neural pathways that weren't developed in childhood.
+
+It can feel strange or even silly at first. But over time, reparenting work can fundamentally change your relationship with yourself — from one of neglect or criticism to one of care and support.`,
+      keyInsights: [
+        { 
+          title: 'You can meet your own needs now', 
+          explanation: 'What you didn\'t receive as a child can be provided by yourself as an adult. The need doesn\'t have to stay unmet forever.' 
+        },
+        { 
+          title: 'It requires conscious effort', 
+          explanation: 'The patterns of self-neglect or self-criticism are automatic. Reparenting is deliberate — choosing to respond to yourself differently than you were taught.' 
+        },
+        { 
+          title: 'Small, consistent acts matter', 
+          explanation: 'Reparenting happens in moments: speaking kindly to yourself, setting a boundary, meeting a need, comforting yourself when hurting.' 
+        },
+        { 
+          title: 'It changes the relationship with yourself', 
+          explanation: 'Over time, you develop an internal source of support that doesn\'t depend on others. You become your own safe base.' 
+        },
+      ],
+      whatHelps: [
+        'Identify what you needed and didn\'t get (validation, comfort, boundaries, encouragement)',
+        'Practice providing those things to yourself now',
+        'Use self-talk that a nurturing parent would use',
+        'Meet your physical needs: rest, food, comfort, safety',
+        'Set boundaries that protect you, as a good parent would',
+        'Celebrate your accomplishments, as a good parent would',
+      ],
+    },
+    reflectionQuestions: [
+      'What did you need as a child that you didn\'t receive?',
+      'How might you provide that to yourself now?',
+      'What would a nurturing parent say to you right now?',
+    ],
+    relatedLessons: ['hm-rel-family-wounds', 'hm-growth-inner-child', 'hm-growth-self-compassion'],
+  },
+  {
+    id: 'hm-growth-inner-child',
+    title: 'Inner Child Work: Healing the Past in the Present',
+    category: 'growth-healing',
+    duration: 7,
+    emoji: '👶',
+    content: {
+      introduction: `The "inner child" is a concept in psychology representing the part of your psyche that retains the feelings, memories, and experiences from childhood. When childhood needs went unmet or childhood wounds went unhealed, this part can continue to influence your adult life in ways you might not recognize.
+
+Inner child work involves connecting with this younger part of yourself, understanding its needs and fears, and providing the care and healing that wasn't available then. It's not about being childish — it's about integrating a part of yourself that's been carrying unprocessed pain.
+
+Signs of an unhealed inner child include: overreacting to situations that remind you of childhood, patterns of self-sabotage, difficulty with intimacy, shame about having needs, perfectionism, people-pleasing, and feeling fundamentally flawed. These are often the inner child's strategies for coping with what was too much to handle at the time.
+
+Healing the inner child doesn't mean the past didn't happen or that those responsible are absolved. It means you're no longer leaving a wounded part of yourself alone in the past. You're bringing them forward into safety.`,
+      keyInsights: [
+        { 
+          title: 'The child is still there', 
+          explanation: 'The experiences and feelings from childhood don\'t disappear — they live in your nervous system and psyche, influencing your present.' 
+        },
+        { 
+          title: 'Adult patterns often have child origins', 
+          explanation: 'Many of your reactions, fears, and protective behaviors started as adaptations to childhood circumstances that no longer apply.' 
+        },
+        { 
+          title: 'Connection and compassion heal', 
+          explanation: 'Simply acknowledging and offering compassion to your inner child can begin to heal wounds that have persisted for decades.' 
+        },
+        { 
+          title: 'You\'re not leaving them behind', 
+          explanation: 'Healing isn\'t about growing out of your inner child. It\'s about bringing that part of you along, cared for and integrated.' 
+        },
+      ],
+      whatHelps: [
+        'Visualize your younger self and offer comfort',
+        'Look at childhood photos and connect with what that child was experiencing',
+        'Write a letter to your inner child, or let your inner child write to you',
+        'Notice when you\'re reacting from a childlike place — that\'s the inner child',
+        'Ask yourself: "What does the little me need right now?"',
+        'Inner child meditation and guided visualizations',
+      ],
+      professionalNote: 'If connecting with your inner child brings up overwhelming emotions or traumatic memories, please work with a therapist trained in this approach.'
+    },
+    reflectionQuestions: [
+      'What did your younger self most need to hear that they didn\'t?',
+      'When do you notice yourself reacting in ways that feel childlike?',
+      'What would you want to say to yourself at age 5? At age 10?',
+    ],
+    relatedLessons: ['hm-growth-reparenting', 'hm-rel-family-wounds', 'hm-mh-trauma-basics'],
+  },
+];
+
+// ============================================================================
+// CATEGORY 9: IDENTITY & SELF
+// ============================================================================
+
+const identitySelfLessons: HumanManualLesson[] = [
+  {
+    id: 'hm-id-sexuality-spectrum',
+    title: 'The Sexuality Spectrum: Understanding Your Orientation',
+    category: 'identity-self',
+    duration: 8,
+    emoji: '🌈',
+    content: {
+      introduction: `Sexual orientation isn't a simple binary — it exists on a spectrum that researchers have been mapping since Alfred Kinsey's groundbreaking work in the 1940s. The Kinsey Scale, later expanded by others, suggests orientation ranges from exclusively heterosexual to exclusively homosexual, with most people falling somewhere in between. And that's just the start of the complexity.
+
+Beyond gay, straight, and bisexual, terms like pansexual (attraction regardless of gender), asexual (little or no sexual attraction), demisexual (attraction only after emotional connection), and queer (an umbrella term reclaimed by many) help capture the full range of human experience. Your orientation might also shift over time — sexual fluidity is a documented phenomenon, particularly among women.
+
+Understanding your orientation is about self-knowledge, not about fitting into boxes. Labels can be helpful for finding community and communicating about yourself, but they're tools, not constraints. If no label fits perfectly, that's okay. If your orientation feels complicated or changes over time, that's okay too.
+
+The key insight from modern sexuality research: there's no "normal" to deviate from. Human sexuality has always been diverse. What's new is having language for that diversity and the social freedom to explore it.`,
+      keyInsights: [
+        { 
+          title: 'Orientation is a spectrum, not a binary', 
+          explanation: 'Research consistently shows sexuality exists on a continuum. Very few people are exclusively attracted to one gender with zero exceptions.' 
+        },
+        { 
+          title: 'Labels are tools, not prisons', 
+          explanation: 'Terms like gay, bi, pan, ace, and queer help communicate and find community. But if no label fits, you don\'t need one. You don\'t owe anyone a category.' 
+        },
+        { 
+          title: 'Fluidity is real', 
+          explanation: 'Sexual orientation can shift over a lifetime. This doesn\'t mean you were "wrong before" — it means humans are dynamic, not static.' 
+        },
+        { 
+          title: 'Attraction has multiple dimensions', 
+          explanation: 'Sexual attraction (who you want sexually), romantic attraction (who you want relationships with), and aesthetic attraction (who you find beautiful) don\'t always align.' 
+        },
+      ],
+      whatHelps: [
+        'Explore without pressure to conclude — self-understanding takes time',
+        'Read about different orientations from people who live them',
+        'Find community — LGBTQ+ spaces, online forums, support groups',
+        'Remember that questioning is normal at any age',
+        'Separate what you actually feel from what you think you "should" feel',
+      ],
+      professionalNote: 'If exploring your sexuality brings up distress, confusion, or conflict with your background, an LGBTQ-affirming therapist can provide support without pushing you toward any particular conclusion.'
+    },
+    reflectionQuestions: [
+      'What do you actually notice about your patterns of attraction, separate from what you were taught to feel?',
+      'Have your attractions shifted over time? What did that feel like?',
+      'Do labels feel helpful or constraining to you? Why?',
+    ],
+    relatedLessons: ['hm-id-questioning-identity', 'hm-rel-gender-identity', 'hm-id-internalized-shame'],
+  },
+  {
+    id: 'hm-id-questioning-identity',
+    title: 'Questioning Your Identity: It\'s Okay Not to Know',
+    category: 'identity-self',
+    duration: 7,
+    emoji: '❓',
+    content: {
+      introduction: `We live in a culture that demands certainty. "What are you?" "Who are you?" "What do you want?" We're expected to know ourselves fully and declare it confidently. But the truth is: not knowing is a valid place to be. Questioning your identity — whether it's sexuality, gender, career, beliefs, or fundamental sense of self — isn't a failure of self-awareness. It's often a sign of growth.
+
+Erik Erikson, the developmental psychologist who gave us the concept of "identity crisis," saw questioning as essential to identity formation. You can't develop a solid sense of self without first exploring, experimenting, and questioning what you've been given. The crisis IS the process, not a problem to be solved as quickly as possible.
+
+Pressure to know yourself can paradoxically make self-knowledge harder. When questioning feels unsafe, when others need you to have an answer, when you need certainty to feel okay — you might grab a label prematurely or deny what you're actually experiencing. True self-knowledge requires the safety to not know.
+
+Sitting with uncertainty is uncomfortable. Our brains crave resolution. But some of the most important questions about who you are don't have quick answers. The ability to tolerate "I don't know yet" is a skill worth developing.`,
+      keyInsights: [
+        { 
+          title: 'Questioning is the process', 
+          explanation: 'Erikson showed that identity develops through crisis and questioning, not despite it. Not knowing is part of how you come to know.' 
+        },
+        { 
+          title: 'Premature closure is a risk', 
+          explanation: 'Grabbing an identity too quickly because uncertainty is uncomfortable can lead to inauthentic choices. Better to stay in the question than commit to the wrong answer.' 
+        },
+        { 
+          title: 'You don\'t owe anyone certainty', 
+          explanation: 'Others might pressure you to define yourself. But your identity development happens on your timeline, not theirs.' 
+        },
+        { 
+          title: 'Not knowing is a valid identity', 
+          explanation: '"I\'m still figuring it out" is a complete sentence. Questioning IS an identity stage, and it can last as long as it needs to.' 
+        },
+      ],
+      whatHelps: [
+        'Give yourself permission to not know yet',
+        'Explore without committing — try on identities and see how they feel',
+        'Reduce exposure to people who pressure you for answers',
+        'Journal about what you notice, without needing conclusions',
+        'Find communities where questioning is normalized',
+        'Remember: identity is process, not destination',
+      ],
+    },
+    reflectionQuestions: [
+      'What aspects of your identity are you currently questioning?',
+      'Who in your life can hold space for your uncertainty?',
+      'What would change if you gave yourself full permission to not know?',
+    ],
+    relatedLessons: ['hm-id-sexuality-spectrum', 'hm-trans-identity-shifts', 'hm-id-finding-values'],
+  },
+  {
+    id: 'hm-id-internalized-shame',
+    title: 'Internalized Shame: When You Hate Parts of Yourself',
+    category: 'identity-self',
+    duration: 9,
+    emoji: '😞',
+    content: {
+      introduction: `Internalized shame happens when you absorb negative messages about some aspect of your identity and turn them against yourself. You don't just feel ashamed when others judge you — you become your own harshest critic, policing and punishing parts of yourself that were never wrong in the first place.
+
+This is particularly insidious for marginalized identities. Internalized homophobia, internalized racism, internalized ableism, internalized misogyny — these aren't personal failures. They're the predictable result of growing up in a society that devalues your identity. The shame isn't yours; it was given to you. But it now operates from inside, which makes it harder to recognize and resist.
+
+The cruelty of internalized shame is that it disguises itself as your own voice. It doesn't feel like prejudice — it feels like truth, like reality, like "I just know this about myself." Recognizing that these beliefs came from outside, that they were absorbed rather than discovered, is the beginning of untangling them.
+
+Healing internalized shame requires both external work (finding community, changing inputs, experiencing acceptance) and internal work (compassion, challenging beliefs, grieving what the shame cost you). Neither alone is sufficient.`,
+      keyInsights: [
+        { 
+          title: 'The shame was given to you', 
+          explanation: 'You weren\'t born hating parts of yourself. That hatred was taught, absorbed, internalized. It feels like yours, but it originated outside.' 
+        },
+        { 
+          title: 'It disguises itself as truth', 
+          explanation: 'Internalized shame doesn\'t announce itself. It masquerades as realistic self-assessment: "I\'m just being honest about my flaws."' 
+        },
+        { 
+          title: 'It operates automatically', 
+          explanation: 'You don\'t consciously choose to shame yourself. The beliefs run in the background, filtering your self-perception and limiting your life.' 
+        },
+        { 
+          title: 'External and internal work are both needed', 
+          explanation: 'Changing your environment and inputs helps. But you also need to actively challenge the beliefs that now live inside you.' 
+        },
+      ],
+      whatHelps: [
+        'Identify the source: where did you learn to feel this way about this part of yourself?',
+        'Find community with others who share your identity and don\'t share the shame',
+        'Challenge the beliefs: are they actually true, or just familiar?',
+        'Limit exposure to media and people who reinforce the shame',
+        'Practice self-compassion specifically toward the shamed parts',
+        'Grieve what the shame cost you',
+      ],
+      professionalNote: 'Working through internalized shame is often best done with a therapist who affirms your identity and understands the dynamics of internalized oppression.'
+    },
+    reflectionQuestions: [
+      'What parts of yourself do you feel ashamed of? Where did that shame come from?',
+      'What would your life look like if that shame didn\'t exist?',
+      'Can you identify the moment or messages that planted the shame?',
+    ],
+    relatedLessons: ['hm-world-minority-stress', 'hm-growth-self-compassion', 'hm-id-sexuality-spectrum'],
+  },
+  {
+    id: 'hm-id-people-pleasing',
+    title: 'People-Pleasing: The Fawn Response',
+    category: 'identity-self',
+    duration: 8,
+    emoji: '🙏',
+    content: {
+      introduction: `You've heard of fight, flight, and freeze. But there's a fourth trauma response: fawn. Fawning means appeasing, pleasing, and merging with others' needs to stay safe. People-pleasing isn't just being nice — when it's compulsive and self-abandoning, it's a survival strategy that developed when pleasing others was literally necessary to survive.
+
+For many people, particularly those raised in chaotic, abusive, or emotionally unpredictable homes, fawning was adaptive. If you could read the room, anticipate needs, and make yourself useful or agreeable, you might avoid harm. The problem is that the strategy continues long after the original danger has passed.
+
+Adult people-pleasers often struggle with knowing their own needs (they've been focused outward for so long), saying no (it feels dangerous), tolerating others' disappointment (it triggers survival panic), and feeling worthy without being useful (their value was conditional).
+
+Breaking the people-pleasing pattern requires understanding that it was survival, not weakness. It requires grieving the self that had to be abandoned to stay safe. And it requires slowly, carefully learning that you can have needs, have opinions, and disappoint people without catastrophe.`,
+      keyInsights: [
+        { 
+          title: 'It\'s a trauma response', 
+          explanation: 'Chronic people-pleasing is often the fawn response — a survival adaptation from environments where pleasing others was necessary for safety.' 
+        },
+        { 
+          title: 'The self gets lost', 
+          explanation: 'When you\'ve spent years focused on what others need, you may not know what you need. The self that wasn\'t safe to have becomes hard to access.' 
+        },
+        { 
+          title: 'No feels dangerous', 
+          explanation: 'For people-pleasers, saying no or disappointing others can trigger genuine nervous system alarm — because at one point, it was dangerous.' 
+        },
+        { 
+          title: 'Worth becomes conditional', 
+          explanation: 'If you were only valued when useful, you may believe your worth depends on what you provide. This is a belief, not a truth, and it can change.' 
+        },
+      ],
+      whatHelps: [
+        'Recognize people-pleasing as survival, not personality',
+        'Practice small nos in low-stakes situations',
+        'Learn to sit with others\' disappointment without fixing it',
+        'Ask yourself: "What do I want?" (this may take time to access)',
+        'Notice when you\'re abandoning yourself to please someone else',
+        'Therapy for underlying attachment and trauma patterns',
+      ],
+    },
+    reflectionQuestions: [
+      'When did you learn that pleasing others was essential?',
+      'What do you actually want, separate from what others want from you?',
+      'What happens in your body when you imagine saying no?',
+    ],
+    relatedLessons: ['hm-rel-boundaries-protect', 'hm-stress-freeze-response', 'hm-id-self-worth'],
+  },
+  {
+    id: 'hm-id-perfectionism',
+    title: 'Perfectionism: The Impossible Standard',
+    category: 'identity-self',
+    duration: 8,
+    emoji: '✨',
+    content: {
+      introduction: `Perfectionism isn't about having high standards. It's about believing your worth depends on being perfect. It's the difference between "I want to do well" and "If I don't do perfectly, I'm worthless." One is healthy striving. The other is a psychological trap.
+
+Research by Dr. Brené Brown and others shows perfectionism is actually correlated with worse outcomes: more anxiety, more depression, more procrastination (it's often safer not to try than to try and fail), and paradoxically, lower performance over time (burnout is inevitable when the standard is inhuman).
+
+Perfectionism often develops in childhoods where love or acceptance felt conditional on achievement. If you were praised for accomplishments but not for being, you learned that worth is earned through performance. If mistakes were punished or shamed, you learned that imperfection is dangerous.
+
+Unlearning perfectionism means accepting that you are inherently worthy, regardless of what you produce. It means allowing yourself to be seen in your imperfection. It means learning that "good enough" is actually good enough. This is terrifying if perfection felt like the only thing keeping you safe.`,
+      keyInsights: [
+        { 
+          title: 'Perfectionism is about worth, not standards', 
+          explanation: 'The core belief is: "If I\'m perfect, I can avoid criticism, rejection, and shame. If I\'m not perfect, I\'m worthless."' 
+        },
+        { 
+          title: 'It backfires', 
+          explanation: 'Perfectionism leads to procrastination, burnout, anxiety, and often worse performance. It\'s not the path to excellence — it\'s the path to exhaustion.' 
+        },
+        { 
+          title: 'It often has childhood roots', 
+          explanation: 'Conditional love, punished mistakes, praise only for achievement — these teach that worth must be earned through perfection.' 
+        },
+        { 
+          title: '"Good enough" is actually better', 
+          explanation: 'Done is better than perfect. Trying and failing is better than not trying. Being seen imperfect is better than hiding forever.' 
+        },
+      ],
+      whatHelps: [
+        'Notice the perfectionist voice and name it as a learned pattern, not truth',
+        'Practice deliberately doing things imperfectly (exposure therapy for perfectionism)',
+        'Separate worth from performance: you are not what you produce',
+        'Explore the roots: where did you learn perfection was required?',
+        'Set "good enough" standards before starting tasks',
+        'Share imperfect work — let others see you trying, not just succeeding',
+      ],
+    },
+    reflectionQuestions: [
+      'What happens to your sense of self-worth when you fail or make mistakes?',
+      'Where did you learn that perfection was necessary?',
+      'What would you attempt if you knew you were allowed to fail?',
+    ],
+    relatedLessons: ['hm-work-imposter', 'hm-growth-self-compassion', 'hm-id-self-worth'],
+  },
+  {
+    id: 'hm-id-rejection-sensitivity',
+    title: 'Rejection Sensitive Dysphoria: When Rejection Devastates',
+    category: 'identity-self',
+    duration: 8,
+    emoji: '💥',
+    content: {
+      introduction: `Rejection Sensitive Dysphoria (RSD) is the extreme emotional pain triggered by the perception of being rejected, criticized, or failing to meet expectations. It's not just feeling bad about rejection — it's an intense, often unbearable flood of emotion that can feel like physical pain.
+
+RSD was initially identified in research on ADHD, where it affects up to 99% of adults with the condition. But the experience isn't limited to ADHD — it can occur with depression, anxiety, autism, and trauma histories. The common thread is a nervous system that processes perceived rejection as an emergency.
+
+The key word is "perceived." RSD can be triggered by actual rejection or by the anticipation of rejection or by interpreting neutral events as rejection. The emotional response is the same regardless of whether the rejection was real or imagined. This makes it particularly difficult, because you can't always trust your perception of whether you're being rejected.
+
+Living with RSD often means managing a hair-trigger emotional response. People may avoid risk (fear of rejection), people-please (prevent rejection), or rage (defensive response to rejection pain). Understanding RSD can help you respond to these intense emotions with more skill and less shame.`,
+      keyInsights: [
+        { 
+          title: 'It\'s not oversensitivity — it\'s different neurology', 
+          explanation: 'RSD isn\'t being dramatic or "too sensitive." It\'s a neurobiological response where the brain processes rejection as a threat emergency.' 
+        },
+        { 
+          title: 'Perception triggers it, not just reality', 
+          explanation: 'You can experience RSD from imagined rejection or neutral events interpreted as rejection. The emotion doesn\'t distinguish between real and perceived.' 
+        },
+        { 
+          title: 'It\'s strongly linked to ADHD', 
+          explanation: 'Up to 99% of adults with ADHD experience RSD. If you have ADHD and intense rejection pain, you\'re not alone.' 
+        },
+        { 
+          title: 'It shapes behavior', 
+          explanation: 'People with RSD often avoid situations with rejection risk, people-please to prevent rejection, or react intensely when triggered. These are coping mechanisms, not character flaws.' 
+        },
+      ],
+      whatHelps: [
+        'Name it: "This is RSD, not evidence that I\'m actually being rejected"',
+        'Pause before reacting — the first interpretation may not be accurate',
+        'Ride the wave: intense emotions peak and pass; it won\'t last forever',
+        'For ADHD-related RSD: some medications help (discuss with your doctor)',
+        'Build a toolkit for intense emotions: grounding, movement, connection',
+        'Let trusted people know about RSD so they can provide reality checks',
+      ],
+      professionalNote: 'If you have ADHD and experience RSD, certain ADHD medications (particularly alpha-agonists like guanfacine) can help reduce RSD intensity. Discuss this with your prescriber.'
+    },
+    reflectionQuestions: [
+      'Do you experience rejection as emotionally devastating rather than just disappointing?',
+      'How does fear of rejection shape your choices and behavior?',
+      'What would help in the moment when the RSD wave hits?',
+    ],
+    relatedLessons: ['hm-id-adhd-identity', 'hm-id-people-pleasing', 'hm-stress-nervous-system'],
+  },
+  {
+    id: 'hm-id-adhd-identity',
+    title: 'ADHD & Identity: More Than Just Attention',
+    category: 'identity-self',
+    duration: 9,
+    emoji: '🧠',
+    content: {
+      introduction: `ADHD (Attention-Deficit/Hyperactivity Disorder) isn't just about attention problems — it's a different way of having a brain that affects every aspect of life. Executive function challenges, emotional regulation difficulties, time blindness, rejection sensitivity, interest-based motivation, and a nervous system that works differently are all part of the picture.
+
+Many people with ADHD grow up being told they're lazy, unmotivated, not trying hard enough, or not living up to their potential. They internalize these messages, developing deep shame about their brains. Late diagnosis (especially common in women, who were underdiagnosed for decades) often brings both relief ("there's a reason!") and grief ("I could have known sooner").
+
+ADHD isn't a character flaw or a lack of willpower. Neuroimaging studies show structural and functional brain differences. The prefrontal cortex, which handles executive functions, develops differently. Dopamine regulation works differently. It's not that you're not trying — it's that your brain is running different software.
+
+Understanding ADHD as part of your identity means neither using it as an excuse nor pretending it doesn't exist. It means learning how your brain works, building systems that work with it rather than against it, and releasing the shame of being different from neurotypical expectations.`,
+      keyInsights: [
+        { 
+          title: 'It\'s a brain difference, not a character flaw', 
+          explanation: 'Neuroimaging shows ADHD brains are structurally and functionally different. You\'re not failing at having a normal brain — you have a different brain.' 
+        },
+        { 
+          title: 'Interest-based, not importance-based motivation', 
+          explanation: 'ADHD brains don\'t reliably activate for "important" things — they activate for interesting, urgent, novel, or challenging things. This isn\'t laziness; it\'s different neurology.' 
+        },
+        { 
+          title: 'Late diagnosis is common and disorienting', 
+          explanation: 'Many people, especially women, aren\'t diagnosed until adulthood. This brings relief and grief — finally understanding, while mourning the struggles that might have been avoided.' 
+        },
+        { 
+          title: 'Shame is learned, not inherent', 
+          explanation: 'The shame ADHD people carry was taught by a world that judged them against neurotypical standards. That shame is not accurate information about your worth.' 
+        },
+      ],
+      whatHelps: [
+        'Learn how ADHD specifically shows up in YOUR brain',
+        'Build systems and structures that work with your brain, not against it',
+        'Release shame — different doesn\'t mean defective',
+        'Connect with ADHD community — you\'re not alone',
+        'Consider medication — it can be life-changing for many',
+        'Grieve the years of struggle before understanding',
+        'Challenge internalized ableism about what "normal" looks like',
+      ],
+      professionalNote: 'If you suspect ADHD, seek evaluation from a specialist. Treatment (medication, coaching, therapy, accommodations) can significantly improve quality of life.'
+    },
+    reflectionQuestions: [
+      'How has ADHD (diagnosed or suspected) shaped your sense of self?',
+      'What shame about your brain differences do you carry?',
+      'What would self-acceptance look like for how your brain works?',
+    ],
+    relatedLessons: ['hm-id-rejection-sensitivity', 'hm-id-autism-masking', 'hm-id-internalized-shame'],
+  },
+  {
+    id: 'hm-id-autism-masking',
+    title: 'Autism & Masking: The Exhaustion of Fitting In',
+    category: 'identity-self',
+    duration: 9,
+    emoji: '🎭',
+    content: {
+      introduction: `Masking is the process by which autistic people consciously or unconsciously hide their autistic traits to appear more neurotypical. It involves suppressing stims, forcing eye contact, scripting social interactions, mimicking facial expressions, and generally performing a version of "normal" that doesn't come naturally.
+
+Many autistic people, especially those diagnosed late in life or those who "pass" as neurotypical, have been masking for so long they don't know who they are underneath. The mask becomes automatic, and removing it feels terrifying. But masking has costs: exhaustion, burnout, anxiety, depression, and a fundamental disconnection from authentic self.
+
+Autism wasn't recognized in many people — particularly women, BIPOC individuals, and those without intellectual disabilities — until recently. Many were missed because their masking was successful. They struggled without knowing why, often developing anxiety, depression, or burnout that was really autistic burnout misunderstood.
+
+Understanding autism as part of identity means recognizing that autistic ways of being aren't wrong or disordered — they're different. Unmasking, where it's safe to do so, means allowing yourself to be authentically autistic: to stim, to rest when needed, to communicate naturally, to stop performing neurotypicality.`,
+      keyInsights: [
+        { 
+          title: 'Masking is exhausting', 
+          explanation: 'Constantly monitoring and suppressing natural behavior to appear "normal" drains enormous cognitive and emotional energy. Autistic burnout is often masking-related.' 
+        },
+        { 
+          title: 'Many don\'t know they\'re autistic', 
+          explanation: 'Late diagnosis is common, especially for women, BIPOC individuals, and anyone who masked successfully. Struggling without knowing why is its own trauma.' 
+        },
+        { 
+          title: 'The mask can become invisible', 
+          explanation: 'After years of masking, you may not know what\'s mask and what\'s you. Discovering your authentic self underneath can take time and feel disorienting.' 
+        },
+        { 
+          title: 'Autistic traits aren\'t deficits', 
+          explanation: 'Deep focus, pattern recognition, honesty, attention to detail, passionate interests — autism comes with strengths, not just challenges.' 
+        },
+      ],
+      whatHelps: [
+        'Learn about autism from autistic people (not just clinical sources)',
+        'Identify where and when unmasking is safe',
+        'Allow yourself to stim, rest, and communicate naturally when possible',
+        'Connect with autistic community — being around people who "get it" is restorative',
+        'Grieve the years of exhaustion and misunderstanding',
+        'Challenge internalized ableism about what "normal" should look like',
+      ],
+      professionalNote: 'If you suspect autism, seek evaluation from a specialist who understands how autism presents in adults, especially in women and marginalized groups. Many clinicians still miss autism in people who mask well.'
+    },
+    reflectionQuestions: [
+      'Where do you find yourself performing "normal" in ways that exhaust you?',
+      'What would you do differently if you didn\'t have to mask?',
+      'What support would help you be more authentically yourself?',
+    ],
+    relatedLessons: ['hm-id-adhd-identity', 'hm-stress-burnout', 'hm-id-highly-sensitive'],
+  },
+  {
+    id: 'hm-id-highly-sensitive',
+    title: 'Highly Sensitive Person (HSP): Not a Flaw, a Trait',
+    category: 'identity-self',
+    duration: 7,
+    emoji: '🌸',
+    content: {
+      introduction: `High sensitivity is a trait found in about 15-20% of the population — and it's found across species, not just humans. Dr. Elaine Aron, who pioneered research on Highly Sensitive People (HSPs), calls it Sensory Processing Sensitivity: the brain processes stimuli more deeply and notices more subtlety than less sensitive brains.
+
+HSPs notice things others miss: subtle changes in people's moods, details in environments, the emotional undercurrents of situations. This depth of processing makes them insightful, empathetic, and often creative. But it also means overwhelm comes faster — more input means more to process.
+
+The problem isn't the sensitivity itself — it's that we live in a culture that doesn't honor it. "Don't be so sensitive" is an insult. Toughness is rewarded; sensitivity is pathologized. HSPs often internalize shame about their trait, trying to be less sensitive rather than learning to work with their nature.
+
+Understanding HSP as a neutral trait — with both advantages and challenges — can shift shame into self-acceptance. You're not weak or broken. Your nervous system is wired for deep processing. That's a feature, not a bug, even when it's hard to manage in an overstimulating world.`,
+      keyInsights: [
+        { 
+          title: 'It\'s biological, not weakness', 
+          explanation: 'High sensitivity has a genetic component and shows differences in brain processing. You didn\'t fail to toughen up — you\'re built differently.' 
+        },
+        { 
+          title: 'It comes with strengths', 
+          explanation: 'Deep processing means noticing subtleties, understanding nuance, and often high creativity and empathy. It\'s not all downside.' 
+        },
+        { 
+          title: 'Overstimulation is real', 
+          explanation: 'When you process more deeply, your threshold for overwhelm is lower. This isn\'t weakness — it\'s the cost of depth.' 
+        },
+        { 
+          title: 'The culture doesn\'t support it', 
+          explanation: 'Loud, fast, constantly stimulating environments are hard for HSPs. The world wasn\'t designed for your nervous system. That\'s the world\'s limitation, not yours.' 
+        },
+      ],
+      whatHelps: [
+        'Reframe sensitivity as a neutral trait with pros and cons',
+        'Build in recovery time — you need more downtime than others',
+        'Create low-stimulation environments where possible',
+        'Protect yourself from overstimulating inputs (news, crowds, etc.)',
+        'Read Elaine Aron\'s work for research-based understanding',
+        'Connect with other HSPs — being understood helps',
+      ],
+    },
+    reflectionQuestions: [
+      'How has being told you\'re "too sensitive" affected how you see yourself?',
+      'What advantages does your sensitivity give you?',
+      'What would it mean to honor your sensitivity instead of fighting it?',
+    ],
+    relatedLessons: ['hm-id-introversion', 'hm-stress-overwhelm', 'hm-id-internalized-shame'],
+  },
+  {
+    id: 'hm-id-introversion',
+    title: 'Introversion in an Extrovert World',
+    category: 'identity-self',
+    duration: 6,
+    emoji: '🏠',
+    content: {
+      introduction: `Introversion isn't shyness, social anxiety, or not liking people. It's about where you get your energy. Introverts recharge through solitude; extroverts recharge through social interaction. Both need connection, and both need alone time — but the balance is different.
+
+The Western world, and American culture in particular, strongly favors extroversion. Open offices, brainstorming sessions, team-building exercises, "networking" as a career requirement — these are all designed for extroverted energy styles. Introverts in this world are constantly being asked to function in ways that drain rather than energize them.
+
+Susan Cain's book "Quiet" brought attention to the extrovert bias and the hidden strengths of introverts: deep thinking, careful listening, ability to focus, and often more meaningful (if fewer) relationships. The problem isn't introversion — it's a culture that pathologizes it.
+
+Living as an introvert in an extrovert world requires both self-acceptance (this is who you are, and it's valid) and practical management (building in recovery time, setting boundaries, finding work environments that don't constantly drain you).`,
+      keyInsights: [
+        { 
+          title: 'Energy, not social skill', 
+          explanation: 'Introversion is about what drains and restores you, not whether you\'re good at social interaction. Many introverts are excellent socializers — they just need recovery afterward.' 
+        },
+        { 
+          title: 'The cultural bias is real', 
+          explanation: 'Western culture treats extroversion as the healthy default. Introverts are constantly asked to adapt. This isn\'t neutral — it\'s preference disguised as norm.' 
+        },
+        { 
+          title: 'Introverts have strengths', 
+          explanation: 'Deep thinking, focused attention, meaningful relationships, careful listening — introversion comes with significant advantages that extrovert culture doesn\'t always recognize.' 
+        },
+        { 
+          title: 'Forced extroversion is exhausting', 
+          explanation: 'Constant social demand without recovery time leads to burnout. Introverts need to protect their energy, not just push through.' 
+        },
+      ],
+      whatHelps: [
+        'Accept introversion as legitimate, not a deficit to overcome',
+        'Build in recovery time around social events',
+        'Communicate your needs: "I need to leave early" is valid',
+        'Find work environments that don\'t constantly drain you',
+        'Protect solitude — it\'s not antisocial, it\'s restorative',
+        'Read "Quiet" by Susan Cain for cultural context and validation',
+      ],
+    },
+    reflectionQuestions: [
+      'How has extrovert culture affected your sense of yourself?',
+      'Do you get enough restorative solitude?',
+      'What would honoring your introversion actually look like?',
+    ],
+    relatedLessons: ['hm-id-highly-sensitive', 'hm-stress-burnout', 'hm-rel-adult-friendships'],
+  },
+  {
+    id: 'hm-id-body-image',
+    title: 'Body Image & Dysmorphia: The Distorted Mirror',
+    category: 'identity-self',
+    duration: 9,
+    emoji: '🪞',
+    content: {
+      introduction: `Body image is how you perceive, think about, and feel about your body. For many people, especially in cultures saturated with unrealistic images, body image is complicated at best and distorted at worst. Body dysmorphia takes this further: you become obsessed with perceived flaws that others can't see or see as minor.
+
+We live in an environment of constant body evaluation. Social media, advertising, and cultural norms send relentless messages about what bodies should look like — messages that are impossible for almost everyone to match. The thin ideal, the fitness ideal, the youth ideal, the whatever-is-trending ideal: these are manufactured standards, not natural ones.
+
+The distortion can become severe enough to be classified as Body Dysmorphic Disorder (BDD), where preoccupation with perceived defects causes significant distress and functional impairment. But even "subclinical" body image struggles affect quality of life, self-esteem, and relationship with your physical self.
+
+Healing body image isn't about loving how you look — it can be about neutrality, about appreciating function over form, about disconnecting worth from appearance. The goal is a relationship with your body that doesn't cause constant suffering.`,
+      keyInsights: [
+        { 
+          title: 'The standards are manufactured', 
+          explanation: 'The body ideals we compare ourselves to are created by industries that profit from our dissatisfaction. They\'re not natural or healthy standards.' 
+        },
+        { 
+          title: 'What you see may not be reality', 
+          explanation: 'Body dysmorphia means your perception of your body is distorted. What you see in the mirror isn\'t what others see — and isn\'t objective.' 
+        },
+        { 
+          title: 'Neutrality is a valid goal', 
+          explanation: 'You don\'t have to love your body. Peaceful coexistence — body neutrality — is often more achievable and still liberating.' 
+        },
+        { 
+          title: 'Function matters more than form', 
+          explanation: 'What your body does is more important than how it looks. Shifting focus from appearance to ability can reduce suffering.' 
+        },
+      ],
+      whatHelps: [
+        'Reduce exposure to appearance-focused media',
+        'Unfollow accounts that trigger comparison',
+        'Focus on what your body does, not how it looks',
+        'Challenge distorted thoughts about your body',
+        'Practice body neutrality if body positivity feels impossible',
+        'For BDD: seek specialized treatment (CBT and exposure are effective)',
+      ],
+      warningSign: 'If body image concerns are causing significant distress, interfering with daily life, or leading to harmful behaviors, please seek professional help.',
+      professionalNote: 'Body Dysmorphic Disorder is a serious condition that responds well to specific treatment (CBT with exposure and response prevention). If you\'re struggling significantly, please see a specialist.'
+    },
+    reflectionQuestions: [
+      'How much mental energy do you spend thinking about your appearance?',
+      'Where did your beliefs about how bodies should look come from?',
+      'What would change if you focused on function instead of form?',
+    ],
+    relatedLessons: ['hm-id-eating-patterns', 'hm-id-comparison-social-media', 'hm-id-internalized-shame'],
+  },
+  {
+    id: 'hm-id-eating-patterns',
+    title: 'Eating Patterns & Control: When Food Becomes Complicated',
+    category: 'identity-self',
+    duration: 9,
+    emoji: '🍽️',
+    content: {
+      introduction: `For many people, food isn't just fuel — it's a battleground. Disordered eating exists on a spectrum from restrictive dieting to binge eating to full eating disorders. The common thread is that food becomes about control, emotion, punishment, comfort, or identity rather than simple nourishment.
+
+Diet culture has normalized disordered eating patterns to such a degree that restriction, food guilt, and "clean eating" obsessions often go unquestioned. But chronic dieting is associated with worse long-term weight outcomes, eating disorders, depression, and a damaged relationship with food that can last a lifetime.
+
+Food restriction or binging often serves emotional functions: control when life feels chaotic, comfort when feelings are overwhelming, punishment when you feel unworthy, numbness when emotions are too much. The behavior makes sense as a coping mechanism — but the coping mechanism has costs.
+
+Healing your relationship with food is possible, but it's often not simple. It may require addressing underlying emotional needs, challenging diet culture beliefs, learning to tolerate emotions without using food, and sometimes treating a full eating disorder with specialized help.`,
+      keyInsights: [
+        { 
+          title: 'Diet culture is disordered eating normalized', 
+          explanation: 'Much of what\'s considered "normal" dieting behavior is actually disordered. Chronic restriction, food guilt, and obsessive "healthy eating" are not healthy.' 
+        },
+        { 
+          title: 'Food behaviors serve emotional functions', 
+          explanation: 'Restriction can be about control. Binging can be about comfort or numbing. Understanding the function helps address the root cause.' 
+        },
+        { 
+          title: 'Dieting doesn\'t work long-term', 
+          explanation: 'The research is clear: diets fail 95% of the time long-term and often lead to weight cycling, which is worse for health than stable higher weight.' 
+        },
+        { 
+          title: 'Recovery is possible', 
+          explanation: 'Even severe eating disorders can be recovered from. A peaceful relationship with food is achievable, though it may require significant work.' 
+        },
+      ],
+      whatHelps: [
+        'Challenge diet culture beliefs about food morality',
+        'Explore intuitive eating principles',
+        'Identify the emotional functions of disordered eating',
+        'Address underlying emotional needs directly',
+        'For eating disorders: seek specialized treatment (they\'re serious and need expert help)',
+        'Be patient — healing food relationships takes time',
+      ],
+      warningSign: 'Eating disorders are serious, sometimes life-threatening conditions. If you\'re significantly restricting, binging and purging, or if food dominates your thoughts, please seek specialized help.',
+      professionalNote: 'Eating disorders require specialized treatment. General therapists often aren\'t trained for this work. Look for eating disorder specialists or treatment programs.'
+    },
+    reflectionQuestions: [
+      'What role does food play in your emotional life beyond nourishment?',
+      'How has diet culture shaped your relationship with food and your body?',
+      'What would a peaceful relationship with food actually look like?',
+    ],
+    relatedLessons: ['hm-id-body-image', 'hm-id-perfectionism', 'hm-mh-anxiety-types'],
+  },
+  {
+    id: 'hm-id-self-worth',
+    title: 'Self-Worth vs Self-Esteem: Building a Stable Core',
+    category: 'identity-self',
+    duration: 8,
+    emoji: '💎',
+    content: {
+      introduction: `Self-esteem and self-worth are often used interchangeably, but they're different. Self-esteem is how you evaluate yourself — it rises when you succeed and falls when you fail. Self-worth is the underlying belief that you have value simply because you exist, independent of what you achieve or how you perform.
+
+Self-esteem alone is unstable because it depends on constantly proving yourself. High self-esteem can tip into narcissism if it's contingent on superiority. Low self-esteem drives endless striving that never satisfies. The goal isn't higher self-esteem — it's stable self-worth: the belief that you're valuable regardless of performance.
+
+This is hard in a culture that constantly reinforces conditional worth. We're told we're valuable when productive, successful, attractive, or useful. The message that you're inherently worthy — just for existing — is rarely emphasized. Most people have to unlearn conditional worth that was absorbed early.
+
+Building self-worth is different from building self-esteem. It's not about collecting achievements or thinking positively about yourself. It's about fundamentally believing that your value doesn't fluctuate with your performance. This is a deep shift that takes time.`,
+      keyInsights: [
+        { 
+          title: 'Esteem fluctuates; worth shouldn\'t', 
+          explanation: 'Self-esteem rises and falls with success and failure. Self-worth is the stable core that holds regardless of outcomes.' 
+        },
+        { 
+          title: 'Conditional worth is learned', 
+          explanation: 'You weren\'t born believing your worth depended on achievement. That belief was taught. It can be unlearned.' 
+        },
+        { 
+          title: 'Performance-based worth is exhausting', 
+          explanation: 'If you have to keep proving yourself to feel worthy, you\'re on a treadmill that never stops. No achievement is ever enough.' 
+        },
+        { 
+          title: 'Inherent worth is radical', 
+          explanation: 'In capitalist culture, believing you\'re valuable just for existing is almost countercultural. It\'s also essential for stable wellbeing.' 
+        },
+      ],
+      whatHelps: [
+        'Notice when your sense of worth rises or falls with performance',
+        'Practice the belief: "I am valuable regardless of what I produce"',
+        'Challenge the cultural messages that tie worth to achievement',
+        'Separate "I did a bad thing" from "I am bad"',
+        'Remember: you would tell a child they have inherent worth. You deserve the same.',
+        'Therapy to address core beliefs about worth',
+      ],
+    },
+    reflectionQuestions: [
+      'Does your sense of worth depend on how you\'re performing?',
+      'Where did you learn that worth was conditional?',
+      'What would change if you truly believed you were worthy just for existing?',
+    ],
+    relatedLessons: ['hm-id-perfectionism', 'hm-growth-self-compassion', 'hm-id-people-pleasing'],
+  },
+  {
+    id: 'hm-id-comparison-social-media',
+    title: 'Comparison & Social Media: The Thief of Joy',
+    category: 'identity-self',
+    duration: 7,
+    emoji: '📱',
+    content: {
+      introduction: `"Comparison is the thief of joy," wrote Theodore Roosevelt, long before Instagram existed. Social media has supercharged comparison, giving us unlimited highlight reels to measure our behind-the-scenes against. The result is an epidemic of inadequacy that research links to depression, anxiety, and decreased life satisfaction.
+
+The comparison trap is particularly insidious because you're comparing your full reality to others' curated presentations. You see their achievements, not their struggles. Their best photos, not their average days. Their success, not their failures. The comparison is fundamentally unfair, but your brain doesn't factor that in.
+
+Social media isn't neutral — it's designed to maximize engagement, which often means maximizing comparison, outrage, and inadequacy. The algorithms show you what keeps you scrolling, and inadequacy keeps people scrolling. You're not weak for being affected; you're responding as designed.
+
+Breaking free from comparison doesn't necessarily mean quitting social media, though that's one option. It means becoming aware of the comparison trap, curating your inputs more carefully, and developing an internal sense of value that doesn't depend on measuring yourself against others.`,
+      keyInsights: [
+        { 
+          title: 'Highlights vs. reality', 
+          explanation: 'You\'re comparing your full life to others\' curated presentations. The comparison is unfair by design.' 
+        },
+        { 
+          title: 'It\'s designed to make you feel inadequate', 
+          explanation: 'Social media algorithms optimize for engagement. Inadequacy drives engagement. You\'re being manipulated on purpose.' 
+        },
+        { 
+          title: 'Comparison erodes wellbeing', 
+          explanation: 'Research shows strong links between social media comparison and depression, anxiety, and life dissatisfaction. The effect is real.' 
+        },
+        { 
+          title: 'Internal reference points are healthier', 
+          explanation: 'Comparing yourself to others is unstable. Comparing yourself to your own past or your own values provides more stable footing.' 
+        },
+      ],
+      whatHelps: [
+        'Audit who you follow — unfollow accounts that trigger comparison',
+        'Set time limits on social media use',
+        'Notice when you\'re comparing and name it: "comparison happening"',
+        'Remember: you\'re seeing their highlight reel, not their reality',
+        'Develop internal metrics: Are you growing? Living your values?',
+        'Take breaks from social media and notice how you feel',
+      ],
+    },
+    reflectionQuestions: [
+      'How does social media affect your mood and sense of self?',
+      'Who do you compare yourself to, and what\'s the effect?',
+      'What would change if you measured yourself against your own values instead of others\' presentations?',
+    ],
+    relatedLessons: ['hm-id-body-image', 'hm-id-self-worth', 'hm-world-news-triggers'],
+  },
+  {
+    id: 'hm-id-finding-values',
+    title: 'Finding Your Values: What Actually Matters to You',
+    category: 'identity-self',
+    duration: 8,
+    emoji: '🧭',
+    content: {
+      introduction: `Values are what you want your life to be about — not goals to achieve but directions to travel. They're different from what you were taught to want, what society says is important, or what you think you "should" value. Discovering your actual values, distinct from inherited or imposed ones, is essential identity work.
+
+Many people have never explicitly identified their values. They live according to defaults: what their family valued, what culture rewards, what seems expected. This can work for a while, but eventually, living out of alignment with your actual values creates a sense of emptiness, inauthenticity, or "something's wrong but I don't know what."
+
+Values work involves getting clear on what genuinely matters to you — not in theory but in practice. Do you value security or adventure? Connection or autonomy? Achievement or peace? There are no right answers, but there are honest and dishonest ones. Living according to someone else's values (even unconsciously) creates suffering.
+
+Clarifying values doesn't mean you'll always live them perfectly. It means you have a compass. When you're facing decisions, struggling with direction, or feeling lost, values provide orientation. "Is this aligned with what I care about?" becomes a usable question.`,
+      keyInsights: [
+        { 
+          title: 'Values are directions, not destinations', 
+          explanation: 'You don\'t achieve values — you live them. They\'re not items to check off but directions to travel in consistently.' 
+        },
+        { 
+          title: 'Inherited values may not be yours', 
+          explanation: 'What your family, culture, or religion values isn\'t automatically what you value. Separating inherited from authentic values takes work.' 
+        },
+        { 
+          title: 'Misalignment creates suffering', 
+          explanation: 'Living according to values that aren\'t actually yours — even if they\'re "good" values — creates a sense of emptiness and inauthenticity.' 
+        },
+        { 
+          title: 'Values provide a compass', 
+          explanation: 'When you\'re clear on what matters, decision-making becomes clearer. "Is this aligned with my values?" is a powerful question.' 
+        },
+      ],
+      whatHelps: [
+        'Values clarification exercises (lists, card sorts, questionnaires)',
+        'Ask: "What do I want my life to stand for?"',
+        'Notice when you feel most alive and aligned — what values are present?',
+        'Separate "should" values from actual values',
+        'Accept that values may conflict — that\'s part of being human',
+        'Use values as a decision-making compass',
+      ],
+    },
+    reflectionQuestions: [
+      'What do you want your life to stand for? (Not achieve — stand for.)',
+      'Which of your values were inherited vs. chosen?',
+      'Where is your life currently misaligned with what you actually care about?',
+    ],
+    relatedLessons: ['hm-work-meaning', 'hm-trans-identity-shifts', 'hm-id-questioning-identity'],
+  },
+];
+
+// ============================================================================
+// EXPORT CATEGORIES
+// ============================================================================
+
+export const humanManualCategories: HumanManualCategory[] = [
+  {
+    id: 'relationships',
+    title: 'Relationships & People',
+    emoji: '💕',
+    description: 'Family wounds, boundaries, adult friendships, and the complicated terrain of human connection.',
+    lessons: relationshipsLessons,
+  },
+  {
+    id: 'mental-health',
+    title: 'Mental Health Real Talk',
+    emoji: '🧠',
+    description: 'Depression, anxiety, trauma, and medication — what they actually are and how to navigate them.',
+    lessons: mentalHealthLessons,
+  },
+  {
+    id: 'stress-survival',
+    title: 'Stress & Survival',
+    emoji: '⚡',
+    description: 'Burnout, overwhelm, nervous system regulation, and what happens when everything is too much.',
+    lessons: stressSurvivalLessons,
+  },
+  {
+    id: 'work-money',
+    title: 'Work & Money',
+    emoji: '💼',
+    description: 'Job identity, financial trauma, imposter syndrome, and finding meaning in what you do.',
+    lessons: workMoneyLessons,
+  },
+  {
+    id: 'world-society',
+    title: 'World & Society',
+    emoji: '🌍',
+    description: 'Collective trauma, generational wounds, minority stress, and living in an overwhelming world.',
+    lessons: worldSocietyLessons,
+  },
+  {
+    id: 'body-health',
+    title: 'Body & Health',
+    emoji: '🏥',
+    description: 'Chronic illness, sleep, movement, substances, and the body-mind connection.',
+    lessons: bodyHealthLessons,
+  },
+  {
+    id: 'life-transitions',
+    title: 'Life Transitions',
+    emoji: '🦋',
+    description: 'Grief, identity shifts, starting over, and navigating the major changes life brings.',
+    lessons: lifeTransitionsLessons,
+  },
+  {
+    id: 'growth-healing',
+    title: 'Growth & Healing',
+    emoji: '🌱',
+    description: 'Self-compassion, reparenting, inner child work, and building a better relationship with yourself.',
+    lessons: growthHealingLessons,
+  },
+  {
+    id: 'identity-self',
+    title: 'Identity & Self',
+    emoji: '🪞',
+    description: 'Sexuality, neurodivergence, body image, values, and understanding who you actually are.',
+    lessons: identitySelfLessons,
+  },
+];
+
+// Flatten all lessons for easy lookup
+export const allHumanManualLessons: HumanManualLesson[] = humanManualCategories.flatMap(cat => cat.lessons);
+
+// Get a single lesson by ID
+export function getHumanManualLesson(id: string): HumanManualLesson | undefined {
+  return allHumanManualLessons.find(lesson => lesson.id === id);
+}
+
+// Get lessons by category
+export function getLessonsByCategory(categoryId: string): HumanManualLesson[] {
+  const category = humanManualCategories.find(cat => cat.id === categoryId);
+  return category ? category.lessons : [];
+}
