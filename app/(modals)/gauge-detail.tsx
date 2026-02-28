@@ -11,6 +11,7 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
+import { useCycleStore, useCycleData, PHASE_INFO } from '../../src/stores/cycleStore';
 import { GAUGE_CONFIG, getGaugeStatusLabel } from '../../src/utils/gaugeHelpers';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { getDailyFact } from '../../src/data/psychKnowledge';
@@ -207,6 +208,40 @@ export default function GaugeDetailScreen() {
           <Text style={styles.cardTitle}>What affects this</Text>
           <Text style={styles.cardBody}>{content.whatAffects.join(' · ')}</Text>
         </View>
+
+        {/* 4b. CYCLE CONTEXT — if cycle tracking enabled */}
+        {(() => {
+          const { trackingEnabled, currentPhase, dayOfCycle, phaseInfo } = useCycleData();
+          const getInsightsForGauge = useCycleStore((s) => s.getInsightsForGauge);
+          
+          if (!trackingEnabled || !currentPhase || !phaseInfo) return null;
+          
+          const cycleInsights = getInsightsForGauge(gaugeId);
+          const contextInsight = cycleInsights.find((i) => i.type === 'context');
+          const patternInsight = cycleInsights.find((i) => i.type === 'pattern');
+          
+          if (!contextInsight) return null;
+          
+          return (
+            <View style={[styles.card, { borderLeftWidth: 4, borderLeftColor: phaseInfo.color }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <Text style={{ fontSize: 20 }}>{phaseInfo.emoji}</Text>
+                <View>
+                  <Text style={styles.cardTitle}>Cycle Context</Text>
+                  <Text style={{ color: TEXT_MUTED, fontSize: 12 }}>
+                    Day {dayOfCycle} · {phaseInfo.name} Phase
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.cardBody}>{contextInsight.message}</Text>
+              {patternInsight && (
+                <Text style={[styles.cardBody, { marginTop: 8, fontStyle: 'italic', color: TEXT_SECONDARY }]}>
+                  📊 {patternInsight.message}
+                </Text>
+              )}
+            </View>
+          );
+        })()}
 
         {/* 5. WHAT TO TRY */}
         <View style={styles.card}>

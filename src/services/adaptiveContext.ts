@@ -13,6 +13,7 @@
 
 import { useUserStore } from '../stores/userStore';
 import { useCockpitStore, type GaugeKey } from '../stores/cockpitStore';
+import { useCycleStore } from '../stores/cycleStore';
 import { getCachedPatternSync, formatPatternForAI } from './systemicDrift';
 import { buildAgeAdaptivePrompt } from './ageAdaptive';
 
@@ -395,6 +396,12 @@ export function buildAdaptiveContext(): string {
       context += `• ${insight}\n`;
     });
     context += `\nUse these insights naturally. Don't quote them back verbatim — weave them into your understanding of who this person is.\n`;
+  }
+
+  // Add Cycle Intelligence — menstrual cycle context if tracking is enabled
+  const cycleContext = useCycleStore.getState().getCycleContextForAI();
+  if (cycleContext) {
+    context += cycleContext;
   }
 
   // Add Systemic Drift Patterns — recurring patterns in their gauge history

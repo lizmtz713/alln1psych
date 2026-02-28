@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { generateCrossSystemInsight } from '../services/cockpitAI';
 import { recordGaugeEvent, refreshDriftCache } from '../services/systemicDrift';
 import { getGaugeHistory } from '../services/crisisPipeline';
+import { useCycleStore } from './cycleStore';
 
 export interface GaugeState {
   value: number; // 0-100, -1 = unset/dim
@@ -474,6 +475,20 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
       if (g.value >= 0) {
         await recordGaugeEvent(g.key, g.value);
       }
+    }
+    
+    // Record for cycle pattern learning (if cycle tracking enabled)
+    try {
+      const cycleStore = useCycleStore.getState();
+      if (cycleStore.trackingEnabled && cycleStore.currentPhase) {
+        for (const g of gauges) {
+          if (g.value >= 0) {
+            cycleStore.recordGaugeForPattern(g.key, g.value);
+          }
+        }
+      }
+    } catch (e) {
+      // Cycle store not available, skip
     }
     
     // Refresh drift analysis cache

@@ -35,6 +35,7 @@ export default function ModalsLayout() {
       <Stack.Screen name="reach-out-scaffold" options={{ presentation: 'modal' }} />
       <Stack.Screen name="drift-detector" options={{ presentation: 'modal' }} />
       <Stack.Screen name="awe-activities" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="cycle" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

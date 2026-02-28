@@ -35,6 +35,7 @@ import JustInTimeCard from '../../src/components/JustInTimeCard';
 import PredictiveWarningBanner from '../../src/components/PredictiveWarningBanner';
 import ReachOutPrompt from '../../src/components/ReachOutPrompt';
 import AweNudgeCard from '../../src/components/AweNudgeCard';
+import { CycleContextCard } from '../../src/components/CycleDashboard';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
 import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
 import { shouldSuggestAwe } from '../../src/services/aweNudge';
@@ -558,6 +559,14 @@ export default function HomeScreen() {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
+          4f. CYCLE CONTEXT — Menstrual cycle awareness (if enabled)
+          Shows current phase and how it affects gauges
+          ═══════════════════════════════════════════════════════════════ */}
+      <Animated.View style={[styles.cycleSection, slideY(card1)]}>
+        <CycleContextCard />
+      </Animated.View>
+
+      {/* ═══════════════════════════════════════════════════════════════
           5. QUICK ACTIONS — Horizontal scroll (secondary to gauges)
           ═══════════════════════════════════════════════════════════════ */}
       <Animated.View style={[styles.actionsSection, slideY(card2)]}>
@@ -791,6 +800,11 @@ const styles = StyleSheet.create({
     fontSize: 15, 
     color: TEXT_PRIMARY, 
     lineHeight: 22,
+  },
+
+  // ─── Cycle Context Section ───
+  cycleSection: {
+    marginBottom: 16,
   },
 
   // ─── Actions Section ───

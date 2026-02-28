@@ -169,6 +169,12 @@ export default function MeScreen() {
               icon="time-outline"
               label="Check-In History"
               onPress={() => navigateTo('/(modals)/history')}
+            />
+            <MenuItem
+              icon="moon-outline"
+              label="Cycle Intelligence"
+              subtitle="Understand your cycle"
+              onPress={() => navigateTo('/(modals)/cycle')}
               isLast
             />
           </View>
