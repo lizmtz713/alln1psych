@@ -14,6 +14,7 @@
 import { useUserStore } from '../stores/userStore';
 import { useCockpitStore, type GaugeKey } from '../stores/cockpitStore';
 import { getCachedPatternSync, formatPatternForAI } from './systemicDrift';
+import { buildAgeAdaptivePrompt } from './ageAdaptive';
 
 type SystemMode = 
   | 'regulated'      // All gauges okay
@@ -214,26 +215,8 @@ export function buildAdaptiveContext(): string {
   const p = pronouns === 'other' ? (customPronouns?.trim() || 'they/them') : (pronouns || 'they/them');
   context += `Pronouns: ${p}. Always use these naturally.\n`;
 
-  if (ageRange) {
-    context += `Life stage: ${ageRange}.\n`;
-    switch (ageRange) {
-      case 'teen':
-        context += `ADAPTATION: Use casual, direct language. No corporate speak. Reference their world — school, friends, social media, parents, identity formation. Their prefrontal cortex is literally still developing — validate that their emotions are intense because their brain is still under construction, not because they're dramatic. Never talk down to them. They can handle real information — they just need it delivered without condescension.\n`;
-        break;
-      case 'young-adult':
-        context += `ADAPTATION: They're navigating identity, career starts, relationships, possibly first time living independently. Direction gauge is often in flux — that's developmentally normal. Avoid assuming they have stable routines. Reference their reality — dating apps, job interviews, roommates, student debt, figuring out who they are outside their family.\n`;
-        break;
-      case 'adult':
-        context += `ADAPTATION: Likely juggling career, relationships, possibly kids. Time is scarce. Be efficient with insights — don't over-explain basics. They may have some therapy exposure. Balance validation with practical tools they can use immediately.\n`;
-        break;
-      case 'midlife':
-        context += `ADAPTATION: May be re-evaluating identity, career, relationships. Empty nest, aging parents, health changes, career plateau or pivot are common. Direction gauge reassessment is developmentally normal at this stage, not a crisis. Respect their life experience — they've been through things.\n`;
-        break;
-      case 'older-adult':
-        context += `ADAPTATION: Legacy, health, loss of peers, retirement adjustment, grandparenting, wisdom. Respect their depth of experience. Don't explain basic concepts — they've lived them. Focus on what's relevant NOW. May be dealing with grief, physical limitations, or loss of independence. Connection gauge is critical — isolation is the #1 health risk.\n`;
-        break;
-    }
-  }
+  // Inject comprehensive age-adaptive language rules
+  context += buildAgeAdaptivePrompt();
 
   if (culturalBackground?.trim()) {
     const bg = culturalBackground.trim();
