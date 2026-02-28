@@ -41,25 +41,8 @@ export default function ModalsLayout() {
       <Stack.Screen name="drift-detector" options={{ presentation: 'modal' }} />
       <Stack.Screen name="identity-setup" options={{ presentation: 'modal' }} />
       <Stack.Screen name="learning-style-quiz" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="patterns" options={{ presentation: 'modal' }} />
       <Stack.Screen name="pre-conversation-check" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="prompt-generator" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="quick-reset" options={{ presentation: 'modal' }} />
       <Stack.Screen name="reach-out-scaffold" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="referee" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="relational-bridge" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="share-insight" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="share-snapshot" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="sovereignty-report" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="therapist-share" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="therapist-share-create" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="foundation-values" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="foundation-directions" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="foundation-people" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="phosm-body" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="phosm-state" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="phosm-emotion" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }
