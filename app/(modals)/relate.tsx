@@ -29,6 +29,7 @@ import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
+import { PreConversationButton } from '../../src/components/PreConversationButton';
 import { COLORS, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 
 // Enable LayoutAnimation on Android
@@ -449,6 +450,12 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
       >
         {!showResults ? (
           <>
+            {/* Pre-Conversation Check — optional, not blocking */}
+            <PreConversationButton 
+              returnTo="/(modals)/relate" 
+              label="Analyzing relationships? Check your system first"
+            />
+
             {/* Mode Toggle */}
             <View style={styles.modeToggle}>
               <Pressable

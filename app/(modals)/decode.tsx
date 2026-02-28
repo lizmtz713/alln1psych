@@ -28,6 +28,7 @@ import {
 } from '../../src/services/socialPhysics';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
+import { PreConversationButton } from '../../src/components/PreConversationButton';
 
 // Lazy load ImagePicker to prevent crash on component mount
 let ImagePickerModule: typeof import('expo-image-picker') | null = null;
@@ -283,6 +284,12 @@ export default function DecodeScreen() {
       >
         {!response ? (
           <>
+            {/* Pre-Conversation Check — optional, not blocking */}
+            <PreConversationButton 
+              returnTo="/(modals)/decode" 
+              label="About to decode a tough message?"
+            />
+            
             <Text style={styles.prompt}>Paste what they sent you, or attach a screenshot.</Text>
             
             {imageUri ? (

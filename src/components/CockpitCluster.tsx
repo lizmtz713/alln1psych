@@ -5,8 +5,8 @@
  * Tesla/Rivian inspired cockpit aesthetic with glows, gradients, and premium feel.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { View, Text, Pressable, StyleSheet, Dimensions, Animated } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Pressable, StyleSheet, Dimensions, Animated, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -14,7 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from './gauges';
 import { getGaugeColor, getOverallStatusLabel, GAUGE_CONFIG } from '../utils/gaugeHelpers';
 import { useCockpitStore, type GaugeKey } from '../stores/cockpitStore';
-import { COLORS } from '../lib/constants';
+import { COLORS, BORDER_RADIUS } from '../lib/constants';
 
 const AMBER = COLORS.amber;
 const AMBER_GLOW = COLORS.amberGlow;
@@ -117,6 +117,9 @@ export function CockpitCluster({
   const router = useRouter();
   const centerPulse = useRef(new Animated.Value(1)).current;
   
+  // State for pre-conversation check modal
+  const [showPreConvoModal, setShowPreConvoModal] = useState(false);
+  
   // Get system mode for highlighting triggered gauges
   const systemMode = useCockpitStore((s) => s.systemMode);
   const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers);
@@ -130,6 +133,9 @@ export function CockpitCluster({
     ? AMBER 
     : (displayScore < 0 ? (TEXT_MUTED + '90') : getGaugeColor(displayScore));
   const activeCount = Object.values(gaugeValues).filter(v => v >= 0).length;
+  
+  // Check if State is low (for pre-conversation check offer)
+  const isStateLow = gaugeValues.state >= 0 && gaugeValues.state < 50;
   
   // Subtle breathing animation for center ring
   useEffect(() => {
@@ -152,11 +158,36 @@ export function CockpitCluster({
 
   const handleGaugePress = (gauge: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    // If tapping State gauge when low, show pre-conversation check option
+    if (gauge === 'state' && isStateLow) {
+      setShowPreConvoModal(true);
+      return;
+    }
+    
     if (onGaugePress) {
       onGaugePress(gauge);
     } else {
       router.push({ pathname: '/(modals)/gauge-detail', params: { gauge } });
     }
+  };
+  
+  const handlePreConvoCheck = () => {
+    setShowPreConvoModal(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push('/(modals)/pre-conversation-check');
+  };
+  
+  const handleGaugeDetail = () => {
+    setShowPreConvoModal(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push({ pathname: '/(modals)/gauge-detail', params: { gauge: 'state' } });
+  };
+  
+  const handleQuickReset = () => {
+    setShowPreConvoModal(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push('/(modals)/quick-reset');
   };
 
   return (
@@ -278,6 +309,47 @@ export function CockpitCluster({
           }
         </Text>
       </View>
+      
+      {/* Pre-Conversation Check Modal — shows when tapping low State gauge */}
+      <Modal
+        visible={showPreConvoModal}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setShowPreConvoModal(false)}
+      >
+        <Pressable 
+          style={styles.preConvoOverlay} 
+          onPress={() => setShowPreConvoModal(false)}
+        >
+          <View style={styles.preConvoCard}>
+            <View style={styles.preConvoIcon}>
+              <Ionicons name="pulse-outline" size={24} color={AMBER} />
+            </View>
+            
+            <Text style={styles.preConvoTitle}>Your State is {gaugeValues.state}</Text>
+            <Text style={styles.preConvoSubtitle}>
+              Preparing for a difficult conversation?
+            </Text>
+            
+            <View style={styles.preConvoActions}>
+              <Pressable style={styles.preConvoBtn} onPress={handlePreConvoCheck}>
+                <Ionicons name="chatbubbles-outline" size={18} color={AMBER} />
+                <Text style={styles.preConvoBtnText}>Pre-Conversation Check</Text>
+              </Pressable>
+              
+              <Pressable style={styles.preConvoBtn} onPress={handleQuickReset}>
+                <Ionicons name="refresh" size={18} color={ACCENT} />
+                <Text style={[styles.preConvoBtnText, { color: ACCENT }]}>Quick Reset (2 min)</Text>
+              </Pressable>
+              
+              <Pressable style={styles.preConvoSecondaryBtn} onPress={handleGaugeDetail}>
+                <Text style={styles.preConvoSecondaryText}>View State Details</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -372,6 +444,73 @@ const styles = StyleSheet.create({
   },
   hintText: {
     fontSize: 13,
+    color: TEXT_MUTED,
+  },
+  
+  // Pre-Conversation Check Modal
+  preConvoOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  preConvoCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: 24,
+    width: '100%',
+    maxWidth: 320,
+    alignItems: 'center',
+  },
+  preConvoIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: AMBER + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  preConvoTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: TEXT_PRIMARY,
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  preConvoSubtitle: {
+    fontSize: 14,
+    color: TEXT_SECONDARY,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  preConvoActions: {
+    width: '100%',
+    gap: 10,
+  },
+  preConvoBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  preConvoBtnText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: AMBER,
+  },
+  preConvoSecondaryBtn: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  preConvoSecondaryText: {
+    fontSize: 14,
     color: TEXT_MUTED,
   },
 });

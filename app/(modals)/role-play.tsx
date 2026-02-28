@@ -26,6 +26,7 @@ import { useUsageStore } from '../../src/stores/usageStore';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
+import { PreConversationButton } from '../../src/components/PreConversationButton';
 
 const ROLE_PLAY_ACCENT = COLORS.rolePlayAccent;
 
@@ -603,6 +604,12 @@ export default function RolePlayScreen() {
       >
       <Text style={styles.setupTitle}>Practice a conversation</Text>
       <Text style={styles.setupSubtitle}>Pick a scenario or create your own</Text>
+
+      {/* Pre-Conversation Check — optional, not blocking */}
+      <PreConversationButton 
+        returnTo="/(modals)/role-play" 
+        label="About to practice a hard conversation?"
+      />
 
       {/* Quick starts FIRST — immediately visible */}
       <View style={{ marginBottom: 24, marginHorizontal: -24 }}>

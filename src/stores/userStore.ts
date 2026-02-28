@@ -156,6 +156,12 @@ interface UserState {
    */
   humanFingerprint: Record<string, string>;
 
+  /**
+   * Personal Values — Core values the user has chosen to track alignment with
+   * Used by the Drift Detector for weekly value alignment reflections
+   */
+  values: string[];
+
   setName: (name: string) => void;
   addTriggerMap: (entry: Omit<TriggerMapEntry, 'id' | 'createdAt'>) => void;
   setPronouns: (pronouns: Pronouns | null) => void;
@@ -180,6 +186,8 @@ interface UserState {
   setTherapyExperience: (v: TherapyExperience | null) => void;
   /** Add a lesson insight to the Human Fingerprint */
   addHumanFingerprintInsight: (lessonId: string, insight: string) => void;
+  /** Set personal values for drift detector */
+  setValues: (values: string[]) => void;
   /** Athlete mode */
   setAthleteMode: (v: boolean) => void;
   setAthleteModeSettings: (v: Partial<AthleteModeSettings>) => void;
@@ -235,6 +243,7 @@ const initialState = {
   strengthMeaning: '',
   therapyExperience: null as TherapyExperience | null,
   humanFingerprint: {} as Record<string, string>,
+  values: [] as string[],
   // Specialized modes
   athleteMode: false,
   athleteModeSettings: { ...defaultAthleteModeSettings } as AthleteModeSettings,
@@ -271,6 +280,8 @@ export const useUserStore = create<UserState>((set) => ({
     set((state) => ({
       humanFingerprint: { ...state.humanFingerprint, [lessonId]: insight },
     })),
+  // Personal values for drift detector
+  setValues: (values) => set({ values }),
   // Athlete mode
   setAthleteMode: (athleteMode) => set({ athleteMode }),
   setAthleteModeSettings: (settings) =>
