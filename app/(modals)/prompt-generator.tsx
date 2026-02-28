@@ -128,7 +128,10 @@ function buildContextBlock(user: ReturnType<typeof useUserStore.getState>, cockp
     }
     
     if (gauges.direction >= 0) {
-      if (gauges.direction < 40) stateDescriptions.push("I'm feeling lost/uncertain about direction");
+      if (gauges.direction < 40) {
+        stateDescriptions.push("I'm feeling lost/uncertain about direction");
+        stateDescriptions.push("(Awe experiences — looking at something vast — might help shift my perspective)");
+      }
     }
     
     if (stateDescriptions.length > 0) {

@@ -34,8 +34,10 @@ import { SystemModeBanner } from '../../src/components/SystemModeBanner';
 import JustInTimeCard from '../../src/components/JustInTimeCard';
 import PredictiveWarningBanner from '../../src/components/PredictiveWarningBanner';
 import ReachOutPrompt from '../../src/components/ReachOutPrompt';
+import AweNudgeCard from '../../src/components/AweNudgeCard';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
 import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
+import { shouldSuggestAwe } from '../../src/services/aweNudge';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
 
@@ -192,6 +194,10 @@ export default function HomeScreen() {
   const [dismissedJitIds, setDismissedJitIds] = useState<string[]>([]);
   const [dismissedWarning, setDismissedWarning] = useState(false);
   
+  // Awe Nudge — shows when Direction is low/stagnant
+  const [showAweNudge, setShowAweNudge] = useState(false);
+  const [dismissedAweNudge, setDismissedAweNudge] = useState(false);
+  
   // Crisis Pipeline - monitors gauge persistence for safety alerts
   const { showAlert: showCrisisAlert, setShowAlert: setShowCrisisAlert, hasAlert: hasCrisisAlert } = useCrisisPipelineCheck();
 
@@ -230,8 +236,16 @@ export default function HomeScreen() {
           setPredictiveWarning(warning);
         }
       });
+      
+      // Check for Awe Nudge (Direction < 40 or stagnant)
+      const directionTrend = useCockpitStore.getState().direction.trend;
+      if (!dismissedAweNudge && directionVal >= 0) {
+        shouldSuggestAwe(directionVal, directionTrend).then(should => {
+          setShowAweNudge(should);
+        });
+      }
     }
-  }, [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal, systemMode, activeGaugeCount, dismissedJitIds, dismissedWarning]);
+  }, [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal, systemMode, activeGaugeCount, dismissedJitIds, dismissedWarning, dismissedAweNudge]);
 
   const handleDismissJitLesson = (lessonId: string) => {
     setDismissedJitIds(prev => [...prev, lessonId]);
@@ -528,6 +542,19 @@ export default function HomeScreen() {
           ═══════════════════════════════════════════════════════════════ */}
       {activeGaugeCount >= 3 && (
         <ReachOutPrompt />
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          4e. AWE NUDGE — Perspective shift for low Direction
+          Shows when Direction < 40 or stagnant for 3+ days
+          ═══════════════════════════════════════════════════════════════ */}
+      {showAweNudge && !dismissedAweNudge && (
+        <AweNudgeCard 
+          onDismiss={() => {
+            setDismissedAweNudge(true);
+            setShowAweNudge(false);
+          }}
+        />
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
