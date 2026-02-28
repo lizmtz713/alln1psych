@@ -5,6 +5,7 @@
 import { getOpenAIKey } from './ai';
 import { useUsageStore } from '../stores/usageStore';
 import { buildKnowledgePrompt } from '../data/psychKnowledge';
+import { buildAgeAdaptivePrompt } from './ageAdaptive';
 
 export interface RolePlayMessage {
   role: 'user' | 'assistant';
@@ -40,9 +41,11 @@ Provide a warm, constructive debrief:
 Keep it concise — 3-4 short paragraphs max. Be warm, be specific, be helpful.`;
 
 function buildRolePlayPrompt(scenario: string, character: string, difficulty: string): string {
-  return ROLEPLAY_SYSTEM_TEMPLATE.replace('{scenario}', scenario)
+  const base = ROLEPLAY_SYSTEM_TEMPLATE.replace('{scenario}', scenario)
     .replace(/{character}/g, character)
     .replace('{difficulty}', difficulty);
+  // Add age-adaptive language rules
+  return base + buildAgeAdaptivePrompt();
 }
 
 function buildDebriefPrompt(
@@ -51,10 +54,12 @@ function buildDebriefPrompt(
   difficulty: string,
   transcript: string
 ): string {
-  return DEBRIEF_SYSTEM_TEMPLATE.replace('{scenario}', scenario)
+  const base = DEBRIEF_SYSTEM_TEMPLATE.replace('{scenario}', scenario)
     .replace(/{character}/g, character)
     .replace('{difficulty}', difficulty)
     .replace('{transcript}', transcript);
+  // Add age-adaptive language rules
+  return base + buildAgeAdaptivePrompt();
 }
 
 export async function sendRolePlayMessage(

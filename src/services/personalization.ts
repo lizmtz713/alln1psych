@@ -3,6 +3,7 @@
  */
 
 import { getOpenAIKey } from './ai';
+import { buildAgeAdaptivePrompt } from './ageAdaptive';
 
 export interface DailyContentContext {
   name: string;
@@ -83,7 +84,9 @@ Generate a JSON response with:
 4. "challengeSuggestion" - A personalized micro-challenge for today based on what they need (1 sentence)
 
 Be warm, specific, and personal. Don't be generic. Reference their actual data.
-Respond ONLY with valid JSON, no markdown.`;
+Respond ONLY with valid JSON, no markdown.
+
+${buildAgeAdaptivePrompt()}`;
 
   try {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
