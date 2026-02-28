@@ -26,6 +26,7 @@ import { usePremiumStore } from '../../src/stores/premiumStore';
 import { useHealthStore } from '../../src/stores/healthStore';
 import { useSpotifyStore } from '../../src/stores/spotifyStore';
 import { useWeatherStore } from '../../src/stores/weatherStore';
+import { useI18n, type Language } from '../../src/i18n';
 import { registerForPushNotifications } from '../../src/services/notifications';
 import {
   buildExportData,
@@ -229,6 +230,56 @@ const healthStyles = StyleSheet.create({
     textTransform: 'capitalize',
   },
 });
+
+function LanguageSelector() {
+  const language = useI18n((s) => s.language);
+  const setLanguage = useI18n((s) => s.setLanguage);
+
+  const languages: { code: Language; name: string; flag: string }[] = [
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'es', name: 'Español', flag: '🇲🇽' },
+  ];
+
+  return (
+    <View>
+      {languages.map((lang, index) => (
+        <View key={lang.code}>
+          <Pressable
+            style={({ pressed }) => [
+              {
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingVertical: 14,
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setLanguage(lang.code);
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Text style={{ fontSize: 24 }}>{lang.flag}</Text>
+              <Text style={{ fontSize: 16, color: TEXT, fontWeight: language === lang.code ? '600' : '400' }}>
+                {lang.name}
+              </Text>
+            </View>
+            {language === lang.code && (
+              <Ionicons name="checkmark-circle" size={24} color={ACCENT} />
+            )}
+          </Pressable>
+          {index < languages.length - 1 && (
+            <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+          )}
+        </View>
+      ))}
+      <Text style={{ fontSize: 12, color: TEXT_DIM, marginTop: 12, lineHeight: 18 }}>
+        Changing language updates all text and AI responses. El español incluye contenido culturalmente adaptado para la comunidad latina.
+      </Text>
+    </View>
+  );
+}
 
 function SpotifyConnectionCard() {
   const isConnected = useSpotifyStore((s) => s.isConnected);
@@ -843,6 +894,12 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Premium Status */}
         <PremiumCard />
+
+        {/* Language */}
+        <Text style={styles.sectionTitle}>Language / Idioma</Text>
+        <View style={styles.card}>
+          <LanguageSelector />
+        </View>
 
         {/* Notifications */}
         <Text style={styles.sectionTitle}>Notifications</Text>

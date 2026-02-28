@@ -5,6 +5,8 @@
 
 import { buildKnowledgePrompt } from '../data/psychKnowledge';
 import { buildAdaptiveContext } from './adaptiveContext';
+import { getCurrentLanguage } from '../i18n';
+import { spanishAIPrompts, getSpanishAgePrompt } from '../i18n/aiPrompts';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { useUsageStore } from '../stores/usageStore';
@@ -445,7 +447,25 @@ function buildSystemPrompt(ctx: UserContext): string {
     }
   }
   
-  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
+  // Check if user prefers Spanish
+  const language = getCurrentLanguage();
+  let languagePrompt = '';
+  
+  if (language === 'es') {
+    languagePrompt = `
+
+IDIOMA: ESPAÑOL
+${spanishAIPrompts.talkToGauge}
+
+${getSpanishAgePrompt(ctx.ageGroup as 'teen' | 'youngAdult' | 'adult' | 'mature' || 'adult')}
+
+INSTRUCCIÓN CRÍTICA: Responde SIEMPRE en español. El usuario ha elegido español como su idioma preferido. Usa español mexicano neutro, cálido y accesible. Si el usuario escribe en inglés, aún así responde en español (pueden estar practicando o ser bilingües).
+
+${spanishAIPrompts.crisisDetection}
+`;
+  }
+
+  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + languagePrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
   return fullPrompt;
 }
 
