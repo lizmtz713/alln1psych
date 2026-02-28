@@ -2,8 +2,9 @@
  * Decode — Analyze messages and get response suggestions.
  * Supports text paste OR screenshot attachment.
  * Includes Social Physics trajectory predictions.
+ * Includes Bias Filter for cognitive bias detection when activated.
  */
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -29,6 +30,8 @@ import {
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
 import { PreConversationButton } from '../../src/components/PreConversationButton';
+import { detectBiases, type BiasFilterResult } from '../../src/services/biasFilter';
+import BiasFilterCard, { BiasFilterBanner } from '../../src/components/BiasFilterCard';
 
 // Lazy load ImagePicker to prevent crash on component mount
 let ImagePickerModule: typeof import('expo-image-picker') | null = null;
@@ -112,12 +115,35 @@ export default function DecodeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [imagePickerAvailable, setImagePickerAvailable] = useState(true);
   
+  // Bias filter state
+  const [showBiasFilter, setShowBiasFilter] = useState(false);
+  const [biasFilterDismissed, setBiasFilterDismissed] = useState(false);
+  
   // Stabilization mode - hooks must be called unconditionally (Rules of Hooks)
   const systemMode = useCockpitStore((s) => s.systemMode) ?? 'capacity';
   const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers) ?? [];
+  const currentState = useCockpitStore((s) => s.state.value);
   
   const [showCaution, setShowCaution] = useState(systemMode === 'stabilization');
   const isStabilization = systemMode === 'stabilization';
+  
+  // Detect biases in message text when activated (State < 50)
+  const biasResult: BiasFilterResult = useMemo(() => {
+    if (!message || message.trim().length < 10) {
+      return { detected: false, biases: [], primaryBias: null, system1Alert: null };
+    }
+    // Only run detection if state is activated (< 50) or unknown
+    if (currentState >= 50) {
+      return { detected: false, biases: [], primaryBias: null, system1Alert: null };
+    }
+    return detectBiases(message, currentState);
+  }, [message, currentState]);
+  
+  // Show bias banner when bias detected and user is activated
+  const shouldShowBiasBanner = biasResult.detected && 
+    !biasFilterDismissed && 
+    !showBiasFilter &&
+    (currentState < 0 || currentState < 50);
 
   // Check if ImagePicker is available on mount
   useEffect(() => {
@@ -231,6 +257,8 @@ export default function DecodeScreen() {
     setSelectedIntent(null);
     setPartnerState({});
     setError(null);
+    setShowBiasFilter(false);
+    setBiasFilterDismissed(false);
   }, []);
 
   const canDecode = imageBase64 || message.trim().length >= 3;
@@ -284,6 +312,28 @@ export default function DecodeScreen() {
       >
         {!response ? (
           <>
+            {/* Bias Filter Full Card Modal */}
+            {showBiasFilter && biasResult.detected && (
+              <BiasFilterCard
+                result={biasResult}
+                currentState={currentState}
+                onRevise={() => {
+                  setShowBiasFilter(false);
+                  // Focus stays on text input for revision
+                }}
+                onSendAnyway={() => {
+                  setShowBiasFilter(false);
+                  setBiasFilterDismissed(true);
+                  // Continue with decode
+                  onDecode();
+                }}
+                onDismiss={() => {
+                  setShowBiasFilter(false);
+                  setBiasFilterDismissed(true);
+                }}
+              />
+            )}
+            
             {/* Pre-Conversation Check — optional, not blocking */}
             <PreConversationButton 
               returnTo="/(modals)/decode" 
@@ -326,6 +376,15 @@ export default function DecodeScreen() {
               onChangeText={setSender}
             />
 
+            {/* Bias Filter Banner - shows when bias detected */}
+            {shouldShowBiasBanner && !showBiasFilter && (
+              <BiasFilterBanner
+                result={biasResult}
+                currentState={currentState}
+                onTap={() => setShowBiasFilter(true)}
+              />
+            )}
+
             {loading ? (
               <View style={styles.loadingWrap}>
                 <ActivityIndicator size="small" color="#7C4DFF" />
@@ -334,7 +393,14 @@ export default function DecodeScreen() {
             ) : (
               <Pressable
                 style={[styles.primaryBtn, !canDecode && styles.primaryBtnDisabled]}
-                onPress={onDecode}
+                onPress={() => {
+                  // If bias detected and not dismissed, show filter card first
+                  if (biasResult.detected && !biasFilterDismissed && (currentState < 0 || currentState < 50)) {
+                    setShowBiasFilter(true);
+                    return;
+                  }
+                  onDecode();
+                }}
                 disabled={!canDecode}
               >
                 <Ionicons name="search" size={20} color="#fff" style={{ marginRight: 8 }} />
