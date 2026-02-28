@@ -1,433 +1,478 @@
 /**
- * Smart Notifications — pattern learning, quiet hours, frequency limits, priority.
- * Schedules local notifications with deep-link data; respects user preferences.
+ * Smart Notifications Service
+ * 
+ * Learns user patterns and delivers the right notification
+ * at the right time.
  */
 
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
-const PATTERN_KEY = '@ingauge/notification_patterns';
-const SENT_TODAY_KEY = '@ingauge/notifications_sent_today';
-const LAST_SENT_KEY = '@ingauge/notifications_last_sent';
+// ============ Types ============
 
-export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
+export interface CheckInEvent {
+  timestamp: string;
+  dayOfWeek: number;        // 0-6, Sunday = 0
+  hourOfDay: number;        // 0-23
+  source: 'organic' | 'notification' | 'widget' | 'circle_prompt';
+  sessionDuration?: number; // seconds
+  gaugesLogged: number;
+}
 
-export type SmartNotificationType =
-  | 'checkin_reminder'
-  | 'gauge_alert'
+export interface TimeWindow {
+  centerHour: number;       // 0-23
+  windowSize: number;       // minutes
+  confidence: number;       // 0-1
+  dayMask: number[];        // which days this applies to
+}
+
+export interface NotificationSettings {
+  enabled: boolean;
+  quietHoursStart: number;  // hour (e.g., 22 for 10pm)
+  quietHoursEnd: number;    // hour (e.g., 7 for 7am)
+  maxPerDay: number;
+  checkInReminders: boolean;
+  circleAlerts: boolean;
+  insightNudges: boolean;
+  streakReminders: boolean;
+}
+
+export type NotificationType = 
+  | 'check_in_reminder'
   | 'circle_alert'
-  | 'streak_celebration'
-  | 'trend_positive'
-  | 'pattern_insight'
+  | 'streak_at_risk'
+  | 'insight_nudge'
+  | 'cycle_context'
+  | 'pattern_detected'
   | 'gentle_reconnect';
 
-export type NotificationFrequency = 'daily' | 'every_other_day' | 'twice_weekly' | 'weekly';
-
-export interface QuietHours {
-  startHour: number; // 0-23, e.g. 22 = 10pm
-  startMinute: number;
-  endHour: number;   // e.g. 8 = 8am
-  endMinute: number;
-}
-
-export interface NotificationTypeConfig {
-  enabled: boolean;
-  priority: NotificationPriority;
-}
-
-export interface SmartNotificationSettings {
-  quietHours: QuietHours;
-  frequency: NotificationFrequency;
-  smartTiming: boolean;
-  maxPerDay: number;
-  minHoursBetween: number;
-  types: Record<SmartNotificationType, NotificationTypeConfig>;
-}
-
-const DEFAULT_QUIET_HOURS: QuietHours = {
-  startHour: 22,
-  startMinute: 0,
-  endHour: 8,
-  endMinute: 0,
-};
-
-export const DEFAULT_SMART_SETTINGS: SmartNotificationSettings = {
-  quietHours: DEFAULT_QUIET_HOURS,
-  frequency: 'daily',
-  smartTiming: true,
-  maxPerDay: 4,
-  minHoursBetween: 2,
-  types: {
-    checkin_reminder: { enabled: true, priority: 'high' },
-    gauge_alert: { enabled: true, priority: 'high' },
-    circle_alert: { enabled: true, priority: 'urgent' },
-    streak_celebration: { enabled: true, priority: 'medium' },
-    trend_positive: { enabled: true, priority: 'low' },
-    pattern_insight: { enabled: true, priority: 'low' },
-    gentle_reconnect: { enabled: true, priority: 'medium' },
-  },
-};
-
-// —— Pattern learning (app opens, check-ins) ——
-export interface PatternEntry {
-  date: string; // YYYY-MM-DD
-  hour: number;
-  minute: number;
-  timestamp: number;
-}
-
-async function getStoredPatterns(): Promise<{ appOpens: PatternEntry[]; checkIns: PatternEntry[] }> {
-  try {
-    const raw = await AsyncStorage.getItem(PATTERN_KEY);
-    if (!raw) return { appOpens: [], checkIns: [] };
-    const parsed = JSON.parse(raw);
-    return {
-      appOpens: Array.isArray(parsed.appOpens) ? parsed.appOpens : [],
-      checkIns: Array.isArray(parsed.checkIns) ? parsed.checkIns : [],
-    };
-  } catch {
-    return { appOpens: [], checkIns: [] };
-  }
-}
-
-async function savePatterns(patterns: { appOpens: PatternEntry[]; checkIns: PatternEntry[] }): Promise<void> {
-  const trimmed = {
-    appOpens: patterns.appOpens.slice(-200),
-    checkIns: patterns.checkIns.slice(-200),
-  };
-  await AsyncStorage.setItem(PATTERN_KEY, JSON.stringify(trimmed));
-}
-
-/** Call when app is opened (e.g. from AppState 'active'). */
-export async function recordAppOpen(): Promise<void> {
-  const now = new Date();
-  const entry: PatternEntry = {
-    date: now.toISOString().slice(0, 10),
-    hour: now.getHours(),
-    minute: now.getMinutes(),
-    timestamp: now.getTime(),
-  };
-  const { appOpens, checkIns } = await getStoredPatterns();
-  appOpens.push(entry);
-  await savePatterns({ appOpens, checkIns });
-}
-
-/** Call when user completes a check-in. */
-export async function recordCheckIn(): Promise<void> {
-  const now = new Date();
-  const entry: PatternEntry = {
-    date: now.toISOString().slice(0, 10),
-    hour: now.getHours(),
-    minute: now.getMinutes(),
-    timestamp: now.getTime(),
-  };
-  const { appOpens, checkIns } = await getStoredPatterns();
-  checkIns.push(entry);
-  await savePatterns({ appOpens, checkIns });
-}
-
-/** Get preferred hour for notifications from learned pattern (median of check-in or app-open hours). */
-export async function getLearnedBestHour(): Promise<number> {
-  const { appOpens, checkIns } = await getStoredPatterns();
-  const source = checkIns.length >= 5 ? checkIns : appOpens;
-  if (source.length === 0) return 9;
-  const hours = source.map((e) => e.hour + e.minute / 60).sort((a, b) => a - b);
-  const mid = Math.floor(hours.length / 2);
-  const median = hours.length % 2 ? hours[mid] : (hours[mid - 1] + hours[mid]) / 2;
-  return Math.max(8, Math.min(21, Math.round(median)));
-}
-
-// —— Quiet hours & frequency ——
-function isWithinQuietHours(now: Date, quiet: QuietHours): boolean {
-  const min = now.getHours() * 60 + now.getMinutes();
-  const startMin = quiet.startHour * 60 + quiet.startMinute;
-  const endMin = quiet.endHour * 60 + quiet.endMinute;
-  if (startMin > endMin) {
-    return min >= startMin || min < endMin;
-  }
-  return min >= startMin && min < endMin;
-}
-
-async function getSentTodayCount(): Promise<number> {
-  try {
-    const raw = await AsyncStorage.getItem(SENT_TODAY_KEY);
-    if (!raw) return 0;
-    const { date, count } = JSON.parse(raw);
-    const today = new Date().toISOString().slice(0, 10);
-    return date === today ? count : 0;
-  } catch {
-    return 0;
-  }
-}
-
-async function getLastSentTime(): Promise<number | null> {
-  try {
-    const raw = await AsyncStorage.getItem(LAST_SENT_KEY);
-    return raw ? parseInt(raw, 10) : null;
-  } catch {
-    return null;
-  }
-}
-
-async function incrementSentToday(): Promise<void> {
-  const today = new Date().toISOString().slice(0, 10);
-  const count = await getSentTodayCount();
-  await AsyncStorage.setItem(SENT_TODAY_KEY, JSON.stringify({ date: today, count: count + 1 }));
-  await AsyncStorage.setItem(LAST_SENT_KEY, String(Date.now()));
-}
-
-/** Check if we're allowed to send (quiet hours, max per day, min interval). Uses in-memory settings. */
-export async function canSendNow(settings: SmartNotificationSettings): Promise<boolean> {
-  const now = new Date();
-  if (isWithinQuietHours(now, settings.quietHours)) return false;
-  const sent = await getSentTodayCount();
-  if (sent >= settings.maxPerDay) return false;
-  const last = await getLastSentTime();
-  if (last && (now.getTime() - last) / (60 * 60 * 1000) < settings.minHoursBetween) return false;
-  return true;
-}
-
-// —— Scheduling (uses Expo Notifications) ——
-export interface NotificationPayload {
-  type: SmartNotificationType;
-  screen?: string;
+interface ScheduledNotification {
+  id: string;
+  type: NotificationType;
+  scheduledFor: string;
   title: string;
   body: string;
-  data?: Record<string, string | number | undefined>;
 }
 
-/** Schedule a one-time local notification at a specific date. Returns identifier or null. */
-export async function scheduleSmartNotification(
-  payload: NotificationPayload,
-  triggerDate: Date,
-  settings: SmartNotificationSettings
-): Promise<string | null> {
-  if (!(await canSendNow(settings))) return null;
-  const typeConfig = settings.types[payload.type];
-  if (!typeConfig?.enabled) return null;
-  if (isWithinQuietHours(triggerDate, settings.quietHours)) return null;
+// ============ Constants ============
 
-  const id = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: payload.title,
-      body: payload.body,
-      data: {
-        type: payload.type,
-        screen: payload.screen ?? getDefaultScreenForType(payload.type),
-        ...payload.data,
+const STORAGE_KEYS = {
+  checkInHistory: 'smart_notif_checkin_history',
+  optimalWindows: 'smart_notif_optimal_windows',
+  settings: 'smart_notif_settings',
+  lastNotifications: 'smart_notif_last_sent',
+  notificationCount: 'smart_notif_daily_count',
+};
+
+const DEFAULT_SETTINGS: NotificationSettings = {
+  enabled: true,
+  quietHoursStart: 22,
+  quietHoursEnd: 7,
+  maxPerDay: 3,
+  checkInReminders: true,
+  circleAlerts: true,
+  insightNudges: true,
+  streakReminders: true,
+};
+
+const DECAY_FACTOR = 0.85; // Per week
+const MIN_DATA_POINTS = 7;
+const CONFIDENCE_THRESHOLD = 0.6;
+
+// ============ Notification Content ============
+
+interface NotificationContent {
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+}
+
+const NOTIFICATION_TEMPLATES: Record<NotificationType, NotificationContent[]> = {
+  check_in_reminder: [
+    { title: 'Quick check-in?', body: 'Take 30 seconds to see where you are right now.' },
+    { title: 'How are you?', body: 'Your dashboard is waiting. Just a quick read.' },
+    { title: '💜 Moment for yourself', body: 'A quick check-in helps you stay aware.' },
+    { title: 'Your system check', body: "How's the cockpit looking today?" },
+  ],
+  circle_alert: [
+    { title: '{name} might need support', body: 'Their temperature dropped to {temp}°' },
+    { title: '💜 {name} is struggling', body: 'Consider reaching out.' },
+  ],
+  streak_at_risk: [
+    { title: '🔥 Keep your streak!', body: "You haven't checked in today. Don't break {days} days!" },
+    { title: 'One quick check-in', body: 'Keep your {days}-day streak going!' },
+  ],
+  insight_nudge: [
+    { title: '💡 Pattern spotted', body: 'Your {gauge} gauge tends to dip on {day}s.' },
+    { title: 'Did you know?', body: "You've been most regulated when you {insight}." },
+  ],
+  cycle_context: [
+    { title: '🌙 Cycle reminder', body: "You're entering {phase} phase. Be gentle with yourself." },
+    { title: 'Heads up', body: '{days} days until your period. Your patterns suggest lighter scheduling.' },
+  ],
+  pattern_detected: [
+    { title: '📊 New pattern found', body: 'Your {gauge} connects to your {trigger}. Tap to explore.' },
+  ],
+  gentle_reconnect: [
+    { title: 'Hey, we miss you', body: "It's been {days} days. Everything okay?" },
+    { title: '💜 Still here', body: 'No pressure — just checking in when you are ready.' },
+  ],
+};
+
+// ============ Pattern Learning ============
+
+class PatternLearner {
+  async getCheckInHistory(): Promise<CheckInEvent[]> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.checkInHistory);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  async recordCheckIn(event: Omit<CheckInEvent, 'timestamp' | 'dayOfWeek' | 'hourOfDay'>): Promise<void> {
+    const now = new Date();
+    const fullEvent: CheckInEvent = {
+      ...event,
+      timestamp: now.toISOString(),
+      dayOfWeek: now.getDay(),
+      hourOfDay: now.getHours(),
+    };
+
+    const history = await this.getCheckInHistory();
+    
+    // Keep last 90 days
+    const ninetyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
+    const filtered = history.filter(e => new Date(e.timestamp).getTime() > ninetyDaysAgo);
+    
+    filtered.push(fullEvent);
+    await AsyncStorage.setItem(STORAGE_KEYS.checkInHistory, JSON.stringify(filtered));
+    
+    // Recalculate optimal windows
+    await this.calculateOptimalWindows();
+  }
+
+  async calculateOptimalWindows(): Promise<TimeWindow[]> {
+    const history = await this.getCheckInHistory();
+    
+    if (history.length < MIN_DATA_POINTS) {
+      // Return default windows for cold start
+      return this.getDefaultWindows();
+    }
+
+    // Weight recent check-ins more heavily
+    const now = Date.now();
+    const weightedByHour: Record<number, number> = {};
+    
+    history.forEach(event => {
+      const ageWeeks = (now - new Date(event.timestamp).getTime()) / (7 * 24 * 60 * 60 * 1000);
+      const weight = Math.pow(DECAY_FACTOR, ageWeeks);
+      
+      const hour = event.hourOfDay;
+      weightedByHour[hour] = (weightedByHour[hour] || 0) + weight;
+    });
+
+    // Find peak hours
+    const peaks: TimeWindow[] = [];
+    const hours = Object.entries(weightedByHour)
+      .map(([h, w]) => ({ hour: parseInt(h), weight: w }))
+      .sort((a, b) => b.weight - a.weight);
+
+    // Take top 2 time windows
+    const maxWeight = hours[0]?.weight || 1;
+    
+    for (let i = 0; i < Math.min(2, hours.length); i++) {
+      const h = hours[i];
+      if (h.weight / maxWeight >= CONFIDENCE_THRESHOLD) {
+        peaks.push({
+          centerHour: h.hour,
+          windowSize: 90,
+          confidence: h.weight / maxWeight,
+          dayMask: [0, 1, 2, 3, 4, 5, 6], // All days for now
+        });
+      }
+    }
+
+    if (peaks.length === 0) {
+      return this.getDefaultWindows();
+    }
+
+    await AsyncStorage.setItem(STORAGE_KEYS.optimalWindows, JSON.stringify(peaks));
+    return peaks;
+  }
+
+  getDefaultWindows(): TimeWindow[] {
+    // Default: 9am and 8pm
+    return [
+      { centerHour: 9, windowSize: 90, confidence: 0.5, dayMask: [0, 1, 2, 3, 4, 5, 6] },
+      { centerHour: 20, windowSize: 90, confidence: 0.5, dayMask: [0, 1, 2, 3, 4, 5, 6] },
+    ];
+  }
+
+  async getOptimalWindows(): Promise<TimeWindow[]> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.optimalWindows);
+      if (data) {
+        return JSON.parse(data);
+      }
+    } catch {
+      // Fall through to default
+    }
+    return this.getDefaultWindows();
+  }
+}
+
+// ============ Notification Scheduler ============
+
+class NotificationScheduler {
+  private learner = new PatternLearner();
+
+  async getSettings(): Promise<NotificationSettings> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.settings);
+      return data ? { ...DEFAULT_SETTINGS, ...JSON.parse(data) } : DEFAULT_SETTINGS;
+    } catch {
+      return DEFAULT_SETTINGS;
+    }
+  }
+
+  async updateSettings(partial: Partial<NotificationSettings>): Promise<void> {
+    const current = await this.getSettings();
+    const updated = { ...current, ...partial };
+    await AsyncStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(updated));
+    
+    // Reschedule notifications with new settings
+    await this.scheduleSmartNotifications();
+  }
+
+  isInQuietHours(settings: NotificationSettings): boolean {
+    const hour = new Date().getHours();
+    
+    if (settings.quietHoursStart < settings.quietHoursEnd) {
+      // Same day quiet hours (e.g., 10am-6pm)
+      return hour >= settings.quietHoursStart && hour < settings.quietHoursEnd;
+    } else {
+      // Overnight quiet hours (e.g., 10pm-7am)
+      return hour >= settings.quietHoursStart || hour < settings.quietHoursEnd;
+    }
+  }
+
+  async canSendNotification(type: NotificationType): Promise<boolean> {
+    const settings = await this.getSettings();
+    
+    if (!settings.enabled) return false;
+    if (this.isInQuietHours(settings)) return false;
+    
+    // Check daily limit
+    const today = new Date().toDateString();
+    const countKey = `${STORAGE_KEYS.notificationCount}_${today}`;
+    const countStr = await AsyncStorage.getItem(countKey);
+    const count = countStr ? parseInt(countStr) : 0;
+    
+    if (count >= settings.maxPerDay) return false;
+    
+    // Check type-specific settings
+    switch (type) {
+      case 'check_in_reminder':
+        return settings.checkInReminders;
+      case 'circle_alert':
+        return settings.circleAlerts;
+      case 'insight_nudge':
+      case 'pattern_detected':
+        return settings.insightNudges;
+      case 'streak_at_risk':
+        return settings.streakReminders;
+      default:
+        return true;
+    }
+  }
+
+  async incrementDailyCount(): Promise<void> {
+    const today = new Date().toDateString();
+    const countKey = `${STORAGE_KEYS.notificationCount}_${today}`;
+    const countStr = await AsyncStorage.getItem(countKey);
+    const count = countStr ? parseInt(countStr) : 0;
+    await AsyncStorage.setItem(countKey, String(count + 1));
+  }
+
+  getRandomTemplate(type: NotificationType): NotificationContent {
+    const templates = NOTIFICATION_TEMPLATES[type];
+    return templates[Math.floor(Math.random() * templates.length)];
+  }
+
+  async scheduleSmartNotifications(): Promise<void> {
+    // Cancel existing scheduled notifications
+    await Notifications.cancelAllScheduledNotificationsAsync();
+    
+    const settings = await this.getSettings();
+    if (!settings.enabled || !settings.checkInReminders) return;
+    
+    const windows = await this.learner.getOptimalWindows();
+    
+    // Schedule for next 7 days
+    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + dayOffset);
+      
+      for (const window of windows) {
+        // Skip if in quiet hours
+        if (window.centerHour >= settings.quietHoursStart || 
+            window.centerHour < settings.quietHoursEnd) {
+          continue;
+        }
+        
+        // Add some randomness within window
+        const minuteOffset = Math.floor(Math.random() * window.windowSize) - window.windowSize / 2;
+        
+        targetDate.setHours(window.centerHour);
+        targetDate.setMinutes(Math.max(0, Math.min(59, 30 + minuteOffset)));
+        targetDate.setSeconds(0);
+        
+        // Don't schedule in the past
+        if (targetDate.getTime() <= Date.now()) continue;
+        
+        const template = this.getRandomTemplate('check_in_reminder');
+        
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: template.title,
+            body: template.body,
+            data: { type: 'check_in_reminder' },
+            sound: true,
+          },
+          trigger: {
+            date: targetDate,
+          },
+        });
+      }
+    }
+  }
+
+  async sendImmediateNotification(
+    type: NotificationType, 
+    params?: Record<string, string | number>
+  ): Promise<boolean> {
+    if (!(await this.canSendNotification(type))) {
+      return false;
+    }
+
+    let template = this.getRandomTemplate(type);
+    
+    // Replace placeholders
+    if (params) {
+      let title = template.title;
+      let body = template.body;
+      
+      Object.entries(params).forEach(([key, value]) => {
+        title = title.replace(`{${key}}`, String(value));
+        body = body.replace(`{${key}}`, String(value));
+      });
+      
+      template = { title, body };
+    }
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: template.title,
+        body: template.body,
+        data: { type },
+        sound: true,
       },
-      badge: 1,
-    },
-    trigger: { date: triggerDate, type: 'date' } as Notifications.NotificationTriggerInput,
-  });
-  await incrementSentToday();
-  return id;
-}
+      trigger: null, // Immediate
+    });
 
-function getDefaultScreenForType(type: SmartNotificationType): string {
-  switch (type) {
-    case 'checkin_reminder':
-    case 'gauge_alert':
-    case 'trend_positive':
-    case 'gentle_reconnect':
-      return '/(modals)/cockpit-checkin';
-    case 'circle_alert':
-      return '/(tabs)/circle';
-    case 'streak_celebration':
-    case 'pattern_insight':
-      return '/(tabs)/index';
-    default:
-      return '/(tabs)/index';
+    await this.incrementDailyCount();
+    return true;
   }
 }
 
-/** Cancel all scheduled notifications with the given type. */
-export async function cancelByType(type: SmartNotificationType): Promise<void> {
-  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-  for (const n of scheduled) {
-    if ((n.content.data as { type?: string })?.type === type) {
-      await Notifications.cancelScheduledNotificationAsync(n.identifier);
-    }
-  }
-}
+// ============ Exported Functions ============
 
-/** Cancel all smart notifications (any type from our types). */
-export async function cancelAllSmartNotifications(): Promise<void> {
-  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-  const ourTypes: SmartNotificationType[] = [
-    'checkin_reminder',
-    'gauge_alert',
-    'circle_alert',
-    'streak_celebration',
-    'trend_positive',
-    'pattern_insight',
-    'gentle_reconnect',
-  ];
-  for (const n of scheduled) {
-    const type = (n.content.data as { type?: string })?.type;
-    if (type && ourTypes.includes(type as SmartNotificationType)) {
-      await Notifications.cancelScheduledNotificationAsync(n.identifier);
-    }
-  }
-}
+const learner = new PatternLearner();
+const scheduler = new NotificationScheduler();
 
-// —— Content builders for each type (call from app when evaluating what to schedule) ——
-export function buildCheckinReminderPayload(daysSince: number): NotificationPayload {
-  return {
-    type: 'checkin_reminder',
-    screen: '/(modals)/cockpit-checkin',
-    title: "It's been a while 💛",
-    body: daysSince >= 2 ? `It's been ${daysSince} days since you checked in. How are you doing?` : 'Quick check-in?',
-    data: { daysSince },
-  };
-}
-
-export function buildGaugeAlertPayload(gaugeLabel: string, daysLow: number): NotificationPayload {
-  return {
-    type: 'gauge_alert',
-    screen: '/(modals)/gauge-detail',
-    title: `${gaugeLabel} could use attention`,
-    body: `Your ${gaugeLabel} has been below 40 for ${daysLow} days. Tap to see what might help.`,
-    data: { gauge: gaugeLabel.toLowerCase(), daysLow },
-  };
-}
-
-export function buildCircleAlertPayload(memberName: string): NotificationPayload {
-  return {
-    type: 'circle_alert',
-    screen: '/(tabs)/circle',
-    title: `${memberName} could use a check-in 💛`,
-    body: "Their gauges have been low. A quick message could mean a lot.",
-    data: { memberName },
-  };
-}
-
-export function buildStreakCelebrationPayload(streakDays: number): NotificationPayload {
-  return {
-    type: 'streak_celebration',
-    screen: '/(tabs)/index',
-    title: `${streakDays}-day streak! 🔥`,
-    body: "You're showing up for yourself. Keep it going!",
-    data: { streakDays },
-  };
-}
-
-export function buildTrendPositivePayload(): NotificationPayload {
-  return {
-    type: 'trend_positive',
-    screen: '/(tabs)/index',
-    title: "You're trending up this week! 📈",
-    body: "Your gauges are looking better. Psych has noticed.",
-    data: {},
-  };
-}
-
-export function buildPatternInsightPayload(insight: string): NotificationPayload {
-  return {
-    type: 'pattern_insight',
-    screen: '/(tabs)/index',
-    title: 'A little insight 💡',
-    body: insight,
-    data: {},
-  };
-}
-
-export function buildGentleReconnectPayload(daysAway: number): NotificationPayload {
-  return {
-    type: 'gentle_reconnect',
-    screen: '/(tabs)/index',
-    title: "Hey, we miss you 💜",
-    body: daysAway >= 5 ? `It's been ${daysAway} days. No pressure — we're here when you're ready.` : "We're here when you need us.",
-    data: { daysAway },
-  };
-}
-
-/** Get next trigger time: today or tomorrow at preferred hour, outside quiet hours. */
-async function getNextTriggerTime(settings: SmartNotificationSettings): Promise<Date> {
-  const hour = settings.smartTiming ? await getLearnedBestHour() : 9;
-  const now = new Date();
-  let trigger = new Date(now);
-  trigger.setHours(hour, 0, 0, 0);
-  if (trigger.getTime() <= now.getTime()) {
-    trigger.setDate(trigger.getDate() + 1);
-  }
-  while (isWithinQuietHours(trigger, settings.quietHours)) {
-    trigger.setHours(trigger.getHours() + 1, 0, 0, 0);
-  }
-  return trigger;
-}
-
-/**
- * Evaluate app state and schedule smart notifications when conditions are met.
- * Call from app on open/foreground (throttled). Uses stores via dynamic require.
- */
-export async function evaluateAndScheduleSmartNotifications(): Promise<void> {
-  let settings: SmartNotificationSettings;
-  try {
-    const { useNotificationSettingsStore } = require('../stores/notificationSettingsStore');
-    settings = useNotificationSettingsStore.getState();
-  } catch {
+export async function initializeSmartNotifications(): Promise<void> {
+  // Request permissions
+  const { status } = await Notifications.requestPermissionsAsync();
+  if (status !== 'granted') {
+    console.log('[SmartNotif] Permission not granted');
     return;
   }
-  if (!(await canSendNow(settings))) return;
 
-  const trigger = await getNextTriggerTime(settings);
-  const today = new Date().toISOString().slice(0, 10);
+  // Configure notification handler
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
 
-  try {
-    const cockpit = require('../stores/cockpitStore').useCockpitStore.getState();
-    const lastCheckIn = cockpit.lastCheckInDate;
-    const daysSinceCheckIn = lastCheckIn
-      ? Math.floor((Date.now() - new Date(lastCheckIn).getTime()) / (24 * 60 * 60 * 1000))
-      : 999;
-    if (settings.types.checkin_reminder?.enabled && daysSinceCheckIn >= 2) {
-      const payload = buildCheckinReminderPayload(daysSinceCheckIn);
-      await scheduleSmartNotification(payload, trigger, settings);
-      return;
-    }
-  } catch {
-    // ignore
-  }
-
-  try {
-    const circle = require('../stores/circleStore').useCircleStore.getState();
-    const members = circle.members ?? [];
-    const lowMember = members.find(
-      (m: { temperature?: string }) => m?.temperature === 'orange' || m?.temperature === 'red'
-    );
-    const memberName = lowMember?.name;
-    if (settings.types.circle_alert?.enabled && memberName) {
-      const payload = buildCircleAlertPayload(memberName);
-      await scheduleSmartNotification(payload, trigger, settings);
-      return;
-    }
-  } catch {
-    // ignore
-  }
-
-  try {
-    const education = require('../stores/educationStore').useEducationStore.getState();
-    const streak = education?.streakDays ?? 0;
-    if (settings.types.streak_celebration?.enabled && streak > 0 && streak % 7 === 0) {
-      const payload = buildStreakCelebrationPayload(streak);
-      await scheduleSmartNotification(payload, trigger, settings);
-      return;
-    }
-  } catch {
-    // ignore
-  }
-
-  try {
-    const cockpit = require('../stores/cockpitStore').useCockpitStore.getState();
-    const lastCheckIn = cockpit.lastCheckInDate;
-    const daysAway = lastCheckIn
-      ? Math.floor((Date.now() - new Date(lastCheckIn).getTime()) / (24 * 60 * 60 * 1000))
-      : 0;
-    if (settings.types.gentle_reconnect?.enabled && daysAway >= 5) {
-      const payload = buildGentleReconnectPayload(daysAway);
-      await scheduleSmartNotification(payload, trigger, settings);
-    }
-  } catch {
-    // ignore
-  }
+  // Schedule initial notifications
+  await scheduler.scheduleSmartNotifications();
 }
+
+export async function recordCheckIn(
+  source: CheckInEvent['source'], 
+  gaugesLogged: number,
+  sessionDuration?: number
+): Promise<void> {
+  await learner.recordCheckIn({ source, gaugesLogged, sessionDuration });
+}
+
+export async function getNotificationSettings(): Promise<NotificationSettings> {
+  return scheduler.getSettings();
+}
+
+export async function updateNotificationSettings(
+  settings: Partial<NotificationSettings>
+): Promise<void> {
+  await scheduler.updateSettings(settings);
+}
+
+export async function sendCircleAlert(memberName: string, temperature: number): Promise<boolean> {
+  return scheduler.sendImmediateNotification('circle_alert', {
+    name: memberName,
+    temp: temperature,
+  });
+}
+
+export async function sendStreakReminder(streakDays: number): Promise<boolean> {
+  return scheduler.sendImmediateNotification('streak_at_risk', {
+    days: streakDays,
+  });
+}
+
+export async function sendCycleReminder(phase: string, daysUntilPeriod?: number): Promise<boolean> {
+  if (daysUntilPeriod !== undefined && daysUntilPeriod <= 3) {
+    return scheduler.sendImmediateNotification('cycle_context', {
+      days: daysUntilPeriod,
+    });
+  }
+  return scheduler.sendImmediateNotification('cycle_context', { phase });
+}
+
+export async function sendGentleReconnect(daysSinceActive: number): Promise<boolean> {
+  return scheduler.sendImmediateNotification('gentle_reconnect', {
+    days: daysSinceActive,
+  });
+}
+
+export async function sendPatternInsight(gauge: string, insight: string): Promise<boolean> {
+  return scheduler.sendImmediateNotification('insight_nudge', {
+    gauge,
+    insight,
+  });
+}
+
+export async function rescheduleNotifications(): Promise<void> {
+  await scheduler.scheduleSmartNotifications();
+}
+
+export async function getOptimalCheckInWindows(): Promise<TimeWindow[]> {
+  return learner.getOptimalWindows();
+}
+
+export { PatternLearner, NotificationScheduler };
