@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.border,
   },
   headerTitle: {
-    ...TYPOGRAPHY.headlineSm,
+    ...TYPOGRAPHY.headingSm,
     color: COLORS.text,
   },
   scroll: {
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     fontSize: 36,
   },
   title: {
-    ...TYPOGRAPHY.headlineMd,
+    ...TYPOGRAPHY.headingMd,
     color: COLORS.text,
     textAlign: 'center',
     marginBottom: SPACING.sm,
