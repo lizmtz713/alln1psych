@@ -65,7 +65,7 @@ const BIAS_PATTERNS: Record<BiasType, {
       /typical/i,
       /of\s+course\s+they\s+(would|did)/i,
     ],
-    explanation: 'Your brain is looking for evidence that fits what you already believe. It's great at spotting confirming info, but it tends to filter out what doesn't fit.',
+    explanation: "Your brain is looking for evidence that fits what you already believe. It's great at spotting confirming info, but it tends to filter out what doesn't fit.",
   },
   catastrophizing: {
     label: 'Catastrophizing',

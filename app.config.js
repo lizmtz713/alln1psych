@@ -67,14 +67,7 @@ module.exports = {
         {
           microphonePermission:
             'InGauge needs microphone access so you can talk to Gauge.',
-        },
-      ],
-      [
-        '@react-native-voice/voice',
-        {
-          microphonePermission: 'InGauge uses the microphone so you can speak to Gauge.',
-          speechRecognitionPermission: 'InGauge uses speech recognition to transcribe what you say.',
-        },
+        }
       ],
     ],
   },
