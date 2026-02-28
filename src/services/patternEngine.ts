@@ -12,7 +12,7 @@ import { getGaugeHistory, type GaugeSnapshot } from './crisisPipeline';
 import { type GaugeKey } from '../stores/cockpitStore';
 
 export type PatternConfidence = 'early_signal' | 'emerging' | 'established';
-export type PatternType = 'feedback_loop' | 'trend' | 'correlation' | 'trigger';
+export type PatternType = 'feedback_loop' | 'trend' | 'correlation' | 'trigger' | 'direction_correlation';
 
 export interface NarrativePattern {
   id: string;
@@ -30,6 +30,25 @@ export interface PatternAnalysis {
   dataPoints: number;
   uniqueDays: number;
   patterns: NarrativePattern[];
+  insufficientDataMessage?: string;
+}
+
+/**
+ * Direction-specific correlation insight
+ * Used by "Purpose Through Pattern" feature
+ */
+export interface DirectionCorrelation {
+  id: string;
+  category: 'sleep' | 'connection' | 'body' | 'time' | 'pattern';
+  narrative: string;
+  frequency: string; // e.g., "5 out of 7 times"
+  strength: 'strong' | 'moderate' | 'emerging';
+}
+
+export interface DirectionInsights {
+  hasEnoughData: boolean;
+  dataPoints: number;
+  correlations: DirectionCorrelation[];
   insufficientDataMessage?: string;
 }
 
@@ -262,6 +281,233 @@ function detectGaugeTrend(history: GaugeSnapshot[], gauge: GaugeKey): NarrativeP
   }
 
   return null;
+}
+
+// ============================================================================
+// PURPOSE THROUGH PATTERN — Direction-specific correlation analysis
+// ============================================================================
+
+const DIRECTION_MINIMUM_DATA_POINTS = 14; // Need 14+ check-ins for Direction insights
+
+/**
+ * Analyze what tends to happen BEFORE Direction rises
+ * This is the core of "Purpose Through Pattern" — reverse-engineering what lifts purpose
+ */
+export async function analyzeDirectionCorrelations(): Promise<DirectionInsights> {
+  const history = await getGaugeHistory();
+  
+  // Need minimum 14 data points for Direction-specific insights
+  if (history.length < DIRECTION_MINIMUM_DATA_POINTS) {
+    const remaining = DIRECTION_MINIMUM_DATA_POINTS - history.length;
+    return {
+      hasEnoughData: false,
+      dataPoints: history.length,
+      correlations: [],
+      insufficientDataMessage: `Direction patterns emerge with more data. ${remaining} more check-ins needed.`,
+    };
+  }
+
+  // Filter to snapshots that have Direction values
+  const withDirection = history.filter(h => h.direction >= 0);
+  if (withDirection.length < 10) {
+    return {
+      hasEnoughData: false,
+      dataPoints: withDirection.length,
+      correlations: [],
+      insufficientDataMessage: `Keep rating your Direction gauge to unlock these insights.`,
+    };
+  }
+
+  const correlations: DirectionCorrelation[] = [];
+  const sorted = [...withDirection].sort((a, b) => a.timestamp - b.timestamp);
+
+  // Find Direction rises: moments where Direction increased by 15+ from previous
+  const directionRises: { prev: GaugeSnapshot; curr: GaugeSnapshot }[] = [];
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = sorted[i - 1];
+    const curr = sorted[i];
+    if (curr.direction - prev.direction >= 15 && prev.direction >= 0 && curr.direction >= 60) {
+      directionRises.push({ prev, curr });
+    }
+  }
+
+  // Also find sustained high Direction periods
+  const highDirectionPeriods = sorted.filter(h => h.direction >= 65);
+
+  // ===== SLEEP/BODY CORRELATION =====
+  // Does Direction rise after Body is high (proxy for good sleep)?
+  const bodyBeforeRise = directionRises.filter(({ prev }) => prev.body >= 60);
+  if (directionRises.length >= 3 && bodyBeforeRise.length >= Math.ceil(directionRises.length * 0.6)) {
+    const ratio = `${bodyBeforeRise.length} out of ${directionRises.length}`;
+    correlations.push({
+      id: 'direction-body-correlation',
+      category: 'sleep',
+      narrative: `Direction tends to rise when your Body gauge is above 60 — ${ratio} times.`,
+      frequency: ratio,
+      strength: bodyBeforeRise.length / directionRises.length >= 0.75 ? 'strong' : 'moderate',
+    });
+  }
+
+  // High Body + High Direction co-occurrence
+  const highBodyHighDirection = highDirectionPeriods.filter(h => h.body >= 60).length;
+  if (highDirectionPeriods.length >= 5 && highBodyHighDirection / highDirectionPeriods.length >= 0.6) {
+    const pct = Math.round((highBodyHighDirection / highDirectionPeriods.length) * 100);
+    correlations.push({
+      id: 'direction-body-cooccur',
+      category: 'body',
+      narrative: `When your Body is above 60, your Direction tends to follow — ${pct}% correlation.`,
+      frequency: `${pct}%`,
+      strength: pct >= 75 ? 'strong' : 'moderate',
+    });
+  }
+
+  // ===== CONNECTION CORRELATION =====
+  // Does Direction rise after Connection improves?
+  const connectionBeforeRise = directionRises.filter(({ prev }) => prev.connection >= 55);
+  if (directionRises.length >= 3 && connectionBeforeRise.length >= Math.ceil(directionRises.length * 0.5)) {
+    const ratio = `${connectionBeforeRise.length} out of ${directionRises.length}`;
+    correlations.push({
+      id: 'direction-connection-correlation',
+      category: 'connection',
+      narrative: `Direction often rises after social connection — ${ratio} times you felt more purposeful after connecting with others.`,
+      frequency: ratio,
+      strength: connectionBeforeRise.length / directionRises.length >= 0.7 ? 'strong' : 'moderate',
+    });
+  }
+
+  // High Connection + High Direction co-occurrence
+  const highConnectionHighDirection = highDirectionPeriods.filter(h => h.connection >= 60).length;
+  if (highDirectionPeriods.length >= 5 && highConnectionHighDirection / highDirectionPeriods.length >= 0.55) {
+    correlations.push({
+      id: 'direction-connection-cooccur',
+      category: 'connection',
+      narrative: `Your sense of purpose tends to be clearer when you're feeling connected to others.`,
+      frequency: `${Math.round((highConnectionHighDirection / highDirectionPeriods.length) * 100)}%`,
+      strength: 'moderate',
+    });
+  }
+
+  // ===== TIME-OF-WEEK PATTERNS =====
+  // Does Direction peak on certain days?
+  const dayOfWeekCounts: Record<number, { total: number; highDirection: number }> = {};
+  for (let i = 0; i <= 6; i++) {
+    dayOfWeekCounts[i] = { total: 0, highDirection: 0 };
+  }
+  
+  sorted.forEach(snapshot => {
+    const day = new Date(snapshot.timestamp).getDay();
+    dayOfWeekCounts[day].total++;
+    if (snapshot.direction >= 60) {
+      dayOfWeekCounts[day].highDirection++;
+    }
+  });
+
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  let bestDay = -1;
+  let bestDayRatio = 0;
+  
+  Object.entries(dayOfWeekCounts).forEach(([day, counts]) => {
+    if (counts.total >= 2) {
+      const ratio = counts.highDirection / counts.total;
+      if (ratio > bestDayRatio && ratio >= 0.5) {
+        bestDayRatio = ratio;
+        bestDay = parseInt(day);
+      }
+    }
+  });
+
+  if (bestDay >= 0 && bestDayRatio >= 0.55) {
+    const pct = Math.round(bestDayRatio * 100);
+    correlations.push({
+      id: 'direction-day-pattern',
+      category: 'time',
+      narrative: `Your Direction tends to peak on ${dayNames[bestDay]}s — ${pct}% of those check-ins showed high purpose.`,
+      frequency: `${pct}%`,
+      strength: bestDayRatio >= 0.7 ? 'strong' : 'emerging',
+    });
+  }
+
+  // Weekend vs weekday
+  const weekdaySnapshots = sorted.filter(h => {
+    const day = new Date(h.timestamp).getDay();
+    return day >= 1 && day <= 5;
+  });
+  const weekendSnapshots = sorted.filter(h => {
+    const day = new Date(h.timestamp).getDay();
+    return day === 0 || day === 6;
+  });
+
+  const weekdayHighDir = weekdaySnapshots.filter(h => h.direction >= 60).length;
+  const weekendHighDir = weekendSnapshots.filter(h => h.direction >= 60).length;
+
+  if (weekdaySnapshots.length >= 5 && weekendSnapshots.length >= 3) {
+    const weekdayRatio = weekdayHighDir / weekdaySnapshots.length;
+    const weekendRatio = weekendHighDir / weekendSnapshots.length;
+    
+    if (weekdayRatio > weekendRatio + 0.2 && weekdayRatio >= 0.5) {
+      correlations.push({
+        id: 'direction-weekday-pattern',
+        category: 'time',
+        narrative: `Your Direction tends to be higher during the work week than on weekends.`,
+        frequency: `${Math.round(weekdayRatio * 100)}% vs ${Math.round(weekendRatio * 100)}%`,
+        strength: 'emerging',
+      });
+    } else if (weekendRatio > weekdayRatio + 0.2 && weekendRatio >= 0.5) {
+      correlations.push({
+        id: 'direction-weekend-pattern',
+        category: 'time',
+        narrative: `Your Direction tends to be higher on weekends than during the work week.`,
+        frequency: `${Math.round(weekendRatio * 100)}% vs ${Math.round(weekdayRatio * 100)}%`,
+        strength: 'emerging',
+      });
+    }
+  }
+
+  // ===== STATE CORRELATION =====
+  // Regulated nervous system → clearer direction
+  const stateBeforeRise = directionRises.filter(({ prev }) => prev.state >= 50);
+  if (directionRises.length >= 3 && stateBeforeRise.length >= Math.ceil(directionRises.length * 0.6)) {
+    const ratio = `${stateBeforeRise.length} out of ${directionRises.length}`;
+    correlations.push({
+      id: 'direction-state-correlation',
+      category: 'pattern',
+      narrative: `Direction rises more often when your nervous system is regulated (State ≥ 50) — ${ratio} times.`,
+      frequency: ratio,
+      strength: stateBeforeRise.length / directionRises.length >= 0.75 ? 'strong' : 'moderate',
+    });
+  }
+
+  // ===== ALIGNMENT LEADING INDICATOR =====
+  // Does high Alignment precede high Direction?
+  const alignmentBeforeRise = directionRises.filter(({ prev }) => prev.alignment >= 55);
+  if (directionRises.length >= 3 && alignmentBeforeRise.length >= Math.ceil(directionRises.length * 0.5)) {
+    correlations.push({
+      id: 'direction-alignment-leading',
+      category: 'pattern',
+      narrative: `Living aligned with your values seems to precede clearer Direction — purpose follows integrity.`,
+      frequency: `${alignmentBeforeRise.length} out of ${directionRises.length}`,
+      strength: 'moderate',
+    });
+  }
+
+  // Sort by strength
+  const strengthOrder = { strong: 0, moderate: 1, emerging: 2 };
+  correlations.sort((a, b) => strengthOrder[a.strength] - strengthOrder[b.strength]);
+
+  return {
+    hasEnoughData: true,
+    dataPoints: withDirection.length,
+    correlations,
+  };
+}
+
+/**
+ * Get current Direction gauge value (for UI decisions)
+ */
+export function getCurrentDirectionValue(): number {
+  // Import dynamically to avoid circular dependency issues
+  const { useCockpitStore } = require('../stores/cockpitStore');
+  return useCockpitStore.getState().direction.value ?? -1;
 }
 
 /**

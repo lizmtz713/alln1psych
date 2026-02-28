@@ -160,6 +160,17 @@ const LESSON_TRIGGERS: LessonTrigger[] = [
     orient: 'Purpose research shows: having something to move toward buffers against depression. Small direction beats no direction.',
     suggestTool: 'journal',
   },
+  {
+    lessonId: 'purpose-through-pattern',
+    title: 'What Usually Lifts Your Direction?',
+    emoji: '🔍',
+    condition: (g) => g.direction < 45 && g.direction >= 0,
+    reason: (g) => `Direction at ${g.direction}% — your data may hold clues about what lifts your sense of purpose.`,
+    urgency: 'gentle',
+    observe: 'Your Direction gauge is running low. Instead of searching for purpose, let\'s look at what already works.',
+    orient: 'Purpose is often reverse-engineered from patterns. Your history shows when Direction tends to rise — that\'s data, not guesswork.',
+    suggestTool: 'patterns', // Will link to patterns modal
+  },
 
   // Alignment-related lessons
   {

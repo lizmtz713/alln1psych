@@ -176,8 +176,11 @@ DO THIS:
 2. Look for what DOES matter, even small things.
 3. Don't ask "what's your purpose?" — too big.
 4. Focus on "what's one thing worth doing today?"
+5. If they have enough check-in history, mention their Direction patterns: "Want to see what usually lifts your Direction? Your data might have clues."
 
 SCRIPT: "When Direction feels unclear, the whole dashboard can feel off. You don't need to find your life purpose right now. What's one thing that feels worth doing today — even something small?"
+
+PATTERN PROMPT: If Direction has been low, consider suggesting: "Your patterns view shows what tends to lift your Direction. Want to explore what your data says?" This reframes purpose-finding from introspection to pattern recognition.
 `;
       break;
       

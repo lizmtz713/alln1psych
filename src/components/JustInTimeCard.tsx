@@ -56,6 +56,7 @@ export default function JustInTimeCard({ lesson, onDismiss }: Props) {
       'relate': '/(modals)/relate',
       'journal': '/(modals)/new-journal',
       'role-play': '/(modals)/role-play',
+      'patterns': '/(modals)/patterns',
     };
     
     const route = toolRoutes[lesson.operateTool];
@@ -121,7 +122,8 @@ export default function JustInTimeCard({ lesson, onDismiss }: Props) {
                lesson.operateTool === 'replay' ? 'Process It' :
                lesson.operateTool === 'relate' ? 'Relate' :
                lesson.operateTool === 'journal' ? 'Journal' :
-               lesson.operateTool === 'role-play' ? 'Practice' : 'Use Tool'}
+               lesson.operateTool === 'role-play' ? 'Practice' :
+               lesson.operateTool === 'patterns' ? 'See Patterns' : 'Use Tool'}
             </Text>
           </TouchableOpacity>
         )}

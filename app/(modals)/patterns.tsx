@@ -24,7 +24,8 @@ import { useWeatherStore } from '../../src/stores/weatherStore';
 import { useHealthStore } from '../../src/stores/healthStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { getEnvironmentContext, getMoonPhase, getTimeContext } from '../../src/services/environment';
-import { analyzePatterns, formatConfidence, type NarrativePattern, type PatternAnalysis } from '../../src/services/patternEngine';
+import { analyzePatterns, analyzeDirectionCorrelations, formatConfidence, type NarrativePattern, type PatternAnalysis, type DirectionInsights } from '../../src/services/patternEngine';
+import PurposeThroughPattern from '../../src/components/PurposeThroughPattern';
 import { usePatternReadiness } from '../../src/hooks/usePatternReadiness';
 import { PatternsBuildingState } from '../../src/components/PatternsBuildingState';
 
@@ -198,6 +199,10 @@ export default function PatternsScreen() {
   // Narrative patterns from pattern engine
   const [patternAnalysis, setPatternAnalysis] = useState<PatternAnalysis | null>(null);
   const [patternsLoading, setPatternsLoading] = useState(true);
+  
+  // Direction-specific insights ("Purpose Through Pattern")
+  const [directionInsights, setDirectionInsights] = useState<DirectionInsights | null>(null);
+  const [directionLoading, setDirectionLoading] = useState(true);
 
   // Gauge data
   const body = useCockpitStore((s) => s.body.value);
@@ -236,13 +241,19 @@ export default function PatternsScreen() {
   useEffect(() => {
     const loadPatterns = async () => {
       setPatternsLoading(true);
+      setDirectionLoading(true);
       try {
-        const analysis = await analyzePatterns();
+        const [analysis, dirInsights] = await Promise.all([
+          analyzePatterns(),
+          analyzeDirectionCorrelations(),
+        ]);
         setPatternAnalysis(analysis);
+        setDirectionInsights(dirInsights);
       } catch (e) {
         console.error('Pattern analysis error:', e);
       } finally {
         setPatternsLoading(false);
+        setDirectionLoading(false);
       }
     };
     loadPatterns();
@@ -472,6 +483,14 @@ export default function PatternsScreen() {
               No strong patterns detected yet in your data. Your gauges tend to vary — which can be a good thing. Keep checking in to see if patterns emerge.
             </Text>
           </View>
+        )}
+
+        {/* PURPOSE THROUGH PATTERN — Direction-specific insights */}
+        {!directionLoading && directionInsights && (
+          <>
+            <Text style={styles.sectionTitle}>What Lifts Your Direction?</Text>
+            <PurposeThroughPattern insights={directionInsights} />
+          </>
         )}
 
         {/* Today's Context (real-time patterns) */}
