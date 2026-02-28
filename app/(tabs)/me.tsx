@@ -300,6 +300,12 @@ export default function MeScreen() {
               onPress={() => Linking.openURL('mailto:feedback@getingauge.com')}
             />
             <MenuItem
+              icon="document-text-outline"
+              label="Share with Therapist"
+              subtitle="Generate professional report"
+              onPress={() => navigateTo('/(modals)/therapist-share')}
+            />
+            <MenuItem
               icon="refresh-outline"
               label="Redo Onboarding"
               onPress={() => navigateTo('/(modals)/onboarding')}
