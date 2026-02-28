@@ -33,6 +33,7 @@ import { StabilizationBanner } from '../../src/components/StabilizationBanner';
 import { SystemModeBanner } from '../../src/components/SystemModeBanner';
 import JustInTimeCard from '../../src/components/JustInTimeCard';
 import PredictiveWarningBanner from '../../src/components/PredictiveWarningBanner';
+import ReachOutPrompt from '../../src/components/ReachOutPrompt';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
 import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
 
@@ -519,6 +520,14 @@ export default function HomeScreen() {
           lesson={jitLessons[0]} 
           onDismiss={() => handleDismissJitLesson(jitLessons[0].lessonId)}
         />
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          4d. REACH-OUT SCAFFOLD — Connection repair prompt
+          Shows when Connection gauge < 40 for 2+ days
+          ═══════════════════════════════════════════════════════════════ */}
+      {activeGaugeCount >= 3 && (
+        <ReachOutPrompt />
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
