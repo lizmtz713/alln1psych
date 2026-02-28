@@ -984,4 +984,63 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.labelMd,
     color: COLORS.accent,
   },
+  
+  // Operating Snapshot Intro
+  snapshotIntro: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: SPACING.xl,
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  snapshotIntroEmoji: {
+    fontSize: 48,
+    marginBottom: SPACING.md,
+  },
+  snapshotIntroTitle: {
+    ...TYPOGRAPHY.headlineLg,
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
+  },
+  snapshotIntroText: {
+    ...TYPOGRAPHY.bodyMd,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: SPACING.lg,
+  },
+  snapshotFeatures: {
+    alignSelf: 'stretch',
+  },
+  snapshotFeature: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  snapshotFeatureText: {
+    ...TYPOGRAPHY.bodyMd,
+    color: COLORS.text,
+  },
+  
+  // Loading Button State
+  loadingButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.button,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
+    marginTop: SPACING.xl,
+    gap: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  loadingButtonText: {
+    ...TYPOGRAPHY.labelLg,
+    color: COLORS.textMuted,
+  },
 });
