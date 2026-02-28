@@ -31,7 +31,6 @@ import { SystemModeBanner } from '../../src/components/SystemModeBanner';
 import JustInTimeCard from '../../src/components/JustInTimeCard';
 import PredictiveWarningBanner from '../../src/components/PredictiveWarningBanner';
 import ReachOutPrompt from '../../src/components/ReachOutPrompt';
-import AweNudgeCard from '../../src/components/AweNudgeCard';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
 import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
 import { shouldSuggestAwe } from '../../src/services/aweNudge';
@@ -564,19 +563,6 @@ export default function HomeScreen() {
           ═══════════════════════════════════════════════════════════════ */}
       {activeGaugeCount >= 3 && (
         <ReachOutPrompt />
-      )}
-
-      {/* ═══════════════════════════════════════════════════════════════
-          4e. AWE NUDGE — Perspective shift for low Direction
-          Shows when Direction < 40 or stagnant for 3+ days
-          ═══════════════════════════════════════════════════════════════ */}
-      {showAweNudge && !dismissedAweNudge && (
-        <AweNudgeCard 
-          onDismiss={() => {
-            setDismissedAweNudge(true);
-            setShowAweNudge(false);
-          }}
-        />
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
