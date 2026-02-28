@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   title: {
-    ...TYPOGRAPHY.headlineSm,
+    ...TYPOGRAPHY.headingSm,
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },

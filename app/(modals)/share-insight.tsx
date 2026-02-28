@@ -29,6 +29,7 @@ import { useUserStore } from '../../src/stores/userStore';
 import { useCircleStore } from '../../src/stores/circleStore';
 import {
   generateShareableInsight,
+  generateOperatingSnapshot,
   createShareLink,
   sendToCircleMember,
   getInsightShareText,
@@ -105,6 +106,14 @@ export default function ShareInsightScreen() {
   // Build insight options
   const insightOptions: InsightOption[] = [
     {
+      type: 'operating-snapshot',
+      emoji: '📖',
+      title: 'My Operating Snapshot',
+      description: 'Share a "manual" for understanding and supporting me',
+      available: hasGauges,
+      unavailableReason: 'Do a check-in first to generate your snapshot',
+    },
+    {
       type: 'gauge-status',
       emoji: '🎛️',
       title: 'How I\'m Feeling',
@@ -114,7 +123,7 @@ export default function ShareInsightScreen() {
     },
     {
       type: 'lesson',
-      emoji: '📖',
+      emoji: '📚',
       title: 'A Lesson That Helped',
       description: 'Share something from the Human Manual',
       available: true,
@@ -158,7 +167,7 @@ export default function ShareInsightScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedType(type);
     
-    if (type === 'gauge-status' || type === 'personology') {
+    if (type === 'gauge-status' || type === 'personology' || type === 'operating-snapshot') {
       // These don't need item selection
       setStep('add-note');
     } else {
@@ -172,40 +181,61 @@ export default function ShareInsightScreen() {
     setStep('add-note');
   };
   
-  const handleGenerateInsight = () => {
+  const handleGenerateInsight = async () => {
     if (!selectedType) return;
     
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setLoading(true);
     
-    let data: any = { personalNote: personalNote.trim() || undefined };
-    
-    if (selectedType === 'gauge-status') {
-      data.context = context.trim() || undefined;
-    } else if (selectedType === 'lesson') {
-      const lesson = sampleLessons.find(l => l.id === selectedItemId);
-      if (lesson) {
-        data.lesson = lesson;
-        data.lessonContent = {
-          introduction: 'Understanding this concept can help transform how you experience and process emotions.',
-          keyConcepts: [{ explanation: 'The key insight here is that emotions are information, not commands.' }],
-        };
-        data.whySharing = whySharing.trim() || undefined;
+    try {
+      // Handle operating-snapshot separately (async generation)
+      if (selectedType === 'operating-snapshot') {
+        const snapshot = await generateOperatingSnapshot(personalNote.trim() || undefined);
+        if (snapshot) {
+          setInsight(snapshot);
+          setStep('preview');
+        } else {
+          Alert.alert('Error', 'Could not generate your Operating Snapshot. Please try again.');
+        }
+        setLoading(false);
+        return;
       }
-    } else if (selectedType === 'discovery') {
-      const discovery = discoveries.find(d => d.id === selectedItemId);
-      if (discovery) {
-        data.discovery = discovery;
-        data.whySharing = whySharing.trim() || undefined;
+      
+      let data: any = { personalNote: personalNote.trim() || undefined };
+      
+      if (selectedType === 'gauge-status') {
+        data.context = context.trim() || undefined;
+      } else if (selectedType === 'lesson') {
+        const lesson = sampleLessons.find(l => l.id === selectedItemId);
+        if (lesson) {
+          data.lesson = lesson;
+          data.lessonContent = {
+            introduction: 'Understanding this concept can help transform how you experience and process emotions.',
+            keyConcepts: [{ explanation: 'The key insight here is that emotions are information, not commands.' }],
+          };
+          data.whySharing = whySharing.trim() || undefined;
+        }
+      } else if (selectedType === 'discovery') {
+        const discovery = discoveries.find(d => d.id === selectedItemId);
+        if (discovery) {
+          data.discovery = discovery;
+          data.whySharing = whySharing.trim() || undefined;
+        }
       }
+      
+      const generated = generateShareableInsight(selectedType, data);
+      if (generated) {
+        setInsight(generated);
+        setStep('preview');
+      } else {
+        Alert.alert('Error', 'Could not generate insight. Please try again.');
+      }
+    } catch (error) {
+      console.error('Generate insight error:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
     }
     
-    const generated = generateShareableInsight(selectedType, data);
-    if (generated) {
-      setInsight(generated);
-      setStep('preview');
-    } else {
-      Alert.alert('Error', 'Could not generate insight. Please try again.');
-    }
+    setLoading(false);
   };
   
   const handleConfirmPreview = () => {
@@ -321,7 +351,7 @@ export default function ShareInsightScreen() {
         setSelectedType(null);
         break;
       case 'add-note':
-        if (selectedType === 'gauge-status' || selectedType === 'personology') {
+        if (selectedType === 'gauge-status' || selectedType === 'personology' || selectedType === 'operating-snapshot') {
           setStep('select-type');
           setSelectedType(null);
         } else {
@@ -450,6 +480,31 @@ export default function ShareInsightScreen() {
   
   const renderNoteInput = () => (
     <View style={styles.section}>
+      {selectedType === 'operating-snapshot' && (
+        <View style={styles.snapshotIntro}>
+          <Text style={styles.snapshotIntroEmoji}>📖</Text>
+          <Text style={styles.snapshotIntroTitle}>Your Operating Snapshot</Text>
+          <Text style={styles.snapshotIntroText}>
+            This creates a "manual" for people who love you — explaining how you work, 
+            what you need, and how to support you. Based on your current state and patterns.
+          </Text>
+          <View style={styles.snapshotFeatures}>
+            <View style={styles.snapshotFeature}>
+              <Ionicons name="checkmark-circle" size={16} color={COLORS.green} />
+              <Text style={styles.snapshotFeatureText}>Current mode & needs</Text>
+            </View>
+            <View style={styles.snapshotFeature}>
+              <Ionicons name="checkmark-circle" size={16} color={COLORS.green} />
+              <Text style={styles.snapshotFeatureText}>Your sensitivities & patterns</Text>
+            </View>
+            <View style={styles.snapshotFeature}>
+              <Ionicons name="checkmark-circle" size={16} color={COLORS.green} />
+              <Text style={styles.snapshotFeatureText}>How to support you best</Text>
+            </View>
+          </View>
+        </View>
+      )}
+      
       {selectedType === 'gauge-status' && (
         <>
           <Text style={styles.inputLabel}>What's going on? (optional)</Text>
@@ -487,7 +542,9 @@ export default function ShareInsightScreen() {
       </Text>
       <TextInput
         style={styles.textInput}
-        placeholder="Something you want them to know..."
+        placeholder={selectedType === 'operating-snapshot' 
+          ? "Anything you want to add for them..." 
+          : "Something you want them to know..."}
         placeholderTextColor={COLORS.textMuted}
         value={personalNote}
         onChangeText={setPersonalNote}
@@ -496,13 +553,24 @@ export default function ShareInsightScreen() {
         textAlignVertical="top"
       />
       
-      <Pressable
-        style={({ pressed }) => [styles.primaryButton, pressed && { opacity: 0.9 }]}
-        onPress={handleGenerateInsight}
-      >
-        <Text style={styles.primaryButtonText}>Preview Share</Text>
-        <Ionicons name="arrow-forward" size={18} color={COLORS.text} />
-      </Pressable>
+      {loading ? (
+        <View style={styles.loadingButtonContainer}>
+          <ActivityIndicator size="small" color={COLORS.accent} />
+          <Text style={styles.loadingButtonText}>
+            {selectedType === 'operating-snapshot' ? 'Generating your snapshot...' : 'Preparing...'}
+          </Text>
+        </View>
+      ) : (
+        <Pressable
+          style={({ pressed }) => [styles.primaryButton, pressed && { opacity: 0.9 }]}
+          onPress={handleGenerateInsight}
+        >
+          <Text style={styles.primaryButtonText}>
+            {selectedType === 'operating-snapshot' ? 'Generate Snapshot' : 'Preview Share'}
+          </Text>
+          <Ionicons name="arrow-forward" size={18} color={COLORS.text} />
+        </Pressable>
+      )}
     </View>
   );
   

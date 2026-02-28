@@ -30,8 +30,6 @@ import {
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
 import { PreConversationButton } from '../../src/components/PreConversationButton';
-import { detectBiases, type BiasFilterResult } from '../../src/services/biasFilter';
-import BiasFilterCard, { BiasFilterBanner } from '../../src/components/BiasFilterCard';
 
 // Lazy load ImagePicker to prevent crash on component mount
 let ImagePickerModule: typeof import('expo-image-picker') | null = null;
@@ -312,28 +310,6 @@ export default function DecodeScreen() {
       >
         {!response ? (
           <>
-            {/* Bias Filter Full Card Modal */}
-            {showBiasFilter && biasResult.detected && (
-              <BiasFilterCard
-                result={biasResult}
-                currentState={currentState}
-                onRevise={() => {
-                  setShowBiasFilter(false);
-                  // Focus stays on text input for revision
-                }}
-                onSendAnyway={() => {
-                  setShowBiasFilter(false);
-                  setBiasFilterDismissed(true);
-                  // Continue with decode
-                  onDecode();
-                }}
-                onDismiss={() => {
-                  setShowBiasFilter(false);
-                  setBiasFilterDismissed(true);
-                }}
-              />
-            )}
-            
             {/* Pre-Conversation Check — optional, not blocking */}
             <PreConversationButton 
               returnTo="/(modals)/decode" 
