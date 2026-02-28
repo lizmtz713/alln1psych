@@ -325,7 +325,7 @@ export const CycleDashboard: React.FC = () => {
           message={insight.message}
           color={
             insight.severity === 'important'
-              ? COLORS.temperature.red
+              ? COLORS.danger
               : insight.severity === 'gentle'
               ? COLORS.warning
               : COLORS.accent
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
     borderWidth: 3,
     borderColor: COLORS.border,
   },
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
   statChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 16,
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
 
   // Phase Info Card
   phaseInfoCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 20,
     marginBottom: 24,
@@ -632,7 +632,7 @@ const styles = StyleSheet.create({
 
   // Insight Card
   insightCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
 
   // Gauge Effects
   gaugeEffects: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -722,7 +722,7 @@ const styles = StyleSheet.create({
 
   // Setup Card
   setupCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
     borderRadius: 20,
     padding: 32,
     alignItems: 'center',
@@ -768,7 +768,7 @@ const styles = StyleSheet.create({
 
   // Manual Entry Card
   manualCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
@@ -804,7 +804,7 @@ const styles = StyleSheet.create({
 
   // Context Card (for home screen)
   contextCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.card,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
