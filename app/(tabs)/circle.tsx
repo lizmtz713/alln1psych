@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
+import MirroringPrompt from '../../src/components/MirroringPrompt';
 import {
   useCircleStore,
   TEMPERATURE_LABELS,
@@ -289,6 +290,18 @@ export default function CircleScreen() {
                   </Pressable>
                   {expanded && (
                     <View style={styles.memberExpand}>
+                      {/* Mirroring Assistant - Active Constructive Responding */}
+                      <MirroringPrompt
+                        memberName={m.name}
+                        relationship={m.relationship}
+                        temperature={m.temperature}
+                        temperatureLabel={m.temperatureLabel}
+                        onCopyResponse={(text) => {
+                          setToast('Copied to clipboard');
+                          setTimeout(() => setToast(null), 2000);
+                        }}
+                      />
+
                       {(m.birthday || editingBirthday === m.id) ? (
                         <>
                           {editingBirthday !== m.id ? (
