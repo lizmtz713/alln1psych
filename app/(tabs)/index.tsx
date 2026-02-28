@@ -31,8 +31,10 @@ import { SystemModeBanner } from '../../src/components/SystemModeBanner';
 import JustInTimeCard from '../../src/components/JustInTimeCard';
 import PredictiveWarningBanner from '../../src/components/PredictiveWarningBanner';
 import ReachOutPrompt from '../../src/components/ReachOutPrompt';
+import AweNudgeCard from '../../src/components/AweNudgeCard';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
 import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
+import { shouldSuggestAwe } from '../../src/services/aweNudge';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
 
@@ -222,10 +224,75 @@ export default function HomeScreen() {
         );
 
   const [insightFetched, setInsightFetched] = useState(false);
+  
+  // Just-in-Time Learning & Predictive Warnings
+  const [jitLessons, setJitLessons] = useState<JustInTimeLesson[]>([]);
+  const [predictiveWarning, setPredictiveWarning] = useState<PredictiveWarning | null>(null);
+  const [dismissedJitIds, setDismissedJitIds] = useState<string[]>([]);
+  const [dismissedWarning, setDismissedWarning] = useState(false);
+  
+  // Awe Nudge — shows when Direction is low/stagnant
+  const [showAweNudge, setShowAweNudge] = useState(false);
+  const [dismissedAweNudge, setDismissedAweNudge] = useState(false);
+  
+  // Crisis Pipeline - monitors gauge persistence for safety alerts
+  const { showAlert: showCrisisAlert, setShowAlert: setShowCrisisAlert, hasAlert: hasCrisisAlert } = useCrisisPipelineCheck();
 
   useEffect(() => {
     useCockpitStore.getState().runDailyDecayIfNeeded();
   }, []);
+
+  // Compute system mode whenever gauges change
+  useEffect(() => {
+    if (activeGaugeCount > 0) {
+      computeSystemMode();
+    }
+  }, [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal, activeGaugeCount, computeSystemMode]);
+
+  // Load Just-in-Time lessons and Predictive Warnings when gauges change
+  useEffect(() => {
+    if (activeGaugeCount >= 3) {
+      const gauges = {
+        body: bodyVal >= 0 ? bodyVal : 50,
+        state: stateVal >= 0 ? stateVal : 50,
+        emotion: emotionVal >= 0 ? emotionVal : 50,
+        connection: connectionVal >= 0 ? connectionVal : 50,
+        direction: directionVal >= 0 ? directionVal : 50,
+        alignment: alignmentVal >= 0 ? alignmentVal : 50,
+      };
+      
+      // Get JIT lessons
+      getJustInTimeLessons(gauges, systemMode).then(lessons => {
+        const filtered = lessons.filter(l => !dismissedJitIds.includes(l.lessonId));
+        setJitLessons(filtered);
+      });
+      
+      // Get predictive warning
+      getMostUrgentWarning().then(warning => {
+        if (!dismissedWarning) {
+          setPredictiveWarning(warning);
+        }
+      });
+      
+      // Check for Awe Nudge (Direction < 40 or stagnant)
+      const directionTrend = useCockpitStore.getState().direction.trend;
+      if (!dismissedAweNudge && directionVal >= 0) {
+        shouldSuggestAwe(directionVal, directionTrend).then(should => {
+          setShowAweNudge(should);
+        });
+      }
+    }
+  }, [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal, systemMode, activeGaugeCount, dismissedJitIds, dismissedWarning, dismissedAweNudge]);
+
+  const handleDismissJitLesson = (lessonId: string) => {
+    setDismissedJitIds(prev => [...prev, lessonId]);
+    setJitLessons(prev => prev.filter(l => l.lessonId !== lessonId));
+  };
+
+  const handleDismissWarning = () => {
+    setDismissedWarning(true);
+    setPredictiveWarning(null);
+  };
 
   useEffect(() => {
     if (activeGaugeCount >= 3 && !insightFetched) {
@@ -497,6 +564,19 @@ export default function HomeScreen() {
           ═══════════════════════════════════════════════════════════════ */}
       {activeGaugeCount >= 3 && (
         <ReachOutPrompt />
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          4e. AWE NUDGE — Perspective shift for low Direction
+          Shows when Direction < 40 or stagnant for 3+ days
+          ═══════════════════════════════════════════════════════════════ */}
+      {showAweNudge && !dismissedAweNudge && (
+        <AweNudgeCard 
+          onDismiss={() => {
+            setDismissedAweNudge(true);
+            setShowAweNudge(false);
+          }}
+        />
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
