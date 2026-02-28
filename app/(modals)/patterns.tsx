@@ -308,7 +308,7 @@ export default function PatternsScreen() {
     try {
       await Share.share({ message: summary });
     } catch (e) {
-      console.error('Share error:', e);
+      if (__DEV__) console.error('Share error:', e);
     }
   };
 

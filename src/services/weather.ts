@@ -91,7 +91,7 @@ class WeatherService {
         lon: location.coords.longitude,
       };
     } catch (error) {
-      console.error('[Weather] Location error:', error);
+      if (__DEV__) console.error('[Weather] Location error:', error);
       return null;
     }
   }
@@ -132,7 +132,7 @@ class WeatherService {
       );
 
       if (!response.ok) {
-        console.error('[Weather] API error:', response.status);
+        if (__DEV__) console.error('[Weather] API error:', response.status);
         return null;
       }
 
@@ -147,7 +147,7 @@ class WeatherService {
 
       return weather;
     } catch (error) {
-      console.error('[Weather] Fetch error:', error);
+      if (__DEV__) console.error('[Weather] Fetch error:', error);
       return null;
     }
   }

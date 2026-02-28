@@ -87,7 +87,7 @@ class HealthKitService {
 
   async initialize(): Promise<boolean> {
     if (Platform.OS !== 'ios') {
-      console.log('HealthKit only available on iOS');
+      if (__DEV__) console.log('HealthKit only available on iOS');
       return false;
     }
 
@@ -99,7 +99,7 @@ class HealthKitService {
       return new Promise((resolve) => {
         healthKit.isAvailable((err: any, available: boolean) => {
           if (err || !available) {
-            console.log('HealthKit not available:', err);
+            if (__DEV__) console.log('HealthKit not available:', err);
             resolve(false);
             return;
           }
@@ -109,7 +109,7 @@ class HealthKitService {
         });
       });
     } catch (e) {
-      console.log('HealthKit module not installed:', e);
+      if (__DEV__) console.log('HealthKit module not installed:', e);
       return false;
     }
   }
@@ -127,7 +127,7 @@ class HealthKitService {
 
       this.AppleHealthKit.initHealthKit(permissions, (err: any) => {
         if (err) {
-          console.log('HealthKit authorization failed:', err);
+          if (__DEV__) console.log('HealthKit authorization failed:', err);
           resolve(false);
           return;
         }

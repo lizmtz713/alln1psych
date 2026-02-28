@@ -174,11 +174,11 @@ export async function speakWithOpenAI(text: string): Promise<void> {
   try {
     const apiKey = await getOpenAIKey();
     if (!apiKey) {
-      console.warn('TTS: No API key');
+      if (__DEV__) console.warn('TTS: No API key');
       return;
     }
 
-    console.log('TTS: Starting for:', text.slice(0, 40));
+    if (__DEV__) console.log('TTS: Starting for:', text.slice(0, 40));
 
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
@@ -196,7 +196,7 @@ export async function speakWithOpenAI(text: string): Promise<void> {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.warn('TTS API error:', response.status, errText);
+      if (__DEV__) console.warn('TTS API error:', response.status, errText);
       return;
     }
 
@@ -231,7 +231,7 @@ export async function speakWithOpenAI(text: string): Promise<void> {
 
     sound.setOnPlaybackStatusUpdate(async (status: any) => {
       if (status.isLoaded && status.didJustFinish) {
-        console.log('TTS: Playback finished');
+        if (__DEV__) console.log('TTS: Playback finished');
         await sound.unloadAsync();
         try {
           await FileSystem.deleteAsync(fileUri, { idempotent: true });
@@ -239,8 +239,8 @@ export async function speakWithOpenAI(text: string): Promise<void> {
       }
     });
 
-    console.log('TTS: Playing audio');
+    if (__DEV__) console.log('TTS: Playing audio');
   } catch (e) {
-    console.warn('TTS failed:', e);
+    if (__DEV__) console.warn('TTS failed:', e);
   }
 }

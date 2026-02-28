@@ -1,7 +1,9 @@
 /**
  * Personology Engine — Relationship Intelligence
- * Birthday-based personality and relationship dynamics (inspired by Goldschneider).
+ * Uses the 48 week-born archetypes (Winter Seekers, Spring Builders, Summer Expressers, Fall Integrators).
  */
+
+import { getArchetypeForBirthday, type Archetype } from '../data/archetypes';
 
 export interface PersonalityPeriod {
   name: string;
@@ -22,28 +24,23 @@ export interface RelationshipDynamic {
   whatYouNeed: string;
 }
 
-const ARCH: Record<number, PersonalityPeriod> = {
-  1: { name: 'The Architect', range: 'January', strengths: ['disciplined', 'strategic', 'resilient', 'goal-oriented'], challenges: ['rigid expectations', 'difficulty showing vulnerability', 'workaholic tendencies'], communicationStyle: 'Direct and practical. Values efficiency.', needsInRelationships: 'Respect for their goals. Space to work. Loyalty through consistency.', stressResponse: 'Withdraws and works harder. May shut down emotionally.' },
-  2: { name: 'The Visionary', range: 'February', strengths: ['innovative', 'independent', 'humanitarian', 'intellectually curious'], challenges: ['emotionally detached', 'contrarian', 'unpredictable'], communicationStyle: 'Idea-driven. Needs mental stimulation.', needsInRelationships: 'Freedom to be unconventional. Intellectual partnership.', stressResponse: 'Detaches emotionally. May intellectualize feelings.' },
-  3: { name: 'The Empath', range: 'March', strengths: ['intuitive', 'compassionate', 'creative', 'adaptable'], challenges: ['absorbs others emotions', 'boundary issues', 'escapist tendencies'], communicationStyle: 'Feels first, thinks second. Needs to feel safe to open up.', needsInRelationships: 'Emotional safety. Gentle honesty over harsh truth.', stressResponse: 'Withdraws into inner world. May use escapism to cope.' },
-  4: { name: 'The Initiator', range: 'April', strengths: ['bold', 'energetic', 'honest', 'protective'], challenges: ['impulsive', 'competitive', 'quick-tempered'], communicationStyle: 'Direct to a fault. Says what they mean immediately.', needsInRelationships: 'Honesty. Someone who can match their energy.', stressResponse: 'Gets louder, more aggressive. Anger is the default.' },
-  5: { name: 'The Builder', range: 'May', strengths: ['reliable', 'patient', 'sensual', 'grounded'], challenges: ['stubborn', 'possessive', 'resistant to change'], communicationStyle: 'Slow and deliberate. Needs time to process.', needsInRelationships: 'Stability. Physical affection. Loyalty.', stressResponse: 'Digs in and refuses to budge.' },
-  6: { name: 'The Communicator', range: 'June', strengths: ['versatile', 'witty', 'social', 'quick-thinking'], challenges: ['scattered', 'inconsistent', 'avoids depth'], communicationStyle: 'Fast, verbal, needs variety. Processes by talking.', needsInRelationships: 'Mental stimulation. Variety.', stressResponse: 'Talks more, commits less. May deflect with humor.' },
-  7: { name: 'The Nurturer', range: 'July', strengths: ['protective', 'emotionally intelligent', 'loyal', 'intuitive'], challenges: ['moody', 'clingy', 'takes everything personally'], communicationStyle: 'Indirect. Tests the water before being vulnerable.', needsInRelationships: 'Emotional security. Reassurance.', stressResponse: 'Retreats into shell. Gets quiet, then resentful.' },
-  8: { name: 'The Leader', range: 'August', strengths: ['confident', 'generous', 'warm', 'creative'], challenges: ['ego-driven', 'needs validation', 'dramatic'], communicationStyle: 'Expressive, passionate. Wants to be heard and appreciated.', needsInRelationships: 'Admiration. Loyalty. Feeling special and seen.', stressResponse: 'Gets louder, more dramatic. Ego bruises run deep.' },
-  9: { name: 'The Analyst', range: 'September', strengths: ['detail-oriented', 'helpful', 'practical', 'thoughtful'], challenges: ['overcritical', 'anxious', 'perfectionist'], communicationStyle: 'Precise. Shows love through acts of service.', needsInRelationships: 'Appreciation for their effort. Patience with anxiety.', stressResponse: 'Becomes hypercritical. Anxious spiral.' },
-  10: { name: 'The Harmonizer', range: 'October', strengths: ['diplomatic', 'fair-minded', 'charming', 'partnership-oriented'], challenges: ['indecisive', 'conflict-avoidant', 'people-pleasing'], communicationStyle: 'Balanced, seeks agreement. May avoid conflict.', needsInRelationships: 'Equality. Partnership where both show up.', stressResponse: 'Freezes on decisions. Avoids conflict until it explodes.' },
-  11: { name: 'The Investigator', range: 'November', strengths: ['intense', 'perceptive', 'transformative', 'loyal to the core'], challenges: ['jealous', 'controlling', 'secretive', 'holds grudges'], communicationStyle: 'Reads you before you speak. Values depth. Tests trust.', needsInRelationships: 'Absolute honesty. Depth. Proven loyalty.', stressResponse: 'Gets controlling. Suspects the worst.' },
-  12: { name: 'The Explorer', range: 'December', strengths: ['optimistic', 'adventurous', 'philosophical', 'honest'], challenges: ['commitment-phobic', 'tactless', 'restless'], communicationStyle: 'Big picture. Honest to a fault.', needsInRelationships: 'Freedom. Growth. Adventure buddy.', stressResponse: 'Runs physically or emotionally. Plans escape route.' },
-};
+function archetypeToPersonalityPeriod(a: Archetype): PersonalityPeriod {
+  const comm = `${a.communicationStyle.respondsTo} Shuts down with: ${a.communicationStyle.shutsDownWith}`;
+  return {
+    name: a.name,
+    range: a.weekRange,
+    strengths: a.strengths.map((s) => s.toLowerCase()),
+    challenges: a.growthEdges.map((e) => e.toLowerCase()),
+    communicationStyle: comm,
+    needsInRelationships: a.inRelationships.needs,
+    stressResponse: a.underStress,
+  };
+}
 
+/** Returns the 48-archetype personality for a birthday (ISO "YYYY-MM-DD"). */
 export function getPersonality(birthday: string): PersonalityPeriod | null {
-  try {
-    const month = new Date(birthday).getMonth() + 1;
-    return ARCH[month] ?? null;
-  } catch {
-    return null;
-  }
+  const archetype = getArchetypeForBirthday(birthday);
+  return archetype ? archetypeToPersonalityPeriod(archetype) : null;
 }
 
 export function getRelationshipDynamic(myBirthday: string, theirBirthday: string): RelationshipDynamic | null {

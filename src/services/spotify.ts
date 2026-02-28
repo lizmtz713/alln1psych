@@ -138,7 +138,7 @@ class SpotifyService {
 
       return { success: false, error: 'Authorization cancelled' };
     } catch (error) {
-      console.error('[Spotify] Connect error:', error);
+      if (__DEV__) console.error('[Spotify] Connect error:', error);
       return { success: false, error: String(error) };
     }
   }
@@ -198,7 +198,7 @@ class SpotifyService {
 
           return response.accessToken;
         } catch (error) {
-          console.error('[Spotify] Token refresh failed:', error);
+          if (__DEV__) console.error('[Spotify] Token refresh failed:', error);
         }
       }
     }
@@ -221,13 +221,13 @@ class SpotifyService {
       });
 
       if (!response.ok) {
-        console.error('[Spotify] API error:', response.status);
+        if (__DEV__) console.error('[Spotify] API error:', response.status);
         return null;
       }
 
       return response.json();
     } catch (error) {
-      console.error('[Spotify] API request failed:', error);
+      if (__DEV__) console.error('[Spotify] API request failed:', error);
       return null;
     }
   }

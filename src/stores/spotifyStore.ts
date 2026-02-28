@@ -114,7 +114,7 @@ export const useSpotifyStore = create<SpotifyState>((set, get) => ({
         lastUpdated: Date.now(),
       });
     } catch (error) {
-      console.error('[SpotifyStore] Refresh failed:', error);
+      if (__DEV__) console.error('[SpotifyStore] Refresh failed:', error);
     }
   },
 

@@ -344,3 +344,228 @@ export const useCircleStore = create<CircleState>((set) => ({
       myTemperatureUpdatedAt: null,
     }),
 }));
+
+// Add to your existing circleStore.ts
+
+import { ConversationSummary, TopicMention, RelationshipPattern } from '../types/relationalMemory';
+
+// ============================================
+// ADD TO YOUR CircleMember INTERFACE
+// (if not already there)
+// ============================================
+interface CircleMemberEnhancements {
+  // AI Memory (auto-populated)
+  conversationSummaries?: ConversationSummary[];
+  topics?: TopicMention[];
+  patterns?: RelationshipPattern[];
+  lastMentionedAt?: string;
+}
+
+// ============================================
+// ADD THESE ACTIONS TO YOUR CIRCLE STORE
+// ============================================
+
+// Record a conversation about this Circle member
+recordConversation: (memberId: string, summary: Omit<ConversationSummary, 'id'>) => void;
+
+// Track topics that come up about this person
+recordTopicMention: (memberId: string, topic: string, sentiment: number) => void;
+
+// Add a pattern detected by AI
+addPattern: (memberId: string, pattern: Omit<RelationshipPattern, 'detectedAt'>) => void;
+
+// Detect which Circle members are mentioned in text
+detectMentionedMembers: (text: string) => CircleMember[];
+
+// Build context string for AI prompts
+getContextForMember: (memberId: string) => string;
+
+// Get full relational context for multiple members
+buildRelationshipContext: (memberIds: string[]) => string;
+
+
+// ============================================
+// IMPLEMENTATIONS
+// ============================================
+
+recordConversation: (memberId, summary) => {
+  set((state) => ({
+    members: state.members.map((m) =>
+      m.id === memberId
+        ? {
+            ...m,
+            conversationSummaries: [
+              { ...summary, id: generateId() },
+              ...(m.conversationSummaries || []).slice(0, 19), // keep last 20
+            ],
+            lastMentionedAt: new Date().toISOString(),
+          }
+        : m
+    ),
+  }));
+},
+
+recordTopicMention: (memberId, topic, sentiment) => {
+  set((state) => ({
+    members: state.members.map((m) => {
+      if (m.id !== memberId) return m;
+      
+      const topics = m.topics || [];
+      const existing = topics.find((t) => t.topic === topic);
+      
+      const newTopics = existing
+        ? topics.map((t) =>
+            t.topic === topic
+              ? {
+                  ...t,
+                  count: t.count + 1,
+                  lastMentioned: new Date().toISOString(),
+                  averageSentiment: (t.averageSentiment * t.count + sentiment) / (t.count + 1),
+                }
+              : t
+          )
+        : [...topics, {
+            topic,
+            count: 1,
+            lastMentioned: new Date().toISOString(),
+            averageSentiment: sentiment,
+          }];
+      
+      return { ...m, topics: newTopics };
+    }),
+  }));
+},
+
+addPattern: (memberId, pattern) => {
+  set((state) => ({
+    members: state.members.map((m) =>
+      m.id === memberId
+        ? {
+            ...m,
+            patterns: [
+              ...(m.patterns || []),
+              { ...pattern, detectedAt: new Date().toISOString() },
+            ].slice(-10), // keep last 10
+          }
+        : m
+    ),
+  }));
+},
+
+detectMentionedMembers: (text) => {
+  const members = get().members;
+  const lower = text.toLowerCase();
+  const mentioned: CircleMember[] = [];
+  
+  // Relationship phrases to check
+  const relationshipPhrases: Record<string, string[]> = {
+    partner: ['my partner', 'my boyfriend', 'my girlfriend', 'my husband', 'my wife', 'my spouse', 'my fiancé', 'my fiancee'],
+    parent: ['my mom', 'my dad', 'my mother', 'my father', 'my parent', 'my parents'],
+    sibling: ['my brother', 'my sister', 'my sibling'],friend: ['my friend', 'my best friend', 'my buddy', 'my bestie'],
+    child: ['my son', 'my daughter', 'my kid', 'my child', 'my kids', 'my children'],
+    coworker: ['my coworker', 'my colleague', 'my boss', 'my manager'],
+  };
+  
+  for (const member of members) {
+    let isMatch = false;
+    
+    // Check name match
+    if (member.name && lower.includes(member.name.toLowerCase())) {
+      isMatch = true;
+    }
+    
+    // Check nickname match
+    if (member.nickname && lower.includes(member.nickname.toLowerCase())) {
+      isMatch = true;
+    }
+    
+    // Check relationship phrase match
+    const phrases = relationshipPhrases[member.relationship] || [];
+    if (phrases.some((phrase) => lower.includes(phrase))) {
+      isMatch = true;
+    }
+    
+    if (isMatch && !mentioned.find((m) => m.id === member.id)) {
+      mentioned.push(member);
+    }
+  }
+  
+  return mentioned;
+},
+
+getContextForMember: (memberId) => {
+  const member = get().members.find((m) => m.id === memberId);
+  if (!member) return '';
+  
+  const parts: string[] = [];
+  
+  // Basic info
+  parts.push(`**${member.name}** (${member.relationship})`);
+  
+  // Birthday / Zodiac / Archetype (if you have these)
+  if (member.birthday) {
+    parts.push(`- Birthday: ${member.birthday}`);
+    // If you have archetype lookup:
+    // const archetype = getArchetypeForBirthday(member.birthday);
+    // parts.push(`- Archetype: ${archetype.name}`);
+  }
+  
+  // Love language
+  if (member.loveLanguage) {
+    const llNames: Record<string, string> = {
+      words: 'Words of Affirmation',
+      time: 'Quality Time',
+      acts: 'Acts of Service',
+      touch: 'Physical Touch',
+      gifts: 'Receiving Gifts',
+    };
+    parts.push(`- Love Language: ${llNames[member.loveLanguage] || member.loveLanguage}`);
+  }
+  
+  // Notes
+  if (member.notes) {
+    parts.push(`- Notes: "${member.notes}"`);
+  }
+  
+  // Recent conversations (last 3)
+  const convos = member.conversationSummaries || [];
+  if (convos.length > 0) {
+    parts.push(`\nRecent conversations:`);
+    convos.slice(0, 3).forEach((conv) => {
+      const date = new Date(conv.date).toLocaleDateString();
+      parts.push(`- ${date}: ${conv.summary} (${conv.sentiment})`);
+    });
+  }
+  
+  // Top topics
+  const topics = member.topics || [];
+  if (topics.length > 0) {
+    const topTopics = [...topics].sort((a, b) => b.count - a.count).slice(0, 3);
+    parts.push(`\nCommon topics:`);
+    topTopics.forEach((t) => {
+      const sentiment = t.averageSentiment > 0.2 ? 'positive' : t.averageSentiment < -0.2 ? 'challenging' : 'neutral';
+      parts.push(`- ${t.topic} (${t.count}x, usually ${sentiment})`);
+    });
+  }
+  
+  // Patterns
+  const patterns = member.patterns || [];
+  if (patterns.length > 0) {
+    parts.push(`\nPatterns noticed:`);
+    patterns.slice(0, 2).forEach((p) => {
+      parts.push(`- ${p.pattern}`);
+    });
+  }
+  
+  return parts.join('\n');
+},
+
+buildRelationshipContext: (memberIds) => {
+  const contexts = memberIds
+    .map((id) => get().getContextForMember(id))
+    .filter(Boolean);
+  
+  if (contexts.length === 0) return '';
+  
+  return `## Circle Members Mentioned\n\n${contexts.join('\n\n---\n\n')}`;
+},

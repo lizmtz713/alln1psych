@@ -93,7 +93,7 @@ export default function SignUpScreen() {
       }
     } catch (e: any) {
       if (e.code === 'ERR_REQUEST_CANCELED') return;
-      console.error('Apple Sign In error:', e);
+      if (__DEV__) console.error('Apple Sign In error:', e);
       Alert.alert('Sign in failed', 'Something went wrong. Please try again.');
     }
   };
