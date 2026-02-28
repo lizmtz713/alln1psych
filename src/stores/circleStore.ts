@@ -254,3 +254,93 @@ export const useCircleStore = create<CircleState>((set) => ({
       time: [
         `Schedule uninterrupted time with ${member.name}`,
         `Put your phone away and be fully present with ${member.name}`,
+        `Plan an activity you can do together with ${member.name}`,
+        `Go for a walk or drive with ${member.name}, just to talk`,
+        `Video call ${member.name} if you can't meet in person`,
+      ],
+      touch: [
+        `Give ${member.name} a long hug when you see them`,
+        `Sit close to ${member.name} — physical presence matters`,
+        `Offer ${member.name} a shoulder massage or back rub`,
+        `Hold ${member.name}'s hand or put your arm around them`,
+        `Make plans to see ${member.name} in person`,
+      ],
+    };
+    
+    const options = NUDGES[member.loveLanguage] || [];
+    if (!options.length) return null;
+    
+    // Rotate based on day + member name hash for variety
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+    const nameHash = member.name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return options[(dayOfYear + nameHash) % options.length];
+  },
+
+  updateMyTemperature: (temp, note) =>
+    set({
+      myTemperature: temp,
+      myTemperatureLabel: TEMPERATURE_LABELS[temp],
+      myTemperatureNote: note ?? '',
+      myTemperatureUpdatedAt: new Date(),
+    }),
+
+  addMoodCheckin: (mood, note) => {
+    const userId = useAuthStore.getState().userId;
+    const label = TEMPERATURE_LABELS[mood];
+    const entry = {
+      id: genId(),
+      mood,
+      label,
+      note,
+      timestamp: new Date(),
+    };
+    set((state) => ({
+      moodHistory: [entry, ...state.moodHistory],
+      myTemperature: mood,
+      myTemperatureLabel: label,
+      myTemperatureNote: note ?? '',
+      myTemperatureUpdatedAt: new Date(),
+    }));
+    if (userId) {
+      database.addMoodCheckin(userId, mood, label, note).catch(() => {});
+    }
+  },
+
+  addNudge: (memberName, message) =>
+    set((state) => ({
+      nudges: [
+        { id: genId(), memberName, message, timestamp: new Date(), read: false, actedOn: false },
+        ...state.nudges,
+      ],
+    })),
+
+  markNudgeRead: (id) =>
+    set((state) => ({
+      nudges: state.nudges.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    })),
+
+  markNudgeActedOn: (id) =>
+    set((state) => ({
+      nudges: state.nudges.map((n) => (n.id === id ? { ...n, actedOn: true, read: true } : n)),
+    })),
+
+  clearDemoData: () =>
+    set({
+      members: [],
+      nudges: [],
+      myTemperature: 'green',
+      myTemperatureLabel: TEMPERATURE_LABELS.green,
+      myTemperatureNote: '',
+      myTemperatureUpdatedAt: null,
+    }),
+  reset: () =>
+    set({
+      members: [],
+      nudges: [],
+      moodHistory: [],
+      myTemperature: 'green',
+      myTemperatureLabel: TEMPERATURE_LABELS.green,
+      myTemperatureNote: '',
+      myTemperatureUpdatedAt: null,
+    }),
+}));
