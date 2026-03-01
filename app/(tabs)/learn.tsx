@@ -30,6 +30,11 @@ import {
   type ManualLesson,
 } from '../../src/data/manualContent';
 import {
+  humanManualCategories,
+  type HumanManualLesson,
+  type HumanManualCategory,
+} from '../../src/data/humanManual';
+import {
   type Discovery,
   getDiscoveriesForDay,
   getMoreDiscoveries,
@@ -412,7 +417,7 @@ export default function LearnScreen() {
               <View style={styles.manualIntroCard}>
                 <Text style={styles.manualIntroTitle}>The Human Manual</Text>
                 <Text style={styles.manualIntroText}>
-                  This isn't self-help fluff. These 48 lessons distill real research into knowledge you can actually use.
+                  This isn't self-help fluff. Over 200 lessons distill real research into knowledge you can actually use.
                 </Text>
                 <View style={styles.manualSourcesRow}>
                   <Ionicons name="library-outline" size={16} color={COLORS.textMuted} />
@@ -460,6 +465,54 @@ export default function LearnScreen() {
                         );
                       })
                     )}
+                  </ScrollView>
+                </View>
+              ))}
+
+              {/* Divider between original manual and expanded content */}
+              <View style={styles.manualDivider}>
+                <View style={styles.manualDividerLine} />
+                <Text style={styles.manualDividerText}>Deep Dives</Text>
+                <View style={styles.manualDividerLine} />
+              </View>
+
+              {/* Human Manual Categories (127 additional lessons) */}
+              {humanManualCategories.map((category) => (
+                <View key={category.id} style={styles.manualSection}>
+                  <View style={styles.manualSectionHeader}>
+                    <Text style={styles.manualSectionEmoji}>{category.emoji}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.manualSectionTitle}>{category.title}</Text>
+                      <Text style={styles.manualSectionDesc}>{category.description}</Text>
+                    </View>
+                  </View>
+                  
+                  <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.lessonCarousel}
+                  >
+                    {category.lessons.map((lesson) => {
+                      const completed = isLessonCompleted(lesson.id);
+                      return (
+                        <Pressable
+                          key={lesson.id}
+                          style={[styles.lessonCard, completed && styles.lessonCardDone]}
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push(`/lesson/${lesson.id}`);
+                          }}
+                        >
+                          {completed && (
+                            <View style={styles.lessonCheck}>
+                              <Ionicons name="checkmark" size={12} color="#fff" />
+                            </View>
+                          )}
+                          <Text style={styles.lessonEmoji}>{lesson.emoji}</Text>
+                          <Text style={styles.lessonTitle} numberOfLines={2}>{lesson.title}</Text>
+                        </Pressable>
+                      );
+                    })}
                   </ScrollView>
                 </View>
               ))}
@@ -898,6 +951,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: COLORS.text,
+  },
+  manualSectionDesc: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  manualDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+    gap: 12,
+  },
+  manualDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.border,
+  },
+  manualDividerText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   lessonCarousel: {
     paddingRight: 20,
