@@ -26,13 +26,13 @@ export const BODY_ZONES: BodyZoneDef[] = [
     id: 'throat',
     label: 'Throat',
     meaning: "Tightness here can mean you're holding back words — something unsaid.",
-    suggestion: 'Take a sip of water. When you’re ready, try writing or saying one thing you’ve been holding in.',
+    suggestion: 'Take a sip of water. When you're ready, try writing or saying one thing you've been holding in.',
   },
   {
     id: 'chest',
     label: 'Chest',
     meaning: 'Heaviness or tightness often connects to grief, anxiety, or heartache.',
-    suggestion: 'Place a hand on your chest and breathe slowly. Name one thing you’re carrying.',
+    suggestion: 'Place a hand on your chest and breathe slowly. Name one thing you're carrying.',
   },
   {
     id: 'stomach',
