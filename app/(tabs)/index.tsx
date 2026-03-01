@@ -25,17 +25,8 @@ import { useDailyContentStore } from '../../src/stores/dailyContentStore';
 import { generateDailyContent } from '../../src/services/personalization';
 import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import { Ionicons } from '@expo/vector-icons';
-import { CrisisPipelineAlert, useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
-import { StabilizationBanner } from '../../src/components/StabilizationBanner';
-import { SystemModeBanner } from '../../src/components/SystemModeBanner';
-import JustInTimeCard from '../../src/components/JustInTimeCard';
-import PredictiveWarningBanner from '../../src/components/PredictiveWarningBanner';
-import ReachOutPrompt from '../../src/components/ReachOutPrompt';
-import AweNudgeCard from '../../src/components/AweNudgeCard';
-import { CycleContextCard } from '../../src/components/CycleDashboard';
-import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
-import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
-import { shouldSuggestAwe } from '../../src/services/aweNudge';
+import { WeeklyInsightCard } from '../../src/components/WeeklyInsightCard';
+import { CockpitCluster } from '../../src/components/CockpitCluster';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
 
@@ -521,9 +512,10 @@ export default function HomeScreen() {
               { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const, iconIsEmoji: false as const },
               { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const, iconIsEmoji: false as const },
               { label: 'Relate', icon: 'heart-circle', route: '/(modals)/relate' as const, iconIsEmoji: false as const },
+              { label: 'Love', icon: 'heart-half', route: '/(modals)/love' as const, iconIsEmoji: false as const },
               { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const, iconIsEmoji: false as const },
               { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const, iconIsEmoji: false as const },
-              { label: 'Help', icon: 'heart', route: '/(modals)/help-someone' as const, iconIsEmoji: false as const },
+              { label: 'Help', icon: 'medkit', route: '/(modals)/help-someone' as const, iconIsEmoji: false as const },
             ];
             return quickActions.map((action) => (
             <Pressable
@@ -548,20 +540,20 @@ export default function HomeScreen() {
 
       <WeeklyInsightCard />
 
-      {/* 2. Six Gauges — cockpit grid; status inside each tile */}
-      <View style={styles.gaugeGridRow}>
-        <View style={styles.gaugeGrid}>
-          {(['body', 'state', 'emotion', 'connection', 'direction', 'alignment'] as GaugeKey[]).map((id) => (
-            <GaugeTile
-              key={id}
-              gaugeId={id}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({ pathname: '/(modals)/gauge-detail', params: { gauge: id } });
-              }}
-            />
-          ))}
-        </View>
+      {/* 2. Six Gauges — Hexagonal Cockpit Cluster */}
+      <View style={styles.cockpitSection}>
+        <Text style={styles.cockpitTitle}>Your Cockpit</Text>
+        <CockpitCluster
+          gaugeValues={{
+            body: bodyVal,
+            state: stateVal,
+            emotion: emotionVal,
+            connection: connectionVal,
+            direction: directionVal,
+            alignment: alignmentVal,
+          }}
+          overall={overall}
+        />
         <Pressable
           style={styles.gaugeInfoIcon}
           onPress={() => {
@@ -573,7 +565,7 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {/* 3. Tap to check in — small, only if they haven't today */}
+      {/* 3. Tap to check in — shown below cockpit if needed */}
       {needsCheckInToday && (
         <Pressable
           style={styles.checkInButtonSmall}
@@ -754,6 +746,8 @@ const styles = StyleSheet.create({
   },
   gaugeGridRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 },
   gaugeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, flex: 1 },
+  cockpitSection: { alignItems: 'center', marginBottom: 16, position: 'relative' },
+  cockpitTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 8 },
   gaugeInfoIcon: { padding: 8, marginLeft: 4 },
   gaugeInfoIconText: { fontSize: 16, color: '#FFFFFF' },
   gaugeTile: {
