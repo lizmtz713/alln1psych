@@ -23,23 +23,25 @@ import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { getGaugeColor } from '../../src/utils/gaugeHelpers';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const COCKPIT_BG = '#09090F';
-const CARD_BG = '#111118';
-const CARD_BORDER = 'rgba(255,255,255,0.06)';
-const TEXT_PRIMARY = '#F0F0F5';
-const TEXT_SECONDARY = '#8888A0';
-const TEXT_MUTED = '#55556A';
-const GREEN = '#34D399';
+// Using design system colors (v2.0 - Oura-inspired)
+const COCKPIT_BG = COLORS.background;
+const CARD_BG = COLORS.surface;
+const CARD_BORDER = COLORS.border;
+const TEXT_PRIMARY = COLORS.text;
+const TEXT_SECONDARY = COLORS.textSecondary;
+const TEXT_MUTED = COLORS.textMuted;
+const GREEN = COLORS.success;
 const YELLOW = '#FBBF24';
-const ORANGE = '#FB923C';
-const RED = '#F87171';
-const GRAY = '#6B7280';
-const ACCENT = '#7C4DFF';
+const ORANGE = COLORS.amber;
+const RED = COLORS.warning;
+const GRAY = COLORS.textMuted;
+const ACCENT = COLORS.accent;
 
 const BODY_LABELS = ['Slept well?', 'Eaten today?', 'Had water?', 'Moved your body?'] as const;
 const BODY_KEYS = ['sleep', 'food', 'water', 'movement'] as const;
