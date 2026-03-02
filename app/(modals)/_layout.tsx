@@ -32,6 +32,28 @@ export default function ModalsLayout() {
       <Stack.Screen name="heart-inbox" options={{ presentation: 'modal' }} />
       <Stack.Screen name="heart-mail-detail" options={{ presentation: 'modal' }} />
       <Stack.Screen name="heart-mail-compose" options={{ presentation: 'modal' }} />
+      {/* NEW - Previously missing */}
+      <Stack.Screen name="awards" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="awe-activities" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="crisis-resources" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="cycle" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="debrief" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="drift-detector" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="identity-setup" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="learning-style-quiz" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="patterns" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="pre-conversation-check" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="prompt-generator" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="quick-reset" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="reach-out-scaffold" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="referee" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="relational-bridge" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="share-insight" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="share-snapshot" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="sovereignty-report" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="therapist-share" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="therapist-share-create" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }
