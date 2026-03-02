@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Pressable, ScrollView, Animated, RefreshControl
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { COLORS, BORDER_RADIUS, TYPOGRAPHY, SPACING } from '../../src/lib/constants';
 import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCircleStore } from '../../src/stores/circleStore';
@@ -81,13 +81,14 @@ function getSuggestedActivities(
   return [first, second];
 }
 
-const COCKPIT_BG = '#09090F';
-const CARD_BG = '#111118';
-const CARD_BORDER = 'rgba(255,255,255,0.06)';
-const TEXT_PRIMARY = '#F0F0F5';
-const TEXT_SECONDARY = '#8888A0';
-const TEXT_MUTED = '#55556A';
-const ACCENT = '#7C4DFF';
+// Using design system colors (v2.0 - Oura-inspired)
+const COCKPIT_BG = COLORS.background;
+const CARD_BG = COLORS.surface;
+const CARD_BORDER = COLORS.border;
+const TEXT_PRIMARY = COLORS.text;
+const TEXT_SECONDARY = COLORS.textSecondary;
+const TEXT_MUTED = COLORS.textMuted;
+const ACCENT = COLORS.accent;
 
 const AFFIRMATIONS = [
   "You're doing better than you think.",
@@ -157,28 +158,76 @@ const GAUGE_ICONS: Record<GaugeKey, string> = {
   alignment: 'checkmark-done-outline',
 };
 
+// Mini arc component for gauge tiles (Oura-inspired)
+function MiniArc({ value, color, size = 44 }: { value: number; color: string; size?: number }) {
+  const isSet = value >= 0;
+  const percent = isSet ? value / 100 : 0;
+  const strokeWidth = 4;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * Math.PI * 1.5; // 270 degree arc
+  const strokeDashoffset = circumference * (1 - percent);
+  
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ position: 'absolute', width: size, height: size }}>
+        {/* Background arc */}
+        <View style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          borderWidth: strokeWidth,
+          borderColor: COLORS.border,
+          borderBottomColor: 'transparent',
+          transform: [{ rotate: '45deg' }],
+        }} />
+      </View>
+      {isSet && (
+        <View style={{ position: 'absolute', width: size, height: size }}>
+          {/* Foreground arc */}
+          <View style={{
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            borderWidth: strokeWidth,
+            borderColor: color,
+            borderBottomColor: 'transparent',
+            borderRightColor: percent > 0.33 ? color : 'transparent',
+            borderTopColor: percent > 0.66 ? color : 'transparent',
+            transform: [{ rotate: '45deg' }],
+            opacity: 0.9,
+          }} />
+        </View>
+      )}
+      <Text style={[styles.gaugeTileValue, { color: isSet ? COLORS.text : COLORS.textMuted }]}>
+        {isSet ? Math.round(value) : '—'}
+      </Text>
+    </View>
+  );
+}
+
 function GaugeTile({ gaugeId, onPress }: { gaugeId: GaugeKey; onPress: () => void }) {
   const gauge = useCockpitStore((s) => s[gaugeId]);
-  const getStoreGaugeColor = useCockpitStore((s) => s.getGaugeColor);
   const config = GAUGE_CONFIG[gaugeId];
   const value = gauge?.value ?? -1;
-  const color = getStoreGaugeColor(gaugeId);
+  // Use new gauge colors from design system
+  const gaugeColorMap: Record<GaugeKey, string> = {
+    body: COLORS.gauges.body,
+    state: COLORS.gauges.state,
+    emotion: COLORS.gauges.emotion,
+    connection: COLORS.gauges.connection,
+    direction: COLORS.gauges.direction,
+    alignment: COLORS.gauges.alignment,
+  };
+  const color = gaugeColorMap[gaugeId];
   const status = getGaugeStatusLabel(value);
-  const iconName = GAUGE_ICONS[gaugeId];
 
   return (
     <Pressable
       style={({ pressed }) => [styles.gaugeTile, pressed && styles.gaugeTilePressed]}
       onPress={onPress}
     >
-      <View style={[styles.gaugeTileRing, { borderColor: color }]}>
-        <Ionicons name={iconName as any} size={18} color="#FFFFFF" style={{ marginBottom: 2 }} />
-        <Text style={styles.gaugeTileValue} numberOfLines={1}>
-          {value >= 0 ? value : '—'}
-        </Text>
-      </View>
-      <Text style={styles.gaugeTileLabel}>{config?.label ?? gaugeId}</Text>
-      <Text style={styles.gaugeTileSub}>{config?.subtitle ?? ''}</Text>
+      <MiniArc value={value} color={color} size={48} />
+      <Text style={[styles.gaugeTileLabel, { color }]}>{config?.label ?? gaugeId}</Text>
       <Text style={[styles.gaugeTileStatus, value < 0 && styles.gaugeTileStatusDim]}>{status}</Text>
     </Pressable>
   );
@@ -662,30 +711,33 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COCKPIT_BG },
   content: { paddingHorizontal: 24, paddingBottom: 40 },
-  statusLabelWrap: { alignItems: 'center', marginBottom: 8 },
+  statusLabelWrap: { alignItems: 'center', marginBottom: SPACING.sm },
   statusLabelCaps: {
-    fontSize: 12,
-    letterSpacing: 1.5,
-    color: TEXT_SECONDARY,
-    textTransform: 'uppercase',
+    ...TYPOGRAPHY.alert,
+    color: COLORS.textSecondary,
   },
-  centralRingWrap: { alignItems: 'center', marginBottom: 20 },
+  centralRingWrap: { alignItems: 'center', marginBottom: SPACING.xl },
   centralRing: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 6,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: CARD_BG,
+    backgroundColor: COLORS.surfaceGlass,
   },
   centralRingValue: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: TEXT_PRIMARY,
+    ...TYPOGRAPHY.scoreMd,
+    color: COLORS.text,
     fontVariant: ['tabular-nums'],
   },
-  centralRingHint: { fontSize: 13, color: TEXT_MUTED, marginTop: 8 },
+  centralRingHint: { 
+    fontSize: 12, 
+    color: COLORS.textMuted, 
+    marginTop: SPACING.sm,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
   checkInButtonSmall: {
     alignSelf: 'center',
     paddingVertical: 8,
@@ -708,31 +760,38 @@ const styles = StyleSheet.create({
     width: '31%',
     minWidth: 100,
     backgroundColor: CARD_BG,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.md,
     borderWidth: 1,
     borderColor: CARD_BORDER,
+    alignItems: 'center',
   },
-  gaugeTilePressed: { backgroundColor: '#16161F' },
+  gaugeTilePressed: { backgroundColor: COLORS.surfaceElevated },
   gaugeTileRing: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 3,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 4,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   gaugeTileValue: {
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.text,
     fontVariant: ['tabular-nums'],
   },
-  gaugeTileLabel: { fontSize: 13, fontWeight: '600', color: '#FFFFFF' },
-  gaugeTileSub: { fontSize: 10, color: '#E0E0E0', marginTop: 2 },
-  gaugeTileStatus: { fontSize: 11, color: '#E0E0E0', marginTop: 4 },
-  gaugeTileStatusDim: { color: '#B0B0C0' },
+  gaugeTileLabel: { 
+    fontSize: 12, 
+    fontWeight: '600', 
+    letterSpacing: 0.5,
+    marginTop: SPACING.xs,
+    textTransform: 'uppercase',
+  },
+  gaugeTileSub: { fontSize: 10, color: COLORS.textSecondary, marginTop: 2 },
+  gaugeTileStatus: { fontSize: 10, color: COLORS.textMuted, marginTop: 4 },
+  gaugeTileStatusDim: { color: COLORS.textDim },
   insightCard: {
     backgroundColor: CARD_BG,
     borderRadius: 12,
@@ -807,9 +866,9 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: CARD_BG,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
     borderWidth: 1,
     borderColor: CARD_BORDER,
   },
