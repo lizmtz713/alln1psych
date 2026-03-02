@@ -12,6 +12,7 @@ import {
   RefreshControl,
   Linking,
   Switch,
+  Alert,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
@@ -218,10 +219,77 @@ export default function MeScreen() {
           <Text style={styles.sectionHeader}>Integrations</Text>
           <View style={styles.menuCard}>
             <MenuItem
-              icon="heart-outline"
+              icon="fitness-outline"
               label="Apple Health"
-              subtitle="Connect sleep, activity, cycle"
+              subtitle="Sleep, activity, heart, cycle"
+              accentColor={COLORS.success}
               onPress={() => navigateTo('/(modals)/health-connections')}
+            />
+            <MenuItem
+              icon="watch-outline"
+              label="Apple Watch"
+              subtitle="Real-time heart rate & HRV"
+              onPress={() => navigateTo('/(modals)/health-connections')}
+            />
+            <MenuItem
+              icon="ellipse-outline"
+              label="Oura Ring"
+              subtitle="Sleep score, readiness, HRV"
+              badge="Soon"
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                Alert.alert('Coming Soon', 'Oura integration is in development. We'll notify you when it's ready!');
+              }}
+            />
+            <MenuItem
+              icon="pulse-outline"
+              label="Whoop"
+              subtitle="Strain, recovery, sleep"
+              badge="Soon"
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                Alert.alert('Coming Soon', 'Whoop integration is in development. We'll notify you when it's ready!');
+              }}
+            />
+            <MenuItem
+              icon="footsteps-outline"
+              label="Fitbit"
+              subtitle="Activity, sleep, stress"
+              badge="Soon"
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                Alert.alert('Coming Soon', 'Fitbit integration is in development. We'll notify you when it's ready!');
+              }}
+            />
+            <MenuItem
+              icon="navigate-outline"
+              label="Garmin"
+              subtitle="Training, body battery"
+              badge="Soon"
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                Alert.alert('Coming Soon', 'Garmin integration is in development. We'll notify you when it's ready!');
+              }}
+            />
+            <MenuItem
+              icon="calendar-outline"
+              label="Calendar"
+              subtitle="Context from your schedule"
+              badge="Soon"
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                Alert.alert('Coming Soon', 'Calendar integration will help InGauge understand your day better. Coming soon!');
+              }}
+            />
+            <MenuItem
+              icon="location-outline"
+              label="Location & Weather"
+              subtitle="Environmental context"
+              badge="Soon"
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                Alert.alert('Coming Soon', 'Weather and location can affect your system. This integration is coming soon!');
+              }}
               isLast
             />
           </View>
