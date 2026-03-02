@@ -1,122 +1,217 @@
 /**
- * InGauge Design System
- * Premium dark theme — deep space with violet energy
- * Fortune 500 quality, Apple-level polish
+ * InGauge Design System v2.0
+ * "The Human Cockpit" — Oura for the Mind
+ * 
+ * Design Philosophy:
+ * - Temperature gradient as signature (cool teal → warm coral)
+ * - Aurora/flowing aesthetics for the mind (not mountains)
+ * - Big bold scores, elegant arcs
+ * - Calm confidence, warm intelligence
+ * 
+ * Based on psychological research:
+ * - Nummenmaa et al. (2014): Bodily maps of emotions → temperature metaphor
+ * - Bar & Neta (2006): Curved shapes feel safer
+ * - Slow animations reduce anxiety
  */
 
 export const COLORS = {
-  // Core backgrounds (deep to surface)
-  background: '#09090F',
-  backgroundElevated: '#0F0F17',
-  surface: '#111118',
-  surfaceElevated: '#18181F',
+  // ═══════════════════════════════════════════════════════════════════
+  // CORE BACKGROUNDS — Deep navy with depth (like Oura)
+  // ═══════════════════════════════════════════════════════════════════
+  background: '#0A0B0F',           // Deepest - primary bg
+  backgroundElevated: '#0E0F14',   // Slightly raised
+  surface: '#12131A',              // Cards
+  surfaceElevated: '#181920',      // Elevated cards
+  surfaceGlass: 'rgba(255, 255, 255, 0.03)',  // Glass effect
   
-  // Text hierarchy
-  text: '#F0F0F5',
-  textSecondary: '#A0A0B0',
-  textMuted: '#6B6B80',
-  textDim: '#45455A',
+  // ═══════════════════════════════════════════════════════════════════
+  // TEXT HIERARCHY
+  // ═══════════════════════════════════════════════════════════════════
+  text: '#F7F7F5',                 // Primary - warm white
+  textSecondary: 'rgba(247, 247, 245, 0.70)',  // 70% opacity
+  textMuted: 'rgba(247, 247, 245, 0.50)',      // 50% opacity  
+  textDim: 'rgba(247, 247, 245, 0.35)',        // 35% opacity
   
-  // Accent - signature violet
-  accent: '#7C4DFF',
-  accentLight: '#9D7AFF',
-  accentDark: '#5C3ACC',
-  accentMuted: 'rgba(124, 77, 255, 0.3)',
-  accentBg: 'rgba(124, 77, 255, 0.12)',
-  accentBgStrong: 'rgba(124, 77, 255, 0.20)',
+  // ═══════════════════════════════════════════════════════════════════
+  // PRIMARY ACCENT — Ocean Teal (calm, regulation, State gauge)
+  // ═══════════════════════════════════════════════════════════════════
+  accent: '#0D9488',               // Primary teal
+  accentLight: '#2DD4BF',          // Light teal
+  accentDark: '#0A7568',           // Dark teal
+  accentMuted: 'rgba(13, 148, 136, 0.3)',
+  accentBg: 'rgba(13, 148, 136, 0.12)',
+  accentBgStrong: 'rgba(13, 148, 136, 0.20)',
   
-  // Inputs
-  inputSurface: 'rgba(255,255,255,0.06)',
-  
-  // Borders
-  border: 'rgba(255, 255, 255, 0.06)',
-  borderLight: 'rgba(255, 255, 255, 0.10)',
-  borderAccent: 'rgba(124, 77, 255, 0.30)',
-  
-  // Status/Temperature colors
-  temperature: {
-    green: '#4ADE80',
-    yellow: '#FACC15',
-    orange: '#FB923C',
-    red: '#F87171',
+  // ═══════════════════════════════════════════════════════════════════
+  // THE 6 GAUGE COLORS — Each with unique identity
+  // ═══════════════════════════════════════════════════════════════════
+  gauges: {
+    body: '#C9956B',       // Earth Amber — physical, grounded
+    state: '#0D9488',      // Ocean Teal — nervous system, regulation
+    emotion: '#E07A5F',    // Sunset Coral — feeling, warmth
+    connection: '#9B8AA6', // Soft Violet — relational, intuitive
+    direction: '#7D9B8C',  // Sage Green — growth, purpose
+    alignment: '#B8963E',  // Deep Gold — values, meaning
   },
+  
+  // Gauge backgrounds (12% opacity)
+  gaugeBg: {
+    body: 'rgba(201, 149, 107, 0.12)',
+    state: 'rgba(13, 148, 136, 0.12)',
+    emotion: 'rgba(224, 122, 95, 0.12)',
+    connection: 'rgba(155, 138, 166, 0.12)',
+    direction: 'rgba(125, 155, 140, 0.12)',
+    alignment: 'rgba(184, 150, 62, 0.12)',
+  },
+  
+  // ═══════════════════════════════════════════════════════════════════
+  // TEMPERATURE GRADIENT — The signature of InGauge
+  // Cool (regulated) → Warm (activated/dysregulated)
+  // ═══════════════════════════════════════════════════════════════════
+  temperature: {
+    cool: '#0D9488',       // Deep Teal — calm, regulated
+    coolLight: '#2DD4BF',  // Light Teal
+    neutral: '#8B8D8E',    // Neutral gray
+    warm: '#D4A574',       // Warm Amber — activated
+    hot: '#E07A5F',        // Soft Coral — high activation
+  },
+  
+  // Legacy temperature mappings (for backwards compatibility)
   green: '#4ADE80',
-  yellow: '#FACC15',
+  yellow: '#FACC15', 
   orange: '#FB923C',
   red: '#F87171',
   
-  // Semantic colors
-  success: '#4ADE80',
-  warning: '#FACC15',
-  error: '#F87171',
-  info: '#60A5FA',
+  // ═══════════════════════════════════════════════════════════════════
+  // STATUS COLORS — "PAY ATTENTION" style alerts
+  // ═══════════════════════════════════════════════════════════════════
+  success: '#4ADE80',      // Green — all clear
+  warning: '#E07A5F',      // Coral (not harsh yellow) — pay attention
+  error: '#EF5350',        // Red — critical
+  info: '#0D9488',         // Teal — informational
   
-  // System mode colors
-  amber: '#F59E0B',
-  amberBg: 'rgba(245, 158, 11, 0.08)',
-  amberBorder: 'rgba(245, 158, 11, 0.20)',
-  amberGlow: 'rgba(245, 158, 11, 0.25)',
+  // System mode (Capacity/Stabilization)
+  amber: '#D4A574',
+  amberBg: 'rgba(212, 165, 116, 0.08)',
+  amberBorder: 'rgba(212, 165, 116, 0.20)',
+  amberGlow: 'rgba(212, 165, 116, 0.25)',
   
-  // Tool-specific accents
-  rolePlayAccent: '#FFB74D',
-  loveAccent: '#EC4899',
-  athleteAccent: '#14B8A6',
-  spectrumAccent: '#60A5FA',
+  // ═══════════════════════════════════════════════════════════════════
+  // TOOL-SPECIFIC ACCENTS
+  // ═══════════════════════════════════════════════════════════════════
+  rolePlayAccent: '#E07A5F',   // Coral — Role Play
+  loveAccent: '#9B8AA6',       // Violet — Love tool
+  athleteAccent: '#7D9B8C',    // Sage — Athlete mode
+  spectrumAccent: '#0D9488',   // Teal — Spectrum
+  journalAccent: '#B8963E',    // Gold — Journal
   
   // Recording state
   recording: '#EF5350',
   
-  // Gradients (as array for LinearGradient)
-  gradientAccent: ['#7C4DFF', '#9D7AFF'],
-  gradientDark: ['#09090F', '#111118'],
-  gradientCard: ['rgba(124, 77, 255, 0.08)', 'rgba(124, 77, 255, 0.02)'],
+  // ═══════════════════════════════════════════════════════════════════
+  // INPUTS & BORDERS
+  // ═══════════════════════════════════════════════════════════════════
+  inputSurface: 'rgba(255, 255, 255, 0.04)',
+  
+  border: 'rgba(255, 255, 255, 0.06)',
+  borderLight: 'rgba(255, 255, 255, 0.10)',
+  borderAccent: 'rgba(13, 148, 136, 0.30)',
+  
+  // ═══════════════════════════════════════════════════════════════════
+  // GRADIENTS — For LinearGradient components
+  // ═══════════════════════════════════════════════════════════════════
+  gradients: {
+    // Primary temperature gradient (horizontal)
+    temperature: ['#0D9488', '#2DD4BF', '#8B8D8E', '#D4A574', '#E07A5F'],
+    
+    // Aurora background gradient (vertical, subtle)
+    aurora: ['#0A0B0F', '#0D1117', '#0A1A1A', '#0A0B0F'],
+    auroraActive: ['#0A0B0F', '#0D1A1A', '#1A1520', '#0A0B0F'],
+    
+    // Card gradients
+    card: ['rgba(13, 148, 136, 0.06)', 'rgba(13, 148, 136, 0.02)'],
+    cardWarm: ['rgba(224, 122, 95, 0.06)', 'rgba(224, 122, 95, 0.02)'],
+    
+    // Gauge-specific gradients
+    body: ['#C9956B', '#D4A574'],
+    state: ['#0D9488', '#2DD4BF'],
+    emotion: ['#E07A5F', '#F4A98C'],
+    connection: ['#9B8AA6', '#B8A6C4'],
+    direction: ['#7D9B8C', '#9BB8A8'],
+    alignment: ['#B8963E', '#D4B062'],
+    
+    // Score arc gradient (teal to coral)
+    scoreArc: ['#0D9488', '#2DD4BF', '#7D9B8C', '#D4A574', '#E07A5F'],
+  },
+  
+  // Legacy gradient format
+  gradientAccent: ['#0D9488', '#2DD4BF'],
+  gradientDark: ['#0A0B0F', '#12131A'],
+  gradientCard: ['rgba(13, 148, 136, 0.08)', 'rgba(13, 148, 136, 0.02)'],
 } as const;
 
-// Spacing scale (4px base)
+// ═══════════════════════════════════════════════════════════════════════
+// SPACING — 8-point grid (Oura uses this)
+// ═══════════════════════════════════════════════════════════════════════
 export const SPACING = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-  xxxl: 32,
+  xs: 4,    // Half-step
+  sm: 8,    // Small
+  md: 12,   // Medium
+  lg: 16,   // Large (base)
+  xl: 24,   // Extra large
+  xxl: 32,  // Section spacing
+  xxxl: 48, // Large section spacing
 } as const;
 
+// ═══════════════════════════════════════════════════════════════════════
+// BORDER RADIUS — Soft, friendly (curved = safe)
+// ═══════════════════════════════════════════════════════════════════════
 export const BORDER_RADIUS = {
   sm: 8,
   md: 12,
   input: 12,
-  card: 14,
+  card: 16,
   button: 14,
-  lg: 16,
-  xl: 20,
+  lg: 20,      // Increased for softer cards
+  xl: 24,
+  xxl: 32,     // For large cards/modals
   full: 9999,
 } as const;
 
-// Typography scale
+// ═══════════════════════════════════════════════════════════════════════
+// TYPOGRAPHY — Big bold scores, clean hierarchy
+// ═══════════════════════════════════════════════════════════════════════
 export const TYPOGRAPHY = {
-  // Display
+  // SCORE DISPLAY — The big numbers (like Oura's 48, 70, 92)
+  scoreXL: { fontSize: 72, fontWeight: '700' as const, lineHeight: 80, letterSpacing: -2 },
+  scoreLg: { fontSize: 56, fontWeight: '700' as const, lineHeight: 64, letterSpacing: -1.5 },
+  scoreMd: { fontSize: 40, fontWeight: '600' as const, lineHeight: 48, letterSpacing: -1 },
+  scoreSm: { fontSize: 32, fontWeight: '600' as const, lineHeight: 40, letterSpacing: -0.5 },
+  
+  // DISPLAY — Headlines
   displayLg: { fontSize: 32, fontWeight: '700' as const, lineHeight: 40, letterSpacing: -0.5 },
   displayMd: { fontSize: 28, fontWeight: '700' as const, lineHeight: 36, letterSpacing: -0.3 },
   displaySm: { fontSize: 24, fontWeight: '600' as const, lineHeight: 32 },
   
-  // Headlines
+  // HEADLINES
   headlineLg: { fontSize: 20, fontWeight: '600' as const, lineHeight: 28 },
   headlineMd: { fontSize: 18, fontWeight: '600' as const, lineHeight: 26 },
   headlineSm: { fontSize: 16, fontWeight: '600' as const, lineHeight: 24 },
   
-  // Body
+  // BODY
   bodyLg: { fontSize: 17, fontWeight: '400' as const, lineHeight: 26 },
   bodyMd: { fontSize: 15, fontWeight: '400' as const, lineHeight: 22 },
   bodySm: { fontSize: 14, fontWeight: '400' as const, lineHeight: 20 },
   
-  // Labels & Captions
-  labelLg: { fontSize: 15, fontWeight: '500' as const, lineHeight: 20 },
-  labelMd: { fontSize: 13, fontWeight: '500' as const, lineHeight: 18 },
-  labelSm: { fontSize: 11, fontWeight: '500' as const, lineHeight: 16 },
+  // LABELS — All caps for gauge labels (like Oura)
+  labelLg: { fontSize: 14, fontWeight: '600' as const, lineHeight: 18, letterSpacing: 1 },
+  labelMd: { fontSize: 12, fontWeight: '600' as const, lineHeight: 16, letterSpacing: 0.8 },
+  labelSm: { fontSize: 10, fontWeight: '600' as const, lineHeight: 14, letterSpacing: 0.5 },
   
-  // Legacy mappings (for backwards compatibility)
+  // ALERT TEXT — "PAY ATTENTION" style
+  alert: { fontSize: 11, fontWeight: '700' as const, lineHeight: 14, letterSpacing: 1.5 },
+  
+  // Legacy mappings
   screenTitle: { fontSize: 28, fontWeight: '700' as const },
   sectionTitle: { fontSize: 20, fontWeight: '600' as const },
   cardTitle: { fontSize: 17, fontWeight: '600' as const },
@@ -125,47 +220,104 @@ export const TYPOGRAPHY = {
   timestamp: { fontSize: 11, lineHeight: 14 },
 } as const;
 
-// Shadow styles
+// ═══════════════════════════════════════════════════════════════════════
+// SHADOWS — Subtle depth, not harsh
+// ═══════════════════════════════════════════════════════════════════════
 export const SHADOWS = {
   sm: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
     elevation: 2,
   },
   md: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.20,
+    shadowRadius: 8,
     elevation: 4,
   },
   lg: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
     elevation: 8,
   },
+  // Gauge glow (uses gauge color)
   glow: {
-    shadowColor: '#7C4DFF',
+    shadowColor: '#0D9488',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
-    shadowRadius: 12,
+    shadowRadius: 16,
     elevation: 8,
+  },
+  // Card float effect
+  float: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 12,
   },
 } as const;
 
-// Animation timings
+// ═══════════════════════════════════════════════════════════════════════
+// ANIMATION — Slow = calm (300-500ms, not snappy)
+// ═══════════════════════════════════════════════════════════════════════
 export const ANIMATION = {
-  fast: 150,
-  normal: 250,
-  slow: 400,
-  spring: { damping: 15, stiffness: 150 },
+  // Durations
+  fast: 200,
+  normal: 350,      // Increased from 250
+  slow: 500,        // Increased from 400
+  slower: 800,      // For score reveals
+  
+  // Gauge fill animation
+  gaugeFill: 800,
+  
+  // Background aurora drift
+  auroraCycle: 15000,  // 15 seconds
+  
+  // Breathing pulse (4 seconds = calm breathing)
+  breathingCycle: 4000,
+  
+  // Spring configs
+  spring: { damping: 20, stiffness: 120 },  // Softer spring
+  springBouncy: { damping: 12, stiffness: 150 },
+  springGentle: { damping: 25, stiffness: 100 },
+  
+  // Easing
+  easeOut: 'cubic-bezier(0.0, 0, 0.2, 1)',
+  easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
 } as const;
 
-// Common component styles
+// ═══════════════════════════════════════════════════════════════════════
+// GAUGE CONFIG — Arc ring settings
+// ═══════════════════════════════════════════════════════════════════════
+export const GAUGE_CONFIG = {
+  // Arc dimensions
+  arcWidth: 8,           // Stroke width
+  arcWidthLarge: 12,     // For detail view
+  arcRadius: 100,        // Default radius
+  arcRadiusSmall: 40,    // For compact cockpit view
+  
+  // Arc angles (for SVG)
+  startAngle: 135,       // Bottom-left
+  endAngle: 405,         // Bottom-right (270° arc)
+  
+  // Score thresholds for color shifts
+  thresholds: {
+    low: 30,
+    medium: 50,
+    good: 70,
+    excellent: 85,
+  },
+} as const;
+
+// ═══════════════════════════════════════════════════════════════════════
+// COMPONENT STYLES — Pre-composed
+// ═══════════════════════════════════════════════════════════════════════
 export const COMPONENT_STYLES = {
   card: {
     backgroundColor: COLORS.surface,
@@ -182,9 +334,17 @@ export const COMPONENT_STYLES = {
     padding: SPACING.lg,
     ...SHADOWS.md,
   },
+  cardGlass: {
+    backgroundColor: COLORS.surfaceGlass,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: SPACING.lg,
+    backdropFilter: 'blur(10px)',
+  },
   button: {
     backgroundColor: COLORS.accent,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.button,
     paddingVertical: SPACING.lg,
     paddingHorizontal: SPACING.xl,
     alignItems: 'center' as const,
@@ -192,7 +352,7 @@ export const COMPONENT_STYLES = {
   },
   buttonSecondary: {
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.button,
     borderWidth: 1,
     borderColor: COLORS.border,
     paddingVertical: SPACING.lg,
@@ -202,7 +362,7 @@ export const COMPONENT_STYLES = {
   },
   input: {
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.input,
     borderWidth: 1,
     borderColor: COLORS.border,
     padding: SPACING.lg,
@@ -211,12 +371,18 @@ export const COMPONENT_STYLES = {
   },
 } as const;
 
+// ═══════════════════════════════════════════════════════════════════════
+// APP CONFIG
+// ═══════════════════════════════════════════════════════════════════════
 export const APP_CONFIG = {
   name: 'InGauge',
+  tagline: 'The Human Cockpit',
   accentColor: COLORS.accent,
 } as const;
 
-/** Muted/softer color palette for Spectrum Mode accessibility */
+// ═══════════════════════════════════════════════════════════════════════
+// MUTED COLORS — Spectrum Mode / Accessibility
+// ═══════════════════════════════════════════════════════════════════════
 export const COLORS_MUTED = {
   background: '#12121A',
   backgroundElevated: '#18181F',
@@ -226,19 +392,24 @@ export const COLORS_MUTED = {
   textSecondary: '#9090A0',
   textMuted: '#707085',
   textDim: '#505065',
-  accent: '#8B7BD8',
-  accentLight: '#A090D8',
-  accentDark: '#6B5BA8',
-  accentBg: 'rgba(139, 123, 216, 0.12)',
+  accent: '#5BA8A0',          // Muted teal
+  accentLight: '#7BC0B8',
+  accentDark: '#4A8880',
+  accentBg: 'rgba(91, 168, 160, 0.12)',
   border: 'rgba(255, 255, 255, 0.08)',
   borderLight: 'rgba(255, 255, 255, 0.12)',
   temperature: {
-    green: '#7BBF7B',
-    yellow: '#E0C860',
-    orange: '#E0A070',
-    red: '#E08080',
+    cool: '#5BA8A0',
+    neutral: '#909090',
+    warm: '#C0A080',
+    hot: '#C09080',
   },
-  rolePlayAccent: '#E0B070',
-  athleteAccent: '#70C0B0',
-  spectrumAccent: '#80B0E0',
+  gauges: {
+    body: '#B89878',
+    state: '#5BA8A0',
+    emotion: '#C09080',
+    connection: '#908898',
+    direction: '#7A9888',
+    alignment: '#A89050',
+  },
 } as const;
