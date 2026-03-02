@@ -3,10 +3,11 @@
  * Complete PHOSM: Internal system + External life domains
  */
 
-// Import new sections (School, Work, Family)
+// Import new sections (School, Work, Family, Origins)
 import { MANUAL_SECTION_5 } from './manualSection5-school';
 import { MANUAL_SECTION_6 } from './manualSection6-work';
 import { MANUAL_SECTION_7 } from './manualSection7-family';
+import { MANUAL_SECTION_8 } from './manualSection8-origins';
 
 export interface LessonContent {
   introduction: string;
@@ -1506,6 +1507,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
   MANUAL_SECTION_5,  // School
   MANUAL_SECTION_6,  // Work
   MANUAL_SECTION_7,  // Family & Relationships
+  MANUAL_SECTION_8,  // Understanding Your Origins (young adult healing)
 ];
 
 /** All manual lesson IDs for progress and lookup */
