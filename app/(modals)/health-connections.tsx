@@ -1,6 +1,6 @@
 /**
- * Health Connections Settings
- * Connect Oura Ring, Apple Health, and other health data sources
+ * Health Connections - PHOSM Data Integration
+ * Connect health devices to enhance gauge intelligence
  */
 
 import React, { useEffect, useState } from 'react';
@@ -9,456 +9,443 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
+  Pressable,
   Alert,
   Linking,
   ActivityIndicator,
   Platform,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import { ErrorBoundary } from '../../src/components/ErrorBoundary';
+import { useHealthStore } from '../../src/stores/healthStore';
 
-// Health integrations
-import {
-  isOuraConnected,
-  syncOuraData,
-  disconnectOura,
-  getCachedOuraData,
-  calculateBodyGaugeFromOura,
-  calculateStateHintFromOura,
-  type OuraSnapshot,
-} from '../../src/services/ouraIntegration';
+// Design System
+const COLORS = {
+  bg: '#09090F',
+  card: '#111118',
+  cardElevated: '#18181F',
+  border: 'rgba(255,255,255,0.08)',
+  text: '#F0F0F5',
+  textSecondary: '#A0A0B8',
+  textMuted: '#6B6B80',
+  accent: '#7C4DFF',
+  accentSoft: 'rgba(124,77,255,0.15)',
+  success: '#4ADE80',
+  successSoft: 'rgba(74,222,128,0.15)',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  pink: '#EC4899',
+  blue: '#3B82F6',
+  teal: '#14B8A6',
+};
 
-import {
-  isHealthKitAvailable,
-  requestHealthKitPermissions,
-  getHealthSnapshot,
-  calculateBodyScore,
-  type HealthSnapshot,
-} from '../../src/services/healthKit';
+// Data types we can pull from HealthKit
+const HEALTH_DATA_TYPES = [
+  {
+    id: 'sleep',
+    category: 'Sleep',
+    icon: 'moon',
+    color: '#6366F1',
+    types: [
+      { name: 'Sleep Duration', desc: 'Hours of sleep last night', gauges: ['Body', 'State'] },
+      { name: 'Sleep Quality', desc: 'Time in each sleep stage', gauges: ['Body', 'State', 'Emotion'] },
+      { name: 'Time in Bed', desc: 'Total time in bed', gauges: ['Body'] },
+      { name: 'Sleep Consistency', desc: 'How regular your sleep schedule is', gauges: ['Body', 'State'] },
+    ],
+  },
+  {
+    id: 'heart',
+    category: 'Heart',
+    icon: 'heart',
+    color: '#EF4444',
+    types: [
+      { name: 'Resting Heart Rate', desc: 'Your baseline heart rate', gauges: ['Body', 'State'] },
+      { name: 'Heart Rate Variability', desc: 'Key stress/recovery indicator', gauges: ['State', 'Emotion'], highlight: true },
+      { name: 'Walking Heart Rate', desc: 'Heart rate while moving', gauges: ['Body'] },
+      { name: 'Blood Oxygen (SpO2)', desc: 'Oxygen saturation levels', gauges: ['Body', 'State'] },
+    ],
+  },
+  {
+    id: 'activity',
+    category: 'Activity',
+    icon: 'footsteps',
+    color: '#F59E0B',
+    types: [
+      { name: 'Steps', desc: 'Daily step count', gauges: ['Body', 'State'] },
+      { name: 'Active Energy', desc: 'Calories burned through activity', gauges: ['Body'] },
+      { name: 'Exercise Minutes', desc: 'Time spent exercising', gauges: ['Body', 'State', 'Emotion'] },
+      { name: 'Stand Hours', desc: 'Hours with standing/movement', gauges: ['Body'] },
+      { name: 'Walking Distance', desc: 'Distance walked/run', gauges: ['Body'] },
+    ],
+  },
+  {
+    id: 'cycle',
+    category: 'Cycle',
+    icon: 'flower',
+    color: '#EC4899',
+    types: [
+      { name: 'Menstrual Cycle', desc: 'Period tracking & phase', gauges: ['ALL'], highlight: true },
+      { name: 'Cycle Day', desc: 'Current day in cycle', gauges: ['Body', 'State', 'Emotion'] },
+      { name: 'Symptoms', desc: 'Logged cycle symptoms', gauges: ['Body', 'Emotion'] },
+      { name: 'Predictions', desc: 'Predicted period & fertile window', gauges: ['Body'] },
+    ],
+  },
+  {
+    id: 'mindfulness',
+    category: 'Mindfulness',
+    icon: 'leaf',
+    color: '#14B8A6',
+    types: [
+      { name: 'Mindful Minutes', desc: 'Time spent meditating', gauges: ['Emotion', 'Alignment'] },
+      { name: 'Stress Level', desc: 'Apple Watch stress detection', gauges: ['State', 'Emotion'] },
+    ],
+  },
+  {
+    id: 'environment',
+    category: 'Environment',
+    icon: 'volume-high',
+    color: '#3B82F6',
+    types: [
+      { name: 'Environmental Sound', desc: 'Noise exposure levels', gauges: ['State'] },
+      { name: 'Headphone Audio', desc: 'Listening volume levels', gauges: ['Body'] },
+    ],
+  },
+];
 
-interface ConnectionStatus {
-  connected: boolean;
-  lastSync?: Date;
-  error?: string;
-}
+// Gauge enhancement explanations
+const GAUGE_ENHANCEMENTS = {
+  Body: {
+    emoji: '🧬',
+    examples: [
+      'Auto-suggest Body score based on sleep + activity',
+      '"You only got 5 hours of sleep — your Body might feel it"',
+      'Track how movement affects your physical state',
+    ],
+  },
+  State: {
+    emoji: '⚡',
+    examples: [
+      'HRV shows your nervous system capacity',
+      '"Your HRV is low — less buffer for stress today"',
+      'Connect sleep quality to energy levels',
+    ],
+  },
+  Emotion: {
+    emoji: '💜',
+    examples: [
+      'Low HRV = emotions feel bigger',
+      'Cycle phase affects emotional patterns',
+      'Exercise correlation with mood',
+    ],
+  },
+  Connection: {
+    emoji: '🤝',
+    examples: [
+      'Low energy affects social capacity',
+      'Cycle phase affects social preferences',
+    ],
+  },
+  Direction: {
+    emoji: '🧭',
+    examples: [
+      'Sleep debt clouds sense of purpose',
+      'Activity correlates with motivation',
+    ],
+  },
+  Alignment: {
+    emoji: '⭐',
+    examples: [
+      'Mindful minutes support values work',
+      'Chronic fatigue can cause values drift',
+    ],
+  },
+};
 
-export default function HealthConnectionsModal() {
+export default function HealthConnectionsScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
+  const healthStore = useHealthStore();
   
-  // Connection states
-  const [ouraStatus, setOuraStatus] = useState<ConnectionStatus>({ connected: false });
-  const [appleHealthStatus, setAppleHealthStatus] = useState<ConnectionStatus>({ connected: false });
-  const [ouraData, setOuraData] = useState<OuraSnapshot | null>(null);
-  const [healthData, setHealthData] = useState<HealthSnapshot | null>(null);
-  const [loading, setLoading] = useState<'oura' | 'apple' | null>(null);
-
+  const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [enabledTypes, setEnabledTypes] = useState<Record<string, boolean>>({
+    sleep: true,
+    heart: true,
+    activity: true,
+    cycle: true,
+    mindfulness: true,
+    environment: false,
+  });
+  
   useEffect(() => {
-    checkConnectionStatus();
+    checkConnection();
   }, []);
-
-  const checkConnectionStatus = async () => {
-    // Check Oura
-    const ouraConnected = await isOuraConnected();
-    if (ouraConnected) {
-      const cached = await getCachedOuraData();
-      setOuraStatus({ 
-        connected: true, 
-        lastSync: cached?.lastSynced ? new Date(cached.lastSynced) : undefined 
-      });
-      setOuraData(cached);
-    }
-
-    // Check Apple Health
-    if (Platform.OS === 'ios') {
-      const available = await isHealthKitAvailable();
-      if (available) {
-        try {
-          const snapshot = await getHealthSnapshot();
-          setAppleHealthStatus({ 
-            connected: true, 
-            lastSync: snapshot?.lastSynced ? new Date(snapshot.lastSynced) : undefined 
-          });
-          setHealthData(snapshot);
-        } catch {
-          setAppleHealthStatus({ connected: false });
-        }
-      }
-    }
+  
+  const checkConnection = async () => {
+    // Check if already connected via healthStore
+    const snapshot = healthStore.snapshot;
+    setIsConnected(!!snapshot);
   };
-
-  // ============ Oura Handlers ============
-
-  const handleConnectOura = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    
-    // In production, this would open OAuth flow
-    // For now, show instructions
-    Alert.alert(
-      'Connect Oura Ring',
-      'To connect your Oura Ring:\n\n1. You\'ll be redirected to Oura\'s website\n2. Log in with your Oura account\n3. Authorize InGauge to read your data\n\nYour data stays private and is only used to help calculate your Body gauge.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Continue', 
-          onPress: () => {
-            // TODO: Replace with actual OAuth URL from env/config
-            Linking.openURL('https://cloud.ouraring.com/oauth/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=ingauge://oauth/oura&scope=daily+personal+heartrate');
-          }
-        },
-      ]
-    );
-  };
-
-  const handleSyncOura = async () => {
-    setLoading('oura');
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-    try {
-      const data = await syncOuraData();
-      setOuraData(data);
-      setOuraStatus({ 
-        connected: data.connected, 
-        lastSync: data.lastSynced ? new Date(data.lastSynced) : undefined,
-        error: data.error,
-      });
-      
-      if (data.connected && !data.error) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-    } catch (e) {
-      setOuraStatus(prev => ({ ...prev, error: 'Failed to sync' }));
-    }
-    
-    setLoading(null);
-  };
-
-  const handleDisconnectOura = () => {
-    Alert.alert(
-      'Disconnect Oura',
-      'This will remove your Oura connection. Your Body gauge will no longer auto-update from Oura data.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Disconnect', 
-          style: 'destructive',
-          onPress: async () => {
-            await disconnectOura();
-            setOuraStatus({ connected: false });
-            setOuraData(null);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          }
-        },
-      ]
-    );
-  };
-
-  // ============ Apple Health Handlers ============
-
-  const handleConnectAppleHealth = async () => {
+  
+  const handleConnect = async () => {
     if (Platform.OS !== 'ios') {
-      Alert.alert('Not Available', 'Apple Health is only available on iOS devices.');
+      Alert.alert('iOS Only', 'Apple Health is only available on iOS devices. Android support via Google Fit is coming soon!');
       return;
     }
     
-    setLoading('apple');
+    setIsConnecting(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     
     try {
-      const granted = await requestHealthKitPermissions();
+      // Request HealthKit permissions
+      const granted = await healthStore.requestPermissions();
+      
       if (granted) {
-        const snapshot = await getHealthSnapshot();
-        setHealthData(snapshot);
-        setAppleHealthStatus({ 
-          connected: true, 
-          lastSync: snapshot?.lastSynced ? new Date(snapshot.lastSynced) : undefined 
-        });
+        await healthStore.syncHealthData();
+        setIsConnected(true);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        
+        Alert.alert(
+          'Connected! 🎉',
+          'Your health data is now enhancing your PHOSM. Check your gauges to see personalized insights.',
+          [{ text: 'Got it' }]
+        );
       } else {
         Alert.alert(
           'Permission Required',
-          'Please enable Health access in Settings > Privacy > Health > InGauge'
+          'To use health data for gauge intelligence, please enable access in:\n\nSettings → Privacy & Security → Health → InGauge',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ]
         );
       }
-    } catch (e) {
-      Alert.alert('Error', 'Failed to connect to Apple Health');
+    } catch (error) {
+      Alert.alert('Connection Error', 'Could not connect to Apple Health. Please try again.');
     }
     
-    setLoading(null);
+    setIsConnecting(false);
   };
-
-  const handleSyncAppleHealth = async () => {
-    setLoading('apple');
+  
+  const toggleCategory = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-    try {
-      const snapshot = await getHealthSnapshot();
-      setHealthData(snapshot);
-      setAppleHealthStatus({ 
-        connected: true, 
-        lastSync: snapshot?.lastSynced ? new Date(snapshot.lastSynced) : undefined 
-      });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch (e) {
-      setAppleHealthStatus(prev => ({ ...prev, error: 'Failed to sync' }));
-    }
-    
-    setLoading(null);
+    setExpandedCategory(expandedCategory === id ? null : id);
   };
-
-  // ============ Render Helpers ============
-
-  const formatLastSync = (date?: Date) => {
-    if (!date) return 'Never';
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.round(diffMs / (1000 * 60));
-    
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffMins < 1440) return `${Math.round(diffMins / 60)}h ago`;
-    return `${Math.round(diffMins / 1440)}d ago`;
+  
+  const toggleEnabled = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setEnabledTypes(prev => ({ ...prev, [id]: !prev[id] }));
   };
-
+  
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Ionicons name="close" size={24} color="#FFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Health Connections</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Intro */}
-        <View style={styles.introBox}>
-          <Text style={styles.introEmoji}>🫀</Text>
-          <Text style={styles.introTitle}>Connect Your Body Data</Text>
-          <Text style={styles.introText}>
-            Link your health devices to auto-populate your Body gauge with real biometrics like sleep, HRV, and activity.
-          </Text>
+    <ErrorBoundary>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={24} color={COLORS.text} />
+          </Pressable>
+          <Text style={styles.title}>Apple Health</Text>
+          <View style={{ width: 32 }} />
         </View>
-
-        {/* Oura Ring */}
-        <View style={styles.section}>
-          <View style={styles.connectionCard}>
-            <View style={styles.connectionHeader}>
-              <View style={styles.connectionIcon}>
-                <Text style={styles.connectionEmoji}>💍</Text>
+        
+        <ScrollView 
+          style={styles.content} 
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Hero Section */}
+          <View style={styles.heroCard}>
+            <View style={styles.heroIconRow}>
+              <View style={[styles.heroIcon, { backgroundColor: '#FF375522' }]}>
+                <Ionicons name="heart" size={32} color="#FF3755" />
               </View>
-              <View style={styles.connectionInfo}>
-                <Text style={styles.connectionName}>Oura Ring</Text>
-                <Text style={styles.connectionDesc}>Sleep, Readiness, HRV, Activity</Text>
-              </View>
-              <View style={[
-                styles.statusBadge,
-                { backgroundColor: ouraStatus.connected ? '#4CAF5022' : '#66666622' }
-              ]}>
-                <View style={[
-                  styles.statusDot,
-                  { backgroundColor: ouraStatus.connected ? '#4CAF50' : '#666' }
-                ]} />
-                <Text style={[
-                  styles.statusText,
-                  { color: ouraStatus.connected ? '#4CAF50' : '#666' }
-                ]}>
-                  {ouraStatus.connected ? 'Connected' : 'Not Connected'}
-                </Text>
+              <Ionicons name="add" size={20} color={COLORS.textMuted} />
+              <View style={[styles.heroIcon, { backgroundColor: COLORS.accentSoft }]}>
+                <Text style={{ fontSize: 28 }}>🧠</Text>
               </View>
             </View>
-
-            {ouraStatus.connected && ouraData && (
-              <View style={styles.dataPreview}>
-                <View style={styles.dataRow}>
-                  <Text style={styles.dataLabel}>Sleep Score</Text>
-                  <Text style={styles.dataValue}>{ouraData.sleep?.score ?? '—'}</Text>
-                </View>
-                <View style={styles.dataRow}>
-                  <Text style={styles.dataLabel}>Readiness</Text>
-                  <Text style={styles.dataValue}>{ouraData.readiness?.score ?? '—'}</Text>
-                </View>
-                <View style={styles.dataRow}>
-                  <Text style={styles.dataLabel}>Body Gauge</Text>
-                  <Text style={[styles.dataValue, { color: '#7C4DFF' }]}>
-                    {calculateBodyGaugeFromOura(ouraData) ?? '—'}%
-                  </Text>
-                </View>
-                <Text style={styles.lastSync}>
-                  Last sync: {formatLastSync(ouraStatus.lastSync)}
-                </Text>
-              </View>
-            )}
-
-            <View style={styles.connectionActions}>
-              {!ouraStatus.connected ? (
-                <TouchableOpacity 
-                  style={styles.connectButton}
-                  onPress={handleConnectOura}
-                >
-                  <Ionicons name="link" size={18} color="#FFF" />
-                  <Text style={styles.connectButtonText}>Connect Oura</Text>
-                </TouchableOpacity>
-              ) : (
-                <>
-                  <TouchableOpacity 
-                    style={styles.syncButton}
-                    onPress={handleSyncOura}
-                    disabled={loading === 'oura'}
-                  >
-                    {loading === 'oura' ? (
-                      <ActivityIndicator size="small" color="#7C4DFF" />
-                    ) : (
-                      <>
-                        <Ionicons name="refresh" size={18} color="#7C4DFF" />
-                        <Text style={styles.syncButtonText}>Sync</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.disconnectButton}
-                    onPress={handleDisconnectOura}
-                  >
-                    <Text style={styles.disconnectButtonText}>Disconnect</Text>
-                  </TouchableOpacity>
-                </>
-              )}
+            <Text style={styles.heroTitle}>Body Data → Mind Intelligence</Text>
+            <Text style={styles.heroText}>
+              Connect Apple Health to give InGauge access to your sleep, heart rate, activity, and cycle data. We transform raw numbers into personalized insights about your mental state.
+            </Text>
+            
+            {/* Connection Status */}
+            <View style={[styles.statusBar, isConnected && styles.statusBarConnected]}>
+              <View style={[styles.statusDot, { backgroundColor: isConnected ? COLORS.success : COLORS.textMuted }]} />
+              <Text style={[styles.statusText, isConnected && { color: COLORS.success }]}>
+                {isConnected ? 'Connected & Syncing' : 'Not Connected'}
+              </Text>
             </View>
-          </View>
-        </View>
-
-        {/* Apple Health */}
-        {Platform.OS === 'ios' && (
-          <View style={styles.section}>
-            <View style={styles.connectionCard}>
-              <View style={styles.connectionHeader}>
-                <View style={[styles.connectionIcon, { backgroundColor: '#FF375522' }]}>
-                  <Ionicons name="heart" size={24} color="#FF3755" />
-                </View>
-                <View style={styles.connectionInfo}>
-                  <Text style={styles.connectionName}>Apple Health</Text>
-                  <Text style={styles.connectionDesc}>Sleep, Steps, Heart Rate, Cycle</Text>
-                </View>
-                <View style={[
-                  styles.statusBadge,
-                  { backgroundColor: appleHealthStatus.connected ? '#4CAF5022' : '#66666622' }
-                ]}>
-                  <View style={[
-                    styles.statusDot,
-                    { backgroundColor: appleHealthStatus.connected ? '#4CAF50' : '#666' }
-                  ]} />
-                  <Text style={[
-                    styles.statusText,
-                    { color: appleHealthStatus.connected ? '#4CAF50' : '#666' }
-                  ]}>
-                    {appleHealthStatus.connected ? 'Connected' : 'Not Connected'}
-                  </Text>
-                </View>
-              </View>
-
-              {appleHealthStatus.connected && healthData && (
-                <View style={styles.dataPreview}>
-                  <View style={styles.dataRow}>
-                    <Text style={styles.dataLabel}>Sleep</Text>
-                    <Text style={styles.dataValue}>
-                      {healthData.sleep?.lastNight?.duration?.toFixed(1) ?? '—'}h
-                    </Text>
-                  </View>
-                  <View style={styles.dataRow}>
-                    <Text style={styles.dataLabel}>Steps</Text>
-                    <Text style={styles.dataValue}>
-                      {healthData.activity?.steps?.toLocaleString() ?? '—'}
-                    </Text>
-                  </View>
-                  <View style={styles.dataRow}>
-                    <Text style={styles.dataLabel}>Body Gauge</Text>
-                    <Text style={[styles.dataValue, { color: '#7C4DFF' }]}>
-                      {calculateBodyScore(healthData) ?? '—'}%
-                    </Text>
-                  </View>
-                  <Text style={styles.lastSync}>
-                    Last sync: {formatLastSync(appleHealthStatus.lastSync)}
-                  </Text>
-                </View>
-              )}
-
-              <View style={styles.connectionActions}>
-                {!appleHealthStatus.connected ? (
-                  <TouchableOpacity 
-                    style={[styles.connectButton, { backgroundColor: '#FF3755' }]}
-                    onPress={handleConnectAppleHealth}
-                    disabled={loading === 'apple'}
-                  >
-                    {loading === 'apple' ? (
-                      <ActivityIndicator size="small" color="#FFF" />
-                    ) : (
-                      <>
-                        <Ionicons name="heart" size={18} color="#FFF" />
-                        <Text style={styles.connectButtonText}>Connect Apple Health</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
+            
+            {!isConnected && (
+              <Pressable 
+                style={styles.connectButton}
+                onPress={handleConnect}
+                disabled={isConnecting}
+              >
+                {isConnecting ? (
+                  <ActivityIndicator color="#FFF" />
                 ) : (
-                  <TouchableOpacity 
-                    style={styles.syncButton}
-                    onPress={handleSyncAppleHealth}
-                    disabled={loading === 'apple'}
-                  >
-                    {loading === 'apple' ? (
-                      <ActivityIndicator size="small" color="#7C4DFF" />
-                    ) : (
-                      <>
-                        <Ionicons name="refresh" size={18} color="#7C4DFF" />
-                        <Text style={styles.syncButtonText}>Sync</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
+                  <>
+                    <Ionicons name="fitness" size={20} color="#FFF" />
+                    <Text style={styles.connectButtonText}>Connect Apple Health</Text>
+                  </>
+                )}
+              </Pressable>
+            )}
+          </View>
+          
+          {/* What We Read Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>What We Read</Text>
+            <Text style={styles.sectionSubtitle}>
+              Tap each category to see specific data types and which gauges they enhance
+            </Text>
+            
+            {HEALTH_DATA_TYPES.map((category) => (
+              <View key={category.id} style={styles.categoryCard}>
+                <Pressable 
+                  style={styles.categoryHeader}
+                  onPress={() => toggleCategory(category.id)}
+                >
+                  <View style={styles.categoryLeft}>
+                    <View style={[styles.categoryIcon, { backgroundColor: category.color + '22' }]}>
+                      <Ionicons name={category.icon as any} size={20} color={category.color} />
+                    </View>
+                    <View>
+                      <Text style={styles.categoryName}>{category.category}</Text>
+                      <Text style={styles.categoryCount}>{category.types.length} data types</Text>
+                    </View>
+                  </View>
+                  <View style={styles.categoryRight}>
+                    <Switch
+                      value={enabledTypes[category.id]}
+                      onValueChange={() => toggleEnabled(category.id)}
+                      trackColor={{ false: COLORS.border, true: category.color + '66' }}
+                      thumbColor={enabledTypes[category.id] ? category.color : COLORS.textMuted}
+                    />
+                    <Ionicons 
+                      name={expandedCategory === category.id ? 'chevron-up' : 'chevron-down'} 
+                      size={20} 
+                      color={COLORS.textMuted} 
+                    />
+                  </View>
+                </Pressable>
+                
+                {expandedCategory === category.id && (
+                  <View style={styles.categoryExpanded}>
+                    {category.types.map((type, idx) => (
+                      <View key={idx} style={styles.dataTypeRow}>
+                        <View style={styles.dataTypeInfo}>
+                          <Text style={[styles.dataTypeName, type.highlight && { color: category.color }]}>
+                            {type.name}
+                            {type.highlight && ' ⭐'}
+                          </Text>
+                          <Text style={styles.dataTypeDesc}>{type.desc}</Text>
+                        </View>
+                        <View style={styles.gaugeChips}>
+                          {type.gauges.map((gauge) => (
+                            <View key={gauge} style={styles.gaugeChip}>
+                              <Text style={styles.gaugeChipText}>{gauge}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
                 )}
               </View>
+            ))}
+          </View>
+          
+          {/* How It Enhances Your Gauges */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>How It Enhances Your Gauges</Text>
+            
+            {Object.entries(GAUGE_ENHANCEMENTS).map(([gauge, info]) => (
+              <View key={gauge} style={styles.enhancementCard}>
+                <View style={styles.enhancementHeader}>
+                  <Text style={styles.enhancementEmoji}>{info.emoji}</Text>
+                  <Text style={styles.enhancementGauge}>{gauge}</Text>
+                </View>
+                <View style={styles.enhancementExamples}>
+                  {info.examples.map((example, idx) => (
+                    <View key={idx} style={styles.enhancementExample}>
+                      <View style={styles.enhancementBullet} />
+                      <Text style={styles.enhancementText}>{example}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ))}
+          </View>
+          
+          {/* The PHOSM Difference */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>The PHOSM Difference</Text>
+            
+            <View style={styles.differenceCard}>
+              <View style={styles.differenceRow}>
+                <View style={styles.differenceLabel}>
+                  <Text style={styles.differenceLabelText}>Apple Health says:</Text>
+                </View>
+                <Text style={styles.differenceValue}>"You slept 5.5 hours"</Text>
+              </View>
+              
+              <View style={styles.differenceArrow}>
+                <Ionicons name="arrow-down" size={20} color={COLORS.accent} />
+              </View>
+              
+              <View style={styles.differenceRow}>
+                <View style={[styles.differenceLabel, { backgroundColor: COLORS.accentSoft }]}>
+                  <Text style={[styles.differenceLabelText, { color: COLORS.accent }]}>InGauge says:</Text>
+                </View>
+                <Text style={styles.differenceValueHighlight}>
+                  "You slept 5.5 hours, and you're on Day 24 of your cycle when energy naturally dips. Your State might feel 20% lower than usual today. That's not weakness — that's two systems working against you. What would 'good enough' look like?"
+                </Text>
+              </View>
             </View>
           </View>
-        )}
-
-        {/* Privacy Note */}
-        <View style={styles.privacyNote}>
-          <Ionicons name="shield-checkmark" size={20} color="#4CAF50" />
-          <Text style={styles.privacyText}>
-            Your health data stays on your device and is only used to calculate your gauges. We never sell or share your biometrics.
-          </Text>
-        </View>
-
-        {/* How it works */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>How It Works</Text>
-          <View style={styles.howItWorks}>
-            <View style={styles.howStep}>
-              <View style={styles.howNumber}><Text style={styles.howNumberText}>1</Text></View>
-              <Text style={styles.howText}>Connect your device</Text>
-            </View>
-            <View style={styles.howStep}>
-              <View style={styles.howNumber}><Text style={styles.howNumberText}>2</Text></View>
-              <Text style={styles.howText}>We read sleep, HRV, activity</Text>
-            </View>
-            <View style={styles.howStep}>
-              <View style={styles.howNumber}><Text style={styles.howNumberText}>3</Text></View>
-              <Text style={styles.howText}>Body gauge auto-updates daily</Text>
+          
+          {/* Privacy */}
+          <View style={styles.privacyCard}>
+            <Ionicons name="shield-checkmark" size={24} color={COLORS.success} />
+            <View style={styles.privacyText}>
+              <Text style={styles.privacyTitle}>Your Data Stays Yours</Text>
+              <Text style={styles.privacyDesc}>
+                Health data never leaves your device. We don't store it on our servers, sell it, or share it. It's only used locally to generate personalized insights.
+              </Text>
             </View>
           </View>
-        </View>
-
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </SafeAreaView>
+          
+          {/* Manage in Settings Link */}
+          {isConnected && (
+            <Pressable 
+              style={styles.settingsLink}
+              onPress={() => Linking.openSettings()}
+            >
+              <Ionicons name="settings-outline" size={18} color={COLORS.accent} />
+              <Text style={styles.settingsLinkText}>Manage in iOS Settings</Text>
+            </Pressable>
+          )}
+          
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </View>
+    </ErrorBoundary>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: COLORS.bg,
   },
   header: {
     flexDirection: 'row',
@@ -467,91 +454,72 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: COLORS.border,
   },
-  headerTitle: {
-    fontSize: 17,
+  backButton: {
+    padding: 4,
+  },
+  title: {
+    fontSize: 18,
     fontWeight: '600',
-    color: '#FFF',
+    color: COLORS.text,
   },
   content: {
     flex: 1,
   },
-  introBox: {
-    alignItems: 'center',
-    padding: 24,
-    marginHorizontal: 16,
-    marginTop: 16,
-    backgroundColor: '#1E1E1E',
-    borderRadius: 16,
-  },
-  introEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  introTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFF',
-    marginBottom: 8,
-  },
-  introText: {
-    fontSize: 14,
-    color: '#AAA',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  section: {
-    paddingHorizontal: 16,
-    marginTop: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFF',
-    marginBottom: 12,
-  },
-  connectionCard: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 16,
+  contentContainer: {
     padding: 16,
   },
-  connectionHeader: {
+  
+  // Hero
+  heroCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  heroIconRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
   },
-  connectionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: '#7C4DFF22',
+  heroIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  connectionEmoji: {
-    fontSize: 24,
+  heroTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  connectionInfo: {
-    flex: 1,
-    marginLeft: 12,
+  heroText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 16,
   },
-  connectionName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFF',
-  },
-  connectionDesc: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
-  },
-  statusBadge: {
+  statusBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    gap: 6,
+    gap: 8,
+    backgroundColor: COLORS.cardElevated,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginBottom: 16,
+  },
+  statusBarConnected: {
+    backgroundColor: COLORS.successSoft,
   },
   statusDot: {
     width: 8,
@@ -559,124 +527,248 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '500',
-  },
-  dataPreview: {
-    backgroundColor: '#2A2A2A',
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 16,
-  },
-  dataRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 6,
-  },
-  dataLabel: {
-    fontSize: 14,
-    color: '#888',
-  },
-  dataValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFF',
-  },
-  lastSync: {
-    fontSize: 11,
-    color: '#666',
-    marginTop: 8,
-    textAlign: 'right',
-  },
-  connectionActions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
+    color: COLORS.textMuted,
   },
   connectButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#7C4DFF',
-    paddingVertical: 12,
-    borderRadius: 12,
     gap: 8,
+    backgroundColor: '#FF3755',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 14,
+    width: '100%',
   },
   connectButtonText: {
-    color: '#FFF',
+    fontSize: 16,
     fontWeight: '600',
-    fontSize: 14,
+    color: '#FFF',
   },
-  syncButton: {
-    flex: 1,
+  
+  // Sections
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginBottom: 16,
+  },
+  
+  // Categories
+  categoryCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    marginBottom: 10,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  categoryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#7C4DFF22',
-    paddingVertical: 12,
+    justifyContent: 'space-between',
+    padding: 14,
+  },
+  categoryLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  categoryIcon: {
+    width: 40,
+    height: 40,
     borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoryName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  categoryCount: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+  },
+  categoryRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
-  syncButtonText: {
-    color: '#7C4DFF',
-    fontWeight: '600',
+  categoryExpanded: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    padding: 14,
+    gap: 12,
+  },
+  dataTypeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  dataTypeInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  dataTypeName: {
     fontSize: 14,
-  },
-  disconnectButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: '#333',
-  },
-  disconnectButtonText: {
-    color: '#F44336',
     fontWeight: '500',
-    fontSize: 14,
+    color: COLORS.text,
+    marginBottom: 2,
   },
-  privacyNote: {
+  dataTypeDesc: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+  },
+  gaugeChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  gaugeChip: {
+    backgroundColor: COLORS.accentSoft,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  gaugeChipText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: COLORS.accent,
+  },
+  
+  // Enhancement Cards
+  enhancementCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  enhancementHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 10,
+  },
+  enhancementEmoji: {
+    fontSize: 20,
+  },
+  enhancementGauge: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  enhancementExamples: {
+    gap: 6,
+  },
+  enhancementExample: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#4CAF5011',
-    marginHorizontal: 16,
-    marginTop: 24,
+    gap: 8,
+  },
+  enhancementBullet: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: COLORS.accent,
+    marginTop: 6,
+  },
+  enhancementText: {
+    flex: 1,
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  
+  // Difference
+  differenceCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
     padding: 16,
-    borderRadius: 12,
-    gap: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  differenceRow: {
+    marginBottom: 8,
+  },
+  differenceLabel: {
+    backgroundColor: COLORS.cardElevated,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 6,
+  },
+  differenceLabelText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+  },
+  differenceValue: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    fontStyle: 'italic',
+  },
+  differenceValueHighlight: {
+    fontSize: 14,
+    color: COLORS.text,
+    lineHeight: 20,
+  },
+  differenceArrow: {
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  
+  // Privacy
+  privacyCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 14,
+    backgroundColor: COLORS.successSoft,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
   },
   privacyText: {
     flex: 1,
+  },
+  privacyTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.success,
+    marginBottom: 4,
+  },
+  privacyDesc: {
     fontSize: 13,
-    color: '#4CAF50',
+    color: COLORS.success,
     lineHeight: 18,
+    opacity: 0.9,
   },
-  howItWorks: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 12,
-    padding: 16,
-  },
-  howStep: {
+  
+  // Settings Link
+  settingsLink: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  howNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#7C4DFF',
-    alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    gap: 8,
+    paddingVertical: 14,
   },
-  howNumberText: {
-    color: '#FFF',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  howText: {
-    fontSize: 14,
-    color: '#CCC',
+  settingsLinkText: {
+    fontSize: 15,
+    color: COLORS.accent,
+    fontWeight: '500',
   },
 });
