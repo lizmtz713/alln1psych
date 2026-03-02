@@ -135,6 +135,7 @@ const TOOL_CATEGORIES = [
       { id: 'quick-reset', icon: 'flash', title: 'Quick Reset', color: '#14B8A6' },
       { id: 'breathing', icon: 'fitness', title: 'Breathe', color: '#14B8A6' },
       { id: 'body-scan', icon: 'body', title: 'Body Scan', color: '#8B5CF6' },
+      { id: 'awe-activities', icon: 'planet', title: 'Awe', color: '#6366F1' },
       { id: 'stress-thermo', icon: 'thermometer', title: 'Stress', color: '#EF4444' },
       { id: 'crisis-resources', icon: 'heart', title: 'Crisis Help', color: '#EF4444' },
     ],
@@ -157,6 +158,7 @@ const TOOL_CATEGORIES = [
       { id: 'journal', icon: 'journal', title: 'Journal', color: '#EC4899' },
       { id: 'gratitude-jar', icon: 'sparkles', title: 'Gratitude', color: '#FBBF24' },
       { id: 'mood-patterns', icon: 'analytics', title: 'Patterns', color: '#6366F1' },
+      { id: 'drift-detector', icon: 'compass', title: 'Drift Check', color: '#F59E0B' },
     ],
   },
   {
@@ -224,6 +226,8 @@ export default function LearnScreen() {
       'quick-reset': '/(modals)/quick-reset',
       'crisis-resources': '/(modals)/crisis-resources',
       'performance-debrief': '/(modals)/debrief',
+      'awe-activities': '/(modals)/awe-activities',
+      'drift-detector': '/(modals)/drift-detector',
     };
     if (modalRoutes[id]) {
       return router.push(modalRoutes[id] as any);

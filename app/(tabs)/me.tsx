@@ -180,9 +180,9 @@ export default function MeScreen() {
           </View>
 
           {/* ═══════════════════════════════════════════════════════════
-              SHARING & INSIGHTS
+              SHARING & REPORTS
               ═══════════════════════════════════════════════════════════ */}
-          <Text style={styles.sectionHeader}>Sharing</Text>
+          <Text style={styles.sectionHeader}>Sharing & Reports</Text>
           <View style={styles.menuCard}>
             <MenuItem
               icon="document-text-outline"
@@ -190,6 +190,18 @@ export default function MeScreen() {
               subtitle="Generate wellness reports"
               accentColor={COLORS.success}
               onPress={() => navigateTo('/(modals)/therapist-share')}
+            />
+            <MenuItem
+              icon="shield-checkmark-outline"
+              label="Sovereignty Report"
+              subtitle="Your full system overview"
+              onPress={() => navigateTo('/(modals)/sovereignty-report')}
+            />
+            <MenuItem
+              icon="share-outline"
+              label="Share Snapshot"
+              subtitle="Share your current state"
+              onPress={() => navigateTo('/(modals)/share-snapshot')}
             />
             <MenuItem
               icon="star-outline"
@@ -201,39 +213,15 @@ export default function MeScreen() {
           </View>
 
           {/* ═══════════════════════════════════════════════════════════
-              MY TOOLS
+              INTEGRATIONS
               ═══════════════════════════════════════════════════════════ */}
-          <Text style={styles.sectionHeader}>My Tools</Text>
+          <Text style={styles.sectionHeader}>Integrations</Text>
           <View style={styles.menuCard}>
             <MenuItem
-              icon="chatbubbles-outline"
-              label="Talk to Gauge"
-              subtitle="Your AI companion"
-              onPress={() => router.push('/(tabs)/talk')}
-            />
-            <MenuItem
-              icon="scale-outline"
-              label="Referee"
-              subtitle="Settle disputes fairly"
-              onPress={() => navigateTo('/(modals)/referee')}
-            />
-            <MenuItem
-              icon="refresh-outline"
-              label="Replay"
-              subtitle="Process what happened"
-              onPress={() => navigateTo('/(modals)/replay')}
-            />
-            <MenuItem
-              icon="search-outline"
-              label="Decode"
-              subtitle="Analyze messages"
-              onPress={() => navigateTo('/(modals)/decode')}
-            />
-            <MenuItem
-              icon="heart-circle-outline"
-              label="Relate"
-              subtitle="Understand anyone"
-              onPress={() => navigateTo('/(modals)/relate')}
+              icon="heart-outline"
+              label="Apple Health"
+              subtitle="Connect sleep, activity, cycle"
+              onPress={() => navigateTo('/(modals)/health-connections')}
               isLast
             />
           </View>
@@ -319,12 +307,6 @@ export default function MeScreen() {
               icon="chatbox-outline"
               label="Send Feedback"
               onPress={() => Linking.openURL('mailto:feedback@getingauge.com')}
-            />
-            <MenuItem
-              icon="document-text-outline"
-              label="Share with Therapist"
-              subtitle="Generate professional report"
-              onPress={() => navigateTo('/(modals)/therapist-share')}
             />
             <MenuItem
               icon="refresh-outline"
