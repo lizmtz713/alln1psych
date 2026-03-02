@@ -215,6 +215,10 @@ export default function LearnScreen() {
       'cockpit-checkin': '/(modals)/cockpit-checkin',
       'mood-patterns': '/(modals)/patterns',
       'learning-style-quiz': '/(modals)/learning-style-quiz',
+      'relational-bridge': '/(modals)/relational-bridge',
+      'quick-reset': '/(modals)/quick-reset',
+      'crisis-resources': '/(modals)/crisis-resources',
+      'performance-debrief': '/(modals)/debrief',
     };
     if (modalRoutes[id]) {
       return router.push(modalRoutes[id] as any);

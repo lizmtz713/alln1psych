@@ -26,7 +26,7 @@ export const RECOVERY_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["Thank you for telling me. That took courage.", "I'm here for you."],
-    safetyTriggers: ['I want to die', 'I can\'t stop', 'I\'ve tried to hurt myself'],
+    safetyTriggers: ['I want to die', `I can't stop`, `I've tried to hurt myself`],
     
     skillsTargeted: ['vulnerability', 'asking for help', 'honesty'],
     hints: [
@@ -112,7 +112,7 @@ export const RECOVERY_SCENARIOS: RoleplayScenario[] = [
     
     persona: 'Person Offering',
     personaDescription: "Doesn't know you're in recovery. Casually offering.",
-    personaTraits: ['casual', 'doesn\'t know your situation', 'not malicious'],
+    personaTraits: ['casual', `doesn't know your situation`, 'not malicious'],
     
     context: "You're at a social event. Someone offers you a drink/substance.",
     firstMessage: "Hey! Want a drink/hit/whatever? Come on, it's a party!",
@@ -211,7 +211,7 @@ export const RECOVERY_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["You're doing the right thing calling me.", "This will pass. Let's ride it out together."],
-    safetyTriggers: ['I don\'t care anymore', 'what\'s the point', 'I already used'],
+    safetyTriggers: [`I don't care anymore`, `what's the point`, 'I already used'],
     
     skillsTargeted: ['urge surfing', 'reaching out', 'honesty about cravings'],
     hints: [
@@ -254,7 +254,7 @@ export const RECOVERY_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "Yo! Long time no see. We should kick it like old times. Everyone misses you.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you think you\'re better than us now'],
+    escalationTriggers: [`you think you're better than us now`],
     deescalationResponses: ["Oh damn, good for you. That's cool.", "I get it. Respect."],
     safetyTriggers: [],
     
@@ -305,7 +305,7 @@ export const RECOVERY_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["I'm glad you called me.", "A relapse doesn't erase your progress."],
-    safetyTriggers: ['I want to die', 'what\'s the point', 'I should just keep using'],
+    safetyTriggers: ['I want to die', `what's the point`, `I should just keep using`],
     
     skillsTargeted: ['honesty about relapse', 'self-compassion', 'getting back up'],
     hints: [
@@ -395,7 +395,7 @@ export const RECOVERY_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'realistic',
     escalationTriggers: [],
     deescalationResponses: ["Thanks for being here.", "It helps to talk about it."],
-    safetyTriggers: ['I\'m going to use', 'I don\'t care anymore', 'what\'s the point of staying sober'],
+    safetyTriggers: [`I'm going to use`, `I don't care anymore`, `what's the point of staying sober`],
     
     skillsTargeted: ['supportive listening', 'not enabling', 'knowing limits'],
     hints: [

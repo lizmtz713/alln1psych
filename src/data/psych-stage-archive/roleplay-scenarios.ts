@@ -87,7 +87,7 @@ const MIDDLE_CHILDHOOD_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["I'm glad you told me. That was brave.", "This isn't your fault."],
-    safetyTriggers: ['hurt myself', 'don\'t want to live', 'scared to come to school'],
+    safetyTriggers: ['hurt myself', `don't want to live`, 'scared to come to school'],
     
     skillsTargeted: ['asking for help', 'describing what happened', 'naming feelings'],
     hints: [
@@ -228,7 +228,7 @@ const EARLY_ADOLESCENCE_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "Here, try this. Everyone does it. It's not a big deal.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['that\'s illegal', 'I\'ll tell someone', 'you\'re stupid'],
+    escalationTriggers: [`that's illegal`, `I'll tell someone`, `you're stupid`],
     deescalationResponses: ["Alright, whatever. More for me.", "Fine, I respect that."],
     safetyTriggers: [],
     
@@ -319,9 +319,9 @@ const EARLY_ADOLESCENCE_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "Don't... don't look at me like that. It's nothing.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['why would you do that', 'that\'s so stupid', 'I\'m telling someone'],
+    escalationTriggers: ['why would you do that', `that's so stupid`, `I'm telling someone`],
     deescalationResponses: ["Sorry. I just... didn't expect you to see.", "Please don't tell anyone."],
-    safetyTriggers: ['I want to die', 'I can\'t stop', 'tonight', 'deeper'],
+    safetyTriggers: ['I want to die', `I can't stop`, 'tonight', 'deeper'],
     
     skillsTargeted: ['staying calm', 'not judging', 'listening', 'knowing when to tell an adult'],
     hints: [
@@ -366,7 +366,7 @@ const EARLY_ADOLESCENCE_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["Wow, thank you for telling me. That took guts.", "I'm glad you trust me."],
-    safetyTriggers: ['I can\'t tell my parents', 'I might get kicked out', 'I hate myself'],
+    safetyTriggers: [`I can't tell my parents`, 'I might get kicked out', 'I hate myself'],
     
     skillsTargeted: ['vulnerability', 'sharing at your own pace', 'asking for what you need'],
     hints: [
@@ -416,7 +416,7 @@ const MIDDLE_ADOLESCENCE_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "Come on, it's not a big deal. Don't you trust me?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you\'re such a prude', 'fine I\'ll find someone else'],
+    escalationTriggers: [`you're such a prude`, `fine I'll find someone else`],
     deescalationResponses: ["Okay, okay. Sorry. I didn't mean to push.", "You're right. I'll wait."],
     safetyTriggers: ['if you loved me', 'you owe me', 'no one will believe you'],
     
@@ -462,9 +462,9 @@ const MIDDLE_ADOLESCENCE_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "You wanted to talk? What's going on?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you have nothing to be depressed about', 'it\'s just hormones'],
+    escalationTriggers: ['you have nothing to be depressed about', `it's just hormones`],
     deescalationResponses: ["I hear you. Thank you for telling me. What do you need?", "I love you. Let's figure this out together."],
-    safetyTriggers: ['hurting myself', 'don\'t want to be here', 'suicide'],
+    safetyTriggers: ['hurting myself', `don't want to be here`, 'suicide'],
     
     skillsTargeted: ['asking for help', 'being specific', 'persisting if dismissed'],
     hints: [
@@ -508,9 +508,9 @@ const MIDDLE_ADOLESCENCE_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "What? My relationship is fine. Why are you asking?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you\'re just jealous', 'you don\'t know them like I do'],
+    escalationTriggers: [`you're just jealous`, `you don't know them like I do`],
     deescalationResponses: ["I... I know. Sometimes I wonder too.", "I hear what you're saying."],
-    safetyTriggers: ['they hit me', 'I\'m scared of them', 'I can\'t leave'],
+    safetyTriggers: ['they hit me', `I'm scared of them`, `I can't leave`],
     
     skillsTargeted: ['expressing concern without judging', 'not pushing too hard', 'staying their friend'],
     hints: [
@@ -556,7 +556,7 @@ const MIDDLE_ADOLESCENCE_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'realistic',
     escalationTriggers: [],
     deescalationResponses: ["Come on, I thought we were close.", "Don't you trust me?"],
-    safetyTriggers: ['send pics', 'keep this secret', 'let\'s meet up alone'],
+    safetyTriggers: ['send pics', 'keep this secret', `let's meet up alone`],
     
     skillsTargeted: ['recognizing red flags', 'trusting gut', 'getting help'],
     hints: [
@@ -651,7 +651,7 @@ const LATE_ADOLESCENCE_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "What's up? Did you want to talk about something?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you\'re so annoying', 'I hate living with you'],
+    escalationTriggers: [`you're so annoying`, 'I hate living with you'],
     deescalationResponses: ["Oh, I didn't realize that was bothering you. My bad.", "Can we figure out a compromise?"],
     safetyTriggers: [],
     
@@ -696,7 +696,7 @@ const LATE_ADOLESCENCE_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "Hello. What can I help you with?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['it\'s not fair', 'everyone else is doing it'],
+    escalationTriggers: [`it's not fair`, 'everyone else is doing it'],
     deescalationResponses: ["I can give you until [date]. Please don't make this a habit.", "Thanks for letting me know ahead of time."],
     safetyTriggers: [],
     
@@ -743,7 +743,7 @@ const LATE_ADOLESCENCE_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'realistic',
     escalationTriggers: [],
     deescalationResponses: ["I... I wasn't expecting this.", "Can we at least talk about it?"],
-    safetyTriggers: ['I can\'t live without you', 'I\'ll hurt myself', 'you\'ll regret this'],
+    safetyTriggers: [`I can't live without you`, `I'll hurt myself`, `you'll regret this`],
     
     skillsTargeted: ['being honest', 'being kind', 'holding boundary'],
     hints: [
@@ -838,7 +838,7 @@ const EMERGING_ADULTHOOD_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "Hey, I need you to take on the Henderson project too. I know you're busy but we're all stretched thin.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['I don\'t care', 'figure it out'],
+    escalationTriggers: [`I don't care`, 'figure it out'],
     deescalationResponses: ["You're right, that's a lot. Let's talk about priorities.", "I hear you. What can we take off your plate?"],
     safetyTriggers: [],
     
@@ -935,7 +935,7 @@ const EARLY_ADULTHOOD_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "I really think we should [their approach]. I don't understand why you're not on board with this.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you always undermine me', 'you\'re too soft/hard'],
+    escalationTriggers: ['you always undermine me', `you're too soft/hard`],
     deescalationResponses: ["Let's figure this out together.", "What's most important to you here?"],
     safetyTriggers: [],
     
@@ -974,13 +974,13 @@ const EARLY_ADULTHOOD_SCENARIOS: RoleplayScenario[] = [
     
     persona: 'Your Aging Parent',
     personaDescription: "Doesn't want to think about getting old. Might be defensive or in denial.",
-    personaTraits: ['proud', 'doesn\'t want to be a burden', 'might be in denial'],
+    personaTraits: ['proud', `doesn't want to be a burden`, 'might be in denial'],
     
     context: "You need to have a conversation about driving, living situation, or health planning.",
     firstMessage: "I'm fine. I don't know why you keep bringing this up. I'm not ready for a nursing home.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you just want to get rid of me', 'I\'m not that old'],
+    escalationTriggers: ['you just want to get rid of me', `I'm not that old`],
     deescalationResponses: ["I know this is hard to talk about.", "I'm not trying to take over your life."],
     safetyTriggers: [],
     
@@ -1070,7 +1070,7 @@ const EARLY_ADULTHOOD_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "You said you wanted to talk? What's going on?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['it\'s always my fault', 'you don\'t even try'],
+    escalationTriggers: [`it's always my fault`, `you don't even try`],
     deescalationResponses: ["I've been feeling that too.", "I don't want to lose us."],
     safetyTriggers: [],
     
@@ -1122,7 +1122,7 @@ const MIDDLE_ADULTHOOD_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "I know you don't approve, but it's my life. I'm not asking for permission.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you always try to control me', 'you don\'t respect me'],
+    escalationTriggers: ['you always try to control me', `you don't respect me`],
     deescalationResponses: ["You're right, it's your life.", "I love you even when I don't agree."],
     safetyTriggers: [],
     
@@ -1161,13 +1161,13 @@ const MIDDLE_ADULTHOOD_SCENARIOS: RoleplayScenario[] = [
     
     persona: 'Your Aging Parent',
     personaDescription: "Struggling with needing help. Might be resistant or grateful.",
-    personaTraits: ['proud', 'scared', 'doesn\'t want to burden you'],
+    personaTraits: ['proud', 'scared', `doesn't want to burden you`],
     
     context: "Your parent needs regular help now. You're taking on more caregiving.",
     firstMessage: "I don't need you to do all this. I don't want to be a burden on you.",
     
     responseStyle: 'supportive',
-    escalationTriggers: ['I can do it myself', 'I\'m not an invalid'],
+    escalationTriggers: ['I can do it myself', `I'm not an invalid`],
     deescalationResponses: ["Thank you for helping me.", "I don't know what I'd do without you."],
     safetyTriggers: [],
     
@@ -1259,7 +1259,7 @@ const MIDDLE_ADULTHOOD_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["It's a big change.", "We'll figure out this new chapter together."],
-    safetyTriggers: ['I have no purpose', 'what\'s the point now'],
+    safetyTriggers: ['I have no purpose', `what's the point now`],
     
     skillsTargeted: ['processing transition', 'identity beyond parenting', 'new chapter'],
     hints: [
@@ -1311,7 +1311,7 @@ const LATE_ADULTHOOD_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["I didn't realize it was so hard.", "What can I do to help?"],
-    safetyTriggers: ['what\'s the point', 'I\'m useless now', 'no one needs me'],
+    safetyTriggers: [`what's the point`, `I'm useless now`, 'no one needs me'],
     
     skillsTargeted: ['identity transition', 'finding new purpose', 'naming feelings'],
     hints: [
@@ -1356,7 +1356,7 @@ const LATE_ADULTHOOD_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["We'll face this together.", "I'm here no matter what."],
-    safetyTriggers: ['I don\'t want treatment', 'maybe I should just', 'I don\'t want to be a burden'],
+    safetyTriggers: [`I don't want treatment`, 'maybe I should just', `I don't want to be a burden`],
     
     skillsTargeted: ['sharing hard news', 'accepting support', 'processing diagnosis'],
     hints: [

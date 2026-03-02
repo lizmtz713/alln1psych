@@ -169,7 +169,7 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     responseStyle: 'realistic',
     escalationTriggers: [],
     deescalationResponses: ["Okay fine, I respect that."],
-    safetyTriggers: ['already have pics', 'I\'ll show everyone', 'you owe me'],
+    safetyTriggers: ['already have pics', `I'll show everyone`, 'you owe me'],
     
     skillsTargeted: ['saying no firmly', 'recognizing manipulation', 'protecting yourself'],
     hints: [
@@ -212,9 +212,9 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     firstMessage: "Why does everyone keep asking about my relationship? We're fine. They're just protective.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you\'re jealous', 'you don\'t understand'],
+    escalationTriggers: [`you're jealous`, `you don't understand`],
     deescalationResponses: ["I... I know you're just worried about me."],
-    safetyTriggers: ['they would hurt me if', 'I can\'t leave', 'I\'m scared'],
+    safetyTriggers: ['they would hurt me if', `I can't leave`, `I'm scared`],
     
     skillsTargeted: ['expressing concern', 'not pushing too hard', 'staying their friend'],
     hints: [
@@ -257,9 +257,9 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     firstMessage: "A B+? You can do better than that. Did you even try? What happened?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['I did my best', 'you don\'t understand'],
+    escalationTriggers: ['I did my best', `you don't understand`],
     deescalationResponses: ["I know. I just want what's best for you.", "Okay, how can I support you?"],
-    safetyTriggers: ['I can\'t take this pressure', 'I want to disappear'],
+    safetyTriggers: [`I can't take this pressure`, 'I want to disappear'],
     
     skillsTargeted: ['advocating for yourself', 'expressing overwhelm', 'setting expectations'],
     hints: [
@@ -304,7 +304,7 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["That's not okay. We'll figure this out together."],
-    safetyTriggers: ['I want to die', 'I can\'t face them', 'I don\'t want to go to school'],
+    safetyTriggers: ['I want to die', `I can't face them`, `I don't want to go to school`],
     
     skillsTargeted: ['asking for help', 'explaining online situations', 'documenting'],
     hints: [
@@ -444,7 +444,7 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
     firstMessage: "I'm just trying to help! I don't know why you're so sensitive about everything.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['my son/daughter never complained', 'you\'re keeping me from my grandchildren'],
+    escalationTriggers: ['my son/daughter never complained', `you're keeping me from my grandchildren`],
     deescalationResponses: ["I didn't realize. I'll try to be better about that."],
     safetyTriggers: [],
     
@@ -534,7 +534,7 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
     firstMessage: "What do you mean we need to talk about money? Is something wrong?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you\'re always judging my spending'],
+    escalationTriggers: [`you're always judging my spending`],
     deescalationResponses: ["You're right, we should talk about this."],
     safetyTriggers: [],
     
@@ -583,7 +583,7 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
     deescalationResponses: ["Thank you for telling me. We'll face this together."],
     safetyTriggers: [],
     
-    skillsTargeted: ['sharing difficult news', 'managing others\' reactions', 'accepting support'],
+    skillsTargeted: ['sharing difficult news', `managing others' reactions`, 'accepting support'],
     hints: [
       "You can ask them to stay calm first",
       "Share facts before emotions",

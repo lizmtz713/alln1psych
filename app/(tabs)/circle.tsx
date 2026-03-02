@@ -224,6 +224,36 @@ export default function CircleScreen() {
         <Text style={styles.hint}>Your circle can see this. Tap to change anytime.</Text>
       </View>
 
+        {/* HEART INBOX */}
+        <Pressable
+          style={styles.bridgeCard}
+          onPress={() => router.push('/(modals)/heart-inbox')}
+        >
+          <View style={styles.bridgeIcon}>
+            <Ionicons name="mail" size={24} color={COLORS.primary} />
+          </View>
+          <View style={styles.bridgeText}>
+            <Text style={styles.bridgeTitle}>Heart Inbox</Text>
+            <Text style={styles.bridgeSubtitle}>Messages from your circle</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
+        </Pressable>
+
+
+        {/* WRITE HEART MAIL */}
+        <Pressable
+          style={styles.bridgeCard}
+          onPress={() => router.push("/(modals)/heart-mail-compose")}
+        >
+          <View style={styles.bridgeIcon}>
+            <Ionicons name="create" size={24} color={COLORS.accent} />
+          </View>
+          <View style={styles.bridgeText}>
+            <Text style={styles.bridgeTitle}>Write Heart Mail</Text>
+            <Text style={styles.bridgeSubtitle}>Send a message to someone you care about</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
+        </Pressable>
       {/* RELATIONAL BRIDGE */}
       <Pressable 
         style={styles.bridgeCard} 

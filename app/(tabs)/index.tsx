@@ -392,6 +392,8 @@ export default function HomeScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
           {(() => {
             const quickActions = [
+              { label: 'Prompts', icon: 'sparkles', route: '/(modals)/prompt-generator' as const, iconIsEmoji: false as const },
+              { label: 'Patterns', icon: 'analytics', route: '/(modals)/patterns' as const, iconIsEmoji: false as const },
               { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const, iconIsEmoji: false as const },
               { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const, iconIsEmoji: false as const },
               { label: 'Relate', icon: 'heart-circle', route: '/(modals)/relate' as const, iconIsEmoji: false as const },

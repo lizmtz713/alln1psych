@@ -27,7 +27,7 @@ export const CHRONIC_ILLNESS_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'realistic',
     escalationTriggers: [],
     deescalationResponses: ["Let me take another look at this.", "What specifically is concerning you?"],
-    safetyTriggers: ['I can\'t live like this', 'no one believes me'],
+    safetyTriggers: [`I can't live like this`, 'no one believes me'],
     
     skillsTargeted: ['self-advocacy', 'persistence', 'specific communication'],
     hints: [
@@ -156,17 +156,17 @@ export const CHRONIC_ILLNESS_SCENARIOS: RoleplayScenario[] = [
     ageRange: [12, 50],
     difficulty: 'beginner',
     
-    persona: 'Friend (doesn\'t understand)',
+    persona: `Friend (doesn't understand)`,
     personaDescription: "Cares about you but frustrated by cancellations. Doesn't get invisible illness.",
-    personaTraits: ['frustrated', 'cares', 'doesn\'t understand'],
+    personaTraits: ['frustrated', 'cares', `doesn't understand`],
     
     context: "Your friend is frustrated that you cancel plans or can't keep up. They don't understand your illness.",
     firstMessage: "You cancel on me so much. Do you even want to hang out anymore? It feels like you're always 'tired.'",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['everyone gets tired', 'you don\'t look sick'],
+    escalationTriggers: ['everyone gets tired', `you don't look sick`],
     deescalationResponses: ["I didn't realize. I'm sorry.", "Tell me more about what it's like."],
-    safetyTriggers: ['I\'m a burden', 'no one wants to be around me'],
+    safetyTriggers: [`I'm a burden`, 'no one wants to be around me'],
     
     skillsTargeted: ['explaining invisible illness', 'setting expectations', 'maintaining friendship'],
     hints: [
@@ -201,7 +201,7 @@ export const CHRONIC_ILLNESS_SCENARIOS: RoleplayScenario[] = [
     ageRange: [16, 50],
     difficulty: 'intermediate',
     
-    persona: 'Person You\'re Dating',
+    persona: `Person You're Dating`,
     personaDescription: "Likes you. Doesn't know about your condition yet. Open to learning.",
     personaTraits: ['interested', 'curious', 'open'],
     
@@ -211,7 +211,7 @@ export const CHRONIC_ILLNESS_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["Thank you for telling me.", "I want to understand. Can you explain more?"],
-    safetyTriggers: ['no one will want me', 'I\'m too much'],
+    safetyTriggers: ['no one will want me', `I'm too much`],
     
     skillsTargeted: ['disclosure timing', 'framing your condition', 'gauging response'],
     hints: [
@@ -444,7 +444,7 @@ export const CHRONIC_ILLNESS_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["That's a real grief.", "You're allowed to mourn that."],
-    safetyTriggers: ['I wish I was dead', 'I can\'t live like this', 'what\'s the point'],
+    safetyTriggers: ['I wish I was dead', `I can't live like this`, `what's the point`],
     
     skillsTargeted: ['naming grief', 'self-compassion', 'processing loss'],
     hints: [
@@ -526,7 +526,7 @@ export const CHRONIC_ILLNESS_SCENARIOS: RoleplayScenario[] = [
     
     persona: 'Well-Meaning Person',
     personaDescription: "Encouraging you to push through when you shouldn't.",
-    personaTraits: ['well-meaning', 'doesn\'t understand', 'encouraging'],
+    personaTraits: ['well-meaning', `doesn't understand`, 'encouraging'],
     
     context: "Someone is encouraging you to push through when you know you need to rest.",
     firstMessage: "Come on, you can do it! Mind over matter. Don't let your illness define you!",

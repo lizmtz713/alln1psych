@@ -5,19 +5,15 @@
  * Tesla/Rivian inspired cockpit aesthetic with glows, gradients, and premium feel.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Pressable, StyleSheet, Dimensions, Animated, Modal } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, Pressable, StyleSheet, Dimensions, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from './gauges';
 import { getGaugeColor, getOverallStatusLabel, GAUGE_CONFIG } from '../utils/gaugeHelpers';
-import { useCockpitStore, type GaugeKey } from '../stores/cockpitStore';
-import { COLORS, BORDER_RADIUS } from '../lib/constants';
-
-const AMBER = COLORS.amber;
-const AMBER_GLOW = COLORS.amberGlow;
+import { BiometricIndicator, type BiometricSource } from './BiometricIndicator';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -106,36 +102,32 @@ interface CockpitClusterProps {
   overall: number;
   onCenterPress?: () => void;
   onGaugePress?: (gauge: string) => void;
+  /** When set, show Oura/Apple Health badge on Body gauge */
+  bodyBiometricSource?: BiometricSource | null;
+  /** When set, show Oura/Apple Health badge on State gauge */
+  stateBiometricSource?: BiometricSource | null;
+  /** Pulse badge when Body data is fresh (e.g. synced in last 15 min) */
+  bodyBiometricFresh?: boolean;
+  /** Pulse badge when State data is fresh */
+  stateBiometricFresh?: boolean;
 }
 
 export function CockpitCluster({ 
   gaugeValues, 
   overall, 
   onCenterPress,
-  onGaugePress 
+  onGaugePress,
+  bodyBiometricSource,
+  stateBiometricSource,
+  bodyBiometricFresh = false,
+  stateBiometricFresh = false,
 }: CockpitClusterProps) {
   const router = useRouter();
   const centerPulse = useRef(new Animated.Value(1)).current;
   
-  // State for pre-conversation check modal
-  const [showPreConvoModal, setShowPreConvoModal] = useState(false);
-  
-  // Get system mode for highlighting triggered gauges
-  const systemMode = useCockpitStore((s) => s.systemMode);
-  const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers);
-  const centerScore = useCockpitStore((s) => s.centerScore);
-  
-  // Use weighted center score when available, fall back to simple average
-  const displayScore = centerScore >= 0 ? centerScore : overall;
-  const overallLabel = getOverallStatusLabel(displayScore);
-  const isStabilization = systemMode === 'stabilization';
-  const ringColor = isStabilization 
-    ? AMBER 
-    : (displayScore < 0 ? (TEXT_MUTED + '90') : getGaugeColor(displayScore));
+  const overallLabel = getOverallStatusLabel(overall);
+  const ringColor = overall < 0 ? (TEXT_MUTED + '90') : getGaugeColor(overall);
   const activeCount = Object.values(gaugeValues).filter(v => v >= 0).length;
-  
-  // Check if State is low (for pre-conversation check offer)
-  const isStateLow = gaugeValues.state >= 0 && gaugeValues.state < 50;
   
   // Subtle breathing animation for center ring
   useEffect(() => {
@@ -158,36 +150,11 @@ export function CockpitCluster({
 
   const handleGaugePress = (gauge: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-    // If tapping State gauge when low, show pre-conversation check option
-    if (gauge === 'state' && isStateLow) {
-      setShowPreConvoModal(true);
-      return;
-    }
-    
     if (onGaugePress) {
       onGaugePress(gauge);
     } else {
       router.push({ pathname: '/(modals)/gauge-detail', params: { gauge } });
     }
-  };
-  
-  const handlePreConvoCheck = () => {
-    setShowPreConvoModal(false);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push('/(modals)/pre-conversation-check');
-  };
-  
-  const handleGaugeDetail = () => {
-    setShowPreConvoModal(false);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push({ pathname: '/(modals)/gauge-detail', params: { gauge: 'state' } });
-  };
-  
-  const handleQuickReset = () => {
-    setShowPreConvoModal(false);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push('/(modals)/quick-reset');
   };
 
   return (
@@ -211,12 +178,10 @@ export function CockpitCluster({
         ]}
         onPress={handleCenterPress}
       >
-        {displayScore >= 0 ? (
+        {overall >= 0 ? (
           <>
-            <Text style={[styles.centerValue, { color: ringColor }]}>{displayScore}</Text>
-            <Text style={styles.centerLabel}>
-              {isStabilization ? 'Stabilizing' : overallLabel}
-            </Text>
+            <Text style={[styles.centerValue, { color: ringColor }]}>{overall}</Text>
+            <Text style={styles.centerLabel}>{overallLabel}</Text>
           </>
         ) : (
           <>
@@ -232,10 +197,6 @@ export function CockpitCluster({
         const GaugeComponent = GAUGE_COMPONENTS[key];
         const config = GAUGE_CONFIG[key as keyof typeof GAUGE_CONFIG];
         const gaugeColor = gaugeValue >= 0 ? getGaugeColor(gaugeValue) : '#E0E0E0';
-        
-        // Check if this gauge is a stabilization trigger
-        const isTriggered = stabilizationTriggers.includes(key as GaugeKey);
-        const displayColor = isTriggered ? AMBER : gaugeColor;
         
         // Calculate position
         const radians = (angle * Math.PI) / 180;
@@ -255,44 +216,39 @@ export function CockpitCluster({
               justifyContent: 'center',
             }}
           >
-            {/* Amber glow for triggered gauges */}
-            {isTriggered && (
-              <View
-                style={{
-                  position: 'absolute',
-                  width: GAUGE_SIZE + 24,
-                  height: GAUGE_SIZE + 24,
-                  borderRadius: (GAUGE_SIZE + 24) / 2,
-                  backgroundColor: AMBER_GLOW,
-                  borderWidth: 2,
-                  borderColor: AMBER,
-                }}
-              />
-            )}
-            
             {/* Glow layer */}
-            <GaugeGlow color={displayColor} intensity={gaugeValue} size={GAUGE_SIZE} />
+            <GaugeGlow color={gaugeColor} intensity={gaugeValue} size={GAUGE_SIZE} />
             
             {/* Gauge bubble */}
             <Pressable
               style={({ pressed }) => [
                 styles.gaugeBubble,
                 {
-                  borderColor: gaugeValue >= 0 ? displayColor : 'rgba(255,255,255,0.3)',
-                  borderWidth: isTriggered ? 2 : 2,
-                  shadowColor: displayColor,
-                  shadowOpacity: gaugeValue >= 0 ? 0.5 : 0,
-                  shadowRadius: 10,
+                  borderColor: gaugeValue >= 0 ? gaugeColor : 'rgba(255,255,255,0.5)',
+                  shadowColor: gaugeColor,
+                  shadowOpacity: gaugeValue >= 0 ? 0.4 : 0,
+                  shadowRadius: 8,
                 },
                 pressed && styles.gaugeBubblePressed,
               ]}
               onPress={() => handleGaugePress(key)}
             >
-              {/* Emoji icon for visibility */}
-              <Text style={styles.gaugeEmoji}>{config.icon}</Text>
-              <Text style={[styles.gaugeLabel, { color: gaugeValue >= 0 ? displayColor : '#888' }]}>
+              {(key === 'body' && bodyBiometricSource) || (key === 'state' && stateBiometricSource) ? (
+                <View style={styles.biometricBadgeWrap}>
+                  <BiometricIndicator
+                    source={key === 'body' ? bodyBiometricSource! : stateBiometricSource!}
+                    fresh={key === 'body' ? bodyBiometricFresh : stateBiometricFresh}
+                    size={14}
+                  />
+                </View>
+              ) : null}
+              <GaugeComponent value={gaugeValue} size={36} />
+              <Text style={[styles.gaugeLabel, { color: gaugeColor }]}>
                 {config.label.toUpperCase()}
               </Text>
+              {gaugeValue >= 0 && (
+                <Text style={[styles.gaugeValue, { color: gaugeColor }]}>{gaugeValue}</Text>
+              )}
             </Pressable>
           </View>
         );
@@ -300,56 +256,13 @@ export function CockpitCluster({
 
       {/* Status hint below */}
       <View style={styles.hintContainer}>
-        <Text style={[styles.hintText, isStabilization && { color: AMBER }]}>
-          {displayScore >= 0 
-            ? isStabilization
-              ? `${activeCount}/6 online • Foundation needs attention`
-              : `${activeCount}/6 online • ${overallLabel}`
+        <Text style={styles.hintText}>
+          {overall >= 0 
+            ? `${activeCount}/6 online • ${overallLabel}`
             : 'Tap center to check in'
           }
         </Text>
       </View>
-      
-      {/* Pre-Conversation Check Modal — shows when tapping low State gauge */}
-      <Modal
-        visible={showPreConvoModal}
-        transparent
-        animationType="fade"
-        statusBarTranslucent
-        onRequestClose={() => setShowPreConvoModal(false)}
-      >
-        <Pressable 
-          style={styles.preConvoOverlay} 
-          onPress={() => setShowPreConvoModal(false)}
-        >
-          <View style={styles.preConvoCard}>
-            <View style={styles.preConvoIcon}>
-              <Ionicons name="pulse-outline" size={24} color={AMBER} />
-            </View>
-            
-            <Text style={styles.preConvoTitle}>Your State is {gaugeValues.state}</Text>
-            <Text style={styles.preConvoSubtitle}>
-              Preparing for a difficult conversation?
-            </Text>
-            
-            <View style={styles.preConvoActions}>
-              <Pressable style={styles.preConvoBtn} onPress={handlePreConvoCheck}>
-                <Ionicons name="chatbubbles-outline" size={18} color={AMBER} />
-                <Text style={styles.preConvoBtnText}>Pre-Conversation Check</Text>
-              </Pressable>
-              
-              <Pressable style={styles.preConvoBtn} onPress={handleQuickReset}>
-                <Ionicons name="refresh" size={18} color={ACCENT} />
-                <Text style={[styles.preConvoBtnText, { color: ACCENT }]}>Quick Reset (2 min)</Text>
-              </Pressable>
-              
-              <Pressable style={styles.preConvoSecondaryBtn} onPress={handleGaugeDetail}>
-                <Text style={styles.preConvoSecondaryText}>View State Details</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Pressable>
-      </Modal>
     </View>
   );
 }
@@ -415,18 +328,21 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 6,
   },
+  biometricBadgeWrap: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    zIndex: 1,
+  },
   gaugeBubblePressed: {
     backgroundColor: '#1a1a24',
     transform: [{ scale: 0.94 }],
   },
-  gaugeEmoji: {
-    fontSize: 24,
-    marginBottom: 2,
-  },
   gaugeLabel: {
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
+    marginTop: 2,
     textAlign: 'center',
   },
   gaugeValue: {
@@ -444,73 +360,6 @@ const styles = StyleSheet.create({
   },
   hintText: {
     fontSize: 13,
-    color: TEXT_MUTED,
-  },
-  
-  // Pre-Conversation Check Modal
-  preConvoOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  preConvoCard: {
-    backgroundColor: CARD_BG,
-    borderRadius: BORDER_RADIUS.xl,
-    padding: 24,
-    width: '100%',
-    maxWidth: 320,
-    alignItems: 'center',
-  },
-  preConvoIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: AMBER + '15',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  preConvoTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: TEXT_PRIMARY,
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  preConvoSubtitle: {
-    fontSize: 14,
-    color: TEXT_SECONDARY,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  preConvoActions: {
-    width: '100%',
-    gap: 10,
-  },
-  preConvoBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  preConvoBtnText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: AMBER,
-  },
-  preConvoSecondaryBtn: {
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  preConvoSecondaryText: {
-    fontSize: 14,
     color: TEXT_MUTED,
   },
 });

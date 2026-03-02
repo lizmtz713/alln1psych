@@ -25,11 +25,11 @@ export const CULTURAL_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "We didn't come to this country for you to throw away your future. Art degree? How will you survive?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you don\'t understand anything', 'I don\'t care what you think'],
+    escalationTriggers: [`you don't understand anything`, `I don't care what you think`],
     deescalationResponses: ["I just want you to have a good life.", "Help me understand why this matters to you."],
     safetyTriggers: [],
     
-    skillsTargeted: ['honoring sacrifice while choosing your path', 'bridging cultural gaps', 'showing you\'ve thought it through'],
+    skillsTargeted: ['honoring sacrifice while choosing your path', 'bridging cultural gaps', `showing you've thought it through`],
     hints: [
       "Acknowledge their sacrifices — they're real",
       "Show you've researched and have a plan",
@@ -70,9 +70,9 @@ export const CULTURAL_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "So who is this person you've been spending time with? What family are they from?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you\'re betraying your family', 'what will people say'],
+    escalationTriggers: [`you're betraying your family`, 'what will people say'],
     deescalationResponses: ["Tell me about them as a person.", "I want to meet them."],
-    safetyTriggers: ['we\'ll disown you', 'you\'re dead to us'],
+    safetyTriggers: [`we'll disown you`, `you're dead to us`],
     
     skillsTargeted: ['honesty', 'introducing partner as person first', 'handling disapproval'],
     hints: [
@@ -117,7 +117,7 @@ export const CULTURAL_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["That sounds really hard.", "I didn't realize you dealt with that."],
-    safetyTriggers: ['I don\'t belong anywhere', 'I wish I wasn\'t', 'I hate being'],
+    safetyTriggers: [`I don't belong anywhere`, `I wish I wasn't`, 'I hate being'],
     
     skillsTargeted: ['articulating identity struggles', 'vulnerability', 'finding belonging'],
     hints: [
@@ -154,7 +154,7 @@ export const CULTURAL_SCENARIOS: RoleplayScenario[] = [
     
     persona: 'Parent (needs translation help)',
     personaDescription: "Depends on you to navigate English/American systems. Doesn't realize the pressure.",
-    personaTraits: ['dependent on you', 'grateful', 'doesn\'t see the burden'],
+    personaTraits: ['dependent on you', 'grateful', `doesn't see the burden`],
     
     context: "You've been translating/navigating for your family since you were young. Today is another request.",
     firstMessage: "Mijo/mija, I need you to call the insurance company again. They sent another letter I don't understand.",
@@ -253,7 +253,7 @@ export const CULTURAL_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'realistic',
     escalationTriggers: [],
     deescalationResponses: ["It's okay. You're still [culture]. Language can come back.", "I'm glad you still try."],
-    safetyTriggers: ['I\'m not really [ethnicity]', 'I\'m a disappointment'],
+    safetyTriggers: [`I'm not really [ethnicity]`, `I'm a disappointment`],
     
     skillsTargeted: ['self-compassion', 'honoring heritage', 'making amends without shame'],
     hints: [
@@ -298,7 +298,7 @@ export const CULTURAL_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["That sounds exhausting.", "I didn't realize you had to do that."],
-    safetyTriggers: ['I can\'t do this anymore', 'I want to disappear'],
+    safetyTriggers: [`I can't do this anymore`, 'I want to disappear'],
     
     skillsTargeted: ['naming exhaustion', 'finding safe spaces', 'self-compassion'],
     hints: [
@@ -347,7 +347,7 @@ export const CULTURAL_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["Thank you for trusting me with this.", "That's a huge weight to carry."],
-    safetyTriggers: ['what\'s the point', 'we might get deported', 'I can\'t take this'],
+    safetyTriggers: [`what's the point`, 'we might get deported', `I can't take this`],
     
     skillsTargeted: ['selective disclosure', 'seeking support', 'managing chronic stress'],
     hints: [
@@ -384,13 +384,13 @@ export const CULTURAL_SCENARIOS: RoleplayScenario[] = [
     
     persona: 'Parent',
     personaDescription: "Proud of you but doesn't understand college life. Might have expectations you can't meet.",
-    personaTraits: ['proud', 'doesn\'t understand', 'high expectations'],
+    personaTraits: ['proud', `doesn't understand`, 'high expectations'],
     
     context: "You're struggling in college with things your family doesn't understand (office hours, networking, mental health days).",
     firstMessage: "Why can't you come home this weekend? You're always so busy. Don't forget why you're there.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['we sacrificed for this', 'you\'re changing'],
+    escalationTriggers: ['we sacrificed for this', `you're changing`],
     deescalationResponses: ["I just miss you.", "Help me understand what college is like."],
     safetyTriggers: [],
     
@@ -435,7 +435,7 @@ export const CULTURAL_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "You're not coming to [traditional event]? This is who we are. Are you ashamed of your family now?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you think you\'re better than us', 'you\'re losing yourself'],
+    escalationTriggers: [`you think you're better than us`, `you're losing yourself`],
     deescalationResponses: ["I don't want to lose you to this new life.", "Maybe we can find a way."],
     safetyTriggers: [],
     

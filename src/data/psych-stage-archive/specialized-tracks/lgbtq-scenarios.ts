@@ -26,7 +26,7 @@ export const LGBTQ_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["Thanks for telling me. I don't totally understand but I'm here for you."],
-    safetyTriggers: ['I hate myself', 'I wish I was normal', 'I can\'t tell my parents'],
+    safetyTriggers: ['I hate myself', 'I wish I was normal', `I can't tell my parents`],
     
     skillsTargeted: ['vulnerability', 'self-acceptance language', 'setting pace'],
     hints: [
@@ -71,7 +71,7 @@ export const LGBTQ_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["Whatever you're feeling is valid.", "There's nothing wrong with you."],
-    safetyTriggers: ['I\'m disgusting', 'God hates me', 'I want to die'],
+    safetyTriggers: [`I'm disgusting`, 'God hates me', 'I want to die'],
     
     skillsTargeted: ['self-reflection', 'self-acceptance', 'normalizing feelings'],
     hints: [
@@ -114,7 +114,7 @@ export const LGBTQ_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "That's so gay. [laughs]",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you\'re gay too', 'why do you care'],
+    escalationTriggers: [`you're gay too`, 'why do you care'],
     deescalationResponses: ["Whatever, it's just a word.", "Fine, my bad."],
     safetyTriggers: [],
     
@@ -165,7 +165,7 @@ export const LGBTQ_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'realistic',
     escalationTriggers: ['how could you do this to us', 'this is a phase'],
     deescalationResponses: ["I love you. This is a lot to take in.", "I need some time but I'm glad you told me."],
-    safetyTriggers: ['get out of my house', 'we\'re sending you away', 'you\'re not my child'],
+    safetyTriggers: ['get out of my house', `we're sending you away`, `you're not my child`],
     
     skillsTargeted: ['courage', 'staying grounded', 'not responsible for their reaction'],
     hints: [
@@ -253,7 +253,7 @@ export const LGBTQ_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "So... I'm gay. I've been wanting to tell you for a while. Please don't hate me.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['that\'s disgusting', 'I don\'t want to be friends anymore'],
+    escalationTriggers: [`that's disgusting`, `I don't want to be friends anymore`],
     deescalationResponses: ["Thank you for telling me.", "I'm glad you trusted me."],
     safetyTriggers: ['I want to die', 'I hate myself', 'my parents will kill me'],
     
@@ -292,7 +292,7 @@ export const LGBTQ_SCENARIOS: RoleplayScenario[] = [
     
     persona: 'Teacher/Adult',
     personaDescription: "Didn't mean harm. Might be apologetic, might be awkward about it.",
-    personaTraits: ['didn\'t mean harm', 'might fumble', 'trying'],
+    personaTraits: [`didn't mean harm`, 'might fumble', 'trying'],
     
     context: "A teacher or other adult used the wrong pronouns for you in front of others.",
     firstMessage: "Yes, she was saying that— oh wait, did I say something wrong?",
@@ -439,7 +439,7 @@ export const LGBTQ_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'realistic',
     escalationTriggers: [],
     deescalationResponses: ["Fine, coffee works. I was just trying to be chill about it.", "Okay, where do you want to go?"],
-    safetyTriggers: ['don\'t tell anyone', 'I\'ll pick you up', 'send me your address'],
+    safetyTriggers: [`don't tell anyone`, `I'll pick you up`, 'send me your address'],
     
     skillsTargeted: ['safety awareness', 'suggesting alternatives', 'trusting gut'],
     hints: [

@@ -39,6 +39,11 @@ import {
   contentAgeToManualAge,
   type ManualLesson,
 } from '../../src/data/manualContent';
+import {
+  getHumanManualLesson,
+  humanManualCategories,
+  type HumanManualLesson,
+} from '../../src/data/humanManual';
 import { ShareInsightButton, type ShareableContent } from '../../src/features/share-insight';
 
 function renderBody(text: string): React.ReactNode[] {
@@ -112,19 +117,33 @@ export default function LessonScreen() {
 
   const legacyLesson = id ? getLessonById(id) : null;
   const manualLesson = id ? getManualLessonById(id) : null;
+  const humanManualLesson = id ? getHumanManualLesson(id) : undefined;
   const isManual = !!manualLesson;
+  const isHumanManual = !!humanManualLesson;
 
   const legacyModule = legacyLesson ? getModuleByLessonId(legacyLesson.id) : null;
   const manualModule = manualLesson ? getManualModuleByLessonId(manualLesson.id) : null;
   const manualSection = manualLesson ? getManualSectionByLessonId(manualLesson.id) : null;
+  const humanManualCategory = humanManualLesson 
+    ? humanManualCategories.find(cat => cat.lessons.some(l => l.id === humanManualLesson.id))
+    : null;
 
   const legacyContent = legacyLesson ? getContentForAge(legacyLesson, contentAge) : null;
   const manualAge = contentAgeToManualAge(contentAge);
   const manualContent = manualLesson ? manualLesson.content[manualAge] : null;
+  // humanManual lessons have a different structure - create compatible content
+  const humanManualContent = humanManualLesson ? {
+    introduction: humanManualLesson.content.introduction,
+    keyConcepts: humanManualLesson.content.keyInsights.map(insight => ({
+      title: insight.title,
+      explanation: insight.explanation,
+    })),
+    reflectionPrompt: humanManualLesson.reflectionQuestions?.[0] ?? 'What resonates with you from this lesson?',
+  } : null;
 
-  const lesson = legacyLesson ?? manualLesson;
+  const lesson = legacyLesson ?? manualLesson ?? humanManualLesson;
   const module = legacyModule ?? manualModule;
-  const content = legacyContent ?? manualContent;
+  const content = legacyContent ?? manualContent ?? humanManualContent;
   const completed = id ? isLessonCompleted(id) : false;
 
   if (!lesson || !content) {
@@ -145,7 +164,9 @@ export default function LessonScreen() {
     ? `${module.emoji} ${module.title}${lessonIndex ? ` · Lesson ${lessonIndex}` : ''}`
     : manualSection
       ? `${manualSection.emoji} ${manualSection.title}`
-      : 'Manual';
+      : humanManualCategory
+        ? `${humanManualCategory.emoji} ${humanManualCategory.title}`
+        : 'Manual';
 
   const handleComplete = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

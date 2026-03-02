@@ -27,7 +27,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["I'm sorry, I don't know what to say.", "I just want you to know I care."],
-    safetyTriggers: ['I want to be with them', 'I can\'t do this anymore'],
+    safetyTriggers: ['I want to be with them', `I can't do this anymore`],
     
     skillsTargeted: ['receiving condolences', 'setting boundaries kindly', 'accepting imperfect support'],
     hints: [
@@ -72,7 +72,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["Let me know what you need.", "I'll follow your lead."],
-    safetyTriggers: ['I can\'t be here', 'I can\'t do this'],
+    safetyTriggers: [`I can't be here`, `I can't do this`],
     
     skillsTargeted: ['asking for what you need', 'navigating re-entry', 'giving yourself grace'],
     hints: [
@@ -107,7 +107,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     ageRange: [8, 60],
     difficulty: 'intermediate',
     
-    persona: 'New Person You\'re Meeting',
+    persona: `New Person You're Meeting`,
     personaDescription: "Doesn't know your situation. Asks an innocent question.",
     personaTraits: ['innocent', 'curious', 'will feel bad'],
     
@@ -197,7 +197,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     ageRange: [12, 30],
     difficulty: 'advanced',
     
-    persona: 'Another Friend (didn\'t know the deceased)',
+    persona: `Another Friend (didn't know the deceased)`,
     personaDescription: "Wants to support you but didn't know the person who died.",
     personaTraits: ['supportive', 'outsider to grief', 'cares about you'],
     
@@ -207,7 +207,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["I'm so sorry.", "Tell me about them?"],
-    safetyTriggers: ['should have been me', 'I can\'t live without them', 'what\'s the point'],
+    safetyTriggers: ['should have been me', `I can't live without them`, `what's the point`],
     
     skillsTargeted: ['sharing grief', 'keeping memory alive', 'accepting support'],
     hints: [
@@ -244,7 +244,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     
     persona: 'Person Who Minimizes',
     personaDescription: "Says 'it's just a pet.' Doesn't understand.",
-    personaTraits: ['dismissive', 'doesn\'t get it', 'might come around'],
+    personaTraits: ['dismissive', `doesn't get it`, 'might come around'],
     
     context: "Your pet died and you're grieving. Someone says 'it's just a pet.'",
     firstMessage: "You're still upset about that? It was just a dog/cat. You can get a new one.",
@@ -301,7 +301,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'realistic',
     escalationTriggers: [],
     deescalationResponses: ["It's okay to be upset.", "What questions do you have?"],
-    safetyTriggers: ['I don\'t want to live through this', 'I hate you both'],
+    safetyTriggers: [`I don't want to live through this`, 'I hate you both'],
     
     skillsTargeted: ['processing shock', 'asking questions', 'expressing feelings'],
     hints: [
@@ -344,7 +344,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "I can't believe your mother/father. They're so selfish. Did they say anything about the money situation? Can you tell them I need to know by Friday?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you\'re taking their side', 'after everything they did'],
+    escalationTriggers: [`you're taking their side`, 'after everything they did'],
     deescalationResponses: ["You're right. I shouldn't put this on you.", "I'm sorry."],
     safetyTriggers: [],
     
@@ -440,7 +440,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["Friendship breakups are real breakups.", "I'm sorry you're going through this."],
-    safetyTriggers: ['no one will ever', 'I can\'t trust anyone'],
+    safetyTriggers: ['no one will ever', `I can't trust anyone`],
     
     skillsTargeted: ['naming friendship grief', 'processing loss', 'moving forward'],
     hints: [
@@ -485,7 +485,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'realistic',
     escalationTriggers: [],
     deescalationResponses: ["I'm sorry. I'm not being helpful. What do you need?"],
-    safetyTriggers: ['I have nothing left', 'what\'s the point of me', 'I want to die'],
+    safetyTriggers: ['I have nothing left', `what's the point of me`, 'I want to die'],
     
     skillsTargeted: ['grieving identity', 'setting boundaries on positivity', 'finding new self'],
     hints: [
@@ -530,7 +530,7 @@ export const GRIEF_SCENARIOS: RoleplayScenario[] = [
     responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: ["It's okay. Take your time.", "I'm just glad we're talking."],
-    safetyTriggers: ['I can\'t live without you', 'I want to go with you'],
+    safetyTriggers: [`I can't live without you`, 'I want to go with you'],
     
     skillsTargeted: ['saying what needs to be said', 'presence over perfection', 'anticipatory grief'],
     hints: [

@@ -17,7 +17,7 @@ export const NEURODIVERGENT_SCENARIOS: RoleplayScenario[] = [
     ageRange: [13, 25],
     difficulty: 'beginner',
     
-    persona: 'Friend (doesn\'t understand ADHD)',
+    persona: `Friend (doesn't understand ADHD)`,
     personaDescription: "Cares about you but frustrated. Has misconceptions about ADHD.",
     personaTraits: ['frustrated', 'misconceptions', 'willing to listen'],
     
@@ -25,7 +25,7 @@ export const NEURODIVERGENT_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "This is like the third time you forgot. Can't you just set a reminder or something? It's not that hard.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you\'re just making excuses'],
+    escalationTriggers: [`you're just making excuses`],
     deescalationResponses: ["I didn't know that. I'm sorry.", "That makes more sense."],
     safetyTriggers: [],
     
@@ -109,7 +109,7 @@ export const NEURODIVERGENT_SCENARIOS: RoleplayScenario[] = [
     
     persona: 'Friend/Partner/Coworker',
     personaDescription: "Said something that felt critical. Probably didn't mean it as harshly as it landed.",
-    personaTraits: ['didn\'t mean harm', 'confused by your reaction'],
+    personaTraits: [`didn't mean harm`, 'confused by your reaction'],
     
     context: "Someone gave you feedback or said something that triggered intense rejection feelings.",
     firstMessage: "Hey, I was just saying maybe next time you could... are you okay? You look really upset.",
@@ -164,7 +164,7 @@ export const NEURODIVERGENT_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "Why can't you just come to the party? It's not that loud. You're being so antisocial.",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you don\'t look autistic', 'everyone gets overwhelmed'],
+    escalationTriggers: [`you don't look autistic`, 'everyone gets overwhelmed'],
     deescalationResponses: ["I didn't realize. What would help?", "Sorry, I didn't understand."],
     safetyTriggers: [],
     
@@ -203,7 +203,7 @@ export const NEURODIVERGENT_SCENARIOS: RoleplayScenario[] = [
     
     persona: 'Someone Trying to Help',
     personaDescription: "Wants to help but doesn't know how. Might be doing things that make it worse.",
-    personaTraits: ['caring', 'doesn\'t know what to do', 'might overwhelm'],
+    personaTraits: ['caring', `doesn't know what to do`, 'might overwhelm'],
     
     context: "You're overwhelmed/in meltdown and someone is trying to help in ways that aren't helping.",
     firstMessage: "Oh no, are you okay? What's wrong? Can I get you something? Should I call someone? What do you need?",
@@ -393,9 +393,9 @@ export const NEURODIVERGENT_SCENARIOS: RoleplayScenario[] = [
     firstMessage: "You've been home all day. How is it possible you couldn't just make one phone call?",
     
     responseStyle: 'realistic',
-    escalationTriggers: ['you\'re just lazy', 'everyone has to do things they don\'t want to'],
+    escalationTriggers: [`you're just lazy`, `everyone has to do things they don't want to`],
     deescalationResponses: ["That sounds really frustrating. I didn't know.", "What can I do to help?"],
-    safetyTriggers: ['I\'m worthless', 'I can\'t do anything right'],
+    safetyTriggers: [`I'm worthless`, `I can't do anything right`],
     
     skillsTargeted: ['explaining without excusing', 'self-compassion', 'problem-solving together'],
     hints: [
@@ -430,7 +430,7 @@ export const NEURODIVERGENT_SCENARIOS: RoleplayScenario[] = [
     ageRange: [11, 30],
     difficulty: 'intermediate',
     
-    persona: 'Friend You\'re With',
+    persona: `Friend You're With`,
     personaDescription: "Doesn't realize you're struggling. Having a good time.",
     personaTraits: ['oblivious', 'friendly', 'will help if asked'],
     

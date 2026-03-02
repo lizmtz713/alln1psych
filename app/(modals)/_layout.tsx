@@ -23,20 +23,15 @@ export default function ModalsLayout() {
       <Stack.Screen name="decode" options={{ presentation: 'modal' }} />
       <Stack.Screen name="relate" options={{ presentation: 'modal' }} />
       <Stack.Screen name="love" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="referee" options={{ presentation: 'modal' }} />
       <Stack.Screen name="history" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="prompt-generator" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="patterns" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="awards" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="identity-setup" options={{ presentation: 'fullScreenModal' }} />
-      <Stack.Screen name="learning-style-quiz" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="pre-conversation-check" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="reach-out-scaffold" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="drift-detector" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="awe-activities" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="cycle" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="therapist-share" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="features" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="weekly-insight" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="resolve" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="health-connections" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="notification-settings" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="heart-inbox" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="heart-mail-detail" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="heart-mail-compose" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }
