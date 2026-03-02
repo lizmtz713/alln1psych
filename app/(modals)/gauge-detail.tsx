@@ -15,27 +15,20 @@ import { useCycleStore, useCycleData, PHASE_INFO } from '../../src/stores/cycleS
 import { GAUGE_CONFIG, getGaugeStatusLabel } from '../../src/utils/gaugeHelpers';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { getDailyFact } from '../../src/data/psychKnowledge';
-import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from '../../src/components/gauges';
+import { GaugeArc } from '../../src/components/gauges/GaugeArc';
 import { ACADEMIC_SOURCES, getInsightsForGauge, type GaugeType } from '../../src/data/academicSources';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../../src/lib/constants';
 
-const GAUGE_COMPONENTS: Record<string, React.FC<{ value: number; size?: number }>> = {
-  body: BodyGauge,
-  state: StateGauge,
-  emotion: EmotionGauge,
-  connection: ConnectionGauge,
-  direction: DirectionGauge,
-  alignment: AlignmentGauge,
-};
+// Using design system colors (v2.0 - Oura-inspired)
+const COCKPIT_BG = COLORS.background;
+const CARD_BG = COLORS.surface;
+const CARD_BORDER = COLORS.border;
+const TEXT_PRIMARY = COLORS.text;
+const TEXT_SECONDARY = COLORS.textSecondary;
+const TEXT_MUTED = COLORS.textMuted;
+const ACCENT = COLORS.accent;
 
-const COCKPIT_BG = '#09090F';
-const CARD_BG = '#111118';
-const CARD_BORDER = 'rgba(255,255,255,0.06)';
-const TEXT_PRIMARY = '#F0F0F5';
-const TEXT_SECONDARY = '#8888A0';
-const TEXT_MUTED = '#55556A';
-const ACCENT = '#7C4DFF';
-
-const GAUGE_SIZE = 140;
+const GAUGE_SIZE = 200;
 
 const GAUGE_DETAIL_CONTENT: Record<
   string,
@@ -174,13 +167,16 @@ export default function GaugeDetailScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 2. LARGE GAUGE */}
+        {/* 2. LARGE GAUGE — Oura-inspired arc visualization */}
         <View style={styles.gaugeWrap}>
-          {(() => {
-            const GaugeComponent = GAUGE_COMPONENTS[gaugeId] ?? BodyGauge;
-            return <GaugeComponent value={value} size={140} />;
-          })()}
-          <Text style={styles.gaugeStatusText}>{statusLabel}</Text>
+          <GaugeArc
+            value={value}
+            gauge={gaugeId as any}
+            size={GAUGE_SIZE}
+            strokeWidth={12}
+            label={config.label}
+            alertText={value >= 0 && value < 30 ? 'PAY ATTENTION' : value >= 0 && value < 50 ? 'NEEDS CARE' : undefined}
+          />
           <TrendIndicator trend={trend} />
         </View>
 
@@ -355,8 +351,8 @@ const styles = StyleSheet.create({
   error: { fontSize: 16, color: TEXT_SECONDARY, padding: 20 },
   scroll: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 40 },
-  gaugeWrap: { alignItems: 'center', marginBottom: 24 },
-  gaugeStatusText: { fontSize: 14, color: TEXT_SECONDARY, marginTop: 8 },
+  gaugeWrap: { alignItems: 'center', marginBottom: SPACING.xl, marginTop: SPACING.lg },
+  gaugeStatusText: { fontSize: 14, color: TEXT_SECONDARY, marginTop: SPACING.sm },
   trendRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 },
   trendText: { fontSize: 14, color: TEXT_SECONDARY },
   card: {
@@ -430,8 +426,8 @@ const styles = StyleSheet.create({
   },
   insightItem: {
     marginBottom: 16,
-    backgroundColor: 'rgba(124,77,255,0.08)',
-    borderRadius: 12,
+    backgroundColor: COLORS.accentBg,
+    borderRadius: BORDER_RADIUS.md,
     padding: 14,
   },
   insightTitle: {
