@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -30,6 +30,7 @@ import {
 } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { getPersonality, getRelationshipDynamic } from '../../src/services/personology';
+import { useHeartNotesStore } from '../../src/stores/heartNotesStore';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -98,6 +99,14 @@ export default function CircleScreen() {
     updateMemberLoveLanguage,
     getLoveLanguageNudge,
   } = useCircleStore();
+
+  // Heart Mail
+  const { inbox, fetchInbox } = useHeartNotesStore();
+  const unreadCount = inbox.filter((m) => m.status === 'pending').length;
+  
+  useEffect(() => {
+    fetchInbox().catch(() => {}); // Silently fail if not logged in
+  }, []);
 
   const isDemoData = members.some((m) => DEMO_MEMBER_IDS.includes(m.id));
 
@@ -211,6 +220,33 @@ export default function CircleScreen() {
           <Text style={styles.demoBadgeText}>Demo data</Text>
         </View>
       )}
+
+      {/* HEART MAIL BANNER */}
+      <Pressable 
+        style={[styles.heartMailBanner, unreadCount > 0 && styles.heartMailBannerActive]}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.push('/(modals)/heart-inbox');
+        }}
+      >
+        <View style={styles.heartMailIcon}>
+          <Ionicons name="mail" size={20} color={unreadCount > 0 ? '#EC4899' : '#8888A0'} />
+          {unreadCount > 0 && (
+            <View style={styles.heartMailBadge}>
+              <Text style={styles.heartMailBadgeText}>{unreadCount}</Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.heartMailText}>
+          <Text style={[styles.heartMailTitle, unreadCount > 0 && styles.heartMailTitleActive]}>
+            {unreadCount > 0 ? `${unreadCount} new Heart ${unreadCount === 1 ? 'Message' : 'Messages'}` : 'Heart Mail'}
+          </Text>
+          <Text style={styles.heartMailSubtitle}>
+            {unreadCount > 0 ? 'Tap to view' : 'Send love notes to your Circle'}
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#55556A" />
+      </Pressable>
 
       {/* YOUR TEMPERATURE */}
       <View style={styles.section}>
@@ -441,15 +477,25 @@ export default function CircleScreen() {
                           onPress={() => handleSendText(m)}
                         >
                           <Ionicons name="chatbubble-outline" size={18} color={COLORS.accent} />
-                          <Text style={styles.actionBtnText}>Send a text</Text>
+                          <Text style={styles.actionBtnText}>Text</Text>
                         </Pressable>
                         <Pressable style={styles.actionBtn} onPress={() => handleCall(m)}>
                           <Ionicons name="call-outline" size={18} color={COLORS.accent} />
                           <Text style={styles.actionBtnText}>Call</Text>
                         </Pressable>
+                        <Pressable 
+                          style={[styles.actionBtn, styles.actionBtnHeart]}
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            router.push({ pathname: '/(modals)/heart-compose', params: { recipientId: m.id, recipientName: m.name } });
+                          }}
+                        >
+                          <Ionicons name="heart-outline" size={18} color="#EC4899" />
+                          <Text style={[styles.actionBtnText, { color: '#EC4899' }]}>Heart Mail</Text>
+                        </Pressable>
                         <Pressable style={styles.actionBtn} onPress={() => handleReachedOut(m)}>
                           <Ionicons name="checkmark-circle-outline" size={18} color={COLORS.accent} />
-                          <Text style={styles.actionBtnText}>I reached out</Text>
+                          <Text style={styles.actionBtnText}>Done</Text>
                         </Pressable>
                       </View>
                       {(m.temperature === 'orange' || m.temperature === 'red') && (
@@ -784,5 +830,68 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: COLORS.surface,
+  },
+  // Heart Mail styles
+  heartMailBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  heartMailBannerActive: {
+    borderColor: '#EC4899' + '44',
+    backgroundColor: 'rgba(236,72,153,0.08)',
+  },
+  heartMailIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(236,72,153,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  heartMailBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#EC4899',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 5,
+  },
+  heartMailBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  heartMailText: {
+    flex: 1,
+  },
+  heartMailTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#8888A0',
+    marginBottom: 2,
+  },
+  heartMailTitleActive: {
+    color: '#EC4899',
+  },
+  heartMailSubtitle: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+  },
+  actionBtnHeart: {
+    backgroundColor: 'rgba(236,72,153,0.1)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
 });

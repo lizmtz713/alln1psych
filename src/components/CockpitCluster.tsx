@@ -20,7 +20,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Layout constants
 const CLUSTER_SIZE = Math.min(SCREEN_WIDTH - 48, 340);
 const CENTER_SIZE = 100;
-const GAUGE_SIZE = 72;
+const GAUGE_SIZE = 76;
 const GAUGE_RADIUS = (CLUSTER_SIZE - GAUGE_SIZE) / 2 - 8; // Distance from center to gauge centers
 
 const TEXT_PRIMARY = '#F0F0F5';
@@ -233,17 +233,17 @@ export function CockpitCluster({
               ]}
               onPress={() => handleGaugePress(key)}
             >
-              {(key === 'body' && bodyBiometricSource) || (key === 'state' && stateBiometricSource) ? (
-                <View style={styles.biometricBadgeWrap}>
-                  <BiometricIndicator
-                    source={key === 'body' ? bodyBiometricSource! : stateBiometricSource!}
-                    fresh={key === 'body' ? bodyBiometricFresh : stateBiometricFresh}
-                    size={14}
-                  />
-                </View>
-              ) : null}
-              <GaugeComponent value={gaugeValue} size={36} />
-              <Text style={[styles.gaugeLabel, { color: gaugeColor }]}>
+              {/* Actual gauge visualization */}
+              {GaugeComponent && (
+                <GaugeComponent value={gaugeValue} size={GAUGE_SIZE - 20} />
+              )}
+              {/* Value overlay */}
+              {gaugeValue >= 0 && (
+                <Text style={[styles.gaugeValueOverlay, { color: displayColor }]}>
+                  {gaugeValue}
+                </Text>
+              )}
+              <Text style={[styles.gaugeLabel, { color: gaugeValue >= 0 ? displayColor : '#888' }]}>
                 {config.label.toUpperCase()}
               </Text>
               {gaugeValue >= 0 && (
@@ -327,6 +327,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowOffset: { width: 0, height: 2 },
     elevation: 6,
+    overflow: 'hidden',
   },
   biometricBadgeWrap: {
     position: 'absolute',
@@ -344,6 +345,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
     marginTop: 2,
     textAlign: 'center',
+    position: 'absolute',
+    bottom: 4,
+  },
+  gaugeValueOverlay: {
+    position: 'absolute',
+    top: 4,
+    fontSize: 10,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
   gaugeValue: {
     fontSize: 11,

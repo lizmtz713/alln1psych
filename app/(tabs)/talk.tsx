@@ -621,20 +621,63 @@ export default function TalkScreen() {
         onClose={() => setShowPremiumGate(false)}
         feature="ai"
       />
-      {/* Header with session controls */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <Text style={{ color: '#F0F0F5', fontSize: 18, fontWeight: '600' }}>Talk to Gauge</Text>
-          <AIUsageIndicator />
+      {/* Header with InGauge branding */}
+      <View style={{ paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '700' }}>InGauge</Text>
+            <AIUsageIndicator />
+          </View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleNewTopic(); }} style={{ backgroundColor: '#111118', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+              <Text style={{ color: '#8888A0', fontSize: 12 }}>New</Text>
+            </Pressable>
+            <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleSaveAndClose(); }} style={{ backgroundColor: '#111118', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
+              <Text style={{ color: '#8888A0', fontSize: 12 }}>Save</Text>
+            </Pressable>
+          </View>
         </View>
-        <View style={{ flexDirection: 'row', gap: 10 }}>
-          <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleNewTopic(); }} style={{ backgroundColor: '#111118', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
-            <Text style={{ color: '#8888A0', fontSize: 13 }}>New Topic</Text>
+        
+        {/* Quick Actions Bar */}
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
+          <Pressable 
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(modals)/prompt-generator'); }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(124,77,255,0.12)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20 }}
+          >
+            <Ionicons name="sparkles" size={16} color="#7C4DFF" />
+            <Text style={{ color: '#7C4DFF', fontSize: 13, fontWeight: '600' }}>Prompts</Text>
           </Pressable>
-          <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleSaveAndClose(); }} style={{ backgroundColor: '#111118', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
-            <Text style={{ color: '#8888A0', fontSize: 13 }}>Save & Close</Text>
+          <Pressable 
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/learn'); }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(59,130,246,0.12)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20 }}
+          >
+            <Ionicons name="apps" size={16} color="#3B82F6" />
+            <Text style={{ color: '#3B82F6', fontSize: 13, fontWeight: '600' }}>Tools</Text>
+          </Pressable>
+          <Pressable 
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setInputMode('voice'); }}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(74,222,128,0.12)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20 }}
+          >
+            <Ionicons name="mic" size={16} color="#4ADE80" />
+            <Text style={{ color: '#4ADE80', fontSize: 13, fontWeight: '600' }}>Voice</Text>
           </Pressable>
         </View>
+        
+        {/* Context Bar - Current Gauges */}
+        {(useCockpitStore.getState().body.value >= 0 || useCockpitStore.getState().state.value >= 0) && (
+          <Pressable 
+            onPress={() => router.push('/(tabs)/index')}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, paddingVertical: 6, paddingHorizontal: 10, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 8 }}
+          >
+            <Ionicons name="pulse" size={14} color="#8888A0" />
+            <Text style={{ color: '#8888A0', fontSize: 12 }}>
+              Body {useCockpitStore.getState().body.value >= 0 ? useCockpitStore.getState().body.value : '—'} • 
+              State {useCockpitStore.getState().state.value >= 0 ? useCockpitStore.getState().state.value : '—'} • 
+              Emotion {useCockpitStore.getState().emotion.value >= 0 ? useCockpitStore.getState().emotion.value : '—'}
+            </Text>
+            <Ionicons name="chevron-forward" size={14} color="#55556A" />
+          </Pressable>
+        )}
       </View>
 
       {/* Follow-up from last time */}

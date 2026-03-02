@@ -1,96 +1,102 @@
-import { createClient } from '@supabase/supabase-js';
 import { notFound } from 'next/navigation';
-import ReportViewer from '@/components/ReportViewer';
+import { createServiceClient, SharedReport, CheckIn } from '@/lib/supabase';
+import { ReportViewer } from '@/components/ReportViewer';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-function getTimeRange(report: { config?: { timeRange?: { start: string; end: string }; range?: string }; created_at: string }) {
-  const tr = report.config?.timeRange;
-  if (tr?.start && tr?.end) return { start: tr.start, end: tr.end };
-  const end = new Date();
-  const start = new Date(report.created_at);
-  const range = report.config?.range ?? '30';
-  if (range === '7') start.setDate(start.getDate() - 7);
-  else if (range === '30') start.setDate(start.getDate() - 30);
-  else start.setFullYear(start.getFullYear() - 10);
-  return { start: start.toISOString(), end: end.toISOString() };
+interface PageProps {
+  params: { shortCode: string };
 }
 
-export default async function SharePage({
-  params,
-  searchParams,
-}: {
-  params: { shortCode: string };
-  searchParams: { t?: string };
-}) {
-  const { shortCode } = params;
-  const token = searchParams.t;
-
-  const { data: report, error: reportError } = await supabase
+async function getReport(shortCode: string) {
+  const supabase = createServiceClient();
+  
+  // Get the report
+  const { data: report, error } = await supabase
     .from('shared_reports')
     .select('*')
     .eq('short_code', shortCode)
     .eq('status', 'active')
     .single();
-
-  if (reportError || !report) notFound();
-  if (new Date(report.expires_at) < new Date()) notFound();
-  if (token != null && report.token !== token) notFound();
-  if (report.max_views != null && report.view_count >= report.max_views) notFound();
-
-  const { start, end } = getTimeRange(report);
-  const userId = report.user_id;
-  const config = report.config ?? {};
-
-  const [profileRes, moodRes, convRes, journalRes] = await Promise.all([
-    supabase.from('profiles').select('name, pronouns').eq('id', userId).single(),
-    config.includeMood !== false
-      ? supabase
-          .from('mood_checkins')
-          .select('id, mood, mood_label, note, created_at')
-          .eq('user_id', userId)
-          .gte('created_at', start)
-          .lte('created_at', end)
-          .order('created_at', { ascending: true })
-      : { data: [] },
-    config.includeConversations !== false
-      ? supabase
-          .from('conversations')
-          .select('id, summary, emotional_tone, created_at')
-          .eq('user_id', userId)
-          .gte('created_at', start)
-          .lte('created_at', end)
-          .order('created_at', { ascending: true })
-      : { data: [] },
-    config.includeJournal !== false
-      ? supabase
-          .from('journal_entries')
-          .select('id, content, mood, created_at')
-          .eq('user_id', userId)
-          .gte('created_at', start)
-          .lte('created_at', end)
-          .order('created_at', { ascending: true })
-      : { data: [] },
+  
+  if (error || !report) {
+    return { error: 'not_found' as const };
+  }
+  
+  // Check expiration
+  if (new Date(report.expires_at) < new Date()) {
+    await supabase
+      .from('shared_reports')
+      .update({ status: 'expired' })
+      .eq('id', report.id);
+    return { error: 'expired' as const };
+  }
+  
+  // Check max views
+  if (report.max_views && report.view_count >= report.max_views) {
+    return { error: 'max_views' as const };
+  }
+  
+  // Get check-in data
+  const { start, end } = report.config.timeRange;
+  const { data: checkins } = await supabase
+    .from('checkins')
+    .select('*')
+    .eq('user_id', report.user_id)
+    .gte('created_at', start)
+    .lte('created_at', end)
+    .order('created_at', { ascending: true });
+  
+  // Log access and increment view count
+  await Promise.all([
+    supabase.from('report_access_logs').insert({
+      report_id: report.id,
+      action: 'viewed',
+    }),
+    supabase
+      .from('shared_reports')
+      .update({
+        view_count: report.view_count + 1,
+        last_accessed_at: new Date().toISOString(),
+      })
+      .eq('id', report.id),
   ]);
+  
+  return {
+    report: report as SharedReport,
+    checkins: (checkins || []) as CheckIn[],
+  };
+}
 
-  await supabase
-    .from('shared_reports')
-    .update({
-      view_count: report.view_count + 1,
-      last_accessed_at: new Date().toISOString(),
-    })
-    .eq('id', report.id);
+export default async function SharePage({ params }: PageProps) {
+  const result = await getReport(params.shortCode);
+  
+  if ('error' in result) {
+    if (result.error === 'not_found') {
+      notFound();
+    }
+    
+    return (
+      <main className="report-container">
+        <div className="text-center py-16">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+            {result.error === 'expired' ? 'Report Expired' : 'View Limit Reached'}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            {result.error === 'expired'
+              ? 'This report link has expired. Please request a new one.'
+              : 'This report has reached its maximum view limit.'}
+          </p>
+        </div>
+      </main>
+    );
+  }
+  
+  return <ReportViewer report={result.report} checkins={result.checkins} />;
+}
 
-  return (
-    <ReportViewer
-      report={report}
-      profile={profileRes.data ?? undefined}
-      moodCheckins={moodRes.data ?? []}
-      conversations={convRes.data ?? []}
-      journalEntries={journalRes.data ?? []}
-    />
-  );
+export async function generateMetadata({ params }: PageProps) {
+  return {
+    title: 'InGauge Wellness Report',
+    description: 'Private wellness report shared via InGauge',
+    robots: 'noindex, nofollow',
+  };
 }

@@ -1,106 +1,433 @@
 /**
- * Heart Inbox — View all incoming heart messages
+ * Heart Inbox Modal
+ * View received Heart Mail messages
  */
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator } from 'react-native';
+
+import { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  RefreshControl,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { useHeartInboxStore } from '../../src/stores/heartInboxStore';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { ErrorBoundary } from '../../src/components/ErrorBoundary';
+import { useHeartNotesStore, type HeartMail, type NoteType } from '../../src/stores/heartNotesStore';
 
-export default function HeartInboxScreen() {
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const { messages, isLoading, fetchMessages } = useHeartInboxStore();
+const COLORS = {
+  bg: '#09090F',
+  surface: '#111118',
+  surfaceElevated: '#1A1A24',
+  border: 'rgba(255,255,255,0.06)',
+  text: '#F0F0F5',
+  textSecondary: '#A0A0B8',
+  textMuted: '#6B6B80',
+  accent: '#7C4DFF',
+  pink: '#EC4899',
+  pinkSoft: 'rgba(236,72,153,0.12)',
+};
 
-  useEffect(() => {
-    fetchMessages();
-  }, []);
+const NOTE_TYPE_CONFIG: Record<NoteType, { emoji: string; label: string }> = {
+  general: { emoji: '💌', label: 'Message' },
+  gratitude: { emoji: '🙏', label: 'Gratitude' },
+  concern: { emoji: '💭', label: 'Concern' },
+  apology: { emoji: '🤝', label: 'Apology' },
+  forgiveness: { emoji: '💜', label: 'Forgiveness' },
+  boundary: { emoji: '🚧', label: 'Boundary' },
+  grief: { emoji: '🕊️', label: 'Support' },
+  encouragement: { emoji: '✨', label: 'Encouragement' },
+};
 
-  const unread = messages.filter(m => !m.read);
-  const read = messages.filter(m => m.read);
+function formatDate(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  if (days === 0) {
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  } else if (days === 1) {
+    return 'Yesterday';
+  } else if (days < 7) {
+    return date.toLocaleDateString([], { weekday: 'short' });
+  } else {
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+}
 
-  const renderMessage = ({ item }: { item: any }) => (
+function MailCard({ mail, onPress }: { mail: HeartMail; onPress: () => void }) {
+  const config = NOTE_TYPE_CONFIG[mail.noteType] || NOTE_TYPE_CONFIG.general;
+  const isUnread = mail.status === 'pending';
+  
+  return (
     <Pressable
-      style={[styles.card, !item.read && styles.unread]}
-      onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        router.push({ pathname: '/(modals)/heart-mail-detail', params: { id: item.id } });
-      }}
+      style={[styles.mailCard, isUnread && styles.mailCardUnread]}
+      onPress={onPress}
     >
-      <View style={styles.cardHeader}>
-        <Text style={styles.fromName}>
-          {item.type === 'anonymous' ? 'Someone in your Circle' : item.from_name}
-        </Text>
-        {!item.read && <View style={styles.dot} />}
+      <View style={[styles.mailEmoji, isUnread && styles.mailEmojiUnread]}>
+        <Text style={{ fontSize: 24 }}>{config.emoji}</Text>
       </View>
-      <Text style={styles.preview} numberOfLines={2}>
-        {item.content}
-      </Text>
-      <Text style={styles.time}>
-        {new Date(item.created_at).toLocaleDateString()}
-      </Text>
+      <View style={styles.mailContent}>
+        <View style={styles.mailHeader}>
+          <Text style={[styles.mailFrom, isUnread && styles.mailFromUnread]}>
+            {mail.isAnonymous ? 'Someone in your Circle' : mail.senderName || 'Anonymous'}
+          </Text>
+          <Text style={styles.mailTime}>{formatDate(mail.createdAt)}</Text>
+        </View>
+        <Text style={styles.mailType}>{config.label}</Text>
+        <Text style={styles.mailPreview} numberOfLines={2}>
+          {mail.content}
+        </Text>
+      </View>
+      {isUnread && <View style={styles.unreadDot} />}
     </Pressable>
   );
+}
 
+export default function HeartInboxScreen() {
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'inbox' | 'sent' | 'drafts'>('inbox');
+  
+  const { inbox, notes, fetchInbox, fetchNotes, markMailRead } = useHeartNotesStore();
+  
+  useEffect(() => {
+    fetchInbox().catch(() => {});
+    fetchNotes().catch(() => {});
+  }, []);
+  
+  const onRefresh = () => {
+    setRefreshing(true);
+    Promise.all([fetchInbox(), fetchNotes()])
+      .finally(() => setRefreshing(false));
+  };
+  
+  const handleMailPress = async (mail: HeartMail) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (mail.status === 'pending') {
+      await markMailRead(mail.id);
+    }
+    router.push({ pathname: '/(modals)/heart-view', params: { id: mail.id } });
+  };
+  
+  const sentNotes = notes.filter((n) => n.status === 'shared' || n.status === 'pending');
+  const draftNotes = notes.filter((n) => n.status === 'draft' || n.status === 'ready');
+  
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={28} color={COLORS.text} />
-        </Pressable>
-        <Text style={styles.title}>Heart Inbox</Text>
-        <View style={{ width: 28 }} />
-      </View>
-
-      {isLoading ? (
-        <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 40 }} />
-      ) : messages.length === 0 ? (
-        <View style={styles.empty}>
-          <Ionicons name="mail-outline" size={64} color={COLORS.textSecondary} />
-          <Text style={styles.emptyText}>No messages yet</Text>
-          <Text style={styles.emptySubtext}>
-            When someone sends you a Heart Note, it'll appear here
-          </Text>
+    <ErrorBoundary>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={24} color={COLORS.text} />
+          </Pressable>
+          <Text style={styles.title}>Heart Mail</Text>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/(modals)/heart-compose');
+            }}
+            style={styles.composeButton}
+          >
+            <Ionicons name="create-outline" size={24} color={COLORS.pink} />
+          </Pressable>
         </View>
-      ) : (
-        <FlatList
-          data={[...unread, ...read]}
-          keyExtractor={(item) => item.id}
-          renderItem={renderMessage}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
-    </View>
+        
+        {/* Tabs */}
+        <View style={styles.tabs}>
+          {[
+            { id: 'inbox' as const, label: 'Inbox', count: inbox.filter((m) => m.status === 'pending').length },
+            { id: 'sent' as const, label: 'Sent', count: 0 },
+            { id: 'drafts' as const, label: 'Drafts', count: draftNotes.length },
+          ].map((tab) => (
+            <Pressable
+              key={tab.id}
+              style={[styles.tab, activeTab === tab.id && styles.tabActive]}
+              onPress={() => setActiveTab(tab.id)}
+            >
+              <Text style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}>
+                {tab.label}
+              </Text>
+              {tab.count > 0 && (
+                <View style={[styles.tabBadge, activeTab === tab.id && styles.tabBadgeActive]}>
+                  <Text style={styles.tabBadgeText}>{tab.count}</Text>
+                </View>
+              )}
+            </Pressable>
+          ))}
+        </View>
+        
+        {/* Content */}
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.contentContainer}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.pink} />
+          }
+        >
+          {activeTab === 'inbox' && (
+            <>
+              {inbox.length === 0 ? (
+                <View style={styles.empty}>
+                  <Text style={styles.emptyEmoji}>💌</Text>
+                  <Text style={styles.emptyTitle}>No messages yet</Text>
+                  <Text style={styles.emptyText}>
+                    Heart Mail you receive from your Circle will appear here.
+                  </Text>
+                </View>
+              ) : (
+                inbox.map((mail) => (
+                  <MailCard key={mail.id} mail={mail} onPress={() => handleMailPress(mail)} />
+                ))
+              )}
+            </>
+          )}
+          
+          {activeTab === 'sent' && (
+            <>
+              {sentNotes.length === 0 ? (
+                <View style={styles.empty}>
+                  <Text style={styles.emptyEmoji}>📤</Text>
+                  <Text style={styles.emptyTitle}>Nothing sent yet</Text>
+                  <Text style={styles.emptyText}>
+                    Messages you send to your Circle will appear here.
+                  </Text>
+                </View>
+              ) : (
+                sentNotes.map((note) => (
+                  <Pressable
+                    key={note.id}
+                    style={styles.mailCard}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push({ pathname: '/(modals)/heart-view', params: { id: note.id, type: 'note' } });
+                    }}
+                  >
+                    <View style={styles.mailEmoji}>
+                      <Text style={{ fontSize: 24 }}>
+                        {NOTE_TYPE_CONFIG[note.noteType]?.emoji || '💌'}
+                      </Text>
+                    </View>
+                    <View style={styles.mailContent}>
+                      <Text style={styles.mailFrom}>To: {note.recipientName}</Text>
+                      <Text style={styles.mailType}>
+                        {note.status === 'pending' ? 'Awaiting response' : 'Delivered'}
+                      </Text>
+                      <Text style={styles.mailPreview} numberOfLines={2}>
+                        {note.content}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))
+              )}
+            </>
+          )}
+          
+          {activeTab === 'drafts' && (
+            <>
+              {draftNotes.length === 0 ? (
+                <View style={styles.empty}>
+                  <Text style={styles.emptyEmoji}>📝</Text>
+                  <Text style={styles.emptyTitle}>No drafts</Text>
+                  <Text style={styles.emptyText}>
+                    Start writing a Heart Note and save it as a draft.
+                  </Text>
+                </View>
+              ) : (
+                draftNotes.map((note) => (
+                  <Pressable
+                    key={note.id}
+                    style={styles.mailCard}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push({ pathname: '/(modals)/heart-compose', params: { draftId: note.id } });
+                    }}
+                  >
+                    <View style={styles.mailEmoji}>
+                      <Text style={{ fontSize: 24 }}>📝</Text>
+                    </View>
+                    <View style={styles.mailContent}>
+                      <Text style={styles.mailFrom}>To: {note.recipientName}</Text>
+                      <Text style={styles.mailType}>Draft</Text>
+                      <Text style={styles.mailPreview} numberOfLines={2}>
+                        {note.content || 'Empty draft'}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))
+              )}
+            </>
+          )}
+        </ScrollView>
+      </View>
+    </ErrorBoundary>
   );
 }
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
-  title: { fontSize: 18, fontWeight: '700', color: COLORS.text },
-  list: { padding: 16 },
-  card: {
+  backButton: {
+    padding: 4,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  composeButton: {
+    padding: 4,
+  },
+  tabs: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  tab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: 16,
-    marginBottom: 12,
   },
-  unread: { borderLeftWidth: 3, borderLeftColor: COLORS.primary },
-  cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-  fromName: { fontSize: 16, fontWeight: '600', color: COLORS.text, flex: 1 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.primary },
-  preview: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 20 },
-  time: { fontSize: 12, color: COLORS.textSecondary, marginTop: 8 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  emptyText: { fontSize: 18, fontWeight: '600', color: COLORS.text, marginTop: 16 },
-  emptySubtext: { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center', marginTop: 8 },
+  tabActive: {
+    backgroundColor: COLORS.pinkSoft,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: COLORS.textMuted,
+  },
+  tabTextActive: {
+    color: COLORS.pink,
+  },
+  tabBadge: {
+    marginLeft: 6,
+    backgroundColor: COLORS.textMuted,
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 5,
+  },
+  tabBadgeActive: {
+    backgroundColor: COLORS.pink,
+  },
+  tabBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  content: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+    gap: 12,
+  },
+  mailCard: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  mailCardUnread: {
+    borderColor: COLORS.pink + '44',
+    backgroundColor: 'rgba(236,72,153,0.05)',
+  },
+  mailEmoji: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.surfaceElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  mailEmojiUnread: {
+    backgroundColor: COLORS.pinkSoft,
+  },
+  mailContent: {
+    flex: 1,
+  },
+  mailHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  mailFrom: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: COLORS.textSecondary,
+  },
+  mailFromUnread: {
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  mailTime: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+  },
+  mailType: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginBottom: 4,
+  },
+  mailPreview: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  unreadDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.pink,
+    alignSelf: 'center',
+    marginLeft: 8,
+  },
+  empty: {
+    alignItems: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
 });

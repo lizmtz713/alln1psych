@@ -180,6 +180,27 @@ export default function MeScreen() {
           </View>
 
           {/* ═══════════════════════════════════════════════════════════
+              SHARING & INSIGHTS
+              ═══════════════════════════════════════════════════════════ */}
+          <Text style={styles.sectionHeader}>Sharing</Text>
+          <View style={styles.menuCard}>
+            <MenuItem
+              icon="document-text-outline"
+              label="Therapist Share"
+              subtitle="Generate wellness reports"
+              accentColor={COLORS.success}
+              onPress={() => navigateTo('/(modals)/therapist-share')}
+            />
+            <MenuItem
+              icon="star-outline"
+              label="Personology Profile"
+              subtitle="Your personality insights"
+              onPress={() => navigateTo('/(modals)/relate')}
+              isLast
+            />
+          </View>
+
+          {/* ═══════════════════════════════════════════════════════════
               MY TOOLS
               ═══════════════════════════════════════════════════════════ */}
           <Text style={styles.sectionHeader}>My Tools</Text>

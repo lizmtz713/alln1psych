@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'InGauge — Share',
-  description: 'View shared wellness report',
+  title: 'InGauge Report',
+  description: 'Shared wellness report from InGauge',
+  robots: 'noindex, nofollow',
 };
 
 export default function RootLayout({
@@ -12,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, fontFamily: 'system-ui, sans-serif', background: '#09090F', color: '#F0F0F5' }}>
+      <body className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {children}
       </body>
     </html>
