@@ -1,5 +1,9 @@
 import { create } from 'zustand';
 import { generateCrossSystemInsight } from '../services/cockpitAI';
+import { recordGaugeEvent, refreshDriftCache } from '../services/systemicDrift';
+import { getGaugeHistory } from '../services/crisisPipeline';
+import { useCycleStore } from './cycleStore';
+import { updateWidget } from '../native/WidgetBridge';
 
 export interface GaugeState {
   value: number; // 0-100, -1 = unset/dim
@@ -265,6 +269,56 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
   },
 
   setLastCheckInDate: (date) => set({ lastCheckInDate: date }),
+
+  /** Record current gauges for systemic drift analysis. Call after check-ins. */
+  recordGaugesForDrift: async () => {
+    const s = useCockpitStore.getState();
+    const gauges: Array<{ key: GaugeKey; value: number }> = [
+      { key: 'body', value: s.body.value },
+      { key: 'state', value: s.state.value },
+      { key: 'emotion', value: s.emotion.value },
+      { key: 'connection', value: s.connection.value },
+      { key: 'direction', value: s.direction.value },
+      { key: 'alignment', value: s.alignment.value },
+    ];
+    
+    // Record each active gauge
+    for (const g of gauges) {
+      if (g.value >= 0) {
+        await recordGaugeEvent(g.key, g.value);
+      }
+    }
+    
+    // Record for cycle pattern learning (if cycle tracking enabled)
+    try {
+      const cycleStore = useCycleStore.getState();
+      if (cycleStore.trackingEnabled && cycleStore.currentPhase) {
+        for (const g of gauges) {
+          if (g.value >= 0) {
+            cycleStore.recordGaugeForPattern(g.key, g.value);
+          }
+        }
+      }
+    } catch (e) {
+      // Cycle store not available, skip
+    }
+    
+    // Refresh drift analysis cache
+    await refreshDriftCache();
+    
+    // Update home screen widget
+    const s = useCockpitStore.getState();
+    updateWidget({
+      body: s.body.value >= 0 ? s.body.value : null,
+      state: s.state.value >= 0 ? s.state.value : null,
+      emotion: s.emotion.value >= 0 ? s.emotion.value : null,
+      connection: s.connection.value >= 0 ? s.connection.value : null,
+      direction: s.direction.value >= 0 ? s.direction.value : null,
+      alignment: s.alignment.value >= 0 ? s.alignment.value : null,
+      lastCheckIn: new Date().toISOString(),
+      insight: s.crossSystemInsight,
+    });
+  },
 
   /** Add a small bonus (+5) to all gauges that are already set. Call after completing a lesson. */
   addLessonBonus: () => {
