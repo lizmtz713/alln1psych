@@ -18,6 +18,7 @@ import { generateDailyContent } from '../../src/services/personalization';
 import { getGaugeColor, getGaugeStatusLabel } from '../../src/utils/gaugeHelpers';
 import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import { Ionicons } from '@expo/vector-icons';
+import { CockpitCluster } from '../../src/components/CockpitCluster';
 
 const GAUGE_KEYS: GaugeKey[] = ['body', 'state', 'emotion', 'connection', 'direction', 'alignment'];
 
@@ -184,6 +185,7 @@ export default function HomeScreen() {
   }, []);
 
   const [refreshing, setRefreshing] = useState(false);
+  const [showGaugeInfo, setShowGaugeInfo] = useState(false);
   const onRefresh = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setRefreshing(true);
@@ -248,27 +250,36 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {/* 3. SIX GAUGES — 2x3 grid */}
-      <View style={styles.gaugesGrid}>
-        {GAUGE_KEYS.map((key) => {
-          const value = gaugeValues[key];
-          return (
-            <Pressable
-              key={key}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push({ pathname: '/(modals)/gauge-detail', params: { gauge: key } });
-              }}
-              style={styles.gaugeCard}
-            >
-              <SmallGauge value={value} size={60} />
-              <Text style={styles.gaugeCardLabel}>{key}</Text>
-              <Text style={styles.gaugeCardStatus}>
-                {value >= 0 ? getGaugeStatusLabel(value) : 'Not checked'}
-              </Text>
-            </Pressable>
-          );
-        })}
+      {/* 2. Six Gauges — hexagonal cockpit cluster */}
+      <View style={styles.cockpitClusterContainer}>
+        <CockpitCluster
+          gaugeValues={{
+            body: bodyVal,
+            state: stateVal,
+            emotion: emotionVal,
+            connection: connectionVal,
+            direction: directionVal,
+            alignment: alignmentVal,
+          }}
+          overall={overallScore}
+          onCenterPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            router.push('/(modals)/cockpit-checkin');
+          }}
+          onGaugePress={(gauge) => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push({ pathname: '/(modals)/gauge-detail', params: { gauge } });
+          }}
+        />
+        <Pressable
+          style={styles.gaugeInfoIcon}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowGaugeInfo(true);
+          }}
+        >
+          <Text style={styles.gaugeInfoIconText}>ⓘ</Text>
+        </Pressable>
       </View>
 
       {/* 4. QUICK ACTION PILLS — 2x3 grid */}
@@ -472,6 +483,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
   },
+  cockpitClusterContainer: { alignItems: 'center', marginBottom: 16, position: 'relative' as const },
+  gaugeInfoIcon: { padding: 8, marginLeft: 4 },
+  gaugeInfoIconText: { fontSize: 16, color: '#FFFFFF' },
   gaugeCard: {
     width: '48%',
     backgroundColor: '#111118',
