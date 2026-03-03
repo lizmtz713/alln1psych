@@ -1127,26 +1127,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  comingSoonCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    padding: 16,
-    alignItems: 'center',
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderStyle: 'dashed',
-  },
-  comingSoonText: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    fontWeight: '500',
-  },
-  comingSoonHint: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    marginTop: 4,
-  },
 
   // Step 3 - Promise
   promiseCard: {

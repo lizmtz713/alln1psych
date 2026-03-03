@@ -13,6 +13,9 @@ export interface GaugeState {
 
 export type GaugeKey = 'body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment';
 
+/** Capacity = normal mode; Stabilization = user asked for lower intensity / safety first */
+export type SystemMode = 'capacity' | 'stabilization';
+
 interface CockpitState {
   body: GaugeState;
   state: GaugeState;
@@ -23,8 +26,15 @@ interface CockpitState {
   lastCheckInDate: string | null;
   /** Cached AI-generated cross-system insight; set by fetchCrossSystemInsight() */
   crossSystemInsight: string | null;
+  /** Capacity vs stabilization mode (affects Share Insight, JIT lessons, etc.) */
+  systemMode: SystemMode;
+  /** Gauge keys that triggered stabilization mode (e.g. ['state', 'emotion']) */
+  stabilizationTriggers: GaugeKey[];
+  /** 0-100 overall regulation score (convenience for Share Insight); derived from gauges */
+  centerScore: number;
 
   getOverallRegulation: () => number;
+  recordGaugesForDrift: () => Promise<void>;
   updateBody: (value: number) => void;
   updateState: (value: number) => void;
   updateEmotion: (value: number) => void;
@@ -76,6 +86,9 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
   alignment: { ...defaultGauge },
   lastCheckInDate: null,
   crossSystemInsight: null,
+  systemMode: 'capacity' as SystemMode,
+  stabilizationTriggers: [],
+  centerScore: 0,
 
   getOverallRegulation: () => {
     const s = get();
@@ -392,16 +405,22 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
   },
 
   reset: () =>
-    set({
-      body: { ...defaultGauge },
-      state: { ...defaultGauge },
-      emotion: { ...defaultGauge },
-      connection: { ...defaultGauge },
-      direction: { ...defaultGauge },
-      alignment: { ...defaultGauge },
-      lastCheckInDate: null,
-      crossSystemInsight: null,
-      bodyDataSource: null,
-      stateDataSource: null,
+    set((s) => {
+      const next = {
+        body: { ...defaultGauge },
+        state: { ...defaultGauge },
+        emotion: { ...defaultGauge },
+        connection: { ...defaultGauge },
+        direction: { ...defaultGauge },
+        alignment: { ...defaultGauge },
+        lastCheckInDate: null,
+        crossSystemInsight: null,
+        systemMode: 'capacity' as SystemMode,
+        stabilizationTriggers: [] as GaugeKey[],
+        centerScore: 0,
+        bodyDataSource: null,
+        stateDataSource: null,
+      };
+      return next;
     }),
 }));

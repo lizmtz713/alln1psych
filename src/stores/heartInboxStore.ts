@@ -25,6 +25,8 @@ interface HeartInboxState {
   markAsRead: (id: string) => Promise<void>;
   acceptSoftShare: (id: string) => Promise<void>;
   declineSoftShare: (id: string) => Promise<void>;
+  /** Remove message from local list (e.g. after decline). */
+  removeFromInbox: (id: string) => void;
 }
 
 export const useHeartInboxStore = create<HeartInboxState>((set, get) => ({
@@ -63,5 +65,9 @@ export const useHeartInboxStore = create<HeartInboxState>((set, get) => ({
   declineSoftShare: async (id: string) => {
     await supabase.from('heart_messages').update({ status: 'declined' }).eq('id', id);
     set({ messages: get().messages.map(m => m.id === id ? { ...m, status: 'declined' } : m) });
+  },
+
+  removeFromInbox: (id: string) => {
+    set({ messages: get().messages.filter(m => m.id !== id) });
   },
 }));

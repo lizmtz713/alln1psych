@@ -238,7 +238,7 @@ export default function MeScreen() {
               badge="Soon"
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Coming Soon', 'Oura integration is in development. We'll notify you when it's ready!');
+                Alert.alert('Coming Soon', "Oura integration is in development. We'll notify you when it's ready!");
               }}
             />
             <MenuItem
@@ -248,7 +248,7 @@ export default function MeScreen() {
               badge="Soon"
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Coming Soon', 'Whoop integration is in development. We'll notify you when it's ready!');
+                Alert.alert('Coming Soon', "Whoop integration is in development. We'll notify you when it's ready!");
               }}
             />
             <MenuItem
@@ -258,7 +258,7 @@ export default function MeScreen() {
               badge="Soon"
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Coming Soon', 'Fitbit integration is in development. We'll notify you when it's ready!');
+                Alert.alert('Coming Soon', "Fitbit integration is in development. We'll notify you when it's ready!");
               }}
             />
             <MenuItem
@@ -268,7 +268,7 @@ export default function MeScreen() {
               badge="Soon"
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Coming Soon', 'Garmin integration is in development. We'll notify you when it's ready!');
+                Alert.alert('Coming Soon', "Garmin integration is in development. We'll notify you when it's ready!");
               }}
             />
             <MenuItem

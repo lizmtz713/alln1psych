@@ -253,6 +253,7 @@ export default function HomeScreen() {
   const directionVal = useCockpitStore((s) => s.direction.value);
   const alignmentVal = useCockpitStore((s) => s.alignment.value);
   const crossSystemInsight = useCockpitStore((s) => s.crossSystemInsight);
+  const systemMode = useCockpitStore((s) => s.systemMode);
 
   const activeGaugeCount = [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal].filter((v) => v >= 0).length;
   const overall =
@@ -807,11 +808,6 @@ const styles = StyleSheet.create({
     color: ACCENT,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-  },
-  insightText: { 
-    fontSize: 15, 
-    color: TEXT_PRIMARY, 
-    lineHeight: 22,
   },
 
   // ─── Cycle Context Section ───

@@ -467,12 +467,13 @@ export async function generateOperatingSnapshot(
     const recentPatterns = convertPatternsToPlainLanguage(driftPatterns);
     const primaryNeeds = generatePrimaryNeeds(gauges, cockpit.systemMode);
     
+    const centerScore = cockpit.getOverallRegulation() >= 0 ? cockpit.getOverallRegulation() : 0;
     // Current state summary
     const currentStateSummary = cockpit.systemMode === 'stabilization'
       ? 'I\'m in a rebuilding phase — taking care of foundation needs'
-      : cockpit.centerScore >= 70
+      : centerScore >= 70
         ? 'I\'m feeling grounded and capable'
-        : cockpit.centerScore >= 50
+        : centerScore >= 50
           ? 'I\'m managing well, with some areas that need attention'
           : 'I\'m going through a challenging time and could use support';
     
@@ -541,14 +542,14 @@ export function generateShareableInsight(
           value: cockpit[key].value,
           trend: cockpit[key].trend,
         }));
-
+      const centerScore = cockpit.getOverallRegulation() >= 0 ? cockpit.getOverallRegulation() : 0;
       return {
         type: 'gauge-status',
         senderName: userName,
         gauges,
         systemMode: cockpit.systemMode,
-        centerScore: cockpit.centerScore,
-        context: data.context || getOverallStatusMessage(cockpit.systemMode, cockpit.centerScore),
+        centerScore,
+        context: data.context || getOverallStatusMessage(cockpit.systemMode, centerScore),
         personalNote: data.personalNote,
         timestamp,
       };

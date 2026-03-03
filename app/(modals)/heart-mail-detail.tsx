@@ -23,8 +23,8 @@ const ACCENT = COLORS.accent;
 
 function getSenderLabel(m: HeartInboxMessage): string {
   if (m.type === 'anonymous') return 'Someone in your Circle 💜';
-  if (m.type === 'soft' && m.accepted !== true) return 'Someone in your Circle 💜';
-  return m.fromName;
+  if (m.type === 'soft_share' && m.status !== 'accepted') return 'Someone in your Circle 💜';
+  return m.from_name;
 }
 
 export default function HeartMailDetailScreen() {
@@ -32,15 +32,15 @@ export default function HeartMailDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const messages = useHeartInboxStore((s) => s.messages);
-  const markRead = useHeartInboxStore((s) => s.markRead);
+  const markAsRead = useHeartInboxStore((s) => s.markAsRead);
   const acceptSoftShare = useHeartInboxStore((s) => s.acceptSoftShare);
   const declineSoftShare = useHeartInboxStore((s) => s.declineSoftShare);
-  const archiveMessage = useHeartInboxStore((s) => s.archiveMessage);
+  const removeFromInbox = useHeartInboxStore((s) => s.removeFromInbox);
 
   const message = useMemo(() => messages.find((m) => m.id === id), [messages, id]);
 
   React.useEffect(() => {
-    if (message && !message.read) markRead(message.id);
+    if (message && !message.read) markAsRead(message.id);
   }, [message?.id, message?.read]);
 
   if (!message) {
@@ -54,9 +54,9 @@ export default function HeartMailDetailScreen() {
     );
   }
 
-  const isSoftPending = message.type === 'soft' && message.accepted === undefined;
-  const showContent = message.type !== 'soft' || message.accepted === true;
-  const canReply = (message.type === 'open' || (message.type === 'soft' && message.accepted === true)) && message.from;
+  const isSoftPending = message.type === 'soft_share' && message.status !== 'accepted' && message.status !== 'declined';
+  const showContent = message.type !== 'soft_share' || message.status === 'accepted';
+  const canReply = (message.type === 'open' || (message.type === 'soft_share' && message.status === 'accepted')) && message.from_user_id;
 
   const handleAccept = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -75,7 +75,7 @@ export default function HeartMailDetailScreen() {
           style: 'destructive',
           onPress: () => {
             declineSoftShare(message.id);
-            archiveMessage(message.id);
+            removeFromInbox(message.id);
             router.back();
           },
         },
@@ -87,7 +87,7 @@ export default function HeartMailDetailScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push({
       pathname: '/(modals)/heart-mail-compose',
-      params: { replyTo: message.from, replyToName: message.fromName },
+      params: { replyTo: message.from_user_id, replyToName: message.from_name },
     });
   };
 
@@ -110,11 +110,11 @@ export default function HeartMailDetailScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
           <Text style={styles.sender}>{getSenderLabel(message)}</Text>
-          <Text style={styles.date}>{new Date(message.createdAt).toLocaleString()}</Text>
+          <Text style={styles.date}>{new Date(message.created_at).toLocaleString()}</Text>
 
           {isSoftPending ? (
             <>
-              <Text style={styles.teaser}>{message.teaser ?? 'Someone sent you a note. Accept to read it.'}</Text>
+              <Text style={styles.teaser}>{message.content ? message.content.slice(0, 80) + (message.content.length > 80 ? '…' : '') : 'Someone sent you a note. Accept to read it.'}</Text>
               <View style={styles.actions}>
                 <Pressable
                   style={({ pressed }) => [styles.acceptBtn, pressed && styles.pressed]}
@@ -143,7 +143,7 @@ export default function HeartMailDetailScreen() {
             onPress={handleReply}
           >
             <Ionicons name="arrow-undo" size={20} color={ACCENT} />
-            <Text style={styles.replyBtnText}>Reply to {message.fromName}</Text>
+            <Text style={styles.replyBtnText}>Reply to {message.from_name}</Text>
           </Pressable>
         )}
 

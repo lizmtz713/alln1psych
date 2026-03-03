@@ -237,7 +237,7 @@ function LessonCard({ insight, compact }: { insight: LessonInsight; compact: boo
 // ============================================
 
 function DiscoveryCard({ insight, compact }: { insight: DiscoveryInsight; compact: boolean }) {
-  const categoryColors: Record<string, string[]> = {
+  const categoryColors: Record<string, [string, string]> = {
     ancient: ['rgba(255, 183, 77, 0.15)', 'transparent'],
     science: ['rgba(96, 165, 250, 0.15)', 'transparent'],
     funfact: ['rgba(74, 222, 128, 0.15)', 'transparent'],

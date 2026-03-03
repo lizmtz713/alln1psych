@@ -15,14 +15,14 @@ export default function HeartMailComposeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [user, setUser] = useState<{ id: string } | null>(null);
-  const profile = useUserStore((s) => s.profile);
+  const name = useUserStore((s) => s.name);
   const members = useCircleStore((s) => s.members);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
   }, []);
 
-  const userName = profile?.name || 'Someone';
+  const userName = name || 'Someone';
 
   const [content, setContent] = useState('');
   const [sending, setSending] = useState(false);

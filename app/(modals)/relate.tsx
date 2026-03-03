@@ -42,7 +42,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 type RelType = 'romantic' | 'family' | 'friendship' | 'work';
 
 const RELATE_ACCENT = '#7C4DFF';
-const RELATE_GRADIENT = ['#7C4DFF', '#9C6AFF'];
+const RELATE_GRADIENT: [string, string] = ['#7C4DFF', '#9C6AFF'];
 const LEARN_BG = 'rgba(124,77,255,0.06)';
 const LEARN_BORDER = 'rgba(124,77,255,0.15)';
 const CARD_GLOW = 'rgba(124,77,255,0.08)';
@@ -646,7 +646,7 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
                   style={[styles.primaryBtnWrap, myBirthday.length !== 10 && styles.primaryBtnDisabled]}
                 >
                   <LinearGradient
-                    colors={myBirthday.length === 10 ? RELATE_GRADIENT : ['#3A3A4A', '#3A3A4A']}
+                    colors={myBirthday.length === 10 ? RELATE_GRADIENT : (['#3A3A4A', '#3A3A4A'] as [string, string])}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.primaryBtn}
@@ -740,7 +740,7 @@ Be specific to THEIR combination. Use "${name1}" and "${name2}" by name. Keep it
                   style={[styles.primaryBtnWrap, !canCheck && styles.primaryBtnDisabled]}
                 >
                   <LinearGradient
-                    colors={canCheck ? RELATE_GRADIENT : ['#3A3A4A', '#3A3A4A']}
+                    colors={canCheck ? RELATE_GRADIENT : (['#3A3A4A', '#3A3A4A'] as [string, string])}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.primaryBtn}
@@ -1056,6 +1056,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: RELATE_ACCENT,
   },
+  ghostBtn: { padding: 14, alignItems: 'center' },
+  ghostBtnText: { fontSize: 15, color: COLORS.textMuted },
 
   // Hero
   heroSection: { alignItems: 'center', marginBottom: 28, paddingTop: 8 },
@@ -1273,20 +1275,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addCircleBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
-  secondaryBtn: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: CARD_BORDER,
-    marginBottom: 8,
-  },
-  secondaryBtnText: { fontSize: 16, color: COLORS.textMuted, fontWeight: '500' },
-  ghostBtn: { padding: 14, alignItems: 'center' },
-  ghostBtnText: { fontSize: 15, color: COLORS.textMuted },
 
   // Person Section (Compare mode)
   personSection: {

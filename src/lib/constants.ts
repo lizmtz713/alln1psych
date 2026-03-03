@@ -36,6 +36,7 @@ export const COLORS = {
   // PRIMARY ACCENT — Ocean Teal (calm, regulation, State gauge)
   // ═══════════════════════════════════════════════════════════════════
   accent: '#0D9488',               // Primary teal
+  primary: '#0D9488',              // Alias for accent (legacy / temperature)
   accentLight: '#2DD4BF',          // Light teal
   accentDark: '#0A7568',           // Dark teal
   accentMuted: 'rgba(13, 148, 136, 0.3)',
@@ -74,6 +75,11 @@ export const COLORS = {
     neutral: '#8B8D8E',    // Neutral gray
     warm: '#D4A574',       // Warm Amber — activated
     hot: '#E07A5F',        // Soft Coral — high activation
+    // Temperature palette (green → red)
+    green: '#4ADE80',
+    yellow: '#FACC15',
+    orange: '#FB923C',
+    red: '#F87171',
   },
   
   // Legacy temperature mappings (for backwards compatibility)

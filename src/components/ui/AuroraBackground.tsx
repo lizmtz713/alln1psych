@@ -74,8 +74,8 @@ export function AuroraBackground({
   return (
     <Animated.View style={[styles.container, { opacity }, style]}>
       <LinearGradient
-        colors={preset.colors as unknown as string[]}
-        locations={preset.locations as unknown as number[]}
+        colors={[...preset.colors] as [string, string, ...string[]]}
+        locations={[...preset.locations] as [number, number, ...number[]]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFillObject}
@@ -84,10 +84,10 @@ export function AuroraBackground({
       {/* Subtle horizontal gradient overlay for depth */}
       <LinearGradient
         colors={[
-          'rgba(13, 148, 136, 0.02)',  // Teal hint left
+          'rgba(13, 148, 136, 0.02)',
           'transparent',
-          'rgba(224, 122, 95, 0.02)',   // Coral hint right
-        ]}
+          'rgba(224, 122, 95, 0.02)',
+        ] as [string, string, string]}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
         style={[StyleSheet.absoluteFillObject, { opacity: INTENSITY_VALUES[intensity] }]}
@@ -111,7 +111,7 @@ export function GradientBackground({
   return (
     <View style={[styles.container, style]}>
       <LinearGradient
-        colors={colors}
+        colors={colors as [string, string, ...string[]]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFillObject}
