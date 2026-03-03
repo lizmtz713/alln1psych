@@ -65,6 +65,8 @@ interface InsightsState {
   getLessonsCompletedThisWeek: () => number;
   getMostCommonMoodThisWeek: () => string | null;
   getGaugeSays: (engagementStreak: number) => string;
+  /** Alias for getGaugeSays (Psych says insight line). */
+  getPsychSays: (engagementStreak: number) => string;
   getWeeklySummary: () => { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null;
   reset: () => void;
 }
@@ -175,6 +177,9 @@ export const useInsightsStore = create<InsightsState>(() => ({
     ];
     return tips[Math.floor(Math.random() * tips.length)];
   },
+
+  getPsychSays: (engagementStreak: number): string =>
+    useInsightsStore.getState().getGaugeSays(engagementStreak),
 
   getWeeklySummary: (): { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null => {
     const now = new Date();

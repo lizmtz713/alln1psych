@@ -638,9 +638,11 @@ export function getLessonsForCategory(categoryId: string, age: number | null): T
  * Get age-appropriate content from a lesson
  */
 export function getLessonContent(lesson: TopicLesson, ageTier: AgeTier): string {
+  // Normalize kebab to camel for content keys
+  const key = ageTier === 'young-adult' ? 'youngAdult' : ageTier;
   // Try exact match first, then fall back
-  const content = lesson.content[ageTier] 
-    || lesson.content.adult 
+  const content = lesson.content[key as keyof typeof lesson.content]
+    || lesson.content.adult
     || lesson.content.youngAdult
     || Object.values(lesson.content)[0]
     || '';

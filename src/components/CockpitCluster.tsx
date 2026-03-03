@@ -239,11 +239,11 @@ export function CockpitCluster({
               )}
               {/* Value overlay */}
               {gaugeValue >= 0 && (
-                <Text style={[styles.gaugeValueOverlay, { color: displayColor }]}>
+                <Text style={[styles.gaugeValueOverlay, { color: gaugeColor }]}>
                   {gaugeValue}
                 </Text>
               )}
-              <Text style={[styles.gaugeLabel, { color: gaugeValue >= 0 ? displayColor : '#888' }]}>
+              <Text style={[styles.gaugeLabel, { color: gaugeValue >= 0 ? gaugeColor : '#888' }]}>
                 {config.label.toUpperCase()}
               </Text>
               {gaugeValue >= 0 && (

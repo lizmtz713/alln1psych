@@ -31,6 +31,10 @@ export interface DriftPattern {
   confidence: number; // 0-1
   insight: string;
   recommendation: string;
+  /** Short pattern label for summaries (e.g. "Monday drops") */
+  pattern: string;
+  /** Number of occurrences observed */
+  frequency: number;
 }
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -124,6 +128,8 @@ function analyzeWeeklyPatterns(history: GaugeEvent[]): DriftPattern[] {
         confidence: Math.min(0.9, lowDay.count / 4), // More data = more confidence
         insight: `Your ${gaugeName} gauge averages ${diff} points lower on ${dayName}s compared to other days.`,
         recommendation: `Consider what happens on ${dayName}s that might affect your ${gaugeName.toLowerCase()}. Is there a recurring meeting, obligation, or pattern?`,
+        pattern: `${dayName} drops`,
+        frequency: lowDay.count,
       });
     }
   }
@@ -173,9 +179,11 @@ function analyzeTimePatterns(history: GaugeEvent[]): DriftPattern[] {
         description: `${gaugeName} dips in the ${lowPeriod.name}`,
         confidence: Math.min(0.85, lowPeriod.count / 5),
         insight: `Your ${gaugeName} gauge tends to be lower in the ${lowPeriod.name}.`,
-        recommendation: gauge === 'body' 
+        recommendation: gauge === 'body'
           ? `This might be related to energy cycles. Check your sleep, meals, and caffeine timing.`
           : `Notice what typically happens in the ${lowPeriod.name} that might affect your ${gaugeName.toLowerCase()}.`,
+        pattern: `${lowPeriod.name} dip`,
+        frequency: lowPeriod.count,
       });
     }
   }
@@ -219,6 +227,8 @@ function analyzeGradualDrift(history: GaugeEvent[]): DriftPattern[] {
         recommendation: drift < 0
           ? `This gradual ${direction} suggests something systemic. What's changed in the past two weeks?`
           : `Nice trend! What's been working for your ${gaugeName.toLowerCase()} lately?`,
+        pattern: `2-week ${direction}`,
+        frequency: recentEvents.length,
       });
     }
   }
@@ -269,6 +279,8 @@ function analyzeCorrelations(history: GaugeEvent[]): DriftPattern[] {
         confidence: bothLowCount / aLowCount,
         insight: pair.insight,
         recommendation: `When your ${GAUGE_NAMES[pair.a]} drops, prioritize it first — it's likely affecting your ${GAUGE_NAMES[pair.b]} too.`,
+        pattern: `${GAUGE_NAMES[pair.a]} → ${GAUGE_NAMES[pair.b]}`,
+        frequency: bothLowCount,
       });
     }
   }

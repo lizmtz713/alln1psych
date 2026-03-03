@@ -8,7 +8,7 @@ import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
-import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
+import { useCockpitStore, type GaugeKey, computeSystemMode } from '../../src/stores/cockpitStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import {
   GAUGE_CONFIG,
@@ -27,6 +27,10 @@ import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import { Ionicons } from '@expo/vector-icons';
 import { WeeklyInsightCard } from '../../src/components/WeeklyInsightCard';
 import { CockpitCluster } from '../../src/components/CockpitCluster';
+import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
+import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
+import { useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
+import { shouldSuggestAwe } from '../../src/services/aweNudge';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
 
@@ -802,6 +806,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     gap: 8,
   },
+  streakEmoji: { fontSize: 14 },
+  streakText: { fontSize: 13, color: TEXT_PRIMARY, fontWeight: '500' },
   insightLabel: {
     fontSize: 13,
     fontWeight: '600',

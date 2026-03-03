@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     color: COLORS.textDim,
   },
   footerTagline: {
-    ...TYPOGRAPHY.labelXs,
+    ...TYPOGRAPHY.labelSm,
     color: COLORS.textDim,
     marginTop: 2,
     fontStyle: 'italic',

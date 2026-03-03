@@ -13,6 +13,16 @@ export interface GaugeState {
 
 export type GaugeKey = 'body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment';
 
+/** Tier 1 = highest priority (body, state, emotion); 2 = connection, direction; 3 = alignment. Used for predictive warnings. */
+export const GAUGE_TIERS: Record<GaugeKey, number> = {
+  body: 1,
+  state: 1,
+  emotion: 1,
+  connection: 2,
+  direction: 2,
+  alignment: 3,
+};
+
 /** Capacity = normal mode; Stabilization = user asked for lower intensity / safety first */
 export type SystemMode = 'capacity' | 'stabilization';
 
@@ -285,14 +295,14 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
 
   /** Record current gauges for systemic drift analysis. Call after check-ins. */
   recordGaugesForDrift: async () => {
-    const s = useCockpitStore.getState();
+    const state = useCockpitStore.getState();
     const gauges: Array<{ key: GaugeKey; value: number }> = [
-      { key: 'body', value: s.body.value },
-      { key: 'state', value: s.state.value },
-      { key: 'emotion', value: s.emotion.value },
-      { key: 'connection', value: s.connection.value },
-      { key: 'direction', value: s.direction.value },
-      { key: 'alignment', value: s.alignment.value },
+      { key: 'body', value: state.body.value },
+      { key: 'state', value: state.state.value },
+      { key: 'emotion', value: state.emotion.value },
+      { key: 'connection', value: state.connection.value },
+      { key: 'direction', value: state.direction.value },
+      { key: 'alignment', value: state.alignment.value },
     ];
     
     // Record each active gauge
@@ -320,16 +330,16 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
     await refreshDriftCache();
     
     // Update home screen widget
-    const s = useCockpitStore.getState();
+    const state2 = useCockpitStore.getState();
     updateWidget({
-      body: s.body.value >= 0 ? s.body.value : null,
-      state: s.state.value >= 0 ? s.state.value : null,
-      emotion: s.emotion.value >= 0 ? s.emotion.value : null,
-      connection: s.connection.value >= 0 ? s.connection.value : null,
-      direction: s.direction.value >= 0 ? s.direction.value : null,
-      alignment: s.alignment.value >= 0 ? s.alignment.value : null,
+      body: state2.body.value >= 0 ? state2.body.value : null,
+      state: state2.state.value >= 0 ? state2.state.value : null,
+      emotion: state2.emotion.value >= 0 ? state2.emotion.value : null,
+      connection: state2.connection.value >= 0 ? state2.connection.value : null,
+      direction: state2.direction.value >= 0 ? state2.direction.value : null,
+      alignment: state2.alignment.value >= 0 ? state2.alignment.value : null,
       lastCheckIn: new Date().toISOString(),
-      insight: s.crossSystemInsight,
+      insight: state2.crossSystemInsight,
     });
   },
 
@@ -424,3 +434,18 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
       return next;
     }),
 }));
+
+/** Compute system mode from current gauge values; call when gauges change. Sets stabilization if any gauge is below threshold. */
+const STABILIZATION_THRESHOLD = 35;
+export function computeSystemMode(): void {
+  const state = useCockpitStore.getState();
+  const triggers: GaugeKey[] = [];
+  const keys: GaugeKey[] = ['body', 'state', 'emotion', 'connection', 'direction', 'alignment'];
+  for (const k of keys) {
+    if (state[k].value >= 0 && state[k].value < STABILIZATION_THRESHOLD) triggers.push(k);
+  }
+  useCockpitStore.setState({
+    systemMode: triggers.length > 0 ? 'stabilization' : 'capacity',
+    stabilizationTriggers: triggers,
+  });
+}

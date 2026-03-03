@@ -8,6 +8,8 @@ import { getArchetypeForBirthday, type Archetype } from '../data/archetypes';
 export interface PersonalityPeriod {
   name: string;
   range: string;
+  /** Optional element label (e.g. "Fire", "Earth") for display */
+  element?: string;
   strengths: string[];
   challenges: string[];
   communicationStyle: string;
@@ -29,6 +31,7 @@ function archetypeToPersonalityPeriod(a: Archetype): PersonalityPeriod {
   return {
     name: a.name,
     range: a.weekRange,
+    element: a.element,
     strengths: a.strengths.map((s) => s.toLowerCase()),
     challenges: a.growthEdges.map((e) => e.toLowerCase()),
     communicationStyle: comm,
