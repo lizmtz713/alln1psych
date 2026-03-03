@@ -175,7 +175,7 @@ export const BRAIN_CARDS: BrainCard[] = [
     category: 'movement',
     quickTake: 'Exercise releases the same chemicals as some antidepressants.',
     content: `Movement releases endorphins, serotonin, and dopamine — your brain's feel-good chemicals. Studies show regular exercise can be as effective as medication for mild-to-moderate depression. You're not imagining it when you feel better after moving.`,
-    funFact: `You don't need intense workouts. Even a 20-minute walk significantly improves mood. Consistency beats intensity.',
+    funFact: `You don't need intense workouts. Even a 20-minute walk significantly improves mood. Consistency beats intensity.`
   },
   {
     id: 'movement-minimum',
