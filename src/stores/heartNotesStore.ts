@@ -117,6 +117,12 @@ interface HeartNotesState {
   // Actions - Inbox
   loadInbox: () => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
+  /** Alias for loadInbox (used by heart-inbox UI). */
+  fetchInbox: () => Promise<void>;
+  /** Alias for loadNotes (used by heart-inbox UI). */
+  fetchNotes: () => Promise<void>;
+  /** Alias for markAsRead (used by heart-inbox UI). */
+  markMailRead: (id: string) => void;
   respondToMail: (id: string, response: string) => Promise<void>;
   archiveMail: (id: string) => Promise<void>;
   thankCircle: () => Promise<void>;
@@ -374,6 +380,10 @@ export const useHeartNotesStore = create<HeartNotesState>((set, get) => ({
       unreadCount: Math.max(0, state.unreadCount - 1),
     }));
   },
+
+  fetchInbox: async () => get().loadInbox(),
+  fetchNotes: async () => get().loadNotes(),
+  markMailRead: (id) => { get().markAsRead(id); },
 
   respondToMail: async (id, response) => {
     const { error } = await supabase

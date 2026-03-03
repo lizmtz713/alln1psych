@@ -273,7 +273,7 @@ export default function OnboardingScreen() {
     if (user?.id) {
       await completeOnboardingDb(user.id, {
         name: nameInput.trim(),
-        age_group: selectedAge ?? undefined,
+        age_group: selectedAge ?? null,
       });
     }
     completeOnboarding();

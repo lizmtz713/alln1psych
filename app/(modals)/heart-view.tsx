@@ -86,7 +86,7 @@ export default function HeartViewScreen() {
     );
   }
   
-  const config = NOTE_TYPE_CONFIG[(mail as any).noteType] || NOTE_TYPE_CONFIG.general;
+  const config = NOTE_TYPE_CONFIG[mail.noteType as NoteType] || NOTE_TYPE_CONFIG.general;
   const isInbox = params.type !== 'note';
   const canRespond = isInbox && !(mail as any).response;
   

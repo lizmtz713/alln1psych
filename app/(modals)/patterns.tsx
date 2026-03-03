@@ -133,11 +133,12 @@ function NarrativePatternCard({ pattern }: { pattern: NarrativePattern }) {
     established: '#4ADE80',   // green
   };
   
-  const typeEmojis = {
+  const typeEmojis: Record<string, string> = {
     feedback_loop: '🔄',
     correlation: '🔗',
     trend: '📈',
     trigger: '⚡',
+    direction_correlation: '🧭',
   };
 
   return (

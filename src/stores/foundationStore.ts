@@ -90,6 +90,8 @@ export interface RegulationMap {
   tools: string[];
   topTools: string[];
   earlyWarnings: string[];
+  customTrigger: string;
+  customTool: string;
 }
 
 /** Emotional Profile - personalization for Emotion gauge */

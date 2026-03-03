@@ -65,7 +65,8 @@ export default function TherapistShareCreateScreen() {
     setCreating(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const max = maxViews.trim() ? parseInt(maxViews, 10) : null;
-    if (maxViews.trim() && (isNaN(max) || max < 1)) {
+    const safeMax = max ?? 7;
+    if (maxViews.trim() && (isNaN(safeMax) || safeMax < 1)) {
       Alert.alert('Invalid value', 'Max views must be a positive number or leave empty for unlimited.');
       setCreating(false);
       return;
@@ -295,5 +296,5 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xl,
     width: '100%',
   },
-  urlText: { ...TYPOGRAPHY.bodySm, color: TEXT, wordBreak: 'break-all' },
+  urlText: { ...TYPOGRAPHY.bodySm, color: TEXT },
 });

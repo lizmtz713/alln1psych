@@ -136,18 +136,20 @@ export default function HelpSomeoneScreen() {
     if (params.relationship) setRelationship(params.relationship);
   }, [params.name, params.relationship]);
 
+  const selectedMember = useCircleMember ? members.find((m) => m.id === useCircleMember) : null;
+  const displayName = selectedMember ? selectedMember.name : personName.trim();
+  const displayRelationship = selectedMember
+    ? selectedMember.relationship.charAt(0).toUpperCase() + selectedMember.relationship.slice(1)
+    : relationship;
+  const canProceedStep1 = displayName.length > 0 && displayRelationship.length > 0;
+  const canProceedStep2 = situation.trim().length >= 10;
+
   useEffect(() => {
     if (quickSelectGoToCoachingRef.current && step === 2 && canProceedStep1 && canProceedStep2) {
       quickSelectGoToCoachingRef.current = false;
       startCoaching();
     }
   }, [step, situation, concerns, canProceedStep1, canProceedStep2]);
-
-  const selectedMember = useCircleMember ? members.find((m) => m.id === useCircleMember) : null;
-  const displayName = selectedMember ? selectedMember.name : personName.trim();
-  const displayRelationship = selectedMember
-    ? selectedMember.relationship.charAt(0).toUpperCase() + selectedMember.relationship.slice(1)
-    : relationship;
 
   const toggleConcern = (label: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -550,7 +552,7 @@ Keep it practical and warm. No extra preamble.`;
           </View>
           <Pressable
             style={[styles.primaryButton, (!canProceedStep2 || !displayName) && styles.primaryButtonDisabled]}
-            onPress={startCoaching}
+            onPress={() => startCoaching()}
             disabled={!canProceedStep2 || !displayName}
           >
             <Text style={styles.primaryButtonText}>Help me help them</Text>
@@ -756,6 +758,7 @@ const styles = StyleSheet.create({
   },
   textArea: { minHeight: 100, textAlignVertical: 'top' },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
     paddingVertical: 10,
     paddingHorizontal: 16,

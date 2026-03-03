@@ -149,6 +149,7 @@ export default function OnboardingScreen() {
         pronouns: pronouns ?? undefined,
         age_group: ageGroup,
         love_language: loveLanguage,
+        communication_preference: null,
       });
     }
     completeOnboarding();

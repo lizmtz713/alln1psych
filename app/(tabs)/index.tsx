@@ -18,6 +18,7 @@ import {
 } from '../../src/utils/gaugeHelpers';
 import { useEngagementStore } from '../../src/stores/engagementStore';
 import { useEducationStore, userAgeToContentAge } from '../../src/stores/educationStore';
+import type { Lesson } from '../../src/data/educationContent';
 import { useConversationStore } from '../../src/stores/conversationStore';
 import { useConversationSummaryStore } from '../../src/stores/conversationSummaryStore';
 import { useJournalStore } from '../../src/stores/journalStore';
@@ -352,7 +353,7 @@ export default function HomeScreen() {
 
   let streak: number = 0;
   let weeklySummary: { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null = null;
-  let nextLesson: { id: string; title: string; duration: string } | null = null;
+  let nextLesson: Lesson | null = null;
   let moodTrend: Array<{ date: string; mood: string }> = [];
   let summaryCount = 0;
   let greetingLine = getDynamicGreeting(user?.name ?? 'you');
