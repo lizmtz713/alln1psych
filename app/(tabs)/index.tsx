@@ -27,7 +27,7 @@ import { generateDailyContent } from '../../src/services/personalization';
 import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import { Ionicons } from '@expo/vector-icons';
 import { WeeklyInsightCard } from '../../src/components/WeeklyInsightCard';
-import { CockpitCluster } from '../../src/components/CockpitCluster';
+import { CockpitHome } from '../../src/components/CockpitHome';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
 import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
 import { useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
@@ -547,11 +547,10 @@ export default function HomeScreen() {
 
       <WeeklyInsightCard />
 
-      {/* 2. Six Gauges — Hexagonal Cockpit Cluster */}
+      {/* 2. Six Gauges — Oura-inspired CockpitHome (swipeable row + featured arc) */}
       <View style={styles.cockpitSection}>
-        <Text style={styles.cockpitTitle}>Your Cockpit</Text>
-        <CockpitCluster
-          gaugeValues={{
+        <CockpitHome
+          gauges={{
             body: bodyVal,
             state: stateVal,
             emotion: emotionVal,
@@ -559,7 +558,15 @@ export default function HomeScreen() {
             direction: directionVal,
             alignment: alignmentVal,
           }}
-          overall={overall}
+          userName={user?.name}
+          onGaugePress={(gauge) => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push(`/(modals)/gauge-detail?gauge=${gauge}`);
+          }}
+          onCheckIn={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/cockpit-checkin');
+          }}
         />
         <Pressable
           style={styles.gaugeInfoIcon}
