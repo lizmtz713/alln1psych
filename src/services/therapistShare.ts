@@ -350,7 +350,8 @@ export async function shareReport(report: TherapistReport): Promise<void> {
   const text = await exportReportAsText(report);
   
   const fileName = `InGauge_Report_${format(new Date(), 'yyyy-MM-dd')}.txt`;
-  const filePath = `${FileSystem.cacheDirectory}${fileName}`;
+  const docDir = (FileSystem as unknown as { documentDirectory: string | null }).documentDirectory;
+  const filePath = `${docDir ?? ''}${fileName}`;
   
   await FileSystem.writeAsStringAsync(filePath, text);
   

@@ -188,7 +188,7 @@ export default function PHOSMStateScreen() {
     const currentIndex = steps.indexOf(step);
     if (currentIndex < steps.length - 1) {
       if (step === 'warnings') {
-        setRegulationMap(regMap);
+        setRegulationMap({ ...defaultMap, ...regMap });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       setStep(steps[currentIndex + 1]);

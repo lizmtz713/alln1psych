@@ -177,9 +177,6 @@ export default function HelpSomeoneScreen() {
     }
   };
 
-  const canProceedStep1 = displayName.length > 0 && displayRelationship.length > 0;
-  const canProceedStep2 = situation.trim().length >= 10;
-
   const startCoaching = (overrideSituation?: string) => {
     const sitToUse = overrideSituation ?? situation;
     if (sitToUse.trim().length < 10 || !displayName) return;

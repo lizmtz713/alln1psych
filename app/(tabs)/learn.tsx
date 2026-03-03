@@ -195,7 +195,7 @@ export default function LearnScreen() {
   const [visibleDiscoveries, setVisibleDiscoveries] = useState(() => getDiscoveriesForDay());
   
   const isLessonCompleted = useEducationStore((s) => s.isLessonCompleted);
-  const markLessonComplete = useEducationStore((s) => s.markLessonComplete);
+  const markComplete = useEducationStore((s) => s.completeLesson);
 
   const switchTab = useCallback((tabId: TabId) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -249,7 +249,7 @@ export default function LearnScreen() {
 
   const loadMoreDiscoveries = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const more = getMoreDiscoveries(visibleDiscoveries.map((d) => d.id), 3);
+    const more = getMoreDiscoveries(new Set(visibleDiscoveries.map((d) => d.id)));
     setVisibleDiscoveries((prev) => [...prev, ...more]);
   }, [visibleDiscoveries]);
 

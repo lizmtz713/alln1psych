@@ -522,6 +522,7 @@ export default function HomeScreen() {
               { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const, iconIsEmoji: false as const },
               { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const, iconIsEmoji: false as const },
               { label: 'Help', icon: 'medkit', route: '/(modals)/help-someone' as const, iconIsEmoji: false as const },
+              { label: 'Resolve', icon: 'git-compare', route: '/(modals)/resolve' as const, iconIsEmoji: false as const },
             ];
             return quickActions.map((action) => (
             <Pressable

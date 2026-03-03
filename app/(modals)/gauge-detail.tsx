@@ -261,13 +261,7 @@ export default function GaugeDetailScreen() {
           ))}
         </View>
 
-        {/* 6. DID YOU KNOW? */}
-        <View style={[styles.card, styles.funFactCard]}>
-          <Text style={styles.cardTitle}>Did you know?</Text>
-          <Text style={styles.cardBody}>{content.funFact}</Text>
-        </View>
-        
-        {/* 7. THE SCIENCE (Academic Sources) */}
+        {/* 6. THE SCIENCE (Academic Sources) */}
         {(() => {
           const sources = ACADEMIC_SOURCES.filter(s => s.primaryGauge === gaugeId);
           const insights = getInsightsForGauge(gaugeId as GaugeType);

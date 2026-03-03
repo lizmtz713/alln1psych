@@ -127,8 +127,8 @@ export function QuickCheckIn({
         
         {/* Question */}
         <Text style={styles.question}>{questionVariant.question}</Text>
-        {questionVariant.subtext && (
-          <Text style={styles.subtext}>{questionVariant.subtext}</Text>
+        {(questionVariant as { subtext?: string }).subtext && (
+          <Text style={styles.subtext}>{(questionVariant as { subtext?: string }).subtext}</Text>
         )}
         
         {/* Options */}

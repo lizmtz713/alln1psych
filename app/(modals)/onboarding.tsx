@@ -274,6 +274,8 @@ export default function OnboardingScreen() {
       await completeOnboardingDb(user.id, {
         name: nameInput.trim(),
         age_group: selectedAge ?? null,
+        communication_preference: null,
+        love_language: null,
       });
     }
     completeOnboarding();

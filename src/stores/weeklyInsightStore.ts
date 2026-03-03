@@ -41,22 +41,22 @@ export const useWeeklyInsightStore = create<WeeklyInsightState>((set, get) => ({
 
     set({ isGenerating: true });
 
-    // TODO: Replace with AI-generated insight from Supabase edge function
-    // For now, return a placeholder
+    // TODO: Replace with AI-generated insight from Supabase edge function when available.
+    // For now, return a static local insight so the UI is useful.
     const placeholder: WeeklyInsight = {
       id: `insight-${Date.now()}`,
       weekOf: getWeekOfLabel(),
       generatedAt: new Date().toISOString(),
-      personalSummary: 'Your weekly insight is being prepared...',
+      personalSummary: 'Small steps add up. This week, notice one moment each day when you felt calm or connected—and one thing you can do tomorrow to support that.',
       theme: {
         title: 'Building Momentum',
-        description: 'This week is about steady progress.',
+        description: 'This week is about steady progress. Focus on one intention per day rather than overhauling everything at once.',
       },
       gaugeFocus: {
         gauge: 'state',
-        reason: 'Your State gauge could use attention.',
+        reason: 'Your nervous system benefits from predictable rhythm.',
         target: 70,
-        practices: ['Morning check-in', 'Breathwork'],
+        practices: ['Morning check-in', 'Breathwork', 'One grounding pause'],
       },
       archetypeGuidance: {
         archetype: 'Explorer',

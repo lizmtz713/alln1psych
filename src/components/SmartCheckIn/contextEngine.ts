@@ -42,6 +42,9 @@ interface CheckInPrompt {
   reason: string;
 }
 
+/** Stub for contextual prompt (e.g. time-based message). */
+export const getContextualPrompt = (): string => '';
+
 /**
  * Determine if we should prompt a check-in
  */

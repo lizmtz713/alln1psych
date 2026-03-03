@@ -215,7 +215,7 @@ export const CycleDashboard: React.FC = () => {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Save',
-          onPress: (date) => {
+          onPress: (date?: string) => {
             if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
               setManualPeriodStart(date);
               syncFromHealthKit();

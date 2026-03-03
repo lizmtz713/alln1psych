@@ -553,7 +553,7 @@ export async function analyzePatterns(): Promise<PatternAnalysis> {
   // Sort by confidence (established first) and type (feedback loops first)
   patterns.sort((a, b) => {
     const confidenceOrder = { established: 0, emerging: 1, early_signal: 2 };
-    const typeOrder = { feedback_loop: 0, correlation: 1, trend: 2, trigger: 3 };
+    const typeOrder = { feedback_loop: 0, correlation: 1, trend: 2, trigger: 3, direction_correlation: 4 };
     
     const confDiff = confidenceOrder[a.confidence] - confidenceOrder[b.confidence];
     if (confDiff !== 0) return confDiff;

@@ -270,7 +270,7 @@ async function updateToolEffectiveness(
  */
 export async function getToolEffectiveness(): Promise<Record<ToolType, ToolEffectiveness>> {
   const data = await AsyncStorage.getItem(TOOL_EFFECTIVENESS_KEY);
-  return data ? JSON.parse(data) : {};
+  return data ? JSON.parse(data) : ({} as Record<ToolType, ToolEffectiveness>);
 }
 
 /**

@@ -130,7 +130,7 @@ export default function MeScreen() {
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>{completedLessons?.size || 0}</Text>
+                <Text style={styles.statValue}>{completedLessons?.length || 0}</Text>
                 <Text style={styles.statLabel}>Lessons</Text>
               </View>
               <View style={styles.statDivider} />

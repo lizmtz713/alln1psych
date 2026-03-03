@@ -11,7 +11,8 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../../lib/constants';
-import { ALL_GAUGES, type GaugeName } from './questionBank';
+import type { GaugeName } from './types';
+import { ALL_GAUGES } from './questionBank';
 
 interface MicroCheckInProps {
   gauge: GaugeName;
@@ -26,10 +27,10 @@ export function MicroCheckIn({
   onComplete,
   onDismiss,
 }: MicroCheckInProps) {
-  const gaugeConfig = ALL_GAUGES[gauge];
+  const gaugeConfig = ALL_GAUGES[gauge as keyof typeof ALL_GAUGES];
   // Use the 'quick' variant (emoji-only)
-  const quickVariant = gaugeConfig.variants.find(v => v.id === 'quick') || gaugeConfig.variants[0];
-  const options = quickVariant.options;
+  const quickVariant = gaugeConfig.variants.find((v: { id: string }) => v.id === 'quick') || gaugeConfig.variants[0];
+  const options = quickVariant.options ?? [];
   
   const handleSelect = (value: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -45,7 +46,7 @@ export function MicroCheckIn({
       
       {/* Emoji options - single row */}
       <View style={styles.optionsRow}>
-        {options.map((opt) => (
+        {options.map((opt: { id: string; label: string; emoji: string; value?: number; valence?: string }) => (
           <Pressable
             key={opt.id}
             style={({ pressed }) => [
@@ -53,7 +54,7 @@ export function MicroCheckIn({
               { borderColor: gaugeConfig.color },
               pressed && styles.emojiButtonPressed,
             ]}
-            onPress={() => handleSelect(opt.value)}
+            onPress={() => handleSelect('value' in opt && typeof opt.value === 'number' ? opt.value : 50)}
           >
             <Text style={styles.emoji}>{opt.emoji}</Text>
           </Pressable>
@@ -86,21 +87,21 @@ export function MicroCheckInCompact({
   gauge: GaugeName;
   onComplete: (value: number) => void;
 }) {
-  const gaugeConfig = ALL_GAUGES[gauge];
-  const quickVariant = gaugeConfig.variants.find(v => v.id === 'quick') || gaugeConfig.variants[0];
-  const options = quickVariant.options;
+  const gaugeConfig = ALL_GAUGES[gauge as keyof typeof ALL_GAUGES];
+  const quickVariant = gaugeConfig.variants.find((v: { id: string }) => v.id === 'quick') || gaugeConfig.variants[0];
+  const options = quickVariant.options ?? [];
   
   return (
     <View style={styles.compactContainer}>
       <Text style={styles.compactEmoji}>{gaugeConfig.emoji}</Text>
       <View style={styles.compactOptions}>
-        {options.map((opt) => (
+        {options.map((opt: { id: string; label: string; emoji: string; value?: number; valence?: string }) => (
           <Pressable
             key={opt.id}
             style={styles.compactButton}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              onComplete(opt.value);
+              onComplete('value' in opt && typeof opt.value === 'number' ? opt.value : 50);
             }}
           >
             <Text style={styles.compactEmoji}>{opt.emoji}</Text>

@@ -157,7 +157,7 @@ export default function HeartComposeScreen() {
       }
       
       if (noteId) {
-        await sendNote(noteId);
+        await sendNote(noteId, sendType);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert(
           'Sent! 💌',
