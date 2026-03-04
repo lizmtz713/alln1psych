@@ -1,12 +1,10 @@
+/**
+ * Lights Screen — Relationship Dashboard
+ * Based on Dunbar's research: Your 5/15/50/150
+ */
+
 import { useMemo, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  ScrollView,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, TextInput, Linking } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,421 +15,239 @@ import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useLightsStore, computeLights } from '../../src/stores/lightsStore';
 import type { Light, LightTier } from '../../src/types/lights';
-import { TIER_LABELS, LIGHT_TEMPERATURE_SCALE } from '../../src/types/lights';
+import { getLightBrightness, BRIGHTNESS_CONFIG, getDailyReachOuts, getTierHealth } from '../../src/services/friendshipMaintenance';
 
-const TEMP_EMOJI: Record<string, string> = {
-  warm: '🟠',
-  neutral: '🟡',
-  cool: '🔵',
-  unknown: '○',
-};
+const TEMP_COLORS = { green: '#22C55E', yellow: '#EAB308', orange: '#F97316', red: '#EF4444', unknown: 'transparent' };
 
-const TEMP_COLOR: Record<string, string> = {
-  warm: LIGHT_TEMPERATURE_SCALE.warm.color,
-  neutral: LIGHT_TEMPERATURE_SCALE.neutral.color,
-  cool: LIGHT_TEMPERATURE_SCALE.cool.color,
-  unknown: COLORS.textMuted,
-};
+const TIERS = [
+  { key: 'five' as const, label: 'Your 5', subtitle: 'Weekly contact', max: 5, emoji: '💛' },
+  { key: 'fifteen' as const, label: 'Your 15', subtitle: 'Every 2-3 weeks', max: 15, emoji: '🧡' },
+  { key: 'fifty' as const, label: 'Your 50', subtitle: 'Monthly', max: 50, emoji: '💜' },
+  { key: 'network' as const, label: 'Your 150', subtitle: 'Quarterly', max: 150, emoji: '💙' },
+];
 
-export default function LightsHubScreen() {
+const TIER_HEALTH_LABEL: Record<string, string> = { five: '5', fifteen: '15', fifty: '50', network: '150' };
+
+export default function LightsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const members = useCircleStore((s) => s.members);
-  const myTemperatureLabel = useCircleStore((s) => s.myTemperatureLabel);
-  const persistState = useLightsStore(
-    useShallow((s) => ({
-      tierByMemberId: s.tierByMemberId,
-      connectionLogByMemberId: s.connectionLogByMemberId,
-      lastContactByMemberId: s.lastContactByMemberId,
-      lightExtrasByMemberId: s.lightExtrasByMemberId,
-    }))
-  );
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedTiers, setExpandedTiers] = useState<Record<string, boolean>>({ five: true, fifteen: true, fifty: false, network: false });
 
-  const lights = useMemo(
-    () => computeLights(members, persistState),
-    [members, persistState.tierByMemberId, persistState.connectionLogByMemberId, persistState.lastContactByMemberId, persistState.lightExtrasByMemberId]
-  );
+  const members = useCircleStore((s) => s.members);
+  const persistState = useLightsStore(useShallow((s) => ({
+    tierByMemberId: s.tierByMemberId,
+    connectionLogByMemberId: s.connectionLogByMemberId,
+    lastContactByMemberId: s.lastContactByMemberId,
+    lightExtrasByMemberId: s.lightExtrasByMemberId,
+  })));
+  const logContact = useLightsStore((s) => s.logContact);
+
+  const lights = useMemo(() => computeLights(members, persistState), [members, persistState]);
+  const filteredLights = useMemo(() => {
+    if (!searchQuery.trim()) return lights;
+    const q = searchQuery.toLowerCase();
+    return lights.filter((l) => l.name.toLowerCase().includes(q));
+  }, [lights, searchQuery]);
 
   const lightsByTier = useMemo(() => {
-    const map: Record<LightTier, Light[]> = {
-      five: [],
-      fifteen: [],
-      fifty: [],
-      network: [],
-      archived: [],
-    };
-    lights.forEach((l) => {
-      if (l.tier !== 'archived') map[l.tier].push(l);
-    });
+    const map: Record<LightTier, Light[]> = { five: [], fifteen: [], fifty: [], network: [], archived: [] };
+    filteredLights.forEach((l) => { if (l.tier !== 'archived') map[l.tier].push(l); });
+    (Object.keys(map) as LightTier[]).forEach((tier) => { map[tier].sort((a, b) => b.daysSinceContact - a.daysSinceContact); });
     return map;
-  }, [lights]);
+  }, [filteredLights]);
 
-  const five = lightsByTier.five;
-  const fifteen = lightsByTier.fifteen;
-  const fifty = lightsByTier.fifty;
-  const network = lightsByTier.network;
+  const dailyReachOuts = useMemo(() => getDailyReachOuts(lights), [lights]);
+  const hasReachOuts = dailyReachOuts.priority.length > 0 || dailyReachOuts.suggested.length > 0;
+  const tierHealth = useMemo(() => getTierHealth(lights), [lights]);
 
-  const flickering = lights.filter((l) => l.status === 'flickering');
-  const coolLights = lights.filter((l) => l.temperature === 'cool');
-  const firstFlickeringCool = flickering.find((l) => l.temperature === 'cool');
-
+  const toggleTier = (tier: string) => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setExpandedTiers((prev) => ({ ...prev, [tier]: !prev[tier] })); };
   const [refreshing, setRefreshing] = useState(false);
-  const onRefresh = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 600);
-  };
+  const onRefresh = () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setRefreshing(true); setTimeout(() => setRefreshing(false), 600); };
+
+  const handleQuickText = (light: Light) => { if (light.phone) { Linking.openURL(`sms:${light.phone.replace(/\D/g, '')}`); logContact(light.id, { type: 'text', quality: 'brief' }); } };
+  const handleQuickCall = (light: Light) => { if (light.phone) { Linking.openURL(`tel:${light.phone.replace(/\D/g, '')}`); logContact(light.id, { type: 'call', quality: 'meaningful' }); } };
 
   return (
     <ErrorBoundary>
-      <ScrollView
-        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />
-        }
-      >
-        {/* Header */}
+      <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <Text style={styles.headerEmoji}>💡</Text>
-          <Text style={styles.headerTitle}>Lights</Text>
-          <Text style={styles.headerSubtitle}>Your relationship dashboard</Text>
+          <View><Text style={styles.headerTitle}>Lights</Text><Text style={styles.headerSubtitle}>Your connections</Text></View>
+          <Pressable style={styles.addButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/lights/add'); }}>
+            <Ionicons name="person-add" size={20} color={COLORS.accent} />
+          </Pressable>
         </View>
 
-        {/* World Temperature */}
-        <Pressable
-          style={styles.worldCard}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/lights/world');
-          }}
-        >
-          <Text style={styles.worldLabel}>🌡️ World Temperature</Text>
-          <Text style={styles.worldValue}>72° Warm</Text>
-          <Text style={styles.worldHint}>Based on check-ins today</Text>
-          <View style={styles.worldBar}>
-            <View style={[styles.worldBarFill, { width: '75%' }]} />
-          </View>
-          <Text style={styles.worldLink}>See world temperature →</Text>
-        </Pressable>
+        <View style={styles.searchWrap}>
+          <Ionicons name="search" size={18} color={COLORS.textMuted} style={styles.searchIcon} />
+          <TextInput style={styles.searchInput} placeholder="Search people..." placeholderTextColor={COLORS.textMuted} value={searchQuery} onChangeText={setSearchQuery} autoCapitalize="none" autoCorrect={false} />
+          {searchQuery.length > 0 && <Pressable onPress={() => setSearchQuery('')}><Ionicons name="close-circle" size={18} color={COLORS.textMuted} /></Pressable>}
+        </View>
 
-        <Pressable
-          style={styles.worldCard}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/lights/family');
-          }}
-        >
-          <Text style={styles.worldLabel}>👨‍👩‍👧 Family Dashboard</Text>
-          <Text style={styles.worldHint}>Group Lights for coordinated care and family patterns</Text>
-          <Text style={styles.worldLink}>Family groups →</Text>
-        </Pressable>
-
-        <View style={styles.divider} />
-
-        {/* Your 5 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>☀️ YOUR 5 — The ones who matter most</Text>
-          <View style={styles.tierCard}>
-            <View style={styles.fiveRow}>
-              {(five.length > 0 ? five : lights.slice(0, 4)).map((l) => (
-                <Pressable
-                  key={l.id}
-                  style={styles.lightDotWrap}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push(`/lights/${l.id}`);
-                  }}
-                >
-                  <View style={[styles.lightDot, { backgroundColor: TEMP_COLOR[l.temperature] ?? TEMP_COLOR.unknown }]}>
-                    <Text style={styles.lightDotEmoji}>{TEMP_EMOJI[l.temperature] ?? '○'}</Text>
-                  </View>
-                  <Text style={styles.lightDotName} numberOfLines={1}>{l.name}</Text>
-                  <Text style={styles.lightDotTemp}>{l.temperatureLabel}</Text>
-                  <Text style={styles.lightDotDays}>
-                    {l.daysSinceContact < 999
-                      ? `${l.daysSinceContact}d ago`
-                      : '—'}
-                    {l.status === 'flickering' ? ' ⚠️' : ''}
-                  </Text>
-                </Pressable>
-              ))}
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}>
+          {hasReachOuts && (
+            <View style={styles.reachOutSection}>
+              <Text style={styles.reachOutTitle}>🌟 Reach out today</Text>
+              <Text style={styles.reachOutSubtitle}>{dailyReachOuts.priority.length > 0 ? `${dailyReachOuts.priority.length} need attention` : 'Keep your connections strong'}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.reachOutScroll} contentContainerStyle={styles.reachOutScrollContent}>
+                {[...dailyReachOuts.priority, ...dailyReachOuts.suggested].map((light) => {
+                  const brightness = getLightBrightness(light.tier, light.daysSinceContact);
+                  const config = BRIGHTNESS_CONFIG[brightness];
+                  return (
+                    <Pressable key={light.id} style={styles.reachOutCard} onPress={() => router.push(`/lights/${light.id}`)}>
+                      <View style={[styles.reachOutLight, { backgroundColor: config.color }]}><Text style={styles.reachOutEmoji}>{config.emoji}</Text></View>
+                      <Text style={styles.reachOutName} numberOfLines={1}>{light.name}</Text>
+                      <Text style={styles.reachOutDays}>{light.daysSinceContact}d ago</Text>
+                      {light.phone && (
+                        <View style={styles.quickActions}>
+                          <Pressable style={styles.quickBtn} onPress={() => handleQuickText(light)}><Ionicons name="chatbubble" size={16} color={COLORS.accent} /></Pressable>
+                          <Pressable style={styles.quickBtn} onPress={() => handleQuickCall(light)}><Ionicons name="call" size={16} color={COLORS.accent} /></Pressable>
+                        </View>
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
             </View>
-            <Pressable
-              style={styles.addTierButton}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push('/lights/add');
-              }}
-            >
-              <Ionicons name="add" size={24} color={COLORS.accent} />
-              <Text style={styles.addTierButtonText}>Add to Your 5</Text>
-            </Pressable>
-          </View>
-
-          {firstFlickeringCool && (
-            <Pressable
-              style={styles.nudgeBanner}
-              onPress={() => router.push(`/lights/${firstFlickeringCool.id}`)}
-            >
-              <Text style={styles.nudgeBannerText}>
-                {firstFlickeringCool.name}'s light is cool and flickering.
-              </Text>
-              <Text style={styles.nudgeBannerCta}>Send warmth →</Text>
-            </Pressable>
           )}
-        </View>
 
-        <View style={styles.divider} />
-
-        {/* Your 15 */}
-        <View style={styles.section}>
-          <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>💡 YOUR 15 — Close friends</Text>
-            <Pressable onPress={() => router.push('/lights/tiers/fifteen')}>
-              <Text style={styles.seeAllLink}>See all 15 →</Text>
-            </Pressable>
-          </View>
-          <SummaryRow lights={fifteen} />
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tierScroll}>
-            {fifteen.slice(0, 10).map((l) => (
-              <Pressable
-                key={l.id}
-                style={styles.smallLightCard}
-                onPress={() => router.push(`/lights/${l.id}`)}
-              >
-                <View style={[styles.smallDot, { backgroundColor: TEMP_COLOR[l.temperature] ?? TEMP_COLOR.unknown }]} />
-                <Text style={styles.smallLightName} numberOfLines={1}>{l.name}</Text>
-              </Pressable>
+          <View style={styles.healthOverview}>
+            {tierHealth.map((th) => (
+              <View key={th.tier} style={styles.healthBar}>
+                <Text style={styles.healthLabel}>{TIER_HEALTH_LABEL[th.tier] ?? th.tier}</Text>
+                <View style={styles.healthTrack}><View style={[styles.healthFill, { width: `${th.healthPercent}%`, backgroundColor: th.healthPercent >= 70 ? '#22C55E' : th.healthPercent >= 40 ? '#EAB308' : '#EF4444' }]} /></View>
+                <Text style={styles.healthPercent}>{th.healthPercent}%</Text>
+              </View>
             ))}
-          </ScrollView>
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Your 50 */}
-        <View style={styles.section}>
-          <Pressable style={styles.sectionRow} onPress={() => router.push('/lights/tiers/fifty')}>
-            <Text style={styles.sectionTitle}>○ YOUR 50 — Friends</Text>
-            <Text style={styles.seeAllLink}>Manage Your 50 →</Text>
-          </Pressable>
-          <SummaryRow lights={fifty} />
-          <Text style={styles.slotCount}>{fifty.length}/50 slots filled</Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Your 150 */}
-        <View style={styles.section}>
-          <Pressable style={styles.sectionRow} onPress={() => router.push('/lights/tiers/network')}>
-            <Text style={styles.sectionTitle}>· YOUR 150 — Acquaintances</Text>
-            <Text style={styles.seeAllLink}>View network →</Text>
-          </Pressable>
-          <Text style={styles.slotCount}>{network.length}/150 in your network</Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Lights Insights */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📊 LIGHTS INSIGHTS</Text>
-          <View style={styles.insightsCard}>
-            {flickering.length > 0 && (
-              <Text style={styles.insightLine}>
-                {flickering.length} light{flickering.length !== 1 ? 's' : ''} flickering (need attention)
-              </Text>
-            )}
-            {coolLights.length > 0 && (
-              <Text style={styles.insightLine}>
-                {coolLights.length} light{coolLights.length !== 1 ? 's' : ''} cooled down
-              </Text>
-            )}
-            <Text style={styles.insightLine}>You're strong with Your 5, but Your 15 could use attention.</Text>
-            <Pressable onPress={() => router.push('/lights/insights')}>
-              <Text style={styles.insightsLink}>See full insights →</Text>
-            </Pressable>
           </View>
-        </View>
 
-        <View style={styles.divider} />
+          {TIERS.map((tier) => {
+            const tierLights = lightsByTier[tier.key];
+            const isExpanded = expandedTiers[tier.key];
+            const health = tierHealth.find(h => h.tier === tier.key);
+            return (
+              <View key={tier.key} style={styles.tierSection}>
+                <Pressable style={styles.tierHeader} onPress={() => toggleTier(tier.key)}>
+                  <View style={styles.tierHeaderLeft}>
+                    <Text style={styles.tierEmoji}>{tier.emoji}</Text>
+                    <View><Text style={styles.tierLabel}>{tier.label}</Text><Text style={styles.tierSubtitle}>{tierLights.length}/{tier.max} · {tier.subtitle}</Text></View>
+                  </View>
+                  <View style={styles.tierHeaderRight}>
+                    {health && health.needsAttention > 0 && <View style={styles.attentionBadge}><Text style={styles.attentionText}>{health.needsAttention}</Text></View>}
+                    <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={20} color={COLORS.textMuted} />
+                  </View>
+                </Pressable>
+                {isExpanded && (
+                  <View style={styles.tierContent}>
+                    {tierLights.length === 0 ? (
+                      <Pressable style={styles.emptyTier} onPress={() => router.push('/lights/add')}><Ionicons name="add-circle-outline" size={24} color={COLORS.textMuted} /><Text style={styles.emptyTierText}>Add someone to {tier.label}</Text></Pressable>
+                    ) : tierLights.map((light, index) => (
+                      <PersonRow key={light.id} light={light} isLast={index === tierLights.length - 1} onPress={() => router.push(`/lights/${light.id}`)} onQuickText={() => handleQuickText(light)} onQuickCall={() => handleQuickCall(light)} />
+                    ))}
+                  </View>
+                )}
+              </View>
+            );
+          })}
 
-        {/* The Art of Friendship */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📚 THE ART OF FRIENDSHIP</Text>
-          {[
-            { title: 'How to make new friends', icon: '🤝', path: '/lesson/hm-rel-new-friends' },
-            { title: 'How to maintain friendships', icon: '🔄', path: '/lesson/hm-rel-maintain' },
-            { title: 'When to let a light go dark', icon: '👋', path: '/lesson/hm-rel-let-go' },
-            { title: "The science of 5-15-50-150", icon: '🔬', path: '/lights/learn' },
-          ].map((item) => (
-            <Pressable
-              key={item.path}
-              style={styles.learnCard}
-              onPress={() => router.push(item.path as any)}
-            >
-              <Text style={styles.learnCardIcon}>{item.icon}</Text>
-              <Text style={styles.learnCardTitle}>{item.title}</Text>
-              <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
-            </Pressable>
-          ))}
-        </View>
+          <View style={styles.scienceFooter}>
+            <Text style={styles.scienceTitle}>The Science</Text>
+            <Text style={styles.scienceText}>Anthropologist Robin Dunbar found humans can maintain ~150 relationships, but intimacy requires regular contact. Without it, relationships decay ~15% per missed contact window.</Text>
+            <Pressable style={styles.learnMoreBtn} onPress={() => router.push('/lights/learn')}><Text style={styles.learnMoreText}>Learn more →</Text></Pressable>
+          </View>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
+          <View style={{ height: insets.bottom + 24 }} />
+        </ScrollView>
+      </View>
     </ErrorBoundary>
   );
 }
 
-function SummaryRow({ lights }: { lights: Light[] }) {
-  const warm = lights.filter((l) => l.temperature === 'warm').length;
-  const neutral = lights.filter((l) => l.temperature === 'neutral').length;
-  const cool = lights.filter((l) => l.temperature === 'cool').length;
-  const flickering = lights.filter((l) => l.status === 'flickering').length;
-  const parts = [];
-  if (warm) parts.push(`${warm} warm`);
-  if (neutral) parts.push(`${neutral} neutral`);
-  if (cool) parts.push(`${cool} cool`);
-  if (flickering) parts.push(`${flickering} flickering`);
+function PersonRow({ light, isLast, onPress, onQuickText, onQuickCall }: { light: Light; isLast: boolean; onPress: () => void; onQuickText: () => void; onQuickCall: () => void }) {
+  const getTempColor = () => { if (light.temperature === 'warm') return TEMP_COLORS.green; if (light.temperature === 'neutral') return TEMP_COLORS.yellow; if (light.temperature === 'cool') return TEMP_COLORS.orange; return TEMP_COLORS.unknown; };
+  const tempColor = getTempColor();
+  const hasSharedTemp = tempColor !== 'transparent';
+  const brightness = getLightBrightness(light.tier, light.daysSinceContact);
+  const config = BRIGHTNESS_CONFIG[brightness];
+  const isUrgent = brightness === 'dim' || brightness === 'dark';
+
   return (
-    <Text style={styles.summaryRow}>
-      {parts.length ? parts.join(' · ') : 'No lights in this tier yet'}
-    </Text>
+    <Pressable style={[styles.personRow, isLast && styles.personRowLast]} onPress={onPress}>
+      <View style={styles.lightIndicator}>
+        <View style={[styles.lightGlow, { backgroundColor: config.color, opacity: config.glow }]} />
+        <View style={[styles.lightCore, { backgroundColor: config.color }]} />
+        {hasSharedTemp && <View style={[styles.tempBadge, { backgroundColor: tempColor }]} />}
+      </View>
+      <View style={styles.personInfo}>
+        <Text style={styles.personName}>{light.name}</Text>
+        <Text style={[styles.personMeta, { color: config.color }]}>{config.label} · {light.daysSinceContact}d{isUrgent && ' ⚠️'}</Text>
+      </View>
+      {light.phone && (
+        <View style={styles.rowActions}>
+          <Pressable style={styles.rowActionBtn} onPress={onQuickText}><Ionicons name="chatbubble-outline" size={18} color={COLORS.textMuted} /></Pressable>
+          <Pressable style={styles.rowActionBtn} onPress={onQuickCall}><Ionicons name="call-outline" size={18} color={COLORS.textMuted} /></Pressable>
+        </View>
+      )}
+      <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  content: { paddingHorizontal: 24, paddingBottom: 24 },
-  header: { marginBottom: 24 },
-  headerEmoji: { fontSize: 32, marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontWeight: '700', color: COLORS.text },
-  headerSubtitle: { fontSize: 15, color: COLORS.textMuted },
-  worldCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 20,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  worldLabel: { fontSize: 13, color: COLORS.textMuted, marginBottom: 4 },
-  worldValue: { fontSize: 36, fontWeight: '700', color: COLORS.text },
-  worldHint: { fontSize: 13, color: COLORS.textMuted, marginTop: 4 },
-  worldBar: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.inputSurface,
-    marginTop: 12,
-    overflow: 'hidden',
-  },
-  worldBarFill: {
-    height: '100%',
-    backgroundColor: COLORS.accent,
-    borderRadius: 4,
-  },
-  worldLink: { fontSize: 14, color: COLORS.accent, marginTop: 12, fontWeight: '500' },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: 24,
-  },
-  section: { marginBottom: 8 },
-  sectionTitle: { fontSize: 17, fontWeight: '600', color: COLORS.text, marginBottom: 12 },
-  sectionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  tierCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  fiveRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    gap: 16,
-    marginBottom: 20,
-  },
-  lightDotWrap: { alignItems: 'center', minWidth: 72 },
-  lightDot: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  lightDotEmoji: { fontSize: 22 },
-  lightDotName: { fontSize: 14, fontWeight: '600', color: COLORS.text },
-  lightDotTemp: { fontSize: 11, color: COLORS.textMuted },
-  lightDotDays: { fontSize: 11, color: COLORS.textMuted, marginTop: 2 },
-  addTierButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    borderStyle: 'dashed',
-    borderWidth: 2,
-    borderColor: COLORS.accent + '66',
-    borderRadius: BORDER_RADIUS.input,
-  },
-  addTierButtonText: { fontSize: 15, color: COLORS.accent, fontWeight: '600' },
-  nudgeBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    backgroundColor: COLORS.accentBg,
-    padding: 14,
-    borderRadius: BORDER_RADIUS.input,
-    marginTop: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: LIGHT_TEMPERATURE_SCALE.cool.color,
-  },
-  nudgeBannerText: { fontSize: 14, color: COLORS.text, flex: 1 },
-  nudgeBannerCta: { fontSize: 14, color: COLORS.accent, fontWeight: '600' },
-  summaryRow: { fontSize: 13, color: COLORS.textMuted, marginBottom: 12 },
-  tierScroll: { marginHorizontal: -24, paddingHorizontal: 24 },
-  smallLightCard: {
-    alignItems: 'center',
-    marginRight: 12,
-    width: 64,
-  },
-  smallDot: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginBottom: 6,
-  },
-  smallLightName: { fontSize: 12, color: COLORS.text },
-  slotCount: { fontSize: 13, color: COLORS.textMuted },
-  seeAllLink: { fontSize: 14, color: COLORS.accent },
-  insightsCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  insightLine: { fontSize: 14, color: COLORS.text, marginBottom: 8 },
-  insightsLink: { fontSize: 14, color: COLORS.accent, marginTop: 8, fontWeight: '500' },
-  learnCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    padding: 16,
-    borderRadius: BORDER_RADIUS.input,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  learnCardIcon: { fontSize: 22, marginRight: 14 },
-  learnCardTitle: { flex: 1, fontSize: 15, color: COLORS.text, fontWeight: '500' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 16 },
+  headerTitle: { fontSize: 32, fontWeight: '700', color: COLORS.text },
+  headerSubtitle: { fontSize: 15, color: COLORS.textMuted, marginTop: 2 },
+  addButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: COLORS.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: COLORS.border },
+  searchWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.surface, marginHorizontal: 24, marginBottom: 16, borderRadius: BORDER_RADIUS.input, paddingHorizontal: 14, height: 44, borderWidth: 1, borderColor: COLORS.border },
+  searchIcon: { marginRight: 10 },
+  searchInput: { flex: 1, fontSize: 16, color: COLORS.text },
+  scroll: { flex: 1 },
+  content: { paddingHorizontal: 24 },
+  reachOutSection: { marginBottom: 20 },
+  reachOutTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text },
+  reachOutSubtitle: { fontSize: 14, color: COLORS.textMuted, marginTop: 4, marginBottom: 12 },
+  reachOutScroll: { marginHorizontal: -24 },
+  reachOutScrollContent: { paddingHorizontal: 24, gap: 12 },
+  reachOutCard: { width: 100, backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.card, padding: 12, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border },
+  reachOutLight: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  reachOutEmoji: { fontSize: 18 },
+  reachOutName: { fontSize: 13, fontWeight: '600', color: COLORS.text, textAlign: 'center' },
+  reachOutDays: { fontSize: 11, color: COLORS.textMuted, marginTop: 2 },
+  quickActions: { flexDirection: 'row', gap: 8, marginTop: 8 },
+  quickBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: COLORS.background, alignItems: 'center', justifyContent: 'center' },
+  healthOverview: { backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.card, padding: 16, marginBottom: 20, borderWidth: 1, borderColor: COLORS.border },
+  healthBar: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  healthLabel: { width: 50, fontSize: 12, fontWeight: '600', color: COLORS.textMuted },
+  healthTrack: { flex: 1, height: 6, backgroundColor: COLORS.border, borderRadius: 3, marginHorizontal: 8, overflow: 'hidden' },
+  healthFill: { height: '100%', borderRadius: 3 },
+  healthPercent: { width: 36, fontSize: 12, fontWeight: '600', color: COLORS.text, textAlign: 'right' },
+  tierSection: { marginBottom: 16 },
+  tierHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: COLORS.surface, padding: 16, borderRadius: BORDER_RADIUS.card, borderWidth: 1, borderColor: COLORS.border },
+  tierHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  tierHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  tierEmoji: { fontSize: 24 },
+  tierLabel: { fontSize: 17, fontWeight: '600', color: COLORS.text },
+  tierSubtitle: { fontSize: 13, color: COLORS.textMuted, marginTop: 2 },
+  attentionBadge: { backgroundColor: '#EF4444', borderRadius: 10, minWidth: 20, height: 20, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
+  attentionText: { fontSize: 11, fontWeight: '700', color: '#fff' },
+  tierContent: { marginTop: 8, backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.card, borderWidth: 1, borderColor: COLORS.border, overflow: 'hidden' },
+  emptyTier: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24 },
+  emptyTierText: { fontSize: 15, color: COLORS.textMuted },
+  personRow: { flexDirection: 'row', alignItems: 'center', padding: 14, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  personRowLast: { borderBottomWidth: 0 },
+  lightIndicator: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  lightGlow: { position: 'absolute', width: 36, height: 36, borderRadius: 18 },
+  lightCore: { width: 14, height: 14, borderRadius: 7 },
+  tempBadge: { position: 'absolute', bottom: 2, right: 2, width: 10, height: 10, borderRadius: 5, borderWidth: 2, borderColor: COLORS.surface },
+  personInfo: { flex: 1 },
+  personName: { fontSize: 16, fontWeight: '500', color: COLORS.text },
+  personMeta: { fontSize: 13, marginTop: 2 },
+  rowActions: { flexDirection: 'row', gap: 4, marginRight: 8 },
+  rowActionBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: COLORS.background, alignItems: 'center', justifyContent: 'center' },
+  scienceFooter: { backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.card, padding: 20, marginTop: 8, borderWidth: 1, borderColor: COLORS.border },
+  scienceTitle: { fontSize: 15, fontWeight: '600', color: COLORS.text, marginBottom: 8 },
+  scienceText: { fontSize: 14, color: COLORS.textMuted, lineHeight: 20 },
+  learnMoreBtn: { marginTop: 12 },
+  learnMoreText: { fontSize: 14, color: COLORS.accent, fontWeight: '500' },
 });

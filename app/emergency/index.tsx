@@ -78,7 +78,11 @@ export default function EmergencyIndexScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.hero}>You're not alone.</Text>
+        <View style={styles.beaconBlock}>
+          <Text style={styles.beaconEmoji}>🚨</Text>
+          <Text style={styles.beaconLine1}>You pressed the beacon.</Text>
+          <Text style={styles.beaconLine2}>I'm here. What do you need?</Text>
+        </View>
 
         {CARDS.map((card) => (
           <Pressable
@@ -106,12 +110,25 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BG },
   scroll: { flex: 1 },
   scrollContent: { padding: SPACING.xl, paddingTop: SPACING.xxl },
-  hero: {
-    fontSize: 26,
-    fontWeight: '700',
+  beaconBlock: {
+    alignItems: 'center',
+    marginBottom: SPACING.xxl,
+  },
+  beaconEmoji: {
+    fontSize: 48,
+    marginBottom: SPACING.lg,
+  },
+  beaconLine1: {
+    fontSize: 18,
+    fontWeight: '600',
     color: TEXT,
     textAlign: 'center',
-    marginBottom: SPACING.xxl,
+    marginBottom: 4,
+  },
+  beaconLine2: {
+    fontSize: 17,
+    color: TEXT_MUTED,
+    textAlign: 'center',
   },
   card: {
     backgroundColor: CARD_BG,

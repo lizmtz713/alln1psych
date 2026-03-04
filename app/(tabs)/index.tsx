@@ -26,6 +26,7 @@ import { useDailyContentStore } from '../../src/stores/dailyContentStore';
 import { generateDailyContent } from '../../src/services/personalization';
 import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import { Ionicons } from '@expo/vector-icons';
+import { HomeHeader } from '../../src/components/HomeHeader';
 import { WeeklyInsightCard } from '../../src/components/WeeklyInsightCard';
 import { CockpitHome } from '../../src/components/CockpitHome';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
@@ -508,42 +509,7 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
     >
-      {/* 1. Quick Action Pills — very top, no header */}
-      <View style={styles.quickActionsWrap}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
-          {(() => {
-            const quickActions = [
-              { label: 'Prompts', icon: 'sparkles', route: '/(modals)/prompt-generator' as const, iconIsEmoji: false as const },
-              { label: 'Patterns', icon: 'analytics', route: '/(modals)/patterns' as const, iconIsEmoji: false as const },
-              { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const, iconIsEmoji: false as const },
-              { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const, iconIsEmoji: false as const },
-              { label: 'Relate', icon: 'heart-circle', route: '/(modals)/relate' as const, iconIsEmoji: false as const },
-              { label: 'Love', icon: 'heart-half', route: '/(modals)/love' as const, iconIsEmoji: false as const },
-              { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const, iconIsEmoji: false as const },
-              { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const, iconIsEmoji: false as const },
-              { label: 'Help', icon: 'medkit', route: '/(modals)/help-someone' as const, iconIsEmoji: false as const },
-              { label: 'Resolve', icon: 'git-compare', route: '/(modals)/resolve' as const, iconIsEmoji: false as const },
-            ];
-            return quickActions.map((action) => (
-            <Pressable
-              key={action.label}
-              style={({ pressed }) => [styles.quickActionPill, pressed && styles.quickActionPressed]}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push(action.route);
-              }}
-            >
-              {action.iconIsEmoji ? (
-                <Text style={styles.quickActionPillEmoji}>{action.icon}</Text>
-              ) : (
-                <Ionicons name={action.icon as any} size={22} color={ACCENT} />
-              )}
-              <Text style={styles.quickActionPillText}>{action.label}</Text>
-            </Pressable>
-            ));
-          })()}
-        </ScrollView>
-      </View>
+      <HomeHeader userName={user?.name?.trim().split(/\s+/)[0] ?? 'there'} />
 
       <WeeklyInsightCard />
 
@@ -591,6 +557,43 @@ export default function HomeScreen() {
           <Text style={styles.checkInButtonSmallText}>Tap to check in</Text>
         </Pressable>
       )}
+
+      {/* Toolkit — right below cockpit */}
+      <View style={styles.quickActionsWrap}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
+          {(() => {
+            const quickActions = [
+              { label: 'Prompts', icon: 'sparkles', route: '/(modals)/prompt-generator' as const, iconIsEmoji: false as const },
+              { label: 'Patterns', icon: 'analytics', route: '/(modals)/patterns' as const, iconIsEmoji: false as const },
+              { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const, iconIsEmoji: false as const },
+              { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const, iconIsEmoji: false as const },
+              { label: 'Relate', icon: 'heart-circle', route: '/(modals)/relate' as const, iconIsEmoji: false as const },
+              { label: 'Love', icon: 'heart-half', route: '/(modals)/love' as const, iconIsEmoji: false as const },
+              { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const, iconIsEmoji: false as const },
+              { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const, iconIsEmoji: false as const },
+              { label: 'Help', icon: 'medkit', route: '/(modals)/help-someone' as const, iconIsEmoji: false as const },
+              { label: 'Resolve', icon: 'git-compare', route: '/(modals)/resolve' as const, iconIsEmoji: false as const },
+            ];
+            return quickActions.map((action) => (
+            <Pressable
+              key={action.label}
+              style={({ pressed }) => [styles.quickActionPill, pressed && styles.quickActionPressed]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(action.route);
+              }}
+            >
+              {action.iconIsEmoji ? (
+                <Text style={styles.quickActionPillEmoji}>{action.icon}</Text>
+              ) : (
+                <Ionicons name={action.icon as any} size={22} color={ACCENT} />
+              )}
+              <Text style={styles.quickActionPillText}>{action.label}</Text>
+            </Pressable>
+            ));
+          })()}
+        </ScrollView>
+      </View>
 
       {/* 4. Greeting + Streak — smaller text */}
       <View style={styles.greetingStreakRow}>

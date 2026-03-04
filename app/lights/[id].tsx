@@ -1,493 +1,277 @@
+/**
+ * Person Profile — Everything you need to show up well for this person
+ */
+
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useRef } from 'react';
+import { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, Linking, Image, Alert } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useLightsStore, computeLights } from '../../src/stores/lightsStore';
-import { TIER_LABELS, LIGHT_TEMPERATURE_SCALE } from '../../src/types/lights';
+import { TIER_LABELS } from '../../src/types/lights';
+import { getLightBrightness, BRIGHTNESS_CONFIG, IDEAL_CONTACT_DAYS, estimateRelationshipStrength } from '../../src/services/friendshipMaintenance';
+import { ReachOutSheet } from '../../src/components/ReachOutSheet';
 
-function daysUntil(iso: string): number {
-  const d = new Date(iso);
-  d.setHours(0, 0, 0, 0);
+const TEMP_COLORS = { green: '#22C55E', yellow: '#EAB308', orange: '#F97316', red: '#EF4444' };
+
+function daysUntilNextBirthday(iso: string): number {
+  const [, month, day] = iso.split('-').map(Number);
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.floor((d.getTime() - today.getTime()) / 86400000);
-  return diff;
+  const thisYear = today.getFullYear();
+  let nextBirthday = new Date(thisYear, month - 1, day);
+  if (nextBirthday < today) nextBirthday = new Date(thisYear + 1, month - 1, day);
+  return Math.ceil((nextBirthday.getTime() - today.getTime()) / 86400000);
 }
 
-function formatBirthday(iso: string): string {
-  const parts = iso.split('-');
-  if (parts.length !== 3) return iso;
-  return `${parts[1]}/${parts[2]}/${parts[0]}`;
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export default function LightProfileScreen() {
+export default function PersonProfileScreen() {
   const params = useLocalSearchParams<{ id: string }>();
   const id = params.id;
   const router = useRouter();
   const insets = useSafeAreaInsets();
+
   const members = useCircleStore((s) => s.members);
-  const persistState = useLightsStore(
-    useShallow((s) => ({
-      tierByMemberId: s.tierByMemberId,
-      connectionLogByMemberId: s.connectionLogByMemberId,
-      lastContactByMemberId: s.lastContactByMemberId,
-      lightExtrasByMemberId: s.lightExtrasByMemberId,
-    }))
-  );
-  const lights = useMemo(() => computeLights(members, persistState), [members, persistState]);
-  const light = lights.find((l) => l.id === id);
+  const persistState = useLightsStore(useShallow((s) => ({
+    tierByMemberId: s.tierByMemberId,
+    connectionLogByMemberId: s.connectionLogByMemberId,
+    lastContactByMemberId: s.lastContactByMemberId,
+    lightExtrasByMemberId: s.lightExtrasByMemberId,
+  })));
+  const logContact = useLightsStore((s) => s.logContact);
   const setTier = useLightsStore((s) => s.setTier);
   const removeLight = useLightsStore((s) => s.removeLight);
 
+  const lights = useMemo(() => computeLights(members, persistState), [members, persistState]);
+  const light = lights.find((l) => l.id === id);
+
+  const [showTierPicker, setShowTierPicker] = useState(false);
+  const [showReachOut, setShowReachOut] = useState(false);
+
   if (!light) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.error}>Light not found.</Text>
-        <Pressable onPress={() => router.back()}>
-          <Text style={styles.link}>Back to Lights</Text>
-        </Pressable>
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.errorText}>Person not found</Text>
+        <Pressable style={styles.backBtn} onPress={() => router.back()}><Text style={styles.backBtnText}>Go back</Text></Pressable>
       </View>
     );
   }
 
-  const tempKey = light.temperature === 'unknown' ? 'neutral' : light.temperature;
-  const tempColor = LIGHT_TEMPERATURE_SCALE[tempKey]?.color ?? COLORS.textMuted;
-  const connectionLog = light.connectionLog ?? [];
-  const hasContactInfo = light.phone || light.email || light.address;
+  const brightness = getLightBrightness(light.tier, light.daysSinceContact);
+  const brightConfig = BRIGHTNESS_CONFIG[brightness];
+  const relationshipStrength = estimateRelationshipStrength(light.tier, light.daysSinceContact);
+  const idealDays = light.tier !== 'archived' ? IDEAL_CONTACT_DAYS[light.tier] : 30;
 
-  const openTel = () => {
-    const raw = (light.phone ?? '').replace(/\D/g, '');
-    if (raw) Linking.openURL(`tel:${raw}`);
-    else Alert.alert('No number', 'No phone number saved for this light.');
+  const getTempInfo = () => {
+    if (light.temperature === 'warm') return { color: TEMP_COLORS.green, label: 'Doing well' };
+    if (light.temperature === 'neutral') return { color: TEMP_COLORS.yellow, label: 'Okay' };
+    if (light.temperature === 'cool') return { color: TEMP_COLORS.orange, label: 'Having a hard time' };
+    return null;
   };
-  const openSms = () => {
-    const raw = (light.phone ?? '').replace(/\D/g, '');
-    if (raw) Linking.openURL(`sms:${raw}`);
-    else Alert.alert('No number', 'No phone number saved for this light.');
-  };
-  const openEmail = () => {
-    if (light.email) Linking.openURL(`mailto:${light.email}`);
-    else Alert.alert('No email', 'No email saved for this light.');
-  };
-  const openMaps = () => {
-    if (light.address) Linking.openURL(`maps://?address=${encodeURIComponent(light.address)}`);
-    else Alert.alert('No address', 'No address saved for this light.');
-  };
-  const copyToClipboard = async (value: string, label: string) => {
-    await Clipboard.setStringAsync(value);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Alert.alert('Copied', `${label} copied to clipboard.`);
-  };
+  const tempInfo = getTempInfo();
+  const birthdayDays = light.birthday ? daysUntilNextBirthday(light.birthday) : null;
+  const birthdaySoon = birthdayDays !== null && birthdayDays <= 14;
+  const recentLog = (light.connectionLog || []).slice(0, 5);
 
-  const scrollRef = useRef<ScrollView>(null);
-  const giftsSectionY = useRef<number>(0);
+  const handleText = () => { if (light.phone) { Linking.openURL(`sms:${light.phone.replace(/\D/g, '')}`); logContact(light.id, { type: 'text', quality: 'brief' }); } else Alert.alert('No phone number', 'Add a phone number to text this person.'); };
+  const handleCall = () => { if (light.phone) { Linking.openURL(`tel:${light.phone.replace(/\D/g, '')}`); logContact(light.id, { type: 'call', quality: 'meaningful' }); } else Alert.alert('No phone number', 'Add a phone number to call this person.'); };
+  const handleMindMail = () => router.push({ pathname: '/mind-mail/compose', params: { recipientId: light.id, recipientName: light.name } } as any);
+  const handleLogInteraction = () => router.push(`/lights/log-entry?id=${encodeURIComponent(light.id)}`);
+  const handleChangeTier = (tier: string) => { setTier(light.id, tier as keyof typeof TIER_LABELS); setShowTierPicker(false); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); };
+  const handleArchive = () => Alert.alert('Archive this light?', `${light.name} will be moved to archived.`, [{ text: 'Cancel', style: 'cancel' }, { text: 'Archive', onPress: () => { setTier(light.id, 'archived'); router.back(); } }]);
+  const handleRemove = () => Alert.alert('Remove this person?', `${light.name} will be permanently removed.`, [{ text: 'Cancel', style: 'cancel' }, { text: 'Remove', style: 'destructive', onPress: () => { removeLight(light.id); router.replace('/(tabs)/lights'); } }]);
 
-  const openLogEntry = () => {
-    router.push(`/lights/log-entry?id=${encodeURIComponent(light.id)}`);
-  };
-
-  const scrollToGifts = () => {
-    scrollRef.current?.scrollTo({ y: giftsSectionY.current, animated: true });
-  };
-
-  // Smart hints (after light is defined)
-  const smartHints = useMemo(() => {
-    const hints: string[] = [];
-    if (light.daysSinceContact >= 14) {
-      const weeks = Math.floor(light.daysSinceContact / 7);
-      hints.push(`You haven't talked to ${light.name} in ${weeks} week${weeks !== 1 ? 's' : ''}`);
-    }
-    if (light.birthday) {
-      const d = daysUntil(light.birthday);
-      if (d >= 0 && d <= 14) hints.push(`${light.name}'s birthday is in ${d === 0 ? 'today!' : d === 1 ? '1 day' : `${d} days`}`);
-    }
-    if (light.anniversary) {
-      const d = daysUntil(light.anniversary);
-      if (d >= 0 && d <= 14) hints.push(`Anniversary in ${d === 0 ? 'today!' : d === 1 ? '1 day' : `${d} days`}`);
-    }
-    const pendingFollowUps = (light.connectionLog ?? [])
-      .flatMap((e) => e.followUps ?? [])
-      .filter(Boolean)
-      .slice(0, 2);
-    pendingFollowUps.forEach((f) => hints.push(`Follow-up: ${f}`));
-    return hints;
-  }, [light]);
+  const formatLogDate = (date: Date | string) => formatDate(typeof date === 'string' ? date : new Date(date).toISOString().slice(0, 10));
 
   return (
-    <ScrollView
-      ref={scrollRef}
-      style={[styles.container, { paddingBottom: insets.bottom + 24 }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.avatarWrap}>
-        {light.photoUri ? (
-          <Image source={{ uri: light.photoUri }} style={[styles.avatar, styles.avatarImage]} />
-        ) : (
-          <View style={[styles.avatar, { backgroundColor: tempColor + '33' }]}>
-            <Text style={styles.avatarEmoji}>👤</Text>
-          </View>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
+      {/* Header */}
+      <View style={styles.header}>
+        {light.photoUri ? <Image source={{ uri: light.photoUri }} style={styles.avatar} /> : (
+          <View style={[styles.avatarPlaceholder, { backgroundColor: brightConfig.color + '33' }]}><Text style={styles.avatarInitial}>{light.name.charAt(0).toUpperCase()}</Text></View>
         )}
         <Text style={styles.name}>{light.name}</Text>
-        <Text style={styles.tierBadge}>{TIER_LABELS[light.tier]}</Text>
-        <View style={[styles.tempChip, { backgroundColor: tempColor + '22' }]}>
-          <Text style={[styles.tempChipText, { color: tempColor }]}>{light.temperatureLabel}</Text>
-        </View>
-      </View>
-
-      {smartHints.length > 0 ? (
-        <>
-          <View style={styles.divider} />
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>REMINDERS</Text>
-            <View style={styles.card}>
-              {smartHints.map((hint, i) => (
-                <View key={i} style={styles.hintRow}>
-                  <Ionicons name="bulb-outline" size={18} color={COLORS.accent} />
-                  <Text style={styles.hintText}>{hint}</Text>
-                </View>
-              ))}
-            </View>
+        <Pressable style={styles.tierBadge} onPress={() => setShowTierPicker(!showTierPicker)}>
+          <Text style={styles.tierText}>{TIER_LABELS[light.tier]}</Text>
+          <Text style={styles.tierRelation}> · {light.relationshipType || 'Friend'}</Text>
+          <Ionicons name="chevron-down" size={14} color={COLORS.textMuted} />
+        </Pressable>
+        {showTierPicker && (
+          <View style={styles.tierPicker}>
+            {(['five', 'fifteen', 'fifty', 'network'] as const).map((tier) => (
+              <Pressable key={tier} style={[styles.tierOption, light.tier === tier && styles.tierOptionSelected]} onPress={() => handleChangeTier(tier)}>
+                <Text style={[styles.tierOptionText, light.tier === tier && styles.tierOptionTextSelected]}>{TIER_LABELS[tier]}</Text>
+              </Pressable>
+            ))}
           </View>
-        </>
-      ) : null}
-
-      {hasContactInfo ? (
-        <>
-          <View style={styles.divider} />
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>QUICK ACTIONS</Text>
-            <View style={styles.quickActions}>
-              {light.phone ? (
-                <>
-                  <Pressable style={styles.quickActionBtn} onPress={openTel}>
-                    <Ionicons name="call" size={24} color={COLORS.accent} />
-                    <Text style={styles.quickActionLabel}>Call</Text>
-                  </Pressable>
-                  <Pressable style={styles.quickActionBtn} onPress={openSms}>
-                    <Ionicons name="chatbubble" size={24} color={COLORS.accent} />
-                    <Text style={styles.quickActionLabel}>Text</Text>
-                  </Pressable>
-                </>
-              ) : null}
-              {light.email ? (
-                <Pressable style={styles.quickActionBtn} onPress={openEmail}>
-                  <Ionicons name="mail" size={24} color={COLORS.accent} />
-                  <Text style={styles.quickActionLabel}>Email</Text>
-                </Pressable>
-              ) : null}
-              {(light.giftIdeas?.length ?? 0) + (light.pastGifts?.length ?? 0) > 0 || light.favoritesSizes ? (
-                <Pressable style={styles.quickActionBtn} onPress={scrollToGifts}>
-                  <Ionicons name="gift" size={24} color={COLORS.accent} />
-                  <Text style={styles.quickActionLabel}>Gift</Text>
-                </Pressable>
-              ) : null}
-              {light.address ? (
-                <Pressable style={styles.quickActionBtn} onPress={openMaps}>
-                  <Ionicons name="car" size={24} color={COLORS.accent} />
-                  <Text style={styles.quickActionLabel}>
-                    Visit{light.driveTimeMinutes ? ` · ${light.driveTimeMinutes} min` : ''}
-                  </Text>
-                </Pressable>
-              ) : null}
-            </View>
+        )}
+        <View style={styles.statusRow}>
+          <View style={styles.statusItem}>
+            <View style={[styles.lightOrb, { backgroundColor: brightConfig.color }]}><Text style={styles.lightEmoji}>{brightConfig.emoji}</Text></View>
+            <Text style={[styles.statusLabel, { color: brightConfig.color }]}>{brightConfig.label}</Text>
+            <Text style={styles.statusSub}>Your connection</Text>
           </View>
-          <View style={styles.divider} />
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>CONTACT INFO</Text>
-            <View style={styles.card}>
-              {light.phone ? (
-                <View style={styles.contactRow}>
-                  <Text style={styles.contactLabel}>Phone</Text>
-                  <View style={styles.contactValueRow}>
-                    <Text style={styles.contactValue}>{light.phone}</Text>
-                    <Pressable onPress={() => copyToClipboard(light.phone!, 'Phone')}>
-                      <Text style={styles.copyLink}>Copy</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              ) : null}
-              {light.email ? (
-                <View style={styles.contactRow}>
-                  <Text style={styles.contactLabel}>Email</Text>
-                  <View style={styles.contactValueRow}>
-                    <Text style={styles.contactValue}>{light.email}</Text>
-                    <Pressable onPress={() => copyToClipboard(light.email!, 'Email')}>
-                      <Text style={styles.copyLink}>Copy</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              ) : null}
-              {light.address ? (
-                <View style={styles.contactRow}>
-                  <Text style={styles.contactLabel}>Address</Text>
-                  <View style={styles.contactValueRow}>
-                    <Text style={styles.contactValue} numberOfLines={2}>{light.address}</Text>
-                    <Pressable onPress={openMaps}>
-                      <Text style={styles.copyLink}>Maps</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              ) : null}
-              {light.birthday ? (
-                <View style={styles.contactRow}>
-                  <Text style={styles.contactLabel}>Birthday</Text>
-                  <Text style={styles.contactValue}>{formatBirthday(light.birthday)} 🎂</Text>
-                </View>
-              ) : null}
+          {tempInfo && (
+            <View style={styles.statusItem}>
+              <View style={[styles.tempOrb, { backgroundColor: tempInfo.color }]} />
+              <Text style={[styles.statusLabel, { color: tempInfo.color }]}>{tempInfo.label}</Text>
+              <Text style={styles.statusSub}>How they're doing</Text>
             </View>
-          </View>
-        </>
-      ) : null}
-
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>WHO THEY ARE</Text>
-        <View style={styles.card}>
-          <Row label="Relationship" value={light.relationshipType} />
-          {light.howWeMet && <Row label="How we met" value={light.howWeMet} />}
-          {light.birthday && <Row label="Birthday" value={formatBirthday(light.birthday)} />}
-        </View>
-      </View>
-
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>LOVE LANGUAGE & NOTES</Text>
-        <View style={styles.card}>
-          {light.loveLanguage && <Row label="Love language" value={light.loveLanguage} />}
-          {light.loveLanguageNotes && <Row label="Notes on how they feel loved" value={light.loveLanguageNotes} />}
-          {light.notes && <Row label="Notes" value={light.notes} />}
-        </View>
-      </View>
-
-      {(light.howTheyOperate || light.howTheyShowLove || light.whatTheyNeed || light.bestWayToConnect) ? (
-        <>
-          <View style={styles.divider} />
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>DO PROFILE — How they operate</Text>
-            <View style={styles.card}>
-              {light.howTheyOperate && <Row label="How they operate" value={light.howTheyOperate} />}
-              {light.howTheyShowLove && <Row label="How they show love" value={light.howTheyShowLove} />}
-              {light.whatTheyNeed && <Row label="What they need" value={light.whatTheyNeed} />}
-              {light.bestWayToConnect && <Row label="Best way to connect" value={light.bestWayToConnect} />}
-            </View>
-          </View>
-        </>
-      ) : null}
-
-      {(light.relateInsights?.length ?? 0) > 0 ? (
-        <>
-          <View style={styles.divider} />
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>RELATE INSIGHTS</Text>
-            <View style={styles.card}>
-              {light.relateInsights!.map((insight, i) => (
-                <Text key={i} style={styles.insightBullet}>• {insight}</Text>
-              ))}
-            </View>
-          </View>
-        </>
-      ) : null}
-
-      {(light.birthday || light.anniversary) ? (
-        <>
-          <View style={styles.divider} />
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>KEY DATES</Text>
-            <View style={styles.card}>
-              {light.birthday && <Row label="Birthday" value={`${formatBirthday(light.birthday)} 🎂`} />}
-              {light.anniversary && <Row label="Anniversary" value={formatBirthday(light.anniversary)} />}
-            </View>
-          </View>
-        </>
-      ) : null}
-
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>THEIR TEMPERATURE</Text>
-        <View style={styles.card}>
-          <Text style={styles.tempLabel}>{light.temperatureLabel}</Text>
-          <Pressable
-            style={styles.primaryButton}
-            onPress={() => router.push({ pathname: '/mind-mail/compose', params: { recipientId: light.id, recipientName: light.name } })}
-          >
-            <Text style={styles.primaryButtonText}>Send Mind Mail</Text>
-          </Pressable>
-          <Pressable style={styles.secondaryButton} onPress={openLogEntry}>
-            <Text style={styles.secondaryButtonText}>Log a call</Text>
-          </Pressable>
-        </View>
-      </View>
-
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>CONNECTION LOG</Text>
-        <View style={styles.card}>
-          {connectionLog.length === 0 ? (
-            <Text style={styles.muted}>No entries yet. Log a call or interaction to remember follow-ups.</Text>
-          ) : (
-            connectionLog.slice(0, 15).map((e) => (
-              <View key={e.id} style={styles.logEntry}>
-                <View style={styles.logRow}>
-                  <Text style={styles.logDate}>{new Date(e.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</Text>
-                  <Text style={styles.logType}>{e.type}</Text>
-                  {e.duration != null ? <Text style={styles.logMeta}>{e.duration} min</Text> : null}
-                  {e.mood ? <Text style={styles.logMeta}>{String(e.mood)}</Text> : null}
-                </View>
-                {(e.summary || e.note) ? (
-                  <Text style={styles.logNote} numberOfLines={2}>{e.summary || e.note}</Text>
-                ) : null}
-                {(e.followUps?.length ?? 0) > 0 ? (
-                  <View style={styles.followUpsWrap}>
-                    {e.followUps!.map((f, i) => (
-                      <Text key={i} style={styles.followUpChip}>→ {f}</Text>
-                    ))}
-                  </View>
-                ) : null}
-              </View>
-            ))
           )}
-          <Pressable style={styles.secondaryButton} onPress={openLogEntry}>
-            <Text style={styles.secondaryButtonText}>+ Log interaction</Text>
-          </Pressable>
         </View>
       </View>
 
-      {(light.giftIdeas?.length ?? 0) + (light.pastGifts?.length ?? 0) > 0 || light.favoritesSizes ? (
-        <>
-          <View style={styles.divider} />
-          <View style={styles.section} onLayout={(e) => { giftsSectionY.current = e.nativeEvent.layout.y; }}>
-            <Text style={styles.sectionTitle}>GIFTS</Text>
-            <View style={styles.card}>
-              {light.favoritesSizes ? <Row label="Favorites / sizes" value={light.favoritesSizes} /> : null}
-              {(light.giftIdeas?.length ?? 0) > 0 ? (
-                <View style={styles.row}>
-                  <Text style={styles.rowLabel}>Gift ideas</Text>
-                  <Text style={styles.rowValue}>{light.giftIdeas!.join(' · ')}</Text>
-                </View>
-              ) : null}
-              {(light.pastGifts?.length ?? 0) > 0 ? (
-                <View style={styles.row}>
-                  <Text style={styles.rowLabel}>Past gifts</Text>
-                  <Text style={styles.rowValue}>{light.pastGifts!.join(' · ')}</Text>
-                </View>
-              ) : null}
-            </View>
-          </View>
-        </>
-      ) : null}
+      {/* Actions */}
+      <View style={styles.actions}>
+        <Pressable style={styles.actionBtn} onPress={handleText}><Ionicons name="chatbubble" size={22} color={COLORS.accent} /><Text style={styles.actionLabel}>Text</Text></Pressable>
+        <Pressable style={styles.actionBtn} onPress={handleCall}><Ionicons name="call" size={22} color={COLORS.accent} /><Text style={styles.actionLabel}>Call</Text></Pressable>
+        <Pressable style={styles.actionBtn} onPress={handleMindMail}><Ionicons name="mail" size={22} color={COLORS.accent} /><Text style={styles.actionLabel}>Mind Mail</Text></Pressable>
+        <Pressable style={styles.actionBtn} onPress={() => setShowReachOut(true)}><Ionicons name="apps" size={22} color={COLORS.accent} /><Text style={styles.actionLabel}>More</Text></Pressable>
+      </View>
 
-      {(light.family || light.interests || light.values) ? (
-        <>
-          <View style={styles.divider} />
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>FAMILY · INTERESTS · VALUES</Text>
-            <View style={styles.card}>
-              {light.family && <Row label="Family" value={light.family} />}
-              {light.interests && <Row label="Interests" value={light.interests} />}
-              {light.values && <Row label="Values" value={light.values} />}
-            </View>
-          </View>
-        </>
-      ) : null}
+      <ReachOutSheet visible={showReachOut} onClose={() => setShowReachOut(false)} light={light} />
 
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>LIGHT STATUS</Text>
-        <View style={styles.card}>
-          <Row label="Tier" value={TIER_LABELS[light.tier]} />
-          <Row label="Brightness" value={light.brightness + '%'} />
-          <Row label="Health" value={light.status === 'healthy' ? 'Healthy' : light.status} />
+      {/* Your Light Together */}
+      <Section title="📊 Your Light Together">
+        <View style={styles.lightStats}>
+          <View style={styles.statRow}><Text style={styles.statLabel}>Last contact</Text><Text style={styles.statValue}>{light.daysSinceContact === 0 ? 'Today' : light.daysSinceContact === 1 ? 'Yesterday' : light.daysSinceContact < 999 ? `${light.daysSinceContact} days ago` : 'Never'}</Text></View>
+          <View style={styles.statRow}><Text style={styles.statLabel}>Ideal frequency</Text><Text style={styles.statValue}>Every {idealDays} days</Text></View>
+          <View style={styles.statRow}><Text style={styles.statLabel}>Connection strength</Text><View style={styles.strengthBar}><View style={[styles.strengthFill, { width: `${relationshipStrength}%`, backgroundColor: brightConfig.color }]} /></View><Text style={[styles.statValue, { color: brightConfig.color }]}>{relationshipStrength}%</Text></View>
         </View>
-      </View>
+        {recentLog.length > 0 && (
+          <View style={styles.recentLog}><Text style={styles.recentLogTitle}>Recent</Text>
+            {recentLog.map((entry) => <View key={entry.id} style={styles.logEntry}><Text style={styles.logDate}>{formatLogDate(entry.date)}</Text><Text style={styles.logType}>{entry.type}</Text>{entry.note && <Text style={styles.logNote} numberOfLines={1}>{entry.note}</Text>}</View>)}
+          </View>
+        )}
+        <Pressable style={styles.viewAllBtn} onPress={handleLogInteraction}><Text style={styles.viewAllText}>View full history →</Text></Pressable>
+      </Section>
 
-      <View style={styles.divider} />
+      {birthdaySoon && <View style={styles.alertCard}><Text style={styles.alertEmoji}>🎂</Text><View style={styles.alertContent}><Text style={styles.alertTitle}>Birthday {birthdayDays === 0 ? 'today!' : `in ${birthdayDays} days`}</Text></View></View>}
 
-      <View style={styles.section}>
-        <Pressable style={styles.linkRow} onPress={() => setTier(light.id, 'archived')}>
-          <Text style={styles.linkRowText}>Archive this light</Text>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
-        </Pressable>
-        <Pressable
-          style={[styles.linkRow, styles.dangerRow]}
-          onPress={() => { removeLight(light.id); router.replace('/(tabs)/lights'); }}
-        >
-          <Text style={styles.dangerText}>Remove from Lights</Text>
-        </Pressable>
-      </View>
+      {(light.loveLanguage || light.bestWayToConnect || light.whatTheyNeed || light.howTheyShowLove) && (
+        <Section title="💝 How to Love Them">
+          {light.loveLanguage && <InfoRow label="Love language" value={light.loveLanguage} />}
+          {light.bestWayToConnect && <InfoRow label="Best way to connect" value={light.bestWayToConnect} />}
+          {light.whatTheyNeed && <InfoRow label="What they need" value={light.whatTheyNeed} />}
+          {light.howTheyShowLove && <InfoRow label="How they show love" value={light.howTheyShowLove} />}
+        </Section>
+      )}
 
-      <View style={{ height: 40 }} />
+      <Section title="🧠 Know Them Better">
+        {light.birthday && <InfoRow label="Birthday" value={formatDate(light.birthday)} />}
+        {light.howWeMet && <InfoRow label="How you met" value={light.howWeMet} />}
+        {light.interests && <InfoRow label="Interests" value={light.interests} />}
+        {light.values && <InfoRow label="Values" value={light.values} />}
+        {light.family && <InfoRow label="Family" value={light.family} />}
+        {!light.interests && !light.values && !light.howWeMet && <Pressable style={styles.addInfoBtn} onPress={() => router.push(`/lights/${light.id}/edit` as any)}><Ionicons name="add" size={18} color={COLORS.accent} /><Text style={styles.addInfoText}>Add more details</Text></Pressable>}
+      </Section>
+
+      {(light.notes || (light.relateInsights && light.relateInsights.length > 0)) && (
+        <Section title="📝 Notes & Context">
+          {light.notes && <Text style={styles.notesText}>{light.notes}</Text>}
+          {light.relateInsights?.map((insight, i) => <Text key={i} style={styles.insightItem}>• {insight}</Text>)}
+        </Section>
+      )}
+
+      {((light.giftIdeas && light.giftIdeas.length > 0) || (light.pastGifts && light.pastGifts.length > 0) || light.favoritesSizes) && (
+        <Section title="🎁 Gifts">
+          {light.favoritesSizes && <InfoRow label="Sizes & favorites" value={light.favoritesSizes} />}
+          {light.giftIdeas && light.giftIdeas.length > 0 && <InfoRow label="Gift ideas" value={light.giftIdeas.join(', ')} />}
+          {light.pastGifts && light.pastGifts.length > 0 && <InfoRow label="Past gifts" value={light.pastGifts.join(', ')} />}
+        </Section>
+      )}
+
+      <Section title="📍 Contact Info">
+        {light.phone && <InfoRow label="Phone" value={light.phone} />}
+        {light.email && <InfoRow label="Email" value={light.email} />}
+        {light.address && <InfoRow label="Address" value={light.address} />}
+        {!light.phone && !light.email && <Pressable style={styles.addInfoBtn} onPress={() => router.push(`/lights/${light.id}/edit` as any)}><Ionicons name="add" size={18} color={COLORS.accent} /><Text style={styles.addInfoText}>Add contact info</Text></Pressable>}
+      </Section>
+
+      <Section title="⚙️ Settings">
+        <Pressable style={styles.settingRow} onPress={() => router.push(`/lights/${light.id}/edit` as any)}><Text style={styles.settingText}>Edit profile</Text><Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} /></Pressable>
+        <Pressable style={styles.settingRow} onPress={handleArchive}><Text style={styles.settingText}>Archive this light</Text><Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} /></Pressable>
+        <Pressable style={[styles.settingRow, styles.dangerRow]} onPress={handleRemove}><Text style={styles.dangerText}>Remove from Lights</Text></Pressable>
+      </Section>
     </ScrollView>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.row}>
-      <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowValue}>{value}</Text>
-    </View>
-  );
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return <View style={styles.section}><Text style={styles.sectionTitle}>{title}</Text><View style={styles.sectionCard}>{children}</View></View>;
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return <View style={styles.infoRow}><Text style={styles.infoLabel}>{label}</Text><Text style={styles.infoValue}>{value}</Text></View>;
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  content: { paddingHorizontal: 24, paddingTop: 16 },
-  error: { color: COLORS.textMuted, padding: 24 },
-  link: { color: COLORS.accent, padding: 24 },
-  avatarWrap: { alignItems: 'center', marginBottom: 8 },
-  avatar: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  avatarImage: { backgroundColor: COLORS.surface },
-  avatarEmoji: { fontSize: 40 },
-  name: { fontSize: 24, fontWeight: '700', color: COLORS.text },
-  tierBadge: { fontSize: 14, color: COLORS.textMuted, marginTop: 4 },
-  tempChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginTop: 8 },
-  tempChipText: { fontSize: 14, fontWeight: '600' },
-  divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 24 },
-  section: { marginBottom: 8 },
-  sectionTitle: { fontSize: 13, fontWeight: '600', color: COLORS.textMuted, marginBottom: 12 },
-  card: { backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.card, padding: 16, borderWidth: 1, borderColor: COLORS.border },
-  row: { marginBottom: 12 },
-  rowLabel: { fontSize: 12, color: COLORS.textMuted, marginBottom: 2 },
-  rowValue: { fontSize: 15, color: COLORS.text },
-  tempLabel: { fontSize: 15, color: COLORS.text, marginBottom: 8 },
-  primaryButton: { backgroundColor: COLORS.accent, paddingVertical: 14, borderRadius: BORDER_RADIUS.button, alignItems: 'center', marginBottom: 10 },
-  primaryButtonText: { fontSize: 16, fontWeight: '600', color: COLORS.text },
-  secondaryButton: { paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border, borderRadius: BORDER_RADIUS.input },
-  secondaryButtonText: { fontSize: 15, color: COLORS.text },
-  muted: { fontSize: 14, color: COLORS.textMuted, marginBottom: 12 },
-  logRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 12 },
-  logDate: { fontSize: 14, color: COLORS.text, width: 48 },
-  logType: { fontSize: 14, color: COLORS.textMuted, textTransform: 'capitalize' },
-  logNote: { flex: 1, fontSize: 13, color: COLORS.textSecondary },
-  linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 16, backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.input, marginBottom: 10, borderWidth: 1, borderColor: COLORS.border },
-  linkRowText: { fontSize: 15, color: COLORS.text },
-  dangerRow: { borderColor: COLORS.error + '44' },
-  dangerText: { fontSize: 15, color: COLORS.error },
-  quickActions: { flexDirection: 'row', gap: 16, flexWrap: 'wrap' },
-  quickActionBtn: { alignItems: 'center', minWidth: 72 },
-  quickActionLabel: { fontSize: 13, color: COLORS.text, marginTop: 6 },
-  contactRow: { marginBottom: 14 },
-  contactLabel: { fontSize: 12, color: COLORS.textMuted, marginBottom: 4 },
-  contactValueRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  contactValue: { flex: 1, fontSize: 15, color: COLORS.text },
-  copyLink: { fontSize: 14, color: COLORS.accent, fontWeight: '500' },
-  hintRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
-  hintText: { flex: 1, fontSize: 14, color: COLORS.text },
-  logEntry: { marginBottom: 14 },
-  logMeta: { fontSize: 12, color: COLORS.textMuted, textTransform: 'capitalize', marginLeft: 4 },
-  followUpsWrap: { marginTop: 4, marginLeft: 0 },
-  followUpChip: { fontSize: 12, color: COLORS.accent, marginTop: 2 },
-  insightBullet: { fontSize: 14, color: COLORS.text, marginBottom: 8 },
+  centered: { justifyContent: 'center', alignItems: 'center' },
+  content: { paddingHorizontal: 24 },
+  errorText: { fontSize: 16, color: COLORS.textMuted, marginBottom: 16 },
+  backBtn: { paddingVertical: 12, paddingHorizontal: 24, backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.button },
+  backBtnText: { fontSize: 16, color: COLORS.accent, fontWeight: '600' },
+  header: { alignItems: 'center', paddingTop: 16, paddingBottom: 24 },
+  avatar: { width: 88, height: 88, borderRadius: 44, marginBottom: 16 },
+  avatarPlaceholder: { width: 88, height: 88, borderRadius: 44, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  avatarInitial: { fontSize: 36, fontWeight: '700', color: COLORS.text },
+  name: { fontSize: 28, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
+  tierBadge: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 12, backgroundColor: COLORS.surface, borderRadius: 20, gap: 4 },
+  tierText: { fontSize: 14, fontWeight: '600', color: COLORS.text },
+  tierRelation: { fontSize: 14, color: COLORS.textMuted },
+  tierPicker: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 12, padding: 12, backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.card },
+  tierOption: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, backgroundColor: COLORS.background },
+  tierOptionSelected: { backgroundColor: COLORS.accent },
+  tierOptionText: { fontSize: 14, color: COLORS.text },
+  tierOptionTextSelected: { color: '#000', fontWeight: '600' },
+  statusRow: { flexDirection: 'row', justifyContent: 'center', gap: 40, marginTop: 20 },
+  statusItem: { alignItems: 'center' },
+  lightOrb: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  lightEmoji: { fontSize: 20 },
+  tempOrb: { width: 48, height: 48, borderRadius: 24, marginBottom: 8 },
+  statusLabel: { fontSize: 14, fontWeight: '600' },
+  statusSub: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
+  actions: { flexDirection: 'row', justifyContent: 'space-around', backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.card, paddingVertical: 16, marginBottom: 24, borderWidth: 1, borderColor: COLORS.border },
+  actionBtn: { alignItems: 'center', minWidth: 60 },
+  actionLabel: { fontSize: 12, color: COLORS.text, marginTop: 6 },
+  section: { marginBottom: 20 },
+  sectionTitle: { fontSize: 15, fontWeight: '600', color: COLORS.text, marginBottom: 12 },
+  sectionCard: { backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.card, padding: 16, borderWidth: 1, borderColor: COLORS.border },
+  lightStats: { marginBottom: 12 },
+  statRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  statLabel: { fontSize: 14, color: COLORS.textMuted },
+  statValue: { fontSize: 14, fontWeight: '600', color: COLORS.text },
+  strengthBar: { flex: 1, height: 6, backgroundColor: COLORS.border, borderRadius: 3, marginHorizontal: 12, overflow: 'hidden' },
+  strengthFill: { height: '100%', borderRadius: 3 },
+  recentLog: { borderTopWidth: 1, borderTopColor: COLORS.border, paddingTop: 12, marginTop: 4 },
+  recentLogTitle: { fontSize: 12, fontWeight: '600', color: COLORS.textMuted, marginBottom: 8 },
+  logEntry: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 12 },
+  logDate: { fontSize: 13, color: COLORS.textMuted, width: 50 },
+  logType: { fontSize: 13, color: COLORS.text, textTransform: 'capitalize' },
+  logNote: { flex: 1, fontSize: 13, color: COLORS.textMuted },
+  viewAllBtn: { paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.border },
+  viewAllText: { fontSize: 14, color: COLORS.accent, fontWeight: '500' },
+  alertCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FBBF2420', borderRadius: BORDER_RADIUS.card, padding: 16, marginBottom: 20, gap: 12 },
+  alertEmoji: { fontSize: 28 },
+  alertContent: { flex: 1 },
+  alertTitle: { fontSize: 15, fontWeight: '600', color: COLORS.text },
+  infoRow: { marginBottom: 12 },
+  infoLabel: { fontSize: 12, color: COLORS.textMuted, marginBottom: 2 },
+  infoValue: { fontSize: 15, color: COLORS.text },
+  notesText: { fontSize: 15, color: COLORS.text, lineHeight: 22, marginBottom: 8 },
+  insightItem: { fontSize: 14, color: COLORS.text, marginBottom: 6 },
+  addInfoBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 12, borderWidth: 1, borderColor: COLORS.border, borderRadius: BORDER_RADIUS.input, borderStyle: 'dashed' },
+  addInfoText: { fontSize: 14, color: COLORS.accent, fontWeight: '500' },
+  settingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  settingText: { fontSize: 15, color: COLORS.text },
+  dangerRow: { borderBottomWidth: 0 },
+  dangerText: { fontSize: 15, color: '#EF4444' },
 });

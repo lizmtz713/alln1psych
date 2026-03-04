@@ -167,6 +167,7 @@ interface LightsState extends LightsPersist {
   setTier: (memberId: string, tier: LightTier) => void;
   setLastContact: (memberId: string, dateIso: string) => void;
   addConnectionEntry: (memberId: string, entry: Omit<ConnectionEntry, 'id'>) => void;
+  logContact: (memberId: string, opts?: { type?: ConnectionEntry['type']; quality?: ConnectionEntry['quality']; note?: string }) => void;
   updateLightExtras: (memberId: string, extras: Partial<LightExtras>) => void;
   addLight: (
     member: Omit<CircleMember, 'id' | 'temperature' | 'temperatureLabel' | 'lastUpdated' | 'addedAt'> & {
@@ -221,6 +222,15 @@ export const useLightsStore = create<LightsState>()(
             [memberId]: entry.date.toISOString().slice(0, 10),
           },
         }));
+      },
+
+      logContact: (memberId, opts = {}) => {
+        get().addConnectionEntry(memberId, {
+          date: new Date(),
+          type: opts.type ?? 'text',
+          quality: opts.quality ?? 'brief',
+          note: opts.note,
+        });
       },
 
       updateLightExtras: (memberId, extras) =>
