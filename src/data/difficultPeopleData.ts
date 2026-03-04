@@ -1,0 +1,290 @@
+/**
+ * Difficult People tool — 8 types, 7 strategies, scripts, 15-question type identifier.
+ * Science: Dr. Ramani Durvasula, Dr. George Simon, Dr. Robin Stern (Gaslight Effect), Cloud & Townsend.
+ */
+
+import type { DifficultPersonType, DifficultPersonStrategy, DifficultPersonScript, DifficultPersonAssessmentQuestion } from '../types/difficultPeople';
+
+export const DIFFICULT_PERSON_TYPES: DifficultPersonType[] = [
+  {
+    id: 'narcissist',
+    label: 'Narcissist',
+    emoji: '👑',
+    tagline: 'It\'s always about them.',
+    redFlags: ['Everything circles back to their needs and achievements', 'Dismisses or belittles your feelings', 'Expects special treatment', 'Envious of others or thinks others are envious of them', 'Uses charm to get what they want, then drops the mask'],
+    commonPhrases: ['You\'re too sensitive.', 'I was just joking.', 'No one else has a problem with me.', 'After everything I\'ve done for you...', 'You don\'t understand how hard I have it.'],
+    howTheyMakeYouFeel: ['Never good enough', 'Confused about what\'s real', 'Walking on eggshells', 'Like your needs don\'t matter'],
+    psychology: 'Narcissism involves a fragile sense of self that depends on admiration and control. They may lack empathy and see others as extensions of themselves or as threats. Not the same as confidence — it\'s a protective shell.',
+    tipsByContext: {
+      family: ['Limit time and topics. Don\'t JADE. Grey rock when they bait you.'],
+      romantic: ['Protect your support system. Don\'t expect them to change. Consider whether the relationship is sustainable.'],
+      work: ['Document. Keep interactions professional. Don\'t take the bait in meetings.'],
+      friend: ['Lower expectations. Don\'t compete for their attention. Protect your energy.'],
+    },
+    whenToWalkAway: 'When you\'re constantly depleted, your reality is denied, or you\'re being used with no reciprocity. When your safety or mental health is at risk.',
+    resources: ['Dr. Ramani (YouTube, books)', '"Should I Stay or Should I Go?" — Ramani'],
+  },
+  {
+    id: 'manipulator',
+    label: 'Manipulator',
+    emoji: '🎭',
+    tagline: 'Guilt trips, strings attached.',
+    redFlags: ['Uses guilt, obligation, or fear to get their way', 'Nothing is ever free — there are strings', 'Twists your words or reframes history', 'Plays victim when confronted', 'Tests limits to see what you\'ll accept'],
+    commonPhrases: ['After everything I\'ve done for you...', 'I guess I\'ll just have to do it myself.', 'I never said that.', 'You\'re so selfish.', 'If you loved me you would...'],
+    howTheyMakeYouFeel: ['Obligated', 'Guilty for saying no', 'Like you owe them', 'Stuck in a transaction'],
+    psychology: 'Manipulation is about control. They use emotional leverage (guilt, fear, obligation) because direct requests might be refused. The goal is to get what they want while making you feel you chose it.',
+    tipsByContext: {
+      family: ['Don\'t JADE. "My answer is no." Refuse to debate the no.'],
+      romantic: ['Name the pattern: "When you say X, it feels like pressure." Set consequences.'],
+      work: ['Document requests and your responses. CC others when appropriate.'],
+      friend: ['Break the transaction: "I appreciate you, and my answer is still no."'],
+    },
+    whenToWalkAway: 'When they escalate after you hold a boundary, or when every interaction leaves you feeling used.',
+    resources: ['"In Sheep\'s Clothing" — George Simon', 'Boundaries (Cloud & Townsend)'],
+  },
+  {
+    id: 'gaslighter',
+    label: 'Gaslighter',
+    emoji: '💨',
+    tagline: 'Makes you question reality.',
+    redFlags: ['Denies things they said or did', 'Tells you you\'re misremembering or "crazy"', 'Uses others to back up their version', 'Shifts blame so you end up apologizing', 'Withholds information and then uses your confusion'],
+    commonPhrases: ['That never happened.', 'You\'re imagining things.', 'You\'re too sensitive.', 'I was only trying to help.', 'Everyone agrees with me.'],
+    howTheyMakeYouFeel: ['Like you can\'t trust your own memory', 'Crazy or unstable', 'Always wrong', 'Isolated'],
+    psychology: 'Gaslighting is a form of emotional abuse that undermines your sense of reality. The goal is to make you dependent on their version of events so they maintain control.',
+    tipsByContext: {
+      family: ['Document (notes, dates). Share with a trusted person. Don\'t argue about what happened — state your truth and disengage.'],
+      romantic: ['This is abuse. Consider safety and support. "The Gaslight Effect" (Stern) for recovery.'],
+      work: ['Paper trail. BCC yourself. Don\'t rely on memory alone in meetings.'],
+      friend: ['Limit one-on-one. Stay in group settings. Trust your perception.'],
+    },
+    whenToWalkAway: 'When you no longer trust your own judgment or when your mental health is deteriorating. Gaslighting is abuse.',
+    resources: ['"The Gaslight Effect" — Dr. Robin Stern', 'Therapy/support for recovery'],
+  },
+  {
+    id: 'passive-aggressive',
+    label: 'Passive-Aggressive',
+    emoji: '😊💢',
+    tagline: 'Hostility with a smile.',
+    redFlags: ['Indirect hostility (sarcasm, "jokes", silence)', 'Agrees then doesn\'t follow through', 'Sulks or punishes without saying why', 'Uses "I was just kidding" to dodge accountability', 'Complains to others instead of addressing you'],
+    commonPhrases: ['I was just kidding.', 'Fine, whatever.', 'I didn\'t say anything.', 'You\'re so sensitive.', 'I forgot. (Again.)'],
+    howTheyMakeYouFeel: ['Frustrated', 'Like you can\'t address the real issue', 'Dismissed', 'Like you\'re the bad guy if you react'],
+    psychology: 'Passive-aggression is hostility expressed indirectly. They may fear conflict or feel unable to assert needs, so they act out through resistance, sarcasm, or withdrawal.',
+    tipsByContext: {
+      work: ['Address behavior, not intent. "When you say X, it impacts Y. Can we talk about it directly?" Document patterns.'],
+      family: ['Don\'t chase. Name it: "When you go silent, I don\'t know what\'s wrong. I need direct communication."'],
+      friend: ['Call it out calmly. "That felt like a dig. Can we talk about what\'s going on?"'],
+    },
+    whenToWalkAway: 'When they refuse to communicate directly and the pattern is damaging your wellbeing.',
+    resources: ['"Living with the Passive-Aggressive Man" — Scott Wetzler', 'Boundaries'],
+  },
+  {
+    id: 'toxic-coworker',
+    label: 'Toxic Coworker',
+    emoji: '🏢',
+    tagline: 'Credit stealers, underminers.',
+    redFlags: ['Takes credit for your work', 'Undermines you in meetings or to the boss', 'Gossips or spreads rumors', 'Competes instead of collaborates', 'Makes you look bad to get ahead'],
+    commonPhrases: ['I thought we agreed I\'d lead that.', 'I was just sharing feedback.', 'I didn\'t mean for it to come out that way.', 'Everyone has been saying...'],
+    howTheyMakeYouFeel: ['Undermined', 'Unsafe to share ideas', 'Pitted against others', 'Exhausted'],
+    psychology: 'Workplace toxicity is often driven by insecurity, competition for resources, or a culture that rewards politics over collaboration.',
+    tipsByContext: {
+      work: ['Document everything. BCC/paper trail. Build alliances with others. Don\'t badmouth — stay professional. Escalate to HR if needed.'],
+    },
+    whenToWalkAway: 'When your reputation or mental health is at risk, or when the organization protects the toxic person. Consider a new role or exit.',
+    resources: ['HR policies', 'Documentation', '"Crucial Conversations"'],
+  },
+  {
+    id: 'emotional-vampire',
+    label: 'Emotional Vampire',
+    emoji: '🧛',
+    tagline: 'Drains your energy.',
+    redFlags: ['Every interaction leaves you depleted', 'Always in crisis; your support never enough', 'Rarely asks about you', 'One-sided; you give, they take', 'You feel responsible for their mood'],
+    commonPhrases: ['I have no one else.', 'You\'re the only one who gets me.', 'I just need to vent for a minute. (Hours later...)', 'Why didn\'t you call me back?'],
+    howTheyMakeYouFeel: ['Drained', 'Guilty for needing space', 'Like you can\'t say no', 'Resentful'],
+    psychology: 'They may have poor emotional regulation or boundaries and use others to regulate. It\'s not always malicious — but the impact on you is real.',
+    tipsByContext: {
+      friend: ['Set time limits. "I have 15 minutes." Don\'t absorb. Redirect: "What do you want to do about it?"'],
+      family: ['Medium chill. Be pleasant but don\'t over-invest. Protect your downtime.'],
+      work: ['Limit availability. "I can talk at 3 for 10 minutes." Don\'t become their default.'],
+    },
+    whenToWalkAway: 'When you\'re chronically depleted and they won\'t respect limits. When the relationship is one-sided and you\'re not getting support.',
+    resources: ['"Emotional Vampires" — Albert Bernstein', 'Boundaries'],
+  },
+  {
+    id: 'boundary-violator',
+    label: 'Boundary Violator',
+    emoji: '🚧',
+    tagline: 'Won\'t take no for an answer.',
+    redFlags: ['Pushes after you say no', 'Guilts or negotiates when you set a limit', 'Shows up uninvited or ignores your stated limits', 'Treats your no as a starting point for debate', 'Gets angry or hurt when you hold the line'],
+    commonPhrases: ['Just this once.', 'You\'re so rigid.', 'I didn\'t think you meant it.', 'Why are you being so difficult?', 'We used to do it.'],
+    howTheyMakeYouFeel: ['Like your no doesn\'t count', 'Guilty', 'Forced to repeat yourself', 'Disrespected'],
+    psychology: 'They may have poor boundaries themselves or have learned that pushing works. They prioritize their want over your limit.',
+    tipsByContext: {
+      family: ['Broken record. "I said no." Don\'t JADE. State consequence if needed.'],
+      friend: ['Be clear and consistent. "I need you to respect when I say no."'],
+      work: ['Put it in writing. "As I said, I can\'t take that on." Escalate if they keep pushing.'],
+    },
+    whenToWalkAway: 'When they refuse to respect your no after repeated attempts. When your safety or wellbeing is compromised.',
+    resources: ['"Set Boundaries, Find Peace" — Nedra Tawwab', 'Boundaries — Cloud & Townsend'],
+  },
+  {
+    id: 'controller',
+    label: 'Controller',
+    emoji: '🎮',
+    tagline: 'Needs to run your life.',
+    redFlags: ['Makes decisions for you or overrides yours', 'Tells you what to do, wear, or think', 'Gets upset when you don\'t follow their plan', 'Frames it as "for your own good"', 'You feel you need permission'],
+    commonPhrases: ['I know what\'s best for you.', 'You shouldn\'t do that.', 'If you loved me you\'d listen.', 'I\'m only trying to help.', 'You\'re not capable of handling that.'],
+    howTheyMakeYouFeel: ['Controlled', 'Invalidated', 'Like you have no say', 'Dependent'],
+    psychology: 'Control is often driven by anxiety or a need for certainty. They may believe they\'re helping, but the effect is to diminish your autonomy.',
+    tipsByContext: {
+      romantic: ['Name it: "I need to make my own decisions. I can hear your view, but the choice is mine." Set consequences.'],
+      family: ['Assert autonomy. "I\'ve decided X." Don\'t ask permission for things that are yours to decide.'],
+      work: ['Clarify roles. "That decision is mine to make." Document if they override you inappropriately.'],
+    },
+    whenToWalkAway: 'When they won\'t respect your autonomy and you feel you\'re losing yourself. When it crosses into abuse (isolation, coercion).',
+    resources: ['"Controlling People" — Patricia Evans', 'Boundaries', 'Safety planning if abuse is present'],
+  },
+];
+
+export const DIFFICULT_PERSON_STRATEGIES: DifficultPersonStrategy[] = [
+  {
+    id: 'grey-rock',
+    label: 'Grey Rock',
+    emoji: '🪨',
+    description: 'Become boring and unreactive. Give minimal response so they get no emotional payoff.',
+    steps: ['Keep responses short and factual.', 'Don\'t share personal details or emotions.', 'Avoid defending or explaining.', 'Stay neutral in tone and body language.', 'They may escalate at first; keep steady.'],
+    whenToUse: 'With narcissists, manipulators, or anyone who feeds off your reaction. When engagement only makes things worse.',
+  },
+  {
+    id: 'broken-record',
+    label: 'Broken Record',
+    emoji: '🔁',
+    description: 'Calmly repeat your boundary without adding new arguments or justifications.',
+    steps: ['State your limit once clearly.', 'When they push back, repeat the same line.', 'Don\'t add reasons — that invites debate.', 'Stay calm. "My answer is no."'],
+    whenToUse: 'With boundary violators, manipulators, or anyone who tries to negotiate your no.',
+  },
+  {
+    id: 'dont-jade',
+    label: 'Don\'t JADE',
+    emoji: '🚫',
+    description: 'Don\'t Justify, Argue, Defend, or Explain. Your no is enough.',
+    steps: ['Say your no or boundary once.', 'When they ask why, don\'t give a reason they can argue with.', '"I\'m not comfortable with that" is enough.', 'If you give a reason, they\'ll try to dismantle it.'],
+    whenToUse: 'With manipulators and anyone who uses your explanations as leverage.',
+  },
+  {
+    id: 'document',
+    label: 'Document Everything',
+    emoji: '📝',
+    description: 'Keep a paper trail. Notes, emails, dates. Protects you and clarifies reality.',
+    steps: ['Write down what was said or done, with dates.', 'BCC yourself on work emails. Save texts.', 'Share with a trusted person if needed.', 'Use it if you need to escalate or leave.'],
+    whenToUse: 'With gaslighters, toxic coworkers, or anyone who twists the past. Essential at work.',
+  },
+  {
+    id: 'medium-chill',
+    label: 'Medium Chill',
+    emoji: '😐',
+    description: 'Pleasant but disengaged. Friendly surface, no deep engagement.',
+    steps: ['Be polite and brief.', 'Don\'t share personal info or feelings.', 'Don\'t take the bait on drama or conflict.', 'Keep interactions short and superficial.'],
+    whenToUse: 'With emotional vampires, family you can\'t avoid, or anyone who drains you when you engage deeply.',
+  },
+  {
+    id: 'fogging',
+    label: 'Fogging',
+    emoji: '🌫️',
+    description: 'Agree with the part that\'s true, deflect the attack. Doesn\'t mean you agree with the criticism.',
+    steps: ['Find the grain of truth in what they said.', 'Agree with that part only. "You\'re right that I was late."', 'Don\'t agree with the attack or the label.', 'Deflect: "I hear you. I\'ll keep that in mind."'],
+    whenToUse: 'With passive-aggressive or critical people. Reduces escalation while not surrendering.',
+  },
+  {
+    id: 'state-consequences',
+    label: 'State Consequences',
+    emoji: '⚖️',
+    description: 'Clear cause and effect. "If X continues, I will Y." Then follow through.',
+    steps: ['State the behavior you need to change.', 'State what you will do if it continues.', 'Mean it. Don\'t threaten empty consequences.', 'Follow through if they don\'t change.'],
+    whenToUse: 'When boundaries are repeatedly crossed and you\'re ready to enforce a limit.',
+  },
+];
+
+export const DIFFICULT_PERSON_SCRIPTS: DifficultPersonScript[] = [
+  {
+    id: 'after-everything',
+    theySay: 'After everything I\'ve done for you...',
+    youSay: 'I appreciate what you\'ve done. My answer is still no.',
+    whyItWorks: 'Breaks the implied transaction without arguing. You don\'t justify or defend — you acknowledge and hold the line.',
+    typeIds: ['manipulator', 'narcissist'],
+  },
+  {
+    id: 'too-sensitive',
+    theySay: 'You\'re too sensitive.',
+    youSay: 'I get to decide what bothers me. This bothers me.',
+    whyItWorks: 'Refuses the invalidation. You don\'t debate whether you should be hurt — you state your reality.',
+    typeIds: ['narcissist', 'gaslighter', 'passive-aggressive'],
+  },
+  {
+    id: 'that-never-happened',
+    theySay: 'That never happened.',
+    youSay: 'I remember it differently. I\'m not going to argue about it.',
+    whyItWorks: 'You don\'t try to prove your memory. You state your truth and disengage. Document elsewhere.',
+    typeIds: ['gaslighter'],
+  },
+  {
+    id: 'just-kidding',
+    theySay: 'I was just kidding.',
+    youSay: 'It didn\'t feel like a joke to me. Please don\'t say that again.',
+    whyItWorks: 'Names the impact without attacking. Sets a clear boundary for next time.',
+    typeIds: ['passive-aggressive', 'narcissist'],
+  },
+  {
+    id: 'if-you-loved',
+    theySay: 'If you loved me you would...',
+    youSay: 'I do care about you. My answer is still no.',
+    whyItWorks: 'Separates love from compliance. You don\'t defend your love — you hold the boundary.',
+    typeIds: ['manipulator', 'controller'],
+  },
+  {
+    id: 'no-one-else',
+    theySay: 'No one else has a problem with me.',
+    youSay: 'I\'m not speaking for anyone else. I\'m telling you what I need.',
+    whyItWorks: 'Keeps the focus on your experience. You don\'t get pulled into defending others or yourself.',
+    typeIds: ['narcissist'],
+  },
+  {
+    id: 'just-this-once',
+    theySay: 'Just this once.',
+    youSay: 'No. I need you to respect that.',
+    whyItWorks: 'Broken record. No negotiation. Clear and final.',
+    typeIds: ['boundary-violator', 'manipulator'],
+  },
+  {
+    id: 'you-dont-understand',
+    theySay: 'You don\'t understand how hard I have it.',
+    youSay: 'I hear that you\'re struggling. I still can\'t do what you\'re asking.',
+    whyItWorks: 'Validates without capitulating. Empathy and limit in one sentence.',
+    typeIds: ['emotional-vampire', 'manipulator'],
+  },
+];
+
+export const DIFFICULT_PERSON_ASSESSMENT_QUESTIONS: DifficultPersonAssessmentQuestion[] = [
+  { id: 'dpq1', typeId: 'narcissist', text: 'Conversations always seem to turn back to their achievements or needs.' },
+  { id: 'dpq2', typeId: 'narcissist', text: 'I feel like I\'m never good enough in their eyes.' },
+  { id: 'dpq3', typeId: 'manipulator', text: 'I often feel guilty when I say no to them.' },
+  { id: 'dpq4', typeId: 'manipulator', text: 'It feels like there are always strings attached to their help.' },
+  { id: 'dpq5', typeId: 'gaslighter', text: 'They deny saying or doing things I clearly remember.' },
+  { id: 'dpq6', typeId: 'gaslighter', text: 'I sometimes question my own memory or judgment after talking to them.' },
+  { id: 'dpq7', typeId: 'passive-aggressive', text: 'Their "jokes" or comments feel like digs at me.' },
+  { id: 'dpq8', typeId: 'passive-aggressive', text: 'They say one thing but do another, or agree then don\'t follow through.' },
+  { id: 'dpq9', typeId: 'toxic-coworker', text: 'They take credit for my work or ideas.' },
+  { id: 'dpq10', typeId: 'toxic-coworker', text: 'I feel undermined by them in professional settings.' },
+  { id: 'dpq11', typeId: 'emotional-vampire', text: 'After spending time with them I feel drained.' },
+  { id: 'dpq12', typeId: 'emotional-vampire', text: 'Our interactions are mostly about their problems; they rarely ask about me.' },
+  { id: 'dpq13', typeId: 'boundary-violator', text: 'They push back or negotiate when I say no.' },
+  { id: 'dpq14', typeId: 'boundary-violator', text: 'I have to repeat my boundaries because they don\'t respect them the first time.' },
+  { id: 'dpq15', typeId: 'controller', text: 'They try to make decisions for me or tell me what I should do.' },
+];
+
+export const CRISIS_RESOURCES_TEXT = `If you're in danger or in crisis:
+
+988 Suicide & Crisis Lifeline — Call or text 988 (24/7)
+Crisis Text Line — Text HOME to 741741 (24/7)
+National Domestic Violence Hotline — 1-800-799-7233 or thehotline.org
+
+You deserve safety and support.`;
