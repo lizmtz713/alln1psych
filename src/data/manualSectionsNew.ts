@@ -1,5 +1,5 @@
 /**
- * Human Owner's Manual — New Sections Index
+ * Human Owner's Manual - New Sections Index
  * 
  * These three sections complete the PHOSM (Personal Health Operating System for the Mind)
  * by covering the EXTERNAL life domains where humans actually live.
@@ -11,9 +11,9 @@
  * - Section 4: Upgrades (EQ, boundaries)
  * 
  * These new sections cover EXTERNAL life domains:
- * - Section 5: School — where learning and social stress collide
- * - Section 6: Work — where adults spend their lives
- * - Section 7: Family & Relationships — where humans shape each other
+ * - Section 5: School - where learning and social stress collide
+ * - Section 6: Work - where adults spend their lives
+ * - Section 7: Family & Relationships - where humans shape each other
  * 
  * Together: Internal system + External life domains = Complete PHOSM
  * 
@@ -55,7 +55,7 @@ export const PHOSM_OVERVIEW = {
   tagline: 'The Human Cockpit',
   
   philosophy: `Like a cockpit, when you understand all the moving pieces, you understand yourself better. 
-You need to know all of that data and be able to make adjustments — same for humans.
+You need to know all of that data and be able to make adjustments - same for humans.
 The gauges show your internal state, but other gauges alongside and behind them also have effects.`,
 
   internalSystem: {
@@ -79,7 +79,7 @@ The gauges show your internal state, but other gauges alongside and behind them 
 
   coreInsight: `Your gauges don't exist in isolation. 
 School affects them. Work affects them. Family affects them. Relationships affect them.
-Understanding HOW life affects your mind — and having a dashboard for ALL of it — 
+Understanding HOW life affects your mind - and having a dashboard for ALL of it - 
 is what makes you a pilot, not a passenger.`,
 
   originStory: `Built for the conversations that don't happen.

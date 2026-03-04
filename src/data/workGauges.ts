@@ -3,7 +3,7 @@
  * Industrial Psychology meets the Gauge System
  * 
  * 90,000 hours. That's how long the average person spends at work.
- * Almost no one teaches us how work affects our psychology — and how to protect ourselves.
+ * Almost no one teaches us how work affects our psychology - and how to protect ourselves.
  */
 
 export interface WorkGaugeImpact {
@@ -31,13 +31,13 @@ export const WORK_INTRO = {
   headline: "90,000 Hours",
   subhead: "That's how long you'll spend at work. Let's make sure it doesn't break you.",
   
-  philosophy: `Work isn't separate from life — it's where most of life happens. Yet we're taught to leave our humanity at the door. "Be professional." "Don't bring personal stuff to work." "Push through."
+  philosophy: `Work isn't separate from life - it's where most of life happens. Yet we're taught to leave our humanity at the door. "Be professional." "Don't bring personal stuff to work." "Push through."
 
 This is a lie. You bring your whole nervous system to work every day. Your Body gauge depletes in that chair. Your State gauge activates with every urgent email. Your Emotion gauge gets suppressed to seem "appropriate." Your Connection gauge starves in remote isolation. Your Direction gauge questions if this is really it. Your Alignment gauge feels the gap between your values and your tasks.
 
-Understanding how work affects your gauges isn't just self-help — it's survival. It's the difference between a sustainable career and burnout at 45. Between bringing your best self home and snapping at your family because you have nothing left.
+Understanding how work affects your gauges isn't just self-help - it's survival. It's the difference between a sustainable career and burnout at 45. Between bringing your best self home and snapping at your family because you have nothing left.
 
-This section won't tell you to "find your passion" or "hustle harder." It will help you understand the real psychological costs of work — and how to protect yourself while still showing up.`,
+This section won't tell you to "find your passion" or "hustle harder." It will help you understand the real psychological costs of work - and how to protect yourself while still showing up.`,
 
   reality: {
     title: "The Reality Nobody Talks About",
@@ -46,7 +46,7 @@ This section won't tell you to "find your passion" or "hustle harder." It will h
       "Your brain wasn't designed for 8 hours of focused knowledge work. It's exhausting in ways physical labor isn't.",
       "Open offices, Slack, and 'quick questions' mean most people can't do 2 hours of deep work in an 8-hour day.",
       "Remote work solved commutes but created 24/7 availability expectations and profound isolation.",
-      "Most workplace stress isn't about the work itself — it's about lack of control, unclear expectations, and poor management.",
+      "Most workplace stress isn't about the work itself - it's about lack of control, unclear expectations, and poor management.",
       "Burnout isn't weakness. It's the predictable result of chronic stress without adequate recovery.",
     ]
   }
@@ -61,12 +61,12 @@ export const WORK_GAUGE_IMPACTS: WorkGaugeImpact[] = [
 
 The worst part? This becomes normal. You stop noticing the headaches, the tension, the fatigue. Your Body gauge slowly drains, and you attribute the exhaustion to "just how work is."
 
-It doesn't have to be this way. But you have to actively protect your body — work won't do it for you.`,
+It doesn't have to be this way. But you have to actively protect your body - work won't do it for you.`,
     
     commonWorkDrains: [
       "Sitting 6-10 hours without real movement",
       "Skipping breakfast, eating lunch at desk, working through hunger",
-      "Caffeine dependence — coffee to start, coffee to push through, coffee to recover",
+      "Caffeine dependence - coffee to start, coffee to push through, coffee to recover",
       "Blue light exposure all day disrupting circadian rhythm",
       "Chronic dehydration (water bottle sits untouched)",
       "Holding tension in shoulders, jaw, back without noticing",
@@ -81,11 +81,11 @@ It doesn't have to be this way. But you have to actively protect your body — w
       "Getting sick every time you take vacation (your body finally rests and crashes)",
       "Needing the whole weekend just to feel human again",
       "Digestive issues that correlate with stressful periods",
-      "Sleep problems — can't fall asleep, can't stay asleep, or wake up exhausted",
+      "Sleep problems - can't fall asleep, can't stay asleep, or wake up exhausted",
     ],
     
     protectionStrategies: [
-      "Set hourly movement reminders — even 2 minutes of standing/stretching helps",
+      "Set hourly movement reminders - even 2 minutes of standing/stretching helps",
       "Protect lunch: leave your desk, eat real food, take 30 minutes minimum",
       "Hydration system: water bottle visible, drink before each meeting",
       "Walking meetings when possible (even just walking while on a call)",
@@ -98,7 +98,7 @@ It doesn't have to be this way. But you have to actively protect your body — w
     boundaryScripts: [
       "I'm stepping away from my desk for lunch. I'll be back at [time].",
       "I need to take a quick break before this next meeting. Give me 5 minutes.",
-      "I'm going to walk while we talk — helps me think better.",
+      "I'm going to walk while we talk - helps me think better.",
       "I'm offline after 6pm to protect my sleep. I'll respond tomorrow.",
       "I'm taking my vacation days and won't be checking email. [Person] can cover urgent issues.",
     ],
@@ -120,9 +120,9 @@ The result? You come home "tired" but can't relax. Wired but exhausted. Your ner
       "Unclear expectations or constantly shifting priorities",
       "Micromanagement that signals 'you're not trusted'",
       "Toxic coworkers or bosses who keep you on edge",
-      "Job insecurity — layoff fears, performance anxiety",
+      "Job insecurity - layoff fears, performance anxiety",
       "Work following you home via phone/laptop",
-      "Sunday Scaries — dreading Monday from Saturday night",
+      "Sunday Scaries - dreading Monday from Saturday night",
     ],
     
     warningSignsAtWork: [
@@ -131,7 +131,7 @@ The result? You come home "tired" but can't relax. Wired but exhausted. Your ner
       "Can't stop thinking about work during off-hours",
       "Irritable and reactive in meetings",
       "Startle response to notification sounds",
-      "Difficulty concentrating — jumping between tasks",
+      "Difficulty concentrating - jumping between tasks",
       "Physical tension you don't notice until you try to relax",
       "Exhausted but can't sleep (system won't turn off)",
     ],
@@ -143,7 +143,7 @@ The result? You come home "tired" but can't relax. Wired but exhausted. Your ner
       "Physical transitions: change location, take a walk, do something to signal 'shift'",
       "End-of-day shutdown ritual: close tabs, write tomorrow's list, leave",
       "Tech boundaries: work apps off personal phone, or at least notifications off after hours",
-      "Morning routine before opening email — protect the first hour",
+      "Morning routine before opening email - protect the first hour",
       "Nervous system resets during the day: box breathing, cold water, movement",
     ],
     
@@ -163,9 +163,9 @@ The result? You come home "tired" but can't relax. Wired but exhausted. Your ner
     color: '#A78BFA',
     howWorkAffectsIt: `"Be professional" usually means "suppress your emotions." Don't show frustration. Don't let them see you're upset. Stay calm even when the situation is genuinely upsetting.
 
-This constant suppression has costs. Research shows suppressing emotions increases physiological stress, impairs memory, and damages relationships. The emotions don't go away — they go underground. They leak out as irritability, cynicism, passive-aggression, or complete numbness.
+This constant suppression has costs. Research shows suppressing emotions increases physiological stress, impairs memory, and damages relationships. The emotions don't go away - they go underground. They leak out as irritability, cynicism, passive-aggression, or complete numbness.
 
-Work often requires emotional labor too — faking positivity, managing others' feelings, staying upbeat for customers or clients even when you're struggling. This is exhausting in ways that don't get recognized.
+Work often requires emotional labor too - faking positivity, managing others' feelings, staying upbeat for customers or clients even when you're struggling. This is exhausting in ways that don't get recognized.
 
 Your Emotion gauge at work is in a constant bind: you have feelings, but you're not "supposed to" have them.`,
     
@@ -174,14 +174,14 @@ Your Emotion gauge at work is in a constant bind: you have feelings, but you're 
       "Faking enthusiasm for projects you don't believe in",
       "Emotional labor: managing customers', clients', or coworkers' emotions",
       "Not being able to express when something is unfair or hurtful",
-      "Imposter syndrome — constant fear of being 'found out'",
+      "Imposter syndrome - constant fear of being 'found out'",
       "Receiving criticism without being able to respond authentically",
       "Workplace conflict that can't be addressed directly",
       "Celebrating wins you don't feel good about, or mourning losses you can't acknowledge",
     ],
     
     warningSignsAtWork: [
-      "Feeling 'numb' at work — disconnected from caring about anything",
+      "Feeling 'numb' at work - disconnected from caring about anything",
       "Cynicism that wasn't there when you started",
       "Irritability that bleeds into home life",
       "Imposter syndrome that never goes away no matter what you achieve",
@@ -197,7 +197,7 @@ Your Emotion gauge at work is in a constant bind: you have feelings, but you're 
       "Process work emotions outside of work: journal, therapy, trusted friend",
       "Validate yourself: 'This situation is genuinely hard, I'm not overreacting'",
       "Take mental health moments: bathroom break to breathe, walk around the block",
-      "Don't take your suppressed work emotions out on family — find another outlet first",
+      "Don't take your suppressed work emotions out on family - find another outlet first",
       "Recognize emotional labor as real work that deserves compensation (and limits)",
       "If imposter syndrome is chronic, it might be the environment, not you",
     ],
@@ -225,14 +225,14 @@ Even in offices, real connection is rare. Most workplace relationships stay care
 Humans need connection. Work often provides the illusion of it without the substance.`,
     
     commonWorkDrains: [
-      "Remote work isolation — days without real human contact",
+      "Remote work isolation - days without real human contact",
       "Surface-level interactions that never go deeper",
       "Competitive environments where colleagues are rivals",
       "Office politics that make trust dangerous",
       "No time for relationship-building (too busy with 'work')",
-      "High turnover — just when you connect, people leave",
-      "Hierarchical distance — can't really connect with bosses or reports",
-      "Global teams across time zones — asynchronous isolation",
+      "High turnover - just when you connect, people leave",
+      "Hierarchical distance - can't really connect with bosses or reports",
+      "Global teams across time zones - asynchronous isolation",
     ],
     
     warningSignsAtWork: [
@@ -240,18 +240,18 @@ Humans need connection. Work often provides the illusion of it without the subst
       "No one at work you'd call if you had a personal crisis",
       "Dreading 'team bonding' events because they feel fake",
       "Not knowing basic things about coworkers' lives",
-      "Feeling invisible — like you could disappear and no one would notice",
+      "Feeling invisible - like you could disappear and no one would notice",
       "Avoiding video calls, keeping camera off, minimizing interaction",
       "Using work as an excuse to avoid real relationships outside work",
-      "Feeling like a 'work robot' — performing functions, not being a person",
+      "Feeling like a 'work robot' - performing functions, not being a person",
     ],
     
     protectionStrategies: [
-      "One real conversation per day — not about work, about life",
-      "Camera on when possible (even when tired) — being seen matters",
+      "One real conversation per day - not about work, about life",
+      "Camera on when possible (even when tired) - being seen matters",
       "In-person time if available, even occasionally, is worth the effort",
       "Find your person at work: one genuine ally makes everything better",
-      "Don't let work be your only source of connection — protect relationships outside",
+      "Don't let work be your only source of connection - protect relationships outside",
       "Create rituals: virtual coffee, walking 1:1s, weekly check-ins that aren't status updates",
       "Share something real (appropriately): 'I had a hard weekend' goes further than 'fine, you?'",
       "If remote, engineer human contact: coffee shop, co-working space, lunch with friends",
@@ -259,10 +259,10 @@ Humans need connection. Work often provides the illusion of it without the subst
     
     boundaryScripts: [
       "Before we dive in, how are you really doing?",
-      "I'd love to grab coffee sometime — not about work, just to connect.",
+      "I'd love to grab coffee sometime - not about work, just to connect.",
       "I've been feeling isolated working from home. Anyone else?",
       "Can we do this as a walking meeting? I need to see humans today.",
-      "I'm going to keep my camera on today — helps me feel more connected.",
+      "I'm going to keep my camera on today - helps me feel more connected.",
       "I'm taking lunch at a coffee shop to be around people. Want to join virtually?",
     ],
   },
@@ -271,13 +271,13 @@ Humans need connection. Work often provides the illusion of it without the subst
     gauge: 'Direction',
     emoji: '🧭',
     color: '#38BDF8',
-    howWorkAffectsIt: `Work can provide direction — or steal it. Meaningful work aligned with your values fills the Direction gauge. But much of modern work feels meaningless: tasks that don't connect to outcomes, projects that get canceled, bureaucracy that serves no one.
+    howWorkAffectsIt: `Work can provide direction - or steal it. Meaningful work aligned with your values fills the Direction gauge. But much of modern work feels meaningless: tasks that don't connect to outcomes, projects that get canceled, bureaucracy that serves no one.
 
 The most insidious Direction drain is golden handcuffs. You make good money doing something that doesn't matter to you. You're too comfortable to leave, too unfulfilled to stay. Years pass. The Direction gauge slowly empties while the bank account fills.
 
-"Sunday Scaries" are often a Direction signal. It's not just anxiety about the week — it's your psychology asking: "Is this really how I'm spending my life?"
+"Sunday Scaries" are often a Direction signal. It's not just anxiety about the week - it's your psychology asking: "Is this really how I'm spending my life?"
 
-Direction doesn't mean you have to love every task. But you need to see how your work connects to something that matters — even if it's just providing for your family, learning skills, or building toward something else.`,
+Direction doesn't mean you have to love every task. But you need to see how your work connects to something that matters - even if it's just providing for your family, learning skills, or building toward something else.`,
     
     commonWorkDrains: [
       "Meaningless tasks: busywork, pointless meetings, reports no one reads",
@@ -309,7 +309,7 @@ Direction doesn't mean you have to love every task. But you need to see how your
       "Small experiments: explore interests without quitting your job",
       "Talk to people in roles/fields you're curious about",
       "Be honest about golden handcuffs: what's the real cost of comfort?",
-      "Remember: Direction can be 'providing for my family' — that IS meaning",
+      "Remember: Direction can be 'providing for my family' - that IS meaning",
     ],
     
     boundaryScripts: [
@@ -328,11 +328,11 @@ Direction doesn't mean you have to love every task. But you need to see how your
     color: '#F472B6',
     howWorkAffectsIt: `Work often requires us to be someone we're not. Play politics. Suppress opinions. Promote products we don't believe in. Stay silent about problems. Pretend to agree with decisions we oppose.
 
-This is misalignment, and it has a cost. Every time you act against your values, your Alignment gauge drops. The stress you can't explain? The exhaustion beyond the hours worked? Often that's alignment friction — the psychological cost of being out of integrity.
+This is misalignment, and it has a cost. Every time you act against your values, your Alignment gauge drops. The stress you can't explain? The exhaustion beyond the hours worked? Often that's alignment friction - the psychological cost of being out of integrity.
 
 The worst part is how normalized this is. "That's just work." "Everyone does it." "You have to play the game." Maybe. But the game has a price, and your nervous system is the one paying it.
 
-Alignment at work isn't about being naive or self-righteous. It's about knowing where your lines are — and what you're trading when you cross them.`,
+Alignment at work isn't about being naive or self-righteous. It's about knowing where your lines are - and what you're trading when you cross them.`,
     
     commonWorkDrains: [
       "Promoting products/services you don't believe in",
@@ -361,7 +361,7 @@ Alignment at work isn't about being naive or self-righteous. It's about knowing 
       "Name the trade-offs honestly: 'I'm choosing X (money, security) over Y (alignment). For now.'",
       "Find where you CAN be aligned: even in imperfect jobs, there are usually areas of integrity",
       "Small acts of authenticity: don't pretend to agree, say 'I see it differently'",
-      "Build exit options: savings, skills, network — so you're not trapped",
+      "Build exit options: savings, skills, network - so you're not trapped",
       "Examine if 'everyone does it' is actually true, or just an excuse",
       "Consider: is the misalignment temporary/strategic or is this who you're becoming?",
       "If you can't change the environment, make a plan to leave it",
@@ -477,20 +477,20 @@ export const BURNOUT_STAGES = {
   stages: [
     { stage: 1, name: "Compulsion to Prove Yourself", description: "Excessive ambition, need to prove worth. Everything becomes urgent." },
     { stage: 2, name: "Working Harder", description: "Taking on more, can't delegate, feeling indispensable. 'Only I can do this right.'" },
-    { stage: 3, name: "Neglecting Needs", description: "Sleep, food, exercise, relationships — all sacrificed for work." },
+    { stage: 3, name: "Neglecting Needs", description: "Sleep, food, exercise, relationships - all sacrificed for work." },
     { stage: 4, name: "Displacement of Conflict", description: "You know something's wrong but blame external factors. Dismiss early warning signs." },
     { stage: 5, name: "Revision of Values", description: "Work becomes the only frame of reference. Friends, hobbies, self-care seem irrelevant." },
     { stage: 6, name: "Denial of Problems", description: "Intolerance, cynicism, aggression. Others are the problem. You're 'fine.'" },
     { stage: 7, name: "Withdrawal", description: "Social isolation. Avoiding contact. Using alcohol, drugs, or other escapes." },
     { stage: 8, name: "Behavioral Changes", description: "Obvious changes visible to others. Fearful, shy, or apathetic. Not yourself." },
     { stage: 9, name: "Depersonalization", description: "Feeling detached from yourself. Going through motions. Everything feels meaningless." },
-    { stage: 10, name: "Inner Emptiness", description: "Seeking ways to feel something — through overeating, sex, drugs, risk-taking." },
+    { stage: 10, name: "Inner Emptiness", description: "Seeking ways to feel something - through overeating, sex, drugs, risk-taking." },
     { stage: 11, name: "Depression", description: "Feeling hopeless, exhausted, lost. No way forward visible." },
     { stage: 12, name: "Burnout Syndrome", description: "Complete mental and physical collapse. May require professional intervention." },
   ],
   recovery: {
     early: "Stages 1-4: Self-care, boundaries, and work adjustments can help. Catch it here.",
-    middle: "Stages 5-8: You need significant changes — possibly a break, definitely support. Don't go it alone.",
+    middle: "Stages 5-8: You need significant changes - possibly a break, definitely support. Don't go it alone.",
     late: "Stages 9-12: Professional help is necessary. This isn't something you can push through. Recovery is possible but takes time.",
   }
 };
@@ -498,11 +498,11 @@ export const BURNOUT_STAGES = {
 export const WORK_WISDOM = [
   {
     title: "The Sustainable Pace Principle",
-    content: "You cannot sprint a marathon. The people who have long, successful careers aren't the ones who burned brightest early — they're the ones who learned to sustain. Protect your recovery like your job depends on it, because long-term, it does.",
+    content: "You cannot sprint a marathon. The people who have long, successful careers aren't the ones who burned brightest early - they're the ones who learned to sustain. Protect your recovery like your job depends on it, because long-term, it does.",
   },
   {
     title: "The 40-Year Frame",
-    content: "You'll likely work for 40 years. Any single job is probably 2-5 years. Don't sacrifice your health, relationships, or integrity for something temporary. The question isn't 'can I push through?' — it's 'at what cost, and is it worth it?'",
+    content: "You'll likely work for 40 years. Any single job is probably 2-5 years. Don't sacrifice your health, relationships, or integrity for something temporary. The question isn't 'can I push through?' - it's 'at what cost, and is it worth it?'",
   },
   {
     title: "The Control Paradox",
@@ -518,6 +518,6 @@ export const WORK_WISDOM = [
   },
   {
     title: "The Exit Option",
-    content: "The best time to look for a job is when you have a job. Building exit options — savings, skills, network — isn't disloyal. It's protection. Feeling trapped makes everything worse. Having choices makes everything more bearable.",
+    content: "The best time to look for a job is when you have a job. Building exit options - savings, skills, network - isn't disloyal. It's protection. Feeling trapped makes everything worse. Having choices makes everything more bearable.",
   },
 ];

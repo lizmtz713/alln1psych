@@ -3,7 +3,7 @@
  * How You Learn Best
  * 
  * Everyone processes information differently.
- * Understanding your learning style helps you actually absorb what you're learning —
+ * Understanding your learning style helps you actually absorb what you're learning -
  * not just read it and forget it.
  */
 
@@ -25,13 +25,13 @@ export interface LearningStyle {
 
 export const LEARNING_STYLES_INTRO = {
   headline: "How Do You Learn Best?",
-  subhead: "Understanding your style helps you actually absorb this — not just read it.",
+  subhead: "Understanding your style helps you actually absorb this - not just read it.",
   
   philosophy: `Ever read something, understood it in the moment, and completely forgot it by the next day? That's not a memory problem. That's a learning style mismatch.
 
 Your brain has preferred pathways for taking in and retaining information. Some people need to see it visually. Some need to hear it explained. Some need to read and write about it. Some need to physically do it.
 
-There's no "best" style — just the one that works for YOUR brain. Most people are a blend of styles, with one or two that are stronger.
+There's no "best" style - just the one that works for YOUR brain. Most people are a blend of styles, with one or two that are stronger.
 
 Understanding your learning style isn't just for school. It's for life. It's how you actually retain the emotional intelligence concepts in this app instead of just scrolling through them.`,
 
@@ -55,7 +55,7 @@ Your brain builds understanding by seeing how things connect spatially. A wall o
       "Color-coding and highlighting",
       "Watching demonstrations rather than hearing instructions",
       "Visualizing concepts as mental images",
-      "Spatial organization — where things are placed matters",
+      "Spatial organization - where things are placed matters",
     ],
 
     strengths: [
@@ -78,13 +78,13 @@ Your brain builds understanding by seeing how things connect spatially. A wall o
       "You take lots of notes, often with drawings or diagrams",
       "You prefer maps over written directions",
       "You notice visual details others miss",
-      "You think in pictures — when someone describes something, you see it",
+      "You think in pictures - when someone describes something, you see it",
       "You're drawn to well-designed apps, websites, and spaces",
     ],
 
     howToUseThisApp: [
-      "Look at the gauge visualizations — the colors and shapes carry meaning",
-      "Pay attention to the emojis and icons — they're memory anchors",
+      "Look at the gauge visualizations - the colors and shapes carry meaning",
+      "Pay attention to the emojis and icons - they're memory anchors",
       "Draw your own diagrams of how the 6 gauges connect",
       "Take screenshots of key concepts and review them",
       "Use the Body Scan with its body map visualization",
@@ -114,7 +114,7 @@ Your brain builds understanding by seeing how things connect spatially. A wall o
     color: '#A78BFA',
     tagline: 'You learn by hearing',
     
-    description: `Auditory learners process information best through sound — listening, discussing, and talking through ideas. You remember what you heard better than what you saw. You probably think by talking things out, either with others or to yourself.
+    description: `Auditory learners process information best through sound - listening, discussing, and talking through ideas. You remember what you heard better than what you saw. You probably think by talking things out, either with others or to yourself.
 
 Podcasts are your friend. Lectures work for you. Reading silently might be less effective than reading aloud. When learning something new, you might need to hear it explained or explain it to someone else to really get it.`,
 
@@ -151,11 +151,11 @@ Podcasts are your friend. Lectures work for you. Reading silently might be less 
     ],
 
     howToUseThisApp: [
-      "Use voice input when talking to Gauge — speak instead of type",
+      "Use voice input when talking to Gauge - speak instead of type",
       "Ask Gauge to explain concepts out loud (use voice response)",
       "Read the gauge descriptions aloud to yourself",
       "Discuss what you're learning with someone else",
-      "Explain a gauge to a friend — teaching reinforces learning",
+      "Explain a gauge to a friend - teaching reinforces learning",
       "Use the guided breathing exercises with audio cues",
     ],
 
@@ -182,7 +182,7 @@ Podcasts are your friend. Lectures work for you. Reading silently might be less 
     color: '#4ADE80',
     tagline: 'You learn by reading and writing',
     
-    description: `Reading/Writing learners process information best through text. You love reading — not just as consumption, but as learning. Taking notes helps you think. Writing things down, in your own words, cements understanding. You might read something multiple times, each pass deepening comprehension.
+    description: `Reading/Writing learners process information best through text. You love reading - not just as consumption, but as learning. Taking notes helps you think. Writing things down, in your own words, cements understanding. You might read something multiple times, each pass deepening comprehension.
 
 Lists, written instructions, and detailed text explanations work for you. You probably prefer email over phone calls. When you want to understand something deeply, you read about it. When you want to process something, you write about it.`,
 
@@ -212,18 +212,18 @@ Lists, written instructions, and detailed text explanations work for you. You pr
     signsThisIsYou: [
       "You take extensive notes and review them",
       "You prefer reading instructions over watching videos",
-      "You write to think — journaling, lists, notes to self",
+      "You write to think - journaling, lists, notes to self",
       "You remember what you read better than what you heard or saw",
       "You often say 'let me write this down'",
       "You're the one who reads the entire manual",
     ],
 
     howToUseThisApp: [
-      "Read through the full gauge content — the depth is there for you",
-      "Use the journal regularly — writing processes emotions for you",
+      "Read through the full gauge content - the depth is there for you",
+      "Use the journal regularly - writing processes emotions for you",
       "Take notes on what you're learning about yourself",
       "Write summaries of each gauge in your own words",
-      "Read the Human Manual lessons thoroughly — they're written for readers",
+      "Read the Human Manual lessons thoroughly - they're written for readers",
       "Create your own 'personal manual' with your patterns and insights",
     ],
 
@@ -250,7 +250,7 @@ Lists, written instructions, and detailed text explanations work for you. You pr
     color: '#F87171',
     tagline: 'You learn by doing',
     
-    description: `Kinesthetic learners process information best through physical experience, practice, and hands-on engagement. You learn by doing, not just reading or hearing. Your body is part of your thinking process. You might need to move while learning — pacing, fidgeting, or gesturing.
+    description: `Kinesthetic learners process information best through physical experience, practice, and hands-on engagement. You learn by doing, not just reading or hearing. Your body is part of your thinking process. You might need to move while learning - pacing, fidgeting, or gesturing.
 
 You probably hate long lectures. You want to try things, not just hear about them. Real-world application is how concepts become real for you. Simulation and practice trump theory every time.`,
 
@@ -283,24 +283,24 @@ You probably hate long lectures. You want to try things, not just hear about the
       "You prefer to 'just try it' rather than read instructions",
       "You often gesture when explaining things",
       "You feel restless sitting through lectures or long readings",
-      "You're aware of physical sensations — body tells you things",
+      "You're aware of physical sensations - body tells you things",
     ],
 
     howToUseThisApp: [
       "DO the activities, don't just read about them",
-      "Body Scan — actually feel where tension is in your body",
-      "Breathing exercises — actually do them, feel the difference",
-      "Role Play — practice conversations, not just read scripts",
-      "Move while learning — walk while listening to explanations",
-      "Apply concepts immediately — check your gauges right now, not 'later'",
+      "Body Scan - actually feel where tension is in your body",
+      "Breathing exercises - actually do them, feel the difference",
+      "Role Play - practice conversations, not just read scripts",
+      "Move while learning - walk while listening to explanations",
+      "Apply concepts immediately - check your gauges right now, not 'later'",
     ],
 
     studyTips: [
       "Walk while listening to Gauge explain things",
-      "Do a gauge check-in after physical activity — notice the difference",
+      "Do a gauge check-in after physical activity - notice the difference",
       "Practice the breathing techniques until they're automatic",
       "Role-play difficult conversations out loud, with movement",
-      "Notice your body's response to different emotions — hands-on discovery",
+      "Notice your body's response to different emotions - hands-on discovery",
     ],
 
     bestActivities: [
@@ -313,7 +313,7 @@ You probably hate long lectures. You want to try things, not just hear about the
 ];
 
 export const LEARNING_STYLE_QUIZ = {
-  intro: "Answer honestly — there are no right answers. Most people are a blend.",
+  intro: "Answer honestly - there are no right answers. Most people are a blend.",
   questions: [
     {
       question: "When learning how to use a new app, you prefer to:",
@@ -398,7 +398,7 @@ Use your primary style for initial learning. Use secondary styles to reinforce.
 
 When something isn't sticking, try a different style's approach. The concept might make sense when you hear it instead of read it, or when you do it instead of watch it.
 
-The goal isn't to label yourself — it's to have more tools for actually learning and retaining what matters.`,
+The goal isn't to label yourself - it's to have more tools for actually learning and retaining what matters.`,
   
   combiningStyles: [
     "Visual + Kinesthetic: Draw while moving, watch demonstrations then practice immediately",

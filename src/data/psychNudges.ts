@@ -1,9 +1,9 @@
 /**
- * PSYCH NUDGES — Personalized Proactive Support
+ * PSYCH NUDGES - Personalized Proactive Support
  * 
  * InGauge as the companion that shows up when no one else does.
  * 
- * "Some people need to feel reached out TO — not just open an app,
+ * "Some people need to feel reached out TO - not just open an app,
  * but feel like something SEES them and cares enough to initiate."
  * 
  * Trigger types:
@@ -104,11 +104,11 @@ export const MORNING_NUDGES: NudgeTemplate = {
   frequency: 'daily',
   messages: [
     {
-      text: "Good morning, {name}. No agenda — just wanted to say I'm here if you need me today. ☀️",
+      text: "Good morning, {name}. No agenda - just wanted to say I'm here if you need me today. ☀️",
       personalized: true,
     },
     {
-      text: "Morning. How are you waking up today? Not how you 'should' feel — how you actually feel.",
+      text: "Morning. How are you waking up today? Not how you 'should' feel - how you actually feel.",
       followUp: "Want to do a quick check-in?",
       action: { label: "Check in", route: "/checkin" },
     },
@@ -117,7 +117,7 @@ export const MORNING_NUDGES: NudgeTemplate = {
       personalized: true,
     },
     {
-      text: "Good morning. Before the day takes over — how's your body feeling right now?",
+      text: "Good morning. Before the day takes over - how's your body feeling right now?",
       action: { label: "Body scan", route: "/tools/body-scan" },
     },
     {
@@ -148,18 +148,18 @@ export const EVENING_NUDGES: NudgeTemplate = {
   frequency: 'daily',
   messages: [
     {
-      text: "Day's winding down. How did it go? Not the tasks — you. How are YOU?",
+      text: "Day's winding down. How did it go? Not the tasks - you. How are YOU?",
       action: { label: "Evening check-in", route: "/checkin" },
     },
     {
-      text: "Hey {name}. Before you scroll or zone out — one thing that went okay today?",
+      text: "Hey {name}. Before you scroll or zone out - one thing that went okay today?",
       personalized: true,
     },
     {
       text: "Good evening. Whatever happened today, you made it through. That counts.",
     },
     {
-      text: "Night mode. What do you need right now — rest, connection, distraction, or just to be seen?",
+      text: "Night mode. What do you need right now - rest, connection, distraction, or just to be seen?",
     },
     {
       text: "End of day check: Did you eat? Drink water? Talk to another human? Basic maintenance counts as wins.",
@@ -234,7 +234,7 @@ export const STATE_DROP_NUDGES: NudgeTemplate = {
       action: { label: "Breathing exercise", route: "/tools/breathing" },
     },
     {
-      text: "Low State isn't weakness — it's data. Your system is telling you something. Want to explore what?",
+      text: "Low State isn't weakness - it's data. Your system is telling you something. Want to explore what?",
     },
     {
       text: "Stress is high, huh? You don't have to fix it right now. But I see it.",
@@ -259,16 +259,16 @@ export const BODY_DROP_NUDGES: NudgeTemplate = {
       text: "Your Body gauge has been low. Have you eaten? Slept? Sometimes the basics help more than we think.",
     },
     {
-      text: "Body is talking — low energy, tension, something off? Check the basics: sleep, food, water, movement.",
+      text: "Body is talking - low energy, tension, something off? Check the basics: sleep, food, water, movement.",
     },
     {
       text: "When did you last eat something real? Drink water? Your body runs your brain. Fuel matters.",
     },
     {
-      text: "Low Body gauge for a few days. This isn't judgment — it's a gentle poke. What does your body need?",
+      text: "Low Body gauge for a few days. This isn't judgment - it's a gentle poke. What does your body need?",
     },
     {
-      text: "Physical state affects everything else. Even one small thing — a glass of water, a stretch — counts.",
+      text: "Physical state affects everything else. Even one small thing - a glass of water, a stretch - counts.",
       action: { label: "Body scan", route: "/tools/body-scan" },
     },
   ],
@@ -298,7 +298,7 @@ export const CONNECTION_DROP_NUDGES: NudgeTemplate = {
       text: "When's the last time you felt really seen by someone? If it's been a while, that's worth noticing.",
     },
     {
-      text: "Humans need connection like they need food. This isn't needy — it's biology. Who could you reach out to today?",
+      text: "Humans need connection like they need food. This isn't needy - it's biology. Who could you reach out to today?",
     },
   ],
 };
@@ -321,11 +321,11 @@ export const EMOTION_DROP_NUDGES: NudgeTemplate = {
       text: "Low Emotion gauge. That can mean sad, numb, overwhelmed, or something you can't name yet. All valid.",
     },
     {
-      text: "When emotions are low for a while, sometimes writing helps. Not to solve — just to witness yourself.",
+      text: "When emotions are low for a while, sometimes writing helps. Not to solve - just to witness yourself.",
       action: { label: "Journal", route: "/tools/journal" },
     },
     {
-      text: "Whatever you're feeling — or not feeling — it's okay. Numbness is a feeling too. I see you.",
+      text: "Whatever you're feeling - or not feeling - it's okay. Numbness is a feeling too. I see you.",
     },
     {
       text: "Emotional weight is real weight. What would make today even 5% lighter?",
@@ -373,7 +373,7 @@ export const ALIGNMENT_DROP_NUDGES: NudgeTemplate = {
   ],
   messages: [
     {
-      text: "Alignment is low. Something feels 'off' — like you're not living as yourself. That's worth exploring.",
+      text: "Alignment is low. Something feels 'off' - like you're not living as yourself. That's worth exploring.",
     },
     {
       text: "When Alignment drops, it often means you're doing something that violates your values. What's the friction?",
@@ -410,13 +410,13 @@ export const SUNDAY_EVENING_NUDGES: NudgeTemplate = {
       action: { label: "Talk to Psych", route: "/talk" },
     },
     {
-      text: "Sunday night check-in. How are you feeling about the week ahead? No judgment — just noticing.",
+      text: "Sunday night check-in. How are you feeling about the week ahead? No judgment - just noticing.",
     },
     {
       text: "The Sunday scaries hit different. If you're dreading Monday, that's data. What is it about?",
     },
     {
-      text: "Week's about to start. Before it does — what do you need? Rest? Prep? Just a moment of peace?",
+      text: "Week's about to start. Before it does - what do you need? Rest? Prep? Just a moment of peace?",
     },
     {
       text: "Sunday night dread is common. It doesn't mean you're weak. It means something in your week needs attention.",
@@ -435,10 +435,10 @@ export const AFTER_HARD_WEEK_NUDGES: NudgeTemplate = {
       text: "You made it through a hard week. That's not nothing. Take a moment to acknowledge that.",
     },
     {
-      text: "This week was rough — I saw it in your gauges. You got through it. That counts.",
+      text: "This week was rough - I saw it in your gauges. You got through it. That counts.",
     },
     {
-      text: "Survived another one. Rest isn't a reward you have to earn — but you've definitely earned it.",
+      text: "Survived another one. Rest isn't a reward you have to earn - but you've definitely earned it.",
     },
     {
       text: "Hard week behind you. Before you think about next week: what do you need right now?",
@@ -464,7 +464,7 @@ export const NO_CHECKIN_NUDGES: NudgeTemplate = {
   ],
   messages: [
     {
-      text: "Hey {name}. Haven't heard from you in a bit. No pressure — but I'm here when you're ready.",
+      text: "Hey {name}. Haven't heard from you in a bit. No pressure - but I'm here when you're ready.",
       personalized: true,
     },
     {
@@ -504,7 +504,7 @@ export const APP_INACTIVE_NUDGES: NudgeTemplate = {
       text: "Checking in after some quiet. You don't have to use me every day. But I'm here when you need me.",
     },
     {
-      text: "Sometimes people pull away when things get hard. If that's you — no judgment. Door's always open.",
+      text: "Sometimes people pull away when things get hard. If that's you - no judgment. Door's always open.",
     },
   ],
 };
@@ -530,7 +530,7 @@ export const CIRCLE_EMPTY_NUDGES: NudgeTemplate = {
       text: "Flying solo for now? That's valid. I'll be your Circle until you're ready to add others.",
     },
     {
-      text: "No Circle yet — that's okay. Some people aren't ready to share gauges with others. I'm not going anywhere.",
+      text: "No Circle yet - that's okay. Some people aren't ready to share gauges with others. I'm not going anywhere.",
     },
     {
       text: "You don't need a Circle to use InGauge. But if there's someone you trust, sharing your temperature can help. No pressure.",
@@ -576,7 +576,7 @@ export const STREAK_NUDGES: NudgeTemplate = {
   frequency: 'as_needed',
   messages: [
     {
-      text: "{streak} days of checking in. That's not obsession — that's self-awareness. Nice work, {name}.",
+      text: "{streak} days of checking in. That's not obsession - that's self-awareness. Nice work, {name}.",
       personalized: true,
     },
     {
@@ -584,11 +584,11 @@ export const STREAK_NUDGES: NudgeTemplate = {
       personalized: true,
     },
     {
-      text: "{streak} day streak! The point isn't the number — it's that you keep showing up for yourself.",
+      text: "{streak} day streak! The point isn't the number - it's that you keep showing up for yourself.",
       personalized: true,
     },
     {
-      text: "Look at you — {streak} days of paying attention to yourself. That matters.",
+      text: "Look at you - {streak} days of paying attention to yourself. That matters.",
       personalized: true,
     },
   ],
