@@ -24,6 +24,9 @@ export type RelationshipType =
 
 export type LoveLanguage = 'words' | 'acts' | 'gifts' | 'time' | 'touch' | null;
 
+/** Closeness tier based on Dunbar's Number */
+export type PersonTier = 'inner' | 'close' | 'friends' | 'community';
+
 export interface CircleMember {
   id: string;
   name: string;
@@ -38,6 +41,10 @@ export interface CircleMember {
   birthday?: string;
   /** Their love language — enables personalized nudges */
   loveLanguage?: LoveLanguage;
+  /** Last time you contacted this person */
+  lastContact?: Date;
+  /** Closeness tier: inner (5), close (15), friends (50), community (150) */
+  tier?: PersonTier;
 }
 
 export interface MoodEntry {
@@ -61,32 +68,38 @@ function genId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-// 20 demo members to test UI with various temperatures
+// Helper to create dates in the past
+const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+// 20 demo members with varied status, tier, and lastContact
 const DEMO_MEMBERS: CircleMember[] = [
-  // 5 Green (doing well)
-  { id: 'demo-1', name: 'Mom', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-2', name: 'Dad', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-3', name: 'Sarah', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-4', name: 'Mike', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-5', name: 'Emma', relationship: 'sibling', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date() },
-  // 5 Yellow (could use love)
-  { id: 'demo-6', name: 'Jake', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-7', name: 'Lisa', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-8', name: 'Grandma', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-9', name: 'Tom', relationship: 'mentor', contactMethod: '', sharingLevel: 'limited', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-10', name: 'Anna', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date() },
-  // 5 Orange (having hard time) — these will pulse
-  { id: 'demo-11', name: 'Chris', relationship: 'sibling', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-12', name: 'Rachel', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-13', name: 'Uncle Joe', relationship: 'other', contactMethod: '', sharingLevel: 'limited', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-14', name: 'Mia', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-15', name: 'David', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date() },
-  // 5 Red (really struggling) — these will pulse + blink
-  { id: 'demo-16', name: 'Brother', relationship: 'sibling', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-17', name: 'Alex', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-18', name: 'Aunt Sue', relationship: 'other', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-19', name: 'Jordan', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date() },
-  { id: 'demo-20', name: 'Best Friend', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date() },
+  // INNER CIRCLE (5) — closest people
+  { id: 'demo-1', name: 'Mom', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'inner', lastContact: daysAgo(1) },
+  { id: 'demo-2', name: 'Dad', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'inner', lastContact: daysAgo(3) },
+  { id: 'demo-3', name: 'Partner', relationship: 'partner', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date(), tier: 'inner', lastContact: daysAgo(0) },
+  { id: 'demo-4', name: 'Sister', relationship: 'sibling', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date(), tier: 'inner', lastContact: daysAgo(2) },
+  { id: 'demo-5', name: 'Best Friend', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date(), tier: 'inner', lastContact: daysAgo(1) },
+  
+  // CLOSE FRIENDS (5) — good friends
+  { id: 'demo-6', name: 'Sarah', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(5) },
+  { id: 'demo-7', name: 'Mike', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(10) },
+  { id: 'demo-8', name: 'Jake', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(8) },
+  { id: 'demo-9', name: 'Lisa', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(4) },
+  { id: 'demo-10', name: 'Grandma', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(20) },
+  
+  // FRIENDS (5) — regular friends  
+  { id: 'demo-11', name: 'Tom', relationship: 'mentor', contactMethod: '', sharingLevel: 'limited', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'friends', lastContact: daysAgo(15) },
+  { id: 'demo-12', name: 'Anna', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date(), tier: 'friends', lastContact: daysAgo(25) },
+  { id: 'demo-13', name: 'Chris', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date(), tier: 'friends', lastContact: daysAgo(12) },
+  { id: 'demo-14', name: 'Rachel', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date(), tier: 'friends', lastContact: daysAgo(7) },
+  { id: 'demo-15', name: 'Uncle Joe', relationship: 'other', contactMethod: '', sharingLevel: 'limited', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'friends', lastContact: daysAgo(45) },
+  
+  // COMMUNITY (5) — acquaintances (some fading/dormant)
+  { id: 'demo-16', name: 'Mia', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'community', lastContact: daysAgo(35) },
+  { id: 'demo-17', name: 'David', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date(), tier: 'community', lastContact: daysAgo(60) },
+  { id: 'demo-18', name: 'Aunt Sue', relationship: 'other', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date(), tier: 'community', lastContact: daysAgo(90) },
+  { id: 'demo-19', name: 'Jordan', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date(), tier: 'community', lastContact: daysAgo(14) },
+  { id: 'demo-20', name: 'Old Coworker', relationship: 'other', contactMethod: '', sharingLevel: 'limited', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'community', lastContact: daysAgo(120) },
 ];
 
 const DEMO_MEMBER_IDS = DEMO_MEMBERS.map(m => m.id);
