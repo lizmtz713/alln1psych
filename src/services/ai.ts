@@ -14,26 +14,14 @@ import { supabase } from '../lib/supabase';
 
 const API_KEY_STORAGE = 'openai_api_key';
 
+
 export async function getOpenAIKey(): Promise<string | null> {
-  try {
-    const fromStore = await SecureStore.getItemAsync(API_KEY_STORAGE);
-    if (fromStore?.trim()) return fromStore.trim();
-  } catch {
-    // ignore
-  }
-  const fromExtra = Constants.expoConfig?.extra?.openaiApiKey as string | undefined;
-  if (fromExtra?.trim()) return fromExtra.trim();
-  const fromEnv = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
-  return fromEnv?.trim() ?? null;
+  // TEMP: hardcode for testing
+  return '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';
+  
+  // ... rest of function
 }
 
-export async function setOpenAIKey(key: string | null): Promise<void> {
-  if (key?.trim()) {
-    await SecureStore.setItemAsync(API_KEY_STORAGE, key.trim());
-  } else {
-    await SecureStore.deleteItemAsync(API_KEY_STORAGE);
-  }
-}
 
 export interface Message {
   role: 'system' | 'user' | 'assistant';
