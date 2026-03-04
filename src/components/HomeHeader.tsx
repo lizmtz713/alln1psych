@@ -1,126 +1,54 @@
 /**
- * HomeHeader — "Hey, {name}" with date and time-based ritual shortcuts.
- * • ☀️ 6am–6pm → Pre-Flight
- * • 🌙 6pm–6am → Post-Flight
- * • 🚨 Always → Emergency Mode
+ * HomeHeader.tsx
+ * Layout: [Greeting + Date]    [☀️/🌙]    [🚨]
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import * as Haptics from 'expo-haptics';
-import { COLORS, SPACING } from '../lib/constants';
 
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-function formatHeaderDate(): string {
-  const d = new Date();
-  return `${DAY_NAMES[d.getDay()]}, ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
-}
-
-/** 6:00–17:59 = day (Pre-Flight); 18:00–5:59 = night (Post-Flight) */
-function isDaytime(): boolean {
-  const h = new Date().getHours();
-  return h >= 6 && h < 18;
-}
-
-export interface HomeHeaderProps {
+interface HomeHeaderProps {
   userName: string;
 }
 
+const getDayIcon = () => {
+  const hour = new Date().getHours();
+  const isDay = hour >= 6 && hour < 18;
+  return { icon: isDay ? '☀️' : '🌙', isDay };
+};
+
+const formatDate = () => {
+  return new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'short', day: 'numeric'
+  });
+};
+
 export function HomeHeader({ userName }: HomeHeaderProps) {
   const router = useRouter();
-  const day = isDaytime();
-  const displayName = (userName?.trim() && userName !== 'there') ? userName : 'there';
-
-  const onPreFlight = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push('/rituals/pre-flight');
-  };
-
-  const onPostFlight = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push('/rituals/post-flight');
-  };
-
-  const onEmergency = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push('/emergency');
-  };
+  const { icon, isDay } = getDayIcon();
 
   return (
-    <View style={styles.wrap}>
-      <View style={styles.topRow}>
-        <Text style={styles.hey}>Hey, {displayName}</Text>
-        <View style={styles.iconsRow}>
-          {day ? (
-            <Pressable
-              style={({ pressed }) => [styles.iconBtn, pressed && styles.iconBtnPressed]}
-              onPress={onPreFlight}
-              accessibilityLabel="Pre-Flight"
-              accessibilityHint="Opens morning check-in"
-            >
-              <Text style={styles.icon}>☀️</Text>
-            </Pressable>
-          ) : (
-            <Pressable
-              style={({ pressed }) => [styles.iconBtn, pressed && styles.iconBtnPressed]}
-              onPress={onPostFlight}
-              accessibilityLabel="Post-Flight"
-              accessibilityHint="Opens evening debrief"
-            >
-              <Text style={styles.icon}>🌙</Text>
-            </Pressable>
-          )}
-          <Pressable
-            style={({ pressed }) => [styles.iconBtn, pressed && styles.iconBtnPressed]}
-            onPress={onEmergency}
-            accessibilityLabel="Emergency"
-            accessibilityHint="Opens emergency support"
-          >
-            <Text style={styles.icon}>🚨</Text>
-          </Pressable>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.greetingContainer}>
+        <Text style={styles.greeting}>Hey, {userName}</Text>
+        <Text style={styles.date}>{formatDate()}</Text>
       </View>
-      <Text style={styles.date}>{formatHeaderDate()}</Text>
+      <TouchableOpacity onPress={() => router.push(isDay ? '/rituals/pre-flight' : '/rituals/post-flight')} style={styles.iconButton}>
+        <Text style={styles.dayIcon}>{icon}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('/emergency')} style={styles.iconButton}>
+        <Text style={styles.emergencyIcon}>🚨</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    marginBottom: SPACING.lg,
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  hey: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  iconsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  iconBtn: {
-    padding: 8,
-    borderRadius: 12,
-    backgroundColor: COLORS.surface,
-  },
-  iconBtnPressed: {
-    opacity: 0.8,
-  },
-  icon: {
-    fontSize: 22,
-  },
-  date: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    marginTop: 4,
-  },
+  container: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
+  greetingContainer: { flex: 1 },
+  greeting: { fontSize: 28, fontWeight: '600', color: '#FFFFFF' },
+  date: { fontSize: 14, color: '#8E8E93', marginTop: 2 },
+  iconButton: { padding: 8, marginLeft: 12 },
+  dayIcon: { fontSize: 28 },
+  emergencyIcon: { fontSize: 24 },
 });

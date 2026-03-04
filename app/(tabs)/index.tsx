@@ -28,7 +28,7 @@ import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeHeader } from '../../src/components/HomeHeader';
 import { WeeklyInsightCard } from '../../src/components/WeeklyInsightCard';
-import { CockpitHome } from '../../src/components/CockpitHome';
+import { CockpitCluster } from '../../src/components/CockpitCluster';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
 import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
 import { useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
@@ -513,10 +513,10 @@ export default function HomeScreen() {
 
       <WeeklyInsightCard />
 
-      {/* 2. Six Gauges — Oura-inspired CockpitHome (swipeable row + featured arc) */}
+      {/* 2. Six Gauges — Hex cockpit (CockpitCluster) */}
       <View style={styles.cockpitSection}>
-        <CockpitHome
-          gauges={{
+        <CockpitCluster
+          gaugeValues={{
             body: bodyVal,
             state: stateVal,
             emotion: emotionVal,
@@ -524,14 +524,14 @@ export default function HomeScreen() {
             direction: directionVal,
             alignment: alignmentVal,
           }}
-          userName={user?.name}
+          overall={overall}
+          onCenterPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/cockpit-checkin');
+          }}
           onGaugePress={(gauge) => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.push(`/(modals)/gauge-detail?gauge=${gauge}`);
-          }}
-          onCheckIn={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/cockpit-checkin');
           }}
         />
         <Pressable
@@ -558,40 +558,32 @@ export default function HomeScreen() {
         </Pressable>
       )}
 
-      {/* Toolkit — right below cockpit */}
+      {/* Toolkit — 9 tools, horizontal scroll */}
       <View style={styles.quickActionsWrap}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
-          {(() => {
-            const quickActions = [
-              { label: 'Prompts', icon: 'sparkles', route: '/(modals)/prompt-generator' as const, iconIsEmoji: false as const },
-              { label: 'Patterns', icon: 'analytics', route: '/(modals)/patterns' as const, iconIsEmoji: false as const },
-              { label: 'Replay', icon: 'refresh', route: '/(modals)/replay' as const, iconIsEmoji: false as const },
-              { label: 'Decode', icon: 'search', route: '/(modals)/decode' as const, iconIsEmoji: false as const },
-              { label: 'Relate', icon: 'heart-circle', route: '/(modals)/relate' as const, iconIsEmoji: false as const },
-              { label: 'Love', icon: 'heart-half', route: '/(modals)/love' as const, iconIsEmoji: false as const },
-              { label: 'Journal', icon: 'journal', route: '/(modals)/new-journal' as const, iconIsEmoji: false as const },
-              { label: 'Practice', icon: 'people', route: '/(modals)/role-play' as const, iconIsEmoji: false as const },
-              { label: 'Help', icon: 'medkit', route: '/(modals)/help-someone' as const, iconIsEmoji: false as const },
-              { label: 'Resolve', icon: 'git-compare', route: '/(modals)/resolve' as const, iconIsEmoji: false as const },
-            ];
-            return quickActions.map((action) => (
+          {[
+            { key: 'decode', label: 'Decode', icon: '🔍', route: '/(modals)/decode' as const },
+            { key: 'resolve', label: 'Resolve', icon: '🤝', route: '/(modals)/resolve' as const },
+            { key: 'roleplay', label: 'Role Play', icon: '🎭', route: '/(modals)/role-play' as const },
+            { key: 'referee', label: 'Referee', icon: '⚖️', route: '/(modals)/referee' as const },
+            { key: 'replay', label: 'Replay', icon: '🔄', route: '/(modals)/replay' as const },
+            { key: 'relate', label: 'Relate', icon: '💬', route: '/(modals)/relate' as const },
+            { key: 'prompts', label: 'Prompts', icon: '✨', route: '/(modals)/prompt-generator' as const },
+            { key: 'love', label: 'Love', icon: '❤️', route: '/(modals)/love' as const },
+            { key: 'help', label: 'Help', icon: '🆘', route: '/(modals)/help-someone' as const },
+          ].map((item) => (
             <Pressable
-              key={action.label}
+              key={item.key}
               style={({ pressed }) => [styles.quickActionPill, pressed && styles.quickActionPressed]}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push(action.route);
+                router.push(item.route);
               }}
             >
-              {action.iconIsEmoji ? (
-                <Text style={styles.quickActionPillEmoji}>{action.icon}</Text>
-              ) : (
-                <Ionicons name={action.icon as any} size={22} color={ACCENT} />
-              )}
-              <Text style={styles.quickActionPillText}>{action.label}</Text>
+              <Text style={styles.quickActionPillEmoji}>{item.icon}</Text>
+              <Text style={styles.quickActionPillText}>{item.label}</Text>
             </Pressable>
-            ));
-          })()}
+          ))}
         </ScrollView>
       </View>
 

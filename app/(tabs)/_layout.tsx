@@ -15,9 +15,10 @@ const COLORS = {
   accentSoft: 'rgba(124,77,255,0.12)',
   // Tab-specific colors
   home: '#4ADE80',      // Green - growth/health
-  ingauge: '#7C4DFF',   // Purple - AI/intelligence  
-  circle: '#EC4899',    // Pink - connection/love
+  ingauge: '#7C4DFF',   // Purple - AI/intelligence
+  circle: '#EC4899',    // Pink - Mind Mail / connection
   explore: '#3B82F6',   // Blue - discovery/learning
+  lights: '#FBBF24',   // Amber - Lights
   me: '#F59E0B',        // Amber - self/personal
 };
 
@@ -112,18 +113,18 @@ export default function TabLayout() {
           }}
         />
         
-        {/* Tab 3: Circle - Relationships */}
+        {/* Tab 3: Mind Mail (was Circle) */}
         <Tabs.Screen
           name="circle"
           options={{
-            title: 'Circle',
+            title: 'Mind Mail',
             tabBarIcon: ({ focused, color, size }) => (
               <TabIcon
                 focused={focused}
                 color={color}
                 size={size ?? 24}
-                name="heart-outline"
-                focusedName="heart"
+                name="mail-outline"
+                focusedName="mail"
                 accentColor={COLORS.circle}
               />
             ),
@@ -150,7 +151,24 @@ export default function TabLayout() {
           }}
         />
         
-        {/* Tab 5: Me - Personal Data & Settings */}
+        {/* Tab 5: Lights */}
+        <Tabs.Screen
+          name="lights"
+          options={{
+            title: 'Lights',
+            tabBarIcon: ({ focused, color, size }) => (
+              <View style={[
+                styles.iconContainer,
+                focused && { backgroundColor: COLORS.lights + '20' }
+              ]}>
+                <Text style={{ fontSize: size ?? 22 }}>💡</Text>
+              </View>
+            ),
+            tabBarActiveTintColor: COLORS.lights,
+          }}
+        />
+        
+        {/* Tab 6: Me - Personal Data & Settings */}
         <Tabs.Screen
           name="me"
           options={{
