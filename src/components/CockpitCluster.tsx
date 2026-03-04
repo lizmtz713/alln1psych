@@ -49,44 +49,84 @@ const GAUGE_POSITIONS = [
   { key: 'alignment', angle: 210 }, // Top-left
 ];
 
-// Animated glow component for gauges
-function GaugeGlow({ color, intensity, size }: { color: string; intensity: number; size: number }) {
+// Animated gauge ring — pulses/blinks for low values
+function AnimatedGaugeRing({ 
+  value, 
+  color, 
+  size, 
+  children 
+}: { 
+  value: number; 
+  color: string; 
+  size: number; 
+  children: React.ReactNode;
+}) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const blinkAnim = useRef(new Animated.Value(1)).current;
+  
+  const isSet = value >= 0;
+  const needsAttention = isSet && value < 50;
+  const isUrgent = isSet && value < 25;
   
   useEffect(() => {
-    // Pulse animation for attention (low values)
-    if (intensity < 40 && intensity >= 0) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.15, duration: 800, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
-        ])
-      ).start();
-    } else {
+    if (!needsAttention) {
       pulseAnim.setValue(1);
+      return;
     }
-  }, [intensity]);
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { 
+          toValue: isUrgent ? 1.1 : 1.06, 
+          duration: isUrgent ? 600 : 1000, 
+          useNativeDriver: true 
+        }),
+        Animated.timing(pulseAnim, { 
+          toValue: 1, 
+          duration: isUrgent ? 600 : 1000, 
+          useNativeDriver: true 
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [needsAttention, isUrgent]);
   
-  if (intensity < 0) return null;
-  
-  const opacity = Math.min(0.6, (intensity / 100) * 0.4 + 0.2);
+  useEffect(() => {
+    if (!isUrgent) {
+      blinkAnim.setValue(1);
+      return;
+    }
+    const blink = Animated.loop(
+      Animated.sequence([
+        Animated.timing(blinkAnim, { toValue: 0.5, duration: 500, useNativeDriver: true }),
+        Animated.timing(blinkAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+      ])
+    );
+    blink.start();
+    return () => blink.stop();
+  }, [isUrgent]);
   
   return (
     <Animated.View
       style={{
-        position: 'absolute',
-        width: size + 20,
-        height: size + 20,
-        borderRadius: (size + 20) / 2,
-        backgroundColor: color,
-        opacity,
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        borderWidth: 4,
+        borderColor: color,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'transparent',
         transform: [{ scale: pulseAnim }],
-        shadowColor: color,
+        opacity: blinkAnim,
+        shadowColor: needsAttention ? color : 'transparent',
         shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.8,
-        shadowRadius: 15,
+        shadowOpacity: needsAttention ? 0.6 : 0,
+        shadowRadius: 10,
       }}
-    />
+    >
+      {children}
+    </Animated.View>
   );
 }
 
@@ -191,12 +231,12 @@ export function CockpitCluster({
         )}
       </Pressable>
 
-      {/* 6 Gauge Circles */}
+      {/* 6 Gauge Circles — Simplified: single ring + value + label */}
       {GAUGE_POSITIONS.map(({ key, angle }) => {
         const gaugeValue = gaugeValues[key as keyof typeof gaugeValues];
-        const GaugeComponent = GAUGE_COMPONENTS[key];
         const config = GAUGE_CONFIG[key as keyof typeof GAUGE_CONFIG];
-        const gaugeColor = gaugeValue >= 0 ? getGaugeColor(gaugeValue) : '#E0E0E0';
+        const isSet = gaugeValue >= 0;
+        const gaugeColor = isSet ? getGaugeColor(gaugeValue) : '#3A3A4A';
         
         // Calculate position
         const radians = (angle * Math.PI) / 180;
@@ -204,53 +244,41 @@ export function CockpitCluster({
         const y = Math.sin(radians) * GAUGE_RADIUS;
 
         return (
-          <View
+          <Pressable
             key={key}
-            style={{
+            style={({ pressed }) => ({
               position: 'absolute',
-              left: CLUSTER_SIZE / 2 + x - GAUGE_SIZE / 2 - 10,
-              top: CLUSTER_SIZE / 2 + y - GAUGE_SIZE / 2 - 10,
-              width: GAUGE_SIZE + 20,
-              height: GAUGE_SIZE + 20,
+              left: CLUSTER_SIZE / 2 + x - GAUGE_SIZE / 2,
+              top: CLUSTER_SIZE / 2 + y - GAUGE_SIZE / 2,
+              width: GAUGE_SIZE,
+              height: GAUGE_SIZE + 18,
               alignItems: 'center',
-              justifyContent: 'center',
-            }}
+              justifyContent: 'flex-start',
+              opacity: pressed ? 0.8 : 1,
+            })}
+            onPress={() => handleGaugePress(key)}
           >
-            {/* Glow layer */}
-            <GaugeGlow color={gaugeColor} intensity={gaugeValue} size={GAUGE_SIZE} />
-            
-            {/* Gauge bubble */}
-            <Pressable
-              style={({ pressed }) => [
-                styles.gaugeBubble,
-                {
-                  borderColor: gaugeValue >= 0 ? gaugeColor : 'rgba(255,255,255,0.5)',
-                  shadowColor: gaugeColor,
-                  shadowOpacity: gaugeValue >= 0 ? 0.4 : 0,
-                  shadowRadius: 8,
-                },
-                pressed && styles.gaugeBubblePressed,
-              ]}
-              onPress={() => handleGaugePress(key)}
-            >
-              {/* Actual gauge visualization */}
-              {GaugeComponent && (
-                <GaugeComponent value={gaugeValue} size={GAUGE_SIZE - 20} />
-              )}
-              {/* Value overlay */}
-              {gaugeValue >= 0 && (
-                <Text style={[styles.gaugeValueOverlay, { color: gaugeColor }]}>
-                  {gaugeValue}
-                </Text>
-              )}
-              <Text style={[styles.gaugeLabel, { color: gaugeValue >= 0 ? gaugeColor : '#888' }]}>
-                {config.label.toUpperCase()}
+            {/* Animated ring — pulses/blinks for low values */}
+            <AnimatedGaugeRing value={gaugeValue} color={gaugeColor} size={GAUGE_SIZE}>
+              <Text style={{
+                fontSize: 22,
+                fontWeight: '700',
+                color: isSet ? gaugeColor : '#666',
+              }}>
+                {isSet ? gaugeValue : '—'}
               </Text>
-              {gaugeValue >= 0 && (
-                <Text style={[styles.gaugeValue, { color: gaugeColor }]}>{gaugeValue}</Text>
-              )}
-            </Pressable>
-          </View>
+            </AnimatedGaugeRing>
+            {/* Label below */}
+            <Text style={{
+              marginTop: 4,
+              fontSize: 10,
+              fontWeight: '600',
+              color: isSet ? gaugeColor : '#666',
+              textTransform: 'capitalize',
+            }}>
+              {config.label}
+            </Text>
+          </Pressable>
         );
       })}
 

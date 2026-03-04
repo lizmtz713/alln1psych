@@ -61,10 +61,42 @@ export function getOverallStatusLabel(value: number): string {
   return 'Critical';
 }
 
+/**
+ * Temperature colors — used by both Gauges and Lights for consistency
+ */
+export const TEMPERATURE_COLORS = {
+  green: '#34D399',   // 75-100: Good / Doing well
+  yellow: '#FBBF24',  // 50-74: Okay / Could use love
+  orange: '#FB923C',  // 25-49: Needs attention / Having hard time
+  red: '#F87171',     // 0-24: Critical / Really struggling
+  dim: '#2A2A3A',     // Unset / Off / No data
+} as const;
+
+/**
+ * Get color for a gauge value (0-100)
+ */
 export function getGaugeColor(value: number): string {
-  if (value < 0) return '#2A2A3A';
-  if (value >= 75) return '#34D399';
-  if (value >= 50) return '#FBBF24';
-  if (value >= 25) return '#FB923C';
-  return '#F87171';
+  if (value < 0) return TEMPERATURE_COLORS.dim;
+  if (value >= 75) return TEMPERATURE_COLORS.green;
+  if (value >= 50) return TEMPERATURE_COLORS.yellow;
+  if (value >= 25) return TEMPERATURE_COLORS.orange;
+  return TEMPERATURE_COLORS.red;
+}
+
+/**
+ * Get color for a temperature string ('green' | 'yellow' | 'orange' | 'red')
+ * Used by Lights/Circle for relationship temperature
+ */
+export function getTemperatureColor(temp: 'green' | 'yellow' | 'orange' | 'red' | string): string {
+  return TEMPERATURE_COLORS[temp as keyof typeof TEMPERATURE_COLORS] || TEMPERATURE_COLORS.dim;
+}
+
+/**
+ * Convert gauge value to temperature string
+ */
+export function valueToTemperature(value: number): 'green' | 'yellow' | 'orange' | 'red' {
+  if (value >= 75) return 'green';
+  if (value >= 50) return 'yellow';
+  if (value >= 25) return 'orange';
+  return 'red';
 }

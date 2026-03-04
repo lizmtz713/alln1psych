@@ -14,6 +14,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { COLORS, TYPOGRAPHY, ANIMATION, SPACING } from '../../lib/constants';
+import { getGaugeColor } from '../../utils/gaugeHelpers';
 
 type GaugeName = 'body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment';
 
@@ -81,8 +82,9 @@ export function GaugeArc({
   
   const isSet = value >= 0;
   const displayValue = isSet ? Math.round(value) : '--';
-  const gaugeColor = COLORS.gauges[gauge];
-  const gradientColors = COLORS.gradients[gauge] || [gaugeColor, gaugeColor];
+  // Use temperature-based color (green/yellow/orange/red) based on value
+  const gaugeColor = isSet ? getGaugeColor(value) : COLORS.textMuted;
+  const gradientColors = [gaugeColor, gaugeColor]; // Solid color based on value
   
   // Arc geometry
   const center = size / 2;
@@ -230,11 +232,12 @@ export function GaugeRow({
   return (
     <View style={styles.gaugeRow}>
       {gauges.map(({ key, label }) => {
-        const value = values[key] ?? -1;
+        const val = values[key] ?? -1;
+        const color = val >= 0 ? getGaugeColor(val) : COLORS.textMuted;
         return (
           <View key={key} style={styles.gaugeRowItem}>
-            <Text style={[styles.rowScore, { color: COLORS.gauges[key] }]}>
-              {value >= 0 ? Math.round(value) : '--'}
+            <Text style={[styles.rowScore, { color }]}>
+              {val >= 0 ? Math.round(val) : '--'}
             </Text>
             <Text style={styles.rowLabel}>{label}</Text>
           </View>

@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateCrossSystemInsight } from '../services/cockpitAI';
 import { recordGaugeEvent, refreshDriftCache } from '../services/systemicDrift';
 import { getGaugeHistory } from '../services/crisisPipeline';
@@ -87,7 +89,9 @@ function decayToward50(value: number): number {
   return Math.round(decayed);
 }
 
-export const useCockpitStore = create<CockpitState>((set, get) => ({
+export const useCockpitStore = create<CockpitState>()(
+  persist(
+    (set, get) => ({
   body: { ...defaultGauge },
   state: { ...defaultGauge },
   emotion: { ...defaultGauge },
@@ -433,7 +437,27 @@ export const useCockpitStore = create<CockpitState>((set, get) => ({
       };
       return next;
     }),
-}));
+}),
+    {
+      name: 'cockpit-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        body: state.body,
+        state: state.state,
+        emotion: state.emotion,
+        connection: state.connection,
+        direction: state.direction,
+        alignment: state.alignment,
+        lastCheckInDate: state.lastCheckInDate,
+        systemMode: state.systemMode,
+        stabilizationTriggers: state.stabilizationTriggers,
+        centerScore: state.centerScore,
+        bodyDataSource: state.bodyDataSource,
+        stateDataSource: state.stateDataSource,
+      }),
+    }
+  )
+);
 
 /** Compute system mode from current gauge values; call when gauges change. Sets stabilization if any gauge is below threshold. */
 const STABILIZATION_THRESHOLD = 35;

@@ -25,6 +25,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { GaugeArc, GaugeRow } from './gauges/GaugeArc';
 import { AuroraBackground, GlassCard } from './ui/AuroraBackground';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, ANIMATION } from '../lib/constants';
+import { getGaugeColor } from '../utils/gaugeHelpers';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -137,7 +138,7 @@ export function CockpitHome({
               >
                 <Text style={[
                   styles.gaugeRowScore,
-                  { color: COLORS.gauges[gauge] },
+                  { color: value >= 0 ? getGaugeColor(value) : COLORS.textMuted },
                   !isSelected && styles.gaugeRowScoreInactive,
                 ]}>
                   {value >= 0 ? Math.round(value) : '--'}
