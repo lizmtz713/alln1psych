@@ -962,6 +962,46 @@ export default function SettingsScreen() {
         </View>
 
         {/* API Key (Power Users) */}
+
+        {/* My PHOSM Section */}
+        <>
+          <Text style={styles.sectionTitle}>My PHOSM</Text>
+          <View style={styles.card}>
+            <Pressable style={styles.row} onPress={() => router.push('/(modals)/foundation-body')}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Text style={{ fontSize: 24 }}>🫀</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rowLabel}>Body Baseline</Text>
+                  <Text style={styles.rowHint}>Sleep, nutrition, movement</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={TEXT_MUTED} />
+            </Pressable>
+            <View style={styles.divider} />
+            <Pressable style={styles.row} onPress={() => router.push('/(modals)/foundation-state')}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Text style={{ fontSize: 24 }}>⚡</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rowLabel}>Regulation Map</Text>
+                  <Text style={styles.rowHint}>Triggers, tools, warnings</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={TEXT_MUTED} />
+            </Pressable>
+            <View style={styles.divider} />
+            <Pressable style={styles.row} onPress={() => router.push('/(modals)/foundation-emotion')}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Text style={{ fontSize: 24 }}>💛</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rowLabel}>Emotional Profile</Text>
+                  <Text style={styles.rowHint}>Vocabulary, patterns, needs</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={TEXT_MUTED} />
+            </Pressable>
+          </View>
+        </>
+
         <Text style={styles.sectionTitle}>Advanced</Text>
         <View style={styles.card}>
           <Pressable

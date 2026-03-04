@@ -50,7 +50,7 @@ All modals have **gesture** (swipe to dismiss). Most also have **manual back or 
 | settings | ✅ arrow-back |
 | share-insight, share-snapshot, sovereignty-report | ✅ back/close |
 | therapist-share, therapist-share-create | ✅ back/close |
-| phosm-state, phosm-emotion, phosm-body, heart-view | ✅ back/close |
+| foundation-state, foundation-emotion, foundation-body, heart-notes | ✅ back/close |
 
 ### app/profile/ (headerShown: false)
 - **index** — Has back (to tabs). ✅  

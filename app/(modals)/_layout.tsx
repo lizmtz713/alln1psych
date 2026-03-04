@@ -54,6 +54,13 @@ export default function ModalsLayout() {
       <Stack.Screen name="sovereignty-report" options={{ presentation: 'modal' }} />
       <Stack.Screen name="therapist-share" options={{ presentation: 'modal' }} />
       <Stack.Screen name="therapist-share-create" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="heart-notes" options={{ presentation: "modal" }} />
+      <Stack.Screen name="foundation-values" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="foundation-directions" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="foundation-people" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="foundation-body" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="foundation-state" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="foundation-emotion" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }
