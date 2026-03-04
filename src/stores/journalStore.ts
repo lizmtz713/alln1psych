@@ -25,7 +25,10 @@ interface JournalState {
   ) => void;
   deleteEntry: (id: string) => void;
   getRecentEntries: (count: number) => JournalEntry[];
+<<<<<<< HEAD
   reset: () => void;
+=======
+>>>>>>> 50bf466 (feat: implement Human Cockpit with 6-gauge system and check-in flow)
 }
 
 export const useJournalStore = create<JournalState>((set, get) => ({
@@ -69,5 +72,8 @@ export const useJournalStore = create<JournalState>((set, get) => ({
   getRecentEntries: (count) => {
     return get().entries.slice(0, count);
   },
+<<<<<<< HEAD
   reset: () => set({ entries: [] }),
+=======
+>>>>>>> 50bf466 (feat: implement Human Cockpit with 6-gauge system and check-in flow)
 }));
