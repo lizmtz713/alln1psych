@@ -61,43 +61,35 @@ function genId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-const DEMO_MEMBER_IDS = ['demo-mom', 'demo-sarah', 'demo-dad'];
-
+// 20 demo members to test UI with various temperatures
 const DEMO_MEMBERS: CircleMember[] = [
-  {
-    id: 'demo-mom',
-    name: 'Mom',
-    relationship: 'parent',
-    contactMethod: '',
-    sharingLevel: 'full',
-    temperature: 'green',
-    temperatureLabel: TEMPERATURE_LABELS.green,
-    lastUpdated: new Date(),
-    addedAt: new Date(),
-  },
-  {
-    id: 'demo-sarah',
-    name: 'Sarah',
-    relationship: 'friend',
-    contactMethod: '',
-    sharingLevel: 'full',
-    temperature: 'yellow',
-    temperatureLabel: TEMPERATURE_LABELS.yellow,
-    lastUpdated: new Date(),
-    addedAt: new Date(),
-  },
-  {
-    id: 'demo-dad',
-    name: 'Dad',
-    relationship: 'parent',
-    contactMethod: '',
-    sharingLevel: 'full',
-    temperature: 'orange',
-    temperatureLabel: TEMPERATURE_LABELS.orange,
-    lastUpdated: new Date(),
-    addedAt: new Date(),
-  },
+  // 5 Green (doing well)
+  { id: 'demo-1', name: 'Mom', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-2', name: 'Dad', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-3', name: 'Sarah', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-4', name: 'Mike', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-5', name: 'Emma', relationship: 'sibling', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date() },
+  // 5 Yellow (could use love)
+  { id: 'demo-6', name: 'Jake', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-7', name: 'Lisa', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-8', name: 'Grandma', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-9', name: 'Tom', relationship: 'mentor', contactMethod: '', sharingLevel: 'limited', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-10', name: 'Anna', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date() },
+  // 5 Orange (having hard time) — these will pulse
+  { id: 'demo-11', name: 'Chris', relationship: 'sibling', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-12', name: 'Rachel', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-13', name: 'Uncle Joe', relationship: 'other', contactMethod: '', sharingLevel: 'limited', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-14', name: 'Mia', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-15', name: 'David', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date() },
+  // 5 Red (really struggling) — these will pulse + blink
+  { id: 'demo-16', name: 'Brother', relationship: 'sibling', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-17', name: 'Alex', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-18', name: 'Aunt Sue', relationship: 'other', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-19', name: 'Jordan', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date() },
+  { id: 'demo-20', name: 'Best Friend', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'red', temperatureLabel: TEMPERATURE_LABELS.red, lastUpdated: new Date(), addedAt: new Date() },
 ];
+
+const DEMO_MEMBER_IDS = DEMO_MEMBERS.map(m => m.id);
 
 interface CircleState {
   members: CircleMember[];
