@@ -438,7 +438,8 @@ export const useLightsStore = create<LightsState>()(
 
       getLights: (members) => {
         const state = get();
-        const lights = computeLights(members, state);
+        const safe = Array.isArray(members) ? members : [];
+        const lights = computeLights(safe, state);
         const { scores, seasons } = get().getMomentumScoresForLights(
           lights.map((l) => ({ id: l.id, tier: l.tier, daysSinceContact: l.daysSinceContact, relationshipContext: l.relationshipContext }))
         );

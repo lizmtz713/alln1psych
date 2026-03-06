@@ -26,19 +26,27 @@ export function getExperienceLevel(
 
 /** Persist first launch date (call once on app open if not set). */
 export async function ensureFirstLaunchDate(): Promise<string> {
-  const existing = await AsyncStorage.getItem(FIRST_LAUNCH_KEY);
-  if (existing) return existing;
-  const now = new Date().toISOString().slice(0, 10);
-  await AsyncStorage.setItem(FIRST_LAUNCH_KEY, now);
-  return now;
+  try {
+    const existing = await AsyncStorage.getItem(FIRST_LAUNCH_KEY);
+    if (existing) return existing;
+    const now = new Date().toISOString().slice(0, 10);
+    await AsyncStorage.setItem(FIRST_LAUNCH_KEY, now);
+    return now;
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
 }
 
 export async function getDaysSinceInstall(): Promise<number> {
-  const raw = await AsyncStorage.getItem(FIRST_LAUNCH_KEY);
-  if (!raw) return 0;
-  const launch = new Date(raw).getTime();
-  const days = Math.floor((Date.now() - launch) / (24 * 60 * 60 * 1000));
-  return Math.max(0, days);
+  try {
+    const raw = await AsyncStorage.getItem(FIRST_LAUNCH_KEY);
+    if (!raw) return 0;
+    const launch = new Date(raw).getTime();
+    const days = Math.floor((Date.now() - launch) / (24 * 60 * 60 * 1000));
+    return Math.max(0, days);
+  } catch {
+    return 0;
+  }
 }
 
 /** Invitation trigger config. */
@@ -100,10 +108,14 @@ const INVITATION_TRIGGERS: Array<{
 ];
 
 export async function getShownInvitationIds(): Promise<Set<InvitationId>> {
-  const raw = await AsyncStorage.getItem(INVITATION_SHOWN_KEY);
-  if (!raw) return new Set();
-  const arr = JSON.parse(raw) as InvitationId[];
-  return new Set(arr);
+  try {
+    const raw = await AsyncStorage.getItem(INVITATION_SHOWN_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw) as InvitationId[];
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
 }
 
 export async function markInvitationShown(id: InvitationId): Promise<void> {
@@ -126,19 +138,23 @@ export async function getPendingInvitation(ctx: {
   stateValue: number;
   connectionValue: number;
 }): Promise<PendingInvitationPayload | null> {
-  const [shown, hasSeenLowState, hasSeenLowConnection] = await Promise.all([
-    getShownInvitationIds(),
-    AsyncStorage.getItem(LOW_STATE_EVER_KEY).then((v) => v === '1'),
-    AsyncStorage.getItem(LOW_CONNECTION_EVER_KEY).then((v) => v === '1'),
-  ]);
-  const fullCtx = { ...ctx, hasSeenLowState, hasSeenLowConnection };
-  for (const inv of INVITATION_TRIGGERS) {
-    if (shown.has(inv.id)) continue;
-    if (inv.check(fullCtx)) {
-      return { id: inv.id, title: inv.title, body: inv.body, route: inv.route, ctaLabel: inv.ctaLabel };
+  try {
+    const [shown, hasSeenLowState, hasSeenLowConnection] = await Promise.all([
+      getShownInvitationIds(),
+      AsyncStorage.getItem(LOW_STATE_EVER_KEY).then((v) => v === '1'),
+      AsyncStorage.getItem(LOW_CONNECTION_EVER_KEY).then((v) => v === '1'),
+    ]);
+    const fullCtx = { ...ctx, hasSeenLowState: !!hasSeenLowState, hasSeenLowConnection: !!hasSeenLowConnection };
+    for (const inv of INVITATION_TRIGGERS) {
+      if (shown.has(inv.id)) continue;
+      if (inv.check(fullCtx)) {
+        return { id: inv.id, title: inv.title, body: inv.body, route: inv.route, ctaLabel: inv.ctaLabel };
+      }
     }
+    return null;
+  } catch {
+    return null;
   }
-  return null;
 }
 
 /** Call when user has low State (so we don't re-invite quick-reset every time). */
@@ -186,7 +202,7 @@ export function getSectionsForLevel(
   switch (level) {
     case 'new':
       return {
-        showCockpit: checkInCount >= 1,
+        showCockpit: true,
         showForecast: false,
         showLightsInvite: false,
         showToolsGrid: false,

@@ -433,24 +433,41 @@ export default function HomeScreen() {
   const cockpitContextItems: ContextItem[] = [];
   const ringColor = overall < 0 ? TEXT_MUTED : getGaugeColor(overall);
 
-  const lights = useLightsStore((s) => s.getLights(members));
+  const membersSafe = Array.isArray(members) ? members : [];
+  const lights = useLightsStore(
+    useShallow((s) => {
+      try {
+        return s.getLights(membersSafe);
+      } catch {
+        return [];
+      }
+    })
+  );
   const lastHeroShownByMemberId = useLightsStore(useShallow((s) => s.lastHeroShownByMemberId));
-  const dailyReachOuts = useMemo(() => getDailyReachOuts(lights, 8), [lights]);
-  const heroResult = useMemo(
-    () =>
-      selectHero(lights, {
+  const dailyReachOuts = useMemo(() => {
+    try {
+      return getDailyReachOuts(lights, 8);
+    } catch {
+      return { priority: [] as Light[], suggested: [] as Light[], rotate: [] as Light[] };
+    }
+  }, [lights]);
+  const heroResult = useMemo(() => {
+    try {
+      return selectHero(lights, {
         momentumByMemberId: Object.fromEntries(
           lights
             .filter((l): l is Light & { momentumScore: number } => l.momentumScore != null)
             .map((l) => [l.id, l.momentumScore])
         ),
-        lastHeroByMemberId: lastHeroShownByMemberId,
-      }),
-    [lights, lastHeroShownByMemberId]
-  );
-  const heroLight = heroResult?.light ?? dailyReachOuts.priority[0] ?? dailyReachOuts.suggested[0];
+        lastHeroByMemberId: lastHeroShownByMemberId ?? {},
+      });
+    } catch {
+      return null;
+    }
+  }, [lights, lastHeroShownByMemberId]);
+  const heroLight = heroResult?.light ?? dailyReachOuts.priority?.[0] ?? dailyReachOuts.suggested?.[0];
   const heroNameForSignals = heroLight?.name;
-  const needAttentionCount = dailyReachOuts.priority.length + dailyReachOuts.suggested.length;
+  const needAttentionCount = (dailyReachOuts.priority?.length ?? 0) + (dailyReachOuts.suggested?.length ?? 0);
 
   const { suggestions: toolSuggestions } = useToolSuggestions({ limit: 2, requireGaugeData: true });
 
@@ -520,12 +537,7 @@ export default function HomeScreen() {
     firstAlert = needsCheckIn[0];
   } catch (e) {
     if (__DEV__) console.error('Home screen setup error:', e);
-    const message = (e && typeof (e as Error).message === 'string' ? (e as Error).message : String(e)) || 'Unknown error';
-    return (
-      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0F0B1E', padding: 24 }}>
-        <Text style={{ color: '#fff', padding: 20, textAlign: 'center', fontSize: 14 }}>Error: {message}</Text>
-      </SafeAreaView>
-    );
+    // Use defaults so we still render Cockpit (e.g. right after onboarding). Do not block with error screen.
   }
 
   const todayDateKey = new Date().toDateString();
@@ -647,9 +659,9 @@ export default function HomeScreen() {
     >
       {/* 1. Pre-Flight / status header */}
       <CockpitStatusHeader
-        firstName={user?.name?.trim().split(/\s+/)[0] ?? 'there'}
+        firstName={(user?.name ?? '').trim().split(/\s+/)[0] || 'there'}
         systemStatusLabel={getSystemScoreLabel(overall)}
-        summaryLine={cockpitContextItems.length > 0 ? cockpitContextItems[0].label : (showInsight && crossSystemInsight ? crossSystemInsight.slice(0, 80) + (crossSystemInsight.length > 80 ? '…' : '') : undefined)}
+        summaryLine={cockpitContextItems.length > 0 ? cockpitContextItems[0].label : (showInsight && typeof crossSystemInsight === 'string' && crossSystemInsight ? crossSystemInsight.slice(0, 80) + (crossSystemInsight.length > 80 ? '…' : '') : undefined)}
       />
 
       {/* 2. System cluster — six gauges + center score */}

@@ -108,6 +108,8 @@ interface UserState {
   loveLanguage: LoveLanguage | null;
   circleInvite: CircleInvite | null;
   onboardingCompleted: boolean;
+  /** True after AuthSync has loaded profile for the current user (avoids redirecting to onboarding on cold start). */
+  profileHydrated: boolean;
   /** Topics the user wants Gauge to be extra gentle about (trauma-informed) */
   sensitiveTopics: string[];
   /** How the user learns best — affects lesson/activity presentation */
@@ -284,6 +286,7 @@ const initialState = {
   loveLanguage: null as LoveLanguage | null,
   circleInvite: null as CircleInvite | null,
   onboardingCompleted: false,
+  profileHydrated: false,
   sensitiveTopics: [] as string[],
   learningStyle: null as LearningStyle | null,
   emergencyContacts: [] as EmergencyContact[],

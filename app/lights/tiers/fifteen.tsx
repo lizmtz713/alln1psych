@@ -18,9 +18,13 @@ export default function YourFifteenScreen() {
       connectionLogByMemberId: s.connectionLogByMemberId,
       lastContactByMemberId: s.lastContactByMemberId,
       lightExtrasByMemberId: s.lightExtrasByMemberId,
+      momentumByMemberId: s.momentumByMemberId,
+      lastHeroShownByMemberId: s.lastHeroShownByMemberId,
+      seasonByMemberId: s.seasonByMemberId,
+      timelineEventsByMemberId: s.timelineEventsByMemberId,
     }))
   );
-  const lights = useMemo(() => computeLights(members, persistState), [members, persistState]);
+  const lights = useMemo(() => computeLights(Array.isArray(members) ? members : [], persistState), [members, persistState]);
   const fifteen = lights.filter((l) => l.tier === 'fifteen');
 
   return (

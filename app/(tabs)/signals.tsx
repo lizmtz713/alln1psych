@@ -34,7 +34,7 @@ import { TransmitComposerSheet } from '../../src/components/signals/TransmitComp
 import { COLORS, BORDER_RADIUS, SPACING } from '../../src/lib/constants';
 import { getRelationshipStatusLabel } from '../../src/lib/signalsCopy';
 import { getHeroTimelineHint } from '../../src/services/timelineEngine';
-import type { Light } from '../../src/types/lights';
+import type { Light, LightTier } from '../../src/types/lights';
 import type { MindMailIntent } from '../../src/types/mindMail';
 
 function todayKey(): string {
@@ -53,7 +53,13 @@ export default function SignalsScreen() {
   const [transmitPresetIntent, setTransmitPresetIntent] = useState<MindMailIntent | null>(null);
 
   const members = useCircleStore((s) => s.members ?? []);
-  const lights = useLightsStore((s) => s.getLights(members));
+  const lights = useLightsStore((s) => {
+    try {
+      return s.getLights(Array.isArray(members) ? members : []);
+    } catch {
+      return [];
+    }
+  });
   const lastHeroShownByMemberId = useLightsStore(useShallow((s) => s.lastHeroShownByMemberId));
   const setLastHeroShown = useLightsStore((s) => s.setLastHeroShown);
 
@@ -102,7 +108,7 @@ export default function SignalsScreen() {
       });
     }
     return [...active].sort((a, b) => {
-      const tierOrder = { five: 0, fifteen: 1, fifty: 2, network: 3 };
+      const tierOrder: Record<LightTier, number> = { five: 0, fifteen: 1, fifty: 2, network: 3, archived: 4 };
       const t = tierOrder[a.tier] - tierOrder[b.tier];
       if (t !== 0) return t;
       return a.daysSinceContact - b.daysSinceContact;

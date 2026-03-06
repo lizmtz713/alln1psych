@@ -26,9 +26,13 @@ export default function CreateFamilyScreen() {
       connectionLogByMemberId: s.connectionLogByMemberId,
       lastContactByMemberId: s.lastContactByMemberId,
       lightExtrasByMemberId: s.lightExtrasByMemberId,
+      momentumByMemberId: s.momentumByMemberId,
+      lastHeroShownByMemberId: s.lastHeroShownByMemberId,
+      seasonByMemberId: s.seasonByMemberId,
+      timelineEventsByMemberId: s.timelineEventsByMemberId,
     }))
   );
-  const lights = computeLights(members, persistState);
+  const lights = computeLights(Array.isArray(members) ? members : [], persistState);
   const createFamily = useFamilyStore((s) => s.createFamily);
 
   const [name, setName] = useState('');

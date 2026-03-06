@@ -40,10 +40,14 @@ export default function LightsScreen() {
     connectionLogByMemberId: s.connectionLogByMemberId,
     lastContactByMemberId: s.lastContactByMemberId,
     lightExtrasByMemberId: s.lightExtrasByMemberId,
+    momentumByMemberId: s.momentumByMemberId,
+    lastHeroShownByMemberId: s.lastHeroShownByMemberId,
+    seasonByMemberId: s.seasonByMemberId,
+    timelineEventsByMemberId: s.timelineEventsByMemberId,
   })));
   const logContact = useLightsStore((s) => s.logContact);
 
-  const lights = useMemo(() => computeLights(members, persistState), [members, persistState]);
+  const lights = useMemo(() => computeLights(Array.isArray(members) ? members : [], persistState), [members, persistState]);
   const filteredLights = useMemo(() => {
     if (!searchQuery.trim()) return lights;
     const q = searchQuery.toLowerCase();

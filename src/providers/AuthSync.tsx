@@ -28,6 +28,7 @@ export function AuthSync({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user) {
       setUserId(null);
+      useUserStore.setState({ profileHydrated: false });
       return;
     }
     const id = user.id;
@@ -37,7 +38,9 @@ export function AuthSync({ children }: { children: React.ReactNode }) {
 
     async function hydrate() {
       const profile = await getProfile(id);
-      if (cancelled || !profile) return;
+      if (cancelled) return;
+      useUserStore.setState({ profileHydrated: true });
+      if (!profile) return;
       useUserStore.setState({
         name: profile.name ?? '',
         pronouns: (profile.pronouns as 'she/her' | 'he/him' | 'they/them' | 'other') ?? null,
@@ -47,6 +50,7 @@ export function AuthSync({ children }: { children: React.ReactNode }) {
         loveLanguage:
           (profile.love_language as 'words' | 'quality-time' | 'acts-of-service' | 'physical-touch' | 'gifts' | 'unknown') ?? null,
         onboardingCompleted: profile.onboarding_completed ?? false,
+        profileHydrated: true,
       });
 
       const entries = await getJournalEntries(id, 100);

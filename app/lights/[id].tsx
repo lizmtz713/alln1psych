@@ -44,12 +44,16 @@ export default function PersonProfileScreen() {
     connectionLogByMemberId: s.connectionLogByMemberId,
     lastContactByMemberId: s.lastContactByMemberId,
     lightExtrasByMemberId: s.lightExtrasByMemberId,
+    momentumByMemberId: s.momentumByMemberId,
+    lastHeroShownByMemberId: s.lastHeroShownByMemberId,
+    seasonByMemberId: s.seasonByMemberId,
+    timelineEventsByMemberId: s.timelineEventsByMemberId,
   })));
   const logContact = useLightsStore((s) => s.logContact);
   const setTier = useLightsStore((s) => s.setTier);
   const removeLight = useLightsStore((s) => s.removeLight);
 
-  const lights = useMemo(() => computeLights(members, persistState), [members, persistState]);
+  const lights = useMemo(() => computeLights(Array.isArray(members) ? members : [], persistState), [members, persistState]);
   const light = lights.find((l) => l.id === id);
 
   const [showTierPicker, setShowTierPicker] = useState(false);

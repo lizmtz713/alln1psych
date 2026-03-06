@@ -202,15 +202,16 @@ export function useCrisisPipelineCheck() {
   const [hasAlert, setHasAlert] = useState(false);
 
   useEffect(() => {
-    runCrisisCheck().then(result => {
-      if (result.alert) {
-        setHasAlert(true);
-        // Auto-show critical alerts, delay warning alerts
-        if (result.alert.severity === 'critical') {
-          setTimeout(() => setShowAlert(true), 1500);
+    runCrisisCheck()
+      .then(result => {
+        if (result?.alert) {
+          setHasAlert(true);
+          if (result.alert.severity === 'critical') {
+            setTimeout(() => setShowAlert(true), 1500);
+          }
         }
-      }
-    });
+      })
+      .catch(() => { /* no-op: avoid unhandled rejection e.g. right after onboarding */ });
   }, []);
 
   return {

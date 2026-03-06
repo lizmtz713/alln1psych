@@ -27,9 +27,13 @@ export default function CoordinateCareScreen() {
       connectionLogByMemberId: s.connectionLogByMemberId,
       lastContactByMemberId: s.lastContactByMemberId,
       lightExtrasByMemberId: s.lightExtrasByMemberId,
+      momentumByMemberId: s.momentumByMemberId,
+      lastHeroShownByMemberId: s.lastHeroShownByMemberId,
+      seasonByMemberId: s.seasonByMemberId,
+      timelineEventsByMemberId: s.timelineEventsByMemberId,
     }))
   );
-  const lights = useMemo(() => computeLights(circleMembers, persistState), [circleMembers, persistState]);
+  const lights = useMemo(() => computeLights(Array.isArray(circleMembers) ? circleMembers : [], persistState), [circleMembers, persistState]);
   const light = lightId ? lights.find((l) => l.id === lightId) : null;
   const [selectedAction, setSelectedAction] = useState<CareAction | null>(null);
 

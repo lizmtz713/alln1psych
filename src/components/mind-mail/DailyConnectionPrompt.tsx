@@ -51,6 +51,10 @@ export function DailyConnectionPrompt({
     connectionLogByMemberId: s.connectionLogByMemberId,
     lastContactByMemberId: s.lastContactByMemberId,
     lightExtrasByMemberId: s.lightExtrasByMemberId,
+    momentumByMemberId: s.momentumByMemberId,
+    lastHeroShownByMemberId: s.lastHeroShownByMemberId,
+    seasonByMemberId: s.seasonByMemberId,
+    timelineEventsByMemberId: s.timelineEventsByMemberId,
   })));
 
   const lights = React.useMemo(() => computeLights(members ?? [], persistState), [members, persistState]);

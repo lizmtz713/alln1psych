@@ -9,6 +9,7 @@ import { ensureFirstLaunchDate } from '../src/services/onboardingService';
 export default function IndexScreen() {
   const { user, loading } = useAuth();
   const onboardingCompleted = useUserStore((s) => s.onboardingCompleted);
+  const profileHydrated = useUserStore((s) => s.profileHydrated);
   const hydrate = useOnboardingStore((s) => s.hydrate);
 
   useEffect(() => {
@@ -24,6 +25,11 @@ export default function IndexScreen() {
 
   if (!user) {
     return <Redirect href="/(auth)/sign-in" />;
+  }
+
+  // Wait for profile load so returning users don't briefly see onboarding (cold start).
+  if (!profileHydrated) {
+    return <SplashScreen />;
   }
 
   if (!onboardingCompleted) {

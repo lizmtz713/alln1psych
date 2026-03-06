@@ -76,14 +76,19 @@ export function usePendingInvitation(): {
 
   const refresh = async () => {
     setLoading(true);
-    const inv = await getPendingInvitation({
-      checkInCount,
-      daysSinceInstall,
-      stateValue: stateValue >= 0 ? stateValue : 100,
-      connectionValue: connectionValue >= 0 ? connectionValue : 100,
-    });
-    setInvitation(inv);
-    setLoading(false);
+    try {
+      const inv = await getPendingInvitation({
+        checkInCount,
+        daysSinceInstall,
+        stateValue: stateValue >= 0 ? stateValue : 100,
+        connectionValue: connectionValue >= 0 ? connectionValue : 100,
+      });
+      setInvitation(inv);
+    } catch {
+      setInvitation(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

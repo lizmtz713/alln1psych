@@ -18,9 +18,13 @@ export default function LightsInsightsScreen() {
       connectionLogByMemberId: s.connectionLogByMemberId,
       lastContactByMemberId: s.lastContactByMemberId,
       lightExtrasByMemberId: s.lightExtrasByMemberId,
+      momentumByMemberId: s.momentumByMemberId,
+      lastHeroShownByMemberId: s.lastHeroShownByMemberId,
+      seasonByMemberId: s.seasonByMemberId,
+      timelineEventsByMemberId: s.timelineEventsByMemberId,
     }))
   );
-  const lights = useMemo(() => computeLights(members, persistState), [members, persistState]);
+  const lights = useMemo(() => computeLights(Array.isArray(members) ? members : [], persistState), [members, persistState]);
   const flickering = lights.filter((l) => l.status === 'flickering');
   const cool = lights.filter((l) => l.temperature === 'cool');
 

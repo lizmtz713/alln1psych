@@ -86,7 +86,7 @@ export function TransmitComposerSheet({
     const text = content.trim();
     const safety = checkContent(text);
     if (safety.isCrisis) {
-      Alert.alert('Take care', safety.message ?? 'If you're in crisis, please reach out to 988 or 741741.');
+      Alert.alert('Take care', safety.message ?? "If you're in crisis, please reach out to 988 or 741741.");
       return;
     }
     setSending(true);
@@ -94,7 +94,7 @@ export function TransmitComposerSheet({
       const payload = {
         recipientName,
         recipientId: recipientId || undefined,
-        recipientType: recipientId ? 'circle' : 'external',
+        recipientType: (recipientId ? 'circle' : 'external') as 'circle' | 'external',
         content: text,
         noteType,
         sendType,

@@ -35,9 +35,16 @@ export function ConnectionPromptCard({ onPressReachOut }: ConnectionPromptCardPr
     connectionLogByMemberId: s.connectionLogByMemberId,
     lastContactByMemberId: s.lastContactByMemberId,
     lightExtrasByMemberId: s.lightExtrasByMemberId,
+    momentumByMemberId: s.momentumByMemberId,
+    lastHeroShownByMemberId: s.lastHeroShownByMemberId,
+    seasonByMemberId: s.seasonByMemberId,
+    timelineEventsByMemberId: s.timelineEventsByMemberId,
   })));
 
-  const lights = React.useMemo(() => computeLights(members, persistState), [members, persistState]);
+  const lights = React.useMemo(
+    () => computeLights(Array.isArray(members) ? members : [], persistState),
+    [members, persistState]
+  );
   const reachOuts = React.useMemo(() => getDailyReachOuts(lights, 5), [lights]);
 
   React.useEffect(() => {

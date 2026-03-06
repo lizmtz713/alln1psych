@@ -48,7 +48,8 @@ export default function ConstellationScreen() {
 
   const tierOrder = ['five', 'fifteen', 'fifty', 'network'] as const;
   const nodes = useMemo(() => {
-    const idx = tierOrder.indexOf(revealLevel);
+    const tierForIndex = revealLevel === 'all' ? 'network' : revealLevel;
+    const idx = tierOrder.indexOf(tierForIndex);
     const allowed = tierOrder.slice(0, idx + 1);
     return allNodes.filter((n) => n.tier !== 'archived' && allowed.includes(n.tier));
   }, [allNodes, revealLevel]);

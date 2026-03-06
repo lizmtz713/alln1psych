@@ -8,7 +8,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SystemCheckCard } from './SystemCheckCard';
 import { ConnectionPromptCard } from './ConnectionPromptCard';
-import { dailyAnchorsStore } from '../../stores/dailyAnchorsStore';
+import { useDailyAnchorsStore } from '../../stores/dailyAnchorsStore';
 import { COLORS, SPACING } from '../../lib/constants';
 
 export interface YourLifeTodaySectionProps {
@@ -19,7 +19,9 @@ export function YourLifeTodaySection({ onPressCheckIn }: YourLifeTodaySectionPro
   const router = useRouter();
 
   useEffect(() => {
-    dailyAnchorsStore.getState().ensureDate();
+    try {
+      useDailyAnchorsStore.getState().ensureDate();
+    } catch (_) { /* no-op: avoid throw on first load */ }
   }, []);
 
   const handleCheckIn = () => {

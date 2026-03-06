@@ -37,7 +37,7 @@ export default function LightsMapScreen() {
   const members = useCircleStore((s) => s.members);
   const getLights = useLightsStore((s) => s.getLights);
 
-  const lights = useMemo(() => getLights(members), [members, getLights]);
+  const lights = useMemo(() => getLights(Array.isArray(members) ? members : []), [members, getLights]);
   const nodes = useMemo(() => computeMapNodes(lights), [lights]);
   const tierBreakdown = useMemo(() => getTierBreakdown(lights), [lights]);
   const temperatureSummary = useMemo(() => getTemperatureSummary(lights), [lights]);
