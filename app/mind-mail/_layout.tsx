@@ -12,6 +12,10 @@ export default function MindMailLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="[id]" />
       <Stack.Screen name="compose" options={{ presentation: 'modal' }} />
+      <Stack.Screen
+        name="glimpse-view"
+        options={{ presentation: 'fullScreenModal', headerShown: false }}
+      />
     </Stack>
   );
 }

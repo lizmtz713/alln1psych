@@ -12,6 +12,10 @@ export interface PreFlightEntry {
   morningFeeling: number; // 0-100
   intention: string;
   completedAt: string; // ISO
+  /** Voice answer for sleep (optional) */
+  sleepVoiceUri?: string;
+  sleepVoiceDurationSec?: number;
+  sleepTranscript?: string;
 }
 
 export type DayRating = 1 | 2 | 3 | 4 | 5;
@@ -27,6 +31,32 @@ export interface PostFlightEntry {
   intentionHonored: IntentionHonored;
   tomorrowNote?: string;
   completedAt: string;
+
+  /** Voice/score from "What was the highlight of today?" */
+  highlightScore?: number;
+  highlightText?: string;
+  highlightVoiceUri?: string;
+  highlightVoiceDurationSec?: number;
+  highlightTranscript?: string;
+
+  /** Voice/score from "Anything weighing on you?" (lower = more weight) */
+  weighingScore?: number;
+  weighingText?: string;
+  weighingVoiceUri?: string;
+  weighingVoiceDurationSec?: number;
+  weighingTranscript?: string;
+
+  /** "Who do you appreciate today?" (no score) */
+  appreciateText?: string;
+  appreciateVoiceUri?: string;
+  appreciateVoiceDurationSec?: number;
+  appreciateTranscript?: string;
+
+  /** "How are you ending the day?" */
+  endingScore?: number;
+  endingVoiceUri?: string;
+  endingVoiceDurationSec?: number;
+  endingTranscript?: string;
 }
 
 export interface RitualsSettings {

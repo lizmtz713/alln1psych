@@ -378,6 +378,53 @@ export function buildAdaptiveContext(): string {
     }
   }
 
+  // Identity & profile (ethnicity, gender, orientation, disability) — for personalized, respectful responses
+  const { ethnicity, genderIdentity, sexualOrientation, disability, bodyRelationship } = state;
+  if (ethnicity?.trim() || genderIdentity?.trim() || sexualOrientation?.trim()) {
+    context += `\nIDENTITY (use to personalize and avoid assumptions; never stereotype):\n`;
+    if (ethnicity?.trim()) context += `Ethnicity/cultural identity: ${ethnicity.trim()}.\n`;
+    if (genderIdentity?.trim()) context += `Gender identity: ${genderIdentity.trim()}. Use their pronouns and affirm their identity.\n`;
+    if (sexualOrientation?.trim()) context += `Sexual orientation: ${sexualOrientation.trim()}.\n`;
+    if (disability?.length) context += `Disability/access: ${disability.join(', ')}. Adapt suggestions for accessibility; don't assume able body/mind.\n`;
+    if (bodyRelationship?.trim()) context += `Relationship to body: ${bodyRelationship.trim()}.\n`;
+  }
+
+  // How they connect — communication and conflict style
+  const { communicationStyleDirect, communicationStyleEmotional, conflictStyle, energyPattern, introvertExtrovert } = state;
+  if (conflictStyle?.trim() || energyPattern?.trim() || introvertExtrovert?.trim()) {
+    context += `\nHOW THEY CONNECT:\n`;
+    if (communicationStyleDirect !== undefined && communicationStyleDirect > 0) context += `Communication: more direct (scale ${communicationStyleDirect}).\n`;
+    if (communicationStyleEmotional !== undefined && communicationStyleEmotional > 0) context += `Emotional expressiveness: ${communicationStyleEmotional}.\n`;
+    if (conflictStyle?.trim()) context += `Conflict style: ${conflictStyle.trim()}.\n`;
+    if (energyPattern?.trim()) context += `Energy pattern: ${energyPattern.trim()}.\n`;
+    if (introvertExtrovert?.trim()) context += `Introvert/Extrovert: ${introvertExtrovert.trim()}.\n`;
+  }
+
+  // What gives life — values, meaning, life stage
+  const { identifyAs, whatBringsMeaning, currentLifeStage, relationshipStatus, parentingStatus, values } = state;
+  if ((identifyAs?.length && identifyAs.length > 0) || (whatBringsMeaning?.length && whatBringsMeaning.length > 0) || currentLifeStage?.trim() || relationshipStatus?.trim() || parentingStatus?.trim() || (values?.length && values.length > 0)) {
+    context += `\nWHAT GIVES THEM LIFE:\n`;
+    if (identifyAs?.length) context += `Identify as: ${identifyAs.join(', ')}.\n`;
+    if (whatBringsMeaning?.length) context += `What brings meaning: ${whatBringsMeaning.join(', ')}.\n`;
+    if (currentLifeStage?.trim()) context += `Life stage: ${currentLifeStage.trim()}.\n`;
+    if (relationshipStatus?.trim()) context += `Relationship status: ${relationshipStatus.trim()}.\n`;
+    if (parentingStatus?.trim()) context += `Parenting: ${parentingStatus.trim()}.\n`;
+    if (values?.length) context += `Core values (align responses and suggestions with these): ${values.join(', ')}.\n`;
+  }
+
+  // Sensitive topics and triggers — handle with care
+  const { sensitiveTopics: sensitiveOpts, sensitiveTopicsCustom, triggersToAvoid } = state;
+  const sensitiveList = [...(sensitiveOpts ?? []), ...(sensitiveTopicsCustom ?? [])].filter(Boolean);
+  if (sensitiveList.length > 0 || triggersToAvoid?.trim()) {
+    context += `\nSENSITIVE TOPICS / TRIGGERS (tread carefully; don't probe or assume):\n`;
+    if (sensitiveList.length > 0) context += `Topics to be extra gentle about: ${sensitiveList.join(', ')}.\n`;
+    if (triggersToAvoid?.trim()) context += `Triggers or phrases to avoid: ${triggersToAvoid.trim()}.\n`;
+  }
+
+  if ((state as any).whatMakesYouDifferent?.trim()) {
+    context += `In their own words (what makes them different): "${(state as any).whatMakesYouDifferent.trim()}". Weave this into your understanding; don't quote back.\n`;
+  }
+
   context += `\nREMEMBER: You are not a generic AI. You are Gauge — built specifically for THIS person. Every response should feel like it was written by someone who gets their world, their culture, their generation, and their experience. If you default to generic wellness advice that could come from any app, you've failed.\n`;
 
   // Add interference logic based on current gauge states

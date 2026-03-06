@@ -10,6 +10,7 @@
 
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
+import { ensureVoiceRemoteUri } from '../services/voiceStorage';
 
 export type NoteStatus = 
   | 'draft'      // Still writing
@@ -33,7 +34,31 @@ export type NoteType =
 export type SendType = 
   | 'open'       // They see who sent it
   | 'anonymous'  // They only know "someone in your Circle"
-  | 'soft';      // They accept before seeing content
+  | 'soft'       // They accept before seeing content
+  | 'glimpse';   // View once, timed — then gone
+
+/** Glimpse (view-once) message fields */
+export interface GlimpseFields {
+  isGlimpse: boolean;
+  glimpseViewSeconds?: number;       // 5–60 seconds
+  glimpseAutoCalculated?: boolean;   // Was duration auto-set?
+  glimpseViewedAt?: string | null;   // ISO when recipient viewed
+}
+
+/** Calculate view duration from content (200 wpm reading speed, clamped 5–60s) */
+export function calculateGlimpseDuration(content: string): number {
+  const words = content.trim().split(/\s+/).filter(Boolean).length;
+  const seconds = Math.ceil((words / 200) * 60);
+  return Math.max(5, Math.min(60, seconds));
+}
+
+export const GLIMPSE_DURATIONS = [
+  { label: '5s', value: 5 },
+  { label: '10s', value: 10 },
+  { label: '20s', value: 20 },
+  { label: '30s', value: 30 },
+  { label: '1m', value: 60 },
+] as const;
 
 export interface HeartNote {
   id: string;
@@ -50,9 +75,20 @@ export interface HeartNote {
   coreMessage?: string;      // AI-distilled summary
   emotion?: string;          // Primary emotion identified
   
+  // Voice
+  hasVoice?: boolean;
+  voiceUri?: string;
+  voiceDurationSec?: number;
+  voiceTranscript?: string;
+  
   // Classification
   noteType: NoteType;
   sendType?: SendType;
+  
+  // Glimpse (view-once)
+  glimpseViewSeconds?: number;
+  glimpseViewedAt?: string | null;
+  glimpseAutoCalculated?: boolean;
   
   // Status
   status: NoteStatus;
@@ -69,6 +105,9 @@ export interface HeartNote {
   
   // Reminders
   reminderDate?: string;
+
+  // Safety (Mind Mail)
+  contentWarning?: boolean;
 }
 
 export interface HeartMail {
@@ -86,9 +125,22 @@ export interface HeartMail {
   createdAt: string;
   readAt?: string;
   
+  // Voice
+  hasVoice?: boolean;
+  voiceUri?: string;
+  voiceDurationSec?: number;
+  voiceTranscript?: string;
+  
+  // Glimpse (view-once)
+  glimpseViewSeconds?: number;
+  glimpseViewedAt?: string | null;
+  
   // Response
   response?: string;
   respondedAt?: string;
+
+  // Safety (Mind Mail)
+  contentWarning?: boolean;
 }
 
 interface HeartNotesState {
@@ -125,6 +177,7 @@ interface HeartNotesState {
   markMailRead: (id: string) => void;
   respondToMail: (id: string, response: string) => Promise<void>;
   archiveMail: (id: string) => Promise<void>;
+  markGlimpseViewed: (id: string) => Promise<void>;
   thankCircle: () => Promise<void>;
   
   // Actions - Draft
@@ -179,6 +232,14 @@ export const useHeartNotesStore = create<HeartNotesState>((set, get) => ({
           recipientResponse: n.recipient_response,
           recipientAcknowledged: n.recipient_acknowledged,
           reminderDate: n.reminder_date,
+          glimpseViewSeconds: n.glimpse_view_seconds,
+          glimpseViewedAt: n.glimpse_viewed_at,
+          glimpseAutoCalculated: n.glimpse_auto_calculated,
+          hasVoice: n.has_voice,
+          voiceUri: n.voice_uri,
+          voiceDurationSec: n.voice_duration_sec,
+          voiceTranscript: n.voice_transcript,
+          contentWarning: n.content_warning ?? false,
         })),
         loading: false,
       });
@@ -192,7 +253,7 @@ export const useHeartNotesStore = create<HeartNotesState>((set, get) => ({
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
-    const newNote = {
+    const newNote: Record<string, unknown> = {
       user_id: user.id,
       recipient_type: note.recipientType || 'external',
       recipient_id: note.recipientId,
@@ -204,6 +265,11 @@ export const useHeartNotesStore = create<HeartNotesState>((set, get) => ({
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
+    if (note.hasVoice !== undefined) newNote.has_voice = note.hasVoice;
+    if (note.voiceUri !== undefined) newNote.voice_uri = note.voiceUri;
+    if (note.contentWarning !== undefined) newNote.content_warning = note.contentWarning;
+    if (note.voiceDurationSec !== undefined) newNote.voice_duration_sec = note.voiceDurationSec;
+    if (note.voiceTranscript !== undefined) newNote.voice_transcript = note.voiceTranscript;
 
     const { data, error } = await supabase
       .from('heart_notes')
@@ -225,6 +291,11 @@ export const useHeartNotesStore = create<HeartNotesState>((set, get) => ({
       status: data.status,
       createdAt: data.created_at,
       updatedAt: data.updated_at,
+      hasVoice: data.has_voice,
+      voiceUri: data.voice_uri,
+      voiceDurationSec: data.voice_duration_sec,
+      voiceTranscript: data.voice_transcript,
+      contentWarning: data.content_warning ?? false,
     };
 
     set(state => ({ notes: [created, ...state.notes] }));
@@ -247,6 +318,14 @@ export const useHeartNotesStore = create<HeartNotesState>((set, get) => ({
     if (updates.recipientName !== undefined) updateData.recipient_name = updates.recipientName;
     if (updates.recipientId !== undefined) updateData.recipient_id = updates.recipientId;
     if (updates.recipientType !== undefined) updateData.recipient_type = updates.recipientType;
+    if (updates.glimpseViewSeconds !== undefined) updateData.glimpse_view_seconds = updates.glimpseViewSeconds;
+    if (updates.glimpseViewedAt !== undefined) updateData.glimpse_viewed_at = updates.glimpseViewedAt;
+    if (updates.glimpseAutoCalculated !== undefined) updateData.glimpse_auto_calculated = updates.glimpseAutoCalculated;
+    if (updates.hasVoice !== undefined) updateData.has_voice = updates.hasVoice;
+    if (updates.voiceUri !== undefined) updateData.voice_uri = updates.voiceUri;
+    if (updates.voiceDurationSec !== undefined) updateData.voice_duration_sec = updates.voiceDurationSec;
+    if (updates.voiceTranscript !== undefined) updateData.voice_transcript = updates.voiceTranscript;
+    if (updates.contentWarning !== undefined) updateData.content_warning = updates.contentWarning;
 
     const { error } = await supabase
       .from('heart_notes')
@@ -279,8 +358,17 @@ export const useHeartNotesStore = create<HeartNotesState>((set, get) => ({
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
+    // Upload local voice to Storage and get remote URL (so DB stores a persistent URL)
+    let voiceUri: string | undefined = note.voiceUri;
+    if (note.hasVoice && note.voiceUri) {
+      voiceUri = await ensureVoiceRemoteUri(note.voiceUri, user.id, id);
+      if (voiceUri && voiceUri !== note.voiceUri) {
+        await get().updateNote(id, { voiceUri });
+      }
+    }
+
     // Create the heart mail entry for recipient
-    const mail = {
+    const mail: Record<string, unknown> = {
       recipient_id: note.recipientId,
       sender_id: user.id,
       sender_name: sendType === 'anonymous' ? null : user.user_metadata?.name || 'Someone',
@@ -290,6 +378,17 @@ export const useHeartNotesStore = create<HeartNotesState>((set, get) => ({
       status: sendType === 'soft' ? 'pending' : 'pending',
       created_at: new Date().toISOString(),
     };
+    if (sendType === 'glimpse' && note.glimpseViewSeconds != null) {
+      mail.glimpse_view_seconds = note.glimpseViewSeconds;
+      mail.glimpse_auto_calculated = note.glimpseAutoCalculated ?? false;
+    }
+    if (note.hasVoice && voiceUri != null) {
+      mail.has_voice = true;
+      mail.voice_uri = voiceUri;
+      mail.voice_duration_sec = note.voiceDurationSec ?? 0;
+      mail.voice_transcript = note.voiceTranscript ?? null;
+    }
+    if (note.contentWarning) mail.content_warning = true;
 
     const { error: mailError } = await supabase
       .from('heart_mail')
@@ -351,6 +450,13 @@ export const useHeartNotesStore = create<HeartNotesState>((set, get) => ({
         readAt: m.read_at,
         response: m.response,
         respondedAt: m.responded_at,
+        glimpseViewSeconds: m.glimpse_view_seconds,
+        glimpseViewedAt: m.glimpse_viewed_at,
+        hasVoice: m.has_voice,
+        voiceUri: m.voice_uri,
+        voiceDurationSec: m.voice_duration_sec,
+        voiceTranscript: m.voice_transcript,
+        contentWarning: m.content_warning ?? false,
       }));
 
       const unreadCount = inbox.filter(m => m.status === 'pending').length;
@@ -415,6 +521,29 @@ export const useHeartNotesStore = create<HeartNotesState>((set, get) => ({
       inbox: state.inbox.map(m =>
         m.id === id ? { ...m, status: 'archived' as const } : m
       ),
+    }));
+  },
+
+  markGlimpseViewed: async (id) => {
+    const viewedAt = new Date().toISOString();
+    const { error } = await supabase
+      .from('heart_mail')
+      .update({
+        glimpse_viewed_at: viewedAt,
+        status: 'read',
+        read_at: viewedAt,
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    set(state => ({
+      inbox: state.inbox.map(m =>
+        m.id === id
+          ? { ...m, glimpseViewedAt: viewedAt, status: 'read' as const, readAt: viewedAt }
+          : m
+      ),
+      unreadCount: Math.max(0, state.unreadCount - 1),
     }));
   },
 

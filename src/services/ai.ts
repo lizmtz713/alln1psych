@@ -5,6 +5,8 @@
 
 import { buildKnowledgePrompt } from '../data/psychKnowledge';
 import { buildAdaptiveContext } from './adaptiveContext';
+import { getCoPilotGaugeContext } from './copilotGaugeContext';
+import { LIFE_PROBLEMS_CONTEXT } from '../constants/copilotPrompts';
 import { getCurrentLanguage } from '../i18n';
 import { spanishAIPrompts, getSpanishAgePrompt } from '../i18n/aiPrompts';
 import * as SecureStore from 'expo-secure-store';
@@ -16,10 +18,19 @@ const API_KEY_STORAGE = 'openai_api_key';
 
 
 export async function getOpenAIKey(): Promise<string | null> {
-  // TEMP: hardcode for testing
-  return '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';
-  
-  // ... rest of function
+  try {
+    return await SecureStore.getItemAsync(API_KEY_STORAGE);
+  } catch {
+    return null;
+  }
+}
+
+export async function setOpenAIKey(key: string | null): Promise<void> {
+  if (key === null || key === '') {
+    await SecureStore.deleteItemAsync(API_KEY_STORAGE);
+  } else {
+    await SecureStore.setItemAsync(API_KEY_STORAGE, key);
+  }
 }
 
 
@@ -453,7 +464,8 @@ ${spanishAIPrompts.crisisDetection}
 `;
   }
 
-  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + languagePrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
+  const copilotGaugeBlock = getCoPilotGaugeContext();
+  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + '\n\n' + copilotGaugeBlock + LIFE_PROBLEMS_CONTEXT + languagePrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
   return fullPrompt;
 }
 

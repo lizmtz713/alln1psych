@@ -84,6 +84,51 @@ export default function LightsScreen() {
           {searchQuery.length > 0 && <Pressable onPress={() => setSearchQuery('')}><Ionicons name="close-circle" size={18} color={COLORS.textMuted} /></Pressable>}
         </View>
 
+        <Pressable
+          style={({ pressed }) => [styles.viewMapCard, pressed && styles.viewMapCardPressed]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/lights/radar');
+          }}
+        >
+          <Text style={styles.viewMapEmoji}>🪐</Text>
+          <View style={styles.viewMapTextWrap}>
+            <Text style={styles.viewMapTitle}>Constellation</Text>
+            <Text style={styles.viewMapSub}>A radar for human connection</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [styles.viewMapCard, pressed && styles.viewMapCardPressed]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/lights/map');
+          }}
+        >
+          <Text style={styles.viewMapEmoji}>🌟</Text>
+          <View style={styles.viewMapTextWrap}>
+            <Text style={styles.viewMapTitle}>View Map</Text>
+            <Text style={styles.viewMapSub}>Classic map view</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [styles.viewMapCard, pressed && styles.viewMapCardPressed]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/lights/world');
+          }}
+        >
+          <Text style={styles.viewMapEmoji}>🌡️</Text>
+          <View style={styles.viewMapTextWrap}>
+            <Text style={styles.viewMapTitle}>World Temperature</Text>
+            <Text style={styles.viewMapSub}>How humanity is feeling</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+        </Pressable>
+
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}>
           {hasReachOuts && (
             <View style={styles.reachOutSection}>
@@ -202,6 +247,21 @@ const styles = StyleSheet.create({
   searchWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.surface, marginHorizontal: 24, marginBottom: 16, borderRadius: BORDER_RADIUS.input, paddingHorizontal: 14, height: 44, borderWidth: 1, borderColor: COLORS.border },
   searchIcon: { marginRight: 10 },
   searchInput: { flex: 1, fontSize: 16, color: COLORS.text },
+  viewMapCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  viewMapCardPressed: { opacity: 0.9 },
+  viewMapEmoji: { fontSize: 28, marginRight: 14 },
+  viewMapTextWrap: { flex: 1 },
+  viewMapTitle: { fontSize: 17, fontWeight: '600', color: COLORS.text },
+  viewMapSub: { fontSize: 13, color: COLORS.textMuted, marginTop: 2 },
   scroll: { flex: 1 },
   content: { paddingHorizontal: 24 },
   reachOutSection: { marginBottom: 20 },

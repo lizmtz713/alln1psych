@@ -11,4 +11,7 @@ export {
   type NoteStatus,
   type NoteType,
   type SendType,
+  type GlimpseFields,
+  calculateGlimpseDuration,
+  GLIMPSE_DURATIONS,
 } from './heartNotesStore';

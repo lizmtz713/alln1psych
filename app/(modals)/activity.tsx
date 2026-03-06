@@ -32,6 +32,7 @@ import { useUserStore } from '../../src/stores/userStore';
 import { getOpenAIKey } from '../../src/services/ai';
 import { useCircleStore } from '../../src/stores/circleStore';
 import type { Temperature } from '../../src/stores/circleStore';
+import { trackCheckIn } from '../../src/hooks/useWrappedTracking';
 import { useConversationStore } from '../../src/stores/conversationStore';
 import { useEducationStore } from '../../src/stores/educationStore';
 
@@ -594,17 +595,11 @@ export default function ActivityScreen() {
           <ActivityIndicator size="large" color={COLORS.accent} style={{ marginVertical: 24 }} />
         ) : r && (
           <View style={styles.card}>
-<<<<<<< HEAD
-            {r.distortion && (<>
-              <Text style={styles.detailLabel}>That sounds like...</Text>
-              <Text style={styles.detailText}>{r.distortion}</Text></>
-=======
             {r.distortion && (
               <>
                 <Text style={styles.detailLabel}>That sounds like...</Text>
                 <Text style={styles.detailText}>{r.distortion}</Text>
               </>
->>>>>>> 50bf466 (feat: implement Human Cockpit with 6-gauge system and check-in flow)
             )}
             <Text style={styles.tcMessage}>{r.message}</Text>
             {r.step === 1 && (
@@ -1122,6 +1117,7 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
     };
     const onSaveCheckin = () => {
       addMoodCheckin(stressToTemp(stressLevel), stressNote.trim() || undefined);
+      trackCheckIn();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert('Saved', 'Check-in saved to your mood history.');
       setStressSubmitted(true);

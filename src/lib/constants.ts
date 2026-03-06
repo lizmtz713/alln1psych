@@ -200,6 +200,7 @@ export const TYPOGRAPHY = {
   displaySm: { fontSize: 24, fontWeight: '600' as const, lineHeight: 32 },
   
   // HEADLINES
+  h2: { fontSize: 24, fontWeight: '700' as const, lineHeight: 32 },
   headlineLg: { fontSize: 20, fontWeight: '600' as const, lineHeight: 28 },
   headlineMd: { fontSize: 18, fontWeight: '600' as const, lineHeight: 26 },
   headlineSm: { fontSize: 16, fontWeight: '600' as const, lineHeight: 24 },

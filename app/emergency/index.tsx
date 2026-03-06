@@ -41,6 +41,13 @@ const CARDS = [
     route: '/emergency/breathe',
   },
   {
+    id: 'quick_reset' as const,
+    emoji: '🙌',
+    title: 'Quick Reset',
+    subtitle: 'Box breathing, grounding, cold, shake — pick one',
+    route: '/tools/quick-reset',
+  },
+  {
     id: 'reach_out' as const,
     emoji: '👤',
     title: 'Reach out',
@@ -57,7 +64,8 @@ export default function EmergencyIndexScreen() {
 
   const handleCardPress = (card: (typeof CARDS)[0]) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    recordAction(card.id === 'copilot' ? 'copilot' : card.id === 'crisis' ? 'crisis_lines' : card.id === 'breathe' ? 'breathe' : 'reach_out');
+    const action = card.id === 'copilot' ? 'copilot' : card.id === 'crisis' ? 'crisis_lines' : card.id === 'breathe' ? 'breathe' : card.id === 'quick_reset' ? 'quick_reset' : 'reach_out';
+    recordAction(action);
     if (card.params) {
       router.push({ pathname: card.route as any, params: card.params });
     } else {

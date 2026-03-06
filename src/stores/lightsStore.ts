@@ -15,6 +15,7 @@ import {
   TIER_BRIGHTNESS,
   LIGHT_TEMPERATURE_SCALE,
 } from '../types/lights';
+import { trackConnectionLog } from '../hooks/useWrappedTracking';
 
 // Map circle temperature (green/yellow/orange/red) to Lights temperature (warm/neutral/cool)
 function circleTempToLightTemp(t: Temperature): LightTemperature {
@@ -166,11 +167,13 @@ export function computeLights(
 interface LightsState extends LightsPersist {
   setTier: (memberId: string, tier: LightTier) => void;
   setLastContact: (memberId: string, dateIso: string) => void;
+  /** Update lastContact to now (e.g. after sending Mind Mail to this person). */
+  recordConnection: (memberId: string) => void;
   addConnectionEntry: (memberId: string, entry: Omit<ConnectionEntry, 'id'>) => void;
   logContact: (memberId: string, opts?: { type?: ConnectionEntry['type']; quality?: ConnectionEntry['quality']; note?: string }) => void;
   updateLightExtras: (memberId: string, extras: Partial<LightExtras>) => void;
   addLight: (
-    member: Omit<CircleMember, 'id' | 'temperature' | 'temperatureLabel' | 'lastUpdated' | 'addedAt'> & {
+    member: Omit<CircleMember, 'id' | 'temperature' | 'temperatureLabel' | 'lastUpdated' | 'addedAt' | 'tier'> & {
       tier?: LightTier;
       howWeMet?: string;
       whatTheyNeed?: string;
@@ -209,6 +212,13 @@ export const useLightsStore = create<LightsState>()(
           lastContactByMemberId: { ...s.lastContactByMemberId, [memberId]: dateIso },
         })),
 
+      recordConnection: (memberId) => {
+        const dateIso = new Date().toISOString().slice(0, 10);
+        set((s) => ({
+          lastContactByMemberId: { ...s.lastContactByMemberId, [memberId]: dateIso },
+        }));
+      },
+
       addConnectionEntry: (memberId, entry) => {
         const id = genId();
         const full: ConnectionEntry = { ...entry, id, date: entry.date };
@@ -231,6 +241,7 @@ export const useLightsStore = create<LightsState>()(
           quality: opts.quality ?? 'brief',
           note: opts.note,
         });
+        trackConnectionLog();
       },
 
       updateLightExtras: (memberId, extras) =>

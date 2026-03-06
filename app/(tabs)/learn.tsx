@@ -115,6 +115,8 @@ const TOOL_CATEGORIES = [
       { id: 'relate', icon: 'heart-circle', title: 'Relate', color: '#EC4899' },
       { id: 'relational-bridge', icon: 'git-merge', title: 'Bridge', color: '#FF9800' },
       { id: 'love', icon: 'heart-half', title: 'Love', color: '#F43F5E' },
+      { id: 'datesume', icon: 'heart', title: 'Datesume', color: '#EC4899' },
+      { id: 'love-history', icon: 'time', title: 'Love History', color: '#F43F5E' },
       { id: 'help-someone', icon: 'hand-left', title: 'Help', color: '#8B5CF6' },
       { id: 'role-play', icon: 'people-circle', title: 'Role Play', color: '#F59E0B' },
       { id: 'comm-builder', icon: 'chatbox', title: 'Comm Lab', color: '#10B981' },
@@ -133,6 +135,7 @@ const TOOL_CATEGORIES = [
     title: 'Regulate',
     tools: [
       { id: 'quick-reset', icon: 'flash', title: 'Quick Reset', color: '#14B8A6' },
+      { id: 'focus', icon: 'timer', title: 'Focus', color: '#0D9488' },
       { id: 'breathing', icon: 'fitness', title: 'Breathe', color: '#14B8A6' },
       { id: 'body-scan', icon: 'body', title: 'Body Scan', color: '#8B5CF6' },
       { id: 'awe-activities', icon: 'planet', title: 'Awe', color: '#6366F1' },
@@ -148,6 +151,7 @@ const TOOL_CATEGORIES = [
       { id: 'emotion-wheel', icon: 'color-palette', title: 'Emotions', color: '#F59E0B' },
       { id: 'emotion-match', icon: 'extension-puzzle', title: 'Match', color: '#EC4899' },
       { id: 'thought-challenger', icon: 'bulb', title: 'Thoughts', color: '#3B82F6' },
+      { id: 'bias-check', icon: 'filter', title: 'Bias Check', color: '#8B5CF6' },
       { id: 'trigger-map', icon: 'map', title: 'Triggers', color: '#10B981' },
     ],
   },
@@ -156,6 +160,10 @@ const TOOL_CATEGORIES = [
     title: 'Grow',
     tools: [
       { id: 'journal', icon: 'journal', title: 'Journal', color: '#EC4899' },
+      { id: 'life-questions', icon: 'help-buoy', title: '12 Life Questions', color: '#8B5CF6' },
+      { id: 'human-skills', icon: 'ribbon', title: '16 Human Skills', color: '#0D9488' },
+      { id: 'creativity', icon: 'brush', title: 'Creativity', color: '#E07A5F' },
+      { id: 'decision', icon: 'git-branch', title: 'Decision', color: '#10B981' },
       { id: 'gratitude-jar', icon: 'sparkles', title: 'Gratitude', color: '#FBBF24' },
       { id: 'mood-patterns', icon: 'analytics', title: 'Patterns', color: '#6366F1' },
       { id: 'drift-detector', icon: 'compass', title: 'Drift Check', color: '#F59E0B' },
@@ -207,6 +215,14 @@ export default function LearnScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     // Tab-based tools
     if (id === 'talk') return router.push('/(tabs)/talk');
+    if (id === 'life-questions') return router.push('/learn/questions');
+    if (id === 'human-skills') return router.push('/learn/skills');
+    if (id === 'focus') return router.push('/tools/focus');
+    if (id === 'creativity') return router.push('/tools/creativity');
+    if (id === 'decision') return router.push('/tools/decision');
+    if (id === 'bias-check') return router.push('/tools/bias-check');
+    if (id === 'datesume') return router.push('/love/datesume');
+    if (id === 'love-history') return router.push('/love-history');
     // Modal-based tools with direct routes
     const modalRoutes: Record<string, string> = {
       'journal': '/(modals)/new-journal',

@@ -1,16 +1,27 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 
 export default function WorldTemperatureScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
-    <ScrollView
-      style={[styles.container, { paddingBottom: insets.bottom + 24 }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={[styles.container, { paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.header, { paddingTop: insets.top }]}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
+          <Ionicons name="chevron-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.headerTitle}>World Temperature</Text>
+        <View style={styles.headerRight} />
+      </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
       <Text style={styles.title}>🌡️ World Temperature</Text>
       <Text style={styles.subtitle}>How humanity is feeling right now.</Text>
 
@@ -52,7 +63,8 @@ export default function WorldTemperatureScreen() {
       </View>
 
       <View style={{ height: 40 }} />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -86,6 +98,19 @@ const rowStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  scroll: { flex: 1 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  backBtn: { padding: 8 },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text },
+  headerRight: { width: 40 },
   content: { paddingHorizontal: 24, paddingTop: 16 },
   title: { fontSize: 24, fontWeight: '700', color: COLORS.text },
   subtitle: { fontSize: 15, color: COLORS.textMuted, marginTop: 6 },

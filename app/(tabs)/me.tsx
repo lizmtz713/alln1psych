@@ -24,6 +24,7 @@ import { useUserStore } from '../../src/stores/userStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useEducationStore } from '../../src/stores/educationStore';
+import { useAchievementStore } from '../../src/stores/achievementStore';
 
 // Design System
 const COLORS = {
@@ -56,6 +57,7 @@ export default function MeScreen() {
   const members = useCircleStore((s) => s.members);
   const getCheckInStreak = useInsightsStore((s) => s.getCheckInStreak);
   const getAchievements = useInsightsStore((s) => s.getAchievements);
+  const achievementUnlockedAt = useAchievementStore((s) => s.unlockedAt);
   const completedLessons = useEducationStore((s) => s.completedLessons);
   
   const [refreshing, setRefreshing] = useState(false);
@@ -63,7 +65,7 @@ export default function MeScreen() {
   
   const streak = getCheckInStreak();
   const achievements = getAchievements();
-  const unlockedCount = achievements.filter((a) => a.unlocked).length;
+  const unlockedCount = Object.keys(achievementUnlockedAt).length;
   
   const tempColor = {
     green: COLORS.green,
@@ -140,14 +142,23 @@ export default function MeScreen() {
               </View>
             </View>
 
-            {/* Edit Profile Button */}
-            <Pressable 
-              style={styles.editProfileBtn}
-              onPress={() => navigateTo('/(modals)/identity-setup')}
-            >
-              <Ionicons name="create-outline" size={18} color={COLORS.accent} />
-              <Text style={styles.editProfileText}>Edit Profile</Text>
-            </Pressable>
+            {/* Edit Profile + Human Control Panel */}
+            <View style={styles.profileActionsRow}>
+              <Pressable 
+                style={styles.editProfileBtn}
+                onPress={() => navigateTo('/(modals)/identity-setup')}
+              >
+                <Ionicons name="create-outline" size={18} color={COLORS.accent} />
+                <Text style={styles.editProfileText}>Edit Profile</Text>
+              </Pressable>
+              <Pressable 
+                style={[styles.editProfileBtn, styles.controlPanelBtn]}
+                onPress={() => navigateTo('/profile')}
+              >
+                <Ionicons name="options-outline" size={18} color={COLORS.accent} />
+                <Text style={styles.editProfileText}>Human Control Panel</Text>
+              </Pressable>
+            </View>
           </View>
 
           {/* ═══════════════════════════════════════════════════════════
@@ -159,7 +170,7 @@ export default function MeScreen() {
               icon="trophy-outline"
               label="Awards & Achievements"
               badge={unlockedCount > 0 ? String(unlockedCount) : undefined}
-              onPress={() => navigateTo('/(modals)/awards')}
+              onPress={() => navigateTo('/profile/achievements')}
             />
             <MenuItem
               icon="analytics-outline"
@@ -170,6 +181,12 @@ export default function MeScreen() {
               icon="time-outline"
               label="Check-In History"
               onPress={() => navigateTo('/(modals)/history')}
+            />
+            <MenuItem
+              icon="airplane-outline"
+              label="Flight Log"
+              subtitle="Pre-Flight & Post-Flight timeline"
+              onPress={() => navigateTo('/flight-log')}
             />
             <MenuItem
               icon="moon-outline"
@@ -556,8 +573,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
 
-  // Edit Profile Button
+  // Edit Profile + Human Control Panel
+  profileActionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+  },
   editProfileBtn: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -566,6 +589,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 8,
   },
+  controlPanelBtn: {},
   editProfileText: {
     fontSize: 15,
     fontWeight: '600',

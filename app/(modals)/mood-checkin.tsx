@@ -20,7 +20,10 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 import { useCircleStore, type Temperature } from '../../src/stores/circleStore';
+import { trackCheckIn } from '../../src/hooks/useWrappedTracking';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
+import { useHumanSkillsStore, CHECKIN_SKILL_IDS, SKILL_POINTS } from '../../src/stores/humanSkillsStore';
+import { runAchievementChecks } from '../../src/services/achievementChecker';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_SIZE = (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.md) / 2;
@@ -61,6 +64,7 @@ export default function MoodCheckinScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const addMoodCheckin = useCircleStore((s) => s.addMoodCheckin);
+  const addSkillPoints = useHumanSkillsStore((s) => s.addPoints);
   const [selected, setSelected] = useState<Temperature | null>(null);
   const [note, setNote] = useState('');
   const [showNote, setShowNote] = useState(false);
@@ -81,6 +85,9 @@ export default function MoodCheckinScreen() {
     if (!selected) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     addMoodCheckin(selected, note.trim() || undefined);
+    trackCheckIn();
+    addSkillPoints(CHECKIN_SKILL_IDS, SKILL_POINTS.checkIn, 'check-in');
+    runAchievementChecks();
     setSaved(true);
   };
 

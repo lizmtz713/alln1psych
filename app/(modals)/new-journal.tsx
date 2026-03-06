@@ -13,8 +13,9 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { COLORS, BORDER_RADIUS, SPACING } from '../../src/lib/constants';
 import { useJournalStore, type JournalMood } from '../../src/stores/journalStore';
+import { VoiceRecorder, VoicePlayer } from '../../src/components/voice';
 import * as Voice from '../../src/services/voice';
 import { hasOpenAIKey } from '../../src/services/ai';
 
@@ -29,7 +30,13 @@ export default function NewJournalScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const addEntry = useJournalStore((s) => s.addEntry);
+  const [mode, setMode] = useState<'text' | 'voice'>('text');
   const [content, setContent] = useState('');
+  const [voiceNote, setVoiceNote] = useState<{
+    uri: string;
+    durationSec: number;
+    transcript?: string;
+  } | null>(null);
   const [mood, setMood] = useState<JournalMood | undefined>(undefined);
   const [saved, setSaved] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -78,11 +85,26 @@ export default function NewJournalScreen() {
   };
 
   const handleSave = () => {
-    const trimmed = content.trim();
-    if (!trimmed) return;
-    addEntry(trimmed, { mood, source: 'manual' });
-    setSaved(true);
+    if (mode === 'text' && content.trim()) {
+      addEntry(content.trim(), { mood, source: 'manual' });
+      setSaved(true);
+      return;
+    }
+    if (mode === 'voice' && voiceNote) {
+      addEntry({
+        transcript: voiceNote.transcript,
+        voiceUri: voiceNote.uri,
+        voiceDurationSec: voiceNote.durationSec,
+        mood,
+        source: 'manual',
+      });
+      setSaved(true);
+      return;
+    }
+    Alert.alert('Empty entry', 'Write or record something first.');
   };
+
+  const canSave = (mode === 'text' && content.trim().length > 0) || (mode === 'voice' && voiceNote != null);
 
   if (saved) {
     return (
@@ -106,33 +128,93 @@ export default function NewJournalScreen() {
         <Text style={styles.cancelText}>Cancel</Text>
       </Pressable>
       <Text style={styles.title}>What's on your mind?</Text>
-      {(isRecording || isProcessingVoice) && (
-        <Text style={styles.recordingLabel}>
-          {isRecording ? 'Listening... Tap mic when done.' : 'Processing...'}
-        </Text>
-      )}
-      {isRecording && liveTranscript ? (
-        <Text style={styles.liveTranscript} numberOfLines={2}>{liveTranscript}</Text>
-      ) : null}
-      <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
-          placeholder="Write anything... or tap the mic to speak."
-          placeholderTextColor={COLORS.textMuted}
-          value={content}
-          onChangeText={setContent}
-          multiline
-          textAlignVertical="top"
-          editable={!isRecording && !isProcessingVoice}
-        />
+
+      {/* Type / Voice mode toggle */}
+      <View style={styles.modeToggle}>
         <Pressable
-          style={[styles.micButton, isRecording && styles.micButtonRecording]}
-          onPress={handleMicPress}
-          disabled={isProcessingVoice}
+          style={[styles.modeBtn, mode === 'text' && styles.modeBtnActive]}
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMode('text'); }}
         >
-          <Ionicons name="mic" size={24} color={COLORS.text} />
+          <Ionicons name="document-text-outline" size={20} color={mode === 'text' ? '#fff' : COLORS.textMuted} />
+          <Text style={[styles.modeBtnText, mode === 'text' && styles.modeBtnTextActive]}>Type</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.modeBtn, mode === 'voice' && styles.modeBtnActive]}
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setMode('voice'); }}
+        >
+          <Ionicons name="mic" size={20} color={mode === 'voice' ? '#fff' : COLORS.textMuted} />
+          <Text style={[styles.modeBtnText, mode === 'voice' && styles.modeBtnTextActive]}>Voice</Text>
         </Pressable>
       </View>
+
+      {/* Text mode */}
+      {mode === 'text' && (
+        <>
+          {(isRecording || isProcessingVoice) && (
+            <Text style={styles.recordingLabel}>
+              {isRecording ? 'Listening... Tap mic when done.' : 'Processing...'}
+            </Text>
+          )}
+          {isRecording && liveTranscript ? (
+            <Text style={styles.liveTranscript} numberOfLines={2}>{liveTranscript}</Text>
+          ) : null}
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.input}
+              placeholder="Write anything... or tap the mic to speak."
+              placeholderTextColor={COLORS.textMuted}
+              value={content}
+              onChangeText={setContent}
+              multiline
+              textAlignVertical="top"
+              editable={!isRecording && !isProcessingVoice}
+            />
+            <Pressable
+              style={[styles.micButton, isRecording && styles.micButtonRecording]}
+              onPress={handleMicPress}
+              disabled={isProcessingVoice}
+            >
+              <Ionicons name="mic" size={24} color={COLORS.text} />
+            </Pressable>
+          </View>
+        </>
+      )}
+
+      {/* Voice mode: record */}
+      {mode === 'voice' && !voiceNote && (
+        <VoiceRecorder
+          onDone={(result) => {
+            setVoiceNote({
+              uri: result.uri,
+              durationSec: result.durationSec,
+              transcript: result.transcript,
+            });
+          }}
+          requestTranscribe={true}
+          onCancel={() => setMode('text')}
+        />
+      )}
+
+      {/* Voice mode: preview after recording */}
+      {mode === 'voice' && voiceNote && (
+        <View style={styles.voicePreview}>
+          <VoicePlayer
+            uri={voiceNote.uri}
+            durationSec={voiceNote.durationSec}
+            transcript={voiceNote.transcript}
+            showTranscript
+          />
+          <Pressable
+            style={styles.reRecordBtn}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setVoiceNote(null);
+            }}
+          >
+            <Text style={styles.reRecordText}>Re-record</Text>
+          </Pressable>
+        </View>
+      )}
       <Text style={styles.moodLabel}>Mood (optional)</Text>
       <View style={styles.moodRow}>
         {MOOD_OPTIONS.map((opt) => (
@@ -150,9 +232,9 @@ export default function NewJournalScreen() {
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [styles.saveButton, pressed && styles.saveButtonPressed, !content.trim() && styles.saveButtonDisabled]}
+          style={({ pressed }) => [styles.saveButton, pressed && styles.saveButtonPressed, !canSave && styles.saveButtonDisabled]}
           onPress={handleSave}
-          disabled={!content.trim()}
+          disabled={!canSave}
         >
           <Text style={styles.saveButtonText}>Save</Text>
         </Pressable>
@@ -170,7 +252,48 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 20,
   },
-  cancelText: { fontSize: 16, color: '#fff', fontWeight: '500' },
+  cancelText: { fontSize: 16, color: COLORS.text, fontWeight: '500' },
+  modeToggle: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.md,
+    padding: 4,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  modeBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: BORDER_RADIUS.sm,
+    gap: 6,
+  },
+  modeBtnActive: {
+    backgroundColor: COLORS.accent,
+  },
+  modeBtnText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+  },
+  modeBtnTextActive: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  voicePreview: {
+    marginTop: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  reRecordBtn: {
+    alignItems: 'center',
+    marginTop: SPACING.md,
+  },
+  reRecordText: {
+    fontSize: 14,
+    color: COLORS.accent,
+  },
   title: {
     fontSize: 22,
     fontWeight: '600',

@@ -4,7 +4,7 @@
 
 export type EmergencyTrigger = 'manual' | 'auto_state' | 'checkin_keywords' | 'copilot_detected';
 
-export type EmergencyAction = 'crisis_lines' | 'copilot' | 'breathe' | 'reach_out';
+export type EmergencyAction = 'crisis_lines' | 'copilot' | 'breathe' | 'quick_reset' | 'reach_out';
 
 export interface EmergencySession {
   id: string;

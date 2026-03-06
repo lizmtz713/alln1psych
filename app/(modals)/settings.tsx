@@ -38,6 +38,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
+import { useFocusMode } from '../../src/hooks/useOnboarding';
 
 // Use design system colors
 const ACCENT = COLORS.accent;
@@ -792,7 +793,8 @@ export default function SettingsScreen() {
   const router = useRouter();
   const settings = useSettingsStore();
   const user = useUserStore();
-  
+  const { focusMode, setFocusMode } = useFocusMode();
+
   // API Key state
   const [apiKey, setApiKey] = useState('');
   const [apiKeyMasked, setApiKeyMasked] = useState('');
@@ -899,6 +901,23 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>Language / Idioma</Text>
         <View style={styles.card}>
           <LanguageSelector />
+        </View>
+
+        {/* Home — Focus Mode */}
+        <Text style={styles.sectionTitle}>Home</Text>
+        <View style={styles.card}>
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.rowLabel}>Focus Mode</Text>
+              <Text style={styles.rowHint}>Simple home: Cockpit, check-in, and one suggestion only</Text>
+            </View>
+            <Switch
+              value={focusMode}
+              onValueChange={setFocusMode}
+              trackColor={{ false: '#2A2A3A', true: ACCENT + '60' }}
+              thumbColor={focusMode ? ACCENT : TEXT_MUTED}
+            />
+          </View>
         </View>
 
         {/* Notifications */}

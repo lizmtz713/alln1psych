@@ -9,7 +9,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useMindMailStore, type MindMail, type MindNote } from '../../src/stores/mindMailStore';
+import { VoicePlayer } from '../../src/components/voice';
 import { COLORS, BORDER_RADIUS, SPACING } from '../../src/lib/constants';
+import { ContentWarning } from '../../src/components/mindmail/ContentWarning';
+import { MessageActions } from '../../src/components/mindmail/MessageActions';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString([], {
@@ -148,7 +151,33 @@ export default function MindMailDetailScreen() {
             )}
           </View>
           <Text style={styles.date}>{formatDate(item.createdAt)}</Text>
-          <Text style={styles.content}>{(item as MindMail).content ?? (item as MindNote).content}</Text>
+          {(item as MindMail).hasVoice && (item as MindMail).voiceUri ? (
+            <View style={styles.voiceBlock}>
+              {(item as MindMail).contentWarning ? (
+                <ContentWarning>
+                  <VoicePlayer
+                    uri={(item as MindMail).voiceUri!}
+                    durationSec={(item as MindMail).voiceDurationSec ?? 0}
+                    transcript={(item as MindMail).voiceTranscript}
+                    showTranscript
+                  />
+                </ContentWarning>
+              ) : (
+                <VoicePlayer
+                  uri={(item as MindMail).voiceUri!}
+                  durationSec={(item as MindMail).voiceDurationSec ?? 0}
+                  transcript={(item as MindMail).voiceTranscript}
+                  showTranscript
+                />
+              )}
+            </View>
+          ) : (item as MindMail).contentWarning || (item as MindNote).contentWarning ? (
+            <ContentWarning>
+              <Text style={styles.content}>{(item as MindMail).content ?? (item as MindNote).content}</Text>
+            </ContentWarning>
+          ) : (
+            <Text style={styles.content}>{(item as MindMail).content ?? (item as MindNote).content}</Text>
+          )}
         </View>
 
         {isInboxItem && (item as MindMail).isAnonymous && (
@@ -195,6 +224,16 @@ export default function MindMailDetailScreen() {
             </Pressable>
           )}
         </View>
+
+        {isInboxItem && (
+          <MessageActions
+            messageId={item.id}
+            senderIdOrToken={(item as MindMail).senderId}
+            senderLabel={senderLabel ?? 'Someone'}
+            isAnonymous={(item as MindMail).isAnonymous}
+            onBlocked={() => router.back()}
+          />
+        )}
       </ScrollView>
     </View>
   );
@@ -232,6 +271,7 @@ const styles = StyleSheet.create({
   sender: { fontSize: 17, fontWeight: '600', color: COLORS.text },
   date: { fontSize: 13, color: COLORS.textMuted, marginBottom: 16 },
   content: { fontSize: 16, color: COLORS.text, lineHeight: 24 },
+  voiceBlock: { marginTop: 8 },
   anonBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,

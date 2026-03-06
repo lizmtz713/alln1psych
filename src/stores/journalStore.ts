@@ -1,8 +1,11 @@
 import { create } from 'zustand';
 import { useAuthStore } from './authStore';
 import * as database from '../services/database';
+import { trackJournalEntry } from '../hooks/useWrappedTracking';
 
 export type JournalMood = 'green' | 'yellow' | 'orange' | 'red';
+
+export type JournalEntryType = 'text' | 'voice' | 'mixed';
 
 export interface JournalEntry {
   id: string;
@@ -11,53 +14,103 @@ export interface JournalEntry {
   source: 'manual' | 'conversation';
   conversationId?: string;
   createdAt: Date;
+  /** Entry type: text-only, voice-only, or both */
+  type?: JournalEntryType;
+  /** Voice note local URI (or remote URL when persisted to Storage) */
+  voiceUri?: string;
+  voiceDurationSec?: number;
+  transcript?: string;
+  transcribedAt?: Date;
 }
 
 function genId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+export type AddEntryOptions = {
+  mood?: JournalMood;
+  source?: 'manual' | 'conversation';
+  conversationId?: string;
+  type?: JournalEntryType;
+  voiceUri?: string;
+  voiceDurationSec?: number;
+  transcript?: string;
+};
+
 interface JournalState {
   entries: JournalEntry[];
-  addEntry: (
-    content: string,
-    options?: { mood?: JournalMood; source?: 'manual' | 'conversation'; conversationId?: string }
-  ) => void;
+  addEntry: (contentOrOptions: string | AddEntryOptions, options?: AddEntryOptions) => void;
   deleteEntry: (id: string) => void;
   getRecentEntries: (count: number) => JournalEntry[];
-<<<<<<< HEAD
   reset: () => void;
-=======
->>>>>>> 50bf466 (feat: implement Human Cockpit with 6-gauge system and check-in flow)
 }
 
 export const useJournalStore = create<JournalState>((set, get) => ({
   entries: [],
 
-  addEntry: (content, options = {}) => {
-    const { mood, source = 'manual', conversationId } = options;
+  addEntry: (contentOrOptions, options = {}) => {
     const userId = useAuthStore.getState().userId;
-    const trimmed = content.trim();
     const createdAt = new Date();
+
+    let content: string;
+    let opts: AddEntryOptions;
+
+    if (typeof contentOrOptions === 'string') {
+      content = contentOrOptions.trim();
+      opts = options;
+    } else {
+      opts = contentOrOptions as AddEntryOptions;
+      content = (opts.transcript ?? '').trim();
+    }
+
+    const {
+      mood,
+      source = 'manual',
+      conversationId,
+      type = content ? 'text' : 'voice',
+      voiceUri,
+      voiceDurationSec,
+      transcript,
+    } = opts;
+
+    const entryForApi = typeof contentOrOptions === 'string' ? content : (content || 'Voice note');
 
     const addLocal = (id: string) =>
       set((state) => ({
         entries: [
-          { id, content: trimmed, mood, source, conversationId, createdAt },
+          {
+            id,
+            content: content || (transcript ?? ''),
+            mood,
+            source,
+            conversationId,
+            createdAt,
+            type: voiceUri ? 'voice' : (content && transcript ? 'mixed' : content ? 'text' : 'voice'),
+            voiceUri,
+            voiceDurationSec,
+            transcript,
+            transcribedAt: transcript ? createdAt : undefined,
+          },
           ...state.entries,
         ],
       }));
 
     if (userId) {
       database
-        .addJournalEntry(userId, trimmed, { mood, source, conversation_id: conversationId })
+        .addJournalEntry(userId, entryForApi, {
+          mood,
+          source,
+          conversation_id: conversationId,
+        })
         .then((res) => {
           if ('id' in res) addLocal(res.id);
           else addLocal(genId());
+          trackJournalEntry();
         })
         .catch(() => addLocal(genId()));
     } else {
       addLocal(genId());
+      trackJournalEntry();
     }
   },
 
@@ -72,8 +125,6 @@ export const useJournalStore = create<JournalState>((set, get) => ({
   getRecentEntries: (count) => {
     return get().entries.slice(0, count);
   },
-<<<<<<< HEAD
+
   reset: () => set({ entries: [] }),
-=======
->>>>>>> 50bf466 (feat: implement Human Cockpit with 6-gauge system and check-in flow)
 }));

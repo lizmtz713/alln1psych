@@ -20,9 +20,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
-import { useCockpitStore } from '../../src/stores/cockpitStore';
+import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
 import { getGaugeColor } from '../../src/utils/gaugeHelpers';
+import { PostCheckInSuggestions } from '../../src/components/checkin/PostCheckInSuggestions';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
+import { useGeneratedInsights } from '../../src/hooks/useGeneratedInsights';
+import { runAchievementChecks } from '../../src/services/achievementChecker';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -101,7 +104,14 @@ export default function CockpitCheckinScreen() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [formVersion, setFormVersion] = useState(0);
+  const [showPostCheckInSuggestions, setShowPostCheckInSuggestions] = useState(false);
+  const [postCheckInGauges, setPostCheckInGauges] = useState<Partial<Record<GaugeKey, { value: number; trend?: 'improving' | 'stable' | 'declining' | null }>>>({});
   const answersRef = useRef<AnswersRef>({ ...initialAnswers, body: { ...initialAnswers.body } });
+
+  const { insights: postCheckInInsights } = useGeneratedInsights({
+    context: 'postCheckIn',
+    withHistory: false,
+  });
 
   const setBodyCheckIn = useCockpitStore((s) => s.setBodyCheckIn);
   const updateState = useCockpitStore((s) => s.updateState);
@@ -125,14 +135,25 @@ export default function CockpitCheckinScreen() {
     setStep((prev) => {
       if (prev >= TOTAL_STEPS - 1) {
         setLastCheckInDate(new Date().toISOString().slice(0, 10));
-        // Record gauges for systemic drift analysis
         recordGaugesForDrift().catch(() => {});
-        setTimeout(() => router.back(), 0);
+        setTimeout(() => {
+          const s = useCockpitStore.getState();
+          const gauges: Partial<Record<GaugeKey, { value: number; trend?: 'improving' | 'stable' | 'declining' | null }>> = {};
+          if (s.body.value >= 0) gauges.body = { value: s.body.value, trend: s.body.trend };
+          if (s.state.value >= 0) gauges.state = { value: s.state.value, trend: s.state.trend };
+          if (s.emotion.value >= 0) gauges.emotion = { value: s.emotion.value, trend: s.emotion.trend };
+          if (s.connection.value >= 0) gauges.connection = { value: s.connection.value, trend: s.connection.trend };
+          if (s.direction.value >= 0) gauges.direction = { value: s.direction.value, trend: s.direction.trend };
+          if (s.alignment.value >= 0) gauges.alignment = { value: s.alignment.value, trend: s.alignment.trend };
+          setPostCheckInGauges(gauges);
+          setShowPostCheckInSuggestions(true);
+          runAchievementChecks();
+        }, 0);
         return prev;
       }
       return prev + 1;
     });
-  }, [setLastCheckInDate, recordGaugesForDrift, router]);
+  }, [setLastCheckInDate, recordGaugesForDrift]);
 
   const handleNext = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -449,6 +470,16 @@ export default function CockpitCheckinScreen() {
         </Pressable>
       </ScrollView>
     </View>
+    <PostCheckInSuggestions
+      gauges={postCheckInGauges}
+      visible={showPostCheckInSuggestions}
+      onDismiss={() => {
+        setShowPostCheckInSuggestions(false);
+        router.back();
+      }}
+      limit={3}
+      generatedInsights={postCheckInInsights}
+    />
     </ErrorBoundary>
   );
 }

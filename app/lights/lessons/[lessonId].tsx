@@ -33,7 +33,7 @@ export default function FriendshipLessonScreen() {
 
   const related = (lesson.relatedLessons ?? [])
     .map((id) => getFriendshipLessonById(id))
-    .filter(Boolean);
+    .filter((r): r is NonNullable<ReturnType<typeof getFriendshipLessonById>> => r != null);
 
   return (
     <ScrollView
@@ -70,10 +70,10 @@ export default function FriendshipLessonScreen() {
             <Pressable
               key={r.id}
               style={styles.relatedRow}
-              onPress={() => router.push(`/lights/lessons/${r!.id}`)}
+              onPress={() => router.push(`/lights/lessons/${r.id}`)}
             >
-              <Text style={styles.relatedIcon}>{r!.icon}</Text>
-              <Text style={styles.relatedTitleText}>{r!.title}</Text>
+              <Text style={styles.relatedIcon}>{r.icon}</Text>
+              <Text style={styles.relatedTitleText}>{r.title}</Text>
               <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
             </Pressable>
           ))}

@@ -46,6 +46,12 @@ export interface HumanManualCategory {
   lessons: HumanManualLesson[];
 }
 
+/** Cross-disciplinary perspective for a lesson (used by lessonPerspectives). */
+export interface LessonPerspective {
+  discipline: string;
+  insight: string;
+}
+
 // ============================================================================
 // CATEGORY 1: RELATIONSHIPS & PEOPLE
 // ============================================================================
@@ -6537,6 +6543,167 @@ Clarifying values doesn't mean you'll always live them perfectly. It means you h
 ];
 
 // ============================================================================
+// BUILDING STABILITY
+// ============================================================================
+
+const buildingStabilityLessons: HumanManualLesson[] = [
+  {
+    id: 'hm-stability-financial-foundations',
+    title: 'Financial Foundations and Your Nervous System',
+    category: 'building-stability',
+    duration: 6,
+    emoji: '💰',
+    content: {
+      introduction: `Money stress isn't just about the numbers. Financial insecurity activates the same threat systems in your brain as physical danger. When you don't know if you can pay rent or feed your family, your body stays in a state of vigilance. That makes it harder to think clearly, sleep, or regulate emotions.
+
+Financial foundations aren't about being rich. They're about reducing the constant background alarm: a small buffer, knowing where your money goes, having a plan for the next emergency. Even small steps — one month of rent in savings, tracking spending for a week — can lower the volume on that alarm.
+
+You're not bad with money because you're stressed. You're stressed partly because money has been unstable. Building stability is a form of self-care.`,
+      keyInsights: [
+        { title: 'Money stress is real stress', explanation: 'The brain treats financial threat like physical threat. Chronic money worry keeps the nervous system on high alert.' },
+        { title: 'Stability is psychological', explanation: 'Knowing you have a plan — even if the plan is small — can reduce anxiety more than the dollar amount alone.' },
+        { title: 'Small steps count', explanation: 'One emergency fund dollar, one tracked week, one bill on autopay. Foundations are built in small, repeatable actions.' },
+      ],
+      whatHelps: [
+        'Name the fear: "What exactly am I afraid will happen?"',
+        'One buffer goal: e.g. one month of essentials in savings',
+        'Track spending for one week without judgment',
+        'Separate "not enough" from "I don\'t know where it goes"',
+      ],
+    },
+    reflectionQuestions: [
+      'What does "financial safety" mean to you in one sentence?',
+      'What\'s one small step you could take this week to reduce money anxiety?',
+    ],
+    relatedLessons: ['hm-work-meaning', 'hm-stability-growth-tension'],
+    triggerGauges: ['state', 'body'],
+    triggerThreshold: 40,
+    triggerMode: 'any',
+  },
+  {
+    id: 'hm-stability-environment',
+    title: 'Your Environment Shapes Your State',
+    category: 'building-stability',
+    duration: 5,
+    emoji: '🏠',
+    content: {
+      introduction: `Your physical environment isn't background. It's input. Clutter, noise, light, and the people in your space all send signals to your nervous system. A chaotic room can make it harder to think. A dark, isolated space can deepen low mood. A place that feels "yours" — even one corner — can become an anchor.
+
+You don't need a perfect space. You need awareness. What in your environment drains you? What helps you feel a little more grounded? Small changes often matter more than big ones: one clear surface, one ritual (light a candle, open the curtain), one boundary with a roommate or family member.`,
+      keyInsights: [
+        { title: 'Environment is input', explanation: 'Your brain is always processing your surroundings. Chaos and clutter add load; order and calm can reduce it.' },
+        { title: 'One anchor is enough', explanation: 'You don\'t need to fix the whole space. One corner, one ritual, one boundary can shift how you feel.' },
+        { title: 'People are part of environment', explanation: 'Who you live with and how you share space affects your sense of safety and rest.' },
+      ],
+      whatHelps: [
+        'Identify one thing that drains you and one that helps',
+        'Create one "anchor" — a spot or ritual that feels like yours',
+        'Negotiate one boundary (noise, privacy, shared chores)',
+      ],
+    },
+    reflectionQuestions: [
+      'What in your environment makes you feel worse? Better?',
+      'What\'s one change you could make this week without spending money?',
+    ],
+    relatedLessons: ['hm-stability-safety', 'hm-stress-burnout'],
+    triggerGauges: ['state', 'body'],
+    triggerThreshold: 45,
+    triggerMode: 'any',
+  },
+  {
+    id: 'hm-stability-safety',
+    title: 'What Safety Actually Means',
+    category: 'building-stability',
+    duration: 6,
+    emoji: '🛡️',
+    content: {
+      introduction: `Safety isn't just physical. Emotional safety is the sense that you can be yourself without being punished, abandoned, or shamed. Many people live in environments where they're physically okay but emotionally on edge — walking on eggshells, hiding feelings, or never quite trusting that they're accepted.
+
+You can't always change the people around you. But you can get clear on what safety would look like for you, and you can start to create pockets of it: one relationship where you don't edit yourself, one place or practice where you feel allowed to rest, one boundary that says "this is not okay." Building safety is often slow. It's still worth naming what you need.`,
+      keyInsights: [
+        { title: 'Emotional safety is real', explanation: 'Your nervous system needs to know it\'s safe to be seen. Without that, you stay in guard mode.' },
+        { title: 'Safety can be partial', explanation: 'You might have safety in one relationship or one context. That still counts and can be expanded.' },
+        { title: 'Boundaries create safety', explanation: 'Knowing you can say no or leave a situation is part of feeling safe.' },
+      ],
+      whatHelps: [
+        'Name what "safe" would feel like in one sentence',
+        'Identify one relationship or context where you feel most yourself',
+        'Practice one boundary — small, clear, repeatable',
+      ],
+      professionalNote: 'If you are in physical danger or abuse, please reach out to a trusted person or resource. You deserve safety.',
+    },
+    reflectionQuestions: [
+      'Where do you feel safest? Where do you feel you have to hide?',
+      'What would need to change for you to feel a little more emotionally safe?',
+    ],
+    relatedLessons: ['hm-rel-boundaries', 'hm-stability-environment'],
+    triggerGauges: ['connection', 'state'],
+    triggerThreshold: 40,
+    triggerMode: 'any',
+  },
+  {
+    id: 'hm-stability-growth-tension',
+    title: 'The Stability–Growth Tension',
+    category: 'building-stability',
+    duration: 5,
+    emoji: '⚖️',
+    content: {
+      introduction: `Life asks for two things that sometimes conflict: stability (enough safety, routine, and predictability to function) and growth (change, risk, and newness). Too much stability and you stagnate. Too much growth without a base and you burn out or spiral.
+
+There's no universal right balance. But you can notice where you are. Are you so focused on surviving that you've stopped asking what you want? Or are you chasing change without a foundation? Often the answer is: build a little more stability first, then take one small growth step. Or: you've been stable for a while — what's one small risk you're ready for?`,
+      keyInsights: [
+        { title: 'Both matter', explanation: 'Stability gives you a base. Growth gives you a life. Neither alone is enough.' },
+        { title: 'Order often helps', explanation: 'When in doubt, stability first. It\'s hard to grow when you\'re in survival mode.' },
+        { title: 'Small steps in both directions', explanation: 'One habit for stability, one experiment for growth. You don\'t have to choose forever.' },
+      ],
+      whatHelps: [
+        'Ask: "Am I in survival mode or do I have room to grow?"',
+        'One stability move: one habit, one buffer, one boundary',
+        'One growth move: one small risk, one new practice, one honest conversation',
+      ],
+    },
+    reflectionQuestions: [
+      'Right now, do you need more stability or more growth?',
+      'What\'s one small step in that direction you could take?',
+    ],
+    relatedLessons: ['hm-stability-financial-foundations', 'hm-growth-reparenting'],
+    triggerGauges: ['direction', 'state'],
+    triggerThreshold: 45,
+    triggerMode: 'any',
+  },
+  {
+    id: 'hm-stability-daily-foundations',
+    title: 'Daily Foundations: Sleep, Food, Movement',
+    category: 'building-stability',
+    duration: 5,
+    emoji: '🌅',
+    content: {
+      introduction: `Stability isn't only big picture. It's also what you do today. Sleep, food, and movement are the tripod. When one is off, the others wobble. When all three are roughly okay, everything else — mood, focus, relationships — has a better chance.
+
+You don't need perfect. You need "good enough." One decent meal. One movement that isn't punishment. One night of slightly better sleep. Tracking or rituals (same wake time, one walk, one meal you look forward to) can turn chaos into a baseline. Start with one leg of the tripod and add from there.`,
+      keyInsights: [
+        { title: 'Sleep, food, movement are foundational', explanation: 'They directly affect your nervous system and mood. Fixing "everything" often starts here.' },
+        { title: 'Good enough beats perfect', explanation: 'One solid meal, one short walk, one slightly earlier bedtime. Consistency over intensity.' },
+        { title: 'Ritual creates predictability', explanation: 'Same wake time, one daily walk, one meal you plan — these signal "I am taking care of myself."' },
+      ],
+      whatHelps: [
+        'Pick one: sleep, food, or movement. What\'s one small improvement?',
+        'One ritual: e.g. same wake time, or one 10-minute walk',
+        'Use check-in or Body gauge to notice how each affects you',
+      ],
+    },
+    reflectionQuestions: [
+      'Which of the three — sleep, food, movement — is most off right now?',
+      'What\'s one "good enough" change you could make this week?',
+    ],
+    relatedLessons: ['hm-stress-burnout', 'hm-stability-financial-foundations'],
+    triggerGauges: ['body', 'state'],
+    triggerThreshold: 45,
+    triggerMode: 'any',
+  },
+];
+
+// ============================================================================
 // EXPORT CATEGORIES
 // ============================================================================
 
@@ -6603,6 +6770,13 @@ export const humanManualCategories: HumanManualCategory[] = [
     emoji: '🪞',
     description: 'Sexuality, neurodivergence, body image, values, and understanding who you actually are.',
     lessons: identitySelfLessons,
+  },
+  {
+    id: 'building-stability',
+    title: 'Building Stability',
+    emoji: '🏗️',
+    description: 'Financial foundations, environment, safety, and the balance between stability and growth.',
+    lessons: buildingStabilityLessons,
   },
 ];
 

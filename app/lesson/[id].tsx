@@ -45,6 +45,7 @@ import {
   type HumanManualLesson,
 } from '../../src/data/humanManual';
 import { ShareInsightButton, type ShareableContent } from '../../src/features/share-insight';
+import { runAchievementChecks } from '../../src/services/achievementChecker';
 
 function renderBody(text: string): React.ReactNode[] {
   const lines = text.split(/\n\n+/);
@@ -172,6 +173,7 @@ export default function LessonScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     saveReflection(lesson.id, reflectionText);
     completeLesson(lesson.id, reflectionText);
+    runAchievementChecks();
     if (reflectionText.trim()) {
       addJournalEntry(reflectionText.trim(), { source: 'manual' });
     }

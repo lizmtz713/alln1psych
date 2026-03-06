@@ -57,7 +57,7 @@ export function PersonLight({
   showStatus = false,
   onPress,
 }: PersonLightProps) {
-  const lightState = calculateLightState(status, lastContact, tier);
+  const lightState = calculateLightState(status, lastContact ?? null, tier);
   const { colorHex, brightness, opacity, animation, needsAttention } = lightState;
   
   const initials = getInitials(name);
@@ -206,7 +206,7 @@ export function PersonLightRow({
   tier = 'friends',
   onPress,
 }: Omit<PersonLightProps, 'size' | 'showLabel' | 'showStatus' | 'avatar'> & { avatar?: string }) {
-  const lightState = calculateLightState(status, lastContact, tier);
+  const lightState = calculateLightState(status, lastContact ?? null, tier);
   const { colorHex, opacity, needsAttention } = lightState;
   const initials = getInitials(name);
   
@@ -220,7 +220,7 @@ export function PersonLightRow({
       </View>
       <View style={styles.rowContent}>
         <Text style={[styles.rowName, { opacity: Math.max(opacity, 0.7) }]}>{name}</Text>
-        <Text style={styles.rowMeta}>{formatLastContact(lastContact)}</Text>
+        <Text style={styles.rowMeta}>{formatLastContact(lastContact ?? null)}</Text>
       </View>
       {needsAttention && (
         <View style={[styles.attentionDot, { backgroundColor: colorHex }]} />

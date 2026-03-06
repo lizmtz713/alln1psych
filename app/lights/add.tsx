@@ -84,12 +84,20 @@ export default function AddLightScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: insets.top }]}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
+          <Ionicons name="chevron-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Add a Light</Text>
+        <View style={styles.headerRight} />
+      </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       <Text style={styles.title}>Add a Light</Text>
       <Text style={styles.subtitle}>Who is becoming part of your world?</Text>
 
@@ -231,13 +239,27 @@ export default function AddLightScreen() {
       </Pressable>
 
       <View style={{ height: 40 }} />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  content: { paddingHorizontal: 24 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  backBtn: { padding: 8 },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text },
+  headerRight: { width: 40 },
+  scroll: { flex: 1 },
+  content: { paddingHorizontal: 24, paddingTop: 16 },
   title: { fontSize: 24, fontWeight: '700', color: COLORS.text },
   subtitle: { fontSize: 15, color: COLORS.textMuted, marginTop: 6 },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 24 },

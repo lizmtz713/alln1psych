@@ -14,20 +14,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from './gauges';
 import { getGaugeColor, getOverallStatusLabel, GAUGE_CONFIG } from '../utils/gaugeHelpers';
 import { BiometricIndicator, type BiometricSource } from './BiometricIndicator';
+import { COLORS, TYPOGRAPHY } from '../lib/constants';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Layout constants
+// Layout constants — Phase 2: hexagonal cockpit with center SystemScore (56pt)
 const CLUSTER_SIZE = Math.min(SCREEN_WIDTH - 48, 340);
-const CENTER_SIZE = 100;
+const CENTER_SIZE = 120; // Larger to fit 56pt score
 const GAUGE_SIZE = 76;
 const GAUGE_RADIUS = (CLUSTER_SIZE - GAUGE_SIZE) / 2 - 8; // Distance from center to gauge centers
 
-const TEXT_PRIMARY = '#F0F0F5';
-const TEXT_SECONDARY = '#8888A0';
-const TEXT_MUTED = '#55556A';
-const CARD_BG = '#111118';
-const ACCENT = '#7C4DFF';
+const TEXT_PRIMARY = COLORS.text;
+const TEXT_SECONDARY = COLORS.textSecondary;
+const TEXT_MUTED = COLORS.textMuted;
+const CARD_BG = COLORS.surface;
+const ACCENT = COLORS.accent;
 
 const GAUGE_COMPONENTS: Record<string, React.FC<{ value: number; size?: number }>> = {
   body: BodyGauge,
@@ -168,6 +169,14 @@ export function CockpitCluster({
   const overallLabel = getOverallStatusLabel(overall);
   const ringColor = overall < 0 ? (TEXT_MUTED + '90') : getGaugeColor(overall);
   const activeCount = Object.values(gaugeValues).filter(v => v >= 0).length;
+
+  // PayAttentionAlert — Oura-style: which gauges need attention (low or critical)
+  const lowGauges = (GAUGE_POSITIONS as { key: string }[])
+    .map(({ key }) => ({ key, value: gaugeValues[key as keyof typeof gaugeValues] }))
+    .filter(({ value }) => value >= 0 && value < 50)
+    .sort((a, b) => a.value - b.value);
+  const criticalGauges = lowGauges.filter(({ value }) => value < 30);
+  const payAttentionLabel = criticalGauges.length > 0 ? 'PAY ATTENTION' : lowGauges.length > 0 ? 'NEEDS CARE' : null;
   
   // Subtle breathing animation for center ring
   useEffect(() => {
@@ -220,7 +229,7 @@ export function CockpitCluster({
       >
         {overall >= 0 ? (
           <>
-            <Text style={[styles.centerValue, { color: ringColor }]}>{overall}</Text>
+            <Text style={[styles.centerValue, { color: ringColor }]}>{Math.round(overall)}</Text>
             <Text style={styles.centerLabel}>{overallLabel}</Text>
           </>
         ) : (
@@ -282,6 +291,22 @@ export function CockpitCluster({
         );
       })}
 
+      {/* PayAttentionAlert — Oura-style when any gauge is low */}
+      {payAttentionLabel && lowGauges.length > 0 && (
+        <Pressable
+          style={[
+            styles.payAttentionAlert,
+            criticalGauges.length > 0 && styles.payAttentionCritical,
+          ]}
+          onPress={handleCenterPress}
+        >
+          <Text style={styles.payAttentionText}>{payAttentionLabel}</Text>
+          <Text style={styles.payAttentionSub}>
+            {lowGauges.map(({ key }) => GAUGE_CONFIG[key]?.label ?? key).join(', ')} — tap to check in
+          </Text>
+        </Pressable>
+      )}
+
       {/* Status hint below */}
       <View style={styles.hintContainer}>
         <Text style={styles.hintText}>
@@ -298,17 +323,17 @@ export function CockpitCluster({
 const styles = StyleSheet.create({
   container: {
     width: CLUSTER_SIZE,
-    height: CLUSTER_SIZE + 40, // Extra space for hint
+    minHeight: CLUSTER_SIZE + 40,
     alignSelf: 'center',
     position: 'relative',
   },
   centerGlow: {
     position: 'absolute',
-    width: CENTER_SIZE + 40,
-    height: CENTER_SIZE + 40,
-    borderRadius: (CENTER_SIZE + 40) / 2,
-    left: CLUSTER_SIZE / 2 - (CENTER_SIZE + 40) / 2,
-    top: CLUSTER_SIZE / 2 - (CENTER_SIZE + 40) / 2,
+    width: CENTER_SIZE + 48,
+    height: CENTER_SIZE + 48,
+    borderRadius: (CENTER_SIZE + 48) / 2,
+    left: CLUSTER_SIZE / 2 - (CENTER_SIZE + 48) / 2,
+    top: CLUSTER_SIZE / 2 - (CENTER_SIZE + 48) / 2,
   },
   centerRing: {
     position: 'absolute',
@@ -332,8 +357,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.96 }],
   },
   centerValue: {
-    fontSize: 28,
-    fontWeight: '700',
+    ...TYPOGRAPHY.scoreLg,
     fontVariant: ['tabular-nums'],
   },
   centerLabel: {
@@ -389,11 +413,34 @@ const styles = StyleSheet.create({
     marginTop: 1,
     fontVariant: ['tabular-nums'],
   },
+  payAttentionAlert: {
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: COLORS.amberBg ?? 'rgba(234, 179, 8, 0.12)',
+    borderWidth: 1,
+    borderColor: COLORS.amber ?? '#EAB308',
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
+  payAttentionCritical: {
+    backgroundColor: COLORS.error ? `${COLORS.error}20` : 'rgba(239, 68, 68, 0.12)',
+    borderColor: COLORS.error ?? '#EF4444',
+  },
+  payAttentionText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: COLORS.text,
+  },
+  payAttentionSub: {
+    fontSize: 12,
+    color: TEXT_SECONDARY,
+    marginTop: 2,
+  },
   hintContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    marginTop: 8,
     alignItems: 'center',
   },
   hintText: {

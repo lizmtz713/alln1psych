@@ -11,6 +11,7 @@ export default function RitualsLayout() {
     >
       <Stack.Screen name="pre-flight" />
       <Stack.Screen name="post-flight" />
+      <Stack.Screen name="gratitude-review" />
     </Stack>
   );
 }

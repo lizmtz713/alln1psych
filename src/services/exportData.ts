@@ -108,11 +108,11 @@ export function buildExportData(range: ExportRange): DataExport {
       completedAt: education.lastLessonDate?.toISOString() ?? new Date().toISOString(),
       reflection,
     };
-  }).filter((e) => range === 'all' || inRange(e.completedAt, range));
+  }).filter((e: { completedAt: string }) => range === 'all' || inRange(e.completedAt, range));
 
   const gratitudeEntries = gratitude
-    .filter((e) => inRange(e.createdAt, range))
-    .map((e) => ({ date: e.createdAt, text: e.text }));
+    .filter((e: { createdAt: string }) => inRange(e.createdAt, range))
+    .map((e: { createdAt: string; text: string }) => ({ date: e.createdAt, text: e.text }));
 
   const triggerMaps = (user.triggerMaps ?? []).filter((t: TriggerMapEntry) =>
     inRange(t.createdAt, range)

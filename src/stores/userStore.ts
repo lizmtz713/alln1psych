@@ -38,6 +38,9 @@ export type TherapyExperience = 'never' | 'tried-it' | 'currently' | 'positive' 
 /** Sport type for athlete mode */
 export type SportType = 'team' | 'individual' | 'endurance' | 'power' | 'mixed' | null;
 
+/** Locale/language for app (i18n). Re-exported for strings.ts. */
+export type AppLocale = 'en' | 'es' | string;
+
 /** Spectrum mode accessibility preferences */
 export interface SpectrumModeSettings {
   /** Reduce animations and motion */
@@ -162,6 +165,35 @@ interface UserState {
    */
   values: string[];
 
+  /** How You Connect — communication & style (profile) */
+  communicationStyleDirect: number;
+  communicationStyleEmotional: number;
+  conflictStyle: string;
+  energyPattern: string;
+  introvertExtrovert: string;
+
+  /** Identity (profile) — ethnicity, gender, disability, body */
+  ethnicity: string;
+  genderIdentity: string;
+  sexualOrientation: string;
+  disability: string[];
+  disabilityDetails: string;
+  bodyRelationship: string;
+
+  /** What Gives Life (profile) */
+  identifyAs: string[];
+  whatBringsMeaning: string[];
+  currentLifeStage: string;
+  relationshipStatus: string;
+  parentingStatus: string;
+
+  /** In Your Own Words (profile) */
+  whatMakesYouDifferent: string;
+
+  /** Sensitive (profile) — custom topics and triggers to avoid */
+  sensitiveTopicsCustom: string[];
+  triggersToAvoid: string;
+
   setName: (name: string) => void;
   addTriggerMap: (entry: Omit<TriggerMapEntry, 'id' | 'createdAt'>) => void;
   setPronouns: (pronouns: Pronouns | null) => void;
@@ -194,6 +226,32 @@ interface UserState {
   /** Spectrum/Accessibility mode */
   setSpectrumMode: (v: boolean) => void;
   setSpectrumModeSettings: (v: Partial<SpectrumModeSettings>) => void;
+  /** How You Connect */
+  setCommunicationStyleDirect: (v: number) => void;
+  setCommunicationStyleEmotional: (v: number) => void;
+  setConflictStyle: (v: string) => void;
+  setEnergyPattern: (v: string) => void;
+  setIntrovertExtrovert: (v: string) => void;
+  /** Identity */
+  setEthnicity: (v: string) => void;
+  setGenderIdentity: (v: string) => void;
+  setSexualOrientation: (v: string) => void;
+  setDisability: (v: string[]) => void;
+  setDisabilityDetails: (v: string) => void;
+  setBodyRelationship: (v: string) => void;
+  /** What Gives Life */
+  setIdentifyAs: (v: string[]) => void;
+  setWhatBringsMeaning: (v: string[]) => void;
+  setCurrentLifeStage: (v: string) => void;
+  setRelationshipStatus: (v: string) => void;
+  setParentingStatus: (v: string) => void;
+  /** In Your Own Words */
+  setWhatMakesYouDifferent: (v: string) => void;
+  /** Sensitive */
+  setSensitiveTopicsCustom: (v: string[]) => void;
+  setTriggersToAvoid: (v: string) => void;
+  /** Profile completeness 0–100 for hub display */
+  getProfileCompleteness: () => number;
   completeOnboarding: () => void;
   resetOnboarding: () => void;
   reset: () => void;
@@ -244,6 +302,30 @@ const initialState = {
   therapyExperience: null as TherapyExperience | null,
   humanFingerprint: {} as Record<string, string>,
   values: [] as string[],
+  // Profile — How You Connect
+  communicationStyleDirect: 0,
+  communicationStyleEmotional: 0,
+  conflictStyle: '',
+  energyPattern: '',
+  introvertExtrovert: '',
+  // Profile — Identity
+  ethnicity: '',
+  genderIdentity: '',
+  sexualOrientation: '',
+  disability: [] as string[],
+  disabilityDetails: '',
+  bodyRelationship: '',
+  // Profile — What Gives Life
+  identifyAs: [] as string[],
+  whatBringsMeaning: [] as string[],
+  currentLifeStage: '',
+  relationshipStatus: '',
+  parentingStatus: '',
+  // Profile — In Your Own Words
+  whatMakesYouDifferent: '',
+  // Profile — Sensitive
+  sensitiveTopicsCustom: [] as string[],
+  triggersToAvoid: '',
   // Specialized modes
   athleteMode: false,
   athleteModeSettings: { ...defaultAthleteModeSettings } as AthleteModeSettings,
@@ -251,7 +333,7 @@ const initialState = {
   spectrumModeSettings: { ...defaultSpectrumModeSettings } as SpectrumModeSettings,
 };
 
-export const useUserStore = create<UserState>((set) => ({
+export const useUserStore = create<UserState>((set, get) => ({
   ...initialState,
 
   setName: (name) => set({ name }),
@@ -294,6 +376,42 @@ export const useUserStore = create<UserState>((set) => ({
     set((state) => ({
       spectrumModeSettings: { ...state.spectrumModeSettings, ...settings },
     })),
+  setCommunicationStyleDirect: (communicationStyleDirect) => set({ communicationStyleDirect }),
+  setCommunicationStyleEmotional: (communicationStyleEmotional) => set({ communicationStyleEmotional }),
+  setConflictStyle: (conflictStyle) => set({ conflictStyle }),
+  setEnergyPattern: (energyPattern) => set({ energyPattern }),
+  setIntrovertExtrovert: (introvertExtrovert) => set({ introvertExtrovert }),
+  setEthnicity: (ethnicity) => set({ ethnicity }),
+  setGenderIdentity: (genderIdentity) => set({ genderIdentity }),
+  setSexualOrientation: (sexualOrientation) => set({ sexualOrientation }),
+  setDisability: (disability) => set({ disability }),
+  setDisabilityDetails: (disabilityDetails) => set({ disabilityDetails }),
+  setBodyRelationship: (bodyRelationship) => set({ bodyRelationship }),
+  setIdentifyAs: (identifyAs) => set({ identifyAs }),
+  setWhatBringsMeaning: (whatBringsMeaning) => set({ whatBringsMeaning }),
+  setCurrentLifeStage: (currentLifeStage) => set({ currentLifeStage }),
+  setRelationshipStatus: (relationshipStatus) => set({ relationshipStatus }),
+  setParentingStatus: (parentingStatus) => set({ parentingStatus }),
+  setWhatMakesYouDifferent: (whatMakesYouDifferent) => set({ whatMakesYouDifferent }),
+  setSensitiveTopicsCustom: (sensitiveTopicsCustom) => set({ sensitiveTopicsCustom }),
+  setTriggersToAvoid: (triggersToAvoid) => set({ triggersToAvoid }),
+  getProfileCompleteness: () => {
+    const state = get();
+    const checks = [
+      state.name,
+      state.pronouns != null,
+      state.ageGroup != null,
+      state.loveLanguage != null,
+      state.sensitiveTopics.length >= 0,
+      state.learningStyle != null,
+      state.culturalBackgroundText || state.culturalBackground?.length,
+      state.ageRange != null,
+      state.therapyExperience != null,
+      state.values?.length,
+    ];
+    const filled = checks.filter(Boolean).length;
+    return Math.round((filled / checks.length) * 100);
+  },
   addTriggerMap: (entry) =>
     set((state) => ({
       triggerMaps: [

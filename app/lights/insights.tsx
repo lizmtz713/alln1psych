@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -8,6 +10,7 @@ import { useLightsStore, computeLights } from '../../src/stores/lightsStore';
 
 export default function LightsInsightsScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const members = useCircleStore((s) => s.members);
   const persistState = useLightsStore(
     useShallow((s) => ({
@@ -22,11 +25,19 @@ export default function LightsInsightsScreen() {
   const cool = lights.filter((l) => l.temperature === 'cool');
 
   return (
-    <ScrollView
-      style={[styles.container, { paddingBottom: insets.bottom + 24 }]}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={[styles.container, { paddingBottom: insets.bottom + 24 }]}>
+      <View style={[styles.header, { paddingTop: insets.top }]}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
+          <Ionicons name="chevron-back" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Lights Insights</Text>
+        <View style={styles.headerRight} />
+      </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
       <Text style={styles.title}>Lights Insights</Text>
       <View style={styles.divider} />
       <View style={styles.card}>
@@ -34,12 +45,26 @@ export default function LightsInsightsScreen() {
         <Text style={styles.line}>{cool.length} cooled down</Text>
       </View>
       <View style={{ height: 40 }} />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  backBtn: { padding: 8 },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text },
+  headerRight: { width: 40 },
+  scroll: { flex: 1 },
   content: { paddingHorizontal: 24, paddingTop: 16 },
   title: { fontSize: 24, fontWeight: '700', color: COLORS.text },
   divider: { height: 1, backgroundColor: COLORS.border, marginVertical: 24 },

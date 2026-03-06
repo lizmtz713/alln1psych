@@ -27,14 +27,68 @@ import { generateDailyContent } from '../../src/services/personalization';
 import { getDiscoveriesForDay } from '../../src/data/discoveries';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeHeader } from '../../src/components/HomeHeader';
-import { WeeklyInsightCard } from '../../src/components/WeeklyInsightCard';
+import { WeeklyInsightPrompt } from '../../src/components/home/WeeklyInsightPrompt';
+import { WeeklyInsightCard as UnifiedInsightCard } from '../../src/components/insights/WeeklyInsightCard';
+import { CockpitShareButton, ShareCockpitChip } from '../../src/components/home/CockpitShareButton';
+import { WinButton } from '../../src/components/wins/WinButton';
+import { HabitsWidget } from '../../src/components/habits/HabitsWidget';
+import { LifeWrappedPreview } from '../../src/components/home/LifeWrappedPreview';
+import { ForecastCard } from '../../src/components/forecast/ForecastCard';
+import { GaugeTriggeredSuggestions } from '../../src/components/home/GaugeTriggeredSuggestions';
+import { DailyInsight } from '../../src/components/home/DailyInsight';
+import { YourLifeTodaySection } from '../../src/components/home/YourLifeTodaySection';
 import { CockpitCluster } from '../../src/components/CockpitCluster';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
 import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
 import { useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
 import { shouldSuggestAwe } from '../../src/services/aweNudge';
+import { useAdaptiveHomeSections, usePendingInvitation } from '../../src/hooks/useOnboarding';
+import { FeatureInvitationModal } from '../../src/components/onboarding/FeatureInvitationModal';
+import { markLowStateSeen, markLowConnectionSeen, ensureFirstLaunchDate } from '../../src/services/onboardingService';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
+
+type ToolItem = { key: string; label: string; icon: string; route: string };
+
+const ALL_TOOLS: ToolItem[] = [
+  // Core 9 (current)
+  { key: 'decode', label: 'Decode', icon: '🔍', route: '/(modals)/decode' },
+  { key: 'resolve', label: 'Resolve', icon: '🤝', route: '/(modals)/resolve' },
+  { key: 'roleplay', label: 'Role Play', icon: '🎭', route: '/(modals)/role-play' },
+  { key: 'referee', label: 'Referee', icon: '⚖️', route: '/(modals)/referee' },
+  { key: 'replay', label: 'Replay', icon: '🔄', route: '/(modals)/replay' },
+  { key: 'relate', label: 'Relate', icon: '💬', route: '/(modals)/relate' },
+  { key: 'prompts', label: 'Prompts', icon: '✨', route: '/(modals)/prompt-generator' },
+  { key: 'love', label: 'Love', icon: '❤️', route: '/(modals)/love' },
+  { key: 'help', label: 'Help', icon: '🆘', route: '/(modals)/help-someone' },
+  // Relationship & self
+  { key: 'datesume', label: 'Datesume', icon: '💝', route: '/love/datesume' },
+  { key: 'love-history', label: 'Love History', icon: '💔', route: '/love-history' },
+  { key: 'attraction', label: 'Attraction', icon: '💫', route: '/(modals)/attraction' },
+  { key: 'attachment', label: 'Attachment', icon: '🌳', route: '/(modals)/attachment-style' },
+  { key: 'boundaries', label: 'Boundaries', icon: '🚧', route: '/(modals)/boundaries' },
+  { key: 'difficult', label: 'Difficult People', icon: '👤', route: '/(modals)/difficult-people' },
+  { key: 'flags', label: 'Flags', icon: '🚩', route: '/(modals)/red-green-flags' },
+  { key: 'critical', label: 'Think', icon: '🧠', route: '/(modals)/critical-thinking' },
+  // Body & systems
+  { key: 'body', label: 'Body', icon: '🫀', route: '/(modals)/foundation-body' },
+  // Media & more
+  { key: 'news-my-way', label: 'News My Way', icon: '📰', route: '/news-my-way' },
+  // Conversation & support
+  { key: 'pre-check', label: 'Pre-Check', icon: '✅', route: '/(modals)/pre-conversation-check' },
+  { key: 'reach-out', label: 'Reach Out', icon: '🤲', route: '/(modals)/reach-out-scaffold' },
+  { key: 'quick-reset', label: 'Quick Reset', icon: '🌬️', route: '/tools/quick-reset' },
+  { key: 'focus', label: 'Focus', icon: '⏱️', route: '/tools/focus' },
+  { key: 'habits', label: 'Habits', icon: '📋', route: '/habits' },
+  { key: 'creativity', label: 'Creativity', icon: '✨', route: '/tools/creativity' },
+  { key: 'decision', label: 'Decision', icon: '🔀', route: '/tools/decision' },
+  { key: 'bias-check', label: 'Bias Check', icon: '🧠', route: '/tools/bias-check' },
+  { key: 'share-insight', label: 'Share Insight', icon: '💡', route: '/(modals)/share-insight' },
+  { key: 'drift', label: 'Drift', icon: '📐', route: '/(modals)/drift-detector' },
+  { key: 'awe', label: 'Awe', icon: '🌟', route: '/(modals)/awe-activities' },
+  { key: 'crisis', label: 'Crisis', icon: '🆘', route: '/(modals)/crisis-resources' },
+  { key: 'learning-style', label: 'Learning Style', icon: '📚', route: '/(modals)/learning-style-quiz' },
+];
 
 const ALL_ACTIVITIES: ActivitySuggestion[] = [
   { id: 'breathing', emoji: '🌬️', title: 'Breathe with me', sub: 'Box breathing — 4 in, 4 hold, 4 out. Calms your nervous system.' },
@@ -286,8 +340,12 @@ export default function HomeScreen() {
   // Crisis Pipeline - monitors gauge persistence for safety alerts
   const { showAlert: showCrisisAlert, setShowAlert: setShowCrisisAlert, hasAlert: hasCrisisAlert } = useCrisisPipelineCheck();
 
+  const sections = useAdaptiveHomeSections();
+  const { invitation, refresh: refreshInvitation } = usePendingInvitation();
+
   useEffect(() => {
     useCockpitStore.getState().runDailyDecayIfNeeded();
+    ensureFirstLaunchDate();
   }, []);
 
   // Compute system mode whenever gauges change
@@ -511,9 +569,25 @@ export default function HomeScreen() {
     >
       <HomeHeader userName={user?.name?.trim().split(/\s+/)[0] ?? 'there'} />
 
-      <WeeklyInsightCard />
+      {sections.showWeeklyInsight && <WeeklyInsightPrompt />}
+
+      <UnifiedInsightCard />
+
+      {sections.showYourLifeToday && (
+        <YourLifeTodaySection
+          onPressCheckIn={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/(modals)/cockpit-checkin');
+          }}
+        />
+      )}
+
+      {sections.showWrapped && <LifeWrappedPreview />}
+
+      {sections.showForecast && <ForecastCard />}
 
       {/* 2. Six Gauges — Hex cockpit (CockpitCluster) */}
+      {sections.showCockpit && (
       <View style={styles.cockpitSection}>
         <CockpitCluster
           gaugeValues={{
@@ -543,7 +617,19 @@ export default function HomeScreen() {
         >
           <Text style={styles.gaugeInfoIconText}>ⓘ</Text>
         </Pressable>
+        <View style={styles.cockpitShareRow}>
+          <CockpitShareButton compact />
+          <ShareCockpitChip />
+          <WinButton />
+        </View>
       </View>
+      )}
+
+      {sections.showGaugeSuggestions && <GaugeTriggeredSuggestions limit={3} />}
+
+      <HabitsWidget />
+
+      {sections.showDailyInsight && <DailyInsight />}
 
       {/* 3. Tap to check in — shown below cockpit if needed */}
       {needsCheckInToday && (
@@ -558,20 +644,11 @@ export default function HomeScreen() {
         </Pressable>
       )}
 
-      {/* Toolkit — 9 tools, horizontal scroll */}
+      {/* Toolkit — all tools, horizontal scroll */}
+      {sections.showToolsGrid && sections.toolLimit > 0 && (
       <View style={styles.quickActionsWrap}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
-          {[
-            { key: 'decode', label: 'Decode', icon: '🔍', route: '/(modals)/decode' as const },
-            { key: 'resolve', label: 'Resolve', icon: '🤝', route: '/(modals)/resolve' as const },
-            { key: 'roleplay', label: 'Role Play', icon: '🎭', route: '/(modals)/role-play' as const },
-            { key: 'referee', label: 'Referee', icon: '⚖️', route: '/(modals)/referee' as const },
-            { key: 'replay', label: 'Replay', icon: '🔄', route: '/(modals)/replay' as const },
-            { key: 'relate', label: 'Relate', icon: '💬', route: '/(modals)/relate' as const },
-            { key: 'prompts', label: 'Prompts', icon: '✨', route: '/(modals)/prompt-generator' as const },
-            { key: 'love', label: 'Love', icon: '❤️', route: '/(modals)/love' as const },
-            { key: 'help', label: 'Help', icon: '🆘', route: '/(modals)/help-someone' as const },
-          ].map((item) => (
+          {ALL_TOOLS.slice(0, sections.toolLimit).map((item) => (
             <Pressable
               key={item.key}
               style={({ pressed }) => [styles.quickActionPill, pressed && styles.quickActionPressed]}
@@ -586,6 +663,7 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
       </View>
+      )}
 
       {/* 4. Greeting + Streak — smaller text */}
       <View style={styles.greetingStreakRow}>
@@ -603,13 +681,15 @@ export default function HomeScreen() {
       </View>
 
       {/* 5. Psych Says — one card (cross-system insight or daily psych says) */}
+      {sections.showPsychSays && (
       <Animated.View style={[styles.card, styles.psychCard, slideY(card1)]}>
         <Text style={styles.psychLabel}>Psych says...</Text>
         <Text style={styles.psychText}>{psychSaysContent}</Text>
       </Animated.View>
+      )}
 
       {/* 6. Discovery — daily discovery card */}
-      {discoveryPreview && (
+      {sections.showDiscovery && discoveryPreview && (
         <Animated.View style={[styles.card, slideY(card2)]}>
           <Text style={styles.cardSectionTitle}>Discovery</Text>
           <Pressable
@@ -680,7 +760,7 @@ export default function HomeScreen() {
         </ScrollView>
       </Animated.View>
 
-      {weeklySummary && (
+      {sections.showWeeklyInsight && weeklySummary && (
         <Animated.View style={[styles.card, styles.weeklyCard, slideY(card3)]}>
           <Text style={styles.cardSectionTitle}>Your week in review</Text>
           <Text style={styles.weeklyLine}>{weeklySummary.line}</Text>
@@ -704,6 +784,13 @@ export default function HomeScreen() {
           </View>
         </Pressable>
       </Modal>
+
+      <FeatureInvitationModal
+        invitation={invitation}
+        onDismiss={refreshInvitation}
+        onMarkLowState={markLowStateSeen}
+        onMarkLowConnection={markLowConnectionSeen}
+      />
     </ScrollView>
     </ErrorBoundary>
   );
@@ -759,6 +846,7 @@ const styles = StyleSheet.create({
   cockpitTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 8 },
   gaugeInfoIcon: { padding: 8, marginLeft: 4 },
   gaugeInfoIconText: { fontSize: 16, color: '#FFFFFF' },
+  cockpitShareRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 12 },
   gaugeTile: {
     width: '31%',
     minWidth: 100,

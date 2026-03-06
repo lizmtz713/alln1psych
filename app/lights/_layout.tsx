@@ -18,6 +18,8 @@ export default function LightsLayout() {
       <Stack.Screen name="log-entry" options={{ title: 'Log connection' }} />
       <Stack.Screen name="add" options={{ title: 'Add a Light' }} />
       <Stack.Screen name="world" options={{ title: 'World Temperature' }} />
+      <Stack.Screen name="map" options={{ title: 'Lights Map' }} />
+      <Stack.Screen name="radar" options={{ title: 'Constellation' }} />
       <Stack.Screen name="insights" options={{ title: 'Lights Insights' }} />
       <Stack.Screen name="learn" options={{ title: 'The Art of Friendship' }} />
       <Stack.Screen name="lessons" options={{ headerShown: false }} />

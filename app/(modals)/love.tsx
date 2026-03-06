@@ -717,6 +717,64 @@ export default function LoveScreen() {
               </Pressable>
             </AnimatedCard>
 
+            {/* Relationships: Datesume & Love History */}
+            <AnimatedCard delay={200}>
+              <View style={styles.languagesSectionHeader}>
+                <Text style={styles.sectionTitle}>Relationships</Text>
+                <Text style={styles.sectionSubtitle}>
+                  Your dating profile and relationship history.
+                </Text>
+              </View>
+            </AnimatedCard>
+            <AnimatedCard delay={250}>
+              <Pressable
+                style={styles.featuredCard}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push('/love/datesume');
+                }}
+              >
+                <LinearGradient
+                  colors={['rgba(236, 72, 153, 0.12)', 'transparent']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={[styles.featuredIcon, { backgroundColor: 'rgba(236, 72, 153, 0.15)' }]}>
+                  <Text style={styles.featuredEmoji}>💝</Text>
+                </View>
+                <View style={styles.featuredContent}>
+                  <Text style={styles.featuredTitle}>Datesume</Text>
+                  <Text style={styles.featuredDesc}>Your dating resume — who you are, what you bring, what you've learned</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+              </Pressable>
+            </AnimatedCard>
+            <AnimatedCard delay={280}>
+              <Pressable
+                style={styles.featuredCard}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push('/love-history');
+                }}
+              >
+                <LinearGradient
+                  colors={['rgba(244, 63, 94, 0.08)', 'transparent']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={[styles.featuredIcon, { backgroundColor: 'rgba(244, 63, 94, 0.12)' }]}>
+                  <Text style={styles.featuredEmoji}>💔</Text>
+                </View>
+                <View style={styles.featuredContent}>
+                  <Text style={styles.featuredTitle}>Love History</Text>
+                  <Text style={styles.featuredDesc}>Past relationships, patterns, and insights</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
+              </Pressable>
+            </AnimatedCard>
+
             {/* 5 Love Languages Section */}
             <AnimatedCard delay={200}>
               <View style={styles.languagesSectionHeader}>

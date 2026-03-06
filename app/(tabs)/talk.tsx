@@ -29,6 +29,7 @@ import * as Voice from '../../src/services/voice';
 import type { CommunicationPreference } from '../../src/stores/userStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useUsageStore } from '../../src/stores/usageStore';
+import { useHumanSkillsStore, AI_TALK_SKILL_IDS, SKILL_POINTS } from '../../src/stores/humanSkillsStore';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { CrisisOverlay } from '../../src/components/CrisisOverlay';
@@ -436,6 +437,7 @@ export default function TalkScreen() {
       }
       addMessage({ role: 'assistant', content: response, isVoice: false });
       incrementAIUsage(); // Track for free tier limits
+      useHumanSkillsStore.getState().addPoints(AI_TALK_SKILL_IDS, SKILL_POINTS.aiTalk, 'ai-talk');
       if (useSettingsStore.getState().aiVoiceEnabled && response?.trim()) {
         setTtsState('loading');
         Voice.speakWithOpenAI(response)
@@ -494,6 +496,7 @@ export default function TalkScreen() {
           addMessage({ role: 'assistant', content: "I'm having trouble connecting right now. Try again in a moment.", isVoice: false });
         } else {
           addMessage({ role: 'assistant', content: response, isVoice: false });
+          useHumanSkillsStore.getState().addPoints(AI_TALK_SKILL_IDS, SKILL_POINTS.aiTalk, 'ai-talk');
         }
         if (useSettingsStore.getState().aiVoiceEnabled && response?.trim() && !response?.startsWith('[AI Error')) {
           setTtsState('loading');
@@ -707,6 +710,7 @@ export default function TalkScreen() {
                     addMessage({ role: 'assistant', content: "I'm having trouble connecting right now. Try again in a moment.", isVoice: false });
                   } else {
                     addMessage({ role: 'assistant', content: response, isVoice: false });
+                    useHumanSkillsStore.getState().addPoints(AI_TALK_SKILL_IDS, SKILL_POINTS.aiTalk, 'ai-talk');
                   }
                   if (useSettingsStore.getState().aiVoiceEnabled && response?.trim() && !response?.startsWith('[AI Error')) {
                     setTtsState('loading');

@@ -61,6 +61,12 @@ export default function ModalsLayout() {
       <Stack.Screen name="foundation-body" options={{ presentation: 'modal' }} />
       <Stack.Screen name="foundation-state" options={{ presentation: 'modal' }} />
       <Stack.Screen name="foundation-emotion" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="attraction" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="attachment-style" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="boundaries" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="difficult-people" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="critical-thinking" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="red-green-flags" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

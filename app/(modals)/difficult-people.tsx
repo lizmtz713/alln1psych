@@ -123,7 +123,7 @@ export default function DifficultPeopleScreen() {
         style={styles.crisisBanner}
         onPress={() => router.push('/(modals)/crisis-resources')}
       >
-        <Ionicons name="shield-checkmark" size={20} color={COLORS.crisis ?? '#EF5350'} />
+        <Ionicons name="shield-checkmark" size={20} color={COLORS.red} />
         <Text style={styles.crisisBannerText}>Crisis & safety resources</Text>
         <Ionicons name="chevron-forward" size={18} color={TEXT_MUTED} />
       </Pressable>

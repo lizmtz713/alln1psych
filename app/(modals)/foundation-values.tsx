@@ -138,8 +138,7 @@ export default function FoundationValuesScreen() {
                     <View style={styles.priorityRank}><Text style={styles.priorityRankText}>{index + 1}</Text></View>
                     <Text style={styles.priorityValue}>{value}</Text>
                     <Pressable onPress={() => handleMovePriority(index, 'up')} disabled={index === 0}><Ionicons name="chevron-up" size={20} color={index === 0 ? '#444' : '#FFF'} /></Pressable>
-                    <Pressable onPress={() => handleMovePriority(index, 'down')} disa
-                    bled={index === prioritizedValues.length - 1}><Ionicons name="chevron-down" size={20} color={index === prioritizedValues.length - 1 ? '#444' : '#FFF'} /></Pressable>
+                    <Pressable onPress={() => handleMovePriority(index, 'down')} disabled={index === prioritizedValues.length - 1}><Ionicons name="chevron-down" size={20} color={index === prioritizedValues.length - 1 ? '#444' : '#FFF'} /></Pressable>
                     </View>
                   ))}
                 </View>

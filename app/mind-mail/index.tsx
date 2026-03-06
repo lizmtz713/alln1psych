@@ -17,7 +17,10 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useMindMailStore, type MindMail, type MindNote, type NoteType } from '../../src/stores/mindMailStore';
+import { useCircleStore } from '../../src/stores/circleStore';
 import { MindMailExplainer, getHasSeenMindMailOnboarding } from '../../src/components/mind-mail/MindMailExplainer';
+import { DailyConnectionPrompt } from '../../src/components/mind-mail/DailyConnectionPrompt';
+import { ConnectionsList } from '../../src/components/mind-mail/ConnectionsList';
 import { COLORS, BORDER_RADIUS, SPACING } from '../../src/lib/constants';
 
 const NOTE_TYPE_CONFIG: Record<NoteType, { emoji: string; label: string }> = {
@@ -53,15 +56,37 @@ function previewSnippet(text: string, maxLen = 50): string {
   return t.length <= maxLen ? t : t.slice(0, maxLen).trim() + '…';
 }
 
+function formatVoiceDuration(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 function InboxRow({ mail, onPress }: { mail: MindMail; onPress: () => void }) {
   const config = NOTE_TYPE_CONFIG[mail.noteType] || NOTE_TYPE_CONFIG.general;
   const isUnread = mail.status === 'pending';
-  const sendLabel = mail.isAnonymous ? 'Anon' : 'Open';
+  const isGlimpse = mail.glimpseViewSeconds != null;
+  const glimpseViewed = !!mail.glimpseViewedAt;
+  const hasVoice = mail.hasVoice === true;
+  const sendLabel = isGlimpse
+    ? glimpseViewed
+      ? 'Glimpse · Viewed'
+      : 'Glimpse'
+    : mail.isAnonymous
+    ? 'Anon'
+    : 'Open';
+
+  const preview =
+    hasVoice && mail.voiceDurationSec != null
+      ? `Voice (${formatVoiceDuration(mail.voiceDurationSec)})`
+      : isGlimpse && !glimpseViewed
+      ? 'Tap to view once (disappears)'
+      : previewSnippet(mail.content);
 
   return (
     <Pressable style={[styles.row, isUnread && styles.rowUnread]} onPress={onPress}>
       <View style={[styles.rowIcon, isUnread && styles.rowIconUnread]}>
-        <Text style={styles.rowEmoji}>{config.emoji}</Text>
+        <Text style={styles.rowEmoji}>{hasVoice ? '🎤' : isGlimpse ? '✨' : config.emoji}</Text>
       </View>
       <View style={styles.rowBody}>
         <View style={styles.rowTop}>
@@ -70,9 +95,16 @@ function InboxRow({ mail, onPress }: { mail: MindMail; onPress: () => void }) {
           </Text>
           <Text style={styles.rowTime}>{formatRelativeTime(mail.createdAt)}</Text>
         </View>
-        <Text style={styles.rowPreview} numberOfLines={1}>{previewSnippet(mail.content)}</Text>
+        <Text style={styles.rowPreview} numberOfLines={1}>
+          {preview}
+        </Text>
         <View style={styles.badgeRow}>
-          <View style={[styles.badge, styles.badgeType]}>
+          {hasVoice && (
+            <View style={[styles.badge, styles.badgeVoice]}>
+              <Text style={styles.badgeText}>Voice</Text>
+            </View>
+          )}
+          <View style={[styles.badge, styles.badgeType, isGlimpse && styles.badgeGlimpse]}>
             <Text style={styles.badgeText}>{sendLabel}</Text>
           </View>
         </View>
@@ -124,9 +156,13 @@ function DraftRow({ note, onPress }: { note: MindNote; onPress: () => void }) {
   );
 }
 
+type TopMode = 'connections' | 'messages';
+
 export default function MindMailInboxScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const members = useCircleStore((s) => s.members ?? []);
+  const [topMode, setTopMode] = useState<TopMode>('connections');
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent' | 'drafts' | 'archive'>('inbox');
   const [showExplainer, setShowExplainer] = useState(false);
@@ -164,6 +200,12 @@ export default function MindMailInboxScreen() {
 
   const handleInboxPress = async (mail: MindMail) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const isGlimpse = mail.glimpseViewSeconds != null;
+    const notYetViewed = !mail.glimpseViewedAt;
+    if (isGlimpse && notYetViewed) {
+      router.push({ pathname: '/mind-mail/glimpse-view', params: { mailId: mail.id } });
+      return;
+    }
     if (mail.status === 'pending') await markMailRead(mail.id);
     router.push(`/mind-mail/${mail.id}`);
   };
@@ -181,6 +223,13 @@ export default function MindMailInboxScreen() {
   const handleArchivePress = (mail: MindMail) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(`/mind-mail/${mail.id}`);
+  };
+
+  const handleSelectPerson = (id: string, name: string) => {
+    router.push({
+      pathname: '/mind-mail/compose',
+      params: { recipientId: id, recipientName: name, from: 'connections' },
+    });
   };
 
   return (
@@ -202,6 +251,46 @@ export default function MindMailInboxScreen() {
           </Pressable>
         </View>
 
+        <View style={styles.topToggle}>
+          <Pressable
+            style={[styles.topToggleBtn, topMode === 'connections' && styles.topToggleBtnActive]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setTopMode('connections');
+            }}
+          >
+            <Text style={[styles.topToggleText, topMode === 'connections' && styles.topToggleTextActive]}>
+              Connections
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.topToggleBtn, topMode === 'messages' && styles.topToggleBtnActive]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setTopMode('messages');
+            }}
+          >
+            <Text style={[styles.topToggleText, topMode === 'messages' && styles.topToggleTextActive]}>
+              Messages
+            </Text>
+          </Pressable>
+        </View>
+
+        {topMode === 'connections' ? (
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />
+            }
+          >
+            <View style={styles.connectionsContent}>
+              <DailyConnectionPrompt />
+              <ConnectionsList members={members} onSelectPerson={handleSelectPerson} />
+            </View>
+          </ScrollView>
+        ) : (
+          <>
         <View style={styles.tabs}>
           {[
             { id: 'inbox' as const, label: 'Inbox', count: unreadCount },
@@ -307,6 +396,8 @@ export default function MindMailInboxScreen() {
             </>
           )}
         </ScrollView>
+          </>
+        )}
       </View>
 
       <MindMailExplainer
@@ -331,6 +422,37 @@ const styles = StyleSheet.create({
   backBtn: { padding: 4 },
   title: { fontSize: 18, fontWeight: '600', color: COLORS.text },
   composeBtn: { padding: 4 },
+  topToggle: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  topToggleBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: BORDER_RADIUS.input,
+    backgroundColor: COLORS.surface,
+  },
+  topToggleBtnActive: {
+    backgroundColor: COLORS.accentBg,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+  },
+  topToggleText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: COLORS.textSecondary,
+  },
+  topToggleTextActive: {
+    color: COLORS.accent,
+  },
+  connectionsContent: {
+    paddingHorizontal: 16,
+    paddingBottom: SPACING.xl,
+  },
   tabs: {
     flexDirection: 'row',
     paddingHorizontal: 16,
@@ -397,6 +519,8 @@ const styles = StyleSheet.create({
   badgeRow: { flexDirection: 'row', marginTop: 6, gap: 6 },
   badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   badgeType: { backgroundColor: COLORS.surfaceElevated },
+  badgeGlimpse: { backgroundColor: 'rgba(224, 124, 124, 0.25)' },
+  badgeVoice: { backgroundColor: 'rgba(13, 148, 136, 0.25)' },
   badgeStatus: { backgroundColor: COLORS.surfaceElevated },
   badgeText: { fontSize: 11, color: COLORS.textMuted, fontWeight: '600' },
   unreadDot: {

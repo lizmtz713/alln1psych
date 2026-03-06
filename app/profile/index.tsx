@@ -12,6 +12,7 @@ import { useUserStore } from '../../src/stores/userStore';
 import { COLORS } from '../../src/lib/constants';
 
 const ABOUT_YOU = [
+  { route: '/profile/human-profile', emoji: '🪞', title: 'Human Profile', subtitle: 'Identity, purpose, life blueprint from the 12 questions' },
   { route: '/your-story', emoji: '📖', title: 'Your Story', subtitle: 'Origins, culture, upbringing' },
   { route: '/profile/identity', emoji: '🪪', title: 'Identity', subtitle: 'Body, disability, gender' },
   { route: '/profile/how-you-connect', emoji: '🤝', title: 'How You Connect', subtitle: 'Love language, communication' },

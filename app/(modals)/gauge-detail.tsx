@@ -16,8 +16,13 @@ import { GAUGE_CONFIG, getGaugeStatusLabel } from '../../src/utils/gaugeHelpers'
 import { useCircleStore } from '../../src/stores/circleStore';
 import { getDailyFact } from '../../src/data/psychKnowledge';
 import { GaugeArc } from '../../src/components/gauges/GaugeArc';
+import { GaugeToolSuggestions } from '../../src/components/gauges/GaugeToolSuggestions';
+import { GaugeInsight } from '../../src/components/gauges/GaugeInsight';
 import { ACADEMIC_SOURCES, getInsightsForGauge, type GaugeType } from '../../src/data/academicSources';
+import { useGeneratedInsights } from '../../src/hooks/useGeneratedInsights';
+import { GeneratedInsightCard } from '../../src/components/insights/GeneratedInsightCard';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../../src/lib/constants';
+import { useSleepStore } from '../../src/stores/sleepStore';
 
 // Using design system colors (v2.0 - Oura-inspired)
 const COCKPIT_BG = COLORS.background;
@@ -126,6 +131,12 @@ export default function GaugeDetailScreen() {
   const statusLabel = getStatusLabel(value);
   const content = GAUGE_DETAIL_CONTENT[gaugeId] ?? GAUGE_DETAIL_CONTENT.body;
 
+  const { insights: generatedInsights } = useGeneratedInsights({
+    context: 'gauge',
+    gauge: gaugeId,
+    withHistory: true,
+  });
+
   if (!config) {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -179,6 +190,42 @@ export default function GaugeDetailScreen() {
           />
           <TrendIndicator trend={trend} />
         </View>
+
+        <GaugeToolSuggestions gauge={gaugeId} value={value >= 0 ? value : 0} trend={trend} limit={3} />
+
+        {/* Personalize this gauge — goals, what it means for you, reminders */}
+        <Pressable
+          style={({ pressed }) => [styles.card, pressed && { opacity: 0.9 }]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push(`/profile/gauges/${gaugeId}` as any);
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View>
+              <Text style={styles.cardTitle}>Personalize this gauge</Text>
+              <Text style={[styles.cardBody, { marginTop: 4, marginBottom: 0 }]}>
+                Set goals, what {config.label} means for you, and reminders
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={ACCENT} />
+          </View>
+        </Pressable>
+
+        <GaugeInsight gauge={gaugeId} limit={3} />
+
+        {/* 2a. Unified Insight Engine — From your data */}
+        {generatedInsights.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>From your data</Text>
+            <Text style={[styles.cardBody, { marginBottom: 12 }]}>
+              What we're seeing from your gauges and check-ins.
+            </Text>
+            {generatedInsights.map((insight) => (
+              <GeneratedInsightCard key={insight.id} insight={insight} variant="compact" />
+            ))}
+          </View>
+        )}
 
         {/* 2b. Knowledge base — Did you know? */}
         {(() => {
@@ -290,6 +337,54 @@ export default function GaugeDetailScreen() {
                     </View>
                   ))}
                 </View>
+              )}
+            </View>
+          );
+        })()}
+
+        {/* 7. SLEEP & BODY — When gauge is Body, show sleep correlation */}
+        {gaugeId === 'body' && (() => {
+          const getRecent = useSleepStore.getState().getRecent;
+          const recentSleep = getRecent(14);
+          const bodyValue = value >= 0 ? value : null;
+          const avgHours = recentSleep.length > 0
+            ? recentSleep.reduce((s, r) => s + r.hours, 0) / recentSleep.length
+            : null;
+          const goodNights = recentSleep.filter((r) => r.hours >= 7).length;
+          const poorNights = recentSleep.filter((r) => r.hours < 6 || r.quality <= 2).length;
+          return (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>😴 Sleep & Body</Text>
+              {recentSleep.length === 0 ? (
+                <Text style={styles.cardBody}>
+                  Log sleep in Pre-Flight (or connect Apple Health) to see how sleep correlates with your Body gauge.
+                </Text>
+              ) : (
+                <>
+                  <Text style={styles.cardBody}>
+                    Last 14 days: {recentSleep.length} night{recentSleep.length !== 1 ? 's' : ''} logged.
+                    {avgHours != null && ` Average ${avgHours.toFixed(1)} hours.`}
+                  </Text>
+                  {goodNights > 0 && (
+                    <Text style={[styles.cardBody, { marginTop: 8, color: COLORS.gauges.body }]}>
+                      On nights you slept 7+ hours, Body tends to benefit. Keep it up.
+                    </Text>
+                  )}
+                  {poorNights > 0 && bodyValue != null && bodyValue < 50 && (
+                    <Text style={[styles.cardBody, { marginTop: 6, fontStyle: 'italic' }]}>
+                      When sleep is short or quality is low, Body often dips. Pre-Flight helps track it.
+                    </Text>
+                  )}
+                  <Pressable
+                    style={{ marginTop: 12 }}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push('/rituals/pre-flight');
+                    }}
+                  >
+                    <Text style={styles.linkText}>Log sleep in Pre-Flight</Text>
+                  </Pressable>
+                </>
               )}
             </View>
           );

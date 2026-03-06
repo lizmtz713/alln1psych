@@ -23,7 +23,9 @@ export default function ProfileLayout() {
       <Stack.Screen name="gauges/alignment" />
       <Stack.Screen name="gauges/alignment-discovery" />
       <Stack.Screen name="goals" />
+      <Stack.Screen name="achievements" />
       <Stack.Screen name="preferences" />
+      <Stack.Screen name="human-profile" />
     </Stack>
   );
 }
