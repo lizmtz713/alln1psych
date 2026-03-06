@@ -18,10 +18,11 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { useShallow } from 'zustand/react/shallow';
 import { useCircleStore } from '../../src/stores/circleStore';
-import { useLightsStore, computeLights } from '../../src/stores/lightsStore';
+import { useLightsStore } from '../../src/stores/lightsStore';
+import { useDailyAnchorsStore } from '../../src/stores/dailyAnchorsStore';
 import { computeConstellationNodes } from '../../src/services/lightsConstellation';
+import { getLastInteractionSummary } from '../../src/services/timelineEngine';
 import type { ConstellationNode } from '../../src/types/lightsConstellation';
 import { ConstellationRadar } from '../../src/components/lights/ConstellationRadar';
 import { ConstellationTimeline } from '../../src/components/lights/ConstellationTimeline';
@@ -35,20 +36,15 @@ export default function ConstellationScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const members = useCircleStore((s) => s.members);
-  const persistState = useLightsStore(useShallow((s) => ({
-    tierByMemberId: s.tierByMemberId,
-    connectionLogByMemberId: s.connectionLogByMemberId,
-    lastContactByMemberId: s.lastContactByMemberId,
-    lightExtrasByMemberId: s.lightExtrasByMemberId,
-  })));
-
-  const lights = useMemo(() => computeLights(members, persistState), [members, persistState]);
+  const lights = useLightsStore((s) => s.getLights(members ?? []));
   const allNodes = useMemo(() => computeConstellationNodes(lights), [lights]);
+  const lastTransmittedToId = useDailyAnchorsStore((s) => s.lastTransmittedToId);
+  const setLastTransmittedToId = useDailyAnchorsStore((s) => s.setLastTransmittedToId);
 
   const [selectedNode, setSelectedNode] = useState<ConstellationNode | null>(null);
   const [timelineRange, setTimelineRange] = useState<'7d' | '30d' | 'all'>('all');
-  /** Progressive reveal: five | fifteen | fifty | all */
-  const [revealLevel, setRevealLevel] = useState<'five' | 'fifteen' | 'fifty' | 'all'>('five');
+  /** Progressive reveal: five | fifteen | fifty | all. Default = top 15 (low cognitive load). */
+  const [revealLevel, setRevealLevel] = useState<'five' | 'fifteen' | 'fifty' | 'all'>('fifteen');
 
   const tierOrder = ['five', 'fifteen', 'fifty', 'network'] as const;
   const nodes = useMemo(() => {
@@ -85,6 +81,8 @@ export default function ConstellationScreen() {
     }
   };
 
+  const selectedLight = selectedNode ? lights.find((l) => l.id === selectedNode.id) : null;
+
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       {/* Zone 1: Radar */}
@@ -92,7 +90,7 @@ export default function ConstellationScreen() {
         <View style={styles.titleRow}>
           <View>
             <Text style={styles.title}>Your constellation</Text>
-            <Text style={styles.subtitle}>Your 5 are closest. Tap any light to see who needs you.</Text>
+            <Text style={styles.subtitle}>You're at the center. Connections you strengthen in Signals show here.</Text>
           </View>
           <Pressable onPress={handleShare} style={styles.shareBtn} hitSlop={12}>
             <Ionicons name="share-outline" size={22} color={COLORS.textMuted} />
@@ -103,6 +101,8 @@ export default function ConstellationScreen() {
             nodes={nodes}
             onNodePress={handleNodePress}
             selectedId={selectedNode?.id ?? null}
+            recentlyConnectedId={nodes.some((n) => n.id === lastTransmittedToId) ? lastTransmittedToId : null}
+            onRecentGlowComplete={() => setLastTransmittedToId(null)}
             size={Math.min(width - 32, RADAR_SIZE)}
           />
         </View>
@@ -133,6 +133,7 @@ export default function ConstellationScreen() {
         {selectedNode ? (
           <ConstellationPersonCard
             node={selectedNode}
+            lastInteractionSummary={selectedLight ? getLastInteractionSummary(selectedLight) : undefined}
             onClose={() => setSelectedNode(null)}
             onOpenFull={handleOpenFull}
             onLogContact={handleLogContact}

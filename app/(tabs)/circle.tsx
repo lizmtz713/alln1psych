@@ -1,865 +1,479 @@
-import { useState, useEffect } from 'react';
+/**
+ * Mind Mail Inbox — email-like inbox with Inbox / Sent / Drafts / Archive tabs
+ */
+
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Pressable,
   ScrollView,
-  TextInput,
-  Linking,
-  LayoutAnimation,
-  Platform,
-  UIManager,
   RefreshControl,
-  Alert,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import * as Haptics from 'expo-haptics';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
-import { TemperatureGauge } from '../../src/components/circle/TemperatureGauge';
-import MirroringPrompt from '../../src/components/MirroringPrompt';
-import {
-  useCircleStore,
-  TEMPERATURE_LABELS,
-  type CircleMember,
-  type Temperature,
-  type Nudge,
-} from '../../src/stores/circleStore';
-import { useUserStore } from '../../src/stores/userStore';
-import { getPersonality, getRelationshipDynamic } from '../../src/services/personology';
-import { useHeartNotesStore } from '../../src/stores/heartNotesStore';
+import { useMindMailStore, type MindMail, type MindNote, type NoteType } from '../../src/stores/mindMailStore';
+import { useCircleStore } from '../../src/stores/circleStore';
+import { MindMailExplainer, getHasSeenMindMailOnboarding } from '../../src/components/mind-mail/MindMailExplainer';
+import { DailyConnectionPrompt } from '../../src/components/mind-mail/DailyConnectionPrompt';
+import { ConnectionsList } from '../../src/components/mind-mail/ConnectionsList';
+import { COLORS, BORDER_RADIUS, SPACING } from '../../src/lib/constants';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
-const SUGGESTED_ACTIONS: Record<Temperature, (name: string) => string> = {
-  green: () => 'All good! No action needed.',
-  yellow: (name) => `${name} could use some love. Maybe send a text?`,
-  orange: (name) => `${name} is having a hard time. A call would mean a lot.`,
-  red: (name) => `${name} is really struggling. Please reach out.`,
+const NOTE_TYPE_CONFIG: Record<NoteType, { emoji: string; label: string }> = {
+  general: { emoji: '💌', label: 'Message' },
+  gratitude: { emoji: '🙏', label: 'Gratitude' },
+  concern: { emoji: '💭', label: 'Concern' },
+  apology: { emoji: '🤝', label: 'Apology' },
+  forgiveness: { emoji: '💜', label: 'Forgiveness' },
+  boundary: { emoji: '🚧', label: 'Boundary' },
+  grief: { emoji: '🕊️', label: 'Support' },
+  encouragement: { emoji: '✨', label: 'Encouragement' },
 };
 
-const DEMO_MEMBER_IDS = ['demo-mom', 'demo-sarah', 'demo-dad'];
+function formatRelativeTime(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
 
-function formatBirthday(iso: string | undefined): string {
-  if (!iso) return '';
-  const [y, m, d] = iso.split('-');
-  if (!m || !d) return iso;
-  return `${m}/${d}/${y}`;
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return date.toLocaleDateString([], { weekday: 'short' });
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
-function formatBirthdayInput(text: string, setter: (t: string) => void): void {
-  const digits = text.replace(/\D/g, '');
-  let out = '';
-  if (digits.length > 0) out += digits.slice(0, 2);
-  if (digits.length > 2) out += '/' + digits.slice(2, 4);
-  if (digits.length > 4) out += '/' + digits.slice(4, 8);
-  setter(out);
+function previewSnippet(text: string, maxLen = 50): string {
+  const t = (text || '').trim();
+  if (!t) return '';
+  return t.length <= maxLen ? t : t.slice(0, maxLen).trim() + '…';
 }
 
-function parseBirthdayToIso(mmDdYyyy: string): string | undefined {
-  const parts = mmDdYyyy.split('/').map((p) => p.trim());
-  if (parts.length !== 3) return undefined;
-  const [mm, dd, yyyy] = parts;
-  if (!mm || !dd || !yyyy || mm.length !== 2 || dd.length !== 2 || yyyy.length !== 4) return undefined;
-  const m = parseInt(mm, 10);
-  const d = parseInt(dd, 10);
-  const y = parseInt(yyyy, 10);
-  if (m < 1 || m > 12 || d < 1 || d > 31 || y < 1900 || y > 2100) return undefined;
-  return `${y}-${mm}-${dd}`;
+function formatVoiceDuration(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export default function CircleScreen() {
+function InboxRow({ mail, onPress }: { mail: MindMail; onPress: () => void }) {
+  const config = NOTE_TYPE_CONFIG[mail.noteType] || NOTE_TYPE_CONFIG.general;
+  const isUnread = mail.status === 'pending';
+  const isGlimpse = mail.glimpseViewSeconds != null;
+  const glimpseViewed = !!mail.glimpseViewedAt;
+  const hasVoice = mail.hasVoice === true;
+  const sendLabel = isGlimpse
+    ? glimpseViewed
+      ? 'Glimpse · Viewed'
+      : 'Glimpse'
+    : mail.isAnonymous
+    ? 'Anon'
+    : 'Open';
+
+  const preview =
+    hasVoice && mail.voiceDurationSec != null
+      ? `Voice (${formatVoiceDuration(mail.voiceDurationSec)})`
+      : isGlimpse && !glimpseViewed
+      ? 'Tap to view once (disappears)'
+      : previewSnippet(mail.content);
+
+  return (
+    <Pressable style={[styles.row, isUnread && styles.rowUnread]} onPress={onPress}>
+      <View style={[styles.rowIcon, isUnread && styles.rowIconUnread]}>
+        <Text style={styles.rowEmoji}>{hasVoice ? '🎤' : isGlimpse ? '✨' : config.emoji}</Text>
+      </View>
+      <View style={styles.rowBody}>
+        <View style={styles.rowTop}>
+          <Text style={[styles.rowFrom, isUnread && styles.rowFromUnread]} numberOfLines={1}>
+            {mail.isAnonymous ? 'Someone in your Circle' : (mail.senderName || 'Someone')}
+          </Text>
+          <Text style={styles.rowTime}>{formatRelativeTime(mail.createdAt)}</Text>
+        </View>
+        <Text style={styles.rowPreview} numberOfLines={1}>
+          {preview}
+        </Text>
+        <View style={styles.badgeRow}>
+          {hasVoice && (
+            <View style={[styles.badge, styles.badgeVoice]}>
+              <Text style={styles.badgeText}>Voice</Text>
+            </View>
+          )}
+          <View style={[styles.badge, styles.badgeType, isGlimpse && styles.badgeGlimpse]}>
+            <Text style={styles.badgeText}>{sendLabel}</Text>
+          </View>
+        </View>
+      </View>
+      {isUnread && <View style={styles.unreadDot} />}
+    </Pressable>
+  );
+}
+
+function SentRow({ note, onPress }: { note: MindNote; onPress: () => void }) {
+  const config = NOTE_TYPE_CONFIG[note.noteType] || NOTE_TYPE_CONFIG.general;
+  const statusLabel = note.status === 'pending' ? 'Awaiting' : note.status === 'shared' ? 'Delivered' : 'Sent';
+
+  return (
+    <Pressable style={styles.row} onPress={onPress}>
+      <View style={styles.rowIcon}>
+        <Text style={styles.rowEmoji}>{config.emoji}</Text>
+      </View>
+      <View style={styles.rowBody}>
+        <View style={styles.rowTop}>
+          <Text style={styles.rowFrom}>To: {note.recipientName}</Text>
+          <Text style={styles.rowTime}>{formatRelativeTime(note.updatedAt || note.createdAt)}</Text>
+        </View>
+        <Text style={styles.rowPreview} numberOfLines={1}>{previewSnippet(note.content)}</Text>
+        <View style={styles.badgeRow}>
+          <View style={[styles.badge, styles.badgeStatus]}>
+            <Text style={styles.badgeText}>{statusLabel}</Text>
+          </View>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+function DraftRow({ note, onPress }: { note: MindNote; onPress: () => void }) {
+  return (
+    <Pressable style={styles.row} onPress={onPress}>
+      <View style={styles.rowIcon}>
+        <Text style={styles.rowEmoji}>📝</Text>
+      </View>
+      <View style={styles.rowBody}>
+        <View style={styles.rowTop}>
+          <Text style={styles.rowFrom}>To: {note.recipientName || '—'}</Text>
+          <Text style={styles.rowTime}>{formatRelativeTime(note.updatedAt || note.createdAt)}</Text>
+        </View>
+        <Text style={styles.rowPreview} numberOfLines={1}>{previewSnippet(note.content) || 'Empty draft'}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
+type TopMode = 'connections' | 'messages';
+
+export default function MindMailInboxScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [expandedNudgeId, setExpandedNudgeId] = useState<string | null>(null);
+  const members = useCircleStore((s) => s.members ?? []);
+  const [topMode, setTopMode] = useState<TopMode>('connections');
   const [refreshing, setRefreshing] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-  const [editingBirthday, setEditingBirthday] = useState<string | null>(null);
-  const [editBirthdayValue, setEditBirthdayValue] = useState('');
-  const onRefresh = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 600);
-  };
+  const [activeTab, setActiveTab] = useState<'inbox' | 'sent' | 'drafts' | 'archive'>('inbox');
+  const [showExplainer, setShowExplainer] = useState(false);
 
-  const {
-    members,
-    myTemperature,
-    myTemperatureLabel,
-    nudges,
-    markNudgeRead,
-    markNudgeActedOn,
-    updateMemberBirthday,
-    updateMemberLoveLanguage,
-    getLoveLanguageNudge,
-  } = useCircleStore();
-
-  // Heart Mail
-  const { inbox, fetchInbox } = useHeartNotesStore();
-  const unreadCount = inbox.filter((m) => m.status === 'pending').length;
-  
   useEffect(() => {
-    fetchInbox().catch(() => {}); // Silently fail if not logged in
+    getHasSeenMindMailOnboarding().then((seen) => {
+      if (!seen) setShowExplainer(true);
+    });
   }, []);
 
-  const isDemoData = members.some((m) => DEMO_MEMBER_IDS.includes(m.id));
+  const {
+    inbox,
+    notes,
+    fetchInbox,
+    fetchNotes,
+    markMailRead,
+    loadInbox,
+    loadNotes,
+  } = useMindMailStore();
 
-  const handleUpdateTemp = () => {
-    router.push('/(modals)/mood-checkin');
+  const unreadCount = inbox.filter((m) => m.status === 'pending').length;
+  const sentNotes = notes.filter((n) => n.status === 'shared' || n.status === 'pending');
+  const draftNotes = notes.filter((n) => n.status === 'draft' || n.status === 'ready');
+  const archivedInbox = inbox.filter((m) => m.status === 'archived');
+
+  useEffect(() => {
+    loadInbox().catch(() => {});
+    loadNotes().catch(() => {});
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    Promise.all([fetchInbox(), fetchNotes()]).finally(() => setRefreshing(false));
   };
 
-  const toggleExpand = (id: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedId(expandedId === id ? null : id);
-  };
-
-  const toggleNudgeExpand = (n: Nudge) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedNudgeId(expandedNudgeId === n.id ? null : n.id);
-    if (!n.read) markNudgeRead(n.id);
-  };
-
-  const handleSendText = (m: CircleMember) => {
-    if (Platform.OS === 'ios') {
-      Alert.prompt(
-        `Send text to ${m.name}`,
-        'Enter their phone number',
-        (phone) => {
-          if (phone?.trim()) Linking.openURL(`sms:${phone.trim().replace(/\D/g, '')}`);
-        }
-      );
-    } else {
-      if (m.contactMethod && !m.contactMethod.includes('@')) {
-        Linking.openURL(`sms:${m.contactMethod.replace(/\D/g, '')}`);
-      } else {
-        Alert.alert(
-          `Send text to ${m.name}`,
-          'Enter their phone number in your circle, or open your messages app.',
-          [
-            { text: 'Open messages', onPress: () => Linking.openURL('sms:') },
-            { text: 'Cancel', style: 'cancel' },
-          ]
-        );
-      }
+  const handleInboxPress = async (mail: MindMail) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const isGlimpse = mail.glimpseViewSeconds != null;
+    const notYetViewed = !mail.glimpseViewedAt;
+    if (isGlimpse && notYetViewed) {
+      router.push({ pathname: '/mind-mail/glimpse-view', params: { mailId: mail.id } });
+      return;
     }
+    if (mail.status === 'pending') await markMailRead(mail.id);
+    router.push(`/mind-mail/${mail.id}`);
   };
 
-  const handleCall = (m: CircleMember) => {
-    if (Platform.OS === 'ios') {
-      Alert.prompt(
-        `Call ${m.name}`,
-        'Enter their phone number',
-        (phone) => {
-          if (phone?.trim()) Linking.openURL(`tel:${phone.trim().replace(/\D/g, '')}`);
-        }
-      );
-    } else {
-      if (m.contactMethod && !m.contactMethod.includes('@')) {
-        Linking.openURL(`tel:${m.contactMethod.replace(/\D/g, '')}`);
-      } else {
-        Alert.alert(
-          `Call ${m.name}`,
-          'Add their phone number in your circle, or open your dialer.',
-          [
-            { text: 'Open dialer', onPress: () => Linking.openURL('tel:') },
-            { text: 'Cancel', style: 'cancel' },
-          ]
-        );
-      }
-    }
+  const handleSentPress = (note: MindNote) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/mind-mail/${note.id}?sent=1`);
   };
 
-  const handleReachedOut = (m: CircleMember) => {
-    const n = nudges.find((x) => x.memberName === m.name);
-    if (n) markNudgeActedOn(n.id);
-    setToast('Reached out recorded');
-    setTimeout(() => setToast(null), 2000);
+  const handleDraftPress = (note: MindNote) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push({ pathname: '/mind-mail/compose', params: { draftId: note.id } });
   };
 
-  const saveBirthday = (memberId: string, value: string) => {
-    const iso = parseBirthdayToIso(value);
-    if (iso) {
-      updateMemberBirthday(memberId, iso);
-      setToast('Birthday saved');
-    } else {
-      setToast('Use MM/DD/YYYY');
-    }
-    setEditingBirthday(null);
-    setEditBirthdayValue('');
-    setTimeout(() => setToast(null), 2000);
+  const handleArchivePress = (mail: MindMail) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/mind-mail/${mail.id}`);
   };
 
-  const startEditBirthday = (m: CircleMember) => {
-    setEditingBirthday(m.id);
-    setEditBirthdayValue(m.birthday ? formatBirthday(m.birthday) : '');
+  const handleSelectPerson = (id: string, name: string) => {
+    router.push({
+      pathname: '/mind-mail/compose',
+      params: { recipientId: id, recipientName: name, from: 'connections' },
+    });
   };
 
   return (
     <ErrorBoundary>
-    <>
-      {toast ? (
-        <View style={[styles.toast, { top: insets.top + 10 }]} pointerEvents="none">
-          <Text style={styles.toastText}>{toast}</Text>
-        </View>
-      ) : null}
-      <ScrollView
-        style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />}
-      >
-        {/* Demo badge – dev only */}
-      {__DEV__ && isDemoData && (
-        <View style={styles.demoBadge}>
-          <Text style={styles.demoBadgeText}>Demo data</Text>
-        </View>
-      )}
-
-      {/* HEART MAIL BANNER */}
-      <Pressable 
-        style={[styles.heartMailBanner, unreadCount > 0 && styles.heartMailBannerActive]}
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          router.push('/(modals)/heart-inbox');
-        }}
-      >
-        <View style={styles.heartMailIcon}>
-          <Ionicons name="mail" size={20} color={unreadCount > 0 ? '#EC4899' : '#8888A0'} />
-          {unreadCount > 0 && (
-            <View style={styles.heartMailBadge}>
-              <Text style={styles.heartMailBadgeText}>{unreadCount}</Text>
-            </View>
-          )}
-        </View>
-        <View style={styles.heartMailText}>
-          <Text style={[styles.heartMailTitle, unreadCount > 0 && styles.heartMailTitleActive]}>
-            {unreadCount > 0 ? `${unreadCount} new Heart ${unreadCount === 1 ? 'Message' : 'Messages'}` : 'Heart Mail'}
-          </Text>
-          <Text style={styles.heartMailSubtitle}>
-            {unreadCount > 0 ? 'Tap to view' : 'Send love notes to your Circle'}
-          </Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color="#55556A" />
-      </Pressable>
-
-      {/* YOUR TEMPERATURE */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Your temperature</Text>
-        <View style={styles.gaugeWrap}>
-          <TemperatureGauge temperature={myTemperature} size="lg" label={myTemperatureLabel} />
-        </View>
-        <Pressable style={styles.updateButton} onPress={handleUpdateTemp}>
-          <Text style={styles.updateButtonText}>Update</Text>
-        </Pressable>
-        <Text style={styles.hint}>Your circle can see this. Tap to change anytime.</Text>
-      </View>
-
-        {/* HEART INBOX */}
-        <Pressable
-          style={styles.bridgeCard}
-          onPress={() => router.push('/(modals)/heart-inbox')}
-        >
-          <View style={styles.bridgeIcon}>
-            <Ionicons name="mail" size={24} color={COLORS.primary} />
-          </View>
-          <View style={styles.bridgeText}>
-            <Text style={styles.bridgeTitle}>Heart Inbox</Text>
-            <Text style={styles.bridgeSubtitle}>Messages from your circle</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
-        </Pressable>
-
-
-        {/* WRITE HEART MAIL */}
-        <Pressable
-          style={styles.bridgeCard}
-          onPress={() => router.push("/(modals)/heart-mail-compose")}
-        >
-          <View style={styles.bridgeIcon}>
-            <Ionicons name="create" size={24} color={COLORS.accent} />
-          </View>
-          <View style={styles.bridgeText}>
-            <Text style={styles.bridgeTitle}>Write Heart Mail</Text>
-            <Text style={styles.bridgeSubtitle}>Send a message to someone you care about</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
-        </Pressable>
-      {/* RELATIONAL BRIDGE */}
-      <Pressable 
-        style={styles.bridgeCard} 
-        onPress={() => router.push('/(modals)/relational-bridge')}
-      >
-        <View style={styles.bridgeIcon}>
-          <Text style={{ fontSize: 24 }}>🌉</Text>
-        </View>
-        <View style={styles.bridgeText}>
-          <Text style={styles.bridgeTitle}>Relational Bridge</Text>
-          <Text style={styles.bridgeSubtitle}>Navigate conflict with someone in your Circle</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color="#888" />
-      </Pressable>
-
-      {/* YOUR CIRCLE */}
-      <View style={styles.section}>
-        <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>Your Circle</Text>
-          <Pressable style={styles.inviteButton} onPress={() => router.push('/(modals)/invite-circle')}>
-            <Ionicons name="add" size={22} color={COLORS.accent} />
-            <Text style={styles.inviteButtonText}>Invite +</Text>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={24} color={COLORS.text} />
+          </Pressable>
+          <Text style={styles.title}>Mind Mail</Text>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/mind-mail/compose');
+            }}
+            style={styles.composeBtn}
+          >
+            <Ionicons name="create-outline" size={24} color={COLORS.accent} />
           </Pressable>
         </View>
 
-        {members.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyEmoji}>💜</Text>
-            <Text style={styles.emptyTitle}>Your circle is empty</Text>
-            <Text style={styles.emptySub}>
-              Invite the people who matter most. They'll see how you're doing — but never what
-              you've said.
+        <View style={styles.topToggle}>
+          <Pressable
+            style={[styles.topToggleBtn, topMode === 'connections' && styles.topToggleBtnActive]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setTopMode('connections');
+            }}
+          >
+            <Text style={[styles.topToggleText, topMode === 'connections' && styles.topToggleTextActive]}>
+              Connections
             </Text>
-            <Pressable
-              style={styles.emptyButton}
-              onPress={() => router.push('/(modals)/invite-circle')}
-            >
-              <Text style={styles.emptyButtonText}>Invite Someone</Text>
-            </Pressable>
-          </View>
+          </Pressable>
+          <Pressable
+            style={[styles.topToggleBtn, topMode === 'messages' && styles.topToggleBtnActive]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setTopMode('messages');
+            }}
+          >
+            <Text style={[styles.topToggleText, topMode === 'messages' && styles.topToggleTextActive]}>
+              Messages
+            </Text>
+          </Pressable>
+        </View>
+
+        {topMode === 'connections' ? (
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />
+            }
+          >
+            <View style={styles.connectionsContent}>
+              <DailyConnectionPrompt />
+              <ConnectionsList members={members} onSelectPerson={handleSelectPerson} />
+            </View>
+          </ScrollView>
         ) : (
-          <View style={styles.memberList}>
-            {members.map((m) => {
-              const expanded = expandedId === m.id;
-              const action = SUGGESTED_ACTIONS[m.temperature](m.name);
-              return (
-                <View key={m.id} style={styles.memberCard}>
-                  <Pressable style={styles.memberHeader} onPress={() => toggleExpand(m.id)}>
-                    <View style={styles.memberInfo}>
-                      <Text style={styles.memberName}>{m.name}</Text>
-                      <Text style={styles.memberRel}>
-                        {m.relationship.charAt(0).toUpperCase() + m.relationship.slice(1)}
-                      </Text>
-                    </View>
-                    <View style={styles.memberGauge}>
-                      <TemperatureGauge temperature={m.temperature} size="sm" pulse />
-                      <Text style={styles.memberLabel}>{m.temperatureLabel}</Text>
-                    </View>
-                    <Ionicons
-                      name={expanded ? 'chevron-up' : 'chevron-down'}
-                      size={20}
-                      color={COLORS.textMuted}
-                    />
-                  </Pressable>
-                  {expanded && (
-                    <View style={styles.memberExpand}>
-                      {/* Mirroring Assistant - Active Constructive Responding */}
-                      <MirroringPrompt
-                        memberName={m.name}
-                        relationship={m.relationship}
-                        temperature={m.temperature}
-                        temperatureLabel={m.temperatureLabel}
-                        onCopyResponse={(text) => {
-                          setToast('Copied to clipboard');
-                          setTimeout(() => setToast(null), 2000);
-                        }}
-                      />
-
-                      {(m.birthday || editingBirthday === m.id) ? (
-                        <>
-                          {editingBirthday !== m.id ? (
-                            <Pressable onPress={() => startEditBirthday(m)} style={{ marginBottom: 8 }}>
-                              <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>
-                                🎂 {formatBirthday(m.birthday)} ✏️
-                              </Text>
-                            </Pressable>
-                          ) : (
-                            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                              <TextInput
-                                value={editBirthdayValue}
-                                onChangeText={(t) => formatBirthdayInput(t, setEditBirthdayValue)}
-                                placeholder="MM/DD/YYYY"
-                                placeholderTextColor={COLORS.textSecondary}
-                                keyboardType="number-pad"
-                                maxLength={10}
-                                style={{ backgroundColor: COLORS.surface, color: COLORS.text, borderRadius: BORDER_RADIUS.input, padding: 10, flex: 1, minWidth: 120 }}
-                              />
-                              <Pressable onPress={() => saveBirthday(m.id, editBirthdayValue)}>
-                                <Text style={{ color: COLORS.accent, fontSize: 14, fontWeight: '600' }}>Save</Text>
-                              </Pressable>
-                              <Pressable onPress={() => { setEditingBirthday(null); setEditBirthdayValue(''); }}>
-                                <Text style={{ color: COLORS.textSecondary, fontSize: 14 }}>Cancel</Text>
-                              </Pressable>
-                            </View>
-                          )}
-                        </>
-                      ) : (
-                        <Pressable onPress={() => startEditBirthday(m)} style={{ marginBottom: 8 }}>
-                          <Text style={{ color: COLORS.textSecondary, fontSize: 13 }}>🎂 Add birthday</Text>
-                        </Pressable>
-                      )}
-
-                      {/* Personality snippet from DOB */}
-                      {m.birthday && (() => {
-                        const personality = getPersonality(m.birthday);
-                        if (!personality) return null;
-                        return (
-                          <Pressable
-                            onPress={() => {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                              router.push({ pathname: '/(modals)/relate', params: { name: m.name, birthday: m.birthday } });
-                            }}
-                            style={{ backgroundColor: COLORS.surface, borderRadius: 12, padding: 12, marginBottom: 12 }}
-                          >
-                            <Text style={{ color: COLORS.textMuted, fontSize: 11, marginBottom: 4 }}>✨ PERSONALITY</Text>
-                            <Text style={{ color: COLORS.accent, fontSize: 15, fontWeight: '600', marginBottom: 4 }}>{personality.name}</Text>
-                            <Text style={{ color: COLORS.textSecondary, fontSize: 13, lineHeight: 18 }} numberOfLines={2}>
-                              {personality.communicationStyle}
-                            </Text>
-                            <Text style={{ color: COLORS.textMuted, fontSize: 12, marginTop: 6 }}>Tap to see full profile →</Text>
-                          </Pressable>
-                        );
-                      })()}
-
-                      {/* Love Language */}
-                      <View style={{ marginBottom: 12 }}>
-                        <Text style={{ color: COLORS.textMuted, fontSize: 12, marginBottom: 6 }}>💜 Love language</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -8 }}>
-                          <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 8 }}>
-                            {[
-                              { value: 'words', label: 'Words', emoji: '💬' },
-                              { value: 'acts', label: 'Acts', emoji: '🤝' },
-                              { value: 'gifts', label: 'Gifts', emoji: '🎁' },
-                              { value: 'time', label: 'Time', emoji: '⏰' },
-                              { value: 'touch', label: 'Touch', emoji: '🤗' },
-                            ].map((opt) => (
-                              <Pressable
-                                key={opt.value}
-                                onPress={() => {
-                                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                  updateMemberLoveLanguage(m.id, m.loveLanguage === opt.value ? null : opt.value as any);
-                                }}
-                                style={{
-                                  paddingHorizontal: 12,
-                                  paddingVertical: 6,
-                                  borderRadius: 16,
-                                  backgroundColor: m.loveLanguage === opt.value ? COLORS.accent : COLORS.surface,
-                                }}
-                              >
-                                <Text style={{ color: m.loveLanguage === opt.value ? '#fff' : COLORS.text, fontSize: 13 }}>
-                                  {opt.emoji} {opt.label}
-                                </Text>
-                              </Pressable>
-                            ))}
-                          </View>
-                        </ScrollView>
-                      </View>
-
-                      {/* Love Language Nudge */}
-                      {m.loveLanguage && (() => {
-                        const nudge = getLoveLanguageNudge(m);
-                        if (!nudge) return null;
-                        return (
-                          <View style={{ backgroundColor: COLORS.accentBg, borderRadius: 12, padding: 12, marginBottom: 12, borderLeftWidth: 3, borderLeftColor: COLORS.accent }}>
-                            <Text style={{ color: COLORS.textMuted, fontSize: 11, marginBottom: 4 }}>💡 SUGGESTION BASED ON THEIR LOVE LANGUAGE</Text>
-                            <Text style={{ color: COLORS.text, fontSize: 14, lineHeight: 20 }}>{nudge}</Text>
-                          </View>
-                        );
-                      })()}
-
-                      <Text style={styles.actionText}>{action}</Text>
-                      <View style={styles.actionRow}>
-                        <Pressable
-                          style={styles.actionBtn}
-                          onPress={() => handleSendText(m)}
-                        >
-                          <Ionicons name="chatbubble-outline" size={18} color={COLORS.accent} />
-                          <Text style={styles.actionBtnText}>Text</Text>
-                        </Pressable>
-                        <Pressable style={styles.actionBtn} onPress={() => handleCall(m)}>
-                          <Ionicons name="call-outline" size={18} color={COLORS.accent} />
-                          <Text style={styles.actionBtnText}>Call</Text>
-                        </Pressable>
-                        <Pressable 
-                          style={[styles.actionBtn, styles.actionBtnHeart]}
-                          onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            router.push({ pathname: '/(modals)/heart-compose', params: { recipientId: m.id, recipientName: m.name } });
-                          }}
-                        >
-                          <Ionicons name="heart-outline" size={18} color="#EC4899" />
-                          <Text style={[styles.actionBtnText, { color: '#EC4899' }]}>Heart Mail</Text>
-                        </Pressable>
-                        <Pressable style={styles.actionBtn} onPress={() => handleReachedOut(m)}>
-                          <Ionicons name="checkmark-circle-outline" size={18} color={COLORS.accent} />
-                          <Text style={styles.actionBtnText}>Done</Text>
-                        </Pressable>
-                      </View>
-                      {(m.temperature === 'orange' || m.temperature === 'red') && (
-                        <Pressable
-                          style={styles.helpSomeoneBtn}
-                          onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            router.push({
-                              pathname: '/(modals)/help-someone',
-                              params: { name: m.name, relationship: m.relationship.charAt(0).toUpperCase() + m.relationship.slice(1) },
-                            });
-                          }}
-                        >
-                          <Text style={styles.helpSomeoneBtnText}>Need help talking to {m.name}?</Text>
-                        </Pressable>
-                      )}
-                    </View>
-                  )}
+          <>
+        <View style={styles.tabs}>
+          {[
+            { id: 'inbox' as const, label: 'Inbox', count: unreadCount },
+            { id: 'sent' as const, label: 'Sent', count: 0 },
+            { id: 'drafts' as const, label: 'Drafts', count: draftNotes.length },
+            { id: 'archive' as const, label: 'Archive', count: archivedInbox.length },
+          ].map((tab) => (
+            <Pressable
+              key={tab.id}
+              style={[styles.tab, activeTab === tab.id && styles.tabActive]}
+              onPress={() => setActiveTab(tab.id)}
+            >
+              <Text style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}>
+                {tab.label}
+              </Text>
+              {tab.count > 0 && (
+                <View style={[styles.tabBadge, activeTab === tab.id && styles.tabBadgeActive]}>
+                  <Text style={styles.tabBadgeText}>{tab.count}</Text>
                 </View>
-              );
-            })}
-          </View>
+              )}
+            </Pressable>
+          ))}
+        </View>
+
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />
+          }
+        >
+          {activeTab === 'inbox' && (
+            <>
+              {inbox.filter((m) => m.status !== 'archived').length === 0 ? (
+                <View style={styles.empty}>
+                  <Text style={styles.emptyEmoji}>💌</Text>
+                  <Text style={styles.emptyTitle}>Your Mind Inbox is empty</Text>
+                  <Text style={styles.emptyText}>
+                    Messages from your Circle will appear here.
+                  </Text>
+                </View>
+              ) : (
+                inbox
+                  .filter((m) => m.status !== 'archived')
+                  .map((mail) => (
+                    <InboxRow key={mail.id} mail={mail} onPress={() => handleInboxPress(mail)} />
+                  ))
+              )}
+            </>
+          )}
+
+          {activeTab === 'sent' && (
+            <>
+              {sentNotes.length === 0 ? (
+                <View style={styles.empty}>
+                  <Text style={styles.emptyEmoji}>📤</Text>
+                  <Text style={styles.emptyTitle}>Nothing sent yet</Text>
+                  <Text style={styles.emptyText}>
+                    Messages you send to your Circle will appear here.
+                  </Text>
+                </View>
+              ) : (
+                sentNotes.map((note) => (
+                  <SentRow key={note.id} note={note} onPress={() => handleSentPress(note)} />
+                ))
+              )}
+            </>
+          )}
+
+          {activeTab === 'drafts' && (
+            <>
+              {draftNotes.length === 0 ? (
+                <View style={styles.empty}>
+                  <Text style={styles.emptyEmoji}>📝</Text>
+                  <Text style={styles.emptyTitle}>No drafts</Text>
+                  <Text style={styles.emptyText}>
+                    Start writing to someone you care about.
+                  </Text>
+                </View>
+              ) : (
+                draftNotes.map((note) => (
+                  <DraftRow key={note.id} note={note} onPress={() => handleDraftPress(note)} />
+                ))
+              )}
+            </>
+          )}
+
+          {activeTab === 'archive' && (
+            <>
+              {archivedInbox.length === 0 ? (
+                <View style={styles.empty}>
+                  <Text style={styles.emptyEmoji}>📦</Text>
+                  <Text style={styles.emptyTitle}>No archived messages</Text>
+                  <Text style={styles.emptyText}>
+                    Archive messages to clear your inbox without deleting.
+                  </Text>
+                </View>
+              ) : (
+                archivedInbox.map((mail) => (
+                  <InboxRow key={mail.id} mail={mail} onPress={() => handleArchivePress(mail)} />
+                ))
+              )}
+            </>
+          )}
+        </ScrollView>
+          </>
         )}
       </View>
 
-      {/* NUDGE HISTORY */}
-      {nudges.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Nudges</Text>
-          <View style={styles.nudgeList}>
-            {nudges.map((n) => {
-              const expanded = expandedNudgeId === n.id;
-              const member = members.find((m) => m.name === n.memberName);
-              const action = member
-                ? SUGGESTED_ACTIONS[member.temperature](n.memberName)
-                : n.message;
-              return (
-                <Pressable
-                  key={n.id}
-                  style={styles.nudgeCard}
-                  onPress={() => toggleNudgeExpand(n)}
-                >
-                  <View style={styles.nudgeHeader}>
-                    <Text style={styles.nudgeMessage}>{n.message}</Text>
-                    <Text style={styles.nudgeTime}>
-                      {n.timestamp.toLocaleDateString([], {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
-                    </Text>
-                    <Ionicons
-                      name={expanded ? 'chevron-up' : 'chevron-down'}
-                      size={18}
-                      color={COLORS.textMuted}
-                    />
-                  </View>
-                  {expanded && (
-                    <View style={styles.nudgeExpand}>
-                      <Text style={styles.actionText}>{action}</Text>
-                      {member && (
-                        <View style={styles.actionRow}>
-                          <Pressable
-                            style={styles.actionBtn}
-                            onPress={() => handleSendText(member)}
-                          >
-                            <Text style={styles.actionBtnText}>Send a text</Text>
-                          </Pressable>
-                          <Pressable style={styles.actionBtn} onPress={() => handleCall(member)}>
-                            <Text style={styles.actionBtnText}>Call</Text>
-                          </Pressable>
-                          <Pressable
-                            style={styles.actionBtn}
-                            onPress={() => {
-                              markNudgeActedOn(n.id);
-                              setToast('Reached out recorded');
-                              setTimeout(() => setToast(null), 2000);
-                            }}
-                          >
-                            <Text style={styles.actionBtnText}>I reached out</Text>
-                          </Pressable>
-                        </View>
-                      )}
-                    </View>
-                  )}
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-      )}
-    </ScrollView>
-    </>
+      <MindMailExplainer
+        visible={showExplainer}
+        onDismiss={() => setShowExplainer(false)}
+      />
     </ErrorBoundary>
   );
 }
 
 const styles = StyleSheet.create({
-  toast: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    zIndex: 999,
-    backgroundColor: COLORS.surface,
+  container: { flex: 1, backgroundColor: COLORS.background },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
     paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  backBtn: { padding: 4 },
+  title: { fontSize: 18, fontWeight: '600', color: COLORS.text },
+  composeBtn: { padding: 4 },
+  topToggle: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  topToggleBtn: {
+    paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: BORDER_RADIUS.input,
-    alignItems: 'center',
-  },
-  toastText: {
-    fontSize: 14,
-    color: COLORS.text,
-  },
-  container: { flex: 1, backgroundColor: COLORS.background },
-  content: { paddingHorizontal: 24, paddingBottom: 40 },
-  bridgeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: COLORS.surface,
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 24,
+  },
+  topToggleBtnActive: {
+    backgroundColor: COLORS.accentBg,
     borderWidth: 1,
-    borderColor: COLORS.accent + '33',
+    borderColor: COLORS.accent,
   },
-  bridgeIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: COLORS.accent + '22',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
+  topToggleText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: COLORS.textSecondary,
   },
-  bridgeText: {
-    flex: 1,
+  topToggleTextActive: {
+    color: COLORS.accent,
   },
-  bridgeTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 2,
+  connectionsContent: {
+    paddingHorizontal: 16,
+    paddingBottom: SPACING.xl,
   },
-  bridgeSubtitle: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-  },
-  demoBadge: {
-    alignSelf: 'flex-end',
-    backgroundColor: COLORS.surface,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  demoBadgeText: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-  },
-  section: { marginBottom: 32 },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 16,
-  },
-  sectionRow: {
+  tabs: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  gaugeWrap: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  updateButton: {
-    alignSelf: 'center',
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    paddingHorizontal: 24,
-    backgroundColor: COLORS.accent,
-    borderRadius: BORDER_RADIUS.button,
-    marginBottom: 8,
-  },
-  updateButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  hint: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-  },
-  inviteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  inviteButtonText: {
-    fontSize: 15,
-    color: COLORS.accent,
-    fontWeight: '500',
-  },
-  empty: {
-    alignItems: 'center',
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-  },
-  emptyEmoji: { fontSize: 48, marginBottom: 16 },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  emptySub: {
-    fontSize: 15,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  emptyButton: {
-    backgroundColor: COLORS.accent,
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    borderRadius: BORDER_RADIUS.button,
-  },
-  emptyButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  memberList: { gap: 12 },
-  memberCard: {
-    backgroundColor: COLORS.inputSurface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 16,
-    overflow: 'hidden',
-  },
-  memberHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  memberInfo: { flex: 1 },
-  memberName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  memberRel: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  memberGauge: {
-    alignItems: 'center',
-    marginRight: 12,
-    width: 80,
-  },
-  memberLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginTop: 2,
-    textAlign: 'center',
-    width: '100%',
-  },
-  memberExpand: {
-    marginTop: 14,
-    paddingTop: 14,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: COLORS.surface,
-  },
-  actionText: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    marginBottom: 12,
-  },
-  actionRow: {
-    flexDirection: 'row',
+    gap: 8,
     flexWrap: 'wrap',
-    gap: 12,
   },
-  actionBtn: {
+  tab: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-  },
-  actionBtnText: {
-    fontSize: 14,
-    color: COLORS.accent,
-  },
-  helpSomeoneBtn: {
-    marginTop: 12,
-    paddingVertical: 10,
     paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
     backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.input,
-    alignSelf: 'flex-start',
   },
-  helpSomeoneBtnText: {
-    fontSize: 14,
-    color: COLORS.accent,
-    fontWeight: '500',
-  },
-  nudgeList: { gap: 10 },
-  nudgeCard: {
-    backgroundColor: COLORS.inputSurface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 14,
-  },
-  nudgeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  nudgeMessage: {
-    flex: 1,
-    fontSize: 15,
-    color: COLORS.text,
-  },
-  nudgeTime: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    marginRight: 8,
-  },
-  nudgeExpand: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: COLORS.surface,
-  },
-  // Heart Mail styles
-  heartMailBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  heartMailBannerActive: {
-    borderColor: '#EC4899' + '44',
-    backgroundColor: 'rgba(236,72,153,0.08)',
-  },
-  heartMailIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(236,72,153,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
-  },
-  heartMailBadge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    backgroundColor: '#EC4899',
+  tabActive: { backgroundColor: COLORS.accentBg ?? 'rgba(13,148,136,0.15)' },
+  tabText: { fontSize: 14, fontWeight: '500', color: COLORS.textMuted },
+  tabTextActive: { color: COLORS.accent },
+  tabBadge: {
+    marginLeft: 6,
+    backgroundColor: COLORS.textMuted,
     borderRadius: 10,
     minWidth: 18,
     height: 18,
@@ -867,31 +481,57 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 5,
   },
-  heartMailBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#FFFFFF',
+  tabBadgeActive: { backgroundColor: COLORS.accent },
+  tabBadgeText: { fontSize: 11, fontWeight: '700', color: '#fff' },
+  scroll: { flex: 1 },
+  scrollContent: { padding: 16, paddingBottom: 40 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  heartMailText: {
-    flex: 1,
+  rowUnread: {
+    borderColor: COLORS.accent + '44',
+    backgroundColor: (COLORS.accentBg ?? 'rgba(13,148,136,0.08)') as string,
   },
-  heartMailTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#8888A0',
-    marginBottom: 2,
+  rowIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.surfaceElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
-  heartMailTitleActive: {
-    color: '#EC4899',
+  rowIconUnread: { backgroundColor: (COLORS.accentBg ?? 'rgba(13,148,136,0.2)') as string },
+  rowEmoji: { fontSize: 22 },
+  rowBody: { flex: 1, minWidth: 0 },
+  rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
+  rowFrom: { fontSize: 15, fontWeight: '500', color: COLORS.textSecondary },
+  rowFromUnread: { fontWeight: '600', color: COLORS.text },
+  rowTime: { fontSize: 12, color: COLORS.textMuted },
+  rowPreview: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 20 },
+  badgeRow: { flexDirection: 'row', marginTop: 6, gap: 6 },
+  badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  badgeType: { backgroundColor: COLORS.surfaceElevated },
+  badgeGlimpse: { backgroundColor: 'rgba(224, 124, 124, 0.25)' },
+  badgeVoice: { backgroundColor: 'rgba(13, 148, 136, 0.25)' },
+  badgeStatus: { backgroundColor: COLORS.surfaceElevated },
+  badgeText: { fontSize: 11, color: COLORS.textMuted, fontWeight: '600' },
+  unreadDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.accent,
+    marginLeft: 8,
   },
-  heartMailSubtitle: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-  },
-  actionBtnHeart: {
-    backgroundColor: 'rgba(236,72,153,0.1)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
+  empty: { alignItems: 'center', paddingVertical: 60, paddingHorizontal: 32 },
+  emptyEmoji: { fontSize: 48, marginBottom: 16 },
+  emptyTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text, marginBottom: 8 },
+  emptyText: { fontSize: 14, color: COLORS.textMuted, textAlign: 'center', lineHeight: 20 },
 });

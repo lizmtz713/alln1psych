@@ -12,7 +12,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from './gauges';
-import { getGaugeColor, getOverallStatusLabel, GAUGE_CONFIG } from '../utils/gaugeHelpers';
+import { getGaugeColor, getSystemScoreLabel, GAUGE_CONFIG } from '../utils/gaugeHelpers';
 import { BiometricIndicator, type BiometricSource } from './BiometricIndicator';
 import { COLORS, TYPOGRAPHY } from '../lib/constants';
 
@@ -166,7 +166,7 @@ export function CockpitCluster({
   const router = useRouter();
   const centerPulse = useRef(new Animated.Value(1)).current;
   
-  const overallLabel = getOverallStatusLabel(overall);
+  const overallLabel = getSystemScoreLabel(overall);
   const ringColor = overall < 0 ? (TEXT_MUTED + '90') : getGaugeColor(overall);
   const activeCount = Object.values(gaugeValues).filter(v => v >= 0).length;
 
@@ -229,11 +229,13 @@ export function CockpitCluster({
       >
         {overall >= 0 ? (
           <>
+            <Text style={styles.centerTitle}>System</Text>
             <Text style={[styles.centerValue, { color: ringColor }]}>{Math.round(overall)}</Text>
             <Text style={styles.centerLabel}>{overallLabel}</Text>
           </>
         ) : (
           <>
+            <Text style={styles.centerTitle}>System</Text>
             <Ionicons name="add-circle-outline" size={28} color={TEXT_MUTED} />
             <Text style={styles.centerLabel}>Check In</Text>
           </>
@@ -359,6 +361,14 @@ const styles = StyleSheet.create({
   centerValue: {
     ...TYPOGRAPHY.scoreLg,
     fontVariant: ['tabular-nums'],
+  },
+  centerTitle: {
+    fontSize: 9,
+    color: TEXT_MUTED,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+    textAlign: 'center',
   },
   centerLabel: {
     fontSize: 9,

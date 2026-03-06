@@ -11,28 +11,28 @@ import type { MindMailIntent } from '../../types/mindMail';
 
 const PROMPTS_BY_INTENT: Record<MindMailIntent, string[]> = {
   encouragement: [
-    "I'm thinking of you and wanted you to know I believe in you.",
+    "I'm thinking of you. I believe in you.",
     "You've got this. I'm in your corner.",
     "Whatever today holds, you don't have to face it alone.",
   ],
   gratitude: [
     "Thank you for being in my life. It matters more than I say.",
-    "I don't say it enough: I'm grateful for you.",
-    "Something you did recently really meant a lot to me.",
+    "I don't say it enough—I'm grateful for you.",
+    "Something you did recently meant a lot to me.",
   ],
   apology: [
-    "I'm sorry. I want you to know I see how that affected you.",
+    "I'm sorry. I see how that affected you.",
     "I was wrong about ___. I'm working on it.",
     "I hurt you and I'm sorry. Can we talk?",
   ],
   concern: [
-    "Hey, I've been thinking about you. How are you really doing?",
-    "No pressure to reply—just wanted to check in.",
+    "I've been thinking about you. How are you really doing?",
+    "No pressure to reply—just checking in.",
     "You've been on my mind. Here if you want to talk.",
   ],
   boundary: [
     "I need to be honest about what works for me going forward.",
-    "I care about you and also need to protect my energy. Here's what I need.",
+    "I care about you and also need to protect my energy.",
     "This is hard to say, but I need to set a limit around ___.",
   ],
   grief: [
@@ -54,7 +54,7 @@ export function GuidedPrompts({ intent, onSelectPrompt }: GuidedPromptsProps) {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.label}>Start from a prompt (optional)</Text>
+      <Text style={styles.label}>Tap to start from one of these</Text>
       <View style={styles.list}>
         {prompts.map((p, i) => (
           <Pressable

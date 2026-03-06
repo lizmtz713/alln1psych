@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View, Pressable, ScrollView, Animated, RefreshControl, SafeAreaView, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +15,7 @@ import {
   getOverallStatusLabel,
   getGaugeStatusLabel,
   getGaugeColor,
+  getSystemScoreLabel,
 } from '../../src/utils/gaugeHelpers';
 import { useEngagementStore } from '../../src/stores/engagementStore';
 import { useEducationStore, userAgeToContentAge } from '../../src/stores/educationStore';
@@ -38,6 +39,16 @@ import { GaugeTriggeredSuggestions } from '../../src/components/home/GaugeTrigge
 import { DailyInsight } from '../../src/components/home/DailyInsight';
 import { YourLifeTodaySection } from '../../src/components/home/YourLifeTodaySection';
 import { CockpitCluster } from '../../src/components/CockpitCluster';
+import { CockpitContextStrip, type ContextItem } from '../../src/components/home/CockpitContextStrip';
+import { CockpitStatusHeader } from '../../src/components/home/CockpitStatusHeader';
+import { CockpitPriorities, type PriorityItem } from '../../src/components/home/CockpitPriorities';
+import { CockpitSignalsPreview } from '../../src/components/home/CockpitSignalsPreview';
+import { useShallow } from 'zustand/react/shallow';
+import { useLightsStore } from '../../src/stores/lightsStore';
+import { getDailyReachOuts } from '../../src/services/friendshipMaintenance';
+import { selectHero } from '../../src/services/heroEngine';
+import type { Light } from '../../src/types/lights';
+import { useToolSuggestions } from '../../src/hooks/useToolSuggestions';
 import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/justInTimeLearning';
 import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
 import { useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
@@ -88,6 +99,16 @@ const ALL_TOOLS: ToolItem[] = [
   { key: 'awe', label: 'Awe', icon: '🌟', route: '/(modals)/awe-activities' },
   { key: 'crisis', label: 'Crisis', icon: '🆘', route: '/(modals)/crisis-resources' },
   { key: 'learning-style', label: 'Learning Style', icon: '📚', route: '/(modals)/learning-style-quiz' },
+];
+
+/** Cockpit "Helpful right now" — context-aware, 6 tools max. Not the full grid. */
+const HELPFUL_RIGHT_NOW_TOOLS: ToolItem[] = [
+  { key: 'quick-reset', label: 'Quick Reset', icon: '🌬️', route: '/tools/quick-reset' },
+  { key: 'decode', label: 'Decode', icon: '🔍', route: '/(modals)/decode' },
+  { key: 'resolve', label: 'Resolve', icon: '🤝', route: '/(modals)/resolve' },
+  { key: 'replay', label: 'Replay', icon: '🔄', route: '/(modals)/replay' },
+  { key: 'reach-out', label: 'Reach Out', icon: '🤲', route: '/(modals)/reach-out-scaffold' },
+  { key: 'boundaries', label: 'Boundaries', icon: '🚧', route: '/(modals)/boundaries' },
 ];
 
 const ALL_ACTIVITIES: ActivitySuggestion[] = [
@@ -408,7 +429,64 @@ export default function HomeScreen() {
   }, [activeGaugeCount, insightFetched]);
   const overallLabel = getOverallStatusLabel(overall);
   const showInsight = Boolean(crossSystemInsight && activeGaugeCount >= 3);
+  /** Context layer for Cockpit (sleep, cycle, life events). Empty until context system is wired. */
+  const cockpitContextItems: ContextItem[] = [];
   const ringColor = overall < 0 ? TEXT_MUTED : getGaugeColor(overall);
+
+  const lights = useLightsStore((s) => s.getLights(members));
+  const lastHeroShownByMemberId = useLightsStore(useShallow((s) => s.lastHeroShownByMemberId));
+  const dailyReachOuts = useMemo(() => getDailyReachOuts(lights, 8), [lights]);
+  const heroResult = useMemo(
+    () =>
+      selectHero(lights, {
+        momentumByMemberId: Object.fromEntries(
+          lights
+            .filter((l): l is Light & { momentumScore: number } => l.momentumScore != null)
+            .map((l) => [l.id, l.momentumScore])
+        ),
+        lastHeroByMemberId: lastHeroShownByMemberId,
+      }),
+    [lights, lastHeroShownByMemberId]
+  );
+  const heroLight = heroResult?.light ?? dailyReachOuts.priority[0] ?? dailyReachOuts.suggested[0];
+  const heroNameForSignals = heroLight?.name;
+  const needAttentionCount = dailyReachOuts.priority.length + dailyReachOuts.suggested.length;
+
+  const { suggestions: toolSuggestions } = useToolSuggestions({ limit: 2, requireGaugeData: true });
+
+  const cockpitPriorityItems: PriorityItem[] = useMemo(() => {
+    const needsCheckIn = overall < 0 || activeGaugeCount < 3;
+    const items: PriorityItem[] = [];
+    if (needsCheckIn) {
+      items.push({
+        id: 'check-in',
+        label: 'Check in',
+        sublabel: 'Reset your State',
+        emoji: '🌡️',
+        route: '/(modals)/cockpit-checkin',
+      });
+    }
+    if (heroLight && items.length < 4) {
+      items.push({
+        id: 'transmit-hero',
+        label: `Transmit to ${heroNameForSignals ?? 'someone'}`,
+        sublabel: 'Send encouragement',
+        emoji: '💜',
+        route: '/(tabs)/signals',
+        params: heroLight?.id ? { hero: heroLight.id } : undefined,
+      });
+    }
+    toolSuggestions.slice(0, 4 - items.length).forEach((s, i) => {
+      items.push({
+        id: `suggestion-${i}-${s.toolKey}`,
+        label: s.label,
+        sublabel: s.reason ?? undefined,
+        emoji: s.icon ?? '✨',
+        route: (s.route as string) ?? '',
+      });
+    });
+    return items.slice(0, 4);
+  }, [overall, activeGaugeCount, heroLight, heroNameForSignals, toolSuggestions]);
 
   let streak: number = 0;
   let weeklySummary: { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null = null;
@@ -567,26 +645,14 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
     >
-      <HomeHeader userName={user?.name?.trim().split(/\s+/)[0] ?? 'there'} />
+      {/* 1. Pre-Flight / status header */}
+      <CockpitStatusHeader
+        firstName={user?.name?.trim().split(/\s+/)[0] ?? 'there'}
+        systemStatusLabel={getSystemScoreLabel(overall)}
+        summaryLine={cockpitContextItems.length > 0 ? cockpitContextItems[0].label : (showInsight && crossSystemInsight ? crossSystemInsight.slice(0, 80) + (crossSystemInsight.length > 80 ? '…' : '') : undefined)}
+      />
 
-      {sections.showWeeklyInsight && <WeeklyInsightPrompt />}
-
-      <UnifiedInsightCard />
-
-      {sections.showYourLifeToday && (
-        <YourLifeTodaySection
-          onPressCheckIn={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/cockpit-checkin');
-          }}
-        />
-      )}
-
-      {sections.showWrapped && <LifeWrappedPreview />}
-
-      {sections.showForecast && <ForecastCard />}
-
-      {/* 2. Six Gauges — Hex cockpit (CockpitCluster) */}
+      {/* 2. System cluster — six gauges + center score */}
       {sections.showCockpit && (
       <View style={styles.cockpitSection}>
         <CockpitCluster
@@ -622,33 +688,30 @@ export default function HomeScreen() {
           <ShareCockpitChip />
           <WinButton />
         </View>
+        {/* 3. Context strip — why gauges look the way they do */}
+        <CockpitContextStrip items={cockpitContextItems} sectionTitle="Context affecting your system" />
       </View>
       )}
 
-      {sections.showGaugeSuggestions && <GaugeTriggeredSuggestions limit={3} />}
-
-      <HabitsWidget />
-
-      {sections.showDailyInsight && <DailyInsight />}
-
-      {/* 3. Tap to check in — shown below cockpit if needed */}
-      {needsCheckInToday && (
-        <Pressable
-          style={styles.checkInButtonSmall}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/(modals)/cockpit-checkin');
-          }}
-        >
-          <Text style={styles.checkInButtonSmallText}>Tap to check in</Text>
-        </Pressable>
+      {/* 4. Today's priorities — 2–4 cards */}
+      {sections.showCockpit && cockpitPriorityItems.length > 0 && (
+        <CockpitPriorities items={cockpitPriorityItems} />
       )}
 
-      {/* Toolkit — all tools, horizontal scroll */}
-      {sections.showToolsGrid && sections.toolLimit > 0 && (
-      <View style={styles.quickActionsWrap}>
+      {/* 5. Key insights — 1–3 short insights */}
+      {sections.showPsychSays && (
+      <Animated.View style={[styles.card, styles.psychCard, slideY(card1)]}>
+        <Text style={styles.psychLabel}>Key insights</Text>
+        <Text style={styles.psychText}>{psychSaysContent}</Text>
+      </Animated.View>
+      )}
+
+      {/* 6. Helpful right now — curated tools, not full grid */}
+      {sections.showToolsGrid && (
+      <View style={[styles.quickActionsWrap, { paddingHorizontal: 20 }]}>
+        <Text style={styles.cardSectionTitle}>Helpful right now</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsScroll}>
-          {ALL_TOOLS.slice(0, sections.toolLimit).map((item) => (
+          {HELPFUL_RIGHT_NOW_TOOLS.map((item) => (
             <Pressable
               key={item.key}
               style={({ pressed }) => [styles.quickActionPill, pressed && styles.quickActionPressed]}
@@ -665,7 +728,55 @@ export default function HomeScreen() {
       </View>
       )}
 
-      {/* 4. Greeting + Streak — smaller text */}
+      {/* 7. Signals preview — shortcut to relationships */}
+      <CockpitSignalsPreview
+        needAttentionCount={needAttentionCount}
+        heroName={heroNameForSignals}
+        heroId={heroLight?.id}
+      />
+
+      {/* 8. Trends / patterns — lower on page */}
+      {weeklySummary && (
+      <View style={[styles.section, { paddingHorizontal: 20 }]}>
+        <Text style={styles.sectionTitle}>This week</Text>
+        <Text style={[styles.psychText, { marginTop: 4 }]} numberOfLines={2}>{weeklySummary.line}</Text>
+      </View>
+      )}
+
+      {/* 9. Manual bite — one small card */}
+      {sections.showDiscovery && discoveryPreview && (
+        <Animated.View style={[styles.card, slideY(card2)]}>
+          <Text style={styles.cardSectionTitle}>Manual</Text>
+          <Pressable
+            style={({ pressed }) => [pressed && { opacity: 0.9 }]}
+            onPress={() => router.push('/(tabs)/learn')}
+          >
+            <Text style={styles.discoveryEmoji}>{discoveryPreview.emoji}</Text>
+            <Text style={styles.discoveryTitle}>{discoveryPreview.title}</Text>
+            <Text style={styles.discoveryContent} numberOfLines={2}>{discoveryPreview.content}</Text>
+            <Text style={styles.discoveryTapHint}>See more in Manual →</Text>
+          </Pressable>
+        </Animated.View>
+      )}
+
+      {/* 10. Reflection prompt */}
+      <Pressable
+        style={[styles.card, { marginHorizontal: 20, marginBottom: SPACING.md }]}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          router.push('/(tabs)/me');
+        }}
+      >
+        <Text style={styles.cardSectionTitle}>Reflection</Text>
+        <Text style={styles.psychText}>What felt most meaningful today?</Text>
+        <Text style={[styles.discoveryTapHint, { marginTop: 8 }]}>Tap to open Journal →</Text>
+      </Pressable>
+
+      <HabitsWidget />
+
+      {sections.showDailyInsight && <DailyInsight />}
+
+      {/* Greeting + Streak — smaller text */}
       <View style={styles.greetingStreakRow}>
         {dailyContentLoading ? (
           <Text style={styles.greetingSmall}>Loading...</Text>
@@ -680,58 +791,7 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {/* 5. Psych Says — one card (cross-system insight or daily psych says) */}
-      {sections.showPsychSays && (
-      <Animated.View style={[styles.card, styles.psychCard, slideY(card1)]}>
-        <Text style={styles.psychLabel}>Psych says...</Text>
-        <Text style={styles.psychText}>{psychSaysContent}</Text>
-      </Animated.View>
-      )}
-
-      {/* 6. Discovery — daily discovery card */}
-      {sections.showDiscovery && discoveryPreview && (
-        <Animated.View style={[styles.card, slideY(card2)]}>
-          <Text style={styles.cardSectionTitle}>Discovery</Text>
-          <Pressable
-            style={({ pressed }) => [pressed && { opacity: 0.9 }]}
-            onPress={() => router.push('/(tabs)/learn')}
-          >
-            <Text style={styles.discoveryEmoji}>{discoveryPreview.emoji}</Text>
-            <Text style={styles.discoveryTitle}>{discoveryPreview.title}</Text>
-            <Text style={styles.discoveryContent} numberOfLines={2}>{discoveryPreview.content}</Text>
-            <Text style={styles.discoveryTapHint}>See more in Manual →</Text>
-          </Pressable>
-        </Animated.View>
-      )}
-
-      {/* 7. My Circle — preview */}
-      {Array.isArray(members) && members.length > 0 && (
-        <Animated.View style={[styles.section, slideY(card2)]}>
-          <Text style={styles.sectionTitle}>My Circle</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.circleScroll}>
-            {members.map((m) => (
-              <Pressable
-                key={m?.id ?? m?.name ?? ''}
-                style={({ pressed }) => [styles.circleMember, pressed && { opacity: 0.9 }]}
-                onPress={() => router.push('/(tabs)/circle')}
-              >
-                <TemperatureGauge temperature={m?.temperature ?? 'green'} size="sm" />
-                <Text style={styles.circleMemberName} numberOfLines={1}>{m?.name ?? 'Someone'}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-          {firstAlert != null && (
-            <View style={[styles.alert, styles.alertGlow]}>
-              <Text style={styles.alertText}>{firstAlert.name} could use a check-in</Text>
-              <Pressable style={({ pressed }) => [styles.alertButton, pressed && { opacity: 0.9 }]} onPress={() => router.push('/(tabs)/circle')}>
-                <Text style={styles.alertButtonText}>See Circle</Text>
-              </Pressable>
-            </View>
-          )}
-        </Animated.View>
-      )}
-
-      {/* 8. Everything else — affirmation, Try This, weekly */}
+      {/* Affirmation, Try This, weekly summary text */}
       <Animated.View style={[styles.card, styles.affirmationCard, slideY(card2)]}>
         <Text style={styles.affirmation}>{affirmation}</Text>
       </Animated.View>

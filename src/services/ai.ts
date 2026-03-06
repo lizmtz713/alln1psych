@@ -16,12 +16,21 @@ import { supabase } from '../lib/supabase';
 
 const API_KEY_STORAGE = 'openai_api_key';
 
+/** Prefer SecureStore (user-configured), then env from .env (never commit .env). */
+function getOpenAIKeyFromEnv(): string | null {
+  const key =
+    (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_OPENAI_API_KEY) ||
+    (typeof process !== 'undefined' && process.env?.OPENAI_API_KEY);
+  return key && key.trim() ? key.trim() : null;
+}
 
 export async function getOpenAIKey(): Promise<string | null> {
   try {
-    return await SecureStore.getItemAsync(API_KEY_STORAGE);
+    const stored = await SecureStore.getItemAsync(API_KEY_STORAGE);
+    if (stored && stored.trim()) return stored.trim();
+    return getOpenAIKeyFromEnv();
   } catch {
-    return null;
+    return getOpenAIKeyFromEnv();
   }
 }
 

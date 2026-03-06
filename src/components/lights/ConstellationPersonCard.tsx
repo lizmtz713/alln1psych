@@ -13,6 +13,8 @@ import { COLORS, SPACING } from '../../lib/constants';
 
 export interface ConstellationPersonCardProps {
   node: ConstellationNode;
+  /** Timeline-based summary (e.g. "Last interaction: 3 weeks ago — Call") — bridges Constellation with Timeline */
+  lastInteractionSummary?: string;
   onClose: () => void;
   onOpenFull: (node: ConstellationNode) => void;
   onLogContact: (node: ConstellationNode) => void;
@@ -20,6 +22,7 @@ export interface ConstellationPersonCardProps {
 
 export function ConstellationPersonCard({
   node,
+  lastInteractionSummary,
   onClose,
   onOpenFull,
   onLogContact,
@@ -49,11 +52,11 @@ export function ConstellationPersonCard({
         {TIER_LABELS[node.tier]} · {getLightTemperatureLabel(node.temperature)}
       </Text>
       <Text style={styles.days}>
-        {node.daysSinceContact === 0
+        {lastInteractionSummary ?? (node.daysSinceContact === 0
           ? 'Contacted today'
           : node.daysSinceContact === 1
             ? '1 day since contact'
-            : `${node.daysSinceContact} days since contact`}
+            : `${node.daysSinceContact} days since contact`)}
       </Text>
       {node.note ? (
         <Text style={styles.note} numberOfLines={2}>{node.note}</Text>

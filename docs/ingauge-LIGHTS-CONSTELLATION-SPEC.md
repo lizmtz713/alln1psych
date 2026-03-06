@@ -24,15 +24,17 @@ Every relationship is encoded by five signals derived from existing Lights data:
 
 ---
 
-## 3. Five-Signal Visual Encoding
+## 3. Visual Encoding (Three Signals Only — See Rule #2)
 
-| Signal | Visual encoding |
-|--------|-----------------|
-| **Closeness** | **Position** — Distance from center (you). Inner ring = Your 5, outer = Your 150. |
-| **Recency** | **Size** — Node size reflects recency (recent contact = larger, faded = smaller). |
-| **Color** | **Temperature** — Warm (orange/amber), Neutral (yellow), Cool (blue). Unknown = muted. |
-| **Motion** | **Urgency** — Flickering/pulse for "needs attention"; steady glow for healthy. |
-| **Cluster** | **Grouping** — Nodes in same life domain (family, work, friends) can cluster or share a subtle region. |
+To avoid overloaded encoding, the map uses **only three** visual dimensions:
+
+| Dimension | Meaning | Encoding |
+|-----------|---------|----------|
+| **Distance** | Closeness tier | Center = YOU; ring 1 = 5, ring 2 = 15, ring 3 = 50, ring 4 = 150. |
+| **Color** | Relationship state | Green = doing well, yellow = warm, orange = drifting, red = needs attention. Unknown = muted. |
+| **Size** | Importance / centrality | Recent contact = larger; faded = smaller. |
+
+**Motion** is reserved for life, not extra meaning: subtle breathing (all nodes), one-time glow (after Transmit), and optional flicker for “needs attention.” No icons, labels on nodes, or extra dimensions.
 
 ---
 
@@ -67,15 +69,92 @@ Data: Use `relationshipType` or a new `cluster` field on the light.
 
 ---
 
-## 6. Progressive Reveal (5-15-50 Rule)
+## 6. Constellation Rules (Anti–Hairball Design)
 
-- **Default view**: Show **Your 5** (inner ring) fully; **Your 15** and **Your 50** as aggregated glow or count until user zooms or taps "Show more."
-- **Zoom out / "Show all"**: Reveal 15, then 50, then 150 so the radar doesn’t overwhelm.
-- Keeps the first impression simple: "Here are your 5. The rest are there when you need them."
+These rules prevent the map from becoming noise and keep it readable and emotionally legible.
 
 ---
 
-## 7. Focus + Context Visualization
+### Constellation Rule #1 — Show Only What Humans Can Process
+
+**Problem (hairball):** Showing the entire network at once → 120 dots, overlapping nodes, chaotic layout. The brain interprets this as noise, not insight.
+
+**Rule:** Show only the relationships a user can emotionally process at once.
+
+| Level   | Visible   |
+|--------|-----------|
+| Default | Inner 15 (Your 5 + Your 15) |
+| Expand | 50        |
+| Expand | 150       |
+
+The map should feel like **your social world**, not your contact database.
+
+---
+
+### Constellation Rule #2 — One Meaning Per Dimension (No Overloaded Encoding)
+
+**Problem:** Encoding too many meanings (color, size, shape, lines, labels, icons, heat maps, alerts) makes the map cognitively impossible to read.
+
+**Rule:** Each visual dimension represents **only one** meaning.
+
+| Dimension | Meaning        | Do not use for |
+|-----------|----------------|-----------------|
+| **Distance** | Closeness tier (center = YOU, ring 1 = 5, ring 2 = 15, ring 3 = 50, ring 4 = 150) | — |
+| **Color** | Relationship state (green = doing well, yellow = warm, orange = drifting, red = needs attention) | — |
+| **Size**  | Importance / emotional centrality (large = more meaningful) | — |
+
+**Avoid:** Icons, labels everywhere, text clutter, relationship-type badges, alert overlays, numbers on nodes. The map must remain calm and readable.
+
+### Constellation Rule #3 — Orbital Stability
+
+**Problem:** If node positions change every time the list is re-sorted (e.g. by attention), users cannot build spatial memory of "where" each person lives on the map.
+
+**Rule:** Within each tier ring, nodes are ordered **deterministically by member id** (e.g. `id.localeCompare`). The same person always appears in the same angular position, so the map feels stable and intuitive. Implementation: `computeConstellationNodes` sorts each tier's list by `light.id` before assigning angles.
+
+---
+
+### Constellation Rule #3 — Alive, Never Busy
+
+**Problem:** Static graphs feel like data visualization, not a living relationship system.
+
+**Rule:** The map must feel **alive but never busy**.
+
+**Allowed motion:**
+- Subtle breathing (nodes: scale 1 → 1.03 → 1, very slow, subconscious).
+- Glow on interaction (e.g. after Transmit).
+- Gentle momentum changes (e.g. node slightly brighter / cooler with interaction over time).
+
+**Forbidden motion:**
+- Constant flashing.
+- Alert pulsing (except reserved, subtle flicker for “needs attention”).
+- Node jitter.
+- Heavy animations.
+
+The map should feel calm, organic, almost celestial.
+
+---
+
+### Constellation Rule #4 — User Is Always the Center
+
+**Rule:** Never move the user node. YOU stays fixed in the center. This creates orientation stability. If the center moves, users lose spatial memory.
+
+---
+
+### Constellation Rule #5 — Meaningful Lines Only (Future)
+
+**Rule:** Connection lines only for the **inner circle** (e.g. YOU → partner, best friend, sibling). **No lines** for 50/150 tiers. Otherwise the graph becomes spaghetti.
+
+---
+
+## 7. Progressive Reveal (5-15-50-150)
+
+- **Default view**: **Inner 15** (Your 5 + Your 15). Low cognitive load; “your inner world.”
+- **Expand**: 50, then 150. So the radar never overwhelms.
+- Implementation: Reveal level control (5 | 15 | 50 | all); default = 15.
+
+---
+
+## 8. Focus + Context Visualization
 
 - **Context**: Full constellation (all visible tiers at current zoom).  
 - **Focus**: Selected node highlighted (glow, label, or pull-out Person Card).  
@@ -83,7 +162,7 @@ Data: Use `relationshipType` or a new `cluster` field on the light.
 
 ---
 
-## 8. Timeline Slider
+## 9. Timeline Slider
 
 - Control: **Last 7 days** | **Last 30 days** | **All time** (or custom range).  
 - Effect: Node positions/sizes or a secondary "ghost" layer show how the constellation looked at that time (e.g. who was in Your 5, who had contact).  
@@ -91,7 +170,7 @@ Data: Use `relationshipType` or a new `cluster` field on the light.
 
 ---
 
-## 9. Person Card Interaction
+## 10. Person Card Interaction
 
 - **Trigger**: Tap node on radar.  
 - **Content**: Name, tier label, temperature, days since contact, optional one-line note.  
@@ -100,7 +179,7 @@ Data: Use `relationshipType` or a new `cluster` field on the light.
 
 ---
 
-## 10. The 3 Wow Moments
+## 11. The 3 Wow Moments
 
 1. **First open**: "This is my relationship radar." One sentence under the radar: "Your 5 are closest. Tap any light to see who needs you."  
 2. **First tap**: Person Card slides up with name and quick actions — "Oh, I can act from here."  
@@ -108,7 +187,7 @@ Data: Use `relationshipType` or a new `cluster` field on the light.
 
 ---
 
-## 11. Visual Design Style (Deep Space Aesthetic)
+## 12. Visual Design Style (Deep Space Aesthetic)
 
 - **Background**: Deep dark (e.g. `#09090F`), subtle starfield or gradient (dark blue/purple to black).  
 - **Center (you)**: Soft glow, small dot or icon; "You" label optional.  
@@ -119,7 +198,7 @@ Data: Use `relationshipType` or a new `cluster` field on the light.
 
 ---
 
-## 12. Share Card Format
+## 13. Share Card Format
 
 - **Export**: Generate a card (square or story) showing:  
   - Blurred or abstract constellation (no names).  
@@ -130,7 +209,7 @@ Data: Use `relationshipType` or a new `cluster` field on the light.
 
 ---
 
-## 13. TypeScript Data Model
+## 14. TypeScript Data Model
 
 See `src/types/lightsConstellation.ts`:
 
@@ -141,7 +220,7 @@ See `src/types/lightsConstellation.ts`:
 
 ---
 
-## 14. Implementation Priorities (4 Phases)
+## 15. Implementation Priorities (4 Phases)
 
 | Phase | Delivered |
 |-------|-----------|

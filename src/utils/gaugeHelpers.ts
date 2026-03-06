@@ -61,6 +61,22 @@ export function getOverallStatusLabel(value: number): string {
   return 'Critical';
 }
 
+/** Cockpit center: Human System Score bands (80–100 Thriving, 60–79 Stable, 40–59 Strained, 0–39 Needs support) */
+export const SYSTEM_SCORE_BANDS = [
+  { min: 80, max: 100, label: 'Thriving' },
+  { min: 60, max: 79, label: 'Stable' },
+  { min: 40, max: 59, label: 'Strained' },
+  { min: 0, max: 39, label: 'Needs support' },
+] as const;
+
+export function getSystemScoreLabel(value: number): string {
+  if (value < 0) return 'Check In';
+  if (value >= 80) return 'Thriving';
+  if (value >= 60) return 'Stable';
+  if (value >= 40) return 'Strained';
+  return 'Needs support';
+}
+
 /**
  * Temperature colors — used by both Gauges and Lights for consistency
  */

@@ -37,8 +37,8 @@ function sizeRatioFromDays(days: number): number {
   return Math.max(0.6, 0.9 - (days - 30) * 0.005);
 }
 
-/** Brightness 0–1 from tier + days */
-function brightnessFromLight(light: Light): number {
+/** Brightness 0–1 from tier + days (when momentum not used) */
+function brightnessFromRecency(light: Light): number {
   const level = getLightBrightness(light.tier, light.daysSinceContact);
   const map: Record<string, number> = {
     bright: 1,
@@ -48,6 +48,15 @@ function brightnessFromLight(light: Light): number {
     dark: 0.15,
   };
   return map[level] ?? 0.5;
+}
+
+/** Brightness 0–1 from momentum when available (Constellation: high → brighter, low → dim, critical → dim + flicker) */
+function brightnessFromMomentum(score: number): number {
+  if (score >= 80) return 1;
+  if (score >= 60) return 0.85;
+  if (score >= 40) return 0.65;
+  if (score >= 20) return 0.45;
+  return 0.25;
 }
 
 /** Convert Light to ConstellationNode with position (by tier ring + angle within cluster) */
@@ -65,9 +74,16 @@ export function lightToConstellationNode(
   const angle = baseAngle + offset * 0.1;
   const x = Math.cos(angle) * radius;
   const y = Math.sin(angle) * radius;
-  const flickering = light.status === 'flickering';
-  const brightness = brightnessFromLight(light);
+  const hasMomentum = light.momentumScore != null;
+  const flickering = light.status === 'flickering' || (hasMomentum && light.momentumScore! < 20);
+  let brightness = hasMomentum ? brightnessFromMomentum(light.momentumScore!) : brightnessFromRecency(light);
+  const season = light.season;
+  if (season === 'growth') brightness = Math.min(1, brightness * 1.1);
+  else if (season === 'dormant') brightness *= 0.85;
   const sizeRatio = sizeRatioFromDays(light.daysSinceContact);
+  const radiusMultiplier = season === 'growth' ? 0.95 : 1;
+  const xScaled = x * radiusMultiplier;
+  const yScaled = y * radiusMultiplier;
 
   return {
     id: light.id,
@@ -75,8 +91,8 @@ export function lightToConstellationNode(
     tier: light.tier,
     temperature: light.temperature,
     brightness,
-    x,
-    y,
+    x: xScaled,
+    y: yScaled,
     flickering,
     daysSinceContact: light.daysSinceContact,
     cluster,
@@ -107,7 +123,8 @@ export function computeConstellationNodes(lights: Light[]): ConstellationNode[] 
 
   const nodes: ConstellationNode[] = [];
   TIER_ORDER.forEach((tier) => {
-    const list = byTier[tier] ?? [];
+    // Orbital stability: sort by id so each person keeps the same position (spatial memory)
+    const list = [...(byTier[tier] ?? [])].sort((a, b) => a.id.localeCompare(b.id));
     list.forEach((light, i) =>
       nodes.push(lightToConstellationNode(light, i, list.length, clusterAngleOffset))
     );

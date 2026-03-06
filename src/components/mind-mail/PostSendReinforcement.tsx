@@ -11,13 +11,23 @@ import { COLORS, BORDER_RADIUS, SPACING } from '../../lib/constants';
 export interface PostSendReinforcementProps {
   visible: boolean;
   onDismiss: () => void;
+  /** When true, show that this connection is glowing in Constellation */
+  showConstellationHint?: boolean;
+  /** Recipient name — when set with showConstellationHint, shows "[Name] is glowing in your Constellation." */
+  recipientName?: string;
 }
 
-export function PostSendReinforcement({ visible, onDismiss }: PostSendReinforcementProps) {
+export function PostSendReinforcement({ visible, onDismiss, showConstellationHint, recipientName }: PostSendReinforcementProps) {
   const handleDismiss = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     onDismiss();
   };
+
+  const constellationLine = showConstellationHint
+    ? recipientName?.trim()
+      ? `${recipientName} is glowing in your Constellation.`
+      : "You'll see this connection in Constellation."
+    : null;
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -25,7 +35,10 @@ export function PostSendReinforcement({ visible, onDismiss }: PostSendReinforcem
         <View style={styles.card}>
           <Text style={styles.emoji}>💜</Text>
           <Text style={styles.title}>Connection strengthened</Text>
-          <Text style={styles.sub}>Small steps strengthen big bonds.</Text>
+          <Text style={styles.sub}>That matters.</Text>
+          {constellationLine ? (
+            <Text style={styles.hint}>{constellationLine}</Text>
+          ) : null}
           <Pressable
             style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
             onPress={handleDismiss}
@@ -56,8 +69,8 @@ const styles = StyleSheet.create({
     minWidth: 280,
   },
   emoji: {
-    fontSize: 48,
-    marginBottom: SPACING.md,
+    fontSize: 32,
+    marginBottom: SPACING.sm,
   },
   title: {
     fontSize: 20,
@@ -70,8 +83,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.sm,
     lineHeight: 22,
+  },
+  hint: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
   },
   button: {
     paddingVertical: 12,

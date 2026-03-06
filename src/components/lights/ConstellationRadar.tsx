@@ -22,6 +22,10 @@ export interface ConstellationRadarProps {
   nodes: ConstellationNode[];
   onNodePress?: (node: ConstellationNode) => void;
   selectedId?: string | null;
+  /** ID of node to briefly glow (e.g. just Transmitted to). Cleared after animation. */
+  recentlyConnectedId?: string | null;
+  /** Called when the recent-glow animation has finished so parent can clear recentlyConnectedId */
+  onRecentGlowComplete?: () => void;
   size?: number;
 }
 
@@ -29,6 +33,8 @@ export function ConstellationRadar({
   nodes,
   onNodePress,
   selectedId,
+  recentlyConnectedId,
+  onRecentGlowComplete,
   size = DEFAULT_SIZE,
 }: ConstellationRadarProps) {
   const [scale, setScale] = useState(1);
@@ -144,6 +150,7 @@ export function ConstellationRadar({
               const color = tempColor(n.temperature);
               const nodeR = BASE_NODE_R * n.sizeRatio;
               const isSelected = selectedId === n.id;
+              const recentlyConnected = recentlyConnectedId === n.id;
               return (
                 <NodeOrb
                   key={n.id}
@@ -154,6 +161,8 @@ export function ConstellationRadar({
                   brightness={n.brightness}
                   flickering={n.flickering}
                   selected={isSelected}
+                  recentlyConnected={recentlyConnected}
+                  onRecentGlowComplete={recentlyConnected ? onRecentGlowComplete : undefined}
                   onPress={() => onNodePress?.(n)}
                 />
               );
@@ -173,6 +182,8 @@ function NodeOrb({
   brightness,
   flickering,
   selected,
+  recentlyConnected,
+  onRecentGlowComplete,
   onPress,
 }: {
   x: number;
@@ -182,9 +193,14 @@ function NodeOrb({
   brightness: number;
   flickering: boolean;
   selected: boolean;
+  recentlyConnected: boolean;
+  onRecentGlowComplete?: () => void;
   onPress: () => void;
 }) {
   const pulse = useRef(new Animated.Value(1)).current;
+  const glowScale = useRef(new Animated.Value(1)).current;
+  const breathScale = useRef(new Animated.Value(1)).current;
+
   useEffect(() => {
     if (!flickering) return;
     const anim = Animated.loop(
@@ -197,7 +213,30 @@ function NodeOrb({
     return () => anim.stop();
   }, [flickering, pulse]);
 
+  useEffect(() => {
+    if (!recentlyConnected) return;
+    const anim = Animated.sequence([
+      Animated.timing(glowScale, { toValue: 1.35, duration: 400, useNativeDriver: true }),
+      Animated.timing(glowScale, { toValue: 1, duration: 800, useNativeDriver: true }),
+    ]);
+    anim.start(() => onRecentGlowComplete?.());
+    return () => anim.stop();
+  }, [recentlyConnected, glowScale, onRecentGlowComplete]);
+
+  // Ambient breathing: 1 → 1.03 → 1, very slow (Rule #3: alive, never busy)
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(breathScale, { toValue: 1.03, duration: 2500, useNativeDriver: true }),
+        Animated.timing(breathScale, { toValue: 1, duration: 2500, useNativeDriver: true }),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [breathScale]);
+
   const opacity = 0.75 + brightness * 0.25;
+  const scale = recentlyConnected ? glowScale : flickering ? pulse : breathScale;
 
   return (
     <Animated.View
@@ -210,7 +249,7 @@ function NodeOrb({
           height: size,
           borderRadius: size / 2,
           opacity: selected ? 1 : opacity,
-          transform: [{ scale: flickering ? pulse : 1 }],
+          transform: [{ scale }],
         },
       ]}
     >
@@ -225,6 +264,13 @@ function NodeOrb({
             backgroundColor: color,
             borderWidth: selected ? 3 : 0,
             borderColor: COLORS.text,
+            ...(recentlyConnected && {
+              shadowColor: color,
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.8,
+              shadowRadius: 12,
+              elevation: 8,
+            }),
           },
         ]}
       />

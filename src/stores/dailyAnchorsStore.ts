@@ -18,8 +18,11 @@ export interface DailyAnchorsState {
   connectionPromptActedOn: boolean;
   /** User saw the daily insight card today */
   dailyInsightSeen: boolean;
+  /** ID of circle member user just Transmitted to (for Constellation glow). Cleared after glow or on date change. */
+  lastTransmittedToId: string | null;
   setConnectionPromptActedOn: (done: boolean) => void;
   setDailyInsightSeen: (seen: boolean) => void;
+  setLastTransmittedToId: (id: string | null) => void;
   /** Mark daily connection prompt done (e.g. after sending Mind Mail). Calls ensureDate then sets acted on. */
   completeConnectionPrompt: () => void;
   /** True if state is for today */
@@ -36,9 +39,11 @@ export const useDailyAnchorsStore = create<DailyAnchorsState>()(
       date: todayKey(),
       connectionPromptActedOn: false,
       dailyInsightSeen: false,
+      lastTransmittedToId: null,
 
       setConnectionPromptActedOn: (done) => set({ connectionPromptActedOn: done }),
       setDailyInsightSeen: (seen) => set({ dailyInsightSeen: seen }),
+      setLastTransmittedToId: (id) => set({ lastTransmittedToId: id }),
 
       completeConnectionPrompt: () => {
         get().ensureDate();
@@ -55,6 +60,7 @@ export const useDailyAnchorsStore = create<DailyAnchorsState>()(
             date: today,
             connectionPromptActedOn: false,
             dailyInsightSeen: false,
+            lastTransmittedToId: null,
           });
         }
       },
@@ -66,6 +72,7 @@ export const useDailyAnchorsStore = create<DailyAnchorsState>()(
         date: s.date,
         connectionPromptActedOn: s.connectionPromptActedOn,
         dailyInsightSeen: s.dailyInsightSeen,
+        lastTransmittedToId: s.lastTransmittedToId,
       }),
     }
   )

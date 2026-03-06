@@ -1,8 +1,14 @@
 /**
- * PHOSM Hero Onboarding — Apple-level simplicity
- * 
- * One concept per screen. Big visuals. Little text.
- * The cockpit IS the hero.
+ * InGauge 3-Minute Onboarding
+ *
+ * Three screens. One mental model per screen. No tutorials.
+ * Goal: Understand the relationship system in ~3 minutes.
+ *
+ * Screen 1 — Your Relationship Universe (Constellation)
+ * Screen 2 — Relationships Change (no guilt)
+ * Screen 3 — Small Moments Matter → Open Signals
+ *
+ * Never use in copy: Momentum, Season, Decay, Algorithm.
  */
 
 import { useState, useRef, useEffect } from 'react';
@@ -11,532 +17,523 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  TextInput,
   Animated,
   Dimensions,
-  Platform,
+  Easing,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
-import Svg, { Circle, Line, Path, G } from 'react-native-svg';
-import { useUserStore, type AgeGroup } from '../../src/stores/userStore';
+import { useUserStore } from '../../src/stores/userStore';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { completeOnboarding as completeOnboardingDb } from '../../src/services/database';
-import { LinearGradient } from 'expo-linear-gradient';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Colors
-const BG = '#09090F';
-const TEXT_PRIMARY = '#FFFFFF';
-const TEXT_SECONDARY = '#8888A0';
+const BG = '#0F0B1E';
+const SURFACE = '#1A1528';
 const ACCENT = '#7C4DFF';
+const ACCENT_LIGHT = '#B388FF';
+const TEXT = '#F5F5F7';
+const TEXT_MUTED = '#9E9E9E';
 
-// Gauge colors
-const GAUGE_COLORS = {
-  body: '#10B981',
-  state: '#F59E0B', 
-  emotion: '#EC4899',
-  connection: '#3B82F6',
-  direction: '#8B5CF6',
-  alignment: '#06B6D4',
-};
+const CENTER_R = 24;
+const NODE_R = 20;
+const ORBIT = 100;
 
-const GAUGE_LABELS = [
-  { key: 'body', label: 'Body', emoji: '🧠', desc: 'Sleep, food, movement' },
-  { key: 'state', label: 'State', emoji: '💓', desc: 'Your nervous system' },
-  { key: 'emotion', label: 'Emotion', emoji: '🎭', desc: 'What you actually feel' },
-  { key: 'connection', label: 'Connection', emoji: '🤝', desc: 'Relationships' },
-  { key: 'direction', label: 'Direction', emoji: '🎯', desc: 'Purpose & motivation' },
-  { key: 'alignment', label: 'Alignment', emoji: '⚖️', desc: 'Values in action' },
-];
-
-const AGE_OPTIONS: { value: AgeGroup; label: string }[] = [
-  { value: '13-17', label: '13–17' },
-  { value: '18-25', label: '18–25' },
-  { value: '26-40', label: '26–40' },
-  { value: '41-60', label: '41–60' },
-  { value: '60+', label: '60+' },
-];
-
-// Animated PHOSM Hexagon Component
-function PHOSMHexagon({ 
-  size = 280, 
-  activeGauges = 0,
-  pulseCenter = false,
-  showLabels = false,
-  highlightGauge = null,
-}: {
-  size?: number;
-  activeGauges?: number;
-  pulseCenter?: boolean;
-  showLabels?: boolean;
-  highlightGauge?: string | null;
-}) {
-  const centerPulse = useRef(new Animated.Value(1)).current;
-  const gaugeAnims = useRef(GAUGE_LABELS.map(() => new Animated.Value(0))).current;
-  
-  useEffect(() => {
-    if (pulseCenter) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(centerPulse, { toValue: 1.08, duration: 1500, useNativeDriver: true }),
-          Animated.timing(centerPulse, { toValue: 1, duration: 1500, useNativeDriver: true }),
-        ])
-      ).start();
-    }
-  }, [pulseCenter]);
-
-  useEffect(() => {
-    // Animate gauges appearing one by one
-    const animations = gaugeAnims.slice(0, activeGauges).map((anim, i) =>
-      Animated.timing(anim, {
-        toValue: 1,
-        duration: 400,
-        delay: i * 150,
-        useNativeDriver: true,
-      })
-    );
-    Animated.parallel(animations).start();
-  }, [activeGauges]);
-
-  const centerSize = size * 0.32;
-  const gaugeSize = size * 0.22;
-  const gaugeRadius = (size - gaugeSize) / 2 - 10;
-
-  // Hexagon positions (top, top-right, bottom-right, bottom, bottom-left, top-left)
-  const angles = [-90, -30, 30, 90, 150, 210];
-
+// ─── Screen 1: Simplified Constellation ───────────────────────────────────
+function ConstellationVisual() {
+  const labels = [
+    { label: 'friend', angle: -140 },
+    { label: 'friend', angle: -60 },
+    { label: 'family', angle: -170 },
+    { label: 'partner', angle: 0 },
+    { label: 'mentor', angle: 160 },
+    { label: 'friend', angle: 60 },
+  ];
   return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      {/* Center glow */}
-      <Animated.View
-        style={{
-          position: 'absolute',
-          width: centerSize + 40,
-          height: centerSize + 40,
-          borderRadius: (centerSize + 40) / 2,
-          backgroundColor: ACCENT + '20',
-          transform: [{ scale: centerPulse }],
-        }}
-      />
-      
-      {/* Center ring */}
-      <View
-        style={{
-          width: centerSize,
-          height: centerSize,
-          borderRadius: centerSize / 2,
-          borderWidth: 4,
-          borderColor: ACCENT,
-          backgroundColor: BG,
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: ACCENT,
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0.5,
-          shadowRadius: 20,
-          elevation: 10,
-        }}
-      >
-        <Text style={{ fontSize: 12, color: TEXT_SECONDARY, letterSpacing: 1 }}>PHOSM</Text>
-      </View>
-
-      {/* 6 Gauge bubbles */}
-      {GAUGE_LABELS.map((gauge, i) => {
-        const angle = angles[i];
-        const radians = (angle * Math.PI) / 180;
-        const x = Math.cos(radians) * gaugeRadius;
-        const y = Math.sin(radians) * gaugeRadius;
-        const color = GAUGE_COLORS[gauge.key as keyof typeof GAUGE_COLORS];
-        const isHighlighted = highlightGauge === gauge.key;
-        const isActive = i < activeGauges;
-
+    <View style={onboardStyles.visualContainer}>
+      {/* Lines from center to nodes */}
+      {labels.map(({ angle }, i) => {
+        const rad = (angle * Math.PI) / 180;
+        const x = Math.cos(rad) * ORBIT;
+        const y = Math.sin(rad) * ORBIT;
         return (
-          <Animated.View
-            key={gauge.key}
-            style={{
-              position: 'absolute',
-              left: size / 2 + x - gaugeSize / 2,
-              top: size / 2 + y - gaugeSize / 2,
-              opacity: gaugeAnims[i],
-              transform: [{ scale: gaugeAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }) }],
-            }}
+          <View
+            key={i}
+            style={[
+              onboardStyles.constellationLine,
+              {
+                width: Math.hypot(x, y),
+                left: ORBIT + CENTER_R,
+                top: ORBIT + CENTER_R,
+                transform: [{ rotate: `${angle}deg` }],
+              },
+            ]}
+          />
+        );
+      })}
+      {/* Center (YOU) */}
+      <View
+        style={[
+          onboardStyles.centerNode,
+          {
+            left: ORBIT + CENTER_R - CENTER_R,
+            top: ORBIT + CENTER_R - CENTER_R,
+            width: CENTER_R * 2,
+            height: CENTER_R * 2,
+            borderRadius: CENTER_R,
+          },
+        ]}
+      >
+        <Text style={onboardStyles.centerLabel}>YOU</Text>
+      </View>
+      {/* Orbiting nodes */}
+      {labels.map(({ label, angle }, i) => {
+        const rad = (angle * Math.PI) / 180;
+        const x = ORBIT + Math.cos(rad) * ORBIT - NODE_R;
+        const y = ORBIT + Math.sin(rad) * ORBIT - NODE_R;
+        return (
+          <View
+            key={i}
+            style={[
+              onboardStyles.orbitNode,
+              { left: x, top: y, width: NODE_R * 2, height: NODE_R * 2, borderRadius: NODE_R },
+            ]}
           >
-            {/* Glow */}
-            {isActive && (
-              <View
-                style={{
-                  position: 'absolute',
-                  width: gaugeSize + 20,
-                  height: gaugeSize + 20,
-                  borderRadius: (gaugeSize + 20) / 2,
-                  backgroundColor: color + '30',
-                  left: -10,
-                  top: -10,
-                }}
-              />
-            )}
-            
-            {/* Gauge bubble */}
-            <View
-              style={{
-                width: gaugeSize,
-                height: gaugeSize,
-                borderRadius: gaugeSize / 2,
-                borderWidth: 2,
-                borderColor: isActive ? color : TEXT_SECONDARY + '40',
-                backgroundColor: BG,
-                alignItems: 'center',
-                justifyContent: 'center',
-                shadowColor: isActive ? color : 'transparent',
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.5,
-                shadowRadius: 10,
-              }}
-            >
-              <Text style={{ fontSize: gaugeSize * 0.35 }}>{gauge.emoji}</Text>
-              {showLabels && (
-                <Text style={{ fontSize: 8, color: TEXT_SECONDARY, marginTop: 2 }}>
-                  {gauge.label.toUpperCase()}
-                </Text>
-              )}
-            </View>
-          </Animated.View>
+            <Text style={onboardStyles.orbitLabel} numberOfLines={1}>
+              {label}
+            </Text>
+          </View>
         );
       })}
     </View>
   );
 }
 
-// Progress dots
-function ProgressDots({ current, total }: { current: number; total: number }) {
+// ─── Screen 2: Node brightening and dimming ──────────────────────────────────
+function RelationshipPulseVisual() {
+  const opacity = useRef(new Animated.Value(1)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const loop = () => {
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(opacity, {
+            toValue: 0.4,
+            duration: 1200,
+            useNativeDriver: true,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          Animated.timing(scale, {
+            toValue: 0.92,
+            duration: 1200,
+            useNativeDriver: true,
+            easing: Easing.inOut(Easing.ease),
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(opacity, {
+            toValue: 1,
+            duration: 1200,
+            useNativeDriver: true,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          Animated.timing(scale, {
+            toValue: 1,
+            duration: 1200,
+            useNativeDriver: true,
+            easing: Easing.inOut(Easing.ease),
+          }),
+        ]),
+      ]).start(({ finished }) => {
+        if (finished) loop();
+      });
+    };
+    loop();
+  }, [opacity, scale]);
+
   return (
-    <View style={styles.progressDots}>
-      {Array.from({ length: total }).map((_, i) => (
-        <View
-          key={i}
-          style={[
-            styles.dot,
-            i < current ? styles.dotActive : styles.dotInactive,
-          ]}
-        />
-      ))}
+    <View style={onboardStyles.visualContainer}>
+      <Animated.View
+        style={[
+          onboardStyles.pulseNode,
+          {
+            opacity,
+            transform: [{ scale }],
+          },
+        ]}
+      >
+        <Text style={onboardStyles.pulseLabel}>Friend</Text>
+      </Animated.View>
     </View>
   );
 }
 
-// Main Onboarding Screen
+// ─── Screen 3: Send → node glows ────────────────────────────────────────────
+function SmallMomentsVisual() {
+  const glow = useRef(new Animated.Value(0)).current;
+  const [showGlow, setShowGlow] = useState(false);
+
+  useEffect(() => {
+    if (!showGlow) return;
+    Animated.timing(glow, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.ease),
+    }).start();
+  }, [showGlow, glow]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowGlow(true), 400);
+    return () => clearTimeout(t);
+  }, []);
+
+  const glowOpacity = glow.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 0.6],
+  });
+
+  return (
+    <View style={onboardStyles.visualContainer}>
+      <View style={onboardStyles.sendRow}>
+        <View style={onboardStyles.sendPill}>
+          <Text style={onboardStyles.sendPillText}>Send encouragement</Text>
+        </View>
+        <Text style={onboardStyles.sendArrow}>↓</Text>
+      </View>
+      <View style={onboardStyles.glowNodeWrap}>
+        <Animated.View
+          style={[
+            onboardStyles.glowHalo,
+            {
+              opacity: glowOpacity,
+            },
+          ]}
+        />
+        <View style={onboardStyles.glowNode}>
+          <Text style={onboardStyles.glowNodeLabel}>Node glows</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// ─── Shared screen layout ───────────────────────────────────────────────────
+function OnboardStep({
+  visual,
+  title,
+  subtitle,
+  extraLines,
+  ctaLabel,
+  onNext,
+  isLast,
+}: {
+  visual: React.ReactNode;
+  title: string;
+  subtitle: string;
+  extraLines?: string[];
+  ctaLabel: string;
+  onNext: () => void;
+  isLast: boolean;
+}) {
+  return (
+    <View style={onboardStyles.step}>
+      <View style={onboardStyles.visualWrap}>{visual}</View>
+      <Text style={onboardStyles.title}>{title}</Text>
+      <Text style={onboardStyles.subtitle}>{subtitle}</Text>
+      {extraLines && extraLines.length > 0 && (
+        <View style={onboardStyles.extraLines}>
+          {extraLines.map((line, i) => (
+            <Text key={i} style={onboardStyles.extraLineText}>
+              {line}
+            </Text>
+          ))}
+        </View>
+      )}
+      <Pressable
+        style={({ pressed }) => [onboardStyles.cta, pressed && onboardStyles.ctaPressed]}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onNext();
+        }}
+      >
+        <Text style={onboardStyles.ctaText}>{ctaLabel}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+// ─── Main ───────────────────────────────────────────────────────────────────
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const fade = useRef(new Animated.Value(1)).current;
   const { user } = useAuth();
+  const { completeOnboarding } = useUserStore();
 
-  const {
-    name, setName,
-    ageGroup, setAgeGroup,
-    completeOnboarding,
-  } = useUserStore();
+  const TOTAL_STEPS = 3;
 
-  const [nameInput, setNameInput] = useState(name || '');
-  const [selectedAge, setSelectedAge] = useState<AgeGroup | null>(ageGroup);
-
-  const TOTAL_STEPS = 6;
-
-  const fadeToNext = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => {
-      setStep(s => s + 1);
-      fadeAnim.setValue(0);
-      Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }).start();
-    });
-  };
-
-  const handleContinue = () => {
-    if (step === 3 && nameInput.trim()) {
-      setName(nameInput.trim());
-    }
-    if (step === 4 && selectedAge) {
-      setAgeGroup(selectedAge);
-    }
+  const goNext = () => {
     if (step === TOTAL_STEPS - 1) {
       finishOnboarding();
       return;
     }
-    fadeToNext();
+    Animated.timing(fade, { toValue: 0, duration: 180, useNativeDriver: true }).start(() => {
+      setStep((s) => s + 1);
+      fade.setValue(0);
+      Animated.timing(fade, { toValue: 1, duration: 280, useNativeDriver: true }).start();
+    });
   };
 
   const finishOnboarding = async () => {
     if (user?.id) {
       await completeOnboardingDb(user.id, {
-        name: nameInput.trim(),
-        age_group: selectedAge ?? null,
+        name: useUserStore.getState().name ?? null,
+        age_group: useUserStore.getState().ageGroup ?? null,
         communication_preference: null,
         love_language: null,
       });
     }
     completeOnboarding();
-    router.replace('/(tabs)');
-  };
-
-  const canContinue = () => {
-    if (step === 3) return nameInput.trim().length > 0;
-    if (step === 4) return selectedAge !== null;
-    return true;
+    router.replace('/(tabs)/signals');
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      {/* Progress */}
-      <View style={styles.header}>
-        <ProgressDots current={step + 1} total={TOTAL_STEPS} />
+    <View style={[onboardStyles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <View style={onboardStyles.dots}>
+        {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+          <View
+            key={i}
+            style={[onboardStyles.dot, i === step && onboardStyles.dotActive]}
+          />
+        ))}
       </View>
 
-      <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        {/* Step 0: Meet PHOSM */}
+      <Animated.View style={[onboardStyles.content, { opacity: fade }]}>
         {step === 0 && (
-          <View style={styles.stepContainer}>
-            <PHOSMHexagon size={280} activeGauges={0} pulseCenter />
-            <View style={styles.textContainer}>
-              <Text style={styles.title}>This is PHOSM</Text>
-              <Text style={styles.subtitle}>
-                Personal Health Operating System for the Mind
-              </Text>
-            </View>
-          </View>
+          <OnboardStep
+            visual={<ConstellationVisual />}
+            title="Your life is shaped by the people around you."
+            subtitle="InGauge helps you see and care for the relationships that matter."
+            ctaLabel="Next"
+            onNext={goNext}
+            isLast={false}
+          />
         )}
-
-        {/* Step 1: 6 Systems */}
         {step === 1 && (
-          <View style={styles.stepContainer}>
-            <PHOSMHexagon size={280} activeGauges={6} pulseCenter showLabels />
-            <View style={styles.textContainer}>
-              <Text style={styles.title}>Your mind runs on 6 systems</Text>
-              <Text style={styles.subtitle}>
-                Body. State. Emotion.{'\n'}Connection. Direction. Alignment.
-              </Text>
-            </View>
-          </View>
+          <OnboardStep
+            visual={<RelationshipPulseVisual />}
+            title="Relationships naturally strengthen, drift, and reconnect."
+            subtitle="InGauge understands these rhythms."
+            extraLines={[
+              'Some relationships grow.',
+              'Some stay steady.',
+              'Some go quiet for a while.',
+            ]}
+            ctaLabel="Next"
+            onNext={goNext}
+            isLast={false}
+          />
         )}
-
-        {/* Step 2: Balance */}
         {step === 2 && (
-          <View style={styles.stepContainer}>
-            <PHOSMHexagon size={280} activeGauges={6} pulseCenter />
-            <View style={styles.textContainer}>
-              <Text style={styles.title}>When they're balanced, you feel it</Text>
-              <Text style={styles.subtitle}>
-                When they're not, you feel that too.{'\n'}PHOSM helps you see what's happening.
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Step 3: Name */}
-        {step === 3 && (
-          <View style={styles.stepContainer}>
-            <View style={styles.inputSection}>
-              <Text style={styles.title}>Let's calibrate your system</Text>
-              <Text style={styles.subtitle}>What should we call you?</Text>
-              <TextInput
-                style={styles.input}
-                value={nameInput}
-                onChangeText={setNameInput}
-                placeholder="Your name"
-                placeholderTextColor={TEXT_SECONDARY + '80'}
-                autoFocus
-                autoCapitalize="words"
-                returnKeyType="done"
-                onSubmitEditing={() => canContinue() && handleContinue()}
-              />
-            </View>
-          </View>
-        )}
-
-        {/* Step 4: Age */}
-        {step === 4 && (
-          <View style={styles.stepContainer}>
-            <View style={styles.inputSection}>
-              <Text style={styles.title}>Hi, {nameInput} 👋</Text>
-              <Text style={styles.subtitle}>This helps us speak your language</Text>
-              <View style={styles.ageGrid}>
-                {AGE_OPTIONS.map((opt) => (
-                  <Pressable
-                    key={opt.value}
-                    style={[
-                      styles.ageOption,
-                      selectedAge === opt.value && styles.ageOptionSelected,
-                    ]}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSelectedAge(opt.value);
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.ageOptionText,
-                        selectedAge === opt.value && styles.ageOptionTextSelected,
-                      ]}
-                    >
-                      {opt.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Step 5: Ready */}
-        {step === 5 && (
-          <View style={styles.stepContainer}>
-            <PHOSMHexagon size={300} activeGauges={6} pulseCenter showLabels />
-            <View style={styles.textContainer}>
-              <Text style={styles.title}>Your PHOSM is ready</Text>
-              <Text style={styles.subtitle}>
-                Let's see what your system is telling you.
-              </Text>
-            </View>
-          </View>
+          <OnboardStep
+            visual={<SmallMomentsVisual />}
+            title="Small moments keep relationships strong."
+            subtitle="A quick message can make a real difference."
+            ctaLabel="Open Signals"
+            onNext={goNext}
+            isLast={true}
+          />
         )}
       </Animated.View>
-
-      {/* Continue Button */}
-      <View style={styles.footer}>
-        <Pressable
-          style={[styles.continueButton, !canContinue() && styles.continueButtonDisabled]}
-          onPress={handleContinue}
-          disabled={!canContinue()}
-        >
-          <Text style={styles.continueButtonText}>
-            {step === TOTAL_STEPS - 1 ? 'Enter Your Cockpit' : 'Continue'}
-          </Text>
-        </Pressable>
-      </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const onboardStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BG,
   },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    alignItems: 'center',
-  },
-  progressDots: {
+  dots: {
     flexDirection: 'row',
+    justifyContent: 'center',
     gap: 8,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
+    backgroundColor: TEXT_MUTED + '50',
   },
   dotActive: {
     backgroundColor: ACCENT,
-  },
-  dotInactive: {
-    backgroundColor: TEXT_SECONDARY + '40',
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: 28,
   },
-  stepContainer: {
+  step: {
     alignItems: 'center',
     width: '100%',
+    maxWidth: 340,
   },
-  textContainer: {
-    marginTop: 48,
+  visualContainer: {
+    width: ORBIT * 2 + NODE_R * 4,
+    height: ORBIT * 2 + NODE_R * 4,
+    marginBottom: 32,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  visualWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
-    color: TEXT_PRIMARY,
+    color: TEXT,
     textAlign: 'center',
     marginBottom: 12,
-    letterSpacing: -0.5,
+    lineHeight: 32,
+    letterSpacing: -0.3,
   },
   subtitle: {
-    fontSize: 17,
-    color: TEXT_SECONDARY,
+    fontSize: 16,
+    color: TEXT_MUTED,
     textAlign: 'center',
-    lineHeight: 26,
-    maxWidth: 300,
+    lineHeight: 24,
+    marginBottom: 8,
   },
-  inputSection: {
-    width: '100%',
+  extraLines: {
+    marginBottom: 24,
+  },
+  extraLineText: {
+    fontSize: 15,
+    color: TEXT_MUTED,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginVertical: 2,
+  },
+  cta: {
+    marginTop: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 24,
+    backgroundColor: ACCENT,
+    minWidth: 200,
     alignItems: 'center',
   },
-  input: {
-    width: '100%',
-    maxWidth: 320,
-    height: 56,
-    backgroundColor: '#111118',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    paddingHorizontal: 20,
-    fontSize: 18,
-    color: TEXT_PRIMARY,
-    marginTop: 32,
-    textAlign: 'center',
+  ctaPressed: {
+    opacity: 0.92,
   },
-  ageGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 12,
-    marginTop: 32,
-    maxWidth: 320,
+  ctaText: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#FFF',
   },
-  ageOption: {
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#111118',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+  // Screen 1 constellation
+  constellationLine: {
+    position: 'absolute',
+    height: 1,
+    backgroundColor: SURFACE,
   },
-  ageOptionSelected: {
-    borderColor: ACCENT,
-    backgroundColor: ACCENT + '20',
-  },
-  ageOptionText: {
-    fontSize: 16,
-    color: TEXT_SECONDARY,
-    fontWeight: '500',
-  },
-  ageOptionTextSelected: {
-    color: ACCENT,
-  },
-  footer: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-  },
-  continueButton: {
-    height: 56,
-    borderRadius: 16,
+  centerNode: {
+    position: 'absolute',
     backgroundColor: ACCENT,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  continueButtonDisabled: {
-    opacity: 0.4,
+  centerLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFF',
+    letterSpacing: 0.5,
   },
-  continueButtonText: {
-    fontSize: 17,
+  orbitNode: {
+    position: 'absolute',
+    backgroundColor: SURFACE,
+    borderWidth: 1,
+    borderColor: TEXT_MUTED + '40',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  orbitLabel: {
+    fontSize: 9,
+    color: TEXT_MUTED,
+    textTransform: 'capitalize',
+  },
+  // Screen 2 pulse
+  pulseNode: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: ACCENT_LIGHT + '60',
+  },
+  pulseLabel: {
+    fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#FFF',
+  },
+  // Screen 3 send → glow
+  sendRow: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sendPill: {
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    backgroundColor: SURFACE,
+    borderWidth: 1,
+    borderColor: ACCENT + '60',
+  },
+  sendPillText: {
+    fontSize: 14,
+    color: ACCENT_LIGHT,
+    fontWeight: '600',
+  },
+  sendArrow: {
+    fontSize: 20,
+    color: TEXT_MUTED,
+    marginTop: 8,
+  },
+  glowNodeWrap: {
+    width: 100,
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glowHalo: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: ACCENT,
+  },
+  glowNode: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glowNodeLabel: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '600',
   },
 });

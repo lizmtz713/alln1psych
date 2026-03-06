@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 
-// Design tokens matching Apple Health inspiration
+// Human OS — five tabs: observe, understand, act, learn, configure
 const COLORS = {
   background: '#09090F',
   surface: '#111118',
@@ -13,13 +13,11 @@ const COLORS = {
   textMuted: '#6B6B80',
   accent: '#7C4DFF',
   accentSoft: 'rgba(124,77,255,0.12)',
-  // Tab-specific colors
-  home: '#4ADE80',      // Green - growth/health
-  ingauge: '#7C4DFF',   // Purple - AI/intelligence
-  circle: '#EC4899',    // Pink - Mind Mail / connection
-  explore: '#3B82F6',   // Blue - discovery/learning
-  lights: '#FBBF24',   // Amber - Lights
-  me: '#F59E0B',        // Amber - self/personal
+  cockpit: '#4ADE80',   // Green - system awareness
+  signals: '#9B8AA6',   // Violet - relationship system
+  tools: '#3B82F6',     // Blue - problem solving
+  manual: '#8B5CF6',   // Purple - knowledge
+  me: '#F59E0B',       // Amber - identity/config
 };
 
 interface TabIconProps {
@@ -75,100 +73,83 @@ export default function TabLayout() {
           },
         }}
       >
-        {/* Tab 1: Home - Status & Check-in */}
+        {/* Tab 1: Cockpit — system awareness. "How am I doing?" */}
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Home',
+            title: 'Cockpit',
             tabBarIcon: ({ focused, color, size }) => (
               <TabIcon
                 focused={focused}
                 color={color}
                 size={size ?? 24}
-                name="home-outline"
-                focusedName="home"
-                accentColor={COLORS.home}
+                name="speedometer-outline"
+                focusedName="speedometer"
+                accentColor={COLORS.cockpit}
               />
             ),
-            tabBarActiveTintColor: COLORS.home,
+            tabBarActiveTintColor: COLORS.cockpit,
           }}
         />
         
-        {/* Tab 2: InGauge - AI Companion */}
+        {/* Tab 2: Signals — relationship system. "How are my relationships doing?" */}
         <Tabs.Screen
-          name="talk"
+          name="signals"
           options={{
-            title: 'InGauge',
+            title: 'Signals',
             tabBarIcon: ({ focused, color, size }) => (
               <TabIcon
                 focused={focused}
                 color={color}
                 size={size ?? 24}
-                name="chatbubble-ellipses-outline"
-                focusedName="chatbubble-ellipses"
-                accentColor={COLORS.ingauge}
+                name="radio-outline"
+                focusedName="radio"
+                accentColor={COLORS.signals}
               />
             ),
-            tabBarActiveTintColor: COLORS.ingauge,
+            tabBarActiveTintColor: COLORS.signals,
           }}
         />
         
-        {/* Tab 3: Mind Mail (was Circle) */}
+        {/* Tab 3: Tools — life problem solving. "How do I handle this situation?" */}
         <Tabs.Screen
-          name="circle"
+          name="tools"
           options={{
-            title: 'Mind Mail',
+            title: 'Tools',
             tabBarIcon: ({ focused, color, size }) => (
               <TabIcon
                 focused={focused}
                 color={color}
                 size={size ?? 24}
-                name="mail-outline"
-                focusedName="mail"
-                accentColor={COLORS.circle}
+                name="construct-outline"
+                focusedName="construct"
+                accentColor={COLORS.tools}
               />
             ),
-            tabBarActiveTintColor: COLORS.circle,
+            tabBarActiveTintColor: COLORS.tools,
           }}
         />
         
-        {/* Tab 4: Explore - Tools & Learning */}
+        {/* Tab 4: Manual — understanding the human system. "How do humans actually work?" */}
         <Tabs.Screen
           name="learn"
           options={{
-            title: 'Explore',
+            title: 'Manual',
             tabBarIcon: ({ focused, color, size }) => (
               <TabIcon
                 focused={focused}
                 color={color}
                 size={size ?? 24}
-                name="compass-outline"
-                focusedName="compass"
-                accentColor={COLORS.explore}
+                name="book-outline"
+                focusedName="book"
+                accentColor={COLORS.manual}
               />
             ),
-            tabBarActiveTintColor: COLORS.explore,
+            tabBarActiveTintColor: COLORS.manual,
           }}
         />
-        
-        {/* Tab 5: Lights */}
-        <Tabs.Screen
-          name="lights"
-          options={{
-            title: 'Lights',
-            tabBarIcon: ({ focused, color, size }) => (
-              <View style={[
-                styles.iconContainer,
-                focused && { backgroundColor: COLORS.lights + '20' }
-              ]}>
-                <Text style={{ fontSize: size ?? 22 }}>💡</Text>
-              </View>
-            ),
-            tabBarActiveTintColor: COLORS.lights,
-          }}
-        />
-        
-        {/* Tab 6: Me - Personal Data & Settings */}
+
+        {/* Tab 5: Me — identity + configuration. "How is my system configured?" */}
         <Tabs.Screen
           name="me"
           options={{
@@ -178,14 +159,19 @@ export default function TabLayout() {
                 focused={focused}
                 color={color}
                 size={size ?? 26}
-                name="person-outline"
-                focusedName="person"
+                name="person-circle-outline"
+                focusedName="person-circle"
                 accentColor={COLORS.me}
               />
             ),
             tabBarActiveTintColor: COLORS.me,
           }}
         />
+        
+        {/* Hidden: talk, circle, lights — deep links / internal routes only */}
+        <Tabs.Screen name="talk" options={{ href: null }} />
+        <Tabs.Screen name="circle" options={{ href: null }} />
+        <Tabs.Screen name="lights" options={{ href: null }} />
       </Tabs>
     </ErrorBoundary>
   );

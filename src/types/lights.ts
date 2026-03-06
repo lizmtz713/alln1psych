@@ -3,6 +3,8 @@
  * Lights = relationships; brightness = closeness (Dunbar tiers); temperature = how they're doing
  */
 
+import type { TimelineEventEntry } from './timeline';
+
 export type LightTier = 'five' | 'fifteen' | 'fifty' | 'network' | 'archived';
 
 /** Temperature for Lights metaphor: warm = doing well, neutral = could use support, cool = hard time */
@@ -78,6 +80,8 @@ export interface Light {
   values?: string;
   /** Stored drive time in minutes (optional) */
   driveTimeMinutes?: number;
+  /** First memory: when you met (timeline shows "You met") */
+  relationshipOrigin?: { year: number; note?: string };
 
   // InGauge integration
   linkedUserId?: string;
@@ -95,6 +99,14 @@ export interface Light {
   temperatureLabel: string;
   status: LightStatus;
   daysSinceContact: number;
+  /** 0–100 from momentum engine; when set, drives status label and Hero ranking */
+  momentumScore?: number;
+  /** Relationship season (affects decay, hero, Constellation) */
+  season?: 'growth' | 'active' | 'dormant' | 'archived';
+  /** Life context override: e.g. life_transition (moving, new job, new parent) → season can shift to dormant without implying the relationship is weakening */
+  relationshipContext?: 'life_transition';
+  /** Stored timeline events (reconnection, milestone, etc.) — attached in getLights */
+  timelineEvents?: TimelineEventEntry[];
 
   // Meta
   createdAt: Date;
