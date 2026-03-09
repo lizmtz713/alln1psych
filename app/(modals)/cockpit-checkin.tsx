@@ -68,7 +68,7 @@ const STATE_OPTIONS = [
 
 const EMOTION_OPTIONS = ['Calm', 'Happy', 'Sad', 'Anxious', 'Angry', 'Overwhelmed', 'Numb', 'Confused'] as const;
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7; // 6 gauges + 1 context (Sleep, Social, Stress)
 
 function emotionToScore(selected: string[]): number {
   if (selected.length === 0) return 50;
@@ -87,6 +87,9 @@ type AnswersRef = {
   iListened: boolean | null;
   directionValue: number | null;
   alignmentValue: number | null;
+  sleepContext: string | null;
+  socialContext: string | null;
+  stressSourceContext: string | null;
 };
 
 const initialAnswers: AnswersRef = {
@@ -97,7 +100,14 @@ const initialAnswers: AnswersRef = {
   iListened: null,
   directionValue: null,
   alignmentValue: null,
+  sleepContext: null,
+  socialContext: null,
+  stressSourceContext: null,
 };
+
+const SLEEP_OPTIONS = ['Great', 'Okay', 'Poor', 'Very poor'] as const;
+const SOCIAL_OPTIONS = ['Yes', 'Briefly', 'Not really', 'No'] as const;
+const STRESS_OPTIONS = ['Work', 'Relationships', 'Health', 'Money', 'Nothing major'] as const;
 
 export default function CockpitCheckinScreen() {
   const insets = useSafeAreaInsets();
@@ -120,6 +130,7 @@ export default function CockpitCheckinScreen() {
   const updateDirection = useCockpitStore((s) => s.updateDirection);
   const updateAlignment = useCockpitStore((s) => s.updateAlignment);
   const setLastCheckInDate = useCockpitStore((s) => s.setLastCheckInDate);
+  const setCheckInContext = useCockpitStore((s) => s.setCheckInContext);
   const recordGaugesForDrift = useCockpitStore((s) => s.recordGaugesForDrift);
 
   const a = answersRef.current;
@@ -132,8 +143,19 @@ export default function CockpitCheckinScreen() {
 
   const flushAndNext = useCallback(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    const cur = answersRef.current;
     setStep((prev) => {
-      if (prev >= TOTAL_STEPS - 1) {
+      if (prev === TOTAL_STEPS - 1) {
+        // Step 6 (context): save context and finish
+        setCheckInContext(
+          cur.sleepContext || cur.socialContext || cur.stressSourceContext
+            ? {
+                sleep: cur.sleepContext ?? undefined,
+                social: cur.socialContext ?? undefined,
+                stressSource: cur.stressSourceContext ?? undefined,
+              }
+            : null
+        );
         setLastCheckInDate(new Date().toISOString().slice(0, 10));
         recordGaugesForDrift().catch(() => {});
         setTimeout(() => {
@@ -153,7 +175,7 @@ export default function CockpitCheckinScreen() {
       }
       return prev + 1;
     });
-  }, [setLastCheckInDate, recordGaugesForDrift]);
+  }, [setLastCheckInDate, setCheckInContext, recordGaugesForDrift]);
 
   const handleNext = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -190,6 +212,7 @@ export default function CockpitCheckinScreen() {
     if (step === 3) return a.listenedToMe !== null && a.iListened !== null;
     if (step === 4) return a.directionValue !== null;
     if (step === 5) return a.alignmentValue !== null;
+    if (step === 6) return true; // Context optional
     return false;
   }, [step, a.stateValue, a.listenedToMe, a.iListened, a.directionValue, a.alignmentValue]);
 
@@ -249,6 +272,24 @@ export default function CockpitCheckinScreen() {
     tick();
   }, [tick]);
 
+  const setSleepContext = useCallback((v: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    answersRef.current.sleepContext = v;
+    tick();
+  }, [tick]);
+
+  const setSocialContext = useCallback((v: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    answersRef.current.socialContext = v;
+    tick();
+  }, [tick]);
+
+  const setStressSourceContext = useCallback((v: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    answersRef.current.stressSourceContext = v;
+    tick();
+  }, [tick]);
+
   return (
     <ErrorBoundary>
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
@@ -267,10 +308,10 @@ export default function CockpitCheckinScreen() {
           <Ionicons name="arrow-back" size={24} color={ACCENT} />
         </Pressable>
         <View style={styles.progressContainer}>
-          <StepProgressIndicator currentStep={step + 1} totalSteps={6} accentColor={ACCENT} />
+          <StepProgressIndicator currentStep={step + 1} totalSteps={TOTAL_STEPS} accentColor={ACCENT} />
         </View>
         <Pressable style={styles.skipBtn} onPress={handleSkip}>
-          <Text style={styles.skipText}>{step === 5 ? 'Done' : 'Skip'}</Text>
+          <Text style={styles.skipText}>{step === TOTAL_STEPS - 1 ? 'Done' : 'Skip'}</Text>
         </Pressable>
       </View>
 
@@ -413,12 +454,14 @@ export default function CockpitCheckinScreen() {
         {/* ——— SCREEN 4: DIRECTION ——— */}
         {step === 4 && (
           <>
-            <Text style={styles.title}>Did you move toward something that matters to you today?</Text>
+            <Text style={styles.title}>How clear does your path feel right now?</Text>
+            <Text style={styles.sub}>Direction is about clarity of life path—not whether you finished tasks today.</Text>
             <View style={styles.optionRow}>
               {[
-                { label: 'Yes', value: 90 },
-                { label: 'Somewhat', value: 55 },
-                { label: 'No', value: 20 },
+                { label: 'Very clear', value: 90 },
+                { label: 'Mostly clear', value: 70 },
+                { label: 'Somewhat uncertain', value: 40 },
+                { label: 'Lost', value: 15 },
               ].map((opt) => (
                 <Pressable
                   key={opt.label}
@@ -429,8 +472,8 @@ export default function CockpitCheckinScreen() {
                 </Pressable>
               ))}
             </View>
-            <Pressable style={styles.linkRow} onPress={() => router.push('/(tabs)/learn')}>
-              <Text style={styles.linkText}>What matters to you?</Text>
+            <Pressable style={styles.linkRow} onPress={() => router.push('/profile/goals')}>
+              <Text style={styles.linkText}>Direction & Goals</Text>
             </Pressable>
           </>
         )}
@@ -438,12 +481,13 @@ export default function CockpitCheckinScreen() {
         {/* ——— SCREEN 5: ALIGNMENT ——— */}
         {step === 5 && (
           <>
-            <Text style={styles.title}>Are your actions matching your values right now?</Text>
+            <Text style={styles.title}>Do your actions today feel true to who you want to be?</Text>
             <View style={styles.optionRow}>
               {[
-                { label: 'Yes, mostly', value: 85 },
-                { label: 'Somewhat', value: 50 },
-                { label: 'Not really', value: 20 },
+                { label: 'Yes', value: 90 },
+                { label: 'Mostly', value: 70 },
+                { label: 'Not really', value: 35 },
+                { label: 'No', value: 15 },
               ].map((opt) => (
                 <Pressable
                   key={opt.label}
@@ -461,12 +505,56 @@ export default function CockpitCheckinScreen() {
           </>
         )}
 
+        {/* ——— SCREEN 6: CONTEXT (Sleep, Social, Stress) ——— */}
+        {step === 6 && (
+          <>
+            <Text style={styles.title}>Quick context</Text>
+            <Text style={styles.sub}>Optional — helps insights. One tap each.</Text>
+            <Text style={styles.contextLabel}>How did you sleep?</Text>
+            <View style={styles.optionRow}>
+              {SLEEP_OPTIONS.map((opt) => (
+                <Pressable
+                  key={opt}
+                  style={[styles.optionChip, a.sleepContext === opt && styles.optionChipSelected]}
+                  onPress={() => setSleepContext(opt)}
+                >
+                  <Text style={[styles.optionChipText, a.sleepContext === opt && styles.optionChipTextSelected]}>{opt}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={styles.contextLabel}>Did you connect with someone meaningful today?</Text>
+            <View style={styles.optionRow}>
+              {SOCIAL_OPTIONS.map((opt) => (
+                <Pressable
+                  key={opt}
+                  style={[styles.optionChip, a.socialContext === opt && styles.optionChipSelected]}
+                  onPress={() => setSocialContext(opt)}
+                >
+                  <Text style={[styles.optionChipText, a.socialContext === opt && styles.optionChipTextSelected]}>{opt}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={styles.contextLabel}>What affected you most today?</Text>
+            <View style={styles.optionRow}>
+              {STRESS_OPTIONS.map((opt) => (
+                <Pressable
+                  key={opt}
+                  style={[styles.optionChip, a.stressSourceContext === opt && styles.optionChipSelected]}
+                  onPress={() => setStressSourceContext(opt)}
+                >
+                  <Text style={[styles.optionChipText, a.stressSourceContext === opt && styles.optionChipTextSelected]}>{opt}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
+
         <Pressable
           style={[styles.primaryBtn, (step !== 0 && !canProceed()) && styles.primaryBtnDisabled]}
           onPress={applyStepAndNext}
           disabled={step !== 0 && !canProceed()}
         >
-          <Text style={styles.primaryBtnText}>{step === 5 ? 'Done' : 'Next'}</Text>
+          <Text style={styles.primaryBtnText}>{step === TOTAL_STEPS - 1 ? 'Done' : 'Next'}</Text>
         </Pressable>
       </ScrollView>
     </View>
@@ -503,6 +591,7 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 20, paddingBottom: 40 },
   title: { fontSize: 22, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 12, letterSpacing: -0.3 },
   sub: { fontSize: 15, color: TEXT_SECONDARY, marginBottom: 16 },
+  contextLabel: { fontSize: 16, fontWeight: '500', color: TEXT_PRIMARY, marginTop: 16, marginBottom: 10 },
   gaugeWrap: { marginBottom: 20 },
   gaugeTrack: { height: 8, borderRadius: 4, borderWidth: 1, overflow: 'hidden', marginBottom: 6 },
   gaugeFill: { height: '100%', borderRadius: 3 },

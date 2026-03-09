@@ -12,6 +12,7 @@ export default function ProfileLayout() {
       <Stack.Screen name="identity" />
       <Stack.Screen name="how-you-connect" />
       <Stack.Screen name="what-gives-life" />
+      <Stack.Screen name="values" />
       <Stack.Screen name="sensitive" />
       <Stack.Screen name="in-your-own-words" />
       <Stack.Screen name="gauges/body" />

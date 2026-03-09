@@ -14,10 +14,10 @@ import { updateExtendedProfile } from '../../src/services/profileService';
 import {
   IDENTIFY_AS_OPTIONS,
   WHAT_BRINGS_MEANING_OPTIONS,
-  CURRENT_LIFE_STAGE_OPTIONS,
   RELATIONSHIP_STATUS_OPTIONS,
   PARENTING_STATUS_OPTIONS,
 } from '../../src/lib/profileOptions';
+import { LIFE_CHAPTERS } from '../../src/data/lifeChapters';
 import { COLORS } from '../../src/lib/constants';
 
 function Chip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
@@ -108,10 +108,16 @@ export default function ProfileWhatGivesLifeScreen() {
         <MultiChip options={IDENTIFY_AS_OPTIONS} selected={identifyAs} onToggle={toggleIdentify} />
         <Text style={styles.sectionLabel}>What brings you meaning</Text>
         <MultiChip options={WHAT_BRINGS_MEANING_OPTIONS} selected={whatBringsMeaning} onToggle={toggleMeaning} />
-        <Text style={styles.sectionLabel}>Current life stage</Text>
+        <Text style={styles.sectionLabel}>Life chapter (for insights)</Text>
+        <Text style={styles.sectionHint}>Helps the app tailor insights during transitions.</Text>
         <View style={styles.chipRow}>
-          {CURRENT_LIFE_STAGE_OPTIONS.map((o) => (
-            <Chip key={o} label={o} selected={currentLifeStage === o} onPress={() => setCurrentLifeStage(o)} />
+          {LIFE_CHAPTERS.map((c) => (
+            <Chip
+              key={c.id}
+              label={c.shortLabel}
+              selected={currentLifeStage === c.id}
+              onPress={() => setCurrentLifeStage(currentLifeStage === c.id ? '' : c.id)}
+            />
           ))}
         </View>
         <Text style={styles.sectionLabel}>Relationship status</Text>
@@ -140,6 +146,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { padding: 20 },
   sectionLabel: { fontSize: 13, fontWeight: '600', color: COLORS.textMuted, marginBottom: 8, marginTop: 16 },
+  sectionHint: { fontSize: 12, color: COLORS.textMuted, marginBottom: 8 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, backgroundColor: COLORS.surface },
   chipSelected: { backgroundColor: COLORS.accent },

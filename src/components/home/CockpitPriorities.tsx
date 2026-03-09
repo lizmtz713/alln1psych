@@ -34,6 +34,10 @@ export function CockpitPriorities({ items, onTransmitToHero }: CockpitPriorities
       onTransmitToHero(item.params.recipientId, item.params.recipientName);
       return;
     }
+    if (item.id === 'transmit-hero' && item.params?.hero) {
+      router.push(`/(tabs)/signals?hero=${encodeURIComponent(item.params.hero)}` as any);
+      return;
+    }
     router.push({ pathname: item.route as any, params: item.params });
   };
 

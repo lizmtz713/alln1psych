@@ -23,8 +23,10 @@ import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
+import { ToolIntro } from '../../src/components/tools/ToolIntro';
+import { getToolIntroContent } from '../../src/data/toolIntroContent';
 
-type Phase = 'input' | 'clarify' | 'verdict';
+type Phase = 'intro' | 'input' | 'clarify' | 'verdict';
 
 const REFEREE_ACCENT = '#F59E0B'; // Whistle gold
 const REFEREE_ACCENT_BG = 'rgba(245, 158, 11, 0.12)';
@@ -93,7 +95,7 @@ export default function RefereeScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
 
-  const [phase, setPhase] = useState<Phase>('input');
+  const [phase, setPhase] = useState<Phase>('intro');
   const [disputeType, setDisputeType] = useState<string | null>(null);
   const [sideA, setSideA] = useState('');
   const [sideAName, setSideAName] = useState('');
@@ -216,6 +218,19 @@ ${clarifyAnswers.trim() || '(No additional context provided)'}`;
       default: return 'Referee';
     }
   };
+
+  const introContent = getToolIntroContent('referee');
+  if (phase === 'intro' && introContent) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <ToolIntro
+          content={introContent}
+          onStart={() => setPhase('input')}
+          onBack={() => router.back()}
+        />
+      </View>
+    );
+  }
 
   return (
     <ErrorBoundary>

@@ -1,12 +1,14 @@
 /**
- * Health data store
- * Caches Apple HealthKit data and manages sync
+ * Health data store — caches Apple HealthKit data and manages sync.
+ * Feeds Body and State gauges (see docs/WEARABLES-HUMAN-OS.md for wearable → gauge mapping).
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { healthKitService, type HealthSnapshot } from '../services/healthKit';
+import { isOuraConnected, syncOuraData, type OuraSnapshot } from '../services/ouraIntegration';
+import { getAggregatedBodyState } from '../services/healthData';
 
 interface HealthState {
   // Authorization
@@ -72,8 +74,20 @@ export const useHealthStore = create<HealthState>()(
 
         try {
           const snapshot = await healthKitService.getFullSnapshot();
-          const bodyScore = healthKitService.calculateBodyScore(snapshot);
-          const stateContribution = healthKitService.calculateStateContribution(snapshot);
+          let bodyScore = healthKitService.calculateBodyScore(snapshot);
+          let stateContribution = healthKitService.calculateStateContribution(snapshot);
+          let ouraSnapshot: OuraSnapshot | null = null;
+
+          if (await isOuraConnected()) {
+            try {
+              ouraSnapshot = await syncOuraData();
+              const aggregated = getAggregatedBodyState(snapshot, ouraSnapshot);
+              if (aggregated.bodyScore != null) bodyScore = aggregated.bodyScore;
+              if (aggregated.stateScore != null) stateContribution = aggregated.stateScore;
+            } catch (e) {
+              // Oura sync failed; keep HealthKit-only scores
+            }
+          }
 
           set({
             snapshot,
@@ -81,8 +95,7 @@ export const useHealthStore = create<HealthState>()(
             stateContributionFromHealth: stateContribution,
             syncError: null,
           });
-          
-          // Auto-update cockpit gauges from health data
+
           try {
             const cockpitStore = require('./cockpitStore').useCockpitStore.getState();
             cockpitStore.syncBodyFromHealth();

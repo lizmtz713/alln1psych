@@ -8,11 +8,16 @@ import { View, Text, StyleSheet, Pressable, Modal, ScrollView, Linking } from 'r
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TemperatureGauge } from '../circle/TemperatureGauge';
+import { RelationshipRing } from './RelationshipRing';
 import { COLORS, BORDER_RADIUS, SPACING } from '../../lib/constants';
-import { getRelationshipStatusLabel } from '../../lib/signalsCopy';
+import {
+  getRelationshipStatusLabel,
+  getRelationshipScoreFromLight,
+  getTemperatureRingColorForLight,
+  getPersonTemperatureDisplay,
+} from '../../lib/signalsCopy';
 import { SEASON_LABELS, SEASON_HELPERS } from '../../types/seasons';
-import { buildTimelineFromLight, formatTimelineDate } from '../../services/timelineEngine';
+import { buildTimelineFromLight, formatTimelineDate, getLastInteractionSummary } from '../../services/timelineEngine';
 import type { TimelineEventType } from '../../types/timeline';
 import type { Light } from '../../types/lights';
 import type { RelationshipSeason } from '../../types/seasons';
@@ -139,13 +144,14 @@ const DIRECT_ACTIONS: { id: 'text' | 'call' | 'email'; label: string; icon: keyo
   { id: 'email', label: 'Email', icon: 'mail-outline', needEmail: true },
 ];
 
-/** InGauge communication — guided relational layer (Transmit, intents). */
+/** InGauge communication — guided relational layer (Transmit, intents, Plan). */
 const SECONDARY_ACTIONS: { id: string; label: string; emoji: string }[] = [
   { id: 'check-in', label: 'Check in', emoji: '👋' },
   { id: 'appreciate', label: 'Appreciate', emoji: '🙏' },
   { id: 'support', label: 'Support', emoji: '💛' },
   { id: 'repair', label: 'Repair', emoji: '🤝' },
   { id: 'celebrate', label: 'Celebrate', emoji: '🎉' },
+  { id: 'plan', label: 'Plan', emoji: '📅' },
   { id: 'transmit', label: 'Transmit', emoji: '💌' },
 ];
 
@@ -173,15 +179,11 @@ export function PersonDetailSheet({
 
   if (!light) return null;
 
-  const statusLabel = getRelationshipStatusLabel(light, needsAttention);
-  const circleTemp =
-    light.sharedTemperature?.label === 'warm'
-      ? 'green'
-      : light.sharedTemperature?.label === 'neutral'
-        ? 'yellow'
-        : light.sharedTemperature?.label === 'cool'
-          ? 'orange'
-          : 'green';
+  const relationshipStatus = getRelationshipStatusLabel(light, needsAttention);
+  const relationshipScore = getRelationshipScoreFromLight(light);
+  const temperatureColor = getTemperatureRingColorForLight(light, needsAttention);
+  const personTemp = getPersonTemperatureDisplay(light);
+  const lastInteractionText = getLastInteractionSummary(light);
 
   const handlePrimaryTransmit = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -211,6 +213,13 @@ export function PersonDetailSheet({
     onQuickAction?.(actionId, light);
   };
 
+  const renderField = (label: string, value: string | undefined) => (
+    <View style={styles.fieldRow}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <Text style={styles.fieldValue} numberOfLines={2}>{value?.trim() ?? '—'}</Text>
+    </View>
+  );
+
   return (
     <Modal
       visible={visible}
@@ -228,13 +237,33 @@ export function PersonDetailSheet({
         </View>
 
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          <View style={styles.identity}>
+          {/* 1. Person Signals */}
+          <View style={styles.signalsSection}>
             <View style={styles.avatarWrap}>
-              <TemperatureGauge temperature={circleTemp as 'green' | 'yellow' | 'orange' | 'red'} size="md" noPulse />
+              <RelationshipRing
+                relationshipScore={relationshipScore}
+                temperatureColor={temperatureColor}
+                attentionNeeded={needsAttention}
+                size="md"
+              />
             </View>
             <Text style={styles.name}>{light.name}</Text>
-            <Text style={styles.circleLabel}>{TIER_LABELS[light.tier]}</Text>
-            <Text style={[styles.status, needsAttention && styles.statusAttention]}>{statusLabel}</Text>
+            <View style={styles.signalsRows}>
+              {personTemp ? (
+                <View style={styles.signalItem}>
+                  <View style={[styles.tempDot, { backgroundColor: personTemp.color }]} />
+                  <Text style={styles.signalLabel}>Temperature: {personTemp.label}</Text>
+                </View>
+              ) : null}
+              <Text style={styles.signalLabel}>Relationship: {relationshipStatus}</Text>
+            </View>
+            {light.temperatureReason ? (
+              <Text style={styles.tempReason}>Reason: {light.temperatureReason}</Text>
+            ) : null}
+            {light.temperatureSuggestedSupport ? (
+              <Text style={styles.tempSupport}>They may appreciate: {light.temperatureSuggestedSupport}</Text>
+            ) : null}
+            <Text style={styles.lastContact}>{lastInteractionText}</Text>
             {light.season && (
               <View style={styles.seasonWrap}>
                 <Text style={styles.seasonLabel}>Season: {SEASON_LABELS[light.season]}</Text>
@@ -242,55 +271,88 @@ export function PersonDetailSheet({
                 <SeasonControl memberId={light.id} season={light.season} onClose={onClose} />
               </View>
             )}
-          </View>
-
-          <View style={styles.summary}>
-            <Text style={styles.summaryText}>
-              Last contact {light.daysSinceContact} days ago
-              {light.relationshipType ? ` · ${light.relationshipType}` : ''}
-            </Text>
-          </View>
-
-          <ConnectionTimeline light={light} />
-
-          <View style={styles.actionsSection}>
-            <Text style={styles.directLabel}>Reach them directly</Text>
-            <View style={styles.directRow}>
-              {DIRECT_ACTIONS.map((a) => {
-                const enabled = (a.needPhone && hasPhone) || (a.needEmail && hasEmail);
-                return (
+            <View style={styles.actionsSection}>
+              <Text style={styles.directLabel}>Reach them directly</Text>
+              <View style={styles.directRow}>
+                {DIRECT_ACTIONS.map((a) => {
+                  const enabled = (a.needPhone && hasPhone) || (a.needEmail && hasEmail);
+                  return (
+                    <Pressable
+                      key={a.id}
+                      style={[styles.directBtn, !enabled && styles.directBtnDisabled]}
+                      onPress={() => enabled && handleDirectAction(a.id)}
+                      disabled={!enabled}
+                    >
+                      <Ionicons name={a.icon} size={20} color={enabled ? COLORS.accent : COLORS.textMuted} />
+                      <Text style={[styles.directBtnLabel, !enabled && styles.directBtnLabelDisabled]}>{a.label}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <Pressable
+                style={({ pressed }) => [styles.primaryCta, pressed && styles.primaryCtaPressed]}
+                onPress={handlePrimaryTransmit}
+              >
+                <Text style={styles.primaryCtaEmoji}>✨</Text>
+                <Text style={styles.primaryCtaLabel}>Transmit</Text>
+              </Pressable>
+              <Text style={styles.secondaryLabel}>Share thoughtfully</Text>
+              <View style={styles.secondaryRow}>
+                {SECONDARY_ACTIONS.map((a) => (
                   <Pressable
                     key={a.id}
-                    style={[styles.directBtn, !enabled && styles.directBtnDisabled]}
-                    onPress={() => enabled && handleDirectAction(a.id)}
-                    disabled={!enabled}
+                    style={({ pressed }) => [styles.actionPill, pressed && styles.actionPillPressed]}
+                    onPress={() => handleAction(a.id)}
                   >
-                    <Ionicons name={a.icon} size={20} color={enabled ? COLORS.accent : COLORS.textMuted} />
-                    <Text style={[styles.directBtnLabel, !enabled && styles.directBtnLabelDisabled]}>{a.label}</Text>
+                    <Text style={styles.actionEmoji}>{a.emoji}</Text>
+                    <Text style={styles.actionLabel}>{a.label}</Text>
                   </Pressable>
-                );
-              })}
+                ))}
+              </View>
             </View>
-            <Pressable
-              style={({ pressed }) => [styles.primaryCta, pressed && styles.primaryCtaPressed]}
-              onPress={handlePrimaryTransmit}
-            >
-              <Text style={styles.primaryCtaEmoji}>✨</Text>
-              <Text style={styles.primaryCtaLabel}>Transmit</Text>
-            </Pressable>
-            <Text style={styles.secondaryLabel}>Share thoughtfully</Text>
-            <View style={styles.secondaryRow}>
-              {SECONDARY_ACTIONS.map((a) => (
-                <Pressable
-                  key={a.id}
-                  style={({ pressed }) => [styles.actionPill, pressed && styles.actionPillPressed]}
-                  onPress={() => handleAction(a.id)}
-                >
-                  <Text style={styles.actionEmoji}>{a.emoji}</Text>
-                  <Text style={styles.actionLabel}>{a.label}</Text>
-                </Pressable>
-              ))}
+          </View>
+
+          {/* 2. Relationship With You */}
+          <View style={styles.profileSection}>
+            <Text style={styles.sectionTitle}>Relationship With You</Text>
+            <View style={styles.fieldList}>
+              {renderField('Love language', light.loveLanguage)}
+              {renderField('Conflict style', light.conflictStyle ?? light.howTheyOperate)}
+              {renderField('Best way to reach', light.bestWayToConnect)}
+              {renderField('How they show love', light.howTheyShowLove)}
             </View>
+          </View>
+
+          {/* 3. Who They Are */}
+          <View style={styles.profileSection}>
+            <Text style={styles.sectionTitle}>Who They Are</Text>
+            <View style={styles.fieldList}>
+              {renderField('Work', light.job)}
+              {renderField('Skills', light.skills)}
+              {renderField('Hobbies', light.hobbies)}
+              {renderField('Interests', light.interests)}
+              {renderField('Family', light.family)}
+              {renderField('Life stage', light.lifeStage)}
+              {renderField('Location', light.location ?? light.address)}
+              {renderField('Languages', light.languages)}
+            </View>
+          </View>
+
+          {/* 4. AI Memory */}
+          <View style={styles.profileSection}>
+            <Text style={styles.sectionTitle}>AI Memory</Text>
+            {light.relateInsights && light.relateInsights.length > 0 ? (
+              <View style={styles.memoryList}>
+                {light.relateInsights.map((entry, i) => (
+                  <View key={i} style={styles.memoryItem}>
+                    <Text style={styles.memoryBullet}>•</Text>
+                    <Text style={styles.memoryText}>{entry}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.emptyHint}>No memories yet. AI can suggest memories from your conversations.</Text>
+            )}
           </View>
 
           <Pressable
@@ -326,18 +388,31 @@ const styles = StyleSheet.create({
   closeBtn: { padding: 8 },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingBottom: SPACING.xl },
-  identity: { alignItems: 'center', marginBottom: SPACING.lg },
+  signalsSection: { alignItems: 'center', marginBottom: SPACING.xl },
   avatarWrap: { marginBottom: SPACING.sm },
-  name: { fontSize: 22, fontWeight: '700', color: COLORS.text, marginBottom: 4 },
-  circleLabel: { fontSize: 14, color: COLORS.textMuted, marginBottom: 4 },
-  status: { fontSize: 15, fontWeight: '600', color: COLORS.accent },
-  statusAttention: { color: COLORS.temperature?.orange ?? '#F97316' },
+  name: { fontSize: 22, fontWeight: '700', color: COLORS.text, marginBottom: 8 },
+  signalsRows: { alignItems: 'center', marginBottom: 4 },
+  signalItem: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  signalLabel: { fontSize: 15, color: COLORS.textSecondary, fontWeight: '500' },
+  tempDot: { width: 8, height: 8, borderRadius: 4 },
+  tempReason: { fontSize: 13, color: COLORS.textMuted, marginTop: 4, fontStyle: 'italic' },
+  tempSupport: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
+  lastContact: { fontSize: 14, color: COLORS.textMuted, marginBottom: 8 },
   seasonWrap: { marginTop: SPACING.sm },
   seasonLabel: { fontSize: 13, fontWeight: '500', color: COLORS.textMuted },
   seasonHelper: { fontSize: 12, color: COLORS.textMuted, marginTop: 2, fontStyle: 'italic', maxWidth: 260 },
-  summary: { marginBottom: SPACING.lg },
-  summaryText: { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center' },
-  actionsSection: { marginBottom: SPACING.xl },
+  actionsSection: { marginTop: SPACING.lg, marginBottom: SPACING.lg, width: '100%' },
+  profileSection: { marginBottom: SPACING.xl },
+  sectionTitle: { fontSize: 13, fontWeight: '600', color: COLORS.textMuted, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
+  fieldList: { gap: 0 },
+  fieldRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  fieldLabel: { fontSize: 14, color: COLORS.textMuted, flex: 0, width: 120 },
+  fieldValue: { fontSize: 14, color: COLORS.text, flex: 1, textAlign: 'right' },
+  memoryList: { gap: 8 },
+  memoryItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  memoryBullet: { fontSize: 14, color: COLORS.textMuted },
+  memoryText: { fontSize: 14, color: COLORS.text, flex: 1 },
+  emptyHint: { fontSize: 14, color: COLORS.textMuted, fontStyle: 'italic', marginTop: 4 },
   directLabel: { fontSize: 13, fontWeight: '600', color: COLORS.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   directRow: { flexDirection: 'row', gap: 12, marginBottom: SPACING.lg },
   directBtn: {

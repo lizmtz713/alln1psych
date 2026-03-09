@@ -12,10 +12,14 @@ import { useRitualsStore } from '../stores/ritualsStore';
 import { useLightsStore } from '../stores/lightsStore';
 import { useWinStore } from '../stores/winStore';
 import { useSleepStore } from '../stores/sleepStore';
+import { useGoalsStore } from '../stores/goalsStore';
+import { useHealthStore } from '../stores/healthStore';
+import { useUserStore } from '../stores/userStore';
+import { useConversationStore } from '../stores/conversationStore';
 import { getGaugeHistory } from '../services/crisisPipeline';
 import type { GaugeSnapshot } from '../services/crisisPipeline';
 import { generateInsights } from '../services/insightEngine';
-import type { GeneratedInsight, InsightContext } from '../types/insights-engine';
+import type { GeneratedInsight, InsightContext, RecentGoalReflections, InsightHealthContext } from '../types/insights-engine';
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
@@ -37,6 +41,41 @@ function getDaysSinceConnection(): number | undefined {
   const d = new Date(latest);
   const now = new Date();
   return Math.floor((now.getTime() - d.getTime()) / 86400000);
+}
+
+/** Last 2 weeks of goal reflection themes for Direction/Alignment cause and growth */
+function getRecentGoalReflections(): RecentGoalReflections | undefined {
+  const { reflections } = useGoalsStore.getState();
+  const cutoff = addDays(todayStr(), -14);
+  const recent = reflections.filter((r) => r.reflectedAt && r.reflectedAt.slice(0, 10) >= cutoff);
+  if (recent.length === 0) return undefined;
+  const whatHelped = recent.map((r) => r.whatHelped?.trim()).filter((s): s is string => !!s);
+  const whatGotInTheWay = recent.map((r) => r.whatGotInTheWay?.trim()).filter((s): s is string => !!s);
+  if (whatHelped.length === 0 && whatGotInTheWay.length === 0) return undefined;
+  return { whatHelped, whatGotInTheWay };
+}
+
+/** Health/wearable context for Body/State cause (sleep, readiness, HRV) */
+async function getInsightHealthContext(): Promise<InsightHealthContext | undefined> {
+  const snapshot = useHealthStore.getState().snapshot;
+  let lastNightSleepHours: number | undefined = snapshot?.sleep?.lastNight?.duration;
+  let readinessScore: number | undefined;
+  let hrvMs: number | undefined = snapshot?.heart?.hrv;
+  try {
+    const { getCachedOuraData } = await import('../services/ouraIntegration');
+    const oura = await getCachedOuraData();
+    if (oura?.connected) {
+      if (lastNightSleepHours == null && oura.sleep?.duration != null) {
+        lastNightSleepHours = oura.sleep.duration / 3600;
+      }
+      if (oura.readiness?.score != null) readinessScore = oura.readiness.score;
+      if (hrvMs == null && oura.heart?.hrv != null) hrvMs = oura.heart.hrv;
+    }
+  } catch {
+    // Oura not available
+  }
+  if (lastNightSleepHours == null && readinessScore == null && hrvMs == null) return undefined;
+  return { lastNightSleepHours, readinessScore, hrvMs };
 }
 
 /** Aggregate gauge history by day for pattern/timing */
@@ -88,6 +127,7 @@ export function useGeneratedInsights(
   const cockpit = useCockpitStore();
   const circle = useCircleStore();
   const rituals = useRitualsStore();
+  const reflections = useGoalsStore((s) => s.reflections);
   // Subscribe to stable state; derive in useMemo to avoid selector-induced re-renders
   const wins = useWinStore((s) => s.wins);
   const sleepByDate = useSleepStore((s) => s.byDate);
@@ -170,6 +210,37 @@ export function useGeneratedInsights(
         }
       }
 
+      const recentGoalReflections = getRecentGoalReflections();
+      const healthContext = await getInsightHealthContext();
+
+      const user = useUserStore.getState();
+      const lifeChapter = user.currentLifeStage?.trim() || undefined;
+      const userValues = (user.values?.length ?? 0) > 0 ? user.values : undefined;
+      const checkInsToday = checkInDates.filter((d) => d === todayStr()).length;
+      const hour = new Date().getHours();
+      const energyContext =
+        checkInsToday >= 2 || hour >= 21
+          ? { checkInsToday, hour }
+          : undefined;
+
+      const conv = useConversationStore.getState();
+      const lastUserMessage = conv.messages?.filter((m) => m.role === 'user').pop();
+      const conversationText =
+        lastUserMessage?.content && typeof lastUserMessage.content === 'string'
+          ? lastUserMessage.content
+          : undefined;
+
+      const circle = useCircleStore.getState();
+      const lastCheckInNote = circle.moodHistory?.find((e) => e.note?.trim())?.note?.trim();
+      const cockpit = useCockpitStore.getState();
+      const checkInContextText =
+        cockpit.checkInContext &&
+        [cockpit.checkInContext.sleep, cockpit.checkInContext.social, cockpit.checkInContext.stressSource]
+          .filter(Boolean)
+          .join(' ');
+      const recentText =
+        conversationText ?? lastCheckInNote ?? (checkInContextText?.trim() || undefined);
+
       const input = {
         context,
         gaugeValues,
@@ -190,6 +261,12 @@ export function useGeneratedInsights(
           hours: s.hours,
           quality: s.quality,
         })),
+        recentGoalReflections,
+        healthContext,
+        lifeChapter,
+        userValues,
+        energyContext,
+        recentText,
       };
 
       const result = generateInsights(input);
@@ -211,6 +288,7 @@ export function useGeneratedInsights(
     rituals.getPostFlightsSince,
     winsThisWeek,
     sleepRecent,
+    reflections.length,
   ]);
 
   useEffect(() => {

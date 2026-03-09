@@ -172,14 +172,20 @@ const DEMO_MEMBERS: CircleMember[] = [
 
 const DEMO_MEMBER_IDS = DEMO_MEMBERS.map(m => m.id);
 
+/** Who can see my temperature. Default inner_circle to avoid awkwardness. */
+export type TemperatureVisibility = 'inner_circle' | 'close_friends' | 'private';
+
 interface CircleState {
   members: CircleMember[];
   myTemperature: Temperature;
   myTemperatureLabel: string;
   myTemperatureNote: string;
   myTemperatureUpdatedAt: Date | null;
+  /** Who can see my temperature (shared awareness, not monitoring). */
+  temperatureVisibility: TemperatureVisibility;
   moodHistory: MoodEntry[];
   nudges: Nudge[];
+  setTemperatureVisibility: (v: TemperatureVisibility) => void;
   addMember: (
     member: Omit<
       CircleMember,
@@ -206,6 +212,8 @@ export const useCircleStore = create<CircleState>((set) => ({
   myTemperatureLabel: TEMPERATURE_LABELS.green,
   myTemperatureNote: '',
   myTemperatureUpdatedAt: null,
+  temperatureVisibility: 'inner_circle',
+  setTemperatureVisibility: (v) => set({ temperatureVisibility: v }),
   moodHistory: [],
   nudges: [
     {

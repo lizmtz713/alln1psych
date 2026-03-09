@@ -7,6 +7,7 @@ import type {
   Light,
   LightTier,
   LightTemperature,
+  PersonTemperatureState,
   ConnectionEntry,
   SharedTemperature,
 } from '../types/lights';
@@ -36,6 +37,14 @@ function circleTempToLightTemp(t: Temperature): LightTemperature {
   return 'cool'; // orange, red
 }
 
+// Map circle temperature to 5-state person temperature (Thriving only from extras)
+function circleTempToPersonState(t: Temperature): PersonTemperatureState {
+  if (t === 'green') return 'good';
+  if (t === 'yellow') return 'busy';
+  if (t === 'orange') return 'stressed';
+  return 'needs_support'; // red
+}
+
 function genId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -55,7 +64,14 @@ export interface LightExtras {
   loveLanguageNotes?: string;
   howTheyOperate?: string;
   howTheyShowLove?: string;
+  conflictStyle?: string;
   relateInsights?: string[];
+  job?: string;
+  skills?: string;
+  hobbies?: string;
+  lifeStage?: string;
+  location?: string;
+  languages?: string;
   anniversary?: string;
   giftIdeas?: string[];
   pastGifts?: string[];
@@ -68,6 +84,12 @@ export interface LightExtras {
   relationshipContext?: 'life_transition';
   /** First memory: when you met (for timeline "You met") */
   relationshipOrigin?: { year: number; note?: string };
+  /** Five-state person temperature override (thriving/good/busy/stressed/needs_support). */
+  personTemperature?: PersonTemperatureState;
+  /** Optional reason for temperature (e.g. "Heavy work week"). */
+  temperatureReason?: string;
+  /** Suggested support (e.g. "Short encouraging message"). */
+  temperatureSuggestedSupport?: string;
 }
 
 export interface MomentumRecord {
@@ -162,6 +184,7 @@ export function computeLights(
       bestWayToConnect: extras.bestWayToConnect,
       howTheyOperate: extras.howTheyOperate,
       howTheyShowLove: extras.howTheyShowLove,
+      conflictStyle: extras.conflictStyle,
       notes: extras.notes,
       relateInsights: extras.relateInsights,
       anniversary: extras.anniversary,
@@ -171,6 +194,12 @@ export function computeLights(
       family: extras.family,
       interests: extras.interests,
       values: extras.values,
+      job: extras.job,
+      skills: extras.skills,
+      hobbies: extras.hobbies,
+      lifeStage: extras.lifeStage,
+      location: extras.location,
+      languages: extras.languages,
       driveTimeMinutes: extras.driveTimeMinutes,
       linkedUserId: undefined,
       canSeeTemperature: true,
@@ -181,6 +210,9 @@ export function computeLights(
       brightness,
       temperature,
       temperatureLabel,
+      personTemperatureState: extras.personTemperature ?? (m.temperature ? circleTempToPersonState(m.temperature) : undefined),
+      temperatureReason: extras.temperatureReason,
+      temperatureSuggestedSupport: extras.temperatureSuggestedSupport,
       status,
       daysSinceContact,
       relationshipContext: extras.relationshipContext,

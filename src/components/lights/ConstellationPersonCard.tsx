@@ -13,9 +13,14 @@ import { COLORS, SPACING } from '../../lib/constants';
 
 export interface ConstellationPersonCardProps {
   node: ConstellationNode;
-  /** Timeline-based summary (e.g. "Last interaction: 3 weeks ago — Call") — bridges Constellation with Timeline */
+  /** Timeline-based summary (e.g. "Last interaction: 3 weeks ago — Call") */
   lastInteractionSummary?: string;
+  /** e.g. "Doing well" / "Needs attention" */
+  relationshipStrengthLabel?: string;
+  /** e.g. "Send a message" */
+  recommendedAction?: string;
   onClose: () => void;
+  onTransmit?: (node: ConstellationNode) => void;
   onOpenFull: (node: ConstellationNode) => void;
   onLogContact: (node: ConstellationNode) => void;
 }
@@ -23,7 +28,10 @@ export interface ConstellationPersonCardProps {
 export function ConstellationPersonCard({
   node,
   lastInteractionSummary,
+  relationshipStrengthLabel,
+  recommendedAction,
   onClose,
+  onTransmit,
   onOpenFull,
   onLogContact,
 }: ConstellationPersonCardProps) {
@@ -49,20 +57,36 @@ export function ConstellationPersonCard({
         </Pressable>
       </View>
       <Text style={styles.meta}>
-        {TIER_LABELS[node.tier]} · {getLightTemperatureLabel(node.temperature)}
+        Temperature: {getLightTemperatureLabel(node.temperature)}
+        {relationshipStrengthLabel != null ? ` · Relationship: ${relationshipStrengthLabel}` : ''}
       </Text>
       <Text style={styles.days}>
-        {lastInteractionSummary ?? (node.daysSinceContact === 0
-          ? 'Contacted today'
+        Last contact: {lastInteractionSummary ?? (node.daysSinceContact === 0
+          ? 'today'
           : node.daysSinceContact === 1
-            ? '1 day since contact'
-            : `${node.daysSinceContact} days since contact`)}
+            ? '1 day ago'
+            : `${node.daysSinceContact} days ago`)}
       </Text>
+      {recommendedAction ? (
+        <Text style={styles.recommended}>Recommended: {recommendedAction}</Text>
+      ) : null}
       {node.note ? (
         <Text style={styles.note} numberOfLines={2}>{node.note}</Text>
       ) : null}
 
       <View style={styles.actions}>
+        {onTransmit && (
+          <Pressable
+            style={[styles.actionBtn, styles.primaryAction]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onTransmit(node);
+            }}
+          >
+            <Text style={styles.primaryActionText}>Transmit</Text>
+            <Ionicons name="send" size={18} color={COLORS.text} />
+          </Pressable>
+        )}
         {node.phone && (
           <>
             <Pressable style={styles.actionBtn} onPress={handleCall}>
@@ -86,14 +110,14 @@ export function ConstellationPersonCard({
           <Text style={styles.actionText}>Log contact</Text>
         </Pressable>
         <Pressable
-          style={[styles.actionBtn, styles.primaryAction]}
+          style={styles.actionBtn}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             onOpenFull(node);
           }}
         >
-          <Text style={styles.primaryActionText}>Open profile</Text>
-          <Ionicons name="chevron-forward" size={18} color={COLORS.text} />
+          <Text style={styles.actionText}>Open profile</Text>
+          <Ionicons name="chevron-forward" size={18} color={COLORS.accent} />
         </Pressable>
       </View>
     </View>
@@ -120,7 +144,8 @@ const styles = StyleSheet.create({
   name: { fontSize: 22, fontWeight: '700', color: COLORS.text, flex: 1 },
   closeBtn: { padding: 4 },
   meta: { fontSize: 14, color: COLORS.textSecondary, marginBottom: 2 },
-  days: { fontSize: 13, color: COLORS.textMuted, marginBottom: 8 },
+  days: { fontSize: 13, color: COLORS.textMuted, marginBottom: 4 },
+  recommended: { fontSize: 14, fontWeight: '600', color: COLORS.accent, marginBottom: 8 },
   note: { fontSize: 14, color: COLORS.textSecondary, fontStyle: 'italic', marginBottom: 12 },
   actions: {
     flexDirection: 'row',

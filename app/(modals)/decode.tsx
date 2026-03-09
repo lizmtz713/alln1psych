@@ -32,6 +32,8 @@ import { ToolCautionModal, StabilizationFooter } from '../../src/components/Stab
 import { PreConversationButton } from '../../src/components/PreConversationButton';
 import { detectBiases, type BiasFilterResult } from '../../src/services/biasFilter';
 import BiasFilterCard, { BiasFilterBanner } from '../../src/components/BiasFilterCard';
+import { ToolIntro } from '../../src/components/tools/ToolIntro';
+import { getToolIntroContent } from '../../src/data/toolIntroContent';
 
 // Lazy load ImagePicker to prevent crash on component mount
 let ImagePickerModule: typeof import('expo-image-picker') | null = null;
@@ -104,6 +106,7 @@ const INTENT_OPTIONS: Array<{ intent: ResponseIntent; label: string; emoji: stri
 export default function DecodeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [showIntro, setShowIntro] = useState(true);
   const [message, setMessage] = useState('');
   const [sender, setSender] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -281,6 +284,19 @@ export default function DecodeScreen() {
       router.back();
     }
   }, [router]);
+
+  const introContent = getToolIntroContent('decode');
+  if (showIntro && introContent) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <ToolIntro
+          content={introContent}
+          onStart={() => setShowIntro(false)}
+          onBack={() => router.back()}
+        />
+      </View>
+    );
+  }
 
   return (
     <>

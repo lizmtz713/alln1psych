@@ -3,9 +3,9 @@
  */
 
 import type { Light } from '../types/lights';
-import type { ConstellationNode, RelationshipClusterId } from '../types/lightsConstellation';
+import type { ConstellationNode, RelationshipClusterId, RelationshipHealthColor } from '../types/lightsConstellation';
 import { getLightBrightness } from './friendshipMaintenance';
-import { FLICKER_DAYS } from '../types/lights';
+import { getTemperatureRingColorForLight } from '../lib/signalsCopy';
 
 const TIER_ORDER: Array<Exclude<Light['tier'], 'archived'>> = ['five', 'fifteen', 'fifty', 'network'];
 
@@ -50,21 +50,39 @@ function brightnessFromRecency(light: Light): number {
   return map[level] ?? 0.5;
 }
 
-/** Brightness 0–1 from momentum when available (Constellation: high → brighter, low → dim, critical → dim + flicker) */
+/** Brightness 0–1 from momentum (high → bright, critical → dim; flicker handled separately) */
 function brightnessFromMomentum(score: number): number {
   if (score >= 80) return 1;
-  if (score >= 60) return 0.85;
-  if (score >= 40) return 0.65;
-  if (score >= 20) return 0.45;
-  return 0.25;
+  if (score >= 60) return 0.82;
+  if (score >= 40) return 0.6;
+  if (score >= 20) return 0.38;
+  return 0.22;
 }
 
-/** Convert Light to ConstellationNode with position (by tier ring + angle within cluster) */
+/** Relationship health color from momentum (for node and YOU↔node line) */
+function relationshipColorFromMomentum(score: number): RelationshipHealthColor {
+  if (score >= 80) return 'green';
+  if (score >= 60) return 'yellow';
+  if (score >= 40) return 'yellow';
+  if (score >= 20) return 'orange';
+  return 'red';
+}
+
+/** Relationship health color from brightness level when no momentum */
+function relationshipColorFromBrightness(level: string): RelationshipHealthColor {
+  if (level === 'bright') return 'green';
+  if (level === 'steady') return 'yellow';
+  if (level === 'dimming') return 'orange';
+  return 'red'; // dim, dark
+}
+
+/** Convert Light to ConstellationNode with position (by tier ring + angle within cluster). Color = person temperature when shared. */
 export function lightToConstellationNode(
   light: Light,
   indexInTier: number,
   totalInTier: number,
-  clusterAngleOffset: Record<RelationshipClusterId, number>
+  clusterAngleOffset: Record<RelationshipClusterId, number>,
+  needsAttention?: boolean
 ): ConstellationNode {
   const tier = light.tier === 'archived' ? 'network' : light.tier;
   const radius = TIER_RADII[tier];
@@ -77,6 +95,7 @@ export function lightToConstellationNode(
   const hasMomentum = light.momentumScore != null;
   const flickering = light.status === 'flickering' || (hasMomentum && light.momentumScore! < 20);
   let brightness = hasMomentum ? brightnessFromMomentum(light.momentumScore!) : brightnessFromRecency(light);
+  const relationshipColor = getTemperatureRingColorForLight(light, needsAttention ?? flickering) as RelationshipHealthColor;
   const season = light.season;
   if (season === 'growth') brightness = Math.min(1, brightness * 1.1);
   else if (season === 'dormant') brightness *= 0.85;
@@ -84,6 +103,8 @@ export function lightToConstellationNode(
   const radiusMultiplier = season === 'growth' ? 0.95 : 1;
   const xScaled = x * radiusMultiplier;
   const yScaled = y * radiusMultiplier;
+  const useAvatar = tier === 'five' || tier === 'fifteen';
+  const photoUri = useAvatar ? (light.photoUri ?? light.photo) : undefined;
 
   return {
     id: light.id,
@@ -91,20 +112,22 @@ export function lightToConstellationNode(
     tier: light.tier,
     temperature: light.temperature,
     brightness,
+    relationshipColor,
     x: xScaled,
     y: yScaled,
     flickering,
     daysSinceContact: light.daysSinceContact,
     cluster,
     sizeRatio,
+    photoUri,
     note: light.notes?.slice(0, 60),
     phone: light.phone,
     relationshipType: light.relationshipType,
   };
 }
 
-/** Build all constellation nodes from lights (excluding archived) */
-export function computeConstellationNodes(lights: Light[]): ConstellationNode[] {
+/** Build all constellation nodes from lights (excluding archived). Optionally pass needsAttentionIds for node color/urgency. */
+export function computeConstellationNodes(lights: Light[], needsAttentionIds?: Set<string>): ConstellationNode[] {
   const active = lights.filter((l) => l.tier !== 'archived');
   const byTier: Record<string, Light[]> = { five: [], fifteen: [], fifty: [], network: [] };
   active.forEach((l) => {
@@ -112,7 +135,6 @@ export function computeConstellationNodes(lights: Light[]): ConstellationNode[] 
     if (byTier[t]) byTier[t].push(l);
   });
 
-  const clusters: RelationshipClusterId[] = ['family', 'close-friends', 'work', 'community', 'other'];
   const clusterAngleOffset: Record<RelationshipClusterId, number> = {
     family: 0,
     'close-friends': 0.3,
@@ -123,10 +145,9 @@ export function computeConstellationNodes(lights: Light[]): ConstellationNode[] 
 
   const nodes: ConstellationNode[] = [];
   TIER_ORDER.forEach((tier) => {
-    // Orbital stability: sort by id so each person keeps the same position (spatial memory)
     const list = [...(byTier[tier] ?? [])].sort((a, b) => a.id.localeCompare(b.id));
     list.forEach((light, i) =>
-      nodes.push(lightToConstellationNode(light, i, list.length, clusterAngleOffset))
+      nodes.push(lightToConstellationNode(light, i, list.length, clusterAngleOffset, needsAttentionIds?.has(light.id)));
     );
   });
   return nodes;

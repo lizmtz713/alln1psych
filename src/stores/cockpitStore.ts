@@ -36,6 +36,10 @@ interface CockpitState {
   direction: GaugeState;
   alignment: GaugeState;
   lastCheckInDate: string | null;
+  /** Dates (YYYY-MM-DD) when user completed a check-in; for streak and pattern analysis. Max 400. */
+  checkInDates: string[];
+  /** Optional context from last check-in (sleep, social, stress) for insights. */
+  checkInContext: { sleep?: string; social?: string; stressSource?: string } | null;
   /** Cached AI-generated cross-system insight; set by fetchCrossSystemInsight() */
   crossSystemInsight: string | null;
   /** Capacity vs stabilization mode (affects Share Insight, JIT lessons, etc.) */
@@ -62,6 +66,10 @@ interface CockpitState {
   addLessonBonus: () => void;
   runDailyDecayIfNeeded: () => void;
   setLastCheckInDate: (date: string) => void;
+  /** Set context from check-in (Sleep, Social, Stress source). */
+  setCheckInContext: (ctx: { sleep?: string; social?: string; stressSource?: string } | null) => void;
+  /** Consecutive days with check-in ending today. Rewards consistency; never punishes missed days. */
+  getCheckInStreak: () => number;
   /** Sync Body gauge from Apple Health data */
   syncBodyFromHealth: () => void;
   /** Data source for Body gauge (for BiometricIndicator) */
@@ -99,6 +107,8 @@ export const useCockpitStore = create<CockpitState>()(
   direction: { ...defaultGauge },
   alignment: { ...defaultGauge },
   lastCheckInDate: null,
+  checkInDates: [],
+  checkInContext: null,
   crossSystemInsight: null,
   systemMode: 'capacity' as SystemMode,
   stabilizationTriggers: [],
@@ -235,12 +245,16 @@ export const useCockpitStore = create<CockpitState>()(
       alignment: s.alignment.value,
     };
     
-    // Get health data if available
+    // Get health data: merged HealthKit + Oura when both available (see docs/WEARABLE-DATA-AUDIT.md)
     let healthData;
     try {
       const healthStore = require('./healthStore').useHealthStore.getState();
       const snapshot = healthStore.snapshot;
-      if (snapshot) {
+      const { getCachedOuraData } = require('../services/ouraIntegration');
+      const { buildAggregatedHealthContext } = require('../services/healthData');
+      const ouraSnapshot = await getCachedOuraData();
+      healthData = buildAggregatedHealthContext(snapshot ?? null, ouraSnapshot ?? null);
+      if (!healthData && snapshot) {
         healthData = {
           sleepHours: snapshot.sleep?.lastNight?.duration,
           sleepQuality: snapshot.sleep?.lastNight?.quality,
@@ -253,7 +267,7 @@ export const useCockpitStore = create<CockpitState>()(
         };
       }
     } catch (e) {
-      // Health store not available
+      // Health store or Oura not available
     }
 
     // Get Spotify listening data if available
@@ -295,7 +309,30 @@ export const useCockpitStore = create<CockpitState>()(
     set({ crossSystemInsight: insight });
   },
 
-  setLastCheckInDate: (date) => set({ lastCheckInDate: date }),
+  setLastCheckInDate: (date) =>
+    set((s) => {
+      const dates = s.checkInDates.includes(date)
+        ? s.checkInDates
+        : [date, ...s.checkInDates].slice(0, 400);
+      return { lastCheckInDate: date, checkInDates: dates };
+    }),
+
+  setCheckInContext: (ctx) => set({ checkInContext: ctx }),
+
+  getCheckInStreak: () => {
+    const dateSet = new Set(get().checkInDates);
+    if (dateSet.size === 0) return 0;
+    const d = new Date();
+    let streak = 0;
+    for (let i = 0; i < 400; i++) {
+      const key = d.toISOString().slice(0, 10);
+      if (dateSet.has(key)) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+      } else break;
+    }
+    return streak;
+  },
 
   /** Record current gauges for systemic drift analysis. Call after check-ins. */
   recordGaugesForDrift: async () => {
@@ -428,6 +465,8 @@ export const useCockpitStore = create<CockpitState>()(
         direction: { ...defaultGauge },
         alignment: { ...defaultGauge },
         lastCheckInDate: null,
+        checkInDates: s.checkInDates,
+        checkInContext: null,
         crossSystemInsight: null,
         systemMode: 'capacity' as SystemMode,
         stabilizationTriggers: [] as GaugeKey[],
@@ -449,6 +488,8 @@ export const useCockpitStore = create<CockpitState>()(
         direction: state.direction,
         alignment: state.alignment,
         lastCheckInDate: state.lastCheckInDate,
+        checkInDates: state.checkInDates,
+        checkInContext: state.checkInContext,
         systemMode: state.systemMode,
         stabilizationTriggers: state.stabilizationTriggers,
         centerScore: state.centerScore,

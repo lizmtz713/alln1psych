@@ -1,6 +1,10 @@
 /**
  * Cockpit AI — cross-system insight from the 6 gauges + health data.
  * Uses OpenAI when available; falls back to hardcoded patterns.
+ *
+ * Wearables → human signals: see docs/WEARABLES-HUMAN-OS.md.
+ * Health data maps to Body (physical capacity) and State (nervous system);
+ * AI compares objective (wearables) + subjective (check-ins) for strongest insights.
  */
 
 import { buildKnowledgePrompt } from '../data/psychKnowledge';
@@ -25,6 +29,12 @@ export interface HealthContext {
   hrv?: number;
   cyclePhase?: string;
   cycleDay?: number;
+  /** Oura readiness (0–100); used as context for State/insights only. */
+  readinessScore?: number;
+  /** Oura sleep score (0–100). */
+  ouraSleepScore?: number;
+  /** Resting heart rate (HealthKit or Oura). */
+  restingHeartRate?: number;
 }
 
 export interface SpotifyContext {
@@ -53,7 +63,7 @@ export async function generateCrossSystemInsight(
   const active = Object.values(gauges).filter((v) => v >= 0);
   if (active.length < 3) return null;
 
-  // Build health context string
+  // Build health context string (physiology only; never claim wearables measure emotion/meaning/values).
   let healthContext = '';
   if (healthData) {
     const parts: string[] = [];
@@ -72,11 +82,20 @@ export async function generateCrossSystemInsight(
     if (healthData.hrv !== undefined) {
       parts.push(`HRV: ${healthData.hrv}ms`);
     }
+    if (healthData.restingHeartRate !== undefined) {
+      parts.push(`Resting HR: ${healthData.restingHeartRate}bpm`);
+    }
+    if (healthData.readinessScore !== undefined) {
+      parts.push(`Readiness: ${healthData.readinessScore}`);
+    }
+    if (healthData.ouraSleepScore !== undefined) {
+      parts.push(`Sleep score: ${healthData.ouraSleepScore}`);
+    }
     if (healthData.cyclePhase) {
       parts.push(`Cycle: Day ${healthData.cycleDay}, ${healthData.cyclePhase}`);
     }
     if (parts.length > 0) {
-      healthContext = `\n\nHEALTH DATA (from Apple Health):\n${parts.join(' | ')}`;
+      healthContext = `\n\nHEALTH DATA (from wearables/Apple Health):\n${parts.join(' | ')}`;
     }
   }
 

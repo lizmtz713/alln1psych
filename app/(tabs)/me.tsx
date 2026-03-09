@@ -1,8 +1,9 @@
 /**
- * Me Tab — Profile & Settings (Kohl's/Best Buy style)
- * Clean grouped sections with list rows
+ * Me Tab — Profile & Settings
+ * Reorganized: Identity, Your System, Insights, Goals, Sharing, Settings, Data Sources, Safety.
+ * Collapsible sections, quick-jump, 6 gauges in 2-column grid.
  */
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,7 +14,20 @@ import {
   Linking,
   Switch,
   Alert,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+  Dimensions,
 } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CONTENT_PADDING_H = 40;
+const GAUGE_GRID_GAP = 10;
+const GAUGE_CARD_WIDTH = (SCREEN_WIDTH - CONTENT_PADDING_H - GAUGE_GRID_GAP) / 2;
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,7 +36,7 @@ import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { useUserStore } from '../../src/stores/userStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
-import { useCircleStore } from '../../src/stores/circleStore';
+import { useCircleStore, type TemperatureVisibility } from '../../src/stores/circleStore';
 import { useEducationStore } from '../../src/stores/educationStore';
 import { useAchievementStore } from '../../src/stores/achievementStore';
 
@@ -48,6 +62,109 @@ const COLORS = {
 
 const APP_VERSION = '1.0.0';
 
+const SECTION_IDS = ['identity', 'system', 'insights', 'goals', 'share', 'settings', 'data', 'safety'] as const;
+const QUICK_JUMP_IDS = ['identity', 'system', 'insights', 'goals', 'share', 'settings'] as const;
+const QUICK_JUMP_LABELS: Record<string, string> = {
+  identity: 'Identity',
+  system: 'System',
+  insights: 'Insights',
+  goals: 'Goals',
+  share: 'Share',
+  settings: 'Settings',
+  data: 'Data',
+  safety: 'Safety',
+};
+
+const GAUGE_ROUTES: { id: string; route: string; emoji: string; title: string }[] = [
+  { id: 'body', route: '/profile/gauges/body', emoji: '🏃', title: 'Body' },
+  { id: 'state', route: '/profile/gauges/state', emoji: '🧘', title: 'State' },
+  { id: 'emotion', route: '/profile/gauges/emotion', emoji: '❤️', title: 'Emotion' },
+  { id: 'connection', route: '/profile/gauges/connection', emoji: '👥', title: 'Connection' },
+  { id: 'direction', route: '/profile/gauges/direction', emoji: '🧭', title: 'Direction' },
+  { id: 'alignment', route: '/profile/gauges/alignment', emoji: '⚖️', title: 'Alignment' },
+];
+
+function CollapsibleSection({
+  id,
+  sectionLabel,
+  title,
+  description,
+  defaultOpen,
+  open,
+  onToggle,
+  children,
+  onLayout,
+}: {
+  id: string;
+  sectionLabel?: string;
+  title: string;
+  description: string;
+  defaultOpen: boolean;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+  onLayout?: (e: { nativeEvent: { layout: { y: number } } }) => void;
+}) {
+  return (
+    <View style={styles.collapseSection} onLayout={onLayout} nativeID={id}>
+      {sectionLabel ? (
+        <>
+          <Text style={styles.sectionLabel}>{sectionLabel}</Text>
+          <View style={styles.sectionLabelLine} />
+        </>
+      ) : null}
+      <Pressable style={styles.collapseHeader} onPress={onToggle}>
+        <Text style={styles.collapseTitle}>{title}</Text>
+        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={20} color={COLORS.textMuted} />
+      </Pressable>
+      {open && (
+        <>
+          {description ? <Text style={styles.collapseDesc}>{description}</Text> : null}
+          <View style={styles.collapseBody}>{children}</View>
+        </>
+      )}
+    </View>
+  );
+}
+
+const TEMPERATURE_VISIBILITY_LABELS: Record<TemperatureVisibility, string> = {
+  inner_circle: 'Inner circle only',
+  close_friends: 'Close friends',
+  private: 'Private',
+};
+
+function TemperatureVisibilityRow() {
+  const visibility = useCircleStore((s) => s.temperatureVisibility);
+  const setVisibility = useCircleStore((s) => s.setTemperatureVisibility);
+  return (
+    <Pressable
+      style={[styles.menuItemRow, styles.menuItemBorder]}
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Alert.alert(
+          'Who can see your temperature?',
+          'Shared awareness, not monitoring. Choose who can see how you\'re doing.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: TEMPERATURE_VISIBILITY_LABELS.private, onPress: () => setVisibility('private') },
+            { text: TEMPERATURE_VISIBILITY_LABELS.close_friends, onPress: () => setVisibility('close_friends') },
+            { text: TEMPERATURE_VISIBILITY_LABELS.inner_circle, onPress: () => setVisibility('inner_circle') },
+          ]
+        );
+      }}
+    >
+      <View style={styles.menuItemLeft}>
+        <View style={styles.menuIconWrap}><Ionicons name="thermometer-outline" size={20} color={COLORS.textSecondary} /></View>
+        <View>
+          <Text style={styles.menuItemLabel}>Temperature visibility</Text>
+          <Text style={styles.menuItemSubtitle}>{TEMPERATURE_VISIBILITY_LABELS[visibility]}</Text>
+        </View>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+    </Pressable>
+  );
+}
+
 export default function MeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -60,8 +177,20 @@ export default function MeScreen() {
   const achievementUnlockedAt = useAchievementStore((s) => s.unlockedAt);
   const completedLessons = useEducationStore((s) => s.completedLessons);
   
+  const scrollRef = useRef<ScrollView>(null);
+  const sectionY = useRef<Record<string, number>>({});
   const [refreshing, setRefreshing] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => ({
+    identity: true,
+    system: true,
+    insights: false,
+    goals: false,
+    share: false,
+    settings: false,
+    data: false,
+    safety: false,
+  }));
   
   const streak = getCheckInStreak();
   const achievements = getAchievements();
@@ -81,24 +210,40 @@ export default function MeScreen() {
     setRefreshing(false);
   };
 
-  const navigateTo = (route: string) => {
+  const navigateTo = useCallback((route: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(route as any);
-  };
+  }, [router]);
+
+  const toggleSection = useCallback((key: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  }, []);
+
+  const scrollToSection = useCallback((key: string) => {
+    const y = sectionY.current[key];
+    if (y != null && scrollRef.current) {
+      scrollRef.current.scrollTo({ y: Math.max(0, y - 80), animated: true });
+    }
+  }, []);
+
+  const captureSectionLayout = useCallback((key: string) => (e: { nativeEvent: { layout: { y: number } } }) => {
+    sectionY.current[key] = e.nativeEvent.layout.y;
+  }, []);
 
   return (
     <ErrorBoundary>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />
           }
         >
-          {/* ═══════════════════════════════════════════════════════════
-              HEADER - Greeting + Profile Card
-              ═══════════════════════════════════════════════════════════ */}
+          {/* Header — Greeting + Profile Card */}
           <View style={styles.headerCard}>
             <View style={styles.headerTop}>
               <View>
@@ -108,318 +253,223 @@ export default function MeScreen() {
                   <Text style={styles.tierText}>Free Plan</Text>
                 </View>
               </View>
-              <Pressable 
-                style={[styles.avatar, { borderColor: tempColor }]}
-                onPress={() => navigateTo('/(modals)/identity-setup')}
-              >
-                <Text style={styles.avatarText}>
-                  {user.name?.charAt(0)?.toUpperCase() || '?'}
-                </Text>
+              <Pressable style={[styles.avatar, { borderColor: tempColor }]} onPress={() => navigateTo('/(modals)/identity-setup')}>
+                <Text style={styles.avatarText}>{user.name?.charAt(0)?.toUpperCase() || '?'}</Text>
                 <View style={[styles.statusDot, { backgroundColor: tempColor }]} />
               </Pressable>
             </View>
-
-            {/* Stats Row */}
             <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{streak}</Text>
-                <Text style={styles.statLabel}>Day Streak</Text>
-              </View>
+              <View style={styles.statItem}><Text style={styles.statValue}>{streak}</Text><Text style={styles.statLabel}>Day Streak</Text></View>
               <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{unlockedCount}</Text>
-                <Text style={styles.statLabel}>Awards</Text>
-              </View>
+              <View style={styles.statItem}><Text style={styles.statValue}>{unlockedCount}</Text><Text style={styles.statLabel}>Awards</Text></View>
               <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{completedLessons?.length || 0}</Text>
-                <Text style={styles.statLabel}>Lessons</Text>
-              </View>
+              <View style={styles.statItem}><Text style={styles.statValue}>{completedLessons?.length || 0}</Text><Text style={styles.statLabel}>Lessons</Text></View>
               <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{members?.length || 0}</Text>
-                <Text style={styles.statLabel}>Circle</Text>
-              </View>
+              <View style={styles.statItem}><Text style={styles.statValue}>{members?.length || 0}</Text><Text style={styles.statLabel}>Circle</Text></View>
             </View>
-
-            {/* Edit Profile + Human Control Panel */}
             <View style={styles.profileActionsRow}>
-              <Pressable 
-                style={styles.editProfileBtn}
-                onPress={() => navigateTo('/(modals)/identity-setup')}
-              >
+              <Pressable style={styles.editProfileBtn} onPress={() => navigateTo('/(modals)/identity-setup')}>
                 <Ionicons name="create-outline" size={18} color={COLORS.accent} />
                 <Text style={styles.editProfileText}>Edit Profile</Text>
               </Pressable>
-              <Pressable 
-                style={[styles.editProfileBtn, styles.controlPanelBtn]}
-                onPress={() => navigateTo('/profile')}
-              >
+              <Pressable style={[styles.editProfileBtn, styles.controlPanelBtn]} onPress={() => navigateTo('/profile')}>
                 <Ionicons name="options-outline" size={18} color={COLORS.accent} />
                 <Text style={styles.editProfileText}>Human Control Panel</Text>
               </Pressable>
             </View>
           </View>
 
-          {/* ═══════════════════════════════════════════════════════════
-              MY PROGRESS
-              ═══════════════════════════════════════════════════════════ */}
-          <Text style={styles.sectionHeader}>My Progress</Text>
-          <View style={styles.menuCard}>
-            <MenuItem
-              icon="trophy-outline"
-              label="Awards & Achievements"
-              badge={unlockedCount > 0 ? String(unlockedCount) : undefined}
-              onPress={() => navigateTo('/profile/achievements')}
-            />
-            <MenuItem
-              icon="analytics-outline"
-              label="Patterns & Insights"
-              onPress={() => navigateTo('/(modals)/patterns')}
-            />
-            <MenuItem
-              icon="time-outline"
-              label="Check-In History"
-              onPress={() => navigateTo('/(modals)/history')}
-            />
-            <MenuItem
-              icon="airplane-outline"
-              label="Flight Log"
-              subtitle="Pre-Flight & Post-Flight timeline"
-              onPress={() => navigateTo('/flight-log')}
-            />
-            <MenuItem
-              icon="moon-outline"
-              label="Cycle Intelligence"
-              subtitle="Understand your cycle"
-              onPress={() => navigateTo('/(modals)/cycle')}
-              isLast
-            />
-          </View>
+          {/* Quick-jump row */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickJumpWrap}>
+            {QUICK_JUMP_IDS.map((id) => (
+              <Pressable key={id} style={styles.quickJumpPill} onPress={() => scrollToSection(id)}>
+                <Text style={styles.quickJumpText}>{QUICK_JUMP_LABELS[id]}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
 
-          {/* ═══════════════════════════════════════════════════════════
-              SHARING & REPORTS
-              ═══════════════════════════════════════════════════════════ */}
-          <Text style={styles.sectionHeader}>Sharing & Reports</Text>
-          <View style={styles.menuCard}>
-            <MenuItem
-              icon="document-text-outline"
-              label="Therapist Share"
-              subtitle="Generate wellness reports"
-              accentColor={COLORS.success}
-              onPress={() => navigateTo('/(modals)/therapist-share')}
-            />
-            <MenuItem
-              icon="shield-checkmark-outline"
-              label="Sovereignty Report"
-              subtitle="Your full system overview"
-              onPress={() => navigateTo('/(modals)/sovereignty-report')}
-            />
-            <MenuItem
-              icon="share-outline"
-              label="Share Snapshot"
-              subtitle="Share your current state"
-              onPress={() => navigateTo('/(modals)/share-snapshot')}
-            />
-            <MenuItem
-              icon="star-outline"
-              label="Personology Profile"
-              subtitle="Your personality insights"
-              onPress={() => navigateTo('/(modals)/relate')}
-              isLast
-            />
-          </View>
-
-          {/* ═══════════════════════════════════════════════════════════
-              INTEGRATIONS
-              ═══════════════════════════════════════════════════════════ */}
-          <Text style={styles.sectionHeader}>Integrations</Text>
-          <View style={styles.menuCard}>
-            <MenuItem
-              icon="fitness-outline"
-              label="Apple Health"
-              subtitle="Sleep, activity, heart, cycle"
-              accentColor={COLORS.success}
-              onPress={() => navigateTo('/(modals)/health-connections')}
-            />
-            <MenuItem
-              icon="watch-outline"
-              label="Apple Watch"
-              subtitle="Real-time heart rate & HRV"
-              onPress={() => navigateTo('/(modals)/health-connections')}
-            />
-            <MenuItem
-              icon="ellipse-outline"
-              label="Oura Ring"
-              subtitle="Sleep score, readiness, HRV"
-              badge="Soon"
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Coming Soon', "Oura integration is in development. We'll notify you when it's ready!");
-              }}
-            />
-            <MenuItem
-              icon="pulse-outline"
-              label="Whoop"
-              subtitle="Strain, recovery, sleep"
-              badge="Soon"
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Coming Soon', "Whoop integration is in development. We'll notify you when it's ready!");
-              }}
-            />
-            <MenuItem
-              icon="footsteps-outline"
-              label="Fitbit"
-              subtitle="Activity, sleep, stress"
-              badge="Soon"
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Coming Soon', "Fitbit integration is in development. We'll notify you when it's ready!");
-              }}
-            />
-            <MenuItem
-              icon="navigate-outline"
-              label="Garmin"
-              subtitle="Training, body battery"
-              badge="Soon"
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Coming Soon', "Garmin integration is in development. We'll notify you when it's ready!");
-              }}
-            />
-            <MenuItem
-              icon="calendar-outline"
-              label="Calendar"
-              subtitle="Context from your schedule"
-              badge="Soon"
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Coming Soon', 'Calendar integration will help InGauge understand your day better. Coming soon!');
-              }}
-            />
-            <MenuItem
-              icon="location-outline"
-              label="Location & Weather"
-              subtitle="Environmental context"
-              badge="Soon"
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                Alert.alert('Coming Soon', 'Weather and location can affect your system. This integration is coming soon!');
-              }}
-              isLast
-            />
-          </View>
-
-          {/* ═══════════════════════════════════════════════════════════
-              MY ACCOUNT
-              ═══════════════════════════════════════════════════════════ */}
-          <Text style={styles.sectionHeader}>My Account</Text>
-          <View style={styles.menuCard}>
-            <MenuItem
-              icon="diamond-outline"
-              label="Upgrade to Pro"
-              subtitle="Unlimited AI, voice, more"
-              accentColor={COLORS.warning}
-              onPress={() => navigateTo('/(modals)/settings')}
-            />
-            <MenuItem
-              icon="key-outline"
-              label="Bring Your Own Key"
-              subtitle="Use your OpenAI API key"
-              onPress={() => navigateTo('/(modals)/settings')}
-            />
-            <MenuItem
-              icon="person-outline"
-              label="Account Settings"
-              onPress={() => navigateTo('/(modals)/settings')}
-              isLast
-            />
-          </View>
-
-          {/* ═══════════════════════════════════════════════════════════
-              APP SETTINGS
-              ═══════════════════════════════════════════════════════════ */}
-          <Text style={styles.sectionHeader}>App Settings</Text>
-          <View style={styles.menuCard}>
-            <View style={styles.menuItemRow}>
-              <View style={styles.menuItemLeft}>
-                <View style={styles.menuIconWrap}>
-                  <Ionicons name="notifications-outline" size={20} color={COLORS.textSecondary} />
-                </View>
-                <Text style={styles.menuItemLabel}>Push Notifications</Text>
-              </View>
-              <Switch
-                value={notificationsEnabled}
-                onValueChange={setNotificationsEnabled}
-                trackColor={{ false: COLORS.border, true: COLORS.accent }}
-                thumbColor="#fff"
-              />
-            </View>
-            <MenuItem
-              icon="moon-outline"
-              label="Appearance"
-              subtitle="Dark mode"
-              onPress={() => navigateTo('/(modals)/settings')}
-            />
-            <MenuItem
-              icon="shield-checkmark-outline"
-              label="Privacy"
-              onPress={() => navigateTo('/(modals)/settings')}
-              isLast
-            />
-          </View>
-
-          {/* ═══════════════════════════════════════════════════════════
-              HELP & SUPPORT
-              ═══════════════════════════════════════════════════════════ */}
-          <Text style={styles.sectionHeader}>Help & Support</Text>
-          <View style={styles.menuCard}>
-            <MenuItem
-              icon="heart-outline"
-              label="Crisis Support (988)"
-              subtitle="24/7 free support"
-              accentColor={COLORS.error}
-              onPress={() => Linking.openURL('tel:988')}
-              showCall
-            />
-            <MenuItem
-              icon="help-circle-outline"
-              label="Help Center"
-              onPress={() => Linking.openURL('https://docs.getingauge.com')}
-            />
-            <MenuItem
-              icon="chatbox-outline"
-              label="Send Feedback"
-              onPress={() => Linking.openURL('mailto:feedback@getingauge.com')}
-            />
-            <MenuItem
-              icon="refresh-outline"
-              label="Redo Onboarding"
-              onPress={() => navigateTo('/(modals)/onboarding')}
-              isLast
-            />
-          </View>
-
-          {/* ═══════════════════════════════════════════════════════════
-              FOOTER
-              ═══════════════════════════════════════════════════════════ */}
-          <Pressable
-            style={styles.signOutBtn}
-            onPress={async () => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              await signOut();
-            }}
+          {/* 1. Identity */}
+          <CollapsibleSection
+            id="identity"
+            sectionLabel="IDENTITY"
+            title="Identity"
+            description="Who you are, your story, and what matters to you."
+            defaultOpen={true}
+            open={!!openSections.identity}
+            onToggle={() => toggleSection('identity')}
+            onLayout={captureSectionLayout('identity')}
           >
+            <View style={styles.menuCard}>
+              <MenuItem icon="person-outline" label="Human Profile" subtitle="Life blueprint from the 12 questions" onPress={() => navigateTo('/profile/human-profile')} />
+              <MenuItem icon="book-outline" label="Your Story" subtitle="Origins, culture, upbringing" onPress={() => navigateTo('/your-story')} />
+              <MenuItem icon="id-card-outline" label="Identity" subtitle="Body, disability, gender" onPress={() => navigateTo('/profile/identity')} />
+              <MenuItem icon="people-outline" label="How You Connect" subtitle="Love language, communication" onPress={() => navigateTo('/profile/how-you-connect')} />
+              <MenuItem icon="sparkles-outline" label="What Gives You Life" subtitle="Interests, meaning, life chapter" onPress={() => navigateTo('/profile/what-gives-life')} />
+              <MenuItem icon="heart-outline" label="Personal Values" subtitle="What matters most — for alignment insights" onPress={() => navigateTo('/profile/values')} />
+              <MenuItem icon="shield-outline" label="Sensitive Topics" subtitle="Careful areas and triggers" onPress={() => navigateTo('/profile/sensitive')} />
+              <MenuItem icon="chatbubble-outline" label="In Your Own Words" subtitle="What makes you different" onPress={() => navigateTo('/profile/in-your-own-words')} isLast />
+            </View>
+          </CollapsibleSection>
+
+          {/* 2. Your System — 6 gauges in 2-column grid */}
+          <CollapsibleSection
+            id="system"
+            sectionLabel="YOUR SYSTEM"
+            title="Your System"
+            description="How your six gauges work together."
+            defaultOpen={true}
+            open={!!openSections.system}
+            onToggle={() => toggleSection('system')}
+            onLayout={captureSectionLayout('system')}
+          >
+            <View style={[styles.gaugeGrid, { gap: GAUGE_GRID_GAP }]}>
+              {GAUGE_ROUTES.map((g) => (
+                <Pressable key={g.id} style={[styles.gaugeGridCard, { width: GAUGE_CARD_WIDTH }]} onPress={() => navigateTo(g.route)}>
+                  <Text style={styles.gaugeGridEmoji}>{g.emoji}</Text>
+                  <Text style={styles.gaugeGridTitle}>{g.title}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </CollapsibleSection>
+
+          {/* 3. Insights & History */}
+          <CollapsibleSection
+            id="insights"
+            sectionLabel="INSIGHTS & HISTORY"
+            title="Insights & History"
+            description="Patterns, records, and your timeline over time."
+            defaultOpen={false}
+            open={!!openSections.insights}
+            onToggle={() => toggleSection('insights')}
+            onLayout={captureSectionLayout('insights')}
+          >
+            <View style={styles.menuCard}>
+              <MenuItem icon="analytics-outline" label="Patterns & Insights" onPress={() => navigateTo('/(modals)/patterns')} />
+              <MenuItem icon="time-outline" label="Check-In History" onPress={() => navigateTo('/(modals)/history')} />
+              <MenuItem icon="calendar-outline" label="Your Human Timeline" subtitle="Your life record — patterns over time" onPress={() => navigateTo('/timeline')} />
+              <MenuItem icon="airplane-outline" label="Flight Log" subtitle="Pre-Flight & Post-Flight timeline" onPress={() => navigateTo('/flight-log')} />
+              <MenuItem icon="moon-outline" label="Cycle Intelligence" subtitle="Understand your cycle" onPress={() => navigateTo('/(modals)/cycle')} />
+              <MenuItem icon="trophy-outline" label="Awards & Achievements" badge={unlockedCount > 0 ? String(unlockedCount) : undefined} onPress={() => navigateTo('/profile/achievements')} isLast />
+            </View>
+          </CollapsibleSection>
+
+          {/* 4. Goals & Growth */}
+          <CollapsibleSection
+            id="goals"
+            sectionLabel="GOALS & GROWTH"
+            title="Goals & Growth"
+            description="Where you're headed and what you're building."
+            defaultOpen={false}
+            open={!!openSections.goals}
+            onToggle={() => toggleSection('goals')}
+            onLayout={captureSectionLayout('goals')}
+          >
+            <View style={styles.menuCard}>
+              <MenuItem icon="flag-outline" label="Active Goals" subtitle="What you are working toward" onPress={() => navigateTo('/profile/goals')} />
+              <MenuItem icon="bulb-outline" label="Goal Setter" subtitle="AI-assisted" onPress={() => navigateTo('/profile/goals')} />
+              <MenuItem icon="refresh-outline" label="Review & Reflect" subtitle="Look back and adjust" onPress={() => navigateTo('/profile/goals')} isLast />
+            </View>
+          </CollapsibleSection>
+
+          {/* 5. Sharing & Reports */}
+          <CollapsibleSection
+            id="share"
+            sectionLabel="SHARING & REPORTS"
+            title="Sharing & Reports"
+            description="What you can share with people who support you."
+            defaultOpen={false}
+            open={!!openSections.share}
+            onToggle={() => toggleSection('share')}
+            onLayout={captureSectionLayout('share')}
+          >
+            <View style={styles.menuCard}>
+              <TemperatureVisibilityRow />
+              <MenuItem icon="document-text-outline" label="Therapist Share" subtitle="Generate wellness reports" accentColor={COLORS.success} onPress={() => navigateTo('/(modals)/therapist-share')} />
+              <MenuItem icon="shield-checkmark-outline" label="Sovereignty Report" subtitle="Your full system overview" onPress={() => navigateTo('/(modals)/sovereignty-report')} />
+              <MenuItem icon="share-outline" label="Share Snapshot" subtitle="Share your current state" onPress={() => navigateTo('/(modals)/share-snapshot')} />
+              <MenuItem icon="star-outline" label="Personology Profile" subtitle="Your personality insights" onPress={() => navigateTo('/(modals)/relate')} isLast />
+            </View>
+          </CollapsibleSection>
+
+          {/* 6. Data Sources — moved above Settings */}
+          <CollapsibleSection
+            id="data"
+            sectionLabel="DATA SOURCES"
+            title="Data Sources"
+            description="The inputs that help your system learn."
+            defaultOpen={false}
+            open={!!openSections.data}
+            onToggle={() => toggleSection('data')}
+            onLayout={captureSectionLayout('data')}
+          >
+            <View style={styles.menuCard}>
+              <MenuItem icon="fitness-outline" label="Apple Health" subtitle="Sleep, activity, heart, cycle" accentColor={COLORS.success} onPress={() => navigateTo('/(modals)/health-connections')} />
+              <MenuItem icon="watch-outline" label="Apple Watch" subtitle="Real-time heart rate & HRV" onPress={() => navigateTo('/(modals)/health-connections')} />
+              <MenuItem icon="ellipse-outline" label="Oura Ring" subtitle="Sleep score, readiness, HRV" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', "Oura integration is in development. We'll notify you when it's ready!"); }} />
+              <MenuItem icon="pulse-outline" label="Whoop" subtitle="Strain, recovery, sleep" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', "Whoop integration is in development. We'll notify you when it's ready!"); }} />
+              <MenuItem icon="footsteps-outline" label="Fitbit" subtitle="Activity, sleep, stress" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', "Fitbit integration is in development. We'll notify you when it's ready!"); }} />
+              <MenuItem icon="navigate-outline" label="Garmin" subtitle="Training, body battery" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', "Garmin integration is in development. We'll notify you when it's ready!"); }} />
+              <MenuItem icon="calendar-outline" label="Calendar" subtitle="Context from your schedule" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', 'Calendar integration will help InGauge understand your day better. Coming soon!'); }} />
+              <MenuItem icon="location-outline" label="Location & Weather" subtitle="Environmental context" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', 'Weather and location can affect your system. This integration is coming soon!'); }} isLast />
+            </View>
+          </CollapsibleSection>
+
+          {/* 7. Settings */}
+          <CollapsibleSection
+            id="settings"
+            sectionLabel="SETTINGS"
+            title="Settings"
+            description="How InGauge works for you."
+            defaultOpen={false}
+            open={!!openSections.settings}
+            onToggle={() => toggleSection('settings')}
+            onLayout={captureSectionLayout('settings')}
+          >
+            <View style={styles.menuCard}>
+              <View style={[styles.menuItemRow, styles.menuItemBorder]}>
+                <View style={styles.menuItemLeft}>
+                  <View style={styles.menuIconWrap}><Ionicons name="notifications-outline" size={20} color={COLORS.textSecondary} /></View>
+                  <Text style={styles.menuItemLabel}>Push Notifications</Text>
+                </View>
+                <Switch value={notificationsEnabled} onValueChange={setNotificationsEnabled} trackColor={{ false: COLORS.border, true: COLORS.accent }} thumbColor="#fff" />
+              </View>
+              <MenuItem icon="alarm-outline" label="Notifications & Reminders" onPress={() => navigateTo('/profile/preferences')} />
+              <MenuItem icon="checkmark-circle-outline" label="Check-In Settings" onPress={() => navigateTo('/profile/preferences')} />
+              <MenuItem icon="sparkles-outline" label="AI Preferences" onPress={() => navigateTo('/profile/preferences')} />
+              <MenuItem icon="moon-outline" label="Appearance" subtitle="Dark mode" onPress={() => navigateTo('/(modals)/settings')} />
+              <MenuItem icon="shield-checkmark-outline" label="Privacy" onPress={() => navigateTo('/(modals)/settings')} />
+              <MenuItem icon="diamond-outline" label="Upgrade to Pro" subtitle="Unlimited AI, voice, more" accentColor={COLORS.warning} onPress={() => navigateTo('/(modals)/settings')} />
+              <MenuItem icon="key-outline" label="Bring Your Own Key" subtitle="Use your OpenAI API key" onPress={() => navigateTo('/(modals)/settings')} />
+              <MenuItem icon="person-outline" label="Account Settings" onPress={() => navigateTo('/(modals)/settings')} isLast />
+            </View>
+          </CollapsibleSection>
+
+          {/* 8. Safety / Data / Support */}
+          <CollapsibleSection
+            id="safety"
+            sectionLabel="SAFETY / DATA / SUPPORT"
+            title="Safety / Data / Support"
+            description="Privacy, support, and control."
+            defaultOpen={false}
+            open={!!openSections.safety}
+            onToggle={() => toggleSection('safety')}
+            onLayout={captureSectionLayout('safety')}
+          >
+            <View style={styles.menuCard}>
+              <MenuItem icon="heart-outline" label="Crisis Support (988)" subtitle="24/7 free support" accentColor={COLORS.error} onPress={() => Linking.openURL('tel:988')} showCall />
+              <MenuItem icon="help-circle-outline" label="Help Center" onPress={() => Linking.openURL('https://docs.getingauge.com')} />
+              <MenuItem icon="chatbox-outline" label="Send Feedback" onPress={() => Linking.openURL('mailto:feedback@getingauge.com')} />
+              <MenuItem icon="refresh-outline" label="Redo Onboarding" onPress={() => navigateTo('/(modals)/onboarding')} />
+              <MenuItem icon="document-text-outline" label="Privacy Policy" onPress={() => Linking.openURL('https://getingauge.com/privacy')} />
+              <MenuItem icon="document-text-outline" label="Terms & Conditions" onPress={() => Linking.openURL('https://getingauge.com/terms')} isLast />
+            </View>
+          </CollapsibleSection>
+
+          {/* Footer — Sign Out + Version only */}
+          <Pressable style={styles.signOutBtn} onPress={async () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); await signOut(); }}>
             <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
             <Text style={styles.signOutText}>Sign Out</Text>
           </Pressable>
-
-          <View style={styles.footer}>
-            <Text style={styles.footerLink}>Terms & Conditions</Text>
-            <Text style={styles.footerDot}>•</Text>
-            <Text style={styles.footerLink}>Privacy Policy</Text>
-          </View>
           <Text style={styles.versionText}>InGauge v{APP_VERSION}</Text>
         </ScrollView>
       </View>
@@ -605,6 +655,91 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 10,
     marginLeft: 4,
+  },
+
+  // Quick-jump
+  quickJumpWrap: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 4,
+    marginBottom: 20,
+  },
+  quickJumpPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  quickJumpText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+
+  // Collapsible section
+  collapseSection: {
+    marginBottom: 16,
+  },
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+    letterSpacing: 1.2,
+    marginBottom: 6,
+    marginTop: 4,
+  },
+  sectionLabelLine: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginBottom: 8,
+  },
+  collapseHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+  },
+  collapseTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  collapseDesc: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginBottom: 12,
+    paddingHorizontal: 4,
+    lineHeight: 19,
+  },
+  collapseBody: {
+    marginTop: 0,
+  },
+
+  // Gauge grid (2 columns) — width set inline via GAUGE_CARD_WIDTH
+  gaugeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 8,
+  },
+  gaugeGridCard: {
+    minWidth: 0,
+    backgroundColor: COLORS.card,
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  gaugeGridEmoji: {
+    fontSize: 24,
+    marginBottom: 6,
+  },
+  gaugeGridTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
   },
 
   // Menu Card

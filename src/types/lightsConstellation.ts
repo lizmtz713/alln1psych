@@ -21,14 +21,19 @@ export interface RelationshipCluster {
   nodeIds: string[];
 }
 
+/** Relationship health / person temperature for node/line — matches Signals ring. */
+export type RelationshipHealthColor = 'green' | 'yellow' | 'orange' | 'red' | 'neutral';
+
 /** Single node on the constellation (5-signal encoding) */
 export interface ConstellationNode {
   id: string;
   name: string;
   tier: LightTier;
   temperature: LightTemperature;
-  /** 0–1 brightness from recency/closeness */
+  /** 0–1 brightness from momentum/recency (high → bright, critical → dim) */
   brightness: number;
+  /** Relationship health color for node and YOU↔node line */
+  relationshipColor?: RelationshipHealthColor;
   /** Normalized position (origin center), -1..1 */
   x: number;
   y: number;
@@ -39,6 +44,8 @@ export interface ConstellationNode {
   cluster: RelationshipClusterId;
   /** Size ratio for recency (recent = larger), 0.5–1.5 */
   sizeRatio: number;
+  /** Avatar for inner layers (5/15); undefined for 50/150 → dot */
+  photoUri?: string;
   /** Optional one-line note for card */
   note?: string;
   phone?: string;

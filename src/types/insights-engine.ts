@@ -5,8 +5,32 @@
 
 import type { GaugeKey } from '../stores/cockpitStore';
 
-/** The 5 insight types from the Unified Insight Engine spec */
+/** The 5 insight kinds from the Unified Insight Engine spec */
 export type InsightKind = 'pattern' | 'cause' | 'timing' | 'growth' | 'meaning';
+
+/** Behavioral type for ranking and delivery (awareness → pattern → cause → prediction → action). */
+export type InsightType = 'awareness' | 'pattern' | 'cause' | 'prediction' | 'action' | 'growth';
+
+/** Data provenance for attribution and ranking. */
+export type SourceType = 'self-report' | 'health' | 'oura' | 'goals' | 'wins' | 'signals' | 'context';
+
+/** Theme buckets for deduplication (one dominant insight per theme per cycle). */
+export type InsightTheme =
+  | 'sleep_recovery'
+  | 'direction_friction'
+  | 'connection_support'
+  | 'energy_regulation'
+  | 'body_basics'
+  | 'emotional_support'
+  | 'general';
+
+export interface InsightMetadata {
+  primaryGauge: GaugeKey;
+  secondaryGauge?: GaugeKey;
+  insightType: InsightType;
+  sourceTypes: SourceType[];
+  theme: InsightTheme;
+}
 
 export interface BaseGeneratedInsight {
   id: string;
@@ -21,6 +45,15 @@ export interface BaseGeneratedInsight {
   confidence: number;
   /** When this insight was generated (ISO) */
   generatedAt: string;
+  /** Optional: for ranking, dedupe, and UI (gauge targeting, source attribution) */
+  primaryGauge?: GaugeKey;
+  secondaryGauge?: GaugeKey;
+  insightType?: InsightType;
+  sourceTypes?: SourceType[];
+  theme?: InsightTheme;
+  /** Optional: e.g. for bias insight → "Try: Reframe" */
+  suggestedToolRoute?: string;
+  suggestedToolLabel?: string;
 }
 
 /** Pattern — "This is what we see in your data" (e.g. Wednesdays are hard, sleep → state) */
@@ -66,7 +99,23 @@ export type GeneratedInsight =
   | MeaningInsight;
 
 /** Input context for the engine: where and for what we're generating insights */
-export type InsightContext = 'home' | 'gauge' | 'postCheckIn';
+export type InsightContext = 'home' | 'gauge' | 'postCheckIn' | 'weekly';
+
+/** Optional health/wearable context for cause insights (Body/State). */
+export interface InsightHealthContext {
+  /** Last night's sleep (hours). */
+  lastNightSleepHours?: number;
+  /** Oura readiness 0–100; low may suggest recovery affecting State. */
+  readinessScore?: number;
+  /** HRV in ms; low may suggest nervous system stress. */
+  hrvMs?: number;
+}
+
+/** Recent goal reflections (Direction/Alignment cause and growth). */
+export interface RecentGoalReflections {
+  whatHelped: string[];
+  whatGotInTheWay: string[];
+}
 
 export interface InsightEngineInput {
   context: InsightContext;
@@ -89,4 +138,16 @@ export interface InsightEngineInput {
   winsThisWeek?: number;
   /** Sleep by day (hours, quality 1–5) for sleep–gauge correlation insights */
   sleepByDay?: Array<{ date: string; hours?: number; quality?: number }>;
+  /** Goal reflection themes (last ~2 weeks) for Direction/Alignment cause and growth */
+  recentGoalReflections?: RecentGoalReflections;
+  /** Health/wearable context for Body/State cause (sleep, recovery, HRV) */
+  healthContext?: InsightHealthContext;
+  /** Current life chapter (e.g. "New parent", "Career transition") for meaning-layer insights */
+  lifeChapter?: string;
+  /** User's chosen values (for values-layer insights: goals ↔ values) */
+  userValues?: string[];
+  /** Energy context: check-ins today, hour — for energy-regulation insights */
+  energyContext?: { checkInsToday?: number; hour?: number };
+  /** Recent free text (check-in note or last message) for bias detection */
+  recentText?: string;
 }

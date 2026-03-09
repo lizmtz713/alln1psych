@@ -10,6 +10,9 @@ export type LightTier = 'five' | 'fifteen' | 'fifty' | 'network' | 'archived';
 /** Temperature for Lights metaphor: warm = doing well, neutral = could use support, cool = hard time */
 export type LightTemperature = 'warm' | 'neutral' | 'cool' | 'unknown';
 
+/** Person temperature state (human system load): stable, broad — not granular emotion. */
+export type PersonTemperatureState = 'thriving' | 'good' | 'busy' | 'stressed' | 'needs_support';
+
 export type LightStatus = 'healthy' | 'flickering' | 'dark';
 
 /** Mood when logging how a connection felt */
@@ -67,6 +70,8 @@ export interface Light {
   bestWayToConnect?: string;
   howTheyOperate?: string;
   howTheyShowLove?: string;
+  /** Conflict / communication style (e.g. "Direct but calm") */
+  conflictStyle?: string;
   notes?: string;
   /** Insights saved from Relate tool */
   relateInsights?: string[];
@@ -78,6 +83,13 @@ export interface Light {
   family?: string;
   interests?: string;
   values?: string;
+  /** Who they are */
+  job?: string;
+  skills?: string;
+  hobbies?: string;
+  lifeStage?: string;
+  location?: string;
+  languages?: string;
   /** Stored drive time in minutes (optional) */
   driveTimeMinutes?: number;
   /** First memory: when you met (timeline shows "You met") */
@@ -97,6 +109,12 @@ export interface Light {
   brightness: number;
   temperature: LightTemperature;
   temperatureLabel: string;
+  /** Five-state person temperature (overrides/extends circle temp when set). */
+  personTemperatureState?: PersonTemperatureState;
+  /** Optional context for temperature (e.g. "Heavy work week", "Traveling"). */
+  temperatureReason?: string;
+  /** AI or manual suggestion (e.g. "Short encouraging message"). */
+  temperatureSuggestedSupport?: string;
   status: LightStatus;
   daysSinceContact: number;
   /** 0–100 from momentum engine; when set, drives status label and Hero ranking */

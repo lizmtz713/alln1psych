@@ -499,27 +499,28 @@ These aren't destiny - they're starting points. Understanding your pattern helps
     rippleEffect: "Connected people connect others. When you're well-resourced relationally, you can give to others without depleting yourself. Parents who have support can parent better. Friends who are filled up can show up. Communities are built from individuals who have capacity for others. Your connection doesn't just help you - it creates ripples of connection outward."
   },
   
+  // Direction = clarity of life path (not task completion). See docs/direction-gauge.md.
   {
     id: 'direction',
     emoji: '🧭',
     name: 'Direction',
     color: '#38BDF8',
-    tagline: 'Purpose and momentum',
-    coreTruth: "Humans don't just need comfort. We need to be going somewhere.",
+    tagline: 'Clarity of life path',
+    coreTruth: "Direction measures clarity and orientation in life—'Do I know where I'm going?'—not whether you finished tasks today. Goals are tools; Direction is navigation.",
     
-    description: "Direction isn't about having your entire life figured out. It's not about finding your One True Purpose and following it perfectly. It's about having something to move toward - even if it's small, even if it changes, even if you're not sure why it matters. Without direction, even pleasure feels empty. With direction, even hard work feels meaningful. Humans are meaning-making creatures. We need to be going somewhere.",
+    description: "Direction is clarity and sense of orientation in life. It answers 'Do I know where I'm going?'—not 'Did I finish my tasks?' It reflects purpose, life focus, decision clarity, and future orientation. It moves slowly; it doesn't change daily. It isn't about having everything figured out or one true purpose. It's about having something that orients you—even if small, even if it changes. Without direction, even pleasure feels empty. With direction, even hard work feels meaningful. Humans are meaning-making creatures. We need to be going somewhere.",
     
     whenLow: {
       feel: "Drifting. Stuck. Empty even when comfortable. Like you're running in place. No reason to get out of bed. Going through motions. Rest that doesn't refresh because there's nothing to rest FOR.",
       look: "Aimless scrolling. Can't motivate. Starting things and not finishing. Envy of people who seem to have purpose. Saying yes to whatever comes because nothing calls to you. Avoidance masquerading as openness.",
-      sound: "'What's the point?' 'I don't know what I want.' 'I should want more but I don't.' 'Nothing sounds appealing.' 'I feel like I'm wasting my life.'",
+      sound: "'What's the point?' 'I don't know what I want.' 'I feel lost.' 'I don't know what I'm doing with my life.' 'Nothing sounds appealing.'",
       taste: "Like gray. Like treading water. Like life is happening around you but you're not in it."
     },
     
     whenHealthy: {
-      feel: "Movement. Momentum. Something pulling you forward. Days that feel like they matter. Energy that comes from engagement. A reason to get up beyond just surviving another day.",
-      look: "Progress on things that matter to you. Saying no to things that don't serve your direction. Challenges that feel meaningful. Growth you can sense. A through-line in your choices.",
-      sound: "'I'm working toward something.' 'This matters to me.' 'I know why I'm doing this.' 'Even hard days are part of something.' 'My time is going where I want it to go.'",
+      feel: "Clarity. Something pulling you forward. Days that feel like they matter. Energy that comes from knowing where you're headed. A reason to get up beyond just surviving another day.",
+      look: "Knowing what matters right now. A clear focus. Saying no to things that don't serve your direction. A through-line in your choices. Direction is stable—it doesn't swing with daily task completion.",
+      sound: "'I know what matters right now.' 'I have a clear focus.' 'I'm working toward something.' 'This matters to me.' 'Even hard days are part of something.'",
       taste: "Like being pulled forward. Like your days are adding up to something. Like your life is yours."
     },
     
@@ -580,17 +581,17 @@ The question isn't 'what should I do with my life?' It's 'what do I value, and h
       }
     ],
     
-    checkIn: "Right now: What's one thing you're moving toward that matters to you? Did today feel like it added up to something? Do you know why you're doing what you're doing? Rate your sense of direction and purpose 1-10.",
+    checkIn: "The in-app check-in uses: 'How clear does your path feel right now?' (Very clear / Mostly clear / Somewhat uncertain / Lost). Direction = clarity of life path, not task completion. Use that framing in any copy or insights.",
     
     quickFixes: [
+      "Ask: 'How clear does my path feel right now?' (clarity, not productivity)",
       "Write down one thing that would make today meaningful",
-      "Do one small thing toward something you care about",
       "Ask: 'What do I want to be different in 6 months?'",
       "Say no to one thing that's not aligned with your direction",
-      "Remember a time you felt purposeful - what was present?"
+      "Remember a time you felt clear about where you were going—what was present?"
     ],
     
-    deepWork: "Clarify your values (not what you should value - what you actually do). Notice what activities create meaning vs. which just pass time. Build small, sustainable practices toward what matters. Create milestones you can progress toward. Reconsider if your current life structure supports your direction or undermines it.",
+    deepWork: "Clarify your values (not what you should value—what you actually do). Notice what gives you a sense of orientation vs. what just passes time. Direction moves slowly; it's about life clarity and focus, not daily output. Reconsider if your current life structure supports your direction or undermines it.",
     
     realWorld: [
       "A person quits their high-paying job and feels lost. The paycheck was good but the meaning was absent. They felt successful and empty. Finding work aligned with their values paid less but filled the direction tank. Same capabilities, different container, completely different experience.",

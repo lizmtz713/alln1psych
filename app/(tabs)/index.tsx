@@ -39,12 +39,13 @@ import { GaugeTriggeredSuggestions } from '../../src/components/home/GaugeTrigge
 import { DailyInsight } from '../../src/components/home/DailyInsight';
 import { YourLifeTodaySection } from '../../src/components/home/YourLifeTodaySection';
 import { CockpitCluster } from '../../src/components/CockpitCluster';
-import { CockpitContextStrip, type ContextItem } from '../../src/components/home/CockpitContextStrip';
+import type { ContextItem } from '../../src/components/home/CockpitContextStrip';
 import { CockpitStatusHeader } from '../../src/components/home/CockpitStatusHeader';
 import { CockpitPriorities, type PriorityItem } from '../../src/components/home/CockpitPriorities';
 import { CockpitSignalsPreview } from '../../src/components/home/CockpitSignalsPreview';
 import { useShallow } from 'zustand/react/shallow';
 import { useLightsStore } from '../../src/stores/lightsStore';
+import { useGoalsStore } from '../../src/stores/goalsStore';
 import { getDailyReachOuts } from '../../src/services/friendshipMaintenance';
 import { selectHero } from '../../src/services/heroEngine';
 import type { Light } from '../../src/types/lights';
@@ -177,6 +178,80 @@ const AFFIRMATIONS = [
 
 function getTodayAffirmation(): string {
   return AFFIRMATIONS[new Date().getDate() % AFFIRMATIONS.length];
+}
+
+/** Relationship insight for Cockpit ↔ Signals loop (Observe → Act). */
+function getRelationshipInsight(lights: Light[], needAttentionCount: number): string | null {
+  const five = lights.filter((l) => l.tier === 'five');
+  const innerCount = five.length;
+  if (innerCount === 0) return null;
+  if (needAttentionCount > 0) {
+    return 'A moment for someone today can strengthen your week.';
+  }
+  const recentInFive = five.filter((l) => l.daysSinceContact <= 14).length;
+  if (recentInFive >= innerCount && innerCount > 0) {
+    return 'Your inner circle is strong right now.';
+  }
+  return null;
+}
+
+/** One system insight per day: cause, chain, or action. Based on gauge values. */
+function getSystemInsightOfTheDay(
+  body: number,
+  state: number,
+  emotion: number,
+  connection: number,
+  direction: number,
+  alignment: number
+): { text: string } {
+  const gauges = [
+    { key: 'body' as const, val: body, label: 'Body' },
+    { key: 'state' as const, val: state, label: 'State' },
+    { key: 'emotion' as const, val: emotion, label: 'Emotion' },
+    { key: 'connection' as const, val: connection, label: 'Connection' },
+    { key: 'direction' as const, val: direction, label: 'Direction' },
+    { key: 'alignment' as const, val: alignment, label: 'Alignment' },
+  ];
+  const withValues = gauges.filter((g) => g.val >= 0);
+  if (withValues.length === 0) {
+    return { text: 'Check in to see how your system is doing and get a daily insight.' };
+  }
+  const low = withValues.filter((g) => g.val < 50);
+  const high = withValues.filter((g) => g.val >= 75);
+  const daySeed = new Date().getDate() + new Date().getMonth() * 31;
+
+  const causeInsights: string[] = [
+    'Connection tends to strengthen your emotional state.',
+    'Sleep strongly affects your motivation and focus the next day.',
+    'When Body is low, State and Emotion often follow.',
+    'Reaching out to people you care about often improves how you feel.',
+    'Rest and movement both support your emotional system.',
+  ];
+  const chainInsights: string[] = [
+    'Low Body → often lowers State → which can lower Emotion. Supporting one helps the others.',
+    'High Connection often supports Alignment—when relationships feel good, values feel clearer.',
+    'State and Emotion are linked. Calming your nervous system can ease difficult feelings.',
+    'Direction improves when Body and Connection are supported.',
+    'Your gauges are connected. What supports one often supports others.',
+  ];
+  const actionInsights: string[] = [
+    'Checking in with someone you care about often improves your emotional state.',
+    'You tend to feel better when you move your body, even a little.',
+    'A short check-in with yourself can clarify what your system needs today.',
+    'Small steps—sleep, connection, or a moment of rest—add up across your system.',
+    'Low state tends to reduce social interaction. A quick reset can help before reaching out.',
+  ];
+
+  if (low.some((g) => g.key === 'body') && daySeed % 3 === 0) {
+    return { text: 'Sleep and rest strongly affect your other gauges. When Body is low, State and Emotion often follow.' };
+  }
+  if (high.some((g) => g.key === 'connection') && (emotion >= 0 ? emotion < 75 : true)) {
+    return { text: causeInsights[daySeed % causeInsights.length] };
+  }
+  if (low.length >= 2) {
+    return { text: chainInsights[daySeed % chainInsights.length] };
+  }
+  return { text: actionInsights[daySeed % actionInsights.length] };
 }
 
 function getDynamicGreeting(name: string): string {
@@ -433,16 +508,15 @@ export default function HomeScreen() {
   const cockpitContextItems: ContextItem[] = [];
   const ringColor = overall < 0 ? TEXT_MUTED : getGaugeColor(overall);
 
-  const membersSafe = Array.isArray(members) ? members : [];
-  const lights = useLightsStore(
-    useShallow((s) => {
-      try {
-        return s.getLights(membersSafe);
-      } catch {
-        return [];
-      }
-    })
-  );
+  const membersSafe = useMemo(() => (Array.isArray(members) ? members : []), [members]);
+  const getLights = useLightsStore((s) => s.getLights);
+  const lights = useMemo(() => {
+    try {
+      return getLights(membersSafe);
+    } catch {
+      return [];
+    }
+  }, [getLights, membersSafe]);
   const lastHeroShownByMemberId = useLightsStore(useShallow((s) => s.lastHeroShownByMemberId));
   const dailyReachOuts = useMemo(() => {
     try {
@@ -470,6 +544,8 @@ export default function HomeScreen() {
   const needAttentionCount = (dailyReachOuts.priority?.length ?? 0) + (dailyReachOuts.suggested?.length ?? 0);
 
   const { suggestions: toolSuggestions } = useToolSuggestions({ limit: 2, requireGaugeData: true });
+  const getGoalForTodayNudge = useGoalsStore((s) => s.getGoalForTodayNudge);
+  const goalNudge = getGoalForTodayNudge();
 
   const cockpitPriorityItems: PriorityItem[] = useMemo(() => {
     const needsCheckIn = overall < 0 || activeGaugeCount < 3;
@@ -493,6 +569,15 @@ export default function HomeScreen() {
         params: heroLight?.id ? { hero: heroLight.id } : undefined,
       });
     }
+    if (goalNudge && items.length < 4) {
+      items.push({
+        id: 'goal-nudge',
+        label: goalNudge.dailyHint ?? `Progress on ${goalNudge.title}`,
+        sublabel: goalNudge.dailyHint ? goalNudge.title : 'Take a small step',
+        emoji: '🎯',
+        route: '/profile/goals',
+      });
+    }
     toolSuggestions.slice(0, 4 - items.length).forEach((s, i) => {
       items.push({
         id: `suggestion-${i}-${s.toolKey}`,
@@ -503,7 +588,7 @@ export default function HomeScreen() {
       });
     });
     return items.slice(0, 4);
-  }, [overall, activeGaugeCount, heroLight, heroNameForSignals, toolSuggestions]);
+  }, [overall, activeGaugeCount, heroLight, heroNameForSignals, goalNudge, toolSuggestions]);
 
   let streak: number = 0;
   let weeklySummary: { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null = null;
@@ -649,6 +734,19 @@ export default function HomeScreen() {
   const needsCheckInToday = overall < 0 || activeGaugeCount < 3;
   const psychSaysContent = showInsight && crossSystemInsight ? crossSystemInsight : psychSays;
 
+  const systemInsightOfTheDay = useMemo(
+    () =>
+      getSystemInsightOfTheDay(
+        bodyVal,
+        stateVal,
+        emotionVal,
+        connectionVal,
+        directionVal,
+        alignmentVal
+      ),
+    [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal]
+  );
+
   return (
     <ErrorBoundary>
     <ScrollView
@@ -700,25 +798,55 @@ export default function HomeScreen() {
           <ShareCockpitChip />
           <WinButton />
         </View>
-        {/* 3. Context strip — why gauges look the way they do */}
-        <CockpitContextStrip items={cockpitContextItems} sectionTitle="Context affecting your system" />
       </View>
       )}
 
-      {/* 4. Today's priorities — 2–4 cards */}
+      {/* 2b. Your system today — one system insight card */}
+      {sections.showCockpit && (
+        <View style={styles.systemTodaySection}>
+          <Text style={styles.systemTodayTitle}>Your system today</Text>
+          <Pressable
+            style={({ pressed }) => [styles.systemTodayCard, pressed && styles.systemTodayCardPressed]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/(tabs)/learn');
+            }}
+          >
+            <Text style={styles.systemTodayIcon}>⚙️</Text>
+            <View style={styles.systemTodayBody}>
+              <Text style={styles.systemTodayText}>{systemInsightOfTheDay.text}</Text>
+              <Text style={styles.systemTodayLearn}>Learn more in Manual →</Text>
+            </View>
+          </Pressable>
+        </View>
+      )}
+
+      {/* 3. What's influencing your system — context + key insights merged */}
+      {(sections.showCockpit && cockpitContextItems.length > 0) || (sections.showPsychSays && !!psychSaysContent) ? (
+        <Animated.View style={[styles.card, styles.psychCard, slideY(card1)]}>
+          <Text style={styles.psychLabel}>What's influencing your system</Text>
+          {cockpitContextItems.length > 0 && (
+            <View style={styles.influencingContext}>
+              {cockpitContextItems.map((item) => (
+                <View key={item.id} style={styles.influencingRow}>
+                  <Text style={styles.influencingLabel}>{item.label}</Text>
+                  {item.detail ? <Text style={styles.influencingDetail}>{item.detail}</Text> : null}
+                </View>
+              ))}
+            </View>
+          )}
+          {sections.showPsychSays && psychSaysContent ? (
+            <Text style={[styles.psychText, cockpitContextItems.length > 0 && { marginTop: 10 }]}>{psychSaysContent}</Text>
+          ) : null}
+        </Animated.View>
+      ) : null}
+
+      {/* 4. What matters today — priorities */}
       {sections.showCockpit && cockpitPriorityItems.length > 0 && (
         <CockpitPriorities items={cockpitPriorityItems} />
       )}
 
-      {/* 5. Key insights — 1–3 short insights */}
-      {sections.showPsychSays && (
-      <Animated.View style={[styles.card, styles.psychCard, slideY(card1)]}>
-        <Text style={styles.psychLabel}>Key insights</Text>
-        <Text style={styles.psychText}>{psychSaysContent}</Text>
-      </Animated.View>
-      )}
-
-      {/* 6. Helpful right now — curated tools, not full grid */}
+      {/* 5. Helpful right now — curated tools */}
       {sections.showToolsGrid && (
       <View style={[styles.quickActionsWrap, { paddingHorizontal: 20 }]}>
         <Text style={styles.cardSectionTitle}>Helpful right now</Text>
@@ -740,14 +868,15 @@ export default function HomeScreen() {
       </View>
       )}
 
-      {/* 7. Signals preview — shortcut to relationships */}
+      {/* 6. Your People — Signals preview */}
       <CockpitSignalsPreview
         needAttentionCount={needAttentionCount}
         heroName={heroNameForSignals}
         heroId={heroLight?.id}
+        relationshipInsight={getRelationshipInsight(lights, needAttentionCount)}
       />
 
-      {/* 8. Trends / patterns — lower on page */}
+      {/* 7. This week — trends */}
       {weeklySummary && (
       <View style={[styles.section, { paddingHorizontal: 20 }]}>
         <Text style={styles.sectionTitle}>This week</Text>
@@ -755,10 +884,10 @@ export default function HomeScreen() {
       </View>
       )}
 
-      {/* 9. Manual bite — one small card */}
+      {/* 8. Learn something small — Manual */}
       {sections.showDiscovery && discoveryPreview && (
         <Animated.View style={[styles.card, slideY(card2)]}>
-          <Text style={styles.cardSectionTitle}>Manual</Text>
+          <Text style={styles.cardSectionTitle}>Learn something small</Text>
           <Pressable
             style={({ pressed }) => [pressed && { opacity: 0.9 }]}
             onPress={() => router.push('/(tabs)/learn')}
@@ -771,7 +900,7 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* 10. Reflection prompt */}
+      {/* 9. Reflection prompt */}
       <Pressable
         style={[styles.card, { marginHorizontal: 20, marginBottom: SPACING.md }]}
         onPress={() => {
@@ -787,6 +916,9 @@ export default function HomeScreen() {
       <HabitsWidget />
 
       {sections.showDailyInsight && <DailyInsight />}
+
+      {/* Unified Insight Engine: 1–2 daily insights from gauges & check-ins */}
+      {sections.showDailyInsight && <UnifiedInsightCard />}
 
       {/* Greeting + Streak — smaller text */}
       <View style={styles.greetingStreakRow}>
@@ -841,6 +973,8 @@ export default function HomeScreen() {
           </Text>
         </Animated.View>
       )}
+      {/* 3–5 deeper weekly insights (patterns, cause, growth) */}
+      {sections.showWeeklyInsight && <UnifiedInsightCard context="weekly" />}
 
       {/* Gauge info modal */}
       <Modal visible={showGaugeInfo} transparent animationType="fade">
@@ -919,6 +1053,38 @@ const styles = StyleSheet.create({
   gaugeInfoIcon: { padding: 8, marginLeft: 4 },
   gaugeInfoIconText: { fontSize: 16, color: '#FFFFFF' },
   cockpitShareRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 12 },
+  systemTodaySection: { marginBottom: 20, paddingHorizontal: 20 },
+  systemTodayTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: TEXT_MUTED,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  systemTodayCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: CARD_BG,
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  systemTodayCardPressed: { opacity: 0.92 },
+  systemTodayIcon: { fontSize: 20, marginRight: 12 },
+  systemTodayBody: { flex: 1, minWidth: 0 },
+  systemTodayText: {
+    fontSize: 15,
+    color: TEXT_PRIMARY,
+    lineHeight: 22,
+  },
+  systemTodayLearn: {
+    fontSize: 13,
+    color: ACCENT,
+    fontWeight: '600',
+    marginTop: 8,
+  },
   gaugeTile: {
     width: '31%',
     minWidth: 100,
@@ -1048,6 +1214,10 @@ const styles = StyleSheet.create({
     color: TEXT_PRIMARY,
     lineHeight: 22,
   },
+  influencingContext: { marginBottom: 0 },
+  influencingRow: { marginBottom: 6 },
+  influencingLabel: { fontSize: 14, fontWeight: '600', color: TEXT_PRIMARY },
+  influencingDetail: { fontSize: 13, color: TEXT_MUTED, marginTop: 2 },
   weeklyCard: {},
   weeklyLine: { fontSize: 16, color: TEXT_PRIMARY, marginBottom: 8, fontWeight: '500' },
   weeklyMeta: { fontSize: 14, color: TEXT_MUTED },

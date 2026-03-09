@@ -27,6 +27,8 @@ import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndic
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
 import { PreConversationButton } from '../../src/components/PreConversationButton';
+import { ToolIntro } from '../../src/components/tools/ToolIntro';
+import { getToolIntroContent } from '../../src/data/toolIntroContent';
 
 const ROLE_PLAY_ACCENT = COLORS.rolePlayAccent;
 
@@ -87,7 +89,8 @@ export default function RolePlayScreen() {
   const [liveTranscript, setLiveTranscript] = useState('');
   const [useWhisperFallback, setUseWhisperFallback] = useState(false);
   const lastOnDeviceResultRef = useRef('');
-  
+  const [showIntro, setShowIntro] = useState(true);
+
   // Stabilization mode
   const systemMode = useCockpitStore((s) => s.systemMode);
   const stabilizationTriggers = useCockpitStore((s) => s.stabilizationTriggers);
@@ -571,6 +574,19 @@ export default function RolePlayScreen() {
           </Pressable>
         </View>
       </KeyboardAvoidingView>
+    );
+  }
+
+  const rolePlayIntroContent = getToolIntroContent('role-play');
+  if (showIntro && rolePlayIntroContent) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <ToolIntro
+          content={rolePlayIntroContent}
+          onStart={() => setShowIntro(false)}
+          onBack={() => router.back()}
+        />
+      </View>
     );
   }
 

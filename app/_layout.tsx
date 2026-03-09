@@ -43,6 +43,7 @@ export default function RootLayout() {
           <Stack.Screen name="mind-mail" />
           <Stack.Screen name="lights" />
           <Stack.Screen name="flight-log" />
+          <Stack.Screen name="timeline" />
           <Stack.Screen name="wrapped" />
           </Stack>
             </NotificationsSetup>

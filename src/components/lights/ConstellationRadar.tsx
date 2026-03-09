@@ -1,22 +1,33 @@
 /**
  * ConstellationRadar — "A radar for human connection"
- * Deep space aesthetic, 5-signal encoding: position, size, color, motion, cluster.
+ * Distance = layer, Color = relationship health, Motion = breathing / glow.
+ * Inner layers (5/15) = avatars; 50/150 = dots.
  */
 
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, Pressable, Dimensions, Text, Animated } from 'react-native';
+import { View, StyleSheet, Pressable, Dimensions, Text, Animated, Image } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import type { ConstellationNode } from '../../types/lightsConstellation';
-import { LIGHT_TEMPERATURE_SCALE } from '../../types/lights';
+import type { ConstellationNode, RelationshipHealthColor } from '../../types/lightsConstellation';
 import { COLORS } from '../../lib/constants';
 
 const DEFAULT_SIZE = Math.min(Dimensions.get('window').width, Dimensions.get('window').height) * 0.88;
 const CENTER_R = 8;
 const BASE_NODE_R = 12;
 const LINE_OPACITY = 0.12;
+const SELECTED_LINE_OPACITY = 0.38;
 
-const tempColor = (t: ConstellationNode['temperature']) =>
-  t === 'unknown' ? COLORS.textMuted : LIGHT_TEMPERATURE_SCALE[t].color;
+const RELATIONSHIP_COLORS: Record<RelationshipHealthColor, string> = {
+  green: '#34D399',
+  yellow: '#FBBF24',
+  orange: '#FB923C',
+  red: '#F87171',
+  neutral: 'rgba(255,255,255,0.5)',
+};
+
+function nodeColor(n: ConstellationNode): string {
+  if (n.relationshipColor) return RELATIONSHIP_COLORS[n.relationshipColor];
+  return COLORS.textMuted;
+}
 
 export interface ConstellationRadarProps {
   nodes: ConstellationNode[];
@@ -89,8 +100,13 @@ export function ConstellationRadar({
               },
             ]}
           >
-            {/* Tier rings (subtle) */}
-            {[0.22, 0.42, 0.65, 0.92].map((r, i) => (
+            {/* Dunbar layer rings: 5 / 15 / 50 / 150 */}
+            {[
+              { r: 0.22, label: '5' },
+              { r: 0.42, label: '15' },
+              { r: 0.65, label: '50' },
+              { r: 0.92, label: '150' },
+            ].map(({ r }, i) => (
               <View
                 key={i}
                 style={[
@@ -101,30 +117,42 @@ export function ConstellationRadar({
                     width: radius * r * 2,
                     height: radius * r * 2,
                     borderRadius: radius * r,
-                    borderColor: 'rgba(255,255,255,0.06)',
+                    borderColor: 'rgba(255,255,255,0.1)',
                   },
                 ]}
               />
             ))}
-            {/* Center (you) */}
+            {/* Center: YOU */}
             <View
               style={[
-                styles.centerDot,
+                styles.centerWrap,
                 {
-                  left: center - CENTER_R,
-                  top: center - CENTER_R,
-                  width: CENTER_R * 2,
-                  height: CENTER_R * 2,
-                  borderRadius: CENTER_R,
+                  left: center - 28,
+                  top: center - 28,
+                  width: 56,
+                  height: 56,
                 },
               ]}
-            />
-            {/* Lines from center to each node */}
+            >
+              <View
+                style={[
+                  styles.centerDot,
+                  {
+                    width: CENTER_R * 2,
+                    height: CENTER_R * 2,
+                    borderRadius: CENTER_R,
+                  },
+                ]}
+              />
+              <Text style={styles.centerLabel}>YOU</Text>
+            </View>
+            {/* Lines from center to each node — selected node gets highlighted line */}
             {nodes.map((n) => {
               const px = center + n.x * radius;
               const py = center + n.y * radius;
               const angle = Math.atan2(py - center, px - center);
               const lineLen = Math.hypot(px - center, py - center);
+              const isSelected = selectedId === n.id;
               return (
                 <View
                   key={`line-${n.id}`}
@@ -134,24 +162,41 @@ export function ConstellationRadar({
                       left: center,
                       top: center,
                       width: lineLen,
-                      height: 1,
-                      backgroundColor: tempColor(n.temperature),
-                      opacity: LINE_OPACITY,
+                      height: isSelected ? 2 : 1,
+                      backgroundColor: nodeColor(n),
+                      opacity: isSelected ? SELECTED_LINE_OPACITY : LINE_OPACITY,
                       transform: [{ rotate: `${angle}rad` }],
                     },
                   ]}
                 />
               );
             })}
-            {/* Nodes */}
+            {/* Nodes: avatars for 5/15, dots for 50/150 */}
             {nodes.map((n) => {
               const px = center + n.x * radius;
               const py = center + n.y * radius;
-              const color = tempColor(n.temperature);
+              const color = nodeColor(n);
               const nodeR = BASE_NODE_R * n.sizeRatio;
               const isSelected = selectedId === n.id;
               const recentlyConnected = recentlyConnectedId === n.id;
-              return (
+              const useAvatar = n.tier === 'five' || n.tier === 'fifteen';
+              return useAvatar ? (
+                <NodeAvatar
+                  key={n.id}
+                  x={px - nodeR}
+                  y={py - nodeR}
+                  size={nodeR * 2}
+                  name={n.name}
+                  photoUri={n.photoUri}
+                  color={color}
+                  brightness={n.brightness}
+                  flickering={n.flickering}
+                  selected={isSelected}
+                  recentlyConnected={recentlyConnected}
+                  onRecentGlowComplete={recentlyConnected ? onRecentGlowComplete : undefined}
+                  onPress={() => onNodePress?.(n)}
+                />
+              ) : (
                 <NodeOrb
                   key={n.id}
                   x={px - nodeR}
@@ -171,6 +216,123 @@ export function ConstellationRadar({
         </View>
       </GestureDetector>
     </GestureHandlerRootView>
+  );
+}
+
+/** Avatar node for inner layers (5/15): image or initial, with relationship-health ring */
+function NodeAvatar({
+  x,
+  y,
+  size,
+  name,
+  photoUri,
+  color,
+  brightness,
+  flickering,
+  selected,
+  recentlyConnected,
+  onRecentGlowComplete,
+  onPress,
+}: {
+  x: number;
+  y: number;
+  size: number;
+  name: string;
+  photoUri?: string;
+  color: string;
+  brightness: number;
+  flickering: boolean;
+  selected: boolean;
+  recentlyConnected: boolean;
+  onRecentGlowComplete?: () => void;
+  onPress: () => void;
+}) {
+  const pulse = useRef(new Animated.Value(1)).current;
+  const glowScale = useRef(new Animated.Value(1)).current;
+  const breathScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (!flickering) return;
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1.12, duration: 600, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.94, duration: 600, useNativeDriver: true }),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [flickering, pulse]);
+
+  useEffect(() => {
+    if (!recentlyConnected) return;
+    const anim = Animated.sequence([
+      Animated.timing(glowScale, { toValue: 1.3, duration: 400, useNativeDriver: true }),
+      Animated.timing(glowScale, { toValue: 1, duration: 800, useNativeDriver: true }),
+    ]);
+    anim.start(() => onRecentGlowComplete?.());
+    return () => anim.stop();
+  }, [recentlyConnected, glowScale, onRecentGlowComplete]);
+
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(breathScale, { toValue: 1.03, duration: 2500, useNativeDriver: true }),
+        Animated.timing(breathScale, { toValue: 1, duration: 2500, useNativeDriver: true }),
+      ])
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [breathScale]);
+
+  const opacity = 0.78 + brightness * 0.22;
+  const scaleAnim = recentlyConnected ? glowScale : flickering ? pulse : breathScale;
+  const initial = name.trim() ? name.trim()[0].toUpperCase() : '?';
+
+  return (
+    <Animated.View
+      style={[
+        styles.nodeWrap,
+        {
+          left: x,
+          top: y,
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          opacity: selected ? 1 : opacity,
+          transform: [{ scale: scaleAnim }],
+        },
+      ]}
+    >
+      <Pressable
+        onPress={onPress}
+        style={[
+          styles.nodeAvatar,
+          {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            borderWidth: 2,
+            borderColor: color,
+            ...(selected && { borderWidth: 3, borderColor: COLORS.text }),
+            ...(recentlyConnected && {
+              shadowColor: color,
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.7,
+              shadowRadius: 10,
+              elevation: 8,
+            }),
+          },
+        ]}
+      >
+        {photoUri ? (
+          <Image source={{ uri: photoUri }} style={[styles.avatarImg, { width: size, height: size, borderRadius: size / 2 }]} resizeMode="cover" />
+        ) : (
+          <View style={[styles.avatarInitial, { width: size, height: size, borderRadius: size / 2, backgroundColor: COLORS.surface }]}>
+            <Text style={[styles.avatarInitialText, { fontSize: Math.max(10, size * 0.4) }]}>{initial}</Text>
+          </View>
+        )}
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -223,7 +385,6 @@ function NodeOrb({
     return () => anim.stop();
   }, [recentlyConnected, glowScale, onRecentGlowComplete]);
 
-  // Ambient breathing: 1 → 1.03 → 1, very slow (Rule #3: alive, never busy)
   useEffect(() => {
     const anim = Animated.loop(
       Animated.sequence([
@@ -293,8 +454,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     borderWidth: 1,
   },
-  centerDot: {
+  centerWrap: {
     position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerDot: {
     backgroundColor: COLORS.accent,
     shadowColor: COLORS.accent,
     shadowOffset: { width: 0, height: 0 },
@@ -302,7 +467,18 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  centerLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+    marginTop: 4,
+    letterSpacing: 0.5,
+  },
   line: { position: 'absolute', transformOrigin: 'left center' },
   nodeWrap: { position: 'absolute' },
   node: { position: 'absolute' },
+  nodeAvatar: { overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  avatarImg: { position: 'absolute' },
+  avatarInitial: { alignItems: 'center', justifyContent: 'center' },
+  avatarInitialText: { color: COLORS.text, fontWeight: '600' },
 });

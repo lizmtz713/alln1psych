@@ -34,6 +34,7 @@ import {
   type HumanManualLesson,
   type HumanManualCategory,
 } from '../../src/data/humanManual';
+import { MANUAL_LIBRARY_GROUPS } from '../../src/data/manualLibraryGroups';
 import {
   type Discovery,
   getDiscoveriesForDay,
@@ -48,6 +49,8 @@ import {
 import { ShareInsight } from '../../src/features/share-insight';
 import { buildDiscoveryShareContent } from '../../src/features/share-insight';
 import { useUserStore } from '../../src/stores/userStore';
+import { useCockpitStore } from '../../src/stores/cockpitStore';
+import type { GaugeKey } from '../../src/stores/cockpitStore';
 import { 
   ACADEMIC_SOURCES, 
   SYNTHESIZED_INSIGHTS,
@@ -55,17 +58,64 @@ import {
   type GaugeType,
 } from '../../src/data/academicSources';
 
-// Academic disciplines that inform InGauge
-const DISCIPLINES = [
-  { id: 'psych', emoji: '🧠', name: 'Psychology', desc: 'How your mind works' },
-  { id: 'neuro', emoji: '⚡', name: 'Neuroscience', desc: 'How your brain works' },
-  { id: 'bio', emoji: '🧬', name: 'Biology', desc: 'How your body works' },
-  { id: 'soc', emoji: '👥', name: 'Sociology', desc: 'How groups shape you' },
-  { id: 'anthro', emoji: '🌍', name: 'Anthropology', desc: 'How culture shapes you' },
-  { id: 'polisci', emoji: '⚖️', name: 'Political Science', desc: 'How power shapes you' },
-];
-
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const GAUGE_KEYS: GaugeKey[] = ['body', 'state', 'emotion', 'connection', 'direction', 'alignment'];
+
+function YourSystemPatternsCard() {
+  const router = useRouter();
+  const body = useCockpitStore((s) => s.body);
+  const state = useCockpitStore((s) => s.state);
+  const emotion = useCockpitStore((s) => s.emotion);
+  const connection = useCockpitStore((s) => s.connection);
+  const direction = useCockpitStore((s) => s.direction);
+  const alignment = useCockpitStore((s) => s.alignment);
+  const crossSystemInsight = useCockpitStore((s) => s.crossSystemInsight);
+  const gauges = { body, state, emotion, connection, direction, alignment };
+  const entries = GAUGE_KEYS.map((key) => ({ key, value: gauges[key].value })).filter((e) => e.value >= 0);
+  const hasData = entries.length > 0;
+  const strongest = hasData ? entries.reduce((a, b) => (a.value >= b.value ? a : b)) : null;
+  const mostSensitive = hasData ? entries.reduce((a, b) => (a.value <= b.value ? a : b)) : null;
+  const gaugeName = (key: GaugeKey) => GAUGES.find((g) => g.id === key)?.name ?? key;
+
+  return (
+    <Pressable
+      style={styles.systemPatternsCard}
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        router.push('/(modals)/cockpit-checkin');
+      }}
+    >
+      <Text style={styles.systemPatternsTitle}>Your System Patterns</Text>
+      {!hasData ? (
+        <Text style={styles.systemPatternsText}>
+          Complete a check-in to see your strongest gauge, your most sensitive gauge, and a short insight.
+        </Text>
+      ) : (
+        <View style={styles.systemPatternsRows}>
+          {strongest && (
+            <Text style={styles.systemPatternsRow}>
+              <Text style={styles.systemPatternsLabel}>Strongest: </Text>
+              {gaugeName(strongest.key)}
+            </Text>
+          )}
+          {mostSensitive && strongest?.key !== mostSensitive?.key && (
+            <Text style={styles.systemPatternsRow}>
+              <Text style={styles.systemPatternsLabel}>Most sensitive: </Text>
+              {gaugeName(mostSensitive.key)}
+            </Text>
+          )}
+          {crossSystemInsight ? (
+            <Text style={styles.systemPatternsInsight} numberOfLines={2}>{crossSystemInsight}</Text>
+          ) : (
+            <Text style={styles.systemPatternsHint}>Tap to check in again and refresh your pattern.</Text>
+          )}
+        </View>
+      )}
+      <Text style={styles.systemPatternsCta}>{hasData ? 'Check in →' : 'Do a check-in →'}</Text>
+    </Pressable>
+  );
+}
 
 // Design System
 const COLORS = {
@@ -85,172 +135,16 @@ const COLORS = {
   iconBg: 'rgba(124,77,255,0.12)',
 };
 
-// Tab configuration
-const TABS = [
-  { id: 'gauges', label: 'Gauges', icon: 'speedometer-outline' },
-  { id: 'manual', label: 'Manual', icon: 'book-outline' },
-  { id: 'tools', label: 'Tools', icon: 'apps-outline' },
-  { id: 'discover', label: 'Discover', icon: 'bulb-outline' },
-] as const;
-
-type TabId = typeof TABS[number]['id'];
-
-// Tools organized by category - ALL app tools
-const TOOL_CATEGORIES = [
-  {
-    id: 'ai',
-    title: 'AI-Powered',
-    tools: [
-      { id: 'talk', icon: 'chatbubbles', title: 'Talk', color: '#7C4DFF' },
-      { id: 'referee', icon: 'scale', title: 'Referee', color: '#F59E0B' },
-      { id: 'prompt-generator', icon: 'sparkles', title: 'Prompts', color: '#EC4899' },
-      { id: 'replay', icon: 'refresh', title: 'Replay', color: '#14B8A6' },
-      { id: 'decode', icon: 'search', title: 'Decode', color: '#3B82F6' },
-    ],
-  },
-  {
-    id: 'connect',
-    title: 'Connect',
-    tools: [
-      { id: 'relate', icon: 'heart-circle', title: 'Relate', color: '#EC4899' },
-      { id: 'relational-bridge', icon: 'git-merge', title: 'Bridge', color: '#FF9800' },
-      { id: 'love', icon: 'heart-half', title: 'Love', color: '#F43F5E' },
-      { id: 'datesume', icon: 'heart', title: 'Datesume', color: '#EC4899' },
-      { id: 'love-history', icon: 'time', title: 'Love History', color: '#F43F5E' },
-      { id: 'help-someone', icon: 'hand-left', title: 'Help', color: '#8B5CF6' },
-      { id: 'role-play', icon: 'people-circle', title: 'Role Play', color: '#F59E0B' },
-      { id: 'comm-builder', icon: 'chatbox', title: 'Comm Lab', color: '#10B981' },
-    ],
-  },
-  {
-    id: 'checkin',
-    title: 'Check In',
-    tools: [
-      { id: 'mood-checkin', icon: 'pulse', title: 'Quick Check', color: '#7C4DFF' },
-      { id: 'cockpit-checkin', icon: 'speedometer', title: 'Full Cockpit', color: '#14B8A6' },
-    ],
-  },
-  {
-    id: 'regulate',
-    title: 'Regulate',
-    tools: [
-      { id: 'quick-reset', icon: 'flash', title: 'Quick Reset', color: '#14B8A6' },
-      { id: 'focus', icon: 'timer', title: 'Focus', color: '#0D9488' },
-      { id: 'breathing', icon: 'fitness', title: 'Breathe', color: '#14B8A6' },
-      { id: 'body-scan', icon: 'body', title: 'Body Scan', color: '#8B5CF6' },
-      { id: 'awe-activities', icon: 'planet', title: 'Awe', color: '#6366F1' },
-      { id: 'stress-thermo', icon: 'thermometer', title: 'Stress', color: '#EF4444' },
-      { id: 'crisis-resources', icon: 'heart', title: 'Crisis Help', color: '#EF4444' },
-    ],
-  },
-  {
-    id: 'understand',
-    title: 'Understand',
-    tools: [
-      { id: 'learning-style-quiz', icon: 'school', title: 'Learning Style', color: '#7C4DFF' },
-      { id: 'emotion-wheel', icon: 'color-palette', title: 'Emotions', color: '#F59E0B' },
-      { id: 'emotion-match', icon: 'extension-puzzle', title: 'Match', color: '#EC4899' },
-      { id: 'thought-challenger', icon: 'bulb', title: 'Thoughts', color: '#3B82F6' },
-      { id: 'bias-check', icon: 'filter', title: 'Bias Check', color: '#8B5CF6' },
-      { id: 'trigger-map', icon: 'map', title: 'Triggers', color: '#10B981' },
-    ],
-  },
-  {
-    id: 'grow',
-    title: 'Grow',
-    tools: [
-      { id: 'journal', icon: 'journal', title: 'Journal', color: '#EC4899' },
-      { id: 'life-questions', icon: 'help-buoy', title: '12 Life Questions', color: '#8B5CF6' },
-      { id: 'human-skills', icon: 'ribbon', title: '16 Human Skills', color: '#0D9488' },
-      { id: 'creativity', icon: 'brush', title: 'Creativity', color: '#E07A5F' },
-      { id: 'decision', icon: 'git-branch', title: 'Decision', color: '#10B981' },
-      { id: 'gratitude-jar', icon: 'sparkles', title: 'Gratitude', color: '#FBBF24' },
-      { id: 'mood-patterns', icon: 'analytics', title: 'Patterns', color: '#6366F1' },
-      { id: 'drift-detector', icon: 'compass', title: 'Drift Check', color: '#F59E0B' },
-    ],
-  },
-  {
-    id: 'athlete',
-    title: 'Athlete Mode',
-    tools: [
-      { id: 'recovery-check', icon: 'battery-charging', title: 'Recovery', color: '#10B981' },
-      { id: 'pre-competition', icon: 'trophy', title: 'Pre-Comp', color: '#FBBF24' },
-      { id: 'performance-debrief', icon: 'clipboard', title: 'Debrief', color: '#3B82F6' },
-      { id: 'athlete-identity', icon: 'star', title: 'Identity', color: '#8B5CF6' },
-    ],
-  },
-  {
-    id: 'spectrum',
-    title: 'Spectrum Mode',
-    tools: [
-      { id: 'sensory-check', icon: 'eye', title: 'Sensory', color: '#14B8A6' },
-      { id: 'stim-toolkit', icon: 'infinite', title: 'Stim', color: '#F59E0B' },
-      { id: 'social-script', icon: 'document-text', title: 'Scripts', color: '#3B82F6' },
-      { id: 'body-double', icon: 'people', title: 'Body Double', color: '#8B5CF6' },
-      { id: 'routine-builder', icon: 'calendar', title: 'Routines', color: '#EC4899' },
-      { id: 'emotion-cards', icon: 'images', title: 'Cards', color: '#FBBF24' },
-    ],
-  },
-];
-
 export default function LearnScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabId>('gauges');
   const [expandedGaugeId, setExpandedGaugeId] = useState<string | null>(null);
-  const [expandedLessonId, setExpandedLessonId] = useState<string | null>(null);
+  const [expandedLibraryGroupId, setExpandedLibraryGroupId] = useState<string | null>(null);
   const [expandedDiscoveryId, setExpandedDiscoveryId] = useState<string | null>(null);
   const [visibleDiscoveries, setVisibleDiscoveries] = useState(() => getDiscoveriesForDay());
   
   const isLessonCompleted = useEducationStore((s) => s.isLessonCompleted);
   const markComplete = useEducationStore((s) => s.completeLesson);
-
-  const switchTab = useCallback((tabId: TabId) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setActiveTab(tabId);
-  }, []);
-
-  const openTool = useCallback((id: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // Tab-based tools
-    if (id === 'talk') return router.push('/(tabs)/talk');
-    if (id === 'life-questions') return router.push('/learn/questions');
-    if (id === 'human-skills') return router.push('/learn/skills');
-    if (id === 'focus') return router.push('/tools/focus');
-    if (id === 'creativity') return router.push('/tools/creativity');
-    if (id === 'decision') return router.push('/tools/decision');
-    if (id === 'bias-check') return router.push('/tools/bias-check');
-    if (id === 'datesume') return router.push('/love/datesume');
-    if (id === 'love-history') return router.push('/love-history');
-    // Modal-based tools with direct routes
-    const modalRoutes: Record<string, string> = {
-      'journal': '/(modals)/new-journal',
-      'referee': '/(modals)/referee',
-      'replay': '/(modals)/replay',
-      'decode': '/(modals)/decode',
-      'relate': '/(modals)/relate',
-      'love': '/(modals)/love',
-      'help-someone': '/(modals)/help-someone',
-      'role-play': '/(modals)/role-play',
-      'prompt-generator': '/(modals)/prompt-generator',
-      'mood-checkin': '/(modals)/mood-checkin',
-      'cockpit-checkin': '/(modals)/cockpit-checkin',
-      'mood-patterns': '/(modals)/patterns',
-      'learning-style-quiz': '/(modals)/learning-style-quiz',
-      'relational-bridge': '/(modals)/relational-bridge',
-      'quick-reset': '/(modals)/quick-reset',
-      'crisis-resources': '/(modals)/crisis-resources',
-      'performance-debrief': '/(modals)/debrief',
-      'awe-activities': '/(modals)/awe-activities',
-      'drift-detector': '/(modals)/drift-detector',
-    };
-    if (modalRoutes[id]) {
-      return router.push(modalRoutes[id] as any);
-    }
-    // Activity-based tools (breathing, body-scan, emotion-wheel, etc.)
-    router.push(`/(modals)/activity?id=${id}`);
-  }, [router]);
 
   const toggleGauge = useCallback((id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -269,17 +163,27 @@ export default function LearnScreen() {
     setVisibleDiscoveries((prev) => [...prev, ...more]);
   }, [visibleDiscoveries]);
 
-  // Get all lessons flat
-  const allLessons = useMemo(() => {
-    const result: { lesson: ManualLesson; section: ManualSection; moduleTitle: string }[] = [];
-    MANUAL_SECTIONS.forEach((section) => {
-      section.modules.forEach((module) => {
-        module.lessons.forEach((lesson) => {
-          result.push({ lesson, section, moduleTitle: module.title });
-        });
-      });
-    });
-    return result;
+  // Get manual sections and human categories for the expanded library group
+  const { sectionsForGroup, humanCategoriesForGroup } = useMemo(() => {
+    if (!expandedLibraryGroupId) {
+      return { sectionsForGroup: [] as ManualSection[], humanCategoriesForGroup: [] as HumanManualCategory[] };
+    }
+    const group = MANUAL_LIBRARY_GROUPS.find((g) => g.id === expandedLibraryGroupId);
+    if (!group) {
+      return { sectionsForGroup: [] as ManualSection[], humanCategoriesForGroup: [] as HumanManualCategory[] };
+    }
+    const sectionIds = new Set(group.manualSectionIds);
+    const categoryIds = new Set(group.humanCategoryIds);
+    return {
+      sectionsForGroup: MANUAL_SECTIONS.filter((s) => sectionIds.has(s.id)),
+      humanCategoriesForGroup: humanManualCategories.filter((c) => categoryIds.has(c.id)),
+    };
+  }, [expandedLibraryGroupId]);
+
+  const toggleLibraryGroup = useCallback((groupId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedLibraryGroupId((prev) => (prev === groupId ? null : groupId));
   }, []);
 
   return (
@@ -287,348 +191,216 @@ export default function LearnScreen() {
       <View style={[styles.container, { paddingTop: insets.top }]}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Learn</Text>
+          <Text style={styles.headerTitle}>Manual</Text>
+          <Text style={styles.headerSubtitle}>
+            The operating manual for being human.
+          </Text>
         </View>
 
-        {/* Top Tabs */}
-        <View style={styles.tabContainer}>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tabScroll}
-          >
-            {TABS.map((tab) => (
-              <Pressable
-                key={tab.id}
-                style={[styles.tab, activeTab === tab.id && styles.tabActive]}
-                onPress={() => switchTab(tab.id)}
-              >
-                <Ionicons 
-                  name={tab.icon as any} 
-                  size={18} 
-                  color={activeTab === tab.id ? '#fff' : COLORS.textMuted} 
-                />
-                <Text style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}>
-                  {tab.label}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Content */}
-        <ScrollView 
+        <ScrollView
           style={styles.content}
-          contentContainerStyle={styles.contentInner}
+          contentContainerStyle={[styles.contentInner, { paddingBottom: insets.bottom + 24 }]}
           showsVerticalScrollIndicator={false}
         >
-          {/* ═══════════════════════════════════════════════════════════
-              GAUGES TAB
-              ═══════════════════════════════════════════════════════════ */}
-          {activeTab === 'gauges' && (
-            <View>
-              {/* Hero Intro */}
-              <View style={styles.heroCard}>
-                <Text style={styles.heroTitle}>{GAUGE_SYSTEM_INTRO.headline}</Text>
-                <Text style={styles.heroSubtitle}>{GAUGE_SYSTEM_INTRO.subhead}</Text>
-                
-                {/* Disciplines Row */}
-                <View style={styles.disciplinesRow}>
-                  {DISCIPLINES.map((d) => (
-                    <View key={d.id} style={styles.disciplineChip}>
-                      <Text style={styles.disciplineEmoji}>{d.emoji}</Text>
-                      <Text style={styles.disciplineName}>{d.name}</Text>
-                    </View>
-                  ))}
-                </View>
-                
-                <Text style={styles.heroDepthText}>
-                  Everything here comes from real research — psychology, neuroscience, sociology, and more. 
-                  Tap any gauge to go deeper. It's all here when you're ready.
-                </Text>
-              </View>
+          {/* ═══ SECTION 1: INTRO / HUMAN OS FRAME ═══ */}
+          <View style={styles.introBlock}>
+            <Text style={styles.introHeadline}>You are not broken.</Text>
+            <Text style={styles.introHeadline}>You are a system.</Text>
+            <Text style={styles.introSupporting}>
+              Manual helps you understand how it works.
+            </Text>
+          </View>
 
-              {/* Gauge Cards */}
-              {GAUGES.map((gauge) => {
-                const isExpanded = expandedGaugeId === gauge.id;
-                const gaugeInsights = getInsightsForGauge(gauge.id as GaugeType);
-                const relevantSources = ACADEMIC_SOURCES.filter(s => s.primaryGauge === gauge.id);
-                
-                return (
-                  <Pressable
-                    key={gauge.id}
-                    style={styles.gaugeCard}
-                    onPress={() => toggleGauge(gauge.id)}
-                  >
-                    <View style={styles.gaugeHeader}>
-                      <View style={[styles.gaugeIcon, { backgroundColor: gauge.color + '20' }]}>
-                        <Text style={styles.gaugeEmoji}>{gauge.emoji}</Text>
-                      </View>
-                      <View style={styles.gaugeInfo}>
-                        <Text style={styles.gaugeName}>{gauge.name}</Text>
-                        <Text style={styles.gaugeTagline}>{gauge.tagline}</Text>
-                      </View>
-                      <Ionicons 
-                        name={isExpanded ? 'chevron-up' : 'chevron-down'} 
-                        size={20} 
-                        color={COLORS.textMuted} 
-                      />
-                    </View>
-                    {isExpanded && (
-                      <View style={styles.gaugeExpanded}>
-                        <Text style={styles.gaugeCoreTruth}>"{gauge.coreTruth}"</Text>
-                        <Text style={styles.gaugeDesc}>{gauge.description}</Text>
-                        
-                        {/* Academic Sources */}
-                        {relevantSources.length > 0 && (
-                          <View style={styles.sourcesSection}>
-                            <Text style={styles.sourcesSectionTitle}>📚 The Science Behind This</Text>
-                            {relevantSources.slice(0, 3).map((source) => (
-                              <View key={source.id} style={styles.sourceRow}>
-                                <Text style={styles.sourceAuthor}>{source.author}</Text>
-                                <Text style={styles.sourceInsight}>{source.keyInsight}</Text>
-                              </View>
-                            ))}
+          {/* ═══ SECTION 2: THE SYSTEM (6 GAUGES) ═══ */}
+          <Text style={styles.sectionBlockTitle}>The System</Text>
+          <Text style={styles.sectionBlockSubtitle}>
+            Start here to learn what each gauge means and what affects it.
+          </Text>
+          {GAUGES.map((gauge) => {
+            const isExpanded = expandedGaugeId === gauge.id;
+            const gaugeInsights = getInsightsForGauge(gauge.id as GaugeType);
+            const relevantSources = ACADEMIC_SOURCES.filter((s) => s.primaryGauge === gauge.id);
+            return (
+              <Pressable
+                key={gauge.id}
+                style={styles.gaugeCard}
+                onPress={() => toggleGauge(gauge.id)}
+              >
+                <View style={styles.gaugeHeader}>
+                  <View style={[styles.gaugeIcon, { backgroundColor: gauge.color + '20' }]}>
+                    <Text style={styles.gaugeEmoji}>{gauge.emoji}</Text>
+                  </View>
+                  <View style={styles.gaugeInfo}>
+                    <Text style={styles.gaugeName}>{gauge.name}</Text>
+                    <Text style={styles.gaugeTagline}>{gauge.tagline}</Text>
+                  </View>
+                  <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={20} color={COLORS.textMuted} />
+                </View>
+                {isExpanded && (
+                  <View style={styles.gaugeExpanded}>
+                    <Text style={styles.gaugeCoreTruth}>"{gauge.coreTruth}"</Text>
+                    <Text style={styles.gaugeDesc}>{gauge.description}</Text>
+                    {relevantSources.length > 0 && (
+                      <View style={styles.sourcesSection}>
+                        <Text style={styles.sourcesSectionTitle}>📚 The Science Behind This</Text>
+                        {relevantSources.slice(0, 3).map((source) => (
+                          <View key={source.id} style={styles.sourceRow}>
+                            <Text style={styles.sourceAuthor}>{source.author}</Text>
+                            <Text style={styles.sourceInsight}>{source.keyInsight}</Text>
                           </View>
-                        )}
-                        
-                        {/* Key Insights Preview */}
-                        {gaugeInsights.length > 0 && (
-                          <View style={styles.insightsPreview}>
-                            <Text style={styles.insightsPreviewTitle}>💡 Key Insights</Text>
-                            {gaugeInsights.slice(0, 2).map((insight) => (
-                              <Text key={insight.id} style={styles.insightPreviewItem}>• {insight.title}</Text>
-                            ))}
-                          </View>
-                        )}
-                        
-                        {/* Learn More Button */}
-                        <Pressable 
-                          style={styles.gaugeLearnMoreBtn}
-                          onPress={() => openGaugeDetail(gauge.id)}
-                        >
-                          <Text style={styles.gaugeLearnMoreText}>Go Deeper →</Text>
-                        </Pressable>
+                        ))}
                       </View>
                     )}
-                  </Pressable>
-                );
-              })}
-              
-              {/* Self InGauged Card */}
-              <View style={styles.selfIngaugedCard}>
-                <Text style={styles.selfIngaugedTitle}>🎯 {SELF_INGAUGED.title}</Text>
-                <Text style={styles.selfIngaugedText}>{SELF_INGAUGED.meaning}</Text>
-                <View style={styles.selfIngaugedDivider} />
-                <Text style={styles.selfIngaugedTagline}>{SELF_INGAUGED.theMovement.tagline}</Text>
-              </View>
-            </View>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════════
-              MANUAL TAB
-              ═══════════════════════════════════════════════════════════ */}
-          {activeTab === 'manual' && (
-            <View>
-              {/* Search Bar */}
-              <ManualSearch />
-              
-              {/* Manual Intro */}
-              <View style={styles.manualIntroCard}>
-                <Text style={styles.manualIntroTitle}>The Human Manual</Text>
-                <Text style={styles.manualIntroText}>
-                  This isn't self-help fluff. Over 200 lessons distill real research into knowledge you can actually use.
-                </Text>
-                <View style={styles.manualSourcesRow}>
-                  <Ionicons name="library-outline" size={16} color={COLORS.textMuted} />
-                  <Text style={styles.manualSourcesText}>
-                    Grounded in psychology, neuroscience, sociology, and more
-                  </Text>
-                </View>
-              </View>
-
-              {/* Contextual Suggestions based on gauge state */}
-              <SuggestedLessons />
-
-              {MANUAL_SECTIONS.map((section) => (
-                <View key={section.id} style={styles.manualSection}>
-                  <View style={styles.manualSectionHeader}>
-                    <Text style={styles.manualSectionEmoji}>{section.emoji}</Text>
-                    <Text style={styles.manualSectionTitle}>{section.title}</Text>
-                  </View>
-                  
-                  <ScrollView 
-                    horizontal 
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.lessonCarousel}
-                  >
-                    {section.modules.map((module) =>
-                      module.lessons.map((lesson) => {
-                        const completed = isLessonCompleted(lesson.id);
-                        return (
-                          <Pressable
-                            key={lesson.id}
-                            style={[styles.lessonCard, completed && styles.lessonCardDone]}
-                            onPress={() => {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                              router.push(`/lesson/${lesson.id}`);
-                            }}
-                          >
-                            {completed && (
-                              <View style={styles.lessonCheck}>
-                                <Ionicons name="checkmark" size={12} color="#fff" />
-                              </View>
-                            )}
-                            <Text style={styles.lessonEmoji}>{lesson.emoji}</Text>
-                            <Text style={styles.lessonTitle} numberOfLines={2}>{lesson.title}</Text>
-                          </Pressable>
-                        );
-                      })
+                    {gaugeInsights.length > 0 && (
+                      <View style={styles.insightsPreview}>
+                        <Text style={styles.insightsPreviewTitle}>💡 Key Insights</Text>
+                        {gaugeInsights.slice(0, 2).map((insight) => (
+                          <Text key={insight.id} style={styles.insightPreviewItem}>• {insight.title}</Text>
+                        ))}
+                      </View>
                     )}
-                  </ScrollView>
-                </View>
-              ))}
-
-              {/* Divider between original manual and expanded content */}
-              <View style={styles.manualDivider}>
-                <View style={styles.manualDividerLine} />
-                <Text style={styles.manualDividerText}>Deep Dives</Text>
-                <View style={styles.manualDividerLine} />
-              </View>
-
-              {/* Human Manual Categories (127 additional lessons) */}
-              {humanManualCategories.map((category) => (
-                <View key={category.id} style={styles.manualSection}>
-                  <View style={styles.manualSectionHeader}>
-                    <Text style={styles.manualSectionEmoji}>{category.emoji}</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.manualSectionTitle}>{category.title}</Text>
-                      <Text style={styles.manualSectionDesc}>{category.description}</Text>
-                    </View>
+                    <Pressable style={styles.gaugeLearnMoreBtn} onPress={() => openGaugeDetail(gauge.id)}>
+                      <Text style={styles.gaugeLearnMoreText}>Go Deeper →</Text>
+                    </Pressable>
                   </View>
-                  
-                  <ScrollView 
-                    horizontal 
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.lessonCarousel}
-                  >
-                    {category.lessons.map((lesson) => {
-                      const completed = isLessonCompleted(lesson.id);
-                      return (
-                        <Pressable
-                          key={lesson.id}
-                          style={[styles.lessonCard, completed && styles.lessonCardDone]}
-                          onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            router.push(`/lesson/${lesson.id}`);
-                          }}
-                        >
-                          {completed && (
-                            <View style={styles.lessonCheck}>
-                              <Ionicons name="checkmark" size={12} color="#fff" />
-                            </View>
-                          )}
-                          <Text style={styles.lessonEmoji}>{lesson.emoji}</Text>
-                          <Text style={styles.lessonTitle} numberOfLines={2}>{lesson.title}</Text>
-                        </Pressable>
-                      );
-                    })}
-                  </ScrollView>
-                </View>
-              ))}
-            </View>
-          )}
+                )}
+              </Pressable>
+            );
+          })}
 
-          {/* ═══════════════════════════════════════════════════════════
-              TOOLS TAB - Sam's Club Style Grid
-              ═══════════════════════════════════════════════════════════ */}
-          {activeTab === 'tools' && (
-            <View>
-              {TOOL_CATEGORIES.map((category) => (
-                <View key={category.id} style={styles.toolCategory}>
-                  <Text style={styles.toolCategoryTitle}>{category.title}</Text>
-                  <View style={styles.toolGrid}>
-                    {category.tools.map((tool) => (
-                      <Pressable
-                        key={tool.id}
-                        style={styles.toolItem}
-                        onPress={() => openTool(tool.id)}
-                      >
-                        <View style={[styles.toolIconWrap, { backgroundColor: tool.color + '15' }]}>
-                          <Ionicons name={tool.icon as any} size={28} color={tool.color} />
+          {/* Your System Patterns — small card tied to their data */}
+          <YourSystemPatternsCard />
+
+          {/* ═══ SECTION 3: THE MANUAL (KNOWLEDGE LIBRARY) ═══ */}
+          <Text style={styles.sectionBlockTitle}>The Manual</Text>
+          <Text style={styles.sectionBlockSubtitle}>
+            A structured library. Pick a group, then explore.
+          </Text>
+          <ManualSearch />
+          <SuggestedLessons />
+          {MANUAL_LIBRARY_GROUPS.map((group) => {
+            const isExpanded = expandedLibraryGroupId === group.id;
+            return (
+              <View key={group.id} style={styles.libraryGroupWrap}>
+                <Pressable
+                  style={[styles.libraryGroupCard, isExpanded && styles.libraryGroupCardExpanded]}
+                  onPress={() => toggleLibraryGroup(group.id)}
+                >
+                  <Text style={styles.libraryGroupEmoji}>{group.emoji}</Text>
+                  <View style={styles.libraryGroupBody}>
+                    <Text style={styles.libraryGroupTitle}>{group.title}</Text>
+                    <Text style={styles.libraryGroupSubtitle}>{group.subtitle}</Text>
+                  </View>
+                  <Text style={styles.libraryGroupCta}>{isExpanded ? 'Collapse' : 'Explore'}</Text>
+                  <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-forward'} size={18} color={COLORS.accent} />
+                </Pressable>
+                {isExpanded && (
+                  <View style={styles.libraryGroupContent}>
+                    {sectionsForGroup.map((section) => (
+                      <View key={section.id} style={styles.manualSection}>
+                        <View style={styles.manualSectionHeader}>
+                          <Text style={styles.manualSectionEmoji}>{section.emoji}</Text>
+                          <Text style={styles.manualSectionTitle}>{section.title}</Text>
                         </View>
-                        <Text style={styles.toolTitle}>{tool.title}</Text>
-                      </Pressable>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.lessonCarousel}>
+                          {section.modules.map((module) =>
+                            module.lessons.map((lesson) => {
+                              const completed = isLessonCompleted(lesson.id);
+                              return (
+                                <Pressable
+                                  key={lesson.id}
+                                  style={[styles.lessonCard, completed && styles.lessonCardDone]}
+                                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push(`/lesson/${lesson.id}`); }}
+                                >
+                                  {completed && <View style={styles.lessonCheck}><Ionicons name="checkmark" size={12} color="#fff" /></View>}
+                                  <Text style={styles.lessonEmoji}>{lesson.emoji}</Text>
+                                  <Text style={styles.lessonTitle} numberOfLines={2}>{lesson.title}</Text>
+                                </Pressable>
+                              );
+                            })
+                          )}
+                        </ScrollView>
+                      </View>
+                    ))}
+                    {humanCategoriesForGroup.map((category) => (
+                      <View key={category.id} style={styles.manualSection}>
+                        <View style={styles.manualSectionHeader}>
+                          <Text style={styles.manualSectionEmoji}>{category.emoji}</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.manualSectionTitle}>{category.title}</Text>
+                            <Text style={styles.manualSectionDesc}>{category.description}</Text>
+                          </View>
+                        </View>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.lessonCarousel}>
+                          {category.lessons.map((lesson) => {
+                            const completed = isLessonCompleted(lesson.id);
+                            return (
+                              <Pressable
+                                key={lesson.id}
+                                style={[styles.lessonCard, completed && styles.lessonCardDone]}
+                                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push(`/lesson/${lesson.id}`); }}
+                              >
+                                {completed && <View style={styles.lessonCheck}><Ionicons name="checkmark" size={12} color="#fff" /></View>}
+                                <Text style={styles.lessonEmoji}>{lesson.emoji}</Text>
+                                <Text style={styles.lessonTitle} numberOfLines={2}>{lesson.title}</Text>
+                              </Pressable>
+                            );
+                          })}
+                        </ScrollView>
+                      </View>
                     ))}
                   </View>
+                )}
+              </View>
+            );
+          })}
+
+          {/* ═══ SECTION 4: DISCOVERIES ═══ */}
+          <Text style={styles.sectionBlockTitle}>Discoveries</Text>
+          <Text style={styles.sectionBlockSubtitle}>
+            Small insights about how humans work.
+          </Text>
+          {visibleDiscoveries.map((discovery) => {
+            const isExpanded = expandedDiscoveryId === discovery.id;
+            return (
+              <Pressable
+                key={discovery.id}
+                style={styles.discoveryCard}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                  setExpandedDiscoveryId(isExpanded ? null : discovery.id);
+                }}
+              >
+                <View style={styles.discoveryHeader}>
+                  <Text style={styles.discoveryEmoji}>{discovery.emoji}</Text>
+                  <View style={styles.discoveryTag}>
+                    <Text style={styles.discoveryTagText}>{getCategoryTag(discovery.category)}</Text>
+                  </View>
                 </View>
-              ))}
-            </View>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════════
-              DISCOVER TAB
-              ═══════════════════════════════════════════════════════════ */}
-          {activeTab === 'discover' && (
-            <View>
-              <Text style={styles.sectionIntro}>
-                Daily insights backed by psychology. Swipe to explore.
-              </Text>
-
-              {visibleDiscoveries.map((discovery) => {
-                const isExpanded = expandedDiscoveryId === discovery.id;
-                return (
-                  <Pressable
-                    key={discovery.id}
-                    style={styles.discoveryCard}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                      setExpandedDiscoveryId(isExpanded ? null : discovery.id);
-                    }}
-                  >
-                    <View style={styles.discoveryHeader}>
-                      <Text style={styles.discoveryEmoji}>{discovery.emoji}</Text>
-                      <View style={styles.discoveryTag}>
-                        <Text style={styles.discoveryTagText}>{getCategoryTag(discovery.category)}</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.discoveryTitle}>{discovery.title}</Text>
-                    <Text style={styles.discoveryContent}>
-                      {isExpanded ? discovery.expanded : discovery.content}
-                    </Text>
-                    {!isExpanded && (
-                      <Text style={styles.discoveryTap}>Tap to learn more</Text>
+                <Text style={styles.discoveryTitle}>{discovery.title}</Text>
+                <Text style={styles.discoveryContent}>{isExpanded ? discovery.expanded : discovery.content}</Text>
+                {!isExpanded && <Text style={styles.discoveryTap}>Tap to learn more</Text>}
+                {isExpanded && (
+                  <ShareInsight
+                    content={buildDiscoveryShareContent(discovery)}
+                    trigger={(onPress) => (
+                      <Pressable style={styles.discoveryShareBtn} onPress={(e) => { e.stopPropagation(); onPress(); }}>
+                        <Ionicons name="share-outline" size={16} color={COLORS.accent} />
+                        <Text style={styles.discoveryShareText}>Share this</Text>
+                      </Pressable>
                     )}
-                    {isExpanded && (
-                      <ShareInsight
-                        content={buildDiscoveryShareContent(discovery)}
-                        trigger={(onPress) => (
-                          <Pressable
-                            style={styles.discoveryShareBtn}
-                            onPress={(e) => {
-                              e.stopPropagation();
-                              onPress();
-                            }}
-                          >
-                            <Ionicons name="share-outline" size={16} color={COLORS.accent} />
-                            <Text style={styles.discoveryShareText}>Share this</Text>
-                          </Pressable>
-                        )}
-                      />
-                    )}
-                  </Pressable>
-                );
-              })}
-
-              <Pressable style={styles.loadMoreBtn} onPress={loadMoreDiscoveries}>
-                <Text style={styles.loadMoreText}>Load More</Text>
-                <Ionicons name="add-circle-outline" size={20} color={COLORS.accent} />
+                  />
+                )}
               </Pressable>
-            </View>
-          )}
+            );
+          })}
+          <Pressable style={styles.loadMoreBtn} onPress={loadMoreDiscoveries}>
+            <Text style={styles.loadMoreText}>Load More</Text>
+            <Ionicons name="add-circle-outline" size={20} color={COLORS.accent} />
+          </Pressable>
 
-          <View style={{ height: 100 }} />
+          <View style={{ height: 80 }} />
         </ScrollView>
       </View>
     </ErrorBoundary>
@@ -647,41 +419,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: COLORS.text,
     letterSpacing: -0.5,
   },
-
-  // Top Tabs
-  tabContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  tabScroll: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    gap: 8,
-  },
-  tab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: COLORS.tabBg,
-    gap: 6,
-  },
-  tabActive: {
-    backgroundColor: COLORS.tabActive,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
+  headerSubtitle: {
+    fontSize: 15,
     color: COLORS.textMuted,
-  },
-  tabTextActive: {
-    color: '#fff',
+    marginTop: 4,
+    maxWidth: 320,
   },
 
   // Content
@@ -692,7 +439,127 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
-  // Intro Card
+  // Section 1: Intro / Human OS frame
+  introBlock: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 24,
+  },
+  introHeadline: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  introSupporting: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
+    marginTop: 12,
+  },
+  sectionBlockTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 4,
+    marginTop: 8,
+  },
+  sectionBlockSubtitle: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+
+  // Library group cards (Section 3)
+  libraryGroupWrap: {
+    marginBottom: 12,
+  },
+  libraryGroupCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  libraryGroupCardExpanded: {
+    borderColor: COLORS.accent + '50',
+    backgroundColor: COLORS.accentSoft,
+  },
+  libraryGroupEmoji: {
+    fontSize: 28,
+    marginRight: 12,
+  },
+  libraryGroupBody: { flex: 1, minWidth: 0 },
+  libraryGroupTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  libraryGroupSubtitle: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  libraryGroupCta: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.accent,
+    marginRight: 4,
+  },
+  libraryGroupContent: {
+    marginTop: 12,
+    paddingLeft: 4,
+  },
+
+  // Your System Patterns card (under The System)
+  systemPatternsCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  systemPatternsTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  systemPatternsText: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 19,
+    marginBottom: 10,
+  },
+  systemPatternsRows: { gap: 4 },
+  systemPatternsRow: { fontSize: 13, color: COLORS.textSecondary },
+  systemPatternsLabel: { fontWeight: '600', color: COLORS.textMuted },
+  systemPatternsInsight: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    fontStyle: 'italic',
+    marginTop: 6,
+    lineHeight: 19,
+  },
+  systemPatternsHint: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginTop: 6,
+  },
+  systemPatternsCta: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.accent,
+    marginTop: 10,
+  },
+
+  // Intro Card (legacy)
   introCard: {
     backgroundColor: COLORS.card,
     borderRadius: 20,

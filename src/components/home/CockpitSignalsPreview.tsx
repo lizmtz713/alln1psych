@@ -16,36 +16,52 @@ export interface CockpitSignalsPreviewProps {
   heroName?: string | null;
   /** Hero id for deep link to Transmit */
   heroId?: string | null;
+  /** Section title (default: "Your People") */
+  sectionTitle?: string;
+  /** Optional relationship insight (e.g. "Your inner circle strengthened this week.") */
+  relationshipInsight?: string | null;
 }
 
 export function CockpitSignalsPreview({
   needAttentionCount,
   heroName,
   heroId,
+  sectionTitle = 'Your People',
+  relationshipInsight,
 }: CockpitSignalsPreviewProps) {
   const router = useRouter();
 
   const openSignals = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push('/(tabs)/signals');
+    const href = heroId ? `/(tabs)/signals?hero=${encodeURIComponent(heroId)}` : '/(tabs)/signals';
+    router.push(href as any);
   };
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Signals</Text>
+      <Text style={styles.sectionTitle}>{sectionTitle}</Text>
       <Pressable
         style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
         onPress={openSignals}
       >
-        <Text style={styles.line}>
-          {needAttentionCount === 0
-            ? 'Your people are in view'
-            : needAttentionCount === 1
-              ? '1 person may need attention'
-              : `${needAttentionCount} people may need attention`}
-        </Text>
         {heroName ? (
-          <Text style={styles.hero}>Today: {heroName}</Text>
+          <Text style={styles.line}>Reach out to {heroName}</Text>
+        ) : (
+          <Text style={styles.line}>
+            {needAttentionCount === 0
+              ? 'Your people are in view'
+              : needAttentionCount === 1
+                ? '1 person may need attention'
+                : `${needAttentionCount} people may need attention`}
+          </Text>
+        )}
+        {heroName ? (
+          <Text style={styles.hero}>
+            {needAttentionCount === 0 ? 'Your people are in view' : needAttentionCount === 1 ? '1 may need attention' : `${needAttentionCount} may need attention`}
+          </Text>
+        ) : null}
+        {relationshipInsight ? (
+          <Text style={styles.insight}>{relationshipInsight}</Text>
         ) : null}
         <Text style={styles.cta}>Open Signals →</Text>
       </Pressable>
@@ -75,5 +91,6 @@ const styles = StyleSheet.create({
   cardPressed: { opacity: 0.92 },
   line: { fontSize: 15, fontWeight: '600', color: COLORS.text },
   hero: { fontSize: 13, color: COLORS.textSecondary, marginTop: 4 },
+  insight: { fontSize: 12, color: COLORS.textMuted, marginTop: 6, fontStyle: 'italic' },
   cta: { fontSize: 13, color: COLORS.accent, fontWeight: '600', marginTop: 8 },
 });

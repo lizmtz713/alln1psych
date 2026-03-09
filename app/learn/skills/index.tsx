@@ -50,7 +50,7 @@ export default function HumanSkillsIndexScreen() {
         <Pressable onPress={handleBack} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={TEXT} />
         </Pressable>
-        <Text style={styles.headerTitle}>16 Human Skills</Text>
+        <Text style={styles.headerTitle}>Core Human Skills</Text>
         <View style={styles.backBtn} />
       </View>
 
@@ -60,7 +60,7 @@ export default function HumanSkillsIndexScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.subtitle}>
-          Practice in life; earn points from check-ins, Quick Reset, Post-Flight, and talking with the AI.
+          These are learnable skills, not personality traits. Practice in life; earn points from check-ins, Quick Reset, Post-Flight, and talking with the AI.
         </Text>
 
         {domains.map((domain) => {

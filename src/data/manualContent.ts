@@ -1449,7 +1449,7 @@ const section4Module5: ManualModule = {
 export const MANUAL_SECTIONS: ManualSection[] = [
   {
     id: 'know-your-machine',
-    title: 'Know Your Machine',
+    title: 'Know Your System',
     subtitle: 'Understanding how you work',
     emoji: '🔧',
     color: '#4FC3F7',
@@ -1463,7 +1463,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
   },
   {
     id: 'maintenance-schedule',
-    title: 'Maintenance Schedule',
+    title: 'Daily Maintenance',
     subtitle: 'Keeping yourself running',
     emoji: '🔩',
     color: '#FFB74D',
@@ -1491,7 +1491,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
   },
   {
     id: 'upgrades',
-    title: 'Upgrades',
+    title: 'Growth',
     subtitle: 'Growing and evolving',
     emoji: '⬆️',
     color: '#66BB6A',

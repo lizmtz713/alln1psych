@@ -21,12 +21,15 @@ import * as Haptics from 'expo-haptics';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useLightsStore } from '../../src/stores/lightsStore';
 import { useDailyAnchorsStore } from '../../src/stores/dailyAnchorsStore';
+import { getDailyReachOuts } from '../../src/services/friendshipMaintenance';
 import { computeConstellationNodes } from '../../src/services/lightsConstellation';
 import { getLastInteractionSummary } from '../../src/services/timelineEngine';
+import { getRelationshipStatusLabel } from '../../src/lib/signalsCopy';
 import type { ConstellationNode } from '../../src/types/lightsConstellation';
 import { ConstellationRadar } from '../../src/components/lights/ConstellationRadar';
 import { ConstellationTimeline } from '../../src/components/lights/ConstellationTimeline';
 import { ConstellationPersonCard } from '../../src/components/lights/ConstellationPersonCard';
+import { TransmitComposerSheet } from '../../src/components/signals/TransmitComposerSheet';
 import { COLORS, SPACING } from '../../src/lib/constants';
 
 const RADAR_SIZE = Math.min(360, 340);
@@ -37,12 +40,20 @@ export default function ConstellationScreen() {
   const { width } = useWindowDimensions();
   const members = useCircleStore((s) => s.members);
   const lights = useLightsStore((s) => s.getLights(members ?? []));
-  const allNodes = useMemo(() => computeConstellationNodes(lights), [lights]);
+  const dailyReachOuts = useMemo(() => getDailyReachOuts(lights, 8), [lights]);
+  const needsAttentionIds = useMemo(
+    () => new Set([...dailyReachOuts.priority, ...dailyReachOuts.suggested].map((l) => l.id)),
+    [dailyReachOuts.priority, dailyReachOuts.suggested]
+  );
+  const allNodes = useMemo(() => computeConstellationNodes(lights, needsAttentionIds), [lights, needsAttentionIds]);
   const lastTransmittedToId = useDailyAnchorsStore((s) => s.lastTransmittedToId);
-  const setLastTransmittedToId = useDailyAnchorsStore((s) => s.setLastTransmittedToId);
 
   const [selectedNode, setSelectedNode] = useState<ConstellationNode | null>(null);
   const [timelineRange, setTimelineRange] = useState<'7d' | '30d' | 'all'>('all');
+  const [transmitSheetVisible, setTransmitSheetVisible] = useState(false);
+  const [transmitRecipientId, setTransmitRecipientId] = useState<string | null>(null);
+  const [transmitRecipientName, setTransmitRecipientName] = useState('');
+  const setLastTransmittedToId = useDailyAnchorsStore((s) => s.setLastTransmittedToId);
   /** Progressive reveal: five | fifteen | fifty | all. Default = top 15 (low cognitive load). */
   const [revealLevel, setRevealLevel] = useState<'five' | 'fifteen' | 'fifty' | 'all'>('fifteen');
 
@@ -69,6 +80,16 @@ export default function ConstellationScreen() {
     router.push(`/lights/log-entry?id=${encodeURIComponent(node.id)}`);
   };
 
+  const handleTransmit = (node: ConstellationNode) => {
+    setTransmitRecipientId(node.id);
+    setTransmitRecipientName(node.name);
+    setTransmitSheetVisible(true);
+  };
+
+  const handleTransmitSent = (recipientId: string | null) => {
+    if (recipientId) setLastTransmittedToId(recipientId);
+  };
+
   const handleShare = async () => {
     try {
       await RNShare.share({
@@ -90,8 +111,8 @@ export default function ConstellationScreen() {
       <View style={styles.zone1}>
         <View style={styles.titleRow}>
           <View>
-            <Text style={styles.title}>Your constellation</Text>
-            <Text style={styles.subtitle}>You're at the center. Connections you strengthen in Signals show here.</Text>
+            <Text style={styles.title}>Signals Radar</Text>
+            <Text style={styles.subtitle}>How is my social world?</Text>
           </View>
           <Pressable onPress={handleShare} style={styles.shareBtn} hitSlop={12}>
             <Ionicons name="share-outline" size={22} color={COLORS.textMuted} />
@@ -135,7 +156,14 @@ export default function ConstellationScreen() {
           <ConstellationPersonCard
             node={selectedNode}
             lastInteractionSummary={selectedLight ? getLastInteractionSummary(selectedLight) : undefined}
+            relationshipStrengthLabel={
+              selectedLight
+                ? getRelationshipStatusLabel(selectedLight, needsAttentionIds.has(selectedNode.id))
+                : undefined
+            }
+            recommendedAction={needsAttentionIds.has(selectedNode.id) ? 'Send a message' : undefined}
             onClose={() => setSelectedNode(null)}
+            onTransmit={handleTransmit}
             onOpenFull={handleOpenFull}
             onLogContact={handleLogContact}
           />
@@ -150,6 +178,18 @@ export default function ConstellationScreen() {
           </View>
         )}
       </View>
+
+      <TransmitComposerSheet
+        visible={transmitSheetVisible}
+        recipientId={transmitRecipientId}
+        recipientName={transmitRecipientName}
+        onClose={() => {
+          setTransmitSheetVisible(false);
+          setTransmitRecipientId(null);
+          setTransmitRecipientName('');
+        }}
+        onSent={handleTransmitSent}
+      />
     </View>
   );
 }

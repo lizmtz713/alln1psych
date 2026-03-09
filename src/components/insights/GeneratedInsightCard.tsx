@@ -1,9 +1,12 @@
 /**
  * Renders a single generated insight (Pattern, Cause, Timing, Growth, Meaning).
+ * Shows optional "Try: [Tool]" when insight has suggestedToolRoute/suggestedToolLabel (e.g. bias → Thought Challenger).
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS, SPACING } from '../../lib/constants';
 import type { GeneratedInsight, InsightKind } from '../../types/insights-engine';
@@ -26,6 +29,8 @@ export interface GeneratedInsightCardProps {
 
 export function GeneratedInsightCard({ insight, variant = 'full' }: GeneratedInsightCardProps) {
   const config = KIND_CONFIG[insight.kind];
+  const router = useRouter();
+  const hasTool = insight.suggestedToolRoute && insight.suggestedToolLabel;
 
   if (variant === 'compact') {
     return (
@@ -46,6 +51,18 @@ export function GeneratedInsightCard({ insight, variant = 'full' }: GeneratedIns
       </View>
       <Text style={styles.title}>{insight.title}</Text>
       <Text style={styles.body}>{insight.body}</Text>
+      {hasTool && (
+        <Pressable
+          style={({ pressed }) => [styles.toolCta, pressed && { opacity: 0.8 }]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push(insight.suggestedToolRoute!);
+          }}
+        >
+          <Ionicons name="construct-outline" size={14} color={COLORS.accent} />
+          <Text style={styles.toolCtaText}>Try: {insight.suggestedToolLabel}</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -86,6 +103,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     lineHeight: 20,
+  },
+  toolCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: SPACING.md,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  toolCtaText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.accent,
   },
   compactCard: {
     backgroundColor: COLORS.surface,

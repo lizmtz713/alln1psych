@@ -29,6 +29,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
+import { ToolIntro } from '../../src/components/tools/ToolIntro';
+import { getToolIntroContent } from '../../src/data/toolIntroContent';
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import type { GaugeKey } from '../../src/stores/cockpitStore';
 
@@ -157,6 +159,21 @@ export default function ResolveScreen() {
   const canProceedDescribe = conflictDescription.trim().length >= 10;
   const canProceedVoiceA = voiceA.trim().length >= 5;
   const canProceedVoiceB = voiceB.trim().length >= 5;
+
+  const resolveIntroContent = getToolIntroContent('resolve');
+  if (phase === 'intro' && resolveIntroContent) {
+    return (
+      <ErrorBoundary>
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+          <ToolIntro
+            content={resolveIntroContent}
+            onStart={() => setPhase('describe')}
+            onBack={() => router.back()}
+          />
+        </View>
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>

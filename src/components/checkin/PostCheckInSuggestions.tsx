@@ -1,6 +1,6 @@
 /**
- * Gauge-Triggered Tools — Post check-in modal: suggest 1–3 tools based on gauges.
- * Optionally shows 1–2 Unified Insight Engine insights (pattern, cause, meaning).
+ * Post check-in reward screen: one small insight (reinforces usage), optional streak, then tool suggestions.
+ * Streaks reward consistency; we never punish missed days.
  */
 
 import React, { useMemo } from 'react';
@@ -8,7 +8,7 @@ import { View, Text, StyleSheet, Modal, Pressable, ScrollView } from 'react-nati
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { getToolSuggestions, type ToolSuggestion } from '../../services/toolSuggestionService';
-import type { GaugeKey } from '../../stores/cockpitStore';
+import { useCockpitStore, type GaugeKey } from '../../stores/cockpitStore';
 import type { GeneratedInsight } from '../../types/insights-engine';
 import { GeneratedInsightCard } from '../insights/GeneratedInsightCard';
 import { COLORS, SPACING } from '../../lib/constants';
@@ -31,6 +31,8 @@ export function PostCheckInSuggestions({
   generatedInsights = [],
 }: PostCheckInSuggestionsProps) {
   const router = useRouter();
+  const getCheckInStreak = useCockpitStore((s) => s.getCheckInStreak);
+  const streak = getCheckInStreak();
 
   const suggestions = useMemo(() => {
     const snap = Object.fromEntries(
@@ -58,11 +60,27 @@ export function PostCheckInSuggestions({
       <Pressable style={styles.overlay} onPress={onDismiss}>
         <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
           <ScrollView style={styles.sheetScroll} showsVerticalScrollIndicator={false}>
-          <Text style={styles.title}>Try this next</Text>
-          <Text style={styles.subtitle}>Based on your check-in</Text>
-          {generatedInsights.slice(0, 2).map((insight) => (
-            <GeneratedInsightCard key={insight.id} insight={insight} variant="compact" />
-          ))}
+          {/* Reward: one small insight */}
+          {generatedInsights.length > 0 && (
+            <>
+              <Text style={styles.title}>Insight</Text>
+              <GeneratedInsightCard key={generatedInsights[0].id} insight={generatedInsights[0]} variant="compact" />
+            </>
+          )}
+          {/* Streak: reward consistency, never punish */}
+          {streak > 0 && (
+            <View style={styles.streakBadge}>
+              <Text style={styles.streakText}>
+                {streak} day streak
+              </Text>
+            </View>
+          )}
+          {suggestions.length > 0 && (
+            <>
+              <Text style={styles.sectionTitle}>Try this next</Text>
+              <Text style={styles.subtitle}>Based on your check-in</Text>
+            </>
+          )}
           {suggestions.map((s) => (
             <Pressable
               key={s.toolKey}
@@ -77,7 +95,7 @@ export function PostCheckInSuggestions({
             </Pressable>
           ))}
           <Pressable style={styles.dismissBtn} onPress={onDismiss}>
-            <Text style={styles.dismissBtnText}>Maybe later</Text>
+            <Text style={styles.dismissBtnText}>Done</Text>
           </Pressable>
           </ScrollView>
         </Pressable>
@@ -104,7 +122,17 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   title: { fontSize: 20, fontWeight: '700', color: COLORS.text, marginBottom: 4 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text, marginTop: SPACING.lg, marginBottom: 4 },
   subtitle: { fontSize: 14, color: COLORS.textMuted, marginBottom: SPACING.lg },
+  streakBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.accentBg,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    marginTop: SPACING.md,
+  },
+  streakText: { fontSize: 15, fontWeight: '600', color: COLORS.accent },
   card: {
     flexDirection: 'row',
     alignItems: 'center',

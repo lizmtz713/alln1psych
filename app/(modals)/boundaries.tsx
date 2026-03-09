@@ -27,6 +27,8 @@ import {
 import { computeCategoryScores, type BoundaryAnswer } from '../../src/services/boundariesService';
 import { useBoundariesStore } from '../../src/stores/boundariesStore';
 import type { ScriptContext } from '../../src/types/boundaries';
+import { ToolIntro } from '../../src/components/tools/ToolIntro';
+import { getToolIntroContent } from '../../src/data/toolIntroContent';
 
 const BG = COLORS.background;
 const CARD_BG = COLORS.surface;
@@ -43,7 +45,7 @@ const SCALE_VALUES = [1, 2, 3, 4, 5];
 export default function BoundariesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-
+  const [showIntro, setShowIntro] = useState(true);
   const [tab, setTab] = useState<Tab>('learn');
   const [scriptFilter, setScriptFilter] = useState<ScriptContext | 'all'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -92,6 +94,19 @@ export default function BoundariesScreen() {
     { key: 'log', label: 'Log', icon: 'list-outline' },
     { key: 'affirmations', label: 'Affirm', icon: 'heart-outline' },
   ];
+
+  const introContent = getToolIntroContent('boundaries');
+  if (showIntro && introContent) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <ToolIntro
+          content={introContent}
+          onStart={() => setShowIntro(false)}
+          onBack={() => router.back()}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
