@@ -21,6 +21,14 @@ export const SEASON_HELPERS: Record<RelationshipSeason, string> = {
   archived: 'No longer active in your day-to-day life.',
 };
 
+/** Friendship seasons — emojis for UI (relationship phases) */
+export const SEASON_EMOJI: Record<RelationshipSeason, string> = {
+  growth: '🌱',
+  active: '🔥',
+  dormant: '🍂',
+  archived: '📁',
+};
+
 /** Days without meaningful interaction before we consider Dormant (momentum low + time) */
 export const DORMANT_DAYS_THRESHOLD = 60;
 

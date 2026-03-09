@@ -9,16 +9,29 @@ import * as Haptics from 'expo-haptics';
 import { FlightInsights, type FlightInsightItem } from './FlightInsights';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../lib/constants';
 import { useGratitudeStore } from '../../stores/gratitudeStore';
+import type { GaugeKey } from '../../stores/cockpitStore';
+
+const GAUGE_LABELS: Record<GaugeKey, string> = {
+  body: 'Body',
+  state: 'State',
+  emotion: 'Emotion',
+  connection: 'Connection',
+  direction: 'Direction',
+  alignment: 'Alignment',
+};
 
 export interface PostFlightCompleteProps {
   insights: FlightInsightItem[];
   gaugesUpdated: { state?: number; emotion?: number };
+  /** Deltas from evening ritual checklist (Reflection ✔ Emotion +2, etc.) */
+  ritualGaugeDeltas?: Partial<Record<GaugeKey, number>>;
   onRestWell: () => void;
 }
 
 export function PostFlightComplete({
   insights,
   gaugesUpdated,
+  ritualGaugeDeltas,
   onRestWell,
 }: PostFlightCompleteProps) {
   const router = useRouter();
@@ -37,8 +50,8 @@ export function PostFlightComplete({
   return (
     <View style={styles.container}>
       <Text style={styles.emoji}>🌙</Text>
-      <Text style={styles.title}>Day Complete</Text>
-      <Text style={styles.subtitle}>You showed up for yourself today.</Text>
+      <Text style={styles.title}>Day Closed</Text>
+      <Text style={styles.subtitle}>System stabilized.{'\n'}Rest well.</Text>
 
       {streak > 0 && (
         <View style={styles.streakBlock}>
@@ -47,6 +60,18 @@ export function PostFlightComplete({
           <Pressable onPress={handleGratitudeReview} style={styles.streakLink}>
             <Text style={styles.streakLinkText}>See review</Text>
           </Pressable>
+        </View>
+      )}
+
+      {ritualGaugeDeltas && Object.keys(ritualGaugeDeltas).length > 0 && (
+        <View style={styles.ritualDeltasRow}>
+          {(Object.entries(ritualGaugeDeltas).filter(([, d]) => typeof d === 'number' && d > 0) as [GaugeKey, number][]).map(([gauge]) => (
+            <View key={gauge} style={styles.ritualDeltaChip}>
+              <Text style={[styles.ritualDeltaText, { color: (COLORS as any).gauges?.[gauge] ?? COLORS.accent }]}>
+                {GAUGE_LABELS[gauge]} ↑
+              </Text>
+            </View>
+          ))}
         </View>
       )}
 
@@ -75,7 +100,7 @@ export function PostFlightComplete({
         onPress={handleRestWell}
         style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
       >
-        <Text style={styles.buttonText}>Rest well</Text>
+        <Text style={styles.buttonText}>Back to Cockpit</Text>
       </Pressable>
     </View>
   );
@@ -116,6 +141,22 @@ const styles = StyleSheet.create({
   streakText: { fontSize: 14, color: COLORS.text, fontWeight: '500' },
   streakLink: { paddingVertical: 4, paddingHorizontal: 4 },
   streakLinkText: { fontSize: 14, color: COLORS.accent, fontWeight: '600' },
+  ritualDeltasRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: SPACING.lg,
+  },
+  ritualDeltaChip: {
+    backgroundColor: COLORS.surface,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: BORDER_RADIUS.button,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  ritualDeltaText: { fontSize: 15, fontWeight: '700' },
   gaugeRow: {
     flexDirection: 'row',
     gap: SPACING.xl,

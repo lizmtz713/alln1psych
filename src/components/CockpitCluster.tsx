@@ -18,11 +18,11 @@ import { COLORS, TYPOGRAPHY } from '../lib/constants';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Layout constants — Phase 2: hexagonal cockpit with center SystemScore (56pt)
-const CLUSTER_SIZE = Math.min(SCREEN_WIDTH - 48, 340);
-const CENTER_SIZE = 120; // Larger to fit 56pt score
-const GAUGE_SIZE = 76;
-const GAUGE_RADIUS = (CLUSTER_SIZE - GAUGE_SIZE) / 2 - 8; // Distance from center to gauge centers
+// Layout constants — hexagonal cockpit with breathing room (gauges not compressed)
+const CLUSTER_SIZE = Math.min(SCREEN_WIDTH - 32, 360);
+const CENTER_SIZE = 120;
+const GAUGE_SIZE = 72;
+const GAUGE_RADIUS = (CLUSTER_SIZE - GAUGE_SIZE) / 2 - 4; // More space between center and gauge circles
 
 const TEXT_PRIMARY = COLORS.text;
 const TEXT_SECONDARY = COLORS.textSecondary;
@@ -170,14 +170,6 @@ export function CockpitCluster({
   const ringColor = overall < 0 ? (TEXT_MUTED + '90') : getGaugeColor(overall);
   const activeCount = Object.values(gaugeValues).filter(v => v >= 0).length;
 
-  // PayAttentionAlert — Oura-style: which gauges need attention (low or critical)
-  const lowGauges = (GAUGE_POSITIONS as { key: string }[])
-    .map(({ key }) => ({ key, value: gaugeValues[key as keyof typeof gaugeValues] }))
-    .filter(({ value }) => value >= 0 && value < 50)
-    .sort((a, b) => a.value - b.value);
-  const criticalGauges = lowGauges.filter(({ value }) => value < 30);
-  const payAttentionLabel = criticalGauges.length > 0 ? 'PAY ATTENTION' : lowGauges.length > 0 ? 'NEEDS CARE' : null;
-  
   // Subtle breathing animation for center ring
   useEffect(() => {
     Animated.loop(
@@ -293,21 +285,7 @@ export function CockpitCluster({
         );
       })}
 
-      {/* PayAttentionAlert — Oura-style when any gauge is low */}
-      {payAttentionLabel && lowGauges.length > 0 && (
-        <Pressable
-          style={[
-            styles.payAttentionAlert,
-            criticalGauges.length > 0 && styles.payAttentionCritical,
-          ]}
-          onPress={handleCenterPress}
-        >
-          <Text style={styles.payAttentionText}>{payAttentionLabel}</Text>
-          <Text style={styles.payAttentionSub}>
-            {lowGauges.map(({ key }) => GAUGE_CONFIG[key]?.label ?? key).join(', ')} — tap to check in
-          </Text>
-        </Pressable>
-      )}
+      {/* Alert is rendered above the gauge by the parent (Home) so the gauge is never covered. */}
 
       {/* Status hint below */}
       <View style={styles.hintContainer}>
@@ -422,32 +400,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 1,
     fontVariant: ['tabular-nums'],
-  },
-  payAttentionAlert: {
-    marginTop: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: COLORS.amberBg ?? 'rgba(234, 179, 8, 0.12)',
-    borderWidth: 1,
-    borderColor: COLORS.amber ?? '#EAB308',
-    alignSelf: 'stretch',
-    alignItems: 'center',
-  },
-  payAttentionCritical: {
-    backgroundColor: COLORS.error ? `${COLORS.error}20` : 'rgba(239, 68, 68, 0.12)',
-    borderColor: COLORS.error ?? '#EF4444',
-  },
-  payAttentionText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-    color: COLORS.text,
-  },
-  payAttentionSub: {
-    fontSize: 12,
-    color: TEXT_SECONDARY,
-    marginTop: 2,
   },
   hintContainer: {
     marginTop: 8,

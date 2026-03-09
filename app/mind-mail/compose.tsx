@@ -35,6 +35,15 @@ import { IntentSelector } from '../../src/components/mind-mail/IntentSelector';
 import { GuidedPrompts } from '../../src/components/mind-mail/GuidedPrompts';
 import { PostSendReinforcement } from '../../src/components/mind-mail/PostSendReinforcement';
 import type { MindMailIntent } from '../../src/types/mindMail';
+import type { Light, LightTier } from '../../src/types/lights';
+
+const TIER_LABELS: Record<LightTier, string> = {
+  five: 'Inner 5',
+  fifteen: 'Close 15',
+  fifty: 'Friends 50',
+  network: 'Network 150',
+  archived: 'Archived',
+};
 
 const SEND_OPTIONS: { id: SendType; label: string }[] = [
   { id: 'open', label: 'Open' },
@@ -49,10 +58,14 @@ export default function MindMailComposeScreen() {
   const params = useLocalSearchParams<{ draftId?: string; recipientId?: string; recipientName?: string; from?: string }>();
   const fromConnectionsFlow = params.from === 'connections';
   const { members } = useCircleStore();
+  const getLights = useLightsStore((s) => s.getLights);
+  const lights: Light[] = getLights(members);
   const { createNote, updateNote, sendNote, notes } = useMindMailStore();
 
   const [recipientId, setRecipientId] = useState('');
   const [recipientName, setRecipientName] = useState('');
+  const [recipientSearch, setRecipientSearch] = useState('');
+  const [showTierDropdown, setShowTierDropdown] = useState(false);
   const [content, setContent] = useState('');
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text');
   const [voiceNote, setVoiceNote] = useState<{
@@ -62,7 +75,6 @@ export default function MindMailComposeScreen() {
   } | null>(null);
   const [sendType, setSendType] = useState<SendType>('open');
   const [glimpseDuration, setGlimpseDuration] = useState<number | 'auto'>('auto');
-  const [showRecipientPicker, setShowRecipientPicker] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [aiMode, setAiMode] = useState<'help' | 'vent' | 'hard' | 'examples' | null>(null);
@@ -105,7 +117,6 @@ export default function MindMailComposeScreen() {
         setGlimpseDuration(
           draft.glimpseAutoCalculated ? 'auto' : (draft.glimpseViewSeconds ?? 'auto')
         );
-        setShowRecipientPicker(false);
         const dt = draft.noteType as MindMailIntent | undefined;
         if (dt && ['encouragement', 'gratitude', 'apology', 'concern', 'boundary', 'grief'].includes(dt)) {
           setSelectedIntent(dt);
@@ -114,7 +125,6 @@ export default function MindMailComposeScreen() {
     } else if (params.recipientId || params.recipientName) {
       setRecipientId(params.recipientId || '');
       setRecipientName(params.recipientName || '');
-      setShowRecipientPicker(false);
     }
   }, [params.draftId, params.recipientId, params.recipientName, notes]);
 
@@ -352,32 +362,105 @@ export default function MindMailComposeScreen() {
           )}
           <View style={styles.row}>
             <Text style={styles.label}>To</Text>
-            {showRecipientPicker ? (
-              <View style={styles.pickerWrap}>
-                {members.length === 0 ? (
-                  <Text style={styles.muted}>No Circle members. Add someone first.</Text>
-                ) : (
-                  members.map((m) => (
-                    <Pressable
-                      key={m.id}
-                      style={styles.pickerRow}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setRecipientId(m.id);
-                        setRecipientName(m.name);
-                        setShowRecipientPicker(false);
-                      }}
-                    >
-                      <Text style={styles.pickerName}>{m.name}</Text>
-                    </Pressable>
-                  ))
-                )}
-              </View>
-            ) : (
-              <Pressable style={styles.recipientRow} onPress={() => setShowRecipientPicker(true)}>
+            {recipientId ? (
+              <Pressable
+                style={styles.recipientRow}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setRecipientId('');
+                  setRecipientName('');
+                  setRecipientSearch('');
+                  setShowTierDropdown(false);
+                }}
+              >
                 <Text style={styles.recipientText}>{recipientName}</Text>
-                <Ionicons name="chevron-down" size={20} color={COLORS.textMuted} />
+                <Text style={styles.changeRecipientText}>Change</Text>
               </Pressable>
+            ) : (
+              <>
+                <View style={styles.toInputRow}>
+                  <TextInput
+                    style={styles.toInput}
+                    placeholder="Type name or choose from circle"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={recipientSearch}
+                    onChangeText={(t) => {
+                      setRecipientSearch(t);
+                      setShowTierDropdown(false);
+                    }}
+                  />
+                  <Pressable
+                    style={styles.chooseCircleBtn}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setShowTierDropdown((v) => !v);
+                    }}
+                  >
+                    <Text style={styles.chooseCircleBtnText}>
+                      {showTierDropdown ? 'Hide circles' : 'Choose from circle'}
+                    </Text>
+                    <Ionicons name={showTierDropdown ? 'chevron-up' : 'chevron-down'} size={18} color={COLORS.accent} />
+                  </Pressable>
+                </View>
+                {recipientSearch.trim().length > 0 && (
+                  <View style={styles.predictionsWrap}>
+                    {lights
+                      .filter((l) => l.name.toLowerCase().includes(recipientSearch.trim().toLowerCase()))
+                      .slice(0, 5)
+                      .map((l) => (
+                        <Pressable
+                          key={l.id}
+                          style={styles.pickerRow}
+                          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            setRecipientId(l.id);
+                            setRecipientName(l.name);
+                            setRecipientSearch('');
+                          }}
+                        >
+                          <Text style={styles.pickerName}>{l.name}</Text>
+                          {l.tier !== 'archived' && (
+                            <Text style={styles.pickerTier}>{TIER_LABELS[l.tier]}</Text>
+                          )}
+                        </Pressable>
+                      ))}
+                    {lights.filter((l) =>
+                      l.name.toLowerCase().includes(recipientSearch.trim().toLowerCase())
+                    ).length === 0 && (
+                      <Text style={styles.muted}>No one in your circle matches.</Text>
+                    )}
+                  </View>
+                )}
+                {showTierDropdown && (
+                  <View style={styles.tierDropdown}>
+                    <ScrollView style={styles.tierDropdownScroll} keyboardShouldPersistTaps="handled">
+                      {(['five', 'fifteen', 'fifty', 'network'] as const).map((tier) => {
+                        const tierLights = lights.filter((l) => l.tier === tier);
+                        if (tierLights.length === 0) return null;
+                        return (
+                          <View key={tier} style={styles.tierSection}>
+                            <Text style={styles.tierSectionLabel}>{TIER_LABELS[tier]}</Text>
+                            {tierLights.map((l) => (
+                              <Pressable
+                                key={l.id}
+                                style={styles.pickerRow}
+                                onPress={() => {
+                                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                  setRecipientId(l.id);
+                                  setRecipientName(l.name);
+                                  setShowTierDropdown(false);
+                                }}
+                              >
+                                <Text style={styles.pickerName}>{l.name}</Text>
+                              </Pressable>
+                            ))}
+                          </View>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+                )}
+              </>
             )}
           </View>
 
@@ -655,7 +738,7 @@ const styles = StyleSheet.create({
   row: { marginBottom: 20 },
   label: { fontSize: 14, fontWeight: '600', color: COLORS.textMuted, marginBottom: 8 },
   pickerWrap: { backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.md, overflow: 'hidden' },
-  pickerRow: { padding: 14, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  pickerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 14, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   pickerName: { fontSize: 16, color: COLORS.text },
   muted: { fontSize: 14, color: COLORS.textMuted, padding: 14 },
   recipientRow: {
@@ -669,6 +752,32 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   recipientText: { fontSize: 16, color: COLORS.text },
+  changeRecipientText: { fontSize: 14, color: COLORS.accent, fontWeight: '500' },
+  toInputRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  toInput: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.md,
+    padding: 14,
+    fontSize: 16,
+    color: COLORS.text,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  chooseCircleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  chooseCircleBtnText: { fontSize: 14, color: COLORS.accent, fontWeight: '500' },
+  predictionsWrap: { marginTop: 8, backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.md, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.border },
+  tierDropdown: { marginTop: 8, backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.md, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.border, maxHeight: 280 },
+  tierDropdownScroll: { maxHeight: 276 },
+  tierSection: { borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  tierSectionLabel: { fontSize: 12, fontWeight: '600', color: COLORS.textMuted, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 4 },
+  pickerTier: { fontSize: 12, color: COLORS.textMuted, marginLeft: 8 },
   typeRow: { flexDirection: 'row', gap: 8 },
   typeBtn: {
     flex: 1,

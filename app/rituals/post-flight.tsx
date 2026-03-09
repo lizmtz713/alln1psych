@@ -18,7 +18,7 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 import { useRitualsStore } from '../../src/stores/ritualsStore';
-import { useCockpitStore } from '../../src/stores/cockpitStore';
+import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
 import { useUserStore } from '../../src/stores/userStore';
 import type { DayRating, IntentionHonored, PostFlightEntry } from '../../src/types/rituals';
 import { updateWidgetData } from '../../src/services/widgetService';
@@ -27,6 +27,7 @@ import { savePostFlightInsightsToJournal } from '../../src/services/insightJourn
 import type { FlightInsightItem } from '../../src/services/insightJournal';
 import { VoiceQuestion, type VoiceQuestionAnswer } from '../../src/components/voice';
 import { PostFlightComplete } from '../../src/components/rituals/PostFlightComplete';
+import { RitualStepChecklist, type RitualStepDef } from '../../src/components/rituals/RitualStepChecklist';
 import { trackPostFlight } from '../../src/hooks/useWrappedTracking';
 import { format } from 'date-fns';
 import { useWinStore } from '../../src/stores/winStore';
@@ -54,6 +55,13 @@ const INTENTION_OPTIONS: { value: IntentionHonored; label: string }[] = [
   { value: 'partial', label: 'Partially' },
   { value: 'no', label: 'Not really' },
   { value: 'forgot', label: "I forgot about it" },
+];
+
+/** Evening ritual quick steps — completion loop. */
+const EVENING_RITUAL_STEPS: RitualStepDef[] = [
+  { id: 'reflect', label: 'Reflection — what mattered today?', deltas: { emotion: 2 } },
+  { id: 'journal', label: 'Journal', deltas: { state: 1 } },
+  { id: 'reach-out', label: 'Reach out to someone meaningful', deltas: { connection: 3 } },
 ];
 
 function todayStr(): string {
@@ -85,6 +93,7 @@ export default function PostFlightScreen() {
   const getMorningIntentionForDate = useRitualsStore((s) => s.getMorningIntentionForDate);
   const updateState = useCockpitStore((s) => s.updateState);
   const updateEmotion = useCockpitStore((s) => s.updateEmotion);
+  const addGaugeDelta = useCockpitStore((s) => s.addGaugeDelta);
 
   const [dayRating, setDayRating] = useState<DayRating | null>(null);
   const [goodThing1, setGoodThing1] = useState('');
@@ -102,6 +111,8 @@ export default function PostFlightScreen() {
   const [showCompleteScreen, setShowCompleteScreen] = useState(false);
   const [completedInsights, setCompletedInsights] = useState<FlightInsightItem[]>([]);
   const [completedGauges, setCompletedGauges] = useState<{ state: number; emotion: number }>({ state: 0, emotion: 0 });
+  const [completedRitualStepIds, setCompletedRitualStepIds] = useState<string[]>([]);
+  const [ritualGaugeDeltas, setRitualGaugeDeltas] = useState<Partial<Record<GaugeKey, number>>>({});
 
   const today = todayStr();
   const morningIntention = getMorningIntentionForDate(today);
@@ -203,6 +214,19 @@ export default function PostFlightScreen() {
     }
   };
 
+  const handleCompleteRitualStep = (step: RitualStepDef) => {
+    if (completedRitualStepIds.includes(step.id)) return;
+    setCompletedRitualStepIds((prev) => [...prev, step.id]);
+    const nextDeltas = { ...ritualGaugeDeltas };
+    for (const [gauge, delta] of Object.entries(step.deltas)) {
+      if (typeof delta === 'number' && delta > 0) {
+        addGaugeDelta(gauge as GaugeKey, delta);
+        nextDeltas[gauge as GaugeKey] = (nextDeltas[gauge as GaugeKey] ?? 0) + delta;
+      }
+    }
+    setRitualGaugeDeltas(nextDeltas);
+  };
+
   const handleRestWell = () => {
     savePostFlightInsightsToJournal(completedInsights);
     updateWidgetData().catch(() => {});
@@ -217,6 +241,7 @@ export default function PostFlightScreen() {
         <PostFlightComplete
           insights={completedInsights}
           gaugesUpdated={completedGauges}
+          ritualGaugeDeltas={ritualGaugeDeltas}
           onRestWell={handleRestWell}
         />
       </View>
@@ -229,7 +254,7 @@ export default function PostFlightScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={TEXT} />
         </Pressable>
-        <Text style={styles.headerTitle}>Post-Flight Debrief</Text>
+        <Text style={styles.headerTitle}>Evening Ritual</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -240,10 +265,18 @@ export default function PostFlightScreen() {
       >
         <View style={styles.hero}>
           <Text style={styles.heroEmoji}>🌙</Text>
-          <Text style={styles.heroTitle}>Post-Flight Debrief</Text>
+          <Text style={styles.heroTitle}>Evening Ritual</Text>
           <Text style={styles.heroSubtitle}>How was your day?</Text>
           <Text style={styles.heroDate}>{dateLabel}</Text>
         </View>
+
+        <Text style={styles.ritualSectionLabel}>Quick wins — tap to complete</Text>
+        <RitualStepChecklist
+          steps={EVENING_RITUAL_STEPS}
+          completedIds={completedRitualStepIds}
+          onCompleteStep={handleCompleteRitualStep}
+          showNumbers
+        />
 
         <View style={styles.divider} />
 
@@ -485,6 +518,14 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: BORDER,
     marginVertical: SPACING.xl,
+  },
+  ritualSectionLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: TEXT_MUTED,
+    marginBottom: SPACING.sm,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   sectionLabel: {
     fontSize: 13,

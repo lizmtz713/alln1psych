@@ -39,7 +39,15 @@ export default function ConstellationScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const members = useCircleStore((s) => s.members);
-  const lights = useLightsStore((s) => s.getLights(members ?? []));
+  const membersSafe = useMemo(() => (Array.isArray(members) ? members : []), [members]);
+  const getLights = useLightsStore((s) => s.getLights);
+  const lights = useMemo(() => {
+    try {
+      return getLights(membersSafe);
+    } catch {
+      return [];
+    }
+  }, [getLights, membersSafe]);
   const dailyReachOuts = useMemo(() => getDailyReachOuts(lights, 8), [lights]);
   const needsAttentionIds = useMemo(
     () => new Set([...dailyReachOuts.priority, ...dailyReachOuts.suggested].map((l) => l.id)),
@@ -111,8 +119,8 @@ export default function ConstellationScreen() {
       <View style={styles.zone1}>
         <View style={styles.titleRow}>
           <View>
-            <Text style={styles.title}>Signals Radar</Text>
-            <Text style={styles.subtitle}>How is my social world?</Text>
+            <Text style={styles.title}>Your constellation</Text>
+            <Text style={styles.subtitle}>Who's close, who's drifting</Text>
           </View>
           <Pressable onPress={handleShare} style={styles.shareBtn} hitSlop={12}>
             <Ionicons name="share-outline" size={22} color={COLORS.textMuted} />
@@ -144,7 +152,7 @@ export default function ConstellationScreen() {
             }}
           >
             <Text style={[styles.revealChipText, revealLevel === level && styles.revealChipTextActive]}>
-              {level === 'five' ? '5' : level === 'fifteen' ? '15' : level === 'fifty' ? '50' : 'All'}
+              {level === 'five' ? 'Inner 5' : level === 'fifteen' ? 'Close 15' : level === 'fifty' ? 'Friends 50' : 'All'}
             </Text>
           </Pressable>
         ))}
@@ -170,7 +178,7 @@ export default function ConstellationScreen() {
         ) : (
           <View style={styles.taglineWrap}>
             <Text style={styles.tagline}>
-              Tap a light to see who needs you.
+              Tap a person to see who needs you.
             </Text>
             <Text style={styles.taglineSub}>
               {allNodes.length} connection{allNodes.length !== 1 ? 's' : ''} in your orbit

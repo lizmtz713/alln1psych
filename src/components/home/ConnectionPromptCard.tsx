@@ -1,5 +1,5 @@
 /**
- * Connection Prompt card — "Your Life Today": who to reach out to (priority from Lights).
+ * Connection Prompt card — "Your Life Today": who to reach out to (priority from People).
  */
 
 import React from 'react';

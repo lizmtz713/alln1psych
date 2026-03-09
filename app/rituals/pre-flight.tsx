@@ -19,7 +19,7 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 import { useRitualsStore } from '../../src/stores/ritualsStore';
-import { useCockpitStore } from '../../src/stores/cockpitStore';
+import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { useCycleStore } from '../../src/stores/cycleStore';
 import { useCircleStore } from '../../src/stores/circleStore';
@@ -30,6 +30,7 @@ import { savePreFlightInsightToJournal } from '../../src/services/insightJournal
 import type { FlightInsightItem } from '../../src/services/insightJournal';
 import { VoiceQuestion, type VoiceQuestionAnswer } from '../../src/components/voice';
 import { PreFlightComplete } from '../../src/components/rituals/PreFlightComplete';
+import { RitualStepChecklist, type RitualStepDef } from '../../src/components/rituals/RitualStepChecklist';
 import { PreFlightForecast } from '../../src/components/forecast/PreFlightForecast';
 import { trackPreFlight } from '../../src/hooks/useWrappedTracking';
 import { format } from 'date-fns';
@@ -58,6 +59,16 @@ function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Morning ritual steps — completion loop: each step lights up a gauge. */
+const MORNING_RITUAL_STEPS: RitualStepDef[] = [
+  { id: 'hydrate', label: 'Hydrate', deltas: { body: 2 } },
+  { id: 'news', label: '5-minute news digest', deltas: { state: 1 } },
+  { id: 'messages', label: 'Check messages', deltas: { connection: 2 } },
+  { id: 'goal', label: 'Set top goal', deltas: { direction: 2 } },
+  { id: 'move', label: 'Stretch or workout', deltas: { body: 2 } },
+  { id: 'breathe', label: '2-minute breathing', deltas: { state: 3, emotion: 1 } },
+];
+
 export default function PreFlightScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -70,6 +81,7 @@ export default function PreFlightScreen() {
   const settings = useRitualsStore((s) => s.settings);
   const addMorningGratitude = useGratitudeStore((s) => s.addMorningGratitude);
   const updateBody = useCockpitStore((s) => s.updateBody);
+  const addGaugeDelta = useCockpitStore((s) => s.addGaugeDelta);
   const getLastNight = useSleepStore((s) => s.getLastNight);
   const addFromPreFlight = useSleepStore((s) => s.addFromPreFlight);
   const setHealthKitCache = useSleepStore((s) => s.setHealthKitCache);
@@ -86,6 +98,8 @@ export default function PreFlightScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [showCompleteScreen, setShowCompleteScreen] = useState(false);
   const [completedInsights, setCompletedInsights] = useState<FlightInsightItem[]>([]);
+  const [completedRitualStepIds, setCompletedRitualStepIds] = useState<string[]>([]);
+  const [ritualGaugeDeltas, setRitualGaugeDeltas] = useState<Partial<Record<GaugeKey, number>>>({});
 
   const lastNight = getLastNight();
   const hasSleepAnswer = sleepAnswer !== null || (manualSleepHours.trim() !== '' && manualSleepQuality !== null);
@@ -163,6 +177,19 @@ export default function PreFlightScreen() {
     }
   };
 
+  const handleCompleteRitualStep = (step: RitualStepDef) => {
+    if (completedRitualStepIds.includes(step.id)) return;
+    setCompletedRitualStepIds((prev) => [...prev, step.id]);
+    const nextDeltas = { ...ritualGaugeDeltas };
+    for (const [gauge, delta] of Object.entries(step.deltas)) {
+      if (typeof delta === 'number' && delta > 0) {
+        addGaugeDelta(gauge as GaugeKey, delta);
+        nextDeltas[gauge as GaugeKey] = (nextDeltas[gauge as GaugeKey] ?? 0) + delta;
+      }
+    }
+    setRitualGaugeDeltas(nextDeltas);
+  };
+
   const handleTakeOff = () => {
     if (completedInsights.length > 0) {
       const item = completedInsights[0];
@@ -177,7 +204,12 @@ export default function PreFlightScreen() {
   if (showCompleteScreen) {
     return (
       <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <PreFlightComplete insights={completedInsights} onTakeOff={handleTakeOff} />
+        <PreFlightComplete
+          insights={completedInsights}
+          bodyUp
+          ritualGaugeDeltas={ritualGaugeDeltas}
+          onTakeOff={handleTakeOff}
+        />
       </View>
     );
   }
@@ -188,7 +220,7 @@ export default function PreFlightScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={24} color={TEXT} />
         </Pressable>
-        <Text style={styles.headerTitle}>Pre-Flight Check</Text>
+        <Text style={styles.headerTitle}>Morning Ritual</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -199,10 +231,18 @@ export default function PreFlightScreen() {
       >
         <View style={styles.hero}>
           <Text style={styles.heroEmoji}>☀️</Text>
-          <Text style={styles.heroTitle}>Pre-Flight Check</Text>
+          <Text style={styles.heroTitle}>Morning Ritual</Text>
           <Text style={styles.heroGreeting}>Good morning, {firstName}</Text>
           <Text style={styles.heroDate}>{dateLabel}</Text>
         </View>
+
+        <Text style={styles.ritualSectionLabel}>Quick wins — tap to complete</Text>
+        <RitualStepChecklist
+          steps={MORNING_RITUAL_STEPS}
+          completedIds={completedRitualStepIds}
+          onCompleteStep={handleCompleteRitualStep}
+          showNumbers
+        />
 
         <PreFlightForecast />
 
@@ -365,6 +405,14 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: BORDER,
     marginVertical: SPACING.xl,
+  },
+  ritualSectionLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: TEXT_MUTED,
+    marginBottom: SPACING.sm,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   sectionLabel: {
     fontSize: 13,

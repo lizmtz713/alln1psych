@@ -57,6 +57,8 @@ interface CockpitState {
   updateConnection: (value: number) => void;
   updateDirection: (value: number) => void;
   updateAlignment: (value: number) => void;
+  /** Ritual completion loop: add a small delta to a gauge (e.g. Hydrate → Body +2). Uses 50 as baseline if gauge unset. */
+  addGaugeDelta: (gauge: GaugeKey, delta: number) => void;
   setBodyCheckIn: (sleep: boolean, food: boolean, water: boolean, movement: boolean) => void;
   getGaugeColor: (gauge: GaugeKey) => string;
   /** Sync getter for cached insight (use after fetchCrossSystemInsight or for initial render). */
@@ -217,6 +219,22 @@ export const useCockpitStore = create<CockpitState>()(
             : null,
       },
     })),
+
+  addGaugeDelta: (gauge, delta) => {
+    const s = get();
+    const g = s[gauge];
+    const current = g.value >= 0 ? g.value : 50;
+    const next = clamp(current + delta);
+    const updaters: Record<GaugeKey, (v: number) => void> = {
+      body: get().updateBody,
+      state: get().updateState,
+      emotion: get().updateEmotion,
+      connection: get().updateConnection,
+      direction: get().updateDirection,
+      alignment: get().updateAlignment,
+    };
+    updaters[gauge](next);
+  },
 
   setBodyCheckIn: (sleep, food, water, movement) => {
     const score = [sleep, food, water, movement].filter(Boolean).length * 25;

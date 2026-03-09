@@ -15,8 +15,11 @@ import {
   getSuggestedMessages,
   executeReachOut,
   getLoveLanguageTips,
+  getToneForContext,
+  MESSAGE_TONE_ORDER,
   type ReachOutAction,
   type MessageContext,
+  type MessageTone,
 } from '../services/reachOutActions';
 import { useLightsStore } from '../stores/lightsStore';
 
@@ -28,6 +31,7 @@ const CONTEXT_LABELS: Record<MessageContext, string> = {
   'random-love': '✨ Appreciation',
   'thinking-of-you': '💭 Thinking of you',
   'need-to-reconnect': '🔄 Reconnect',
+  'funny': '😂 Funny',
 };
 
 interface ReachOutSheetProps {
@@ -39,12 +43,13 @@ interface ReachOutSheetProps {
 export function ReachOutSheet({ visible, onClose, light }: ReachOutSheetProps) {
   const [customMessage, setCustomMessage] = useState('');
   const [showAllActions, setShowAllActions] = useState(false);
+  const [messageTone, setMessageTone] = useState<MessageTone | null>(null);
   const addConnectionEntry = useLightsStore((s) => s.addConnectionEntry);
 
   const recommendedActions = getRecommendedActions(light);
   const suggestedMessages = getSuggestedMessages(light);
   const loveLanguageTips = getLoveLanguageTips(light.loveLanguage);
-  const quickActions = recommendedActions.slice(0, 6);
+  const quickActions = recommendedActions.slice(0, 3);
 
   const handleActionPress = async (action: ReachOutAction) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -101,11 +106,25 @@ export function ReachOutSheet({ visible, onClose, light }: ReachOutSheetProps) {
             </View>
           </View>
 
-          {/* Suggested Messages */}
+          {/* Suggested Messages — tone filters */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>What to Say</Text>
             <Text style={styles.sectionSubtitle}>Tap to copy, then send</Text>
-            {suggestedMessages.map((suggestion, index) => (
+            <View style={styles.toneRow}>
+              {MESSAGE_TONE_ORDER.map((tone) => (
+                <Pressable
+                  key={tone}
+                  style={[styles.toneChip, messageTone === tone && styles.toneChipActive]}
+                  onPress={() => setMessageTone(messageTone === tone ? null : tone)}
+                >
+                  <Text style={[styles.toneChipText, messageTone === tone && styles.toneChipTextActive]}>{tone}</Text>
+                </Pressable>
+              ))}
+            </View>
+            {(messageTone
+              ? suggestedMessages.filter((s) => getToneForContext(s.context) === messageTone)
+              : suggestedMessages
+            ).map((suggestion, index) => (
               <Pressable key={index} style={styles.messageCard} onPress={() => handleCopyMessage(suggestion.message)}>
                 <Text style={styles.messageContext}>{CONTEXT_LABELS[suggestion.context]}</Text>
                 <Text style={styles.messageText}>"{suggestion.message}"</Text>
@@ -152,10 +171,10 @@ export function ReachOutSheet({ visible, onClose, light }: ReachOutSheetProps) {
             </View>
           )}
 
-          {/* Show All Actions */}
+          {/* More options — keep primary 3, expand to full list on tap */}
           <Pressable style={styles.showAllBtn} onPress={() => setShowAllActions(!showAllActions)}>
-            <Text style={styles.showAllText}>{showAllActions ? 'Hide all options' : 'Show all options'}</Text>
-            <Ionicons name={showAllActions ? 'chevron-up' : 'chevron-down'} size={18} color={COLORS.accent} />
+            <Text style={styles.showAllText}>{showAllActions ? 'Hide options' : 'More options →'}</Text>
+            <Ionicons name={showAllActions ? 'chevron-up' : 'chevron-forward'} size={18} color={COLORS.accent} />
           </Pressable>
 
           {showAllActions && (
@@ -191,6 +210,11 @@ const styles = StyleSheet.create({
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '600', color: COLORS.text, marginBottom: 8 },
   sectionSubtitle: { fontSize: 13, color: COLORS.textMuted, marginBottom: 12 },
+  toneRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  toneChip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: BORDER_RADIUS.input ?? 10, backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.border },
+  toneChipActive: { borderColor: COLORS.accent, backgroundColor: COLORS.accentBg ?? 'rgba(124,77,255,0.12)' },
+  toneChipText: { fontSize: 13, fontWeight: '500', color: COLORS.textSecondary },
+  toneChipTextActive: { color: COLORS.accent, fontWeight: '600' },
   quickActionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   quickActionBtn: { width: '30%', backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.card, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border },
   quickActionEmoji: { fontSize: 28, marginBottom: 8 },

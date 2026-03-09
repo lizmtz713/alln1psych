@@ -14,13 +14,13 @@ export default function LightsLayout() {
         contentStyle: { backgroundColor: COLORS.background },
       }}
     >
-      <Stack.Screen name="[id]" options={{ title: 'Light' }} />
+      <Stack.Screen name="[id]" options={{ title: 'Person' }} />
       <Stack.Screen name="log-entry" options={{ title: 'Log connection' }} />
-      <Stack.Screen name="add" options={{ title: 'Add a Light' }} />
+      <Stack.Screen name="add" options={{ title: 'Add someone' }} />
       <Stack.Screen name="world" options={{ title: 'World Temperature' }} />
-      <Stack.Screen name="map" options={{ title: 'Lights Map' }} />
-      <Stack.Screen name="radar" options={{ title: 'Constellation' }} />
-      <Stack.Screen name="insights" options={{ title: 'Lights Insights' }} />
+      <Stack.Screen name="map" options={{ title: 'Relationship Universe' }} />
+      <Stack.Screen name="radar" options={{ title: 'Relationship Universe' }} />
+      <Stack.Screen name="insights" options={{ title: 'People Insights' }} />
       <Stack.Screen name="learn" options={{ title: 'The Art of Friendship' }} />
       <Stack.Screen name="lessons" options={{ headerShown: false }} />
       <Stack.Screen name="tiers/five" options={{ title: 'Your 5' }} />

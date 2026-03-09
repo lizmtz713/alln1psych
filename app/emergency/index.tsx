@@ -51,7 +51,7 @@ const CARDS = [
     id: 'reach_out' as const,
     emoji: '👤',
     title: 'Reach out',
-    subtitle: 'Contact someone from your Lights',
+    subtitle: 'Contact someone from your people',
     route: '/emergency/reach-out',
   },
 ];

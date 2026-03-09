@@ -1,5 +1,5 @@
 /**
- * Emergency Mode — Reach out. Contact someone from your Lights. Call / Text.
+ * Emergency Mode — Reach out. Contact someone from your people. Call / Text.
  */
 
 import React from 'react';
@@ -65,7 +65,7 @@ export default function EmergencyReachOutScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.intro}>Sometimes you just need a person.</Text>
-        <Text style={styles.sectionLabel}>Your closest Lights</Text>
+        <Text style={styles.sectionLabel}>Your closest people</Text>
 
         {lights.slice(0, 5).map((light) => (
           <View key={light.id} style={styles.card}>
@@ -91,7 +91,7 @@ export default function EmergencyReachOutScreen() {
         ))}
 
         {lights.length === 0 && (
-          <Text style={styles.empty}>Add people in Lights so you can reach out when you need them.</Text>
+          <Text style={styles.empty}>Add people so you can reach out when you need them.</Text>
         )}
 
         <View style={styles.divider} />

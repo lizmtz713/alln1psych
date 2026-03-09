@@ -109,11 +109,13 @@ export function LightsConstellation({ nodes, onNodePress, size = DEFAULT_SIZE }:
                 />
               );
             })}
-            {/* Nodes */}
+            {/* Nodes — active = full color, inactive = faded for easier pattern reading */}
             {nodes.map((n) => {
               const px = center + n.x * radius;
               const py = center + n.y * radius;
               const color = nodeColor(n);
+              const isActive = n.brightness >= 0.5 || n.flickering;
+              const nodeOpacity = isActive ? 1 : 0.35;
               return (
                 <Pressable
                   key={n.id}
@@ -127,7 +129,7 @@ export function LightsConstellation({ nodes, onNodePress, size = DEFAULT_SIZE }:
                       height: NODE_R * 2,
                       borderRadius: NODE_R,
                       backgroundColor: color,
-                      opacity: 0.9 + n.brightness * 0.1,
+                      opacity: nodeOpacity,
                     },
                   ]}
                 />

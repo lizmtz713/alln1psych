@@ -17,10 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useMindMailStore, type MindMail, type MindNote, type NoteType } from '../../src/stores/mindMailStore';
-import { useCircleStore } from '../../src/stores/circleStore';
 import { MindMailExplainer, getHasSeenMindMailOnboarding } from '../../src/components/mind-mail/MindMailExplainer';
-import { DailyConnectionPrompt } from '../../src/components/mind-mail/DailyConnectionPrompt';
-import { ConnectionsList } from '../../src/components/mind-mail/ConnectionsList';
 import { COLORS, BORDER_RADIUS, SPACING } from '../../src/lib/constants';
 
 const NOTE_TYPE_CONFIG: Record<NoteType, { emoji: string; label: string }> = {
@@ -156,13 +153,9 @@ function DraftRow({ note, onPress }: { note: MindNote; onPress: () => void }) {
   );
 }
 
-type TopMode = 'connections' | 'messages';
-
 export default function MindMailInboxScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const members = useCircleStore((s) => s.members ?? []);
-  const [topMode, setTopMode] = useState<TopMode>('connections');
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'inbox' | 'sent' | 'drafts' | 'archive'>('inbox');
   const [showExplainer, setShowExplainer] = useState(false);
@@ -225,13 +218,6 @@ export default function MindMailInboxScreen() {
     router.push(`/mind-mail/${mail.id}`);
   };
 
-  const handleSelectPerson = (id: string, name: string) => {
-    router.push({
-      pathname: '/mind-mail/compose',
-      params: { recipientId: id, recipientName: name, from: 'connections' },
-    });
-  };
-
   return (
     <ErrorBoundary>
       <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -251,46 +237,6 @@ export default function MindMailInboxScreen() {
           </Pressable>
         </View>
 
-        <View style={styles.topToggle}>
-          <Pressable
-            style={[styles.topToggleBtn, topMode === 'connections' && styles.topToggleBtnActive]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setTopMode('connections');
-            }}
-          >
-            <Text style={[styles.topToggleText, topMode === 'connections' && styles.topToggleTextActive]}>
-              Connections
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[styles.topToggleBtn, topMode === 'messages' && styles.topToggleBtnActive]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setTopMode('messages');
-            }}
-          >
-            <Text style={[styles.topToggleText, topMode === 'messages' && styles.topToggleTextActive]}>
-              Messages
-            </Text>
-          </Pressable>
-        </View>
-
-        {topMode === 'connections' ? (
-          <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />
-            }
-          >
-            <View style={styles.connectionsContent}>
-              <DailyConnectionPrompt />
-              <ConnectionsList members={members} onSelectPerson={handleSelectPerson} />
-            </View>
-          </ScrollView>
-        ) : (
-          <>
         <View style={styles.tabs}>
           {[
             { id: 'inbox' as const, label: 'Inbox', count: unreadCount },
@@ -396,8 +342,6 @@ export default function MindMailInboxScreen() {
             </>
           )}
         </ScrollView>
-          </>
-        )}
       </View>
 
       <MindMailExplainer
@@ -422,37 +366,6 @@ const styles = StyleSheet.create({
   backBtn: { padding: 4 },
   title: { fontSize: 18, fontWeight: '600', color: COLORS.text },
   composeBtn: { padding: 4 },
-  topToggle: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  topToggleBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: BORDER_RADIUS.input,
-    backgroundColor: COLORS.surface,
-  },
-  topToggleBtnActive: {
-    backgroundColor: COLORS.accentBg,
-    borderWidth: 1,
-    borderColor: COLORS.accent,
-  },
-  topToggleText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: COLORS.textSecondary,
-  },
-  topToggleTextActive: {
-    color: COLORS.accent,
-  },
-  connectionsContent: {
-    paddingHorizontal: 16,
-    paddingBottom: SPACING.xl,
-  },
   tabs: {
     flexDirection: 'row',
     paddingHorizontal: 16,

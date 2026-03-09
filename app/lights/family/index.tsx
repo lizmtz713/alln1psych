@@ -10,7 +10,7 @@ export default function FamilyDashboardIndex() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.subtitle}>
-        Group your Lights for coordinated care, events, and family patterns.
+        Group your people for coordinated care, events, and family patterns.
       </Text>
 
       {families.length === 0 ? (

@@ -85,7 +85,7 @@ export default function CreateFamilyScreen() {
 
       <View style={styles.section}>
         <Text style={styles.label}>Family members</Text>
-        <Text style={styles.hint}>Select from your Lights</Text>
+        <Text style={styles.hint}>Select from your people</Text>
 
         {familyLights.length > 0 && (
           <>

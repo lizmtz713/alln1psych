@@ -163,7 +163,7 @@ export default function ReachOutScaffoldScreen() {
         <Pressable style={styles.backButton} onPress={handleBack}>
           <Ionicons name="arrow-back" size={24} color={TEXT} />
         </Pressable>
-        <Text style={styles.viewTitle}>Light Check-In Messages</Text>
+        <Text style={styles.viewTitle}>Check-In Messages</Text>
         <View style={{ width: 40 }} />
       </View>
 

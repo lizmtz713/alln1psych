@@ -60,7 +60,7 @@ export default function LogEntryScreen() {
   if (!light || !id) {
     return (
       <View style={styles.container}>
-        <Text style={styles.muted}>Light not found.</Text>
+        <Text style={styles.muted}>Person not found.</Text>
         <Pressable onPress={() => router.back()}>
           <Text style={styles.link}>Back</Text>
         </Pressable>

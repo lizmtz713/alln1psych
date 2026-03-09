@@ -76,7 +76,7 @@ export default function LightsScreen() {
     <ErrorBoundary>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <View><Text style={styles.headerTitle}>Lights</Text><Text style={styles.headerSubtitle}>Your connections</Text></View>
+          <View><Text style={styles.headerTitle}>People</Text><Text style={styles.headerSubtitle}>Your connections</Text></View>
           <Pressable style={styles.addButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/lights/add'); }}>
             <Ionicons name="person-add" size={20} color={COLORS.accent} />
           </Pressable>
@@ -97,23 +97,8 @@ export default function LightsScreen() {
         >
           <Text style={styles.viewMapEmoji}>🪐</Text>
           <View style={styles.viewMapTextWrap}>
-            <Text style={styles.viewMapTitle}>Constellation</Text>
+            <Text style={styles.viewMapTitle}>Relationship Universe</Text>
             <Text style={styles.viewMapSub}>A radar for human connection</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [styles.viewMapCard, pressed && styles.viewMapCardPressed]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/lights/map');
-          }}
-        >
-          <Text style={styles.viewMapEmoji}>🌟</Text>
-          <View style={styles.viewMapTextWrap}>
-            <Text style={styles.viewMapTitle}>View Map</Text>
-            <Text style={styles.viewMapSub}>Classic map view</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
         </Pressable>

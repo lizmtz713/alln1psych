@@ -146,9 +146,9 @@ export function computeConstellationNodes(lights: Light[], needsAttentionIds?: S
   const nodes: ConstellationNode[] = [];
   TIER_ORDER.forEach((tier) => {
     const list = [...(byTier[tier] ?? [])].sort((a, b) => a.id.localeCompare(b.id));
-    list.forEach((light, i) =>
+    list.forEach((light, i) => {
       nodes.push(lightToConstellationNode(light, i, list.length, clusterAngleOffset, needsAttentionIds?.has(light.id)));
-    );
+    });
   });
   return nodes;
 }

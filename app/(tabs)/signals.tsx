@@ -1,6 +1,7 @@
 /**
- * Signals — Unified relationship hub (Lights + Mind Mail merged).
- * One place to see who matters, who needs attention, and take action (Transmit / Check in / Log).
+ * Signals — Insights & predictions hub (awareness layer).
+ * All signals in one place: relationship drift, birthdays, social health, predictions, insights.
+ * Easy access, well organized. Links to People and Tools for action.
  */
 
 import { useMemo, useState, useEffect } from 'react';
@@ -11,233 +12,27 @@ import {
   Pressable,
   ScrollView,
   RefreshControl,
-  Image,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useShallow } from 'zustand/react/shallow';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useLightsStore } from '../../src/stores/lightsStore';
-import { useDailyAnchorsStore } from '../../src/stores/dailyAnchorsStore';
-import { useCockpitStore } from '../../src/stores/cockpitStore';
 import {
+  getDriftWarning,
+  getSocialHealthScore,
   getDailyReachOuts,
 } from '../../src/services/friendshipMaintenance';
-import { selectHero } from '../../src/services/heroEngine';
-import { RelationshipRing } from '../../src/components/signals/RelationshipRing';
-import { PersonDetailSheet } from '../../src/components/signals/PersonDetailSheet';
-import { TransmitComposerSheet } from '../../src/components/signals/TransmitComposerSheet';
+import { getBirthdayReminders, getLastTimeMoments } from '../../src/services/memoryEngine';
+import { getMostUrgentWarning } from '../../src/services/predictiveWarnings';
 import { COLORS, BORDER_RADIUS, SPACING } from '../../src/lib/constants';
-import {
-  getRelationshipStatusLabel,
-  getRelationshipScoreFromLight,
-  getTemperatureRingColorForLight,
-} from '../../src/lib/signalsCopy';
-import type { Light, LightTier } from '../../src/types/lights';
-import type { MindMailIntent } from '../../src/types/mindMail';
-
-function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-const CARD_WIDTH = 88;
-const CARD_MARGIN = 10;
-const RING_SIZE = 36;
-const AVATAR_SIZE = 26;
-
-function RelationshipCard({
-  light,
-  needsAttention,
-  onPress,
-  onTransmit,
-}: {
-  light: Light;
-  needsAttention: boolean;
-  onPress: () => void;
-  onTransmit: (id: string, name: string) => void;
-}) {
-  const relationshipScore = getRelationshipScoreFromLight(light);
-  const temperatureColor = getTemperatureRingColorForLight(light, needsAttention);
-  const avatarUri = light.photoUri || light.photoUrl;
-  const initial = (light.name || '?').trim()[0]?.toUpperCase() || '?';
-
-  return (
-    <Pressable
-      style={[styles.hCard, needsAttention && styles.hCardAttention]}
-      onPress={onPress}
-    >
-      <View style={styles.ringWithAvatar}>
-        <RelationshipRing
-          relationshipScore={relationshipScore}
-          temperatureColor={temperatureColor}
-          attentionNeeded={needsAttention}
-          size="sm"
-        />
-        <View style={[styles.hCardAvatar, { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2 }]}>
-          {avatarUri ? (
-            <Image source={{ uri: avatarUri }} style={styles.hCardAvatarImage} />
-          ) : (
-            <Text style={styles.hCardAvatarInitial} numberOfLines={1}>{initial}</Text>
-          )}
-        </View>
-      </View>
-      <Text style={styles.hCardName} numberOfLines={1}>{light.name}</Text>
-    </Pressable>
-  );
-}
-
-function HorizontalCircleStrip({
-  title,
-  subtitle,
-  capacityLabel,
-  lights,
-  dailyPriorityIds,
-  onPressCard,
-  onTransmit,
-  maxCards,
-  onSeeAllPress,
-}: {
-  title: string;
-  subtitle?: string;
-  capacityLabel?: string;
-  lights: Light[];
-  dailyPriorityIds: Set<string>;
-  onPressCard: (light: Light) => void;
-  onTransmit: (id: string, name: string) => void;
-  maxCards?: number;
-  /** When set, show "See all" and call this on press */
-  onSeeAllPress?: () => void;
-}) {
-  const show = maxCards != null ? lights.slice(0, maxCards) : lights;
-  const hasMore = maxCards != null && lights.length > maxCards;
-  const isEmpty = lights.length === 0;
-  return (
-    <View style={styles.hStripSection}>
-      <View style={styles.hStripHeader}>
-        <View style={styles.hStripTitleRow}>
-          <Text style={styles.sectionTitle}>{title}</Text>
-          {capacityLabel != null && <Text style={styles.capacityLabel}>{capacityLabel}</Text>}
-        </View>
-        {subtitle ? <Text style={styles.sectionSubtitle}>{subtitle}</Text> : null}
-      </View>
-      {isEmpty ? (
-        <View style={styles.hStripEmpty}>
-          <Text style={styles.hStripEmptyText}>No one in this layer yet</Text>
-        </View>
-      ) : (
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.hStripContent}
-      >
-        {show.map((light) => (
-          <RelationshipCard
-            key={light.id}
-            light={light}
-            needsAttention={dailyPriorityIds.has(light.id)}
-            onPress={() => onPressCard(light)}
-            onTransmit={() => onTransmit(light.id, light.name)}
-          />
-        ))}
-        {hasMore && onSeeAllPress ? (
-          <Pressable style={styles.hCardSeeAll} onPress={onSeeAllPress}>
-            <Text style={styles.hCardSeeAllText}>See all</Text>
-            <Ionicons name="chevron-forward" size={16} color={COLORS.accent} />
-          </Pressable>
-        ) : null}
-      </ScrollView>
-      )}
-    </View>
-  );
-}
-
-function CollapsibleRingStrip({
-  title,
-  capacityLabel,
-  lights,
-  dailyPriorityIds,
-  onPressCard,
-  onTransmit,
-  onSeeAllPress,
-}: {
-  title: string;
-  capacityLabel?: string;
-  lights: Light[];
-  dailyPriorityIds: Set<string>;
-  onPressCard: (light: Light) => void;
-  onTransmit: (id: string, name: string) => void;
-  onSeeAllPress: () => void;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const isEmpty = lights.length === 0;
-
-  if (isEmpty) {
-    return (
-      <View style={styles.hStripSection}>
-        <View style={styles.hStripHeader}>
-          <View style={styles.hStripTitleRow}>
-            <Text style={styles.sectionTitle}>{title}</Text>
-            {capacityLabel != null && <Text style={styles.capacityLabel}>{capacityLabel}</Text>}
-          </View>
-        </View>
-        <View style={styles.hStripEmpty}>
-          <Text style={styles.hStripEmptyText}>No one in this layer yet</Text>
-        </View>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.hStripSection}>
-      <Pressable
-        style={styles.collapsibleHeader}
-        onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setExpanded((e) => !e); }}
-      >
-        <View style={styles.hStripTitleRow}>
-          <Text style={styles.sectionTitle}>{title}</Text>
-          {capacityLabel != null && <Text style={styles.capacityLabel}>{capacityLabel}</Text>}
-        </View>
-        <Ionicons name={expanded ? 'chevron-down' : 'chevron-forward'} size={18} color={COLORS.textMuted} />
-      </Pressable>
-      {expanded && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.hStripContent}
-        >
-          {lights.slice(0, 12).map((light) => (
-            <RelationshipCard
-              key={light.id}
-              light={light}
-              needsAttention={dailyPriorityIds.has(light.id)}
-              onPress={() => onPressCard(light)}
-              onTransmit={onTransmit}
-            />
-          ))}
-          {lights.length > 12 && (
-            <Pressable style={styles.hCardSeeAll} onPress={onSeeAllPress}>
-              <Text style={styles.hCardSeeAllText}>See all</Text>
-              <Ionicons name="chevron-forward" size={16} color={COLORS.accent} />
-            </Pressable>
-          )}
-        </ScrollView>
-      )}
-    </View>
-  );
-}
 
 export default function SignalsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
-  const [personSheetLight, setPersonSheetLight] = useState<Light | null>(null);
-  const [transmitSheetVisible, setTransmitSheetVisible] = useState(false);
-  const [transmitRecipientId, setTransmitRecipientId] = useState<string | null>(null);
-  const [transmitRecipientName, setTransmitRecipientName] = useState('');
-  const [transmitPresetIntent, setTransmitPresetIntent] = useState<MindMailIntent | null>(null);
 
   const members = useCircleStore((s) => s.members ?? []);
   const membersSafe = useMemo(() => (Array.isArray(members) ? members : []), [members]);
@@ -249,37 +44,18 @@ export default function SignalsScreen() {
       return [];
     }
   }, [getLights, membersSafe]);
-  const lastHeroShownByMemberId = useLightsStore(useShallow((s) => s.lastHeroShownByMemberId));
-  const setLastHeroShown = useLightsStore((s) => s.setLastHeroShown);
 
+  const driftWarning = useMemo(() => getDriftWarning(lights), [lights]);
+  const socialHealth = useMemo(() => getSocialHealthScore(lights), [lights]);
+  const birthdayReminders = useMemo(() => getBirthdayReminders(lights, 14), [lights]);
+  const lastTimeMoments = useMemo(() => getLastTimeMoments(lights, 21, 5), [lights]);
   const dailyReachOuts = useMemo(() => getDailyReachOuts(lights, 8), [lights]);
-
-  const heroResult = useMemo(
-    () =>
-      selectHero(lights, {
-        momentumByMemberId: Object.fromEntries(
-          lights.filter((l): l is Light & { momentumScore: number } => l.momentumScore != null).map((l) => [l.id, l.momentumScore])
-        ),
-        lastHeroByMemberId: lastHeroShownByMemberId,
-      }),
-    [lights, lastHeroShownByMemberId]
-  );
-
-  const priority = heroResult?.light ?? dailyReachOuts.priority[0] ?? dailyReachOuts.suggested[0];
-  const heroLifeEventLabel = heroResult?.lifeEventLabel;
-
+  const [predictiveWarning, setPredictiveWarning] = useState<Awaited<ReturnType<typeof getMostUrgentWarning>>>(null);
   useEffect(() => {
-    if (priority?.id) setLastHeroShown(priority.id);
-  }, [priority?.id, setLastHeroShown]);
+    getMostUrgentWarning().then(setPredictiveWarning).catch(() => setPredictiveWarning(null));
+  }, []);
 
-  const ensureDate = useDailyAnchorsStore((s) => s.ensureDate);
-  const date = useDailyAnchorsStore((s) => s.date);
-  const connectionPromptActedOn = useDailyAnchorsStore((s) => s.connectionPromptActedOn);
-  const isToday = date === todayKey();
-  const actedOn = isToday && connectionPromptActedOn;
   const needAttentionCount = dailyReachOuts.priority.length + dailyReachOuts.suggested.length;
-
-  useEffect(() => { ensureDate(); }, [ensureDate]);
 
   const onRefresh = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -287,47 +63,10 @@ export default function SignalsScreen() {
     setTimeout(() => setRefreshing(false), 600);
   };
 
-  const openTransmitSheet = (recipientId: string | null, recipientName: string, presetIntent?: MindMailIntent | null) => {
-    setTransmitRecipientId(recipientId);
-    setTransmitRecipientName(recipientName || '');
-    setTransmitPresetIntent(presetIntent ?? null);
-    setTransmitSheetVisible(true);
+  const openPeople = (heroId?: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(heroId ? `/(tabs)/people?hero=${encodeURIComponent(heroId)}` as any : '/(tabs)/people');
   };
-
-  const openPersonSheet = (light: Light) => {
-    setPersonSheetLight(light);
-  };
-
-  const closePersonSheet = () => setPersonSheetLight(null);
-
-  const needsAttentionLights = useMemo(
-    () => [...dailyReachOuts.priority, ...dailyReachOuts.suggested],
-    [dailyReachOuts.priority, dailyReachOuts.suggested]
-  );
-
-  const dailyPriorityIds = useMemo(
-    () => new Set(needsAttentionLights.map((l) => l.id)),
-    [needsAttentionLights]
-  );
-
-  const activeLights = useMemo(
-    () => lights.filter((l) => l.tier !== 'archived'),
-    [lights]
-  );
-
-  const lightsByTier = useMemo(() => {
-    const by: Record<LightTier, Light[]> = { five: [], fifteen: [], fifty: [], network: [], archived: [] };
-    activeLights.forEach((l) => { if (l.tier && by[l.tier]) by[l.tier].push(l); });
-    return by;
-  }, [activeLights]);
-
-  const params = useLocalSearchParams<{ hero?: string }>();
-  useEffect(() => {
-    const heroId = params.hero;
-    if (!heroId || lights.length === 0) return;
-    const light = lights.find((l) => l.id === heroId);
-    if (light) setPersonSheetLight(light);
-  }, [params.hero, lights]);
 
   return (
     <ErrorBoundary>
@@ -339,425 +78,183 @@ export default function SignalsScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accent} />
         }
       >
-        {/* A. Header — minimal */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Signals</Text>
-          <View style={styles.headerActions}>
-            <Pressable
-              style={styles.headerBtn}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push('/lights/add');
-              }}
-            >
-              <Ionicons name="person-add" size={22} color={COLORS.accent} />
-            </Pressable>
-            <Pressable
-              style={styles.headerBtn}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                router.push('/mind-mail');
-              }}
-              accessibilityLabel="Inbox"
-            >
-              <Ionicons name="mail" size={22} color={COLORS.accent} />
-            </Pressable>
-          </View>
+          <Text style={styles.headerSub}>Insights & predictions</Text>
         </View>
 
-        {/* B. One suggestion — AI guidance */}
-        {actedOn ? (
-          <View style={styles.suggestionCard}>
-            <Text style={styles.suggestionTitle}>You reached out today</Text>
-            <Text style={styles.suggestionSub}>That matters.</Text>
-          </View>
-        ) : (
-          <Pressable
-            style={({ pressed }) => [styles.suggestionCard, pressed && styles.suggestionCardPressed]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              if (priority) openTransmitSheet(priority.id, priority.name, 'encouragement');
-              else openTransmitSheet(null, '');
-            }}
-          >
-            <Text style={styles.suggestionLabel}>Suggestion for today</Text>
-            <Text style={styles.suggestionTitle} numberOfLines={1}>
-              {priority ? `${priority.name} could use a moment from you` : 'Who could use a message today?'}
-            </Text>
-            <Text style={styles.suggestionCta}>Send message</Text>
+        {/* Relationship signals */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Relationship signals</Text>
+          {driftWarning && (
+            <Pressable
+              style={({ pressed }) => [styles.card, styles.cardDrift, pressed && styles.cardPressed]}
+              onPress={() => openPeople(driftWarning.light.id)}
+            >
+              <Text style={styles.cardEmoji}>📡</Text>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>{driftWarning.light.name} is drifting</Text>
+                <Text style={styles.cardSub}>
+                  You usually talk every {driftWarning.normalRhythmDays} days. It's been {driftWarning.daysSinceContact} days.
+                </Text>
+                <Text style={styles.cardCta}>See in People →</Text>
+              </View>
+            </Pressable>
+          )}
+          {birthdayReminders.slice(0, 3).map((b) => (
+            <Pressable
+              key={b.light.id}
+              style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+              onPress={() => openPeople(b.light.id)}
+            >
+              <Text style={styles.cardEmoji}>🎂</Text>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>{b.light.name}'s birthday {b.daysUntil === 0 ? 'today' : b.label}</Text>
+                <Text style={styles.cardCta}>See in People →</Text>
+              </View>
+            </Pressable>
+          ))}
+          {lastTimeMoments.slice(0, 2).map((m) => (
+            <Pressable
+              key={m.light.id}
+              style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+              onPress={() => openPeople(m.light.id)}
+            >
+              <Text style={styles.cardEmoji}>💭</Text>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>Haven't seen {m.light.name} in {m.daysAgo} days</Text>
+                <Text style={styles.cardSub}>Last time: {m.lastActivities[0] ?? 'Got together'}</Text>
+                <Text style={styles.cardCta}>See in People →</Text>
+              </View>
+            </Pressable>
+          ))}
+          {needAttentionCount > 0 && !driftWarning && (
+            <Pressable style={({ pressed }) => [styles.card, pressed && styles.cardPressed]} onPress={() => openPeople()}>
+              <Text style={styles.cardEmoji}>💛</Text>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>{needAttentionCount} {needAttentionCount === 1 ? 'person' : 'people'} may need attention</Text>
+                <Text style={styles.cardCta}>Open People →</Text>
+              </View>
+            </Pressable>
+          )}
+          {!driftWarning && birthdayReminders.length === 0 && lastTimeMoments.length === 0 && needAttentionCount === 0 && (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyText}>No relationship signals right now</Text>
+              <Text style={styles.emptySub}>Your people are in view</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Social health */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Social health</Text>
+          <Pressable style={({ pressed }) => [styles.card, pressed && styles.cardPressed]} onPress={() => openPeople()}>
+            <View style={styles.healthRow}>
+              <Text style={styles.healthScore}>{socialHealth.score}%</Text>
+              <View style={styles.healthTiers}>
+                {socialHealth.tierSummaries.map((t) => (
+                  <Text key={t.tier} style={styles.healthTier}>
+                    {t.label}: {t.statusLabel.toLowerCase()}
+                  </Text>
+                ))}
+              </View>
+            </View>
+            <Text style={styles.cardCta}>See in People →</Text>
           </Pressable>
+        </View>
+
+        {/* Predictions */}
+        {predictiveWarning && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Predictions</Text>
+            <Pressable
+              style={({ pressed }) => [styles.card, styles.cardPrediction, pressed && styles.cardPressed]}
+              onPress={() => router.push('/(modals)/cockpit-checkin')}
+            >
+              <Text style={styles.cardEmoji}>📈</Text>
+              <View style={styles.cardBody}>
+                <Text style={styles.cardTitle}>{predictiveWarning.message}</Text>
+                <Text style={styles.cardSub}>{predictiveWarning.suggestion}</Text>
+                <Text style={styles.cardCta}>Check in →</Text>
+              </View>
+            </Pressable>
+          </View>
         )}
 
-        {/* C. Needs Attention — first signal */}
-        <HorizontalCircleStrip
-          title={needAttentionCount > 0 ? `Needs Attention (${needAttentionCount})` : 'Needs Attention'}
-          lights={needsAttentionLights}
-          dailyPriorityIds={dailyPriorityIds}
-          onPressCard={openPersonSheet}
-          onTransmit={openTransmitSheet}
-        />
-
-        {/* E. Inner Circle (5) — Dunbar layer */}
-        <HorizontalCircleStrip
-          title="Inner Circle (5)"
-          subtitle="The people closest to you"
-          capacityLabel={`${lightsByTier.five.length} / 5`}
-          lights={lightsByTier.five}
-          dailyPriorityIds={dailyPriorityIds}
-          onPressCard={openPersonSheet}
-          onTransmit={openTransmitSheet}
-        />
-
-        {/* E. Close Friends (15) */}
-        <HorizontalCircleStrip
-          title="Close Friends (15)"
-          capacityLabel={`${lightsByTier.fifteen.length} / 15`}
-          lights={lightsByTier.fifteen}
-          dailyPriorityIds={dailyPriorityIds}
-          onPressCard={openPersonSheet}
-          onTransmit={openTransmitSheet}
-        />
-
-        {/* F. Community (50) — collapsible */}
-        <CollapsibleRingStrip
-          title="Community (50)"
-          capacityLabel={`${lightsByTier.fifty.length} / 50`}
-          lights={lightsByTier.fifty}
-          dailyPriorityIds={dailyPriorityIds}
-          onPressCard={openPersonSheet}
-          onTransmit={openTransmitSheet}
-          onSeeAllPress={() => router.push('/lights/tiers/fifty')}
-        />
-
-        {/* G. Network (150) — collapsible */}
-        <CollapsibleRingStrip
-          title="Network (150)"
-          capacityLabel={`${lightsByTier.network.length} / 150`}
-          lights={lightsByTier.network}
-          dailyPriorityIds={dailyPriorityIds}
-          onPressCard={openPersonSheet}
-          onTransmit={openTransmitSheet}
-          onSeeAllPress={() => router.push('/lights/tiers/network')}
-        />
-
-        {/* I. Relationship Universe — Constellation preview */}
-        <Pressable
-          style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.push('/lights/radar');
-          }}
-        >
-          <Text style={styles.cardEmoji}>🪐</Text>
-          <View style={styles.cardTextWrap}>
-            <Text style={styles.cardTitle}>Relationship Universe</Text>
-            <Text style={styles.cardSub}>Your constellation — who's close, who's drifting</Text>
+        {/* Quick link to People */}
+        <Pressable style={({ pressed }) => [styles.ctaCard, pressed && styles.cardPressed]} onPress={() => openPeople()}>
+          <Ionicons name="people" size={24} color={COLORS.accent} />
+          <View style={styles.ctaTextWrap}>
+            <Text style={styles.ctaTitle}>Open People</Text>
+            <Text style={styles.ctaSub}>Relationships, drift, Transmit</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
         </Pressable>
 
-        {/* Empty state when no one added yet */}
-        {activeLights.length === 0 && (
-          <Pressable
-            style={styles.emptyList}
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/lights/add'); }}
-          >
-            <Text style={styles.emptyListEmoji}>👋</Text>
-            <Text style={styles.emptyListTitle}>Add someone</Text>
-            <Text style={styles.emptyListSub}>Start with the people who matter most.</Text>
-          </Pressable>
-        )}
-
-        {/* J. Understand Signals — Learn / Map / Insights */}
-        <View style={styles.understandSection}>
-          <Text style={styles.sectionTitle}>Understand Signals</Text>
-          <View style={styles.moreRow}>
-            <Pressable
-              style={styles.moreCard}
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/lights/learn'); }}
-            >
-              <Text style={styles.moreEmoji}>📖</Text>
-              <Text style={styles.moreLabel}>Learn</Text>
-            </Pressable>
-            <Pressable
-              style={styles.moreCard}
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/lights/map'); }}
-            >
-              <Text style={styles.moreEmoji}>🌟</Text>
-              <Text style={styles.moreLabel}>Map</Text>
-            </Pressable>
-            <Pressable
-              style={styles.moreCard}
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/lights/insights'); }}
-            >
-              <Text style={styles.moreEmoji}>💡</Text>
-              <Text style={styles.moreLabel}>Insights</Text>
-            </Pressable>
-          </View>
-        </View>
+        <View style={{ height: 40 }} />
       </ScrollView>
-
-      <PersonDetailSheet
-        visible={personSheetLight != null}
-        light={personSheetLight}
-        needsAttention={personSheetLight ? (dailyReachOuts.priority.some((l) => l.id === personSheetLight.id) || dailyReachOuts.suggested.some((l) => l.id === personSheetLight.id)) : false}
-        onClose={closePersonSheet}
-        onTransmit={(id, name, presetIntent) => { closePersonSheet(); openTransmitSheet(id, name, presetIntent); }}
-        onSeeFullProfile={(id) => router.push(`/lights/${id}`)}
-      />
-
-      <TransmitComposerSheet
-        visible={transmitSheetVisible}
-        recipientId={transmitRecipientId}
-        recipientName={transmitRecipientName}
-        presetIntent={transmitPresetIntent}
-        onClose={() => { setTransmitSheetVisible(false); setTransmitRecipientId(null); setTransmitRecipientName(''); setTransmitPresetIntent(null); }}
-        onSent={(id) => {
-          useDailyAnchorsStore.getState().setConnectionPromptActedOn(true);
-          if (id) useDailyAnchorsStore.getState().setLastTransmittedToId(id);
-        }}
-      />
     </ErrorBoundary>
-  );
-}
-
-function PersonRow({
-  light,
-  dailyPriorityIds,
-  onPress,
-  onTransmit,
-  statusLabel,
-}: {
-  light: Light;
-  dailyPriorityIds: Set<string>;
-  onPress: () => void;
-  onTransmit: () => void;
-  statusLabel?: string;
-}) {
-  const needsAttention = dailyPriorityIds.has(light.id);
-  const relationshipScore = getRelationshipScoreFromLight(light);
-  const temperatureColor = getTemperatureRingColorForLight(light, needsAttention);
-  const label = statusLabel ?? getRelationshipStatusLabel(light, needsAttention);
-
-  return (
-    <Pressable style={[styles.row, needsAttention && styles.rowAttention]} onPress={onPress}>
-      <RelationshipRing
-        relationshipScore={relationshipScore}
-        temperatureColor={temperatureColor}
-        attentionNeeded={needsAttention}
-        size="sm"
-      />
-      <View style={styles.rowBody}>
-        <Text style={styles.rowName} numberOfLines={1}>{light.name}</Text>
-        <Text style={styles.rowMeta}>
-          {label} · {light.daysSinceContact}d
-        </Text>
-      </View>
-      <Pressable
-        style={styles.transmitBtn}
-        onPress={(e) => { e.stopPropagation(); onTransmit(); }}
-      >
-        <Text style={styles.transmitBtnText}>Transmit</Text>
-      </Pressable>
-      <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
-    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
-  content: { paddingHorizontal: 24 },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-    paddingHorizontal: 0,
-  },
+  content: { paddingHorizontal: 20 },
+  header: { marginBottom: SPACING.lg },
   headerTitle: { fontSize: 28, fontWeight: '700', color: COLORS.text },
-  suggestionCard: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: SPACING.lg,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  suggestionCardPressed: { opacity: 0.92 },
-  suggestionLabel: { fontSize: 12, fontWeight: '600', color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
-  suggestionTitle: { fontSize: 17, fontWeight: '600', color: COLORS.text, marginBottom: 8 },
-  suggestionSub: { fontSize: 14, color: COLORS.textSecondary, marginTop: 2 },
-  suggestionCta: { fontSize: 15, fontWeight: '600', color: COLORS.accent },
-  collapsibleHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-    paddingVertical: 4,
-  },
-  headerActions: { flexDirection: 'row', gap: 8 },
-  headerBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  heroSection: { marginBottom: SPACING.md },
-  systemContextWrap: { marginBottom: SPACING.sm, paddingHorizontal: 2 },
-  systemContextText: { fontSize: 13, color: COLORS.textMuted, fontStyle: 'italic' },
-  signalsStrip: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: SPACING.lg,
-  },
-  signalsStripText: { fontSize: 14, fontWeight: '600', color: COLORS.accent },
-  signalsStripMuted: { color: COLORS.textMuted, fontWeight: '500' },
-  signalsStripSystem: { color: COLORS.textSecondary, fontWeight: '500', fontStyle: 'italic' },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: SPACING.lg,
-    marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  cardPressed: { opacity: 0.9 },
-  cardEmoji: { fontSize: 28, marginRight: 14 },
-  cardTextWrap: { flex: 1 },
-  cardTitle: { fontSize: 17, fontWeight: '600', color: COLORS.text },
-  cardSub: { fontSize: 13, color: COLORS.textMuted, marginTop: 2 },
-  attentionSection: { marginBottom: SPACING.lg },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: COLORS.textMuted },
-  hStripHeader: { marginBottom: 10 },
-  hStripTitleRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 },
-  capacityLabel: { fontSize: 14, fontWeight: '600', color: COLORS.accent },
-  sectionSubtitle: { fontSize: 13, color: COLORS.textMuted, marginTop: 2 },
-  hStripEmpty: { paddingVertical: 12, paddingHorizontal: 4 },
-  hStripEmptyText: { fontSize: 14, color: COLORS.textMuted },
-  listSection: { marginBottom: SPACING.xl },
-  listHeader: { marginBottom: SPACING.sm },
-  listTitle: { fontSize: 18, fontWeight: '600', color: COLORS.text, marginBottom: 8 },
-  sortRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
-  sortChip: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: BORDER_RADIUS.input,
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  sortChipActive: { borderColor: COLORS.accent, backgroundColor: COLORS.accentBg },
-  sortChipText: { fontSize: 14, color: COLORS.textSecondary, fontWeight: '500' },
-  sortChipTextActive: { color: COLORS.accent },
-  emptyList: {
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: SPACING.xl,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  emptyListEmoji: { fontSize: 40, marginBottom: 12 },
-  emptyListTitle: { fontSize: 17, fontWeight: '600', color: COLORS.text, marginBottom: 4 },
-  emptyListSub: { fontSize: 14, color: COLORS.textMuted },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.input,
-    padding: SPACING.md,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  rowAttention: {
-    borderColor: COLORS.accent + '44',
-    backgroundColor: COLORS.accentBg as string,
-  },
-  rowBody: { flex: 1, marginLeft: SPACING.md, minWidth: 0 },
-  rowName: { fontSize: 16, fontWeight: '600', color: COLORS.text },
-  rowMeta: { fontSize: 13, marginTop: 2 },
-  transmitBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginRight: 8,
-    borderRadius: BORDER_RADIUS.sm,
-    backgroundColor: COLORS.accentBg as string,
-  },
-  transmitBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.accent },
-  understandSection: { marginBottom: SPACING.lg },
-  moreRow: { flexDirection: 'row', gap: 12 },
-  moreCard: {
-    flex: 1,
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    padding: SPACING.md,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  moreEmoji: { fontSize: 24, marginBottom: 6 },
-  moreLabel: { fontSize: 12, fontWeight: '600', color: COLORS.textSecondary },
-  // Horizontal circle strips
-  hStripSection: { marginBottom: SPACING.lg },
-  hStripContent: { paddingRight: SPACING.lg },
-  hCard: {
-    width: CARD_WIDTH,
-    marginRight: CARD_MARGIN,
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.card,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: 4,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    alignItems: 'center',
-  },
-  hCardAttention: {
-    borderColor: COLORS.accent + '44',
-    backgroundColor: COLORS.accentBg as string,
-  },
-  ringWithAvatar: {
-    position: 'relative',
-    width: RING_SIZE,
-    height: RING_SIZE,
-    alignSelf: 'center',
-  },
-  hCardAvatar: {
-    position: 'absolute',
-    left: (RING_SIZE - AVATAR_SIZE) / 2,
-    top: (RING_SIZE - AVATAR_SIZE) / 2,
-    backgroundColor: COLORS.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  hCardAvatarImage: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-  },
-  hCardAvatarInitial: {
-    fontSize: 12,
+  headerSub: { fontSize: 15, color: COLORS.textMuted, marginTop: 4 },
+  section: { marginBottom: SPACING.xl },
+  sectionTitle: {
+    fontSize: 13,
     fontWeight: '700',
     color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 10,
   },
-  hCardName: { fontSize: 13, fontWeight: '600', color: COLORS.text, marginTop: 6, textAlign: 'center' },
-  hCardSeeAll: {
-    width: CARD_WIDTH,
-    marginRight: CARD_MARGIN,
-    justifyContent: 'center',
+  card: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: SPACING.lg,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  cardDrift: { borderLeftWidth: 3, borderLeftColor: COLORS.accent },
+  cardPrediction: { borderLeftWidth: 3, borderLeftColor: '#F59E0B' },
+  cardPressed: { opacity: 0.92 },
+  cardEmoji: { fontSize: 24, marginRight: 12 },
+  cardBody: { flex: 1 },
+  cardTitle: { fontSize: 16, fontWeight: '600', color: COLORS.text, marginBottom: 4 },
+  cardSub: { fontSize: 14, color: COLORS.textSecondary, marginBottom: 6 },
+  cardCta: { fontSize: 14, fontWeight: '600', color: COLORS.accent },
+  healthRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  healthScore: { fontSize: 32, fontWeight: '800', color: COLORS.accent, marginRight: 16 },
+  healthTiers: { flex: 1 },
+  healthTier: { fontSize: 13, color: COLORS.textSecondary, marginBottom: 2 },
+  emptyCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+  },
+  emptyText: { fontSize: 15, color: COLORS.textSecondary, fontWeight: '500' },
+  emptySub: { fontSize: 13, color: COLORS.textMuted, marginTop: 4 },
+  ctaCard: {
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.card,
+    padding: SPACING.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
-    flexDirection: 'row',
+    gap: 12,
   },
-  hCardSeeAllText: { fontSize: 14, fontWeight: '600', color: COLORS.accent },
+  ctaTextWrap: { flex: 1 },
+  ctaTitle: { fontSize: 17, fontWeight: '600', color: COLORS.text },
+  ctaSub: { fontSize: 13, color: COLORS.textMuted, marginTop: 2 },
 });

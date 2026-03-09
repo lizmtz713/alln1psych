@@ -151,6 +151,29 @@ export function getDailyReachOuts(lights: Light[], maxSuggestions: number = 5): 
   return { priority, suggested, rotate };
 }
 
+// === DRIFT WARNING (relationship GPS) ===
+
+export interface DriftWarning {
+  light: Light;
+  normalRhythmDays: number;
+  daysSinceContact: number;
+}
+
+/** Top drifter: someone past their normal contact rhythm. For "X is drifting" card. */
+export function getDriftWarning(lights: Light[]): DriftWarning | null {
+  const active = lights.filter((l) => l.tier !== 'archived');
+  let best: DriftWarning | null = null;
+  for (const light of active) {
+    const normalRhythm = light.averageContactDays ?? IDEAL_CONTACT_DAYS[light.tier];
+    if (light.daysSinceContact <= normalRhythm) continue;
+    const drift = light.daysSinceContact - normalRhythm;
+    if (!best || drift > best.daysSinceContact - best.normalRhythmDays) {
+      best = { light, normalRhythmDays: normalRhythm, daysSinceContact: light.daysSinceContact };
+    }
+  }
+  return best;
+}
+
 // === RELATIONSHIP DECAY ===
 
 export function estimateRelationshipStrength(
@@ -204,4 +227,100 @@ export function getTierHealth(lights: Light[]): TierHealth[] {
 
     return { tier, total, healthy, dimming, needsAttention, healthPercent };
   });
+}
+
+// === SOCIAL HEALTH SCORE (Apple Health for relationships) ===
+
+export type TierHealthStatus = 'strong' | 'stable' | 'fading';
+
+export interface TierSummary {
+  tier: LightTier;
+  label: string;
+  count: number;
+  max: number;
+  status: TierHealthStatus;
+  statusLabel: string;
+}
+
+export interface SocialHealthResult {
+  score: number;
+  tierSummaries: TierSummary[];
+  suggestions: string[];
+}
+
+const TIER_DISPLAY_ORDER: Exclude<LightTier, 'archived'>[] = ['five', 'fifteen', 'fifty', 'network'];
+const TIER_NAMES: Record<Exclude<LightTier, 'archived'>, string> = {
+  five: 'Inner circle',
+  fifteen: 'Close friends',
+  fifty: 'Community',
+  network: 'Network',
+};
+
+export function getSocialHealthScore(lights: Light[]): SocialHealthResult {
+  const tierHealth = getTierHealth(lights);
+  const activeLights = lights.filter((l) => l.tier !== 'archived');
+  const tierSummaries: TierSummary[] = TIER_DISPLAY_ORDER.map((tier) => {
+    const th = tierHealth.find((t) => t.tier === tier);
+    const total = th?.total ?? 0;
+    const max = tier === 'five' ? 5 : tier === 'fifteen' ? 15 : tier === 'fifty' ? 50 : 150;
+    let status: TierHealthStatus = 'stable';
+    let statusLabel = 'Stable';
+    if (th) {
+      if (th.healthPercent >= 80 && th.needsAttention === 0) {
+        status = 'strong';
+        statusLabel = 'Strong';
+      } else if (th.needsAttention > 0 || th.healthPercent < 50) {
+        status = 'fading';
+        statusLabel = 'Fading';
+      } else {
+        statusLabel = 'Stable';
+      }
+    }
+    return {
+      tier,
+      label: TIER_NAMES[tier],
+      count: total,
+      max,
+      status,
+      statusLabel,
+    };
+  });
+
+  const totalWeight = tierSummaries.reduce((acc, t) => acc + (t.max > 0 ? 1 : 0), 0);
+  const scorePerTier = tierSummaries.map((t) => {
+    if (t.max === 0) return 100;
+    const th = tierHealth.find((x) => x.tier === t.tier);
+    const healthPct = th?.healthPercent ?? 100;
+    const fillPct = Math.min(100, (t.count / t.max) * 100);
+    return (healthPct * 0.7 + fillPct * 0.3);
+  });
+  const score = totalWeight > 0
+    ? Math.round(
+        scorePerTier.reduce((a, b) => a + b, 0) / scorePerTier.length
+      )
+    : 100;
+  const clampedScore = Math.max(0, Math.min(100, score));
+
+  const suggestions: string[] = [];
+  const priority = getDailyReachOuts(lights, 3).priority;
+  if (priority.length > 0) {
+    suggestions.push(`Reach out to ${priority[0].name}`);
+  }
+  const drifting = activeLights.filter((l) => {
+    const ideal = l.averageContactDays ?? IDEAL_CONTACT_DAYS[l.tier];
+    return l.daysSinceContact > ideal;
+  });
+  if (drifting.length >= 2) {
+    suggestions.push(`Strengthen ${drifting.length} drifting friendships`);
+  }
+  const dimming = tierHealth.filter((t) => t.dimming > 0);
+  if (dimming.length > 0 && suggestions.length < 3) {
+    suggestions.push('Plan a group hangout');
+  }
+
+  return {
+    score: clampedScore,
+    tierSummaries,
+    suggestions: suggestions.slice(0, 3),
+  };
 }

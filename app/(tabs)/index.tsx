@@ -30,7 +30,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { HomeHeader } from '../../src/components/HomeHeader';
 import { WeeklyInsightPrompt } from '../../src/components/home/WeeklyInsightPrompt';
 import { WeeklyInsightCard as UnifiedInsightCard } from '../../src/components/insights/WeeklyInsightCard';
-import { CockpitShareButton, ShareCockpitChip } from '../../src/components/home/CockpitShareButton';
 import { WinButton } from '../../src/components/wins/WinButton';
 import { HabitsWidget } from '../../src/components/habits/HabitsWidget';
 import { LifeWrappedPreview } from '../../src/components/home/LifeWrappedPreview';
@@ -547,6 +546,14 @@ export default function HomeScreen() {
   const getGoalForTodayNudge = useGoalsStore((s) => s.getGoalForTodayNudge);
   const goalNudge = getGoalForTodayNudge();
 
+  const priorityLabelMap: Record<string, string> = {
+    resolve: 'Resolve tension',
+    'role-play': 'Practice conversation',
+    decode: 'Decode',
+    replay: 'Replay',
+    'reach-out': 'Reach out',
+    boundaries: 'Boundaries',
+  };
   const cockpitPriorityItems: PriorityItem[] = useMemo(() => {
     const needsCheckIn = overall < 0 || activeGaugeCount < 3;
     const items: PriorityItem[] = [];
@@ -562,10 +569,10 @@ export default function HomeScreen() {
     if (heroLight && items.length < 4) {
       items.push({
         id: 'transmit-hero',
-        label: `Transmit to ${heroNameForSignals ?? 'someone'}`,
-        sublabel: 'Send encouragement',
+        label: 'Send encouragement',
+        sublabel: heroNameForSignals ?? 'Someone in your circle',
         emoji: '💜',
-        route: '/(tabs)/signals',
+        route: '/(tabs)/people',
         params: heroLight?.id ? { hero: heroLight.id } : undefined,
       });
     }
@@ -579,9 +586,10 @@ export default function HomeScreen() {
       });
     }
     toolSuggestions.slice(0, 4 - items.length).forEach((s, i) => {
+      const displayLabel = priorityLabelMap[s.toolKey] ?? s.label;
       items.push({
         id: `suggestion-${i}-${s.toolKey}`,
-        label: s.label,
+        label: displayLabel,
         sublabel: s.reason ?? undefined,
         emoji: s.icon ?? '✨',
         route: (s.route as string) ?? '',
@@ -725,6 +733,7 @@ export default function HomeScreen() {
   };
 
   const [showGaugeInfo, setShowGaugeInfo] = useState(false);
+  const [showCockpitMoreMenu, setShowCockpitMoreMenu] = useState(false);
 
   const slideY = (v: Animated.Value) => ({
     opacity: v,
@@ -747,22 +756,71 @@ export default function HomeScreen() {
     [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal]
   );
 
+  const cockpitTopPadding = Math.max(insets.top, 80);
+
   return (
     <ErrorBoundary>
     <ScrollView
-      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+      style={[styles.container, { paddingTop: cockpitTopPadding, paddingBottom: insets.bottom }]}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
     >
-      {/* 1. Pre-Flight / status header */}
-      <CockpitStatusHeader
-        firstName={(user?.name ?? '').trim().split(/\s+/)[0] || 'there'}
-        systemStatusLabel={getSystemScoreLabel(overall)}
-        summaryLine={cockpitContextItems.length > 0 ? cockpitContextItems[0].label : (showInsight && typeof crossSystemInsight === 'string' && crossSystemInsight ? crossSystemInsight.slice(0, 80) + (crossSystemInsight.length > 80 ? '…' : '') : undefined)}
-      />
+      {/* 1. Greeting + system status + top-right utilities */}
+      <View style={styles.cockpitTopRow}>
+        <View style={styles.cockpitHeaderWrap}>
+          <CockpitStatusHeader
+            firstName={(user?.name ?? '').trim().split(/\s+/)[0] || 'there'}
+            systemStatusLabel={getSystemScoreLabel(overall)}
+            summaryLine={cockpitContextItems.length > 0 ? cockpitContextItems[0].label : (showInsight && typeof crossSystemInsight === 'string' && crossSystemInsight ? crossSystemInsight.slice(0, 80) + (crossSystemInsight.length > 80 ? '…' : '') : undefined)}
+          />
+        </View>
+        <Pressable
+          style={styles.cockpitMoreBtn}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowCockpitMoreMenu(true);
+          }}
+        >
+          <Ionicons name="ellipsis-horizontal" size={24} color={COLORS.text} />
+        </Pressable>
+      </View>
 
-      {/* 2. System cluster — six gauges + center score */}
+      {/* 2. Needs care — thin strip above gauge (never over it) */}
+      {sections.showCockpit && (() => {
+        const gaugeEntries = [
+          { key: 'body' as const, value: bodyVal },
+          { key: 'state' as const, value: stateVal },
+          { key: 'emotion' as const, value: emotionVal },
+          { key: 'connection' as const, value: connectionVal },
+          { key: 'direction' as const, value: directionVal },
+          { key: 'alignment' as const, value: alignmentVal },
+        ];
+        const lowGauges = gaugeEntries.filter(({ value }) => value >= 0 && value < 50).sort((a, b) => a.value - b.value);
+        const criticalGauges = lowGauges.filter(({ value }) => value < 30);
+        if (lowGauges.length === 0) return null;
+        const isCritical = criticalGauges.length > 0;
+        const label = isCritical ? 'Pay attention' : 'Needs care';
+        const names = lowGauges.map(({ key }) => GAUGE_CONFIG[key]?.label ?? key).join(' and ');
+        return (
+          <Pressable
+            style={[styles.needsCareStrip, isCritical && styles.needsCareStripCritical]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/(modals)/cockpit-checkin');
+            }}
+          >
+            <Text style={styles.needsCareIcon}>⚠</Text>
+            <View style={styles.needsCareTextWrap}>
+              <Text style={styles.needsCareTitle}>{label}</Text>
+              <Text style={styles.needsCareSub}>{names} are low{overall >= 0 ? ` (${Math.round(overall)})` : ''}</Text>
+            </View>
+            <Text style={styles.needsCareTap}>Tap to check in</Text>
+          </Pressable>
+        );
+      })()}
+
+      {/* 3. System cluster — six gauges + center score */}
       {sections.showCockpit && (
       <View style={styles.cockpitSection}>
         <CockpitCluster
@@ -793,55 +851,61 @@ export default function HomeScreen() {
         >
           <Text style={styles.gaugeInfoIconText}>ⓘ</Text>
         </Pressable>
-        <View style={styles.cockpitShareRow}>
-          <CockpitShareButton compact />
-          <ShareCockpitChip />
+        <View style={styles.cockpitActionsRow}>
           <WinButton />
+        </View>
+        {/* One ritual by time of day + emergency beacon */}
+        <View style={styles.ritualEntryRow}>
+          {(() => {
+            const hour = new Date().getHours();
+            const isMorning = hour >= 5 && hour < 12;
+            return (
+              <>
+                <Pressable
+                  style={({ pressed }) => [styles.ritualEntryBtn, pressed && styles.ritualEntryPressed]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push(isMorning ? '/rituals/pre-flight' : '/rituals/post-flight');
+                  }}
+                >
+                  <Text style={styles.ritualEntryEmoji}>{isMorning ? '☀️' : '🌙'}</Text>
+                  <Text style={styles.ritualEntryLabel}>{isMorning ? 'Morning Ritual' : 'Evening Ritual'}</Text>
+                </Pressable>
+                <Pressable
+                  style={({ pressed }) => [styles.ritualEntryBtn, styles.ritualEntryEmergency, pressed && styles.ritualEntryPressed]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    router.push('/emergency');
+                  }}
+                >
+                  <Text style={styles.ritualEntryEmoji}>🆘</Text>
+                  <Text style={styles.ritualEntryLabel}>Emergency</Text>
+                </Pressable>
+              </>
+            );
+          })()}
         </View>
       </View>
       )}
 
-      {/* 2b. Your system today — one system insight card */}
-      {sections.showCockpit && (
-        <View style={styles.systemTodaySection}>
-          <Text style={styles.systemTodayTitle}>Your system today</Text>
-          <Pressable
-            style={({ pressed }) => [styles.systemTodayCard, pressed && styles.systemTodayCardPressed]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              router.push('/(tabs)/learn');
-            }}
-          >
-            <Text style={styles.systemTodayIcon}>⚙️</Text>
-            <View style={styles.systemTodayBody}>
-              <Text style={styles.systemTodayText}>{systemInsightOfTheDay.text}</Text>
-              <Text style={styles.systemTodayLearn}>Learn more in Manual →</Text>
-            </View>
+      {/* 4. Influencing your system — one short line when body/connection low; else 3 lines max */}
+      {sections.showCockpit && (psychSaysContent || systemInsightOfTheDay.text) && (
+        <Animated.View style={[styles.card, styles.influencingCard, slideY(card1)]}>
+          <Text style={styles.psychLabel}>Influencing your system</Text>
+          <Text style={styles.influencingShort} numberOfLines={3}>
+            {bodyVal >= 0 && bodyVal < 50 && connectionVal >= 0 && connectionVal < 50
+              ? 'Low body energy may be affecting connection today.'
+              : (typeof psychSaysContent === 'string' && psychSaysContent)
+                ? psychSaysContent
+                : systemInsightOfTheDay.text}
+          </Text>
+          <Pressable onPress={() => router.push('/(tabs)/learn')} style={styles.influencingLearn}>
+            <Text style={styles.systemTodayLearn}>Learn more in Manual →</Text>
           </Pressable>
-        </View>
+        </Animated.View>
       )}
 
-      {/* 3. What's influencing your system — context + key insights merged */}
-      {(sections.showCockpit && cockpitContextItems.length > 0) || (sections.showPsychSays && !!psychSaysContent) ? (
-        <Animated.View style={[styles.card, styles.psychCard, slideY(card1)]}>
-          <Text style={styles.psychLabel}>What's influencing your system</Text>
-          {cockpitContextItems.length > 0 && (
-            <View style={styles.influencingContext}>
-              {cockpitContextItems.map((item) => (
-                <View key={item.id} style={styles.influencingRow}>
-                  <Text style={styles.influencingLabel}>{item.label}</Text>
-                  {item.detail ? <Text style={styles.influencingDetail}>{item.detail}</Text> : null}
-                </View>
-              ))}
-            </View>
-          )}
-          {sections.showPsychSays && psychSaysContent ? (
-            <Text style={[styles.psychText, cockpitContextItems.length > 0 && { marginTop: 10 }]}>{psychSaysContent}</Text>
-          ) : null}
-        </Animated.View>
-      ) : null}
-
-      {/* 4. What matters today — priorities */}
+      {/* 5. What matters today — priorities */}
       {sections.showCockpit && cockpitPriorityItems.length > 0 && (
         <CockpitPriorities items={cockpitPriorityItems} />
       )}
@@ -868,11 +932,12 @@ export default function HomeScreen() {
       </View>
       )}
 
-      {/* 6. Your People — Signals preview */}
+      {/* 6. People signals */}
       <CockpitSignalsPreview
         needAttentionCount={needAttentionCount}
         heroName={heroNameForSignals}
         heroId={heroLight?.id}
+        sectionTitle="People signals"
         relationshipInsight={getRelationshipInsight(lights, needAttentionCount)}
       />
 
@@ -900,7 +965,7 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* 9. Reflection prompt */}
+      {/* 9. Reflection */}
       <Pressable
         style={[styles.card, { marginHorizontal: 20, marginBottom: SPACING.md }]}
         onPress={() => {
@@ -909,8 +974,8 @@ export default function HomeScreen() {
         }}
       >
         <Text style={styles.cardSectionTitle}>Reflection</Text>
-        <Text style={styles.psychText}>What felt most meaningful today?</Text>
-        <Text style={[styles.discoveryTapHint, { marginTop: 8 }]}>Tap to open Journal →</Text>
+        <Text style={styles.psychText}>What felt meaningful today?</Text>
+        <Text style={[styles.discoveryTapHint, { marginTop: 8 }]}>Open journal →</Text>
       </Pressable>
 
       <HabitsWidget />
@@ -920,7 +985,7 @@ export default function HomeScreen() {
       {/* Unified Insight Engine: 1–2 daily insights from gauges & check-ins */}
       {sections.showDailyInsight && <UnifiedInsightCard />}
 
-      {/* Greeting + Streak — smaller text */}
+      {/* Greeting + streak (compact) */}
       <View style={styles.greetingStreakRow}>
         {dailyContentLoading ? (
           <Text style={styles.greetingSmall}>Loading...</Text>
@@ -935,13 +1000,18 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {/* Affirmation, Try This, weekly summary text */}
-      <Animated.View style={[styles.card, styles.affirmationCard, slideY(card2)]}>
-        <Text style={styles.affirmation}>{affirmation}</Text>
+      {/* Daily perspective — 2 lines max */}
+      <Animated.View style={[styles.card, styles.dailyPerspectiveCard, slideY(card2)]}>
+        <Text style={styles.cardSectionTitle}>Daily perspective</Text>
+        <Text style={styles.dailyPerspectiveText}>
+          Your journey is unique.{'\n'}
+          Today is a chance to invest in yourself.
+        </Text>
       </Animated.View>
 
+      {/* Try today — experiments / micro tools */}
       <Animated.View style={[styles.tryThisPillsWrap, slideY(card3)]}>
-        <Text style={styles.cardSectionTitle}>Try this</Text>
+        <Text style={styles.cardSectionTitle}>Try today</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tryThisPillsRow}>
           {(() => {
             const hour = new Date().getHours();
@@ -975,6 +1045,47 @@ export default function HomeScreen() {
       )}
       {/* 3–5 deeper weekly insights (patterns, cause, growth) */}
       {sections.showWeeklyInsight && <UnifiedInsightCard context="weekly" />}
+
+      {/* Cockpit more menu — Share snapshot, Export, Daily summary */}
+      <Modal visible={showCockpitMoreMenu} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setShowCockpitMoreMenu(false)}>
+          <View style={styles.moreMenuCard} onStartShouldSetResponder={() => true}>
+            <Pressable
+              style={styles.moreMenuItem}
+              onPress={() => {
+                setShowCockpitMoreMenu(false);
+                router.push('/share/cockpit');
+              }}
+            >
+              <Ionicons name="share-outline" size={20} color={COLORS.text} />
+              <Text style={styles.moreMenuLabel}>Share snapshot</Text>
+            </Pressable>
+            <Pressable
+              style={styles.moreMenuItem}
+              onPress={() => {
+                setShowCockpitMoreMenu(false);
+                router.push('/(modals)/share-insight');
+              }}
+            >
+              <Ionicons name="document-text-outline" size={20} color={COLORS.text} />
+              <Text style={styles.moreMenuLabel}>Export report</Text>
+            </Pressable>
+            <Pressable
+              style={styles.moreMenuItem}
+              onPress={() => {
+                setShowCockpitMoreMenu(false);
+                router.push('/(tabs)/me');
+              }}
+            >
+              <Ionicons name="calendar-outline" size={20} color={COLORS.text} />
+              <Text style={styles.moreMenuLabel}>Daily summary</Text>
+            </Pressable>
+            <Pressable style={styles.moreMenuCancel} onPress={() => setShowCockpitMoreMenu(false)}>
+              <Text style={styles.moreMenuCancelText}>Cancel</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
 
       {/* Gauge info modal */}
       <Modal visible={showGaugeInfo} transparent animationType="fade">
@@ -1048,11 +1159,78 @@ const styles = StyleSheet.create({
   },
   gaugeGridRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 },
   gaugeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, flex: 1 },
+  cockpitTopRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', paddingRight: 12 },
+  cockpitHeaderWrap: { flex: 1, minWidth: 0 },
+  cockpitMoreBtn: { padding: 8, marginTop: 4 },
+  needsCareStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: COLORS.amberBg ?? 'rgba(234, 179, 8, 0.12)',
+    borderWidth: 1,
+    borderColor: COLORS.amber ?? '#EAB308',
+    gap: 10,
+  },
+  needsCareStripCritical: {
+    backgroundColor: COLORS.error ? `${COLORS.error}18` : 'rgba(239, 68, 68, 0.12)',
+    borderColor: COLORS.error ?? '#EF4444',
+  },
+  needsCareIcon: { fontSize: 16, color: COLORS.text },
+  needsCareTextWrap: { flex: 1, minWidth: 0 },
+  needsCareTitle: { fontSize: 13, fontWeight: '700', color: COLORS.text },
+  needsCareSub: { fontSize: 12, color: TEXT_SECONDARY, marginTop: 1 },
+  needsCareTap: { fontSize: 12, color: ACCENT, fontWeight: '600' },
   cockpitSection: { alignItems: 'center', marginBottom: 16, position: 'relative' },
   cockpitTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 8 },
   gaugeInfoIcon: { padding: 8, marginLeft: 4 },
   gaugeInfoIconText: { fontSize: 16, color: '#FFFFFF' },
-  cockpitShareRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 12 },
+  cockpitActionsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
+  ritualEntryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 16,
+  },
+  ritualEntryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: CARD_BG,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: BORDER_RADIUS.button,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  ritualEntryPressed: { opacity: 0.9 },
+  ritualEntryEmoji: { fontSize: 18 },
+  ritualEntryLabel: { fontSize: 14, fontWeight: '600', color: TEXT_PRIMARY },
+  ritualEntryEmergency: { borderColor: COLORS.border },
+  moreMenuCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: 16,
+    padding: 8,
+    marginHorizontal: 24,
+    minWidth: 240,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  moreMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  moreMenuLabel: { fontSize: 16, color: TEXT_PRIMARY, fontWeight: '500' },
+  moreMenuCancel: { paddingVertical: 12, paddingHorizontal: 16, marginTop: 4, alignItems: 'center' },
+  moreMenuCancelText: { fontSize: 16, color: COLORS.textMuted, fontWeight: '500' },
   systemTodaySection: { marginBottom: 20, paddingHorizontal: 20 },
   systemTodayTitle: {
     fontSize: 13,
@@ -1204,6 +1382,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   psychCard: { borderLeftWidth: 4, borderLeftColor: ACCENT },
+  influencingCard: { borderLeftWidth: 4, borderLeftColor: ACCENT, marginHorizontal: 20 },
+  influencingShort: { fontSize: 15, color: TEXT_PRIMARY, lineHeight: 22, marginTop: 4 },
+  influencingLearn: { marginTop: 10 },
+  dailyPerspectiveCard: { marginHorizontal: 20 },
+  dailyPerspectiveText: { fontSize: 16, color: TEXT_SECONDARY, lineHeight: 24, fontStyle: 'italic' },
   psychLabel: {
     fontSize: 13,
     color: TEXT_MUTED,

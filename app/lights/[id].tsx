@@ -142,8 +142,8 @@ export default function PersonProfileScreen() {
 
       <ReachOutSheet visible={showReachOut} onClose={() => setShowReachOut(false)} light={light} />
 
-      {/* Your Light Together */}
-      <Section title="📊 Your Light Together">
+      {/* You two together */}
+      <Section title="📊 You two together">
         <View style={styles.lightStats}>
           <View style={styles.statRow}><Text style={styles.statLabel}>Last contact</Text><Text style={styles.statValue}>{light.daysSinceContact === 0 ? 'Today' : light.daysSinceContact === 1 ? 'Yesterday' : light.daysSinceContact < 999 ? `${light.daysSinceContact} days ago` : 'Never'}</Text></View>
           <View style={styles.statRow}><Text style={styles.statLabel}>Ideal frequency</Text><Text style={styles.statValue}>Every {idealDays} days</Text></View>
@@ -174,7 +174,7 @@ export default function PersonProfileScreen() {
         {light.interests && <InfoRow label="Interests" value={light.interests} />}
         {light.values && <InfoRow label="Values" value={light.values} />}
         {light.family && <InfoRow label="Family" value={light.family} />}
-        {!light.interests && !light.values && !light.howWeMet && <Pressable style={styles.addInfoBtn} onPress={() => router.push(`/lights/${light.id}/edit` as any)}><Ionicons name="add" size={18} color={COLORS.accent} /><Text style={styles.addInfoText}>Add more details</Text></Pressable>}
+        {!light.interests && !light.values && !light.howWeMet && <Pressable style={styles.addInfoBtn} onPress={() => router.push(`/lights/edit/${light.id}` as any)}><Ionicons name="add" size={18} color={COLORS.accent} /><Text style={styles.addInfoText}>Add more details</Text></Pressable>}
       </Section>
 
       {(light.notes || (light.relateInsights && light.relateInsights.length > 0)) && (
@@ -196,13 +196,13 @@ export default function PersonProfileScreen() {
         {light.phone && <InfoRow label="Phone" value={light.phone} />}
         {light.email && <InfoRow label="Email" value={light.email} />}
         {light.address && <InfoRow label="Address" value={light.address} />}
-        {!light.phone && !light.email && <Pressable style={styles.addInfoBtn} onPress={() => router.push(`/lights/${light.id}/edit` as any)}><Ionicons name="add" size={18} color={COLORS.accent} /><Text style={styles.addInfoText}>Add contact info</Text></Pressable>}
+        {!light.phone && !light.email && <Pressable style={styles.addInfoBtn} onPress={() => router.push(`/lights/edit/${light.id}` as any)}><Ionicons name="add" size={18} color={COLORS.accent} /><Text style={styles.addInfoText}>Add contact info</Text></Pressable>}
       </Section>
 
       <Section title="⚙️ Settings">
-        <Pressable style={styles.settingRow} onPress={() => router.push(`/lights/${light.id}/edit` as any)}><Text style={styles.settingText}>Edit profile</Text><Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} /></Pressable>
+        <Pressable style={styles.settingRow} onPress={() => router.push(`/lights/edit/${light.id}` as any)}><Text style={styles.settingText}>Edit profile</Text><Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} /></Pressable>
         <Pressable style={styles.settingRow} onPress={handleArchive}><Text style={styles.settingText}>Archive this light</Text><Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} /></Pressable>
-        <Pressable style={[styles.settingRow, styles.dangerRow]} onPress={handleRemove}><Text style={styles.dangerText}>Remove from Lights</Text></Pressable>
+        <Pressable style={[styles.settingRow, styles.dangerRow]} onPress={handleRemove}><Text style={styles.dangerText}>Remove from People</Text></Pressable>
       </Section>
     </ScrollView>
   );

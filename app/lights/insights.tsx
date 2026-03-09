@@ -34,7 +34,7 @@ export default function LightsInsightsScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
           <Ionicons name="chevron-back" size={24} color={COLORS.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Lights Insights</Text>
+        <Text style={styles.headerTitle}>People Insights</Text>
         <View style={styles.headerRight} />
       </View>
       <ScrollView
@@ -42,7 +42,7 @@ export default function LightsInsightsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-      <Text style={styles.title}>Lights Insights</Text>
+      <Text style={styles.title}>People Insights</Text>
       <View style={styles.divider} />
       <View style={styles.card}>
         <Text style={styles.line}>{flickering.length} flickering</Text>

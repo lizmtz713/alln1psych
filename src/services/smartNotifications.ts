@@ -16,6 +16,7 @@ export type SmartNotificationType =
   | 'checkin_reminder'
   | 'gauge_alert'
   | 'circle_alert'
+  | 'drift_warning'
   | 'streak_celebration'
   | 'trend_positive'
   | 'pattern_insight'
@@ -61,6 +62,7 @@ export const DEFAULT_SMART_SETTINGS: SmartNotificationSettings = {
     checkin_reminder: { enabled: true, priority: 'high' },
     gauge_alert: { enabled: true, priority: 'high' },
     circle_alert: { enabled: true, priority: 'urgent' },
+    drift_warning: { enabled: true, priority: 'high' },
     streak_celebration: { enabled: true, priority: 'medium' },
     trend_positive: { enabled: true, priority: 'low' },
     pattern_insight: { enabled: true, priority: 'low' },
@@ -233,6 +235,8 @@ function getDefaultScreenForType(type: SmartNotificationType): string {
       return '/(modals)/cockpit-checkin';
     case 'circle_alert':
       return '/(tabs)/circle';
+    case 'drift_warning':
+      return '/(tabs)/people';
     case 'streak_celebration':
     case 'pattern_insight':
       return '/(tabs)/index';
@@ -258,6 +262,7 @@ export async function cancelAllSmartNotifications(): Promise<void> {
     'checkin_reminder',
     'gauge_alert',
     'circle_alert',
+    'drift_warning',
     'streak_celebration',
     'trend_positive',
     'pattern_insight',
@@ -332,6 +337,21 @@ export function buildPatternInsightPayload(insight: string): NotificationPayload
   };
 }
 
+export function buildDriftWarningPayload(
+  personName: string,
+  normalRhythmDays: number,
+  daysSinceContact: number,
+  personId?: string
+): NotificationPayload {
+  return {
+    type: 'drift_warning',
+    screen: personId ? `/(tabs)/people?hero=${encodeURIComponent(personId)}` : '/(tabs)/people',
+    title: `${personName} is drifting`,
+    body: `You usually talk every ${normalRhythmDays} days. It's been ${daysSinceContact} days. Want to reconnect?`,
+    data: { personName, personId: personId ?? '', normalRhythmDays, daysSinceContact },
+  };
+}
+
 export function buildGentleReconnectPayload(daysAway: number): NotificationPayload {
   return {
     type: 'gentle_reconnect',
@@ -400,6 +420,29 @@ export async function evaluateAndScheduleSmartNotifications(): Promise<void> {
       const payload = buildCircleAlertPayload(memberName);
       await scheduleSmartNotification(payload, trigger, settings);
       return;
+    }
+  } catch {
+    // ignore
+  }
+
+  try {
+    if (settings.types.drift_warning?.enabled) {
+      const { useLightsStore } = require('../stores/lightsStore');
+      const { getDriftWarning } = require('./friendshipMaintenance');
+      const members = require('../stores/circleStore').useCircleStore.getState().members ?? [];
+      const getLights = useLightsStore.getState().getLights;
+      const lights = getLights(Array.isArray(members) ? members : []);
+      const drift = getDriftWarning(lights);
+      if (drift) {
+        const payload = buildDriftWarningPayload(
+          drift.light.name,
+          drift.normalRhythmDays,
+          drift.daysSinceContact,
+          drift.light.id
+        );
+        await scheduleSmartNotification(payload, trigger, settings);
+        return;
+      }
     }
   } catch {
     // ignore

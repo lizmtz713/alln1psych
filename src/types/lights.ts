@@ -31,6 +31,8 @@ export interface ConnectionEntry {
   summary?: string;
   /** Follow-ups to remember (e.g. "Ask about her interview") */
   followUps?: string[];
+  /** Who initiated this contact (for interaction balance) */
+  initiatedBy?: 'me' | 'them';
 }
 
 export interface SharedTemperature {

@@ -15,8 +15,9 @@ import {
   getRelationshipScoreFromLight,
   getTemperatureRingColorForLight,
   getPersonTemperatureDisplay,
+  getInteractionBalance,
 } from '../../lib/signalsCopy';
-import { SEASON_LABELS, SEASON_HELPERS } from '../../types/seasons';
+import { SEASON_LABELS, SEASON_HELPERS, SEASON_EMOJI } from '../../types/seasons';
 import { buildTimelineFromLight, formatTimelineDate, getLastInteractionSummary } from '../../services/timelineEngine';
 import type { TimelineEventType } from '../../types/timeline';
 import type { Light } from '../../types/lights';
@@ -266,7 +267,7 @@ export function PersonDetailSheet({
             <Text style={styles.lastContact}>{lastInteractionText}</Text>
             {light.season && (
               <View style={styles.seasonWrap}>
-                <Text style={styles.seasonLabel}>Season: {SEASON_LABELS[light.season]}</Text>
+                <Text style={styles.seasonLabel}>Season: {SEASON_EMOJI[light.season]} {SEASON_LABELS[light.season]}</Text>
                 <Text style={styles.seasonHelper}>{SEASON_HELPERS[light.season]}</Text>
                 <SeasonControl memberId={light.id} season={light.season} onClose={onClose} />
               </View>
@@ -316,6 +317,15 @@ export function PersonDetailSheet({
           <View style={styles.profileSection}>
             <Text style={styles.sectionTitle}>Relationship With You</Text>
             <View style={styles.fieldList}>
+              {(() => {
+                const balance = getInteractionBalance(light);
+                return balance != null ? (
+                  <View style={styles.fieldRow}>
+                    <Text style={styles.fieldLabel}>Interaction balance</Text>
+                    <Text style={styles.fieldValue}>You: {balance.you}% · Them: {balance.them}%</Text>
+                  </View>
+                ) : null;
+              })()}
               {renderField('Love language', light.loveLanguage)}
               {renderField('Conflict style', light.conflictStyle ?? light.howTheyOperate)}
               {renderField('Best way to reach', light.bestWayToConnect)}
@@ -323,7 +333,7 @@ export function PersonDetailSheet({
             </View>
           </View>
 
-          {/* 3. Who They Are */}
+          {/* 3. Who They Are + Know them better prompts */}
           <View style={styles.profileSection}>
             <Text style={styles.sectionTitle}>Who They Are</Text>
             <View style={styles.fieldList}>
@@ -335,6 +345,31 @@ export function PersonDetailSheet({
               {renderField('Life stage', light.lifeStage)}
               {renderField('Location', light.location ?? light.address)}
               {renderField('Languages', light.languages)}
+            </View>
+            <Text style={styles.knowThemLabel}>Know them better</Text>
+            <View style={styles.knowThemRow}>
+              {[
+                { key: 'birthday', label: 'Birthday', value: light.birthday },
+                { key: 'loveLanguage', label: 'Love language', value: light.loveLanguage },
+                { key: 'food', label: 'Favorite food', value: (light as { favoriteFood?: string }).favoriteFood },
+                { key: 'vacation', label: 'Dream vacation', value: (light as { dreamVacation?: string }).dreamVacation },
+                { key: 'stresses', label: 'What stresses them', value: (light as { whatStressesThem?: string }).whatStressesThem },
+                { key: 'excites', label: 'What excites them', value: (light as { whatExcitesThem?: string }).whatExcitesThem },
+              ].map(({ key, label, value }) => (
+                <Pressable
+                  key={key}
+                  style={({ pressed }) => [styles.knowThemChip, pressed && styles.knowThemChipPressed]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    onSeeFullProfile(light.id);
+                    onClose();
+                  }}
+                >
+                  <Text style={styles.knowThemChipText} numberOfLines={1}>
+                    {value ? `✓ ${label}` : `+ ${label}`}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
           </View>
 
@@ -405,6 +440,11 @@ const styles = StyleSheet.create({
   profileSection: { marginBottom: SPACING.xl },
   sectionTitle: { fontSize: 13, fontWeight: '600', color: COLORS.textMuted, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
   fieldList: { gap: 0 },
+  knowThemLabel: { fontSize: 12, fontWeight: '600', color: COLORS.textMuted, marginTop: 12, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  knowThemRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  knowThemChip: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: BORDER_RADIUS.input ?? 10, backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.border },
+  knowThemChipPressed: { opacity: 0.9 },
+  knowThemChipText: { fontSize: 13, color: COLORS.textSecondary, fontWeight: '500' },
   fieldRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   fieldLabel: { fontSize: 14, color: COLORS.textMuted, flex: 0, width: 120 },
   fieldValue: { fontSize: 14, color: COLORS.text, flex: 1, textAlign: 'right' },

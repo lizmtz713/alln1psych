@@ -122,3 +122,41 @@ export async function scheduleCheckInReminder(
   });
   return id;
 }
+
+// === DRIFT WARNING (relationship radar) ===
+
+const DRIFT_NOTIFICATION_TYPE = 'drift-warning';
+
+/** Schedule a single "X is drifting" notification (e.g. tomorrow at 10am). */
+export async function scheduleDriftReminder(
+  personName: string,
+  normalRhythmDays: number,
+  daysSinceContact: number,
+  triggerDate?: Date
+): Promise<string | null> {
+  await cancelDriftReminders();
+  const d = triggerDate ?? (() => {
+    const t = new Date();
+    t.setDate(t.getDate() + 1);
+    t.setHours(10, 0, 0, 0);
+    return t;
+  })();
+  const id = await Notifications.scheduleNotificationAsync({
+    content: {
+      title: `${personName} is drifting`,
+      body: `You usually talk every ${normalRhythmDays} days. It's been ${daysSinceContact} days. Want to reconnect?`,
+      data: { type: DRIFT_NOTIFICATION_TYPE, personName, normalRhythmDays, daysSinceContact },
+    },
+    trigger: { date: d, type: 'date' } as Notifications.NotificationTriggerInput,
+  });
+  return id;
+}
+
+export async function cancelDriftReminders(): Promise<void> {
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  for (const n of scheduled) {
+    if ((n.content.data as { type?: string })?.type === DRIFT_NOTIFICATION_TYPE) {
+      await Notifications.cancelScheduledNotificationAsync(n.identifier);
+    }
+  }
+}

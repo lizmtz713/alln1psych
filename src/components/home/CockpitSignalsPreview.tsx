@@ -26,14 +26,14 @@ export function CockpitSignalsPreview({
   needAttentionCount,
   heroName,
   heroId,
-  sectionTitle = 'Your People',
+  sectionTitle = 'People signals',
   relationshipInsight,
 }: CockpitSignalsPreviewProps) {
   const router = useRouter();
 
   const openSignals = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const href = heroId ? `/(tabs)/signals?hero=${encodeURIComponent(heroId)}` : '/(tabs)/signals';
+    const href = heroId ? `/(tabs)/people?hero=${encodeURIComponent(heroId)}` : '/(tabs)/people';
     router.push(href as any);
   };
 
@@ -45,25 +45,19 @@ export function CockpitSignalsPreview({
         onPress={openSignals}
       >
         {heroName ? (
-          <Text style={styles.line}>Reach out to {heroName}</Text>
-        ) : (
-          <Text style={styles.line}>
-            {needAttentionCount === 0
-              ? 'Your people are in view'
-              : needAttentionCount === 1
-                ? '1 person may need attention'
-                : `${needAttentionCount} people may need attention`}
-          </Text>
-        )}
-        {heroName ? (
-          <Text style={styles.hero}>
-            {needAttentionCount === 0 ? 'Your people are in view' : needAttentionCount === 1 ? '1 may need attention' : `${needAttentionCount} may need attention`}
-          </Text>
+          <Text style={styles.line}>{heroName} may need a moment</Text>
         ) : null}
+        <Text style={styles.hero}>
+          {needAttentionCount === 0
+            ? 'Your people are in view'
+            : needAttentionCount === 1
+              ? '1 relationship needs attention'
+              : `${needAttentionCount} relationships need attention`}
+        </Text>
         {relationshipInsight ? (
           <Text style={styles.insight}>{relationshipInsight}</Text>
         ) : null}
-        <Text style={styles.cta}>Open Signals →</Text>
+        <Text style={styles.cta}>People →</Text>
       </Pressable>
     </View>
   );

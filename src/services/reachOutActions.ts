@@ -73,7 +73,23 @@ export const REACH_OUT_ACTIONS: ReachOutAction[] = [
     deepLink: (l) => l.phone ? `sms:${l.phone.replace(/\D/g, '')}` : null },
 ];
 
-export type MessageContext = 'just-checking-in' | 'been-a-while' | 'they-struggling' | 'celebration' | 'random-love' | 'thinking-of-you' | 'need-to-reconnect';
+export type MessageContext = 'just-checking-in' | 'been-a-while' | 'they-struggling' | 'celebration' | 'random-love' | 'thinking-of-you' | 'need-to-reconnect' | 'funny';
+
+/** Tone filter for message suggestions: Reconnect, Appreciation, Funny, Deep, Quick */
+export type MessageTone = 'Reconnect' | 'Appreciation' | 'Funny' | 'Deep' | 'Quick';
+
+export const MESSAGE_TONE_ORDER: MessageTone[] = ['Reconnect', 'Appreciation', 'Funny', 'Deep', 'Quick'];
+
+const CONTEXT_TO_TONE: Record<MessageContext, MessageTone> = {
+  'just-checking-in': 'Quick',
+  'been-a-while': 'Reconnect',
+  'they-struggling': 'Deep',
+  'celebration': 'Quick',
+  'random-love': 'Appreciation',
+  'thinking-of-you': 'Quick',
+  'need-to-reconnect': 'Reconnect',
+  'funny': 'Funny',
+};
 
 export const EXAMPLE_MESSAGES: { context: MessageContext; messages: string[] }[] = [
   { context: 'just-checking-in', messages: [
@@ -104,7 +120,16 @@ export const EXAMPLE_MESSAGES: { context: MessageContext; messages: string[] }[]
     "Just saw something and it reminded me of you!",
     "You popped into my head so I had to reach out 💭",
   ]},
+  { context: 'funny', messages: [
+    "I just thought of the dumbest thing and you're the only one who'd get it.",
+    "Sending you this so we can laugh about it later 😂",
+    "No context. Just vibes. And you.",
+  ]},
 ];
+
+export function getToneForContext(context: MessageContext): MessageTone {
+  return CONTEXT_TO_TONE[context] ?? 'Quick';
+}
 
 export function getRecommendedActions(light: Light): ReachOutAction[] {
   const loveLanguage = light.loveLanguage;
@@ -138,7 +163,10 @@ export function getSuggestedMessages(light: Light): { context: MessageContext; m
   const randomLove = EXAMPLE_MESSAGES.find(e => e.context === 'random-love')!;
   suggestions.push({ context: 'random-love', message: randomLove.messages[Math.floor(Math.random() * randomLove.messages.length)] });
 
-  return suggestions.slice(0, 4);
+  const funny = EXAMPLE_MESSAGES.find(e => e.context === 'funny')!;
+  suggestions.push({ context: 'funny', message: funny.messages[Math.floor(Math.random() * funny.messages.length)] });
+
+  return suggestions.slice(0, 5);
 }
 
 export async function executeReachOut(action: ReachOutAction, light: Light, options?: { message?: string }): Promise<boolean> {

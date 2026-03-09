@@ -23,7 +23,7 @@ export default function FamilySettingsScreen() {
   const handleDelete = () => {
     Alert.alert(
       'Delete family group',
-      `Remove "${family.name}"? This won't delete your Lights, only the group.`,
+      `Remove "${family.name}"? This won't delete your people, only the group.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {

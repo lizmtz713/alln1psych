@@ -32,7 +32,7 @@ export function LightsMapSnapshot({
 
   return (
     <View style={[styles.card, { width, height, padding: CARD_PADDING }]}>
-      <Text style={styles.title}>Lights Map</Text>
+      <Text style={styles.title}>My People</Text>
       <Text style={styles.subtitle}>{nodeCount} connection{nodeCount !== 1 ? 's' : ''}</Text>
 
       {/* Tier breakdown */}

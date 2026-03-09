@@ -38,7 +38,25 @@ export default function AddLightScreen() {
   const [relationship, setRelationship] = useState<RelationshipType>('friend');
   const [howWeMet, setHowWeMet] = useState('');
   const [notes, setNotes] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [contactLoading, setContactLoading] = useState(false);
+
+  /** Normalize to ISO YYYY-MM-DD for Memory Engine and reminders. */
+  const normalizeBirthday = (raw: string): string | undefined => {
+    const t = raw.trim();
+    if (!t) return undefined;
+    const match = t.match(/^(\d{1,2})-(\d{1,2})(?:-(\d{4}))?$/);
+    if (match) {
+      const month = parseInt(match[1], 10);
+      const day = parseInt(match[2], 10);
+      const year = match[3] ? parseInt(match[3], 10) : new Date().getFullYear();
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      }
+    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
+    return undefined;
+  };
 
   const handleImportContacts = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -48,6 +66,7 @@ export default function AddLightScreen() {
       if (contact) {
         setPickedContact(contact);
         setName(contact.name);
+        setBirthday(contact.birthday ?? '');
       } else {
         Alert.alert(
           'Contacts',
@@ -70,7 +89,7 @@ export default function AddLightScreen() {
       relationship,
       contactMethod: pickedContact?.phone ?? pickedContact?.email ?? '',
       sharingLevel: 'full',
-      birthday: pickedContact?.birthday ?? undefined,
+      birthday: pickedContact?.birthday ?? normalizeBirthday(birthday) ?? undefined,
       tier,
       howWeMet: howWeMet.trim() || undefined,
       notes: notes.trim() || undefined,
@@ -89,7 +108,7 @@ export default function AddLightScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
           <Ionicons name="chevron-back" size={24} color={COLORS.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Add a Light</Text>
+        <Text style={styles.headerTitle}>Add someone</Text>
         <View style={styles.headerRight} />
       </View>
       <ScrollView
@@ -98,7 +117,7 @@ export default function AddLightScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-      <Text style={styles.title}>Add a Light</Text>
+      <Text style={styles.title}>Add someone</Text>
       <Text style={styles.subtitle}>Who is becoming part of your world?</Text>
 
       <View style={styles.divider} />
@@ -202,6 +221,16 @@ export default function AddLightScreen() {
         </View>
       </ScrollView>
 
+      <Text style={styles.label}>Birthday (optional)</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="e.g. 12-25 or 1990-12-25"
+        placeholderTextColor={COLORS.textMuted}
+        value={pickedContact?.birthday ?? birthday}
+        onChangeText={setBirthday}
+        editable={!pickedContact?.birthday}
+      />
+
       <Text style={styles.label}>How did you meet? (optional)</Text>
       <TextInput
         style={styles.input}
@@ -235,7 +264,7 @@ export default function AddLightScreen() {
       <View style={styles.divider} />
 
       <Pressable style={styles.primaryButton} onPress={handleAdd}>
-        <Text style={styles.primaryButtonText}>Add Light</Text>
+        <Text style={styles.primaryButtonText}>Add person</Text>
       </Pressable>
 
       <View style={{ height: 40 }} />

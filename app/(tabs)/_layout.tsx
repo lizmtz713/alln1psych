@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 
-// Human OS — five tabs: observe, understand, act, learn, configure
+// Human OS — six tabs: Cockpit, Signals (insights), People (relationships), Tools, Manual, Me
 const COLORS = {
   background: '#09090F',
   surface: '#111118',
@@ -13,10 +13,11 @@ const COLORS = {
   textMuted: '#6B6B80',
   accent: '#7C4DFF',
   accentSoft: 'rgba(124,77,255,0.12)',
-  cockpit: '#4ADE80',   // Green - system awareness
-  signals: '#9B8AA6',   // Violet - relationship system
-  tools: '#3B82F6',     // Blue - problem solving
-  manual: '#8B5CF6',   // Purple - knowledge
+  cockpit: '#4ADE80',   // Green - life overview
+  signals: '#9B8AA6',   // Violet - insights & predictions
+  people: '#A78BFA',    // Purple - relationship system
+  tools: '#3B82F6',     // Blue - action layer
+  manual: '#8B5CF6',    // Purple - knowledge
   me: '#F59E0B',       // Amber - identity/config
 };
 
@@ -92,7 +93,7 @@ export default function TabLayout() {
           }}
         />
         
-        {/* Tab 2: Signals — relationship system. "How are my relationships doing?" */}
+        {/* Tab 2: Signals — insights & predictions. Awareness layer. */}
         <Tabs.Screen
           name="signals"
           options={{
@@ -102,16 +103,35 @@ export default function TabLayout() {
                 focused={focused}
                 color={color}
                 size={size ?? 24}
-                name="radio-outline"
-                focusedName="radio"
+                name="pulse-outline"
+                focusedName="pulse"
                 accentColor={COLORS.signals}
               />
             ),
             tabBarActiveTintColor: COLORS.signals,
           }}
         />
+
+        {/* Tab 3: People — relationship subsystem. */}
+        <Tabs.Screen
+          name="people"
+          options={{
+            title: 'People',
+            tabBarIcon: ({ focused, color, size }) => (
+              <TabIcon
+                focused={focused}
+                color={color}
+                size={size ?? 24}
+                name="people-outline"
+                focusedName="people"
+                accentColor={COLORS.people}
+              />
+            ),
+            tabBarActiveTintColor: COLORS.people,
+          }}
+        />
         
-        {/* Tab 3: Tools — life problem solving. "How do I handle this situation?" */}
+        {/* Tab 4: Tools — life problem solving. "How do I handle this situation?" */}
         <Tabs.Screen
           name="tools"
           options={{
@@ -130,7 +150,7 @@ export default function TabLayout() {
           }}
         />
         
-        {/* Tab 4: Manual — understanding the human system. "How do humans actually work?" */}
+        {/* Tab 5: Manual — understanding the human system. "How do humans actually work?" */}
         <Tabs.Screen
           name="learn"
           options={{
@@ -149,7 +169,7 @@ export default function TabLayout() {
           }}
         />
 
-        {/* Tab 5: Me — identity + configuration. "How is my system configured?" */}
+        {/* Tab 6: Me — identity + configuration. "How is my system configured?" */}
         <Tabs.Screen
           name="me"
           options={{

@@ -113,6 +113,20 @@ export function getTemperatureRingColorForLight(light: Light, needsAttention: bo
   return 'neutral';
 }
 
+/** Interaction balance from connection log (when initiatedBy is set). Returns You % and Them %. */
+export function getInteractionBalance(light: Light): { you: number; them: number } | null {
+  const withInitiated = (light.connectionLog ?? []).filter((e) => e.initiatedBy);
+  if (withInitiated.length === 0) return null;
+  const me = withInitiated.filter((e) => e.initiatedBy === 'me').length;
+  const them = withInitiated.filter((e) => e.initiatedBy === 'them').length;
+  const total = me + them;
+  if (total === 0) return null;
+  return {
+    you: Math.round((me / total) * 100),
+    them: Math.round((them / total) * 100),
+  };
+}
+
 /** Relationship strength 1–5 for ring fill. Momentum 0–100 → 5=strong, 1=weak. When no momentum, derive from brightness. */
 export function getRelationshipScoreFromLight(light: Light): number {
   if (light.momentumScore != null) {

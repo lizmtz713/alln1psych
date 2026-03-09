@@ -10,6 +10,7 @@ import {
   cancelDailyCheckin,
   cancelEveningReflection,
 } from '../services/notifications';
+import { evaluateAndScheduleSmartNotifications } from '../services/smartNotifications';
 import * as database from '../services/database';
 
 /**
@@ -51,8 +52,16 @@ export function NotificationsSetup({ children }: { children: React.ReactNode }) 
   }, [user?.id, settings.notificationsCheckIn]);
 
   useEffect(() => {
+    if (!user?.id) return;
+    const t = setTimeout(() => {
+      evaluateAndScheduleSmartNotifications().catch(() => {});
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [user?.id]);
+
+  useEffect(() => {
     listenerRef.current = Notifications.addNotificationResponseReceivedListener((response) => {
-      const data = response.notification.request.content.data as { type?: string };
+      const data = response.notification.request.content.data as { type?: string; personId?: string } & Record<string, unknown>;
       const type = data?.type;
       if (type === 'daily-checkin') {
         router.push('/(modals)/mood-checkin');
@@ -60,6 +69,10 @@ export function NotificationsSetup({ children }: { children: React.ReactNode }) 
         router.push('/(tabs)/talk');
       } else if (type === 'circle-nudge') {
         router.push('/(tabs)/circle');
+      } else if (type === 'drift-warning' && data?.personId) {
+        router.push(`/(tabs)/people?hero=${encodeURIComponent(String(data.personId))}` as any);
+      } else if (type === 'drift_warning' && data?.personId) {
+        router.push(`/(tabs)/people?hero=${encodeURIComponent(String(data.personId))}` as any);
       }
     });
 

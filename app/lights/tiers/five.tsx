@@ -31,7 +31,7 @@ export default function YourFiveScreen() {
     <ScrollView style={[styles.container, { paddingBottom: insets.bottom + 24 }]} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Your 5 — The ones who matter most</Text>
       {five.length === 0 ? (
-        <Text style={styles.empty}>No one in Your 5 yet. Add from the Lights hub.</Text>
+        <Text style={styles.empty}>No one in Your 5 yet. Add from People.</Text>
       ) : (
         five.map((l) => (
           <Pressable key={l.id} style={styles.row} onPress={() => router.push(`/lights/${l.id}`)}>
