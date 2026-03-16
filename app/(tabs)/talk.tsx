@@ -17,7 +17,7 @@ import {
 import { Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { COLORS, BORDER_RADIUS, APP_CONFIG } from '../../src/lib/constants';
 import { useUserStore } from '../../src/stores/userStore';
 import {
   useConversationStore,
@@ -30,7 +30,11 @@ import type { CommunicationPreference } from '../../src/stores/userStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useUsageStore } from '../../src/stores/usageStore';
 import { useHumanSkillsStore, AI_TALK_SKILL_IDS, SKILL_POINTS } from '../../src/stores/humanSkillsStore';
+import { useLifeQuestionsStore } from '../../src/stores/lifeQuestionsStore';
+import { getLifeQuestionById } from '../../src/data/lifeQuestions';
+import { getSkillsInOrder } from '../../src/data/humanSkills';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import type { LifeQuestionId } from '../../src/types/life-questions';
 import * as Haptics from 'expo-haptics';
 import { CrisisOverlay } from '../../src/components/CrisisOverlay';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
@@ -40,6 +44,9 @@ import { useHealthStore } from '../../src/stores/healthStore';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ShareInsight } from '../../src/features/share-insight';
 import { buildAIResponseShareContent } from '../../src/features/share-insight';
+import { AiDisclaimerGate } from '../../src/components/AiDisclaimerGate';
+import { VoiceDisclosureModal } from '../../src/components/VoiceDisclosureModal';
+import { useLegalConsentStore } from '../../src/stores/legalConsentStore';
 
 const MIC_BUTTON_SIZE = 80;
 const MIC_BUTTON_SIZE_SMALL = 48;
@@ -90,6 +97,66 @@ function AnimatedMessageRow({
   );
 }
 
+const MAX_LIFE_QUESTIONS_SUMMARY = 1200;
+const MAX_HUMAN_SKILLS_SUMMARY = 900;
+
+function oneLineFromResponse(
+  reflection: string | undefined,
+  exercises: { exerciseId: string; value: string | string[] | number }[]
+): string {
+  if (reflection?.trim()) {
+    const s = reflection.trim();
+    return s.length > 100 ? s.slice(0, 97) + '...' : s;
+  }
+  const first = exercises[0];
+  if (!first) return '';
+  const v = first.value;
+  if (typeof v === 'string') return v.length > 100 ? v.slice(0, 97) + '...' : v;
+  if (Array.isArray(v)) return (v as string[]).slice(0, 3).join(', ');
+  return `scale: ${v}`;
+}
+
+function buildLifeQuestionsSummary(): string | undefined {
+  const { progress, responses, completedCount } = useLifeQuestionsStore.getState();
+  const completed = progress.completed ?? {};
+  const count = completedCount();
+  if (count === 0) {
+    return 'Not started. All 12 questions are available in Learn → 12 Life Questions.';
+  }
+  const lines: string[] = [`Completed ${count}/12:`];
+  const completedIds = Object.keys(completed) as LifeQuestionId[];
+  for (const id of completedIds) {
+    const mod = getLifeQuestionById(id);
+    const label = mod?.shortTitle ?? id;
+    const res = responses[id];
+    const one = res ? oneLineFromResponse(res.reflection, res.exercises) : '';
+    if (one) lines.push(`- ${label}: "${one}"`);
+    else lines.push(`- ${label}: (answered)`);
+  }
+  const notDone = (['identity', 'purpose', 'values', 'strengths', 'fears', 'relationships', 'meaning', 'legacy', 'growth', 'belonging', 'choice', 'story'] as LifeQuestionId[]).filter((id) => !completed[id]);
+  if (notDone.length > 0) {
+    const labels = notDone.map((id) => getLifeQuestionById(id)?.shortTitle ?? id);
+    lines.push('Not yet: ' + labels.join(', '));
+  }
+  const out = lines.join('\n');
+  return out.length > MAX_LIFE_QUESTIONS_SUMMARY ? out.slice(0, MAX_LIFE_QUESTIONS_SUMMARY - 3) + '...' : out;
+}
+
+function buildHumanSkillsSummary(): string | undefined {
+  const skillsStore = useHumanSkillsStore.getState();
+  const skills = getSkillsInOrder();
+  const withPoints = skills
+    .map((s) => ({ skill: s, pts: skillsStore.getPoints(s.id), level: skillsStore.getLevel(s.id) }))
+    .filter((x) => x.pts > 0)
+    .sort((a, b) => b.pts - a.pts);
+  if (withPoints.length === 0) {
+    return 'No skill points yet. They earn points from check-ins, Quick Reset, Post-Flight debrief, and talking with you.';
+  }
+  const lines = withPoints.map((x) => `${x.skill.shortTitle}: ${x.level} (${x.pts} pts)`);
+  const out = lines.join(', ');
+  return out.length > MAX_HUMAN_SKILLS_SUMMARY ? out.slice(0, MAX_HUMAN_SKILLS_SUMMARY - 3) + '...' : out;
+}
+
 function buildUserContext(): UserContext {
   const {
     name,
@@ -120,6 +187,9 @@ function buildUserContext(): UserContext {
     pronouns === 'other'
       ? (customPronouns?.trim() || 'not specified')
       : (pronouns ?? 'not specified');
+  
+  const lifeQuestionsSummary = buildLifeQuestionsSummary();
+  const humanSkillsSummary = buildHumanSkillsSummary();
   
   return {
     name: name || 'there',
@@ -158,6 +228,8 @@ function buildUserContext(): UserContext {
       direction: cockpitState.direction.value >= 0 ? cockpitState.direction.value : undefined,
       alignment: cockpitState.alignment.value >= 0 ? cockpitState.alignment.value : undefined,
     },
+    lifeQuestionsSummary: lifeQuestionsSummary ?? undefined,
+    humanSkillsSummary: humanSkillsSummary ?? undefined,
   };
 }
 
@@ -205,6 +277,9 @@ export default function TalkScreen() {
   const [useWhisperFallback, setUseWhisperFallback] = useState(false);
   const lastOnDeviceResultRef = useRef('');
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [showVoiceDisclosure, setShowVoiceDisclosure] = useState(false);
+  const hasAcceptedVoiceDisclosure = useLegalConsentStore((s) => s.hasAcceptedVoiceDisclosure());
+  const setVoiceDisclosureAccepted = useLegalConsentStore((s) => s.setVoiceDisclosureAccepted);
   const [convToast, setConvToast] = useState(false);
   const [showFollowUpBanner, setShowFollowUpBanner] = useState(false);
   const [followUpDismissed, setFollowUpDismissed] = useState(false);
@@ -550,12 +625,18 @@ export default function TalkScreen() {
       return;
     }
 
+    // Voice disclosure before first voice use
+    if (!hasAcceptedVoiceDisclosure) {
+      setShowVoiceDisclosure(true);
+      return;
+    }
+
     // Tap to start: on-device first, fallback to record + Whisper on error
     const { status } = await Audio.requestPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert(
         'Microphone access needed',
-        'Go to Settings > InGauge to enable it.',
+        `Go to Settings > ${APP_CONFIG.name} to enable it.`,
         [{ text: 'OK' }]
       );
       return;
@@ -588,7 +669,7 @@ export default function TalkScreen() {
         if (e instanceof Error && e.message === 'Microphone permission not granted') {
           Alert.alert(
             'Microphone access needed',
-            'Go to Settings > InGauge to enable it.',
+            `Go to Settings > ${APP_CONFIG.name} to enable it.`,
             [{ text: 'OK' }]
           );
         }
@@ -607,11 +688,20 @@ export default function TalkScreen() {
 
   return (
     <ErrorBoundary>
+    <AiDisclaimerGate>
     <KeyboardAvoidingView
       style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={0}
     >
+      <VoiceDisclosureModal
+        visible={showVoiceDisclosure}
+        onAccept={() => {
+          setVoiceDisclosureAccepted();
+          setShowVoiceDisclosure(false);
+          handleMicPress();
+        }}
+      />
       {showCrisisOverlay && (
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
           <CrisisOverlay onDismiss={() => setShowCrisisOverlay(false)} />
@@ -624,11 +714,11 @@ export default function TalkScreen() {
         onClose={() => setShowPremiumGate(false)}
         feature="ai"
       />
-      {/* Header with InGauge branding */}
+      {/* Header with app branding */}
       <View style={{ paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '700' }}>InGauge</Text>
+            <Text style={{ color: '#F0F0F5', fontSize: 20, fontWeight: '700' }}>{APP_CONFIG.name}</Text>
             <AIUsageIndicator />
           </View>
           <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -867,6 +957,7 @@ export default function TalkScreen() {
             <Text style={styles.topicStartersTitle}>Not sure where to start?</Text>
             <View style={styles.topicStartersGrid}>
               {[
+                { emoji: '🔧', label: 'Fix an argument', route: '/tools/repair' as const },
                 { emoji: '💔', label: 'Betrayal / Trust', prompt: "I'm dealing with betrayal in my relationship. I need to talk through what happened." },
                 { emoji: '😰', label: 'Anxiety', prompt: "I've been feeling really anxious lately and I don't know why." },
                 { emoji: '😢', label: 'Grief / Loss', prompt: "I'm grieving and I need someone to talk to about it." },
@@ -881,9 +972,13 @@ export default function TalkScreen() {
                   style={styles.topicStarterChip}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setTextInput(topic.prompt);
-                    setInputMode('text');
-                    setTimeout(() => textInputRef.current?.focus(), 100);
+                    if ('route' in topic && topic.route) {
+                      router.push(topic.route as any);
+                    } else if ('prompt' in topic && topic.prompt) {
+                      setTextInput(topic.prompt);
+                      setInputMode('text');
+                      setTimeout(() => textInputRef.current?.focus(), 100);
+                    }
                   }}
                 >
                   <Text style={styles.topicStarterEmoji}>{topic.emoji}</Text>
@@ -995,6 +1090,7 @@ export default function TalkScreen() {
         )}
       </View>
     </KeyboardAvoidingView>
+    </AiDisclaimerGate>
     </ErrorBoundary>
   );
 }

@@ -54,11 +54,18 @@ export interface WeatherContext {
   moodImpact?: string;        // positive/neutral/negative
 }
 
+/** Optional context from quick log / check-in: what user said is influencing them. */
+export interface DriverContext {
+  driverLabels: string[];
+  systemImpactLabels: string[];
+}
+
 export async function generateCrossSystemInsight(
   gauges: CockpitGauges,
   healthData?: HealthContext,
   spotifyData?: SpotifyContext,
-  weatherData?: WeatherContext
+  weatherData?: WeatherContext,
+  driverContext?: DriverContext
 ): Promise<string | null> {
   const active = Object.values(gauges).filter((v) => v >= 0);
   if (active.length < 3) return null;
@@ -164,6 +171,18 @@ export async function generateCrossSystemInsight(
     }
   }
 
+  let driverContextBlock = '';
+  if (driverContext && (driverContext.driverLabels.length > 0 || driverContext.systemImpactLabels.length > 0)) {
+    const parts: string[] = [];
+    if (driverContext.driverLabels.length > 0) {
+      parts.push(`User said these life factors are influencing them: ${driverContext.driverLabels.join(', ')}.`);
+    }
+    if (driverContext.systemImpactLabels.length > 0) {
+      parts.push(`User said these parts of their system feel affected: ${driverContext.systemImpactLabels.join(', ')}.`);
+    }
+    driverContextBlock = `\n\nUSER-REPORTED INFLUENCES (from quick log or check-in):\n${parts.join(' ')}`;
+  }
+
   const systemPrompt = `You are the AI brain of a Human Cockpit — a 6-gauge emotional regulation system. You read all gauges AND health data together and provide ONE brief insight (2-3 sentences max) about how the user's systems are interacting.
 
 The 6 gauges (0-100 scale, -1 means not checked):
@@ -172,10 +191,11 @@ The 6 gauges (0-100 scale, -1 means not checked):
 - Emotion (emotional clarity): ${gauges.emotion}
 - Connection (belonging, being seen): ${gauges.connection}
 - Direction (purpose, momentum): ${gauges.direction}
-- Alignment (actions matching values): ${gauges.alignment}${healthContext}${musicContext}${weatherContext}${environmentContext}
+- Alignment (actions matching values): ${gauges.alignment}${healthContext}${musicContext}${weatherContext}${environmentContext}${driverContextBlock}
 
 Rules:
 - Read the PATTERN across gauges, not individual numbers
+- If USER-REPORTED INFLUENCES are present, weave them in naturally: e.g. "Work and sleep are influencing you today" or "You noted Connection and Direction feel affected — that's a common pair when stress is up."
 - Tell them what's CONNECTED: "Your anxiety might be coming from your body, not your emotions"
 - Be direct but warm
 - Never use clinical jargon
@@ -207,25 +227,29 @@ Rules:
     );
     // Check for error responses (AI service returns string like "[AI Error: ...]")
     if (!response || response.startsWith('[AI Error') || response.includes('error')) {
-      return getHardcodedInsight(gauges);
+      return getHardcodedInsight(gauges, driverContext);
     }
     return response.trim();
   } catch {
-    return getHardcodedInsight(gauges);
+    return getHardcodedInsight(gauges, driverContext);
   }
 }
 
-function getHardcodedInsight(gauges: CockpitGauges): string | null {
+function getHardcodedInsight(gauges: CockpitGauges, driverContext?: DriverContext): string | null {
   const insights: string[] = [];
+  const driverPrefix =
+    driverContext && driverContext.driverLabels.length > 0
+      ? `${driverContext.driverLabels.slice(0, 3).join(' and ')} ${driverContext.driverLabels.length > 3 ? 'and others' : ''} are influencing you. `
+      : '';
 
   if (gauges.body >= 0 && gauges.body < 40 && gauges.emotion >= 0 && gauges.emotion < 50) {
     insights.push(
-      "Your emotional state may be tied to your body. Low sleep and nutrition amplify anxiety by up to 30%. Address your Body gauge first."
+      driverPrefix + "Your emotional state may be tied to your body. Low sleep and nutrition amplify anxiety by up to 30%. Address your Body gauge first."
     );
   }
   if (gauges.state >= 0 && gauges.state < 40 && gauges.connection >= 0 && gauges.connection < 40) {
     insights.push(
-      "You're in a stressed state AND feeling disconnected. That's the hardest combination for your brain. Even a short conversation with someone safe can shift both gauges."
+      driverPrefix + "You're in a stressed state AND feeling disconnected. That's the hardest combination for your brain. Even a short conversation with someone safe can shift both gauges."
     );
   }
   if (
@@ -235,15 +259,15 @@ function getHardcodedInsight(gauges: CockpitGauges): string | null {
     gauges.alignment < 40
   ) {
     insights.push(
-      "Low direction and low alignment together can feel like depression. It's often not — it's a navigation problem. Let's revisit what matters to you."
+      driverPrefix + "Low direction and low alignment together can feel like depression. It's often not — it's a navigation problem. Let's revisit what matters to you."
     );
   }
   const active = Object.values(gauges).filter((v) => v >= 0);
   if (active.length >= 4 && active.every((v) => v >= 70)) {
     insights.push(
-      'Your systems are well-regulated. This is what balance feels like. Take note of what you did to get here.'
+      driverPrefix + 'Your systems are well-regulated. This is what balance feels like. Take note of what you did to get here.'
     );
   }
 
-  return insights.length > 0 ? insights[0] : null;
+  return insights.length > 0 ? insights[0] : (driverPrefix ? driverPrefix.trim() : null);
 }

@@ -12,7 +12,8 @@ export type QuickResetExerciseId =
   | 'physiological-sigh'
   | '5-4-3-2-1-grounding'
   | 'cold-reset'
-  | 'shake-it-out';
+  | 'shake-it-out'
+  | 'short-walk';
 
 export interface ResetSession {
   id: string;

@@ -33,7 +33,7 @@ export default function IndexScreen() {
   }
 
   if (!onboardingCompleted) {
-    return <Redirect href="/(modals)/onboarding" />;
+    return <Redirect href="/onboarding" />;
   }
 
   return <Redirect href="/(tabs)" />;

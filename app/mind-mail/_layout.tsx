@@ -16,6 +16,7 @@ export default function MindMailLayout() {
         name="glimpse-view"
         options={{ presentation: 'fullScreenModal', headerShown: false }}
       />
+      <Stack.Screen name="maintenance-ticket" />
     </Stack>
   );
 }

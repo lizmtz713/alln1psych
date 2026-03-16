@@ -16,6 +16,7 @@ import { PhysiologicalSigh } from '../../../src/components/quickReset/Physiologi
 import { FiveFourGrounding } from '../../../src/components/quickReset/FiveFourGrounding';
 import { ColdReset } from '../../../src/components/quickReset/ColdReset';
 import { ShakeItOut } from '../../../src/components/quickReset/ShakeItOut';
+import { ShortWalk } from '../../../src/components/quickReset/ShortWalk';
 
 const VALID_IDS: QuickResetExerciseId[] = [
   'box-breathing',
@@ -23,6 +24,7 @@ const VALID_IDS: QuickResetExerciseId[] = [
   '5-4-3-2-1-grounding',
   'cold-reset',
   'shake-it-out',
+  'short-walk',
 ];
 
 const TITLES: Record<QuickResetExerciseId, string> = {
@@ -31,6 +33,7 @@ const TITLES: Record<QuickResetExerciseId, string> = {
   '5-4-3-2-1-grounding': '5-4-3-2-1 Grounding',
   'cold-reset': 'Cold Reset',
   'shake-it-out': 'Shake It Out',
+  'short-walk': 'Short Walk',
 };
 
 export default function QuickResetExerciseScreen() {
@@ -69,6 +72,8 @@ export default function QuickResetExerciseScreen() {
         return <ColdReset onComplete={handleComplete} />;
       case 'shake-it-out':
         return <ShakeItOut onComplete={handleComplete} />;
+      case 'short-walk':
+        return <ShortWalk onComplete={handleComplete} />;
       default:
         return <BoxBreathing onComplete={handleComplete} />;
     }

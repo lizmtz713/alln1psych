@@ -30,7 +30,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { HomeHeader } from '../../src/components/HomeHeader';
 import { WeeklyInsightPrompt } from '../../src/components/home/WeeklyInsightPrompt';
 import { WeeklyInsightCard as UnifiedInsightCard } from '../../src/components/insights/WeeklyInsightCard';
-import { WinButton } from '../../src/components/wins/WinButton';
 import { HabitsWidget } from '../../src/components/habits/HabitsWidget';
 import { LifeWrappedPreview } from '../../src/components/home/LifeWrappedPreview';
 import { ForecastCard } from '../../src/components/forecast/ForecastCard';
@@ -53,9 +52,19 @@ import { getJustInTimeLessons, type JustInTimeLesson } from '../../src/services/
 import { getMostUrgentWarning, type PredictiveWarning } from '../../src/services/predictiveWarnings';
 import { useCrisisPipelineCheck } from '../../src/components/CrisisPipelineAlert';
 import { shouldSuggestAwe } from '../../src/services/aweNudge';
-import { useAdaptiveHomeSections, usePendingInvitation } from '../../src/hooks/useOnboarding';
+import { useAdaptiveHomeSections, useExperienceLevel, usePendingInvitation } from '../../src/hooks/useOnboarding';
+import { useSyncCockpitToFleet } from '../../src/hooks/useSyncCockpitToFleet';
 import { FeatureInvitationModal } from '../../src/components/onboarding/FeatureInvitationModal';
 import { markLowStateSeen, markLowConnectionSeen, ensureFirstLaunchDate } from '../../src/services/onboardingService';
+import { getPrimarySuggestionWithPersonalization } from '../../src/services/driverAwareSuggestions';
+import { getPatternInsights, getTopDriverThisWeek, weeklyLineAddsNewInfo } from '../../src/services/checkInPatternInsights';
+import { getWhatUsuallyHelps, getWhatUsuallyHelpsForAction } from '../../src/services/whatUsuallyHelps';
+import { getForecast } from '../../src/services/forecastService';
+import { getReciprocityThisWeek } from '../../src/services/reciprocityService';
+import { getPersonalStrategy } from '../../src/services/personalStrategyService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const COCKPIT_FIRST_VISIT_KEY = 'cockpit_first_visit_done';
 
 type ActivitySuggestion = { id: string; emoji: string; title: string; sub: string };
 
@@ -71,7 +80,7 @@ const ALL_TOOLS: ToolItem[] = [
   { key: 'relate', label: 'Relate', icon: '💬', route: '/(modals)/relate' },
   { key: 'prompts', label: 'Prompts', icon: '✨', route: '/(modals)/prompt-generator' },
   { key: 'love', label: 'Love', icon: '❤️', route: '/(modals)/love' },
-  { key: 'help', label: 'Help', icon: '🆘', route: '/(modals)/help-someone' },
+  { key: 'help', label: 'Help', icon: '🆘', route: '/tools/help-someone' },
   // Relationship & self
   { key: 'datesume', label: 'Datesume', icon: '💝', route: '/love/datesume' },
   { key: 'love-history', label: 'Love History', icon: '💔', route: '/love-history' },
@@ -82,12 +91,12 @@ const ALL_TOOLS: ToolItem[] = [
   { key: 'flags', label: 'Flags', icon: '🚩', route: '/(modals)/red-green-flags' },
   { key: 'critical', label: 'Think', icon: '🧠', route: '/(modals)/critical-thinking' },
   // Body & systems
-  { key: 'body', label: 'Body', icon: '🫀', route: '/(modals)/foundation-body' },
+  { key: 'body', label: 'Body', icon: '🫀', route: '/foundation/body' },
   // Media & more
   { key: 'news-my-way', label: 'News My Way', icon: '📰', route: '/news-my-way' },
   // Conversation & support
   { key: 'pre-check', label: 'Pre-Check', icon: '✅', route: '/(modals)/pre-conversation-check' },
-  { key: 'reach-out', label: 'Reach Out', icon: '🤲', route: '/(modals)/reach-out-scaffold' },
+  { key: 'reach-out', label: 'Reach Out', icon: '🤲', route: '/tools/reach-out' },
   { key: 'quick-reset', label: 'Quick Reset', icon: '🌬️', route: '/tools/quick-reset' },
   { key: 'focus', label: 'Focus', icon: '⏱️', route: '/tools/focus' },
   { key: 'habits', label: 'Habits', icon: '📋', route: '/habits' },
@@ -107,7 +116,7 @@ const HELPFUL_RIGHT_NOW_TOOLS: ToolItem[] = [
   { key: 'decode', label: 'Decode', icon: '🔍', route: '/(modals)/decode' },
   { key: 'resolve', label: 'Resolve', icon: '🤝', route: '/(modals)/resolve' },
   { key: 'replay', label: 'Replay', icon: '🔄', route: '/(modals)/replay' },
-  { key: 'reach-out', label: 'Reach Out', icon: '🤲', route: '/(modals)/reach-out-scaffold' },
+  { key: 'reach-out', label: 'Reach Out', icon: '🤲', route: '/tools/reach-out' },
   { key: 'boundaries', label: 'Boundaries', icon: '🚧', route: '/(modals)/boundaries' },
 ];
 
@@ -382,6 +391,7 @@ function GaugeTile({ gaugeId, onPress }: { gaugeId: GaugeKey; onPress: () => voi
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  useSyncCockpitToFleet();
   const circle = useCircleStore();
   const members = circle.members ?? [];
   const myTemperature = circle.myTemperature ?? 'green';
@@ -409,6 +419,69 @@ export default function HomeScreen() {
   const alignmentVal = useCockpitStore((s) => s.alignment.value);
   const crossSystemInsight = useCockpitStore((s) => s.crossSystemInsight);
   const systemMode = useCockpitStore((s) => s.systemMode);
+  const checkInSystemImpact = useCockpitStore((s) => s.checkInSystemImpact);
+  const checkInDrivers = useCockpitStore((s) => s.checkInDrivers);
+  const checkInContext = useCockpitStore((s) => s.checkInContext);
+  const checkInHistory = useCockpitStore((s) => s.checkInHistory);
+  const recordSuggestedActionTaken = useCockpitStore((s) => s.recordSuggestedActionTaken);
+  const suggestedActionsTaken = useCockpitStore((s) => s.suggestedActionsTaken);
+  const connectionLogByMemberId = useLightsStore((s) => s.connectionLogByMemberId ?? {});
+  const patternInsights = useMemo(() => getPatternInsights(checkInHistory), [checkInHistory]);
+  const topDriverThisWeek = useMemo(() => getTopDriverThisWeek(checkInHistory), [checkInHistory]);
+  const primarySuggestion = useMemo(
+    () =>
+      getPrimarySuggestionWithPersonalization(
+        checkInSystemImpact ?? null,
+        checkInDrivers ?? null,
+        suggestedActionsTaken
+      ),
+    [checkInSystemImpact, checkInDrivers, suggestedActionsTaken]
+  );
+  const primaryPatternLine = patternInsights[0] ?? null;
+  const showWeeklyInCard = useMemo(
+    () => weeklyLineAddsNewInfo(primaryPatternLine, topDriverThisWeek),
+    [primaryPatternLine, topDriverThisWeek]
+  );
+  const whatUsuallyHelpsList = useMemo(() => getWhatUsuallyHelps(suggestedActionsTaken), [suggestedActionsTaken]);
+  const whatUsuallyHelpsForPrimary = useMemo(
+    () =>
+      primarySuggestion
+        ? getWhatUsuallyHelpsForAction(primarySuggestion.id, suggestedActionsTaken)
+        : null,
+    [primarySuggestion?.id, suggestedActionsTaken]
+  );
+
+  const forecastItems = useMemo(
+    () =>
+      getForecast({
+        gauges: {
+          ...(bodyVal >= 0 && { body: bodyVal }),
+          ...(stateVal >= 0 && { state: stateVal }),
+          ...(connectionVal >= 0 && { connection: connectionVal }),
+          ...(directionVal >= 0 && { direction: directionVal }),
+        },
+        checkInContext,
+      }),
+    [bodyVal, stateVal, connectionVal, directionVal, checkInContext]
+  );
+
+  const reciprocityResult = useMemo(
+    () => getReciprocityThisWeek({ connectionLogByMemberId }),
+    [connectionLogByMemberId]
+  );
+
+  const personalStrategyItems = useMemo(
+    () =>
+      getPersonalStrategy(
+        suggestedActionsTaken.map((t) => ({
+          actionId: t.actionId,
+          takenAt: t.takenAt,
+          gaugesAtTime: t.gaugesAtTime,
+        })),
+        checkInHistory.map((h) => ({ timestamp: h.timestamp, gauges: h.gauges }))
+      ),
+    [suggestedActionsTaken, checkInHistory]
+  );
 
   const activeGaugeCount = [bodyVal, stateVal, emotionVal, connectionVal, directionVal, alignmentVal].filter((v) => v >= 0).length;
   const overall =
@@ -436,6 +509,17 @@ export default function HomeScreen() {
   const { showAlert: showCrisisAlert, setShowAlert: setShowCrisisAlert, hasAlert: hasCrisisAlert } = useCrisisPipelineCheck();
 
   const sections = useAdaptiveHomeSections();
+  const { daysSinceInstall } = useExperienceLevel();
+  const [isFirstCockpitVisit, setIsFirstCockpitVisit] = useState<boolean | null>(null);
+  useEffect(() => {
+    AsyncStorage.getItem(COCKPIT_FIRST_VISIT_KEY).then((v) => setIsFirstCockpitVisit(v !== '1'));
+  }, []);
+  useEffect(() => {
+    if (sections.showCockpit && isFirstCockpitVisit === true) {
+      AsyncStorage.setItem(COCKPIT_FIRST_VISIT_KEY, '1');
+      setIsFirstCockpitVisit(false);
+    }
+  }, [sections.showCockpit, isFirstCockpitVisit]);
   const { invitation, refresh: refreshInvitation } = usePendingInvitation();
 
   useEffect(() => {
@@ -597,6 +681,27 @@ export default function HomeScreen() {
     });
     return items.slice(0, 4);
   }, [overall, activeGaugeCount, heroLight, heroNameForSignals, goalNudge, toolSuggestions]);
+
+  /** Single "Helpful right now" suggestion — one at a time to avoid decision paralysis. Verb-oriented CTAs. */
+  const helpfulRightNow = useMemo((): { title: string; ctaLabel: string; route: string } | null => {
+    if (!sections.showCockpit) return null;
+    const isFirstDay = daysSinceInstall <= 1;
+    const hasNoGauges = activeGaugeCount === 0;
+    const lowEmotionOrState = (emotionVal >= 0 && emotionVal < 50) || (stateVal >= 0 && stateVal < 50);
+    if (isFirstCockpitVisit !== false) {
+      return { title: 'Try a quick emotional check-in', ctaLabel: 'Check in', route: '/(modals)/cockpit-checkin' };
+    }
+    if (isFirstDay || hasNoGauges) {
+      return { title: 'Try a quick emotional check-in', ctaLabel: 'Check in', route: '/(modals)/cockpit-checkin' };
+    }
+    if (lowEmotionOrState) {
+      return { title: 'Give yourself a quick reset', ctaLabel: 'Start reset', route: '/tools/quick-reset' };
+    }
+    if (needAttentionCount > 0) {
+      return { title: 'Reach out to someone you trust', ctaLabel: 'Open People', route: '/(tabs)/people' };
+    }
+    return { title: 'Fix a message before sending', ctaLabel: 'Check tone', route: '/tools/tone-check' };
+  }, [sections.showCockpit, isFirstCockpitVisit, daysSinceInstall, activeGaugeCount, emotionVal, stateVal, needAttentionCount]);
 
   let streak: number = 0;
   let weeklySummary: { mostCommonMood: string | null; checkInDays: number; lessonsCount: number; conversationDays: number; line: string } | null = null;
@@ -786,6 +891,38 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
+      {/* One forecast surface only: strip when we have a risk line, else compact card (see docs/INTELLIGENCE-PRIORITY.md) */}
+      {sections.showCockpit && forecastItems.length > 0 ? (
+        <Pressable
+          style={styles.forecastStripWrap}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/forecast');
+          }}
+        >
+          <View style={styles.forecastStrip}>
+            <Text style={styles.forecastStripIcon}>🔮</Text>
+            <View style={styles.forecastStripTextWrap}>
+              <Text style={styles.forecastStripLine}>{forecastItems[0].line}</Text>
+              {forecastItems[0].suggestion && (
+                <Text style={styles.forecastStripSuggestion}>{forecastItems[0].suggestion}</Text>
+              )}
+            </View>
+          </View>
+        </Pressable>
+      ) : sections.showCockpit ? (
+        <ForecastCard
+          compact
+          body={bodyVal}
+          state={stateVal}
+          emotion={emotionVal}
+          connection={connectionVal}
+          direction={directionVal}
+          alignment={alignmentVal}
+          checkInContext={checkInContext}
+        />
+      ) : null}
+
       {/* 2. Needs care — thin strip above gauge (never over it) */}
       {sections.showCockpit && (() => {
         const gaugeEntries = [
@@ -820,10 +957,34 @@ export default function HomeScreen() {
         );
       })()}
 
+      {/* Status line: above cluster, centered (avoids collision with Alignment) */}
+      {sections.showCockpit && overall >= 0 && (
+        <View style={styles.clusterStatusLine}>
+          <Text style={styles.clusterStatusText}>{activeGaugeCount}/6 online · {getSystemScoreLabel(overall)}</Text>
+        </View>
+      )}
+
+      {/* Moment of stillness — Pause opens breathing */}
+      {sections.showCockpit && (
+        <View style={styles.pauseRow}>
+          <Pressable
+            style={({ pressed }) => [styles.pauseBtn, pressed && styles.pauseBtnPressed]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.push('/(modals)/activity?id=breathing');
+            }}
+            accessibilityLabel="Pause — Before you react, breathe"
+          >
+            <Text style={styles.pauseBtnText}>Pause</Text>
+          </Pressable>
+        </View>
+      )}
+
       {/* 3. System cluster — six gauges + center score */}
       {sections.showCockpit && (
       <View style={styles.cockpitSection}>
         <CockpitCluster
+          hideStatusHint
           gaugeValues={{
             body: bodyVal,
             state: stateVal,
@@ -841,64 +1002,115 @@ export default function HomeScreen() {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.push(`/(modals)/gauge-detail?gauge=${gauge}`);
           }}
+          leftSignalLines={[
+            checkInContext?.sleep ? `Sleep: ${checkInContext.sleep}` : 'Sleep: —',
+            bodyVal >= 0 && bodyVal < 50 ? 'Recovery: Low' : 'Recovery: —',
+            'HRV: —',
+          ]}
+          rightSignalLines={[
+            directionVal >= 0 && directionVal < 50 ? 'Focus load: High' : 'Focus load: —',
+            (reciprocityResult?.given ?? 0) + (reciprocityResult?.received ?? 0) > 0 ? `Reach outs: ${(reciprocityResult?.given ?? 0) + (reciprocityResult?.received ?? 0)}` : 'Connection days: —',
+            stateVal >= 0 && stateVal < 50 ? 'Task pressure: High' : 'Task pressure: —',
+          ]}
         />
-        <Pressable
-          style={styles.gaugeInfoIcon}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setShowGaugeInfo(true);
-          }}
-        >
-          <Text style={styles.gaugeInfoIconText}>ⓘ</Text>
-        </Pressable>
-        <View style={styles.cockpitActionsRow}>
-          <WinButton />
-        </View>
-        {/* One ritual by time of day + emergency beacon */}
-        <View style={styles.ritualEntryRow}>
-          {(() => {
-            const hour = new Date().getHours();
-            const isMorning = hour >= 5 && hour < 12;
-            return (
-              <>
-                <Pressable
-                  style={({ pressed }) => [styles.ritualEntryBtn, pressed && styles.ritualEntryPressed]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push(isMorning ? '/rituals/pre-flight' : '/rituals/post-flight');
-                  }}
-                >
-                  <Text style={styles.ritualEntryEmoji}>{isMorning ? '☀️' : '🌙'}</Text>
-                  <Text style={styles.ritualEntryLabel}>{isMorning ? 'Morning Ritual' : 'Evening Ritual'}</Text>
-                </Pressable>
-                <Pressable
-                  style={({ pressed }) => [styles.ritualEntryBtn, styles.ritualEntryEmergency, pressed && styles.ritualEntryPressed]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push('/emergency');
-                  }}
-                >
-                  <Text style={styles.ritualEntryEmoji}>🆘</Text>
-                  <Text style={styles.ritualEntryLabel}>Emergency</Text>
-                </Pressable>
-              </>
-            );
-          })()}
-        </View>
       </View>
       )}
 
-      {/* 4. Influencing your system — one short line when body/connection low; else 3 lines max */}
-      {sections.showCockpit && (psychSaysContent || systemInsightOfTheDay.text) && (
+      {/* Helpful right now — single contextual suggestion (just below gauges) */}
+      {sections.showCockpit && helpfulRightNow && (
+        <Pressable
+          style={({ pressed }) => [styles.helpfulRightNowWrap, pressed && styles.helpfulRightNowPressed]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push(helpfulRightNow.route as any);
+          }}
+        >
+          <Text style={styles.helpfulRightNowTitle}>Helpful right now</Text>
+          <View style={styles.helpfulRightNowDivider} />
+          <View style={styles.helpfulRightNowRow}>
+            <View style={styles.helpfulRightNowContent}>
+              <Text style={styles.helpfulRightNowSuggestion}>{helpfulRightNow.title}</Text>
+              <Text style={styles.helpfulRightNowCta}>→ {helpfulRightNow.ctaLabel}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} style={styles.helpfulRightNowArrow} />
+          </View>
+        </Pressable>
+      )}
+
+      {/* Compassion check — when State or Emotion are low */}
+      {sections.showCockpit && ((stateVal >= 0 && stateVal < 50) || (emotionVal >= 0 && emotionVal < 50)) && (
+        <View style={styles.compassionLine}>
+          <Text style={styles.compassionText}>Be gentle with yourself today.</Text>
+        </View>
+      )}
+
+      {/* 4. Influencing your system — one short line when body/connection low; else 3 lines max. Action from quick log when set. */}
+      {sections.showCockpit && (psychSaysContent || systemInsightOfTheDay.text || primarySuggestion || patternInsights.length > 0) && (
         <Animated.View style={[styles.card, styles.influencingCard, slideY(card1)]}>
-          <Text style={styles.psychLabel}>Influencing your system</Text>
+          <View style={styles.influencingCardHeader}>
+            <Text style={styles.psychLabel}>Influencing your system</Text>
+            <Pressable
+              hitSlop={8}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowGaugeInfo(true);
+              }}
+              style={styles.influencingInfoIcon}
+            >
+              <Text style={styles.gaugeInfoIconText}>ⓘ</Text>
+            </Pressable>
+          </View>
           <Text style={styles.influencingShort} numberOfLines={3}>
             {bodyVal >= 0 && bodyVal < 50 && connectionVal >= 0 && connectionVal < 50
               ? 'Low body energy may be affecting connection today.'
               : (typeof psychSaysContent === 'string' && psychSaysContent)
                 ? psychSaysContent
-                : systemInsightOfTheDay.text}
+                : systemInsightOfTheDay.text || (primarySuggestion ? 'You logged what’s affecting your system.' : patternInsights.length > 0 ? 'Patterns from your recent check-ins.' : '')}
           </Text>
+          {primarySuggestion && (
+            <View style={styles.primarySuggestionWrap}>
+              <Pressable
+                style={styles.suggestedAction}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  recordSuggestedActionTaken({
+                    actionId: primarySuggestion.id,
+                    route: primarySuggestion.route,
+                    label: primarySuggestion.label,
+                    systemImpact: checkInSystemImpact ?? undefined,
+                    drivers: checkInDrivers ?? undefined,
+                    gaugesAtTime:
+                      bodyVal >= 0 || stateVal >= 0 || emotionVal >= 0 || connectionVal >= 0 || directionVal >= 0 || alignmentVal >= 0
+                        ? {
+                            ...(bodyVal >= 0 && { body: bodyVal }),
+                            ...(stateVal >= 0 && { state: stateVal }),
+                            ...(emotionVal >= 0 && { emotion: emotionVal }),
+                            ...(connectionVal >= 0 && { connection: connectionVal }),
+                            ...(directionVal >= 0 && { direction: directionVal }),
+                            ...(alignmentVal >= 0 && { alignment: alignmentVal }),
+                          }
+                        : undefined,
+                  });
+                  router.push(primarySuggestion.route as any);
+                }}
+              >
+                <Text style={styles.suggestedActionText}>{primarySuggestion.label}</Text>
+              </Pressable>
+              {whatUsuallyHelpsForPrimary && (
+                <Text style={styles.whatUsuallyHelpsLine}>{whatUsuallyHelpsForPrimary}</Text>
+              )}
+            </View>
+          )}
+          {(primaryPatternLine || (showWeeklyInCard && topDriverThisWeek)) && (
+            <View style={styles.patternInsightsWrap}>
+              {primaryPatternLine && (
+                <Text style={styles.patternInsightText} numberOfLines={1}>{primaryPatternLine}</Text>
+              )}
+              {showWeeklyInCard && topDriverThisWeek && (
+                <Text style={styles.patternInsightText} numberOfLines={1}>{topDriverThisWeek}</Text>
+              )}
+            </View>
+          )}
           <Pressable onPress={() => router.push('/(tabs)/learn')} style={styles.influencingLearn}>
             <Text style={styles.systemTodayLearn}>Learn more in Manual →</Text>
           </Pressable>
@@ -941,11 +1153,16 @@ export default function HomeScreen() {
         relationshipInsight={getRelationshipInsight(lights, needAttentionCount)}
       />
 
-      {/* 7. This week — trends */}
-      {weeklySummary && (
+      {/* 7. This week — trends (Sunday summary or pattern line from check-in history) */}
+      {(weeklySummary || topDriverThisWeek) && (
       <View style={[styles.section, { paddingHorizontal: 20 }]}>
         <Text style={styles.sectionTitle}>This week</Text>
-        <Text style={[styles.psychText, { marginTop: 4 }]} numberOfLines={2}>{weeklySummary.line}</Text>
+        {weeklySummary && (
+          <Text style={[styles.psychText, { marginTop: 4 }]} numberOfLines={2}>{weeklySummary.line}</Text>
+        )}
+        {!weeklySummary && topDriverThisWeek && (
+          <Text style={[styles.psychText, { marginTop: 4 }]}>{topDriverThisWeek}</Text>
+        )}
       </View>
       )}
 
@@ -965,18 +1182,25 @@ export default function HomeScreen() {
         </Animated.View>
       )}
 
-      {/* 9. Reflection */}
-      <Pressable
-        style={[styles.card, { marginHorizontal: 20, marginBottom: SPACING.md }]}
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          router.push('/(tabs)/me');
-        }}
-      >
+      {/* 9. Reflection — one deeper prompt (values, direction, impact) */}
+      <View style={[styles.card, { marginHorizontal: 20, marginBottom: SPACING.md }]}>
         <Text style={styles.cardSectionTitle}>Reflection</Text>
-        <Text style={styles.psychText}>What felt meaningful today?</Text>
-        <Text style={[styles.discoveryTapHint, { marginTop: 8 }]}>Open journal →</Text>
-      </Pressable>
+        <Text style={styles.psychText}>What kind of work or contribution would make your life feel meaningful?</Text>
+        <View style={{ flexDirection: 'row', marginTop: 10, gap: 12 }}>
+          <Pressable
+            style={{ flex: 1 }}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/me'); }}
+          >
+            <Text style={styles.discoveryTapHint}>Journal →</Text>
+          </Pressable>
+          <Pressable
+            style={{ flex: 1 }}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/tools/life-direction-finder'); }}
+          >
+            <Text style={styles.discoveryTapHint}>Explore direction →</Text>
+          </Pressable>
+        </View>
+      </View>
 
       <HabitsWidget />
 
@@ -1034,13 +1258,35 @@ export default function HomeScreen() {
         </ScrollView>
       </Animated.View>
 
-      {sections.showWeeklyInsight && weeklySummary && (
+      {sections.showWeeklyInsight && (weeklySummary || topDriverThisWeek || whatUsuallyHelpsList.length > 0 || reciprocityResult.line || personalStrategyItems.length > 0) && (
         <Animated.View style={[styles.card, styles.weeklyCard, slideY(card3)]}>
           <Text style={styles.cardSectionTitle}>Your week in review</Text>
-          <Text style={styles.weeklyLine}>{weeklySummary.line}</Text>
-          <Text style={styles.weeklyMeta}>
-            Most common mood: {weeklySummary.mostCommonMood} · {weeklySummary.lessonsCount} lessons · {weeklySummary.conversationDays} conversation(s)
-          </Text>
+          {weeklySummary && <Text style={styles.weeklyLine}>{weeklySummary.line}</Text>}
+          {topDriverThisWeek && <Text style={styles.weeklyLine}>{topDriverThisWeek}</Text>}
+          {reciprocityResult.line && (
+            <Text style={styles.weeklyLine}>{reciprocityResult.line}</Text>
+          )}
+          {weeklySummary && (
+            <Text style={styles.weeklyMeta}>
+              Most common mood: {weeklySummary.mostCommonMood} · {weeklySummary.lessonsCount} lessons · {weeklySummary.conversationDays} conversation(s)
+            </Text>
+          )}
+          {whatUsuallyHelpsList.length > 0 && (
+            <View style={styles.whatHelpedWrap}>
+              <Text style={styles.whatHelpedTitle}>What usually helps</Text>
+              {whatUsuallyHelpsList.map((item) => (
+                <Text key={item.actionId} style={styles.whatHelpedItem}>{item.copy}</Text>
+              ))}
+            </View>
+          )}
+          {personalStrategyItems.length > 0 && (
+            <View style={styles.whatHelpedWrap}>
+              <Text style={styles.whatHelpedTitle}>What works for you</Text>
+              {personalStrategyItems.map((item, i) => (
+                <Text key={`${item.actionId}-${item.gauge}-${i}`} style={styles.whatHelpedItem}>{item.copy}</Text>
+              ))}
+            </View>
+          )}
         </Animated.View>
       )}
       {/* 3–5 deeper weekly insights (patterns, cause, growth) */}
@@ -1059,6 +1305,16 @@ export default function HomeScreen() {
             >
               <Ionicons name="share-outline" size={20} color={COLORS.text} />
               <Text style={styles.moreMenuLabel}>Share snapshot</Text>
+            </Pressable>
+            <Pressable
+              style={styles.moreMenuItem}
+              onPress={() => {
+                setShowCockpitMoreMenu(false);
+                router.push('/(modals)/quick-log');
+              }}
+            >
+              <Ionicons name="flash-outline" size={20} color={COLORS.text} />
+              <Text style={styles.moreMenuLabel}>Quick log</Text>
             </Pressable>
             <Pressable
               style={styles.moreMenuItem}
@@ -1162,14 +1418,30 @@ const styles = StyleSheet.create({
   cockpitTopRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', paddingRight: 12 },
   cockpitHeaderWrap: { flex: 1, minWidth: 0 },
   cockpitMoreBtn: { padding: 8, marginTop: 4 },
+  forecastStripWrap: { marginHorizontal: 20, marginBottom: 8, gap: 6 },
+  forecastStrip: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: COLORS.surface ?? 'rgba(26, 21, 40, 0.9)',
+    borderWidth: 1,
+    borderColor: COLORS.border ?? 'rgba(124, 77, 255, 0.3)',
+    gap: 8,
+  },
+  forecastStripIcon: { fontSize: 16 },
+  forecastStripTextWrap: { flex: 1, minWidth: 0 },
+  forecastStripLine: { fontSize: 14, fontWeight: '600', color: COLORS.text },
+  forecastStripSuggestion: { fontSize: 13, color: TEXT_SECONDARY, marginTop: 2 },
   needsCareStrip: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'stretch',
     marginHorizontal: 20,
-    marginBottom: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    marginBottom: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: BORDER_RADIUS.md,
     backgroundColor: COLORS.amberBg ?? 'rgba(234, 179, 8, 0.12)',
     borderWidth: 1,
@@ -1185,33 +1457,93 @@ const styles = StyleSheet.create({
   needsCareTitle: { fontSize: 13, fontWeight: '700', color: COLORS.text },
   needsCareSub: { fontSize: 12, color: TEXT_SECONDARY, marginTop: 1 },
   needsCareTap: { fontSize: 12, color: ACCENT, fontWeight: '600' },
-  cockpitSection: { alignItems: 'center', marginBottom: 16, position: 'relative' },
-  cockpitTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 8 },
-  gaugeInfoIcon: { padding: 8, marginLeft: 4 },
-  gaugeInfoIconText: { fontSize: 16, color: '#FFFFFF' },
-  cockpitActionsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
-  ritualEntryRow: {
-    flexDirection: 'row',
+  clusterStatusLine: {
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-    marginTop: 16,
+    marginBottom: 6,
   },
-  ritualEntryBtn: {
-    flexDirection: 'row',
+  clusterStatusText: {
+    fontSize: 12,
+    color: TEXT_MUTED,
+  },
+  pauseRow: {
     alignItems: 'center',
-    gap: 6,
+    marginBottom: 10,
+  },
+  pauseBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
     backgroundColor: CARD_BG,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: BORDER_RADIUS.button,
     borderWidth: 1,
     borderColor: CARD_BORDER,
   },
-  ritualEntryPressed: { opacity: 0.9 },
-  ritualEntryEmoji: { fontSize: 18 },
-  ritualEntryLabel: { fontSize: 14, fontWeight: '600', color: TEXT_PRIMARY },
-  ritualEntryEmergency: { borderColor: COLORS.border },
+  pauseBtnPressed: { opacity: 0.85 },
+  pauseBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: ACCENT,
+  },
+  compassionLine: {
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  helpfulRightNowWrap: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.card,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  },
+  helpfulRightNowPressed: { opacity: 0.92 },
+  helpfulRightNowTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: TEXT_MUTED,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  helpfulRightNowDivider: {
+    height: 1,
+    backgroundColor: CARD_BORDER,
+    marginBottom: 10,
+  },
+  helpfulRightNowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  helpfulRightNowContent: { flex: 1, minWidth: 0 },
+  helpfulRightNowSuggestion: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: TEXT_PRIMARY,
+    marginBottom: 6,
+  },
+  helpfulRightNowCta: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: ACCENT,
+  },
+  helpfulRightNowArrow: { marginLeft: 8 },
+  compassionText: {
+    fontSize: 13,
+    color: TEXT_MUTED,
+    fontStyle: 'italic',
+  },
+  cockpitSection: { alignItems: 'center', marginTop: 4, marginBottom: 16, position: 'relative' },
+  cockpitTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 8 },
+  influencingCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  influencingInfoIcon: { padding: 4 },
+  gaugeInfoIconText: { fontSize: 14, color: COLORS.textMuted },
   moreMenuCard: {
     backgroundColor: CARD_BG,
     borderRadius: 16,
@@ -1385,12 +1717,17 @@ const styles = StyleSheet.create({
   influencingCard: { borderLeftWidth: 4, borderLeftColor: ACCENT, marginHorizontal: 20 },
   influencingShort: { fontSize: 15, color: TEXT_PRIMARY, lineHeight: 22, marginTop: 4 },
   influencingLearn: { marginTop: 10 },
+  primarySuggestionWrap: { marginTop: 12 },
+  suggestedAction: { paddingVertical: 8 },
+  suggestedActionText: { fontSize: 14, fontWeight: '600', color: ACCENT },
+  whatUsuallyHelpsLine: { fontSize: 12, color: COLORS.textMuted, fontStyle: 'italic', marginTop: 4, marginLeft: 0 },
+  patternInsightsWrap: { marginTop: 12, gap: 4 },
+  patternInsightText: { fontSize: 13, color: COLORS.textMuted, fontStyle: 'italic' },
   dailyPerspectiveCard: { marginHorizontal: 20 },
   dailyPerspectiveText: { fontSize: 16, color: TEXT_SECONDARY, lineHeight: 24, fontStyle: 'italic' },
   psychLabel: {
     fontSize: 13,
     color: TEXT_MUTED,
-    marginBottom: 6,
   },
   psychText: {
     fontSize: 16,
@@ -1404,6 +1741,9 @@ const styles = StyleSheet.create({
   weeklyCard: {},
   weeklyLine: { fontSize: 16, color: TEXT_PRIMARY, marginBottom: 8, fontWeight: '500' },
   weeklyMeta: { fontSize: 14, color: TEXT_MUTED },
+  whatHelpedWrap: { marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: COLORS.border },
+  whatHelpedTitle: { fontSize: 13, fontWeight: '600', color: COLORS.textMuted, marginBottom: 8, textTransform: 'uppercase' },
+  whatHelpedItem: { fontSize: 14, color: TEXT_PRIMARY, marginBottom: 4, fontStyle: 'italic' },
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 18, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 8 },
   muted: { fontSize: 15, color: TEXT_MUTED },

@@ -22,6 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { APP_CONFIG } from '../../src/lib/constants';
 
 // Fortune 500 Design System
 const COLORS = {
@@ -230,7 +231,7 @@ export default function SharedInsightPage() {
               colors={['#7C4DFF', '#9E7AFF']}
               style={styles.logoDot}
             />
-            <Text style={styles.logoText}>InGauge</Text>
+            <Text style={styles.logoText}>{APP_CONFIG.name}</Text>
           </View>
         </View>
         
@@ -602,7 +603,7 @@ export default function SharedInsightPage() {
                 colors={['#7C4DFF', '#9E7AFF']}
                 style={styles.footerLogo}
               />
-              <Text style={styles.footerName}>InGauge</Text>
+              <Text style={styles.footerName}>{APP_CONFIG.name}</Text>
             </View>
             <Text style={styles.footerTagline}>The Human Cockpit</Text>
             <Text style={styles.footerDesc}>

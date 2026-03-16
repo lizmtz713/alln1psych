@@ -6,7 +6,14 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "lint": "npx eslint .",
+    "test": "node scripts/run-tests.js",
+    "audit:routes": "node scripts/audit-routes.js",
+    "audit:ownership": "node scripts/audit-route-ownership.js",
+    "audit:structure": "npm run audit:routes && npm run audit:ownership",
+    "audit": "npm run typecheck && npm run audit:structure"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -31,7 +38,7 @@
     "expo-linear-gradient": "~15.0.8",
     "expo-linking": "^8.0.11",
     "expo-localization": "~17.0.8",
-    "expo-location": "~18.0.10",
+    "expo-location": "~19.0.8",
     "expo-notifications": "^0.32.16",
     "expo-router": "^6.0.23",
     "expo-secure-store": "^15.0.8",
@@ -53,8 +60,20 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
-    "@types/react-native": "^0.72.8",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~10.0.0",
     "typescript": "~5.9.2"
+  },
+  "overrides": {
+    "@expo/fingerprint": "0.15.4"
+  },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": ["react-native-health", "expo-av"],
+        "listUnknownPackages": false
+      }
+    }
   },
   "private": true
 }

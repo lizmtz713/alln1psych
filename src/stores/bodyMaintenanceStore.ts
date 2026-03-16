@@ -1,266 +1,345 @@
 /**
- * Body Maintenance store — routines, completions, service providers.
+ * Body Maintenance Schedule — persist completions and custom frequencies.
+ * Everything is editable. Integrates with Body gauge (overdue insight optional).
+ * Also holds user-defined routines and service providers (in-memory + persisted).
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuthStore } from './authStore';
-import type {
-  RoutineItem,
-  ServiceProvider,
-  RoutineCompletion,
-  Frequency,
-  FrequencyType,
-} from '../types/bodyMaintenance';
+import {
+  BODY_MAINTENANCE_CATEGORIES,
+  getMaintenanceItemById,
+  type MaintenanceInterval,
+  type IntervalUnit,
+} from '../data/bodyMaintenance';
+import type { RoutineItem, ServiceProvider, Frequency } from '../types/bodyMaintenance';
 
-function genId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+const LOCAL_USER_ID = 'local';
+
+export interface BodyMaintenancePersist {
+  /** itemId -> last completed date (ISO string) */
+  lastDoneByItemId: Record<string, string>;
+  /** itemId -> user-overridden interval */
+  customIntervalByItemId: Record<string, MaintenanceInterval>;
 }
 
-function nowIso(): string {
-  return new Date().toISOString();
+function addIntervalToDate(date: Date, interval: MaintenanceInterval): Date {
+  const next = new Date(date);
+  const { value, unit } = interval;
+  if (unit === 'days') next.setDate(next.getDate() + value);
+  else if (unit === 'weeks') next.setDate(next.getDate() + value * 7);
+  else if (unit === 'months') next.setMonth(next.getMonth() + value);
+  else if (unit === 'years') next.setFullYear(next.getFullYear() + value);
+  return next;
 }
 
-function addDays(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
+function getIntervalForItem(
+  itemId: string,
+  customByItemId: Record<string, MaintenanceInterval>
+): MaintenanceInterval | null {
+  const custom = customByItemId[itemId];
+  if (custom) return custom;
+  const def = getMaintenanceItemById(itemId);
+  return def?.defaultInterval ?? null;
 }
 
-function addMonths(date: Date, months: number): Date {
-  const d = new Date(date);
-  d.setMonth(d.getMonth() + months);
-  return d;
+/** Compute next due date string from a Frequency and a base date. Used by routine/provider scheduling. */
+export function computeNextDue(frequency: Frequency, fromDate: Date | string): string {
+  const d = typeof fromDate === 'string' ? new Date(fromDate) : fromDate;
+  const t = frequency.type;
+  const v = frequency.value ?? 1;
+  if (t === 'daily') d.setDate(d.getDate() + 1);
+  else if (t === 'every_x_days') d.setDate(d.getDate() + v);
+  else if (t === 'weekly') d.setDate(d.getDate() + 7);
+  else if (t === 'biweekly') d.setDate(d.getDate() + 14);
+  else if (t === 'monthly') d.setMonth(d.getMonth() + 1);
+  else if (t === 'every_x_months') d.setMonth(d.getMonth() + v);
+  else if (t === 'quarterly') d.setMonth(d.getMonth() + 3);
+  else if (t === 'yearly') d.setFullYear(d.getFullYear() + 1);
+  return d.toISOString().slice(0, 10);
 }
 
-/** Compute next due date from frequency and last completed (or today if never). */
-export function computeNextDue(freq: Frequency, lastCompletedIso?: string): string {
-  const from = lastCompletedIso ? new Date(lastCompletedIso) : new Date();
-  let next: Date;
-  switch (freq.type) {
-    case 'daily':
-      next = addDays(from, 1);
-      break;
-    case 'every_x_days':
-      next = addDays(from, Math.max(1, freq.value ?? 1));
-      break;
-    case 'weekly':
-      next = addDays(from, 7);
-      break;
-    case 'biweekly':
-      next = addDays(from, 14);
-      break;
-    case 'monthly':
-      next = addMonths(from, 1);
-      break;
-    case 'every_x_months':
-      next = addMonths(from, Math.max(1, freq.value ?? 1));
-      break;
-    case 'quarterly':
-      next = addMonths(from, 3);
-      break;
-    case 'yearly':
-      next = addMonths(from, 12);
-      break;
-    default:
-      next = addDays(from, 7);
-  }
-  return next.toISOString();
+function computeNextDueFromFrequency(frequency: Frequency, fromDateStr: string): string {
+  return computeNextDue(frequency, new Date(fromDateStr));
 }
 
-interface BodyMaintenanceState {
+export const useBodyMaintenanceStore = create<BodyMaintenancePersist & {
+  markDone: (itemId: string) => void;
+  setCustomInterval: (itemId: string, interval: MaintenanceInterval | null) => void;
+  getLastDone: (itemId: string) => string | undefined;
+  getNextDue: (itemId: string) => Date | null;
+  isOverdue: (itemId: string) => boolean;
+  getInterval: (itemId: string) => MaintenanceInterval | null;
+  getOverdueItems: () => { itemId: string; label: string }[];
+  getTimelineEntries: () => { monthKey: string; monthLabel: string; isOverdue: boolean; items: { itemId: string; label: string }[] }[];
   routines: RoutineItem[];
-  completions: RoutineCompletion[];
   providers: ServiceProvider[];
-
-  addRoutine: (input: Omit<RoutineItem, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'nextDue'>) => RoutineItem;
-  updateRoutine: (id: string, updates: Partial<RoutineItem>) => void;
-  removeRoutine: (id: string) => void;
+  getRoutinesByFrequency: (freq: string) => RoutineItem[];
+  getComingUp: (limit: number) => Array<{ item?: RoutineItem; provider?: ServiceProvider; dueLabel: string; overdueDays?: number }>;
+  completeRoutine: (id: string) => void;
   getRoutine: (id: string) => RoutineItem | undefined;
-  completeRoutine: (routineId: string, notes?: string) => void;
-  snoozeRoutine: (routineId: string, days: number) => void;
-
-  addProvider: (input: Omit<ServiceProvider, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => ServiceProvider;
-  updateProvider: (id: string, updates: Partial<ServiceProvider>) => void;
-  removeProvider: (id: string) => void;
+  snoozeRoutine: (id: string, days?: number) => void;
+  removeRoutine: (id: string) => void;
+  addRoutine: (input: Omit<RoutineItem, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & Partial<Pick<RoutineItem, 'id' | 'lastCompleted' | 'nextDue' | 'notes'>>) => void;
+  addProvider: (input: Omit<ServiceProvider, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & Partial<Pick<ServiceProvider, 'id'>>) => void;
   getProvider: (id: string) => ServiceProvider | undefined;
-
-  getRoutinesByFrequency: (band: 'daily' | 'weekly' | 'monthly' | 'quarterly') => RoutineItem[];
-  getComingUp: (limit: number) => Array<{ item: RoutineItem; dueLabel: string; overdueDays?: number } | { provider: ServiceProvider; dueLabel: string; overdueDays?: number }>;
-  getItemsDueThisWeek: () => RoutineItem[];
-}
-
-const defaultFrequency: Frequency = { type: 'weekly' };
-
-export const useBodyMaintenanceStore = create<BodyMaintenanceState>()(
+  updateProvider: (id: string, patch: Partial<ServiceProvider>) => void;
+  removeProvider: (id: string) => void;
+}>()(
   persist(
     (set, get) => ({
+      lastDoneByItemId: {},
+      customIntervalByItemId: {},
       routines: [],
-      completions: [],
       providers: [],
 
-      addRoutine: (input) => {
-        const userId = useAuthStore.getState().userId ?? 'local';
-        const now = nowIso();
-        const nextDue = computeNextDue(input.frequency, input.lastCompleted);
-        const routine: RoutineItem = {
+      markDone(itemId: string) {
+        const iso = new Date().toISOString().slice(0, 10);
+        set((s) => ({
+          lastDoneByItemId: { ...s.lastDoneByItemId, [itemId]: iso },
+        }));
+      },
+
+      setCustomInterval(itemId: string, interval: MaintenanceInterval | null) {
+        set((s) => {
+          const next = { ...s.customIntervalByItemId };
+          if (interval) next[itemId] = interval;
+          else delete next[itemId];
+          return { customIntervalByItemId: next };
+        });
+      },
+
+      getLastDone(itemId: string) {
+        return get().lastDoneByItemId[itemId];
+      },
+
+      getInterval(itemId: string) {
+        return getIntervalForItem(itemId, get().customIntervalByItemId);
+      },
+
+      getNextDue(itemId: string): Date | null {
+        const last = get().lastDoneByItemId[itemId];
+        const interval = getIntervalForItem(itemId, get().customIntervalByItemId);
+        if (!interval || !last) return null;
+        const from = new Date(last);
+        return addIntervalToDate(from, interval);
+      },
+
+      isOverdue(itemId: string): boolean {
+        const next = get().getNextDue(itemId);
+        if (!next) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        next.setHours(0, 0, 0, 0);
+        return next < today;
+      },
+
+      /** Overdue items for gauge insight (e.g. "You're overdue for a dental cleaning") */
+      getOverdueItems(): { itemId: string; label: string }[] {
+        const out: { itemId: string; label: string }[] = [];
+        for (const cat of BODY_MAINTENANCE_CATEGORIES) {
+          for (const item of cat.items) {
+            if (get().isOverdue(item.id)) out.push({ itemId: item.id, label: item.label });
+          }
+        }
+        return out;
+      },
+
+      /** Timeline: next 6 months + overdue, grouped by month for "Jan: Doctor, Feb: Haircut" */
+      getTimelineEntries(): { monthKey: string; monthLabel: string; isOverdue: boolean; items: { itemId: string; label: string }[] }[] {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const byMonth = new Map<string, { itemId: string; label: string }[]>();
+        const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+        for (const cat of BODY_MAINTENANCE_CATEGORIES) {
+          for (const item of cat.items) {
+            const next = get().getNextDue(item.id);
+            if (!next) continue;
+            const nextNorm = new Date(next);
+            nextNorm.setHours(0, 0, 0, 0);
+            const key = nextNorm.getFullYear() + '-' + String(nextNorm.getMonth()).padStart(2, '0');
+            const monthLabel = months[nextNorm.getMonth()] + ' ' + nextNorm.getFullYear();
+            if (nextNorm < today) {
+              const k = '_overdue';
+              if (!byMonth.has(k)) byMonth.set(k, []);
+              byMonth.get(k)!.push({ itemId: item.id, label: item.label });
+            } else {
+              const end = new Date(today);
+              end.setMonth(end.getMonth() + 6);
+              if (nextNorm <= end) {
+                if (!byMonth.has(key)) byMonth.set(key, []);
+                byMonth.get(key)!.push({ itemId: item.id, label: item.label });
+              }
+            }
+          }
+        }
+        const entries: { monthKey: string; monthLabel: string; isOverdue: boolean; items: { itemId: string; label: string }[] }[] = [];
+        if (byMonth.has('_overdue')) {
+          entries.push({ monthKey: '_overdue', monthLabel: 'Overdue', isOverdue: true, items: byMonth.get('_overdue')! });
+        }
+        const keys = Array.from(byMonth.keys()).filter((k) => k !== '_overdue').sort();
+        for (const key of keys) {
+          const [y, m] = key.split('-').map(Number);
+          entries.push({
+            monthKey: key,
+            monthLabel: months[m] + ' ' + y,
+            isOverdue: false,
+            items: byMonth.get(key)!,
+          });
+        }
+        return entries;
+      },
+
+      getRoutinesByFrequency(freq: string): RoutineItem[] {
+        return get().routines.filter((r) => r.frequency.type === freq);
+      },
+
+      getComingUp(limit: number): Array<{ item?: RoutineItem; provider?: ServiceProvider; dueLabel: string; overdueDays?: number }> {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const entries: Array<{ item?: RoutineItem; provider?: ServiceProvider; dueLabel: string; overdueDays?: number }> = [];
+        for (const r of get().routines) {
+          if (!r.nextDue) continue;
+          const due = new Date(r.nextDue);
+          due.setHours(0, 0, 0, 0);
+          const overdueDays = Math.floor((now.getTime() - due.getTime()) / 86400000);
+          entries.push({
+            item: r,
+            dueLabel: due.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+            overdueDays: overdueDays > 0 ? overdueDays : undefined,
+          });
+        }
+        for (const p of get().providers) {
+          if (!p.nextDue) continue;
+          const due = new Date(p.nextDue);
+          due.setHours(0, 0, 0, 0);
+          const overdueDays = Math.floor((now.getTime() - due.getTime()) / 86400000);
+          entries.push({
+            provider: p,
+            dueLabel: due.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+            overdueDays: overdueDays > 0 ? overdueDays : undefined,
+          });
+        }
+        entries.sort((a, b) => {
+          const aDue = (a.item?.nextDue ?? a.provider?.nextDue) ?? '';
+          const bDue = (b.item?.nextDue ?? b.provider?.nextDue) ?? '';
+          return aDue.localeCompare(bDue);
+        });
+        return entries.slice(0, limit);
+      },
+
+      getRoutine(id: string): RoutineItem | undefined {
+        return get().routines.find((r) => r.id === id);
+      },
+
+      completeRoutine(id: string): void {
+        const r = get().routines.find((x) => x.id === id);
+        if (!r) return;
+        const now = new Date().toISOString().slice(0, 10);
+        const next = computeNextDueFromFrequency(r.frequency, now);
+        set((s) => ({
+          routines: s.routines.map((x) =>
+            x.id === id ? { ...x, lastCompleted: now, nextDue: next, updatedAt: new Date().toISOString() } : x
+          ),
+        }));
+      },
+
+      snoozeRoutine(id: string, days: number = 1): void {
+        const r = get().routines.find((x) => x.id === id);
+        if (!r) return;
+        const d = new Date();
+        d.setDate(d.getDate() + (days ?? 1));
+        const next = d.toISOString().slice(0, 10);
+        set((s) => ({
+          routines: s.routines.map((x) => (x.id === id ? { ...x, nextDue: next, updatedAt: new Date().toISOString() } : x)),
+        }));
+      },
+
+      removeRoutine(id: string): void {
+        set((s) => ({ routines: s.routines.filter((r) => r.id !== id) }));
+      },
+
+      addRoutine(input: Omit<RoutineItem, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & Partial<Pick<RoutineItem, 'id' | 'lastCompleted' | 'nextDue' | 'notes'>>): void {
+        const now = new Date().toISOString();
+        const id = input.id ?? 'r-' + Date.now();
+        const nextDue = input.nextDue ?? computeNextDueFromFrequency(input.frequency, new Date().toISOString().slice(0, 10));
+        const item: RoutineItem = {
           ...input,
-          id: genId(),
-          userId,
-          nextDue,
+          id,
+          userId: LOCAL_USER_ID,
           createdAt: now,
           updatedAt: now,
+          lastCompleted: input.lastCompleted,
+          nextDue,
+          notes: input.notes,
         };
-        set((s) => ({ routines: [...s.routines, routine] }));
-        return routine;
+        set((s) => ({ routines: [...s.routines, item] }));
       },
 
-      updateRoutine: (id, updates) => {
-        const routine = get().routines.find((r) => r.id === id);
-        if (!routine) return;
-        const nextDue = updates.lastCompleted != null || updates.frequency != null
-          ? computeNextDue(updates.frequency ?? routine.frequency, updates.lastCompleted ?? routine.lastCompleted)
-          : updates.nextDue ?? routine.nextDue;
-        set((s) => ({
-          routines: s.routines.map((r) =>
-            r.id === id
-              ? { ...r, ...updates, nextDue, updatedAt: nowIso() }
-              : r
-          ),
-        }));
-      },
-
-      removeRoutine: (id) => {
-        set((s) => ({
-          routines: s.routines.filter((r) => r.id !== id),
-          completions: s.completions.filter((c) => c.routineId !== id),
-        }));
-      },
-
-      getRoutine: (id) => get().routines.find((r) => r.id === id),
-
-      completeRoutine: (routineId, notes) => {
-        const routine = get().getRoutine(routineId);
-        if (!routine) return;
-        const completedAt = nowIso();
-        const completion: RoutineCompletion = {
-          id: genId(),
-          routineId,
-          completedAt,
-          notes,
-        };
-        const nextDue = computeNextDue(routine.frequency, completedAt);
-        const streak = (routine.streak ?? 0) + 1;
-        set((s) => ({
-          completions: [completion, ...s.completions],
-          routines: s.routines.map((r) =>
-            r.id === routineId
-              ? {
-                  ...r,
-                  lastCompleted: completedAt,
-                  nextDue,
-                  streak,
-                  updatedAt: nowIso(),
-                }
-              : r
-          ),
-        }));
-      },
-
-      snoozeRoutine: (routineId, days) => {
-        const routine = get().getRoutine(routineId);
-        if (!routine) return;
-        const currentDue = routine.nextDue ? new Date(routine.nextDue) : new Date();
-        const nextDue = addDays(currentDue, days).toISOString();
-        set((s) => ({
-          routines: s.routines.map((r) =>
-            r.id === routineId ? { ...r, nextDue, updatedAt: nowIso() } : r
-          ),
-        }));
-      },
-
-      addProvider: (input) => {
-        const userId = useAuthStore.getState().userId ?? 'local';
-        const now = nowIso();
+      addProvider(input: Omit<ServiceProvider, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & Partial<Pick<ServiceProvider, 'id'>>): void {
+        const now = new Date().toISOString();
+        const id = input.id ?? 'p-' + Date.now();
         const provider: ServiceProvider = {
           ...input,
-          id: genId(),
-          userId,
+          id,
+          userId: LOCAL_USER_ID,
+          paymentMethods: input.paymentMethods ?? [],
+          reminderEnabled: input.reminderEnabled ?? false,
           createdAt: now,
           updatedAt: now,
         };
         set((s) => ({ providers: [...s.providers, provider] }));
-        return provider;
       },
 
-      updateProvider: (id, updates) => {
+      getProvider(id: string): ServiceProvider | undefined {
+        return get().providers.find((p) => p.id === id);
+      },
+
+      updateProvider(id: string, patch: Partial<ServiceProvider>): void {
+        const now = new Date().toISOString();
         set((s) => ({
-          providers: s.providers.map((p) =>
-            p.id === id ? { ...p, ...updates, updatedAt: nowIso() } : p
-          ),
+          providers: s.providers.map((p) => (p.id === id ? { ...p, ...patch, updatedAt: now } : p)),
         }));
       },
 
-      removeProvider: (id) => {
+      removeProvider(id: string): void {
         set((s) => ({ providers: s.providers.filter((p) => p.id !== id) }));
-      },
-
-      getProvider: (id) => get().providers.find((p) => p.id === id),
-
-      getRoutinesByFrequency: (band) => {
-        const all = get().routines;
-        const map = {
-          daily: ['daily'] as FrequencyType[],
-          weekly: ['weekly', 'biweekly', 'every_x_days'] as FrequencyType[],
-          monthly: ['monthly', 'every_x_months'] as FrequencyType[],
-          quarterly: ['quarterly', 'yearly'] as FrequencyType[],
-        };
-        const types = map[band];
-        return all.filter((r) => types.includes(r.frequency.type));
-      },
-
-      getComingUp: (limit) => {
-        const now = new Date();
-        const items: Array<{ item: RoutineItem; dueLabel: string; overdueDays?: number } | { provider: ServiceProvider; dueLabel: string; overdueDays?: number }> = [];
-
-        get().routines.forEach((r) => {
-          if (!r.nextDue) return;
-          const due = new Date(r.nextDue);
-          const overdueDays = due < now ? Math.ceil((now.getTime() - due.getTime()) / 86400000) : 0;
-          const dueLabel = overdueDays > 0 ? `${overdueDays} day${overdueDays !== 1 ? 's' : ''} overdue` : due.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-          items.push({ item: r, dueLabel, overdueDays: overdueDays > 0 ? overdueDays : undefined });
-        });
-        get().providers.forEach((p) => {
-          if (!p.nextDue) return;
-          const due = new Date(p.nextDue);
-          const overdueDays = due < now ? Math.ceil((now.getTime() - due.getTime()) / 86400000) : 0;
-          const dueLabel = overdueDays > 0 ? `${overdueDays} day${overdueDays !== 1 ? 's' : ''} overdue` : due.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-          items.push({ provider: p, dueLabel, overdueDays: overdueDays > 0 ? overdueDays : undefined });
-        });
-
-        items.sort((a, b) => {
-          const dateA = 'item' in a ? (a.item.nextDue ? new Date(a.item.nextDue).getTime() : 0) : (a.provider.nextDue ? new Date(a.provider.nextDue).getTime() : 0);
-          const dateB = 'item' in b ? (b.item.nextDue ? new Date(b.item.nextDue).getTime() : 0) : (b.provider.nextDue ? new Date(b.provider.nextDue).getTime() : 0);
-          return dateA - dateB;
-        });
-        return items.slice(0, limit);
-      },
-
-      getItemsDueThisWeek: () => {
-        const now = new Date();
-        const weekEnd = addDays(now, 7);
-        return get().routines.filter((r) => {
-          if (!r.nextDue) return false;
-          const d = new Date(r.nextDue);
-          return d >= now && d <= weekEnd;
-        });
       },
     }),
     {
-      name: 'alln1-body-maintenance',
+      name: 'body-maintenance',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (s) => ({ routines: s.routines, completions: s.completions, providers: s.providers }),
+      partialize: (s) => ({
+        lastDoneByItemId: s.lastDoneByItemId,
+        customIntervalByItemId: s.customIntervalByItemId,
+        routines: s.routines,
+        providers: s.providers,
+      }),
     }
   )
 );
+
+/** Format interval for display, e.g. "every 6 months" */
+export function formatInterval(interval: MaintenanceInterval): string {
+  const { value, unit } = interval;
+  if (value === 1 && unit === 'years') return 'yearly';
+  if (value === 1 && unit === 'months') return 'monthly';
+  if (value === 1 && unit === 'weeks') return 'weekly';
+  if (value === 1 && unit === 'days') return 'daily';
+  if (unit === 'years') return `every ${value} years`;
+  if (unit === 'months') return `every ${value} months`;
+  if (unit === 'weeks') return `every ${value} weeks`;
+  if (unit === 'days') return `every ${value} days`;
+  return `${value} ${unit}`;
+}
+
+/** Format next due for display, e.g. "Jan 15" or "Overdue" */
+export function formatNextDue(nextDue: Date | null, isOverdue: boolean): string {
+  if (!nextDue) return 'Not scheduled';
+  if (isOverdue) return 'Overdue';
+  const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec';
+  const m = nextDue.getMonth();
+  const d = nextDue.getDate();
+  return `${months.split(' ')[m]} ${d}`;
+}

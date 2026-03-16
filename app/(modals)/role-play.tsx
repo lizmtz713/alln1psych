@@ -29,6 +29,8 @@ import { ToolCautionModal, StabilizationFooter } from '../../src/components/Stab
 import { PreConversationButton } from '../../src/components/PreConversationButton';
 import { ToolIntro } from '../../src/components/tools/ToolIntro';
 import { getToolIntroContent } from '../../src/data/toolIntroContent';
+import { SIMULATION_DISCLAIMER } from '../../src/data/legalDisclaimers';
+import { useHumanSkillsStore, ROLE_PLAY_SKILL_IDS, SKILL_POINTS } from '../../src/stores/humanSkillsStore';
 
 const ROLE_PLAY_ACCENT = COLORS.rolePlayAccent;
 
@@ -38,9 +40,14 @@ const DIFFICULTY_OPTIONS: { value: RolePlayDifficulty; label: string }[] = [
   { value: 'challenging', label: 'Challenging' },
 ];
 
+/** MVP presets first (relationship repair), then broader scenarios. */
 const QUICK_STARTS = [
-  { scenario: 'Asking my boss for a raise', character: 'My boss', emoji: '💼' },
+  { scenario: 'Apologize and repair', character: 'The person I hurt', emoji: '🙏' },
+  { scenario: 'Ask for repair after a fight', character: 'Partner or family', emoji: '💬' },
+  { scenario: 'Start a hard conversation', character: 'The person', emoji: '🫂' },
+  { scenario: 'Respond to criticism without getting defensive', character: 'Partner or coworker', emoji: '🎯' },
   { scenario: 'Set a boundary with someone', character: 'The person', emoji: '🚧' },
+  { scenario: 'Asking my boss for a raise', character: 'My boss', emoji: '💼' },
   { scenario: 'Have a hard talk with family', character: 'Family member', emoji: '👨\u200d👩\u200d👧' },
   { scenario: 'Practice saying no', character: 'The person asking', emoji: '✋' },
   { scenario: 'Come out to someone', character: 'Family member or friend', emoji: '🏳️‍🌈' },
@@ -315,6 +322,7 @@ export default function RolePlayScreen() {
     if (!hasApiKey) {
       setDebrief("Add your API key in Settings to get personalized debriefs. You did great practicing — that's what matters.");
       setPhase('debrief');
+      useHumanSkillsStore.getState().addPoints(ROLE_PLAY_SKILL_IDS, SKILL_POINTS.conversationSimulation, 'tool');
       return;
     }
     setIsLoading(true);
@@ -328,11 +336,13 @@ export default function RolePlayScreen() {
       );
       setDebrief(transcriptText);
       setPhase('debrief');
+      useHumanSkillsStore.getState().addPoints(ROLE_PLAY_SKILL_IDS, SKILL_POINTS.conversationSimulation, 'tool');
     } catch (e) {
       setDebrief(
         "I couldn't generate a debrief right now, but practicing was still valuable. You showed up — that's what counts."
       );
       setPhase('debrief');
+      useHumanSkillsStore.getState().addPoints(ROLE_PLAY_SKILL_IDS, SKILL_POINTS.conversationSimulation, 'tool');
     } finally {
       setIsLoading(false);
     }
@@ -620,6 +630,7 @@ export default function RolePlayScreen() {
       >
       <Text style={styles.setupTitle}>Practice a conversation</Text>
       <Text style={styles.setupSubtitle}>Pick a scenario or create your own</Text>
+      <Text style={styles.simulationDisclaimer}>{SIMULATION_DISCLAIMER}</Text>
 
       {/* Pre-Conversation Check — optional, not blocking */}
       <PreConversationButton 
@@ -807,6 +818,12 @@ const styles = StyleSheet.create({
   setupSubtitle: {
     fontSize: 15,
     color: COLORS.textSecondary,
+    marginBottom: 8,
+  },
+  simulationDisclaimer: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
     marginBottom: 20,
   },
   setupLabel: {

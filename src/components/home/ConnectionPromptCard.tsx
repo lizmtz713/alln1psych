@@ -61,7 +61,7 @@ export function ConnectionPromptCard({ onPressReachOut }: ConnectionPromptCardPr
       router.push(`/lights/log-entry?id=${encodeURIComponent(priority.id)}`);
     } else {
       onPressReachOut?.();
-      router.push('/(modals)/reach-out-scaffold');
+      router.push('/tools/reach-out');
     }
   };
 

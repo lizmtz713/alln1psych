@@ -1,6 +1,7 @@
-export const GAUGE_CONFIG: Record<string, { label: string; subtitle: string; icon: string; description: string; color: string }> = {
+export const GAUGE_CONFIG: Record<string, { label: string; microLabel: string; subtitle: string; icon: string; description: string; color: string }> = {
   body: {
     label: 'Body',
+    microLabel: 'Energy / health',
     subtitle: 'Sleep · Fuel · Movement',
     icon: '🫀',
     description: 'Your biological regulation. If this is off, everything feels off.',
@@ -8,6 +9,7 @@ export const GAUGE_CONFIG: Record<string, { label: string; subtitle: string; ico
   },
   state: {
     label: 'State',
+    microLabel: 'Stress / calm',
     subtitle: 'Nervous System',
     icon: '⚡',
     description: 'Your nervous system regulation. Calm, alert, threatened, or overstimulated.',
@@ -15,6 +17,7 @@ export const GAUGE_CONFIG: Record<string, { label: string; subtitle: string; ico
   },
   emotion: {
     label: 'Emotion',
+    microLabel: 'Mood / feelings',
     subtitle: 'Emotional Clarity',
     icon: '💎',
     description: 'How clearly you can identify what you actually feel.',
@@ -22,13 +25,15 @@ export const GAUGE_CONFIG: Record<string, { label: string; subtitle: string; ico
   },
   connection: {
     label: 'Connection',
+    microLabel: 'Relationships',
     subtitle: 'Belonging & Support',
     icon: '🤝',
-    description: 'Your sense of belonging, safety, and being seen by others.',
+    description: 'Connection reflects how supported and connected you feel with people.',
     color: '#2DD4BF',
   },
   direction: {
     label: 'Direction',
+    microLabel: 'Purpose / goals',
     subtitle: 'Purpose & Momentum',
     icon: '🧭',
     description: 'Your sense of agency, purpose, and forward movement.',
@@ -36,6 +41,7 @@ export const GAUGE_CONFIG: Record<string, { label: string; subtitle: string; ico
   },
   alignment: {
     label: 'Alignment',
+    microLabel: 'Living my values',
     subtitle: 'Integrity & Congruence',
     icon: '⚖️',
     description: 'Whether your actions match your values.',

@@ -7,7 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '../lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS, APP_CONFIG } from '../lib/constants';
 import type {
   ShareableInsight,
   GaugeStatusInsight,
@@ -145,7 +145,7 @@ function GaugeStatusCard({ insight, compact }: { insight: GaugeStatusInsight; co
       
       {/* Footer */}
       <View style={styles.cardFooter}>
-        <Text style={styles.appBranding}>via InGauge</Text>
+        <Text style={styles.appBranding}>via {APP_CONFIG.name}</Text>
       </View>
     </View>
   );
@@ -226,7 +226,7 @@ function LessonCard({ insight, compact }: { insight: LessonInsight; compact: boo
       
       {/* Footer */}
       <View style={styles.cardFooter}>
-        <Text style={styles.appBranding}>via InGauge Human Manual</Text>
+        <Text style={styles.appBranding}>via {APP_CONFIG.name} Human Manual</Text>
       </View>
     </View>
   );
@@ -298,7 +298,7 @@ function DiscoveryCard({ insight, compact }: { insight: DiscoveryInsight; compac
       
       {/* Footer */}
       <View style={styles.cardFooter}>
-        <Text style={styles.appBranding}>via InGauge 101 Discoveries</Text>
+        <Text style={styles.appBranding}>via {APP_CONFIG.name} 101 Discoveries</Text>
       </View>
     </View>
   );
@@ -392,7 +392,7 @@ function PersonologyCard({ insight, compact }: { insight: PersonologyInsight; co
       
       {/* Footer */}
       <View style={styles.cardFooter}>
-        <Text style={styles.appBranding}>via InGauge Personology</Text>
+        <Text style={styles.appBranding}>via {APP_CONFIG.name} Personology</Text>
       </View>
     </View>
   );

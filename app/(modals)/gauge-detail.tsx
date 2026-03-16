@@ -23,6 +23,7 @@ import { useGeneratedInsights } from '../../src/hooks/useGeneratedInsights';
 import { GeneratedInsightCard } from '../../src/components/insights/GeneratedInsightCard';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../../src/lib/constants';
 import { useSleepStore } from '../../src/stores/sleepStore';
+import { useBodyMaintenanceStore } from '../../src/stores/bodyMaintenanceStore';
 
 // Using design system colors (v2.0 - Oura-inspired)
 const COCKPIT_BG = COLORS.background;
@@ -72,9 +73,9 @@ const GAUGE_DETAIL_CONTENT: Record<
   connection: {
     whatAffects: ['Quality time', 'Feeling heard', 'Conflict', 'Isolation', 'Trust'],
     whatToTry: [
-      { label: 'Check on someone', route: '/(tabs)/circle' },
-      { label: 'Role play a hard conversation', route: '/(modals)/role-play' },
-      { label: 'Help', route: '/(modals)/help-someone' },
+      { label: 'Reach Out', route: '/tools/reach-out' },
+      { label: 'Relational Bridge', route: '/(modals)/relational-bridge' },
+      { label: 'People', route: '/(tabs)/people' },
     ],
     funFact:
       "Social isolation affects the brain like physical pain. Connection isn't a luxury. It's a biological requirement.",
@@ -189,6 +190,33 @@ export default function GaugeDetailScreen() {
             alertText={value >= 0 && value < 30 ? 'PAY ATTENTION' : value >= 0 && value < 50 ? 'NEEDS CARE' : undefined}
           />
           <TrendIndicator trend={trend} />
+          <View style={styles.colorLegend}>
+            <Text style={[styles.colorLegendDot, { backgroundColor: '#34D399' }]} />
+            <Text style={styles.colorLegendText}>Strong / stable</Text>
+            <Text style={[styles.colorLegendDot, { backgroundColor: '#FBBF24' }]} />
+            <Text style={styles.colorLegendText}>Watch</Text>
+            <Text style={[styles.colorLegendDot, { backgroundColor: '#F87171' }]} />
+            <Text style={styles.colorLegendText}>Needs attention</Text>
+          </View>
+        </View>
+
+        {/* Tap insight: short explanation + actions */}
+        <View style={styles.insightCard}>
+          <Text style={styles.insightCardBody}>{config.description}</Text>
+          <Text style={styles.insightCardTitle}>Quick actions</Text>
+          {content.whatToTry.slice(0, 3).map((item, i) => (
+            <Pressable
+              key={item.label}
+              style={({ pressed }) => [styles.insightActionRow, i === 2 && styles.insightActionRowLast, pressed && { opacity: 0.8 }]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push(item.route as any);
+              }}
+            >
+              <Text style={styles.insightActionText}>{item.label}</Text>
+              <Ionicons name="chevron-forward" size={18} color={ACCENT} />
+            </Pressable>
+          ))}
         </View>
 
         <GaugeToolSuggestions gauge={gaugeId} value={value >= 0 ? value : 0} trend={trend} limit={3} />
@@ -211,6 +239,53 @@ export default function GaugeDetailScreen() {
             <Ionicons name="chevron-forward" size={20} color={ACCENT} />
           </View>
         </Pressable>
+
+        {/* Body → Maintenance schedule (human maintenance like a car service) */}
+        {gaugeId === 'body' && (
+          <>
+            {(() => {
+              const getOverdueItems = useBodyMaintenanceStore.getState().getOverdueItems;
+              const overdue = getOverdueItems();
+              if (overdue.length > 0) {
+                return (
+                  <Pressable
+                    style={[styles.card, { borderLeftWidth: 4, borderLeftColor: COLORS.error }]}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      router.push('/(modals)/body-maintenance');
+                    }}
+                  >
+                    <Text style={styles.cardTitle}>Overdue maintenance</Text>
+                    <Text style={[styles.cardBody, { marginBottom: 6 }]}>
+                      {overdue.length === 1
+                        ? `You're overdue for ${overdue[0].label.toLowerCase()}.`
+                        : `You're overdue: ${overdue.slice(0, 3).map((i) => i.label).join(', ')}${overdue.length > 3 ? '…' : ''}.`}
+                    </Text>
+                    <Text style={styles.linkText}>Open Body Maintenance →</Text>
+                  </Pressable>
+                );
+              }
+              return null;
+            })()}
+            <Pressable
+              style={({ pressed }) => [styles.card, pressed && { opacity: 0.9 }]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.push('/(modals)/body-maintenance');
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View>
+                  <Text style={styles.cardTitle}>Maintenance</Text>
+                  <Text style={[styles.cardBody, { marginTop: 4, marginBottom: 0 }]}>
+                    Health, dental, grooming, movement, recovery — track and schedule
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={ACCENT} />
+              </View>
+            </Pressable>
+          </>
+        )}
 
         <GaugeInsight gauge={gaugeId} limit={3} />
 
@@ -444,6 +519,38 @@ const styles = StyleSheet.create({
   gaugeStatusText: { fontSize: 14, color: TEXT_SECONDARY, marginTop: SPACING.sm },
   trendRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 },
   trendText: { fontSize: 14, color: TEXT_SECONDARY },
+  colorLegend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginTop: 16,
+  },
+  colorLegendDot: { width: 8, height: 8, borderRadius: 4 },
+  colorLegendText: { fontSize: 12, color: TEXT_MUTED },
+  insightCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+    borderLeftWidth: 4,
+    borderLeftColor: ACCENT,
+  },
+  insightCardBody: { fontSize: 15, color: TEXT_SECONDARY, lineHeight: 22, marginBottom: 12 },
+  insightCardTitle: { fontSize: 13, fontWeight: '600', color: TEXT_PRIMARY, marginBottom: 8 },
+  insightActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: CARD_BORDER,
+  },
+  insightActionText: { fontSize: 15, color: ACCENT, fontWeight: '500' },
+  insightActionRowLast: { borderBottomWidth: 0 },
   card: {
     backgroundColor: CARD_BG,
     borderRadius: 16,

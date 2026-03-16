@@ -25,8 +25,13 @@ export default function ShareCockpitScreen() {
         <View style={styles.placeholder} />
       </View>
       <View style={styles.placeholderBody}>
-        <Text style={styles.placeholderText}>Cockpit Snapshot screen</Text>
-        <Text style={styles.placeholderSub}>Theme, format, period pickers + card preview + share/save</Text>
+        <Text style={styles.placeholderEmoji}>📊</Text>
+        <Text style={styles.placeholderText}>Share your system snapshot</Text>
+        <Text style={styles.placeholderSub}>Share your current gauges as a card. This screen is being built — for now you can share from Me → Share Snapshot or from the cockpit after a check-in.</Text>
+        <Pressable style={styles.settingsLink} onPress={() => router.push('/(modals)/share-snapshot')}>
+          <Text style={styles.settingsLinkText}>Open Share Snapshot</Text>
+          <Ionicons name="open-outline" size={18} color={COLORS.accent} />
+        </Pressable>
       </View>
     </View>
   );
@@ -47,6 +52,9 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: '600', color: COLORS.text },
   placeholder: { width: 40 },
   placeholderBody: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.xl },
-  placeholderText: { fontSize: 17, color: COLORS.text, marginBottom: 8 },
-  placeholderSub: { fontSize: 13, color: COLORS.textMuted, textAlign: 'center' },
+  placeholderEmoji: { fontSize: 40, marginBottom: 12 },
+  placeholderText: { fontSize: 17, fontWeight: '600', color: COLORS.text, marginBottom: 8, textAlign: 'center' },
+  placeholderSub: { fontSize: 14, color: COLORS.textMuted, textAlign: 'center', marginBottom: 20, lineHeight: 22 },
+  settingsLink: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: 12 },
+  settingsLinkText: { fontSize: 15, fontWeight: '500', color: COLORS.accent },
 });

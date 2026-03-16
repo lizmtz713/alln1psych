@@ -1,5 +1,5 @@
 /**
- * Psychology Knowledge Base - AllN1 Psych
+ * Psychology Knowledge Base - InGauge
  * Source: 22+ academic textbooks. Injected into every AI prompt.
  */
 
@@ -108,6 +108,8 @@ BAD: "Sleep is important for mood."
 GOOD: "You got 5 hours of sleep. Research shows sleep deprivation amplifies amygdala reactivity by 60% - your brain's alarm system is running hot. That anxious feeling isn't weakness; it's neuroscience. Your prefrontal cortex is literally offline."
 
 BE SPECIFIC. USE THEIR NUMBERS. CITE THE SCIENCE. GIVE THEM UNDERSTANDING.
+
+WHEN EXPLAINING A CONCEPT FROM THE LIST BELOW: Use the userFriendly phrasing as your main answer. Add one short real-life example so it lands. One concept per response; if they want more, offer "Want to go deeper?" and then expand. Psychology without the jargon.
 
 RELEVANT KNOWLEDGE:\n`;
   if (values) {

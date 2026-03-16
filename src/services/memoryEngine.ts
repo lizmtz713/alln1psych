@@ -3,7 +3,7 @@
  * Birthday reminders, last time you saw someone, CTAs to reconnect.
  */
 
-import type { Light } from '../types/lights';
+import type { Light, ConnectionEntry } from '../types/lights';
 
 export interface BirthdayReminder {
   light: Light;
@@ -78,13 +78,15 @@ export function getLastTimeMoments(lights: Light[], minDaysAgo: number = 21, max
     if (daysAgo < minDaysAgo) continue;
 
     const activities: string[] = [];
-    for (const e of sorted.slice(0, 3)) {
-      if (e.type === 'in-person' && e.summary) activities.push(e.summary);
-      else if (e.type === 'in-person') activities.push('Got together');
-      else if (e.type === 'video') activities.push('Video call');
-      else if (e.type === 'call' && e.duration != null) activities.push(`${e.duration} min call`);
+    for (const ev of sorted.slice(0, 3)) {
+      const e = ev as ConnectionEntry;
+      const t = e.type as string;
+      if (t === 'in-person' && e.summary) activities.push(e.summary);
+      else if (t === 'in-person') activities.push('Got together');
+      else if (t === 'video') activities.push('Video call');
+      else if (t === 'call' && e.duration != null) activities.push(`${e.duration} min call`);
       else if (e.note && e.note.length <= 30) activities.push(e.note);
-      else if (e.type === 'in-person' || e.type === 'social') activities.push('Hangout');
+      else if (t === 'in-person' || t === 'social') activities.push('Hangout');
     }
     const lastActivities = [...new Set(activities)].slice(0, 3);
     out.push({ light, lastDate, lastActivities, daysAgo });

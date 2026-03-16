@@ -1,0 +1,16 @@
+import { Stack } from 'expo-router';
+import { COLORS } from '../../../src/lib/constants';
+
+export default function SelfDiscoveryLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: COLORS.background },
+      }}
+    >
+      <Stack.Screen name="index" />
+      <Stack.Screen name="[id]" />
+    </Stack>
+  );
+}

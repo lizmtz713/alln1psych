@@ -1,7 +1,8 @@
-import { Tabs } from 'expo-router';
-import { Platform, View, Text, StyleSheet } from 'react-native';
+import { Tabs, usePathname, useRouter } from 'expo-router';
+import { Platform, View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 
 // Human OS — six tabs: Cockpit, Signals (insights), People (relationships), Tools, Manual, Me
@@ -45,11 +46,30 @@ function TabIcon({ focused, color, size, name, focusedName, accentColor }: TabIc
   );
 }
 
+const CONTEXT_LABELS: Record<string, string> = {
+  index: 'Cockpit',
+  signals: 'Signals',
+  people: 'People',
+  tools: 'Tools',
+  learn: 'Manual',
+  me: 'Me',
+};
+
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  
+  const pathname = usePathname();
+  const router = useRouter();
+  const segment = pathname?.replace('/(tabs)/', '')?.split('/')[0] ?? '';
+  const contextScreen = CONTEXT_LABELS[segment] || segment || 'App';
+
+  const openAskGauge = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push(`/(modals)/ask-gauge?contextScreen=${encodeURIComponent(contextScreen)}`);
+  };
+
   return (
     <ErrorBoundary>
+      <View style={styles.tabsWrap}>
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -193,11 +213,31 @@ export default function TabLayout() {
         <Tabs.Screen name="circle" options={{ href: null }} />
         <Tabs.Screen name="lights" options={{ href: null }} />
       </Tabs>
+      <Pressable style={[styles.fab, { bottom: (Platform.OS === 'ios' ? insets.bottom : 8) + 80 }]} onPress={openAskGauge} accessibilityLabel="Ask Gauge">
+        <Ionicons name="chatbubble-ellipses" size={24} color="#fff" />
+      </Pressable>
+      </View>
     </ErrorBoundary>
   );
 }
 
 const styles = StyleSheet.create({
+  tabsWrap: { flex: 1 },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
   iconContainer: {
     width: 40,
     height: 32,

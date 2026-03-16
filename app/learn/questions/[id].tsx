@@ -39,6 +39,7 @@ export default function LifeQuestionDetailScreen() {
   const markCompleted = useLifeQuestionsStore((s) => s.markCompleted);
 
   const [reflection, setReflectionLocal] = useState('');
+  const [expandedHelp, setExpandedHelp] = useState<Record<string, boolean>>({});
   const response = getResponse(questionId);
 
   useEffect(() => {
@@ -99,23 +100,63 @@ export default function LifeQuestionDetailScreen() {
           <Text style={styles.description}>{module.description}</Text>
         </View>
 
+        {(module.whyWeAsk ?? module.timeEstimate ?? module.paceNote) ? (
+          <View style={styles.contextCard}>
+            {module.whyWeAsk ? (
+              <>
+                <Text style={styles.contextLabel}>Why we ask</Text>
+                <Text style={styles.contextText}>{module.whyWeAsk}</Text>
+              </>
+            ) : null}
+            {module.timeEstimate ? (
+              <Text style={styles.timeEstimate}>Rough time: {module.timeEstimate}</Text>
+            ) : null}
+            {module.paceNote ? (
+              <Text style={styles.paceNote}>{module.paceNote}</Text>
+            ) : null}
+          </View>
+        ) : null}
+        {module.whatResearchSays ? (
+          <View style={[styles.contextCard, styles.researchCard]}>
+            <Text style={styles.contextLabel}>What science says</Text>
+            <Text style={styles.contextText}>{module.whatResearchSays}</Text>
+          </View>
+        ) : null}
+
         <Text style={styles.sectionLabel}>PROMPTS</Text>
         {module.prompts.map((p) => (
           <View key={p.id} style={styles.promptCard}>
             <Text style={styles.promptText}>{p.text}</Text>
             {p.hint && <Text style={styles.promptHint}>{p.hint}</Text>}
+            {p.helpText ? (
+              <Pressable
+                style={styles.helpToggle}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setExpandedHelp((prev) => ({ ...prev, [p.id]: !prev[p.id] }));
+                }}
+              >
+                <Text style={styles.helpToggleText}>{expandedHelp[p.id] ? 'Hide help' : 'Need help?'}</Text>
+                <Ionicons name={expandedHelp[p.id] ? 'chevron-up' : 'chevron-down'} size={18} color={COLORS.accent} />
+              </Pressable>
+            ) : null}
+            {p.helpText && expandedHelp[p.id] ? (
+              <Text style={styles.helpText}>{p.helpText}</Text>
+            ) : null}
           </View>
         ))}
 
         <Text style={[styles.sectionLabel, { marginTop: 24 }]}>EXERCISES</Text>
         {module.exercises.map((ex) => {
           const value = getExerciseValue(ex.id);
+          const renderExerciseTip = () => ex.tip ? <Text style={styles.exerciseTip}>💡 {ex.tip}</Text> : null;
           if (ex.type === 'freeform' || ex.type === 'reflection') {
             const text = typeof value === 'string' ? value : '';
             return (
               <View key={ex.id} style={styles.exerciseCard}>
                 <Text style={styles.exerciseTitle}>{ex.title}</Text>
                 <Text style={styles.exerciseInstruction}>{ex.instruction}</Text>
+                {renderExerciseTip()}
                 <TextInput
                   style={styles.input}
                   placeholder={ex.placeholder}
@@ -135,6 +176,7 @@ export default function LifeQuestionDetailScreen() {
               <View key={ex.id} style={styles.exerciseCard}>
                 <Text style={styles.exerciseTitle}>{ex.title}</Text>
                 <Text style={styles.exerciseInstruction}>{ex.instruction}</Text>
+                {renderExerciseTip()}
                 <TextInput
                   style={styles.input}
                   placeholder={ex.placeholder}
@@ -152,6 +194,7 @@ export default function LifeQuestionDetailScreen() {
               <View key={ex.id} style={styles.exerciseCard}>
                 <Text style={styles.exerciseTitle}>{ex.title}</Text>
                 <Text style={styles.exerciseInstruction}>{ex.instruction}</Text>
+                {renderExerciseTip()}
                 <View style={styles.scaleRow}>
                   <Text style={styles.scaleLabel}>{low}</Text>
                   <View style={styles.scaleDots}>
@@ -212,6 +255,23 @@ const styles = StyleSheet.create({
   emoji: { fontSize: 48, marginBottom: SPACING.md },
   title: { ...TYPOGRAPHY.h2, color: TEXT, textAlign: 'center', marginBottom: 8 },
   description: { fontSize: 16, color: TEXT_MUTED, textAlign: 'center', lineHeight: 24 },
+  contextCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.card,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  researchCard: { backgroundColor: COLORS.surfaceElevated ?? CARD_BG },
+  contextLabel: { fontSize: 12, fontWeight: '600', color: COLORS.accent, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 },
+  contextText: { fontSize: 15, color: TEXT_MUTED, lineHeight: 22, marginBottom: 8 },
+  timeEstimate: { fontSize: 13, color: TEXT_MUTED, marginBottom: 4 },
+  paceNote: { fontSize: 13, color: TEXT_MUTED, fontStyle: 'italic', lineHeight: 20 },
+  helpToggle: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10 },
+  helpToggleText: { fontSize: 14, color: COLORS.accent, fontWeight: '500' },
+  helpText: { fontSize: 14, color: TEXT_MUTED, lineHeight: 20, marginTop: 8, fontStyle: 'italic' },
+  exerciseTip: { fontSize: 13, color: COLORS.accent, lineHeight: 18, marginBottom: 10 },
   sectionLabel: {
     fontSize: 12,
     fontWeight: '600',

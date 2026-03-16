@@ -349,7 +349,7 @@ export default function PreFlightScreen() {
             <Text style={styles.headsUpRow}>📅 3 meetings today</Text>
           )}
           {upcomingBirthdays.length > 0 && (
-            <Text style={styles.headsUpRow}>🎂 {upcomingBirthdays[0] ? `${upcomingBirthdays[0].name}'s birthday!` : "A Light's birthday!"}</Text>
+            <Text style={styles.headsUpRow}>🎂 {upcomingBirthdays[0] ? `${upcomingBirthdays[0].name}'s birthday!` : "Someone's birthday!"}</Text>
           )}
           {settings.showCycleInfo && dayOfCycle != null && (
             <Text style={styles.headsUpRow}>🌙 Day {dayOfCycle} of cycle{phase ? ` (${phase})` : ''}</Text>

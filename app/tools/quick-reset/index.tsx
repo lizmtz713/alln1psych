@@ -54,6 +54,13 @@ const EXERCISES = [
     subtitle: 'Release tension through movement.',
     duration: '~1 min',
   },
+  {
+    id: 'short-walk' as const,
+    emoji: '🚶',
+    title: 'Short Walk',
+    subtitle: '2–5 min. Focus on your steps and surroundings.',
+    duration: '2–5 min',
+  },
 ];
 
 export default function QuickResetIndexScreen() {

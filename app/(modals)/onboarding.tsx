@@ -1,20 +1,19 @@
 /**
- * InGauge Onboarding — Human OS flow (~60 sec)
+ * InGauge Onboarding — Simple version (~1 min)
  *
- * 1. Welcome
- * 2. Human System (6 gauges)
- * 3. Your Cockpit
- * 4. Relationships (Signals)
- * 5. Tools + Manual
+ * 1. Hook — Life is complicated... Get Started
+ * 2. Why you're here — Fix message / Feeling / Relationships / Practice / Just explore
+ * 3. Immediate value — Inline taste (tone check, check-in, repair, or explore)
+ * 4. Show the system — Signals, Tools, Learning
+ * 5. Permissions (optional) — Health/Oura, skip
  * 6. Legal & Consent
  * 7. Quick Setup (name, optional age)
- * 8. First Check-In (3 questions → initialize gauges)
- * 9. Enter Cockpit
+ * 8. Cockpit — Your Cockpit is ready + highlight (first check-in or Tone Check)
  *
- * No jargon: momentum, seasons, algorithm, constellation logic.
+ * See docs/ONBOARDING-SIMPLE.md
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -26,15 +25,20 @@ import {
   Linking,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useUserStore } from '../../src/stores/userStore';
+import { APP_CONFIG } from '../../src/lib/constants';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { completeOnboarding as completeOnboardingDb } from '../../src/services/database';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AGE_REQUIREMENT } from '../../src/data/legalDisclaimers';
+import { analyzeToneForMessage } from '../../src/services/ai';
 
 const BG = '#0F0B1E';
 const SURFACE = '#1A1528';
@@ -43,24 +47,26 @@ const ACCENT_LIGHT = '#B388FF';
 const TEXT = '#F5F5F7';
 const TEXT_MUTED = '#9E9E9E';
 
-const CENTER_R = 28;
-const GAUGE_R = 14;
-const ORBIT = 72;
-
 const TERMS_URL = 'https://alln1network.com/terms';
 const PRIVACY_URL = 'https://alln1network.com/privacy';
 const CONSENT_STORAGE_KEY = 'onboarding_legal_consent_at';
 
-const GAUGE_ANGLES: { label: string; angle: number }[] = [
-  { label: 'Body', angle: -90 },
-  { label: 'State', angle: -30 },
-  { label: 'Emotion', angle: 30 },
-  { label: 'Connection', angle: 90 },
-  { label: 'Direction', angle: 150 },
-  { label: 'Alignment', angle: 210 },
+const TOTAL_STEPS = 8;
+
+type WhyChoice = 'fix_message' | 'feeling' | 'relationships' | 'practice' | 'explore' | null;
+const WHY_OPTIONS: { id: WhyChoice; label: string }[] = [
+  { id: 'fix_message', label: 'Fix a message or conversation' },
+  { id: 'feeling', label: 'Understand how I\'m feeling' },
+  { id: 'relationships', label: 'Improve my relationships' },
+  { id: 'practice', label: 'Practice difficult conversations' },
+  { id: 'explore', label: 'Just explore' },
 ];
 
-const TOTAL_STEPS = 9;
+const SYSTEM_CARDS: { icon: string; title: string; subtitle: string }[] = [
+  { icon: '📡', title: 'Signals', subtitle: 'See what\'s happening' },
+  { icon: '🔧', title: 'Tools', subtitle: 'Handle real situations' },
+  { icon: '📚', title: 'Learning', subtitle: 'Build real-life skills' },
+];
 
 // ─── Shared step wrapper ───────────────────────────────────────────────────
 function StepLayout({
@@ -70,6 +76,7 @@ function StepLayout({
   ctaDisabled,
   showBack,
   onBack,
+  hideCta,
 }: {
   children: React.ReactNode;
   onNext: () => void;
@@ -77,6 +84,8 @@ function StepLayout({
   ctaDisabled?: boolean;
   showBack?: boolean;
   onBack?: () => void;
+  /** When true, no Next button — e.g. step advances on option tap */
+  hideCta?: boolean;
 }) {
   return (
     <View style={s.step}>
@@ -92,17 +101,19 @@ function StepLayout({
         </Pressable>
       )}
       {children}
-      <Pressable
-        style={({ pressed }) => [s.cta, (ctaDisabled || pressed) && s.ctaDisabled]}
-        onPress={() => {
-          if (ctaDisabled) return;
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          onNext();
-        }}
-        disabled={ctaDisabled}
-      >
-        <Text style={[s.ctaText, ctaDisabled && s.ctaTextDisabled]}>{ctaLabel}</Text>
-      </Pressable>
+      {!hideCta && (
+        <Pressable
+          style={({ pressed }) => [s.cta, (ctaDisabled || pressed) && s.ctaDisabled]}
+          onPress={() => {
+            if (ctaDisabled) return;
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onNext();
+          }}
+          disabled={ctaDisabled}
+        >
+          <Text style={[s.ctaText, ctaDisabled && s.ctaTextDisabled]}>{ctaLabel}</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -122,14 +133,18 @@ export default function OnboardingScreen() {
   const updateAlignment = useCockpitStore((s) => s.updateAlignment);
   const setLastCheckInDate = useCockpitStore((s) => s.setLastCheckInDate);
 
+  const [whyChoice, setWhyChoice] = useState<WhyChoice>(null);
+  const [toneMessage, setToneMessage] = useState('');
+  const [toneResult, setToneResult] = useState<{ tone: string; possibleImpact: string; alternativePhrasing: string } | null>(null);
+  const [toneAnalyzing, setToneAnalyzing] = useState(false);
+  const [feelingQuick, setFeelingQuick] = useState<'good' | 'okay' | 'low' | null>(null);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeHealth, setAgreeHealth] = useState(false);
+  const [agreeAI, setAgreeAI] = useState(false);
+  const [agreeAge, setAgreeAge] = useState(false);
   const [quickName, setQuickName] = useState(() => useUserStore.getState().name ?? '');
   const [quickBirthYear, setQuickBirthYear] = useState('');
-  const [sleepAnswer, setSleepAnswer] = useState<'good' | 'okay' | 'poor' | null>(null);
-  const [feelingAnswer, setFeelingAnswer] = useState<'good' | 'okay' | 'low' | null>(null);
-  const [onMindAnswer, setOnMindAnswer] = useState<'yes' | 'abit' | 'no' | null>(null);
 
   const goNext = () => {
     if (step === TOTAL_STEPS - 1) {
@@ -178,29 +193,51 @@ export default function OnboardingScreen() {
         if (__DEV__) console.warn('Onboarding DB complete failed:', e);
       }
     }
-    if (agreeTerms && agreePrivacy && agreeHealth) {
+    if (agreeTerms && agreePrivacy && agreeHealth && agreeAI && agreeAge) {
       await AsyncStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
+    }
+    if (feelingQuick == null) {
+      updateBody(50);
+      updateState(50);
+      updateEmotion(50);
+      updateConnection(50);
+      updateDirection(50);
+      updateAlignment(50);
     }
     completeOnboarding();
     requestAnimationFrame(() => router.replace('/(tabs)'));
   };
 
-  const applyFirstCheckIn = () => {
-    const bodyScore = sleepAnswer === 'good' ? 75 : sleepAnswer === 'okay' ? 50 : 25;
-    const stateScore = feelingAnswer === 'good' ? 70 : feelingAnswer === 'okay' ? 50 : 30;
-    const directionScore = onMindAnswer === 'yes' ? 45 : onMindAnswer === 'abit' ? 60 : 75;
-    updateBody(sleepAnswer != null ? bodyScore : 50);
-    updateState(feelingAnswer != null ? stateScore : 50);
-    updateEmotion(feelingAnswer != null ? stateScore : 50);
+  const runToneCheck = useCallback(async () => {
+    const text = toneMessage.trim();
+    if (!text) return;
+    setToneAnalyzing(true);
+    setToneResult(null);
+    try {
+      const res = await analyzeToneForMessage(text);
+      if (res) setToneResult(res);
+      else Alert.alert('Need API key', 'Add your OpenAI key in Me → Bring Your Own Key to use Tone Check.');
+    } catch (e) {
+      Alert.alert('Something went wrong', 'Try again or skip for now.');
+    } finally {
+      setToneAnalyzing(false);
+    }
+  }, [toneMessage]);
+
+  const applyFeelingToGauges = useCallback(() => {
+    if (feelingQuick == null) return;
+    const s = feelingQuick === 'good' ? 70 : feelingQuick === 'okay' ? 50 : 30;
+    updateState(s);
+    updateEmotion(s);
+    updateBody(50);
     updateConnection(50);
-    updateDirection(onMindAnswer != null ? directionScore : 50);
+    updateDirection(50);
     updateAlignment(50);
     setLastCheckInDate(new Date().toISOString().slice(0, 10));
-  };
+  }, [feelingQuick, updateState, updateEmotion, updateBody, updateConnection, updateDirection, updateAlignment, setLastCheckInDate]);
 
-  const canProceedLegal = agreeTerms && agreePrivacy && agreeHealth;
-  const canProceedSetup = (quickName ?? '').trim().length > 0;
-  const canProceedCheckIn = sleepAnswer != null && feelingAnswer != null && onMindAnswer != null;
+  const canProceedLegal = agreeTerms && agreePrivacy && agreeHealth && agreeAI && agreeAge;
+  const canProceedSetup = true;
 
   return (
     <KeyboardAvoidingView
@@ -221,107 +258,128 @@ export default function OnboardingScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Animated.View style={[s.content, { opacity: fade }]}>
-          {/* 1. Welcome */}
+          {/* 1. Hook */}
           {step === 0 && (
-            <StepLayout onNext={goNext} ctaLabel="Begin">
+            <StepLayout onNext={goNext} ctaLabel="Get Started">
               <View style={s.visualWrap}>
-                <Text style={s.welcomeEmoji}>✈️</Text>
-                <Text style={s.title}>Welcome to your Human Operating System.</Text>
-                <Text style={s.subtitle}>
-                  Understand yourself, strengthen relationships, and navigate life with clarity.
-                </Text>
-                <Text style={s.muted}>Built using psychology, behavioral science, and systems thinking.</Text>
+                <Text style={s.title}>Life is complicated.</Text>
+                <Text style={s.subtitle}>Most people were never taught how to navigate it.</Text>
+                <Text style={s.muted}>InGauge helps you understand yourself, handle difficult conversations, and improve relationships.</Text>
               </View>
             </StepLayout>
           )}
 
-          {/* 2. Human System */}
+          {/* 2. Why you're here — tap option → go to step 2 immediately (one fewer tap) */}
           {step === 1 && (
-            <StepLayout onNext={goNext} ctaLabel="Next" showBack onBack={goBack}>
-              <View style={s.visualWrap}>
-                <View style={s.hexWrap}>
-                  {GAUGE_ANGLES.map(({ label, angle }, i) => {
-                    const rad = (angle * Math.PI) / 180;
-                    const x = ORBIT + Math.cos(rad) * ORBIT - GAUGE_R;
-                    const y = ORBIT + Math.sin(rad) * ORBIT - GAUGE_R;
-                    return (
-                      <View
-                        key={i}
-                        style={[s.gaugeNode, { left: x, top: y, width: GAUGE_R * 2, height: GAUGE_R * 2, borderRadius: GAUGE_R }]}
-                      >
-                        <Text style={s.gaugeNodeLabel}>{label}</Text>
-                      </View>
-                    );
-                  })}
-                </View>
-                <Text style={s.title}>Every human system runs on six core signals.</Text>
-                <Text style={s.subtitle}>InGauge helps you understand and balance them.</Text>
+            <StepLayout onNext={goNext} ctaLabel="Next" showBack onBack={goBack} hideCta>
+              <Text style={s.title}>What would help you most right now?</Text>
+              <View style={s.whyList}>
+                {WHY_OPTIONS.map((opt) => (
+                  <Pressable
+                    key={opt.id ?? 'explore'}
+                    style={[s.whyCard, whyChoice === opt.id && s.whyCardActive]}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setWhyChoice(opt.id);
+                      goNext();
+                    }}
+                  >
+                    <Text style={[s.whyCardText, whyChoice === opt.id && s.whyCardTextActive]}>{opt.label}</Text>
+                  </Pressable>
+                ))}
               </View>
             </StepLayout>
           )}
 
-          {/* 3. Your Cockpit */}
+          {/* 3. Immediate value */}
           {step === 2 && (
-            <StepLayout onNext={goNext} ctaLabel="Next" showBack onBack={goBack}>
-              <View style={s.visualWrap}>
-                <View style={s.hexWrap}>
-                  <View style={[s.centerNode, { left: ORBIT + CENTER_R - CENTER_R, top: ORBIT + CENTER_R - CENTER_R, width: CENTER_R * 2, height: CENTER_R * 2, borderRadius: CENTER_R }]}>
-                    <Text style={s.centerLabel}>SYSTEM</Text>
+            <StepLayout
+              onNext={() => { if (whyChoice === 'feeling' && feelingQuick != null) applyFeelingToGauges(); goNext(); }}
+              ctaLabel="Next"
+              ctaDisabled={toneAnalyzing}
+              showBack
+              onBack={goBack}
+            >
+              {whyChoice === 'fix_message' && (
+                <>
+                  <Text style={s.title}>Paste the message you're about to send.</Text>
+                  <TextInput
+                    style={s.toneInput}
+                    placeholder="e.g. Why didn't you respond earlier?"
+                    placeholderTextColor={TEXT_MUTED}
+                    value={toneMessage}
+                    onChangeText={setToneMessage}
+                    multiline
+                  />
+                  <Pressable style={[s.toneBtn, (!toneMessage.trim() || toneAnalyzing) && s.ctaDisabled]} onPress={runToneCheck} disabled={!toneMessage.trim() || toneAnalyzing}>
+                    {toneAnalyzing ? <ActivityIndicator size="small" color="#fff" /> : <Text style={s.ctaText}>See tone feedback</Text>}
+                  </Pressable>
+                  {toneResult && (
+                    <View style={s.toneResult}>
+                      <Text style={s.toneResultLabel}>How it may sound</Text>
+                      <Text style={s.toneResultText}>{toneResult.tone}</Text>
+                      <Text style={s.toneResultLabel}>Try this instead</Text>
+                      <Text style={s.toneResultAlt}>{toneResult.alternativePhrasing}</Text>
+                    </View>
+                  )}
+                </>
+              )}
+              {whyChoice === 'feeling' && (
+                <>
+                  <Text style={s.title}>How are you doing right now?</Text>
+                  <View style={s.chipRow}>
+                    {(['good', 'okay', 'low'] as const).map((v) => (
+                      <Pressable key={v} style={[s.chip, feelingQuick === v && s.chipActive]} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setFeelingQuick(v); }}>
+                        <Text style={[s.chipText, feelingQuick === v && s.chipTextActive]}>{v === 'good' ? 'Good' : v === 'okay' ? 'Okay' : 'Low'}</Text>
+                      </Pressable>
+                    ))}
                   </View>
-                  {GAUGE_ANGLES.map(({ label, angle }, i) => {
-                    const rad = (angle * Math.PI) / 180;
-                    const x = ORBIT + Math.cos(rad) * ORBIT - GAUGE_R;
-                    const y = ORBIT + Math.sin(rad) * ORBIT - GAUGE_R;
-                    return (
-                      <View key={i} style={[s.gaugeNode, { left: x, top: y, width: GAUGE_R * 2, height: GAUGE_R * 2, borderRadius: GAUGE_R }]}>
-                        <Text style={s.gaugeNodeLabel}>{label}</Text>
-                      </View>
-                    );
-                  })}
-                </View>
-                <Text style={s.title}>The Cockpit shows how your system is doing in one glance.</Text>
-                <Text style={s.subtitle}>Check in, understand patterns, and see what matters today.</Text>
-              </View>
+                  <Text style={s.muted}>We'll use this to set your gauges. You can check in anytime from the Cockpit.</Text>
+                </>
+              )}
+              {whyChoice === 'relationships' && (
+                <>
+                  <Text style={s.title}>Improve my relationships</Text>
+                  <Text style={s.subtitle}>In Tools you'll find Repair Builder and Conversation Builder — they help you turn conflict into clear, respectful messages.</Text>
+                  <Text style={s.muted}>You'll try them right after this.</Text>
+                </>
+              )}
+              {whyChoice === 'practice' && (
+                <>
+                  <Text style={s.title}>Practice difficult conversations</Text>
+                  <Text style={s.subtitle}>Role Play lets you rehearse: start a hard conversation, apologize, ask for help, or set a boundary. Find it in Tools.</Text>
+                </>
+              )}
+              {whyChoice === 'explore' && (
+                <Text style={s.subtitle}>You can explore the Cockpit, Tools, and Learn at your own pace.</Text>
+              )}
             </StepLayout>
           )}
 
-          {/* 4. Relationships */}
+          {/* 4. Show the system — visual mini cards so people remember */}
           {step === 3 && (
             <StepLayout onNext={goNext} ctaLabel="Next" showBack onBack={goBack}>
-              <View style={s.visualWrap}>
-                <View style={s.constellationWrap}>
-                  <View style={s.constellationCenter}><Text style={s.centerLabel}>YOU</Text></View>
-                  {[0, 1, 2].map((i) => {
-                    const angle = i * 120 - 90;
-                    const rad = (angle * Math.PI) / 180;
-                    const x = 80 + Math.cos(rad) * 70 - 18;
-                    const y = 80 + Math.sin(rad) * 70 - 18;
-                    return (
-                      <View key={i} style={[s.orbitNode, { left: x, top: y }]}>
-                        <Text style={s.orbitLabel}>•</Text>
-                      </View>
-                    );
-                  })}
-                </View>
-                <Text style={s.title}>Relationships shape your human system.</Text>
-                <Text style={s.subtitle}>InGauge helps you notice who matters and stay connected.</Text>
+              <Text style={s.title}>InGauge helps you navigate life using three things:</Text>
+              <View style={s.systemCardList}>
+                {SYSTEM_CARDS.map((card) => (
+                  <View key={card.title} style={s.systemCard}>
+                    <Text style={s.systemCardIcon}>{card.icon}</Text>
+                    <View style={s.systemCardBody}>
+                      <Text style={s.systemCardTitle}>{card.title}</Text>
+                      <Text style={s.systemCardSubtitle}>{card.subtitle}</Text>
+                    </View>
+                  </View>
+                ))}
               </View>
+              <Text style={s.muted}>Your Cockpit and tabs connect all three.</Text>
             </StepLayout>
           )}
 
-          {/* 5. Tools + Manual */}
+          {/* 5. Permissions (optional) */}
           {step === 4 && (
-            <StepLayout onNext={goNext} ctaLabel="Next" showBack onBack={goBack}>
-              <View style={s.visualWrap}>
-                <Text style={s.title}>When life gets complicated, InGauge helps.</Text>
-                <View style={s.bulletList}>
-                  <Text style={s.bullet}>• Decode conversations</Text>
-                  <Text style={s.bullet}>• Resolve conflict</Text>
-                  <Text style={s.bullet}>• Understand emotions</Text>
-                  <Text style={s.bullet}>• Learn the science of being human</Text>
-                </View>
-                <Text style={s.subtitle}>Tools and the Manual are there when you need them.</Text>
-              </View>
+            <StepLayout onNext={goNext} ctaLabel="Skip for now" showBack onBack={goBack}>
+              <Text style={s.title}>Connect Apple Health or Oura?</Text>
+              <Text style={s.subtitle}>Your signals help us suggest the right tools. You can connect later in Me → Preferences.</Text>
             </StepLayout>
           )}
 
@@ -331,9 +389,9 @@ export default function OnboardingScreen() {
               <Text style={s.legalTitle}>Before we begin</Text>
               <View style={s.legalScroll}>
                 <Text style={s.legalSection}>Privacy</Text>
-                <Text style={s.legalBody}>InGauge stores your personal data privately and securely. Your information is never sold.</Text>
+                <Text style={s.legalBody}>{APP_CONFIG.name} stores your personal data privately and securely. Your information is never sold.</Text>
                 <Text style={s.legalSection}>Health Disclaimer</Text>
-                <Text style={s.legalBody}>InGauge provides insights and educational tools but is not medical or psychological advice. This app does not replace professional medical or mental health care.</Text>
+                <Text style={s.legalBody}>{APP_CONFIG.name} provides insights and educational tools but is not medical or psychological advice. This app does not replace professional medical or mental health care.</Text>
                 <Text style={s.legalSection}>Data Use</Text>
                 <Text style={s.legalBody}>Your data may be used to generate insights and improve the system. You can export your data from settings.</Text>
                 <View style={s.checkboxRow}>
@@ -360,18 +418,30 @@ export default function OnboardingScreen() {
                   </Pressable>
                   <Text style={s.checkboxLabel}>I understand this app does not replace professional medical or mental health care.</Text>
                 </View>
+                <View style={s.checkboxRow}>
+                  <Pressable style={s.checkbox} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setAgreeAI((v: boolean) => !v); }}>
+                    <Text style={s.checkboxText}>{agreeAI ? '✓' : ' '}</Text>
+                  </Pressable>
+                  <Text style={s.checkboxLabel}>I understand AI responses may not always be accurate and are not professional advice.</Text>
+                </View>
+                <View style={s.checkboxRow}>
+                  <Pressable style={s.checkbox} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setAgreeAge((v: boolean) => !v); }}>
+                    <Text style={s.checkboxText}>{agreeAge ? '✓' : ' '}</Text>
+                  </Pressable>
+                  <Text style={s.checkboxLabel}>{AGE_REQUIREMENT.checkboxLabel}</Text>
+                </View>
               </View>
             </StepLayout>
           )}
 
           {/* 7. Quick Setup */}
           {step === 6 && (
-            <StepLayout onNext={goNext} ctaLabel="Next" ctaDisabled={!canProceedSetup} showBack onBack={goBack}>
+            <StepLayout onNext={goNext} ctaLabel="Next" showBack onBack={goBack}>
               <Text style={s.title}>Quick setup</Text>
               <Text style={s.subtitle}>Only what we need to get started.</Text>
               <TextInput
                 style={s.input}
-                placeholder="Your name"
+                placeholder="Your name (optional)"
                 placeholderTextColor={TEXT_MUTED}
                 value={quickName}
                 onChangeText={setQuickName}
@@ -390,54 +460,13 @@ export default function OnboardingScreen() {
             </StepLayout>
           )}
 
-          {/* 8. First Check-In */}
+          {/* 8. Cockpit */}
           {step === 7 && (
-            <StepLayout
-              onNext={() => {
-                applyFirstCheckIn();
-                goNext();
-              }}
-              ctaLabel="Next"
-              ctaDisabled={!canProceedCheckIn}
-              showBack
-              onBack={goBack}
-            >
-              <Text style={s.title}>First check-in</Text>
-              <Text style={s.subtitle}>Three quick questions to initialize your Cockpit.</Text>
-              <Text style={s.question}>How did you sleep?</Text>
-              <View style={s.chipRow}>
-                {(['good', 'okay', 'poor'] as const).map((v) => (
-                  <Pressable key={v} style={[s.chip, sleepAnswer === v && s.chipActive]} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSleepAnswer(v); }}>
-                    <Text style={[s.chipText, sleepAnswer === v && s.chipTextActive]}>{v === 'good' ? 'Good' : v === 'okay' ? 'Okay' : 'Poor'}</Text>
-                  </Pressable>
-                ))}
-              </View>
-              <Text style={s.question}>How are you feeling?</Text>
-              <View style={s.chipRow}>
-                {(['good', 'okay', 'low'] as const).map((v) => (
-                  <Pressable key={v} style={[s.chip, feelingAnswer === v && s.chipActive]} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setFeelingAnswer(v); }}>
-                    <Text style={[s.chipText, feelingAnswer === v && s.chipTextActive]}>{v === 'good' ? 'Good' : v === 'okay' ? 'Okay' : 'Low'}</Text>
-                  </Pressable>
-                ))}
-              </View>
-              <Text style={s.question}>Anything on your mind today?</Text>
-              <View style={s.chipRow}>
-                {(['yes', 'abit', 'no'] as const).map((v) => (
-                  <Pressable key={v} style={[s.chip, onMindAnswer === v && s.chipActive]} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setOnMindAnswer(v); }}>
-                    <Text style={[s.chipText, onMindAnswer === v && s.chipTextActive]}>{v === 'yes' ? 'Yes' : v === 'abit' ? 'A bit' : 'No'}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </StepLayout>
-          )}
-
-          {/* 9. Enter Cockpit */}
-          {step === 8 && (
             <StepLayout onNext={finishOnboarding} ctaLabel="Open Cockpit" showBack onBack={goBack}>
               <View style={s.visualWrap}>
                 <Text style={s.welcomeEmoji}>🌡️</Text>
                 <Text style={s.title}>Your Cockpit is ready.</Text>
-                <Text style={s.subtitle}>You'll see your six gauges and what matters today.</Text>
+                <Text style={s.subtitle}>Try your first check-in, or need help with a message? You'll find both from the dashboard.</Text>
               </View>
             </StepLayout>
           )}
@@ -462,22 +491,41 @@ const s = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', color: TEXT, textAlign: 'center', marginBottom: 10, lineHeight: 28 },
   subtitle: { fontSize: 15, color: TEXT_MUTED, textAlign: 'center', lineHeight: 22, marginBottom: 8 },
   muted: { fontSize: 13, color: TEXT_MUTED, fontStyle: 'italic', marginTop: 4 },
+  reframe: { fontSize: 12, color: TEXT_MUTED, fontStyle: 'italic', marginTop: 12, textAlign: 'center', paddingHorizontal: 8 },
   cta: { marginTop: 24, paddingVertical: 16, paddingHorizontal: 32, borderRadius: 24, backgroundColor: ACCENT, minWidth: 200, alignItems: 'center' },
   ctaDisabled: { opacity: 0.5 },
   ctaText: { fontSize: 17, fontWeight: '700', color: '#FFF' },
   ctaTextDisabled: { color: '#AAA' },
   welcomeEmoji: { fontSize: 48, marginBottom: 16 },
-  hexWrap: { width: ORBIT * 2 + GAUGE_R * 4, height: ORBIT * 2 + GAUGE_R * 4, position: 'relative', marginBottom: 20 },
-  centerNode: { position: 'absolute', backgroundColor: ACCENT, alignItems: 'center', justifyContent: 'center' },
-  centerLabel: { fontSize: 10, fontWeight: '700', color: '#FFF' },
-  gaugeNode: { position: 'absolute', backgroundColor: SURFACE, borderWidth: 1.5, borderColor: ACCENT + '80', alignItems: 'center', justifyContent: 'center' },
-  gaugeNodeLabel: { fontSize: 9, color: TEXT, fontWeight: '600' },
-  constellationWrap: { width: 160, height: 160, position: 'relative', marginBottom: 20 },
-  constellationCenter: { position: 'absolute', left: 64, top: 64, width: 32, height: 32, borderRadius: 16, backgroundColor: ACCENT, alignItems: 'center', justifyContent: 'center' },
-  orbitNode: { position: 'absolute', width: 36, height: 36, borderRadius: 18, backgroundColor: SURFACE, borderWidth: 1, borderColor: ACCENT + '60', alignItems: 'center', justifyContent: 'center' },
-  orbitLabel: { fontSize: 18, color: TEXT },
-  bulletList: { alignSelf: 'stretch', marginVertical: 12 },
-  bullet: { fontSize: 15, color: TEXT_MUTED, marginBottom: 6 },
+  whyList: { width: '100%', marginTop: 16, gap: 10 },
+  whyCard: { paddingVertical: 14, paddingHorizontal: 18, borderRadius: 12, backgroundColor: SURFACE, borderWidth: 1, borderColor: TEXT_MUTED + '40', marginBottom: 8 },
+  whyCardActive: { borderColor: ACCENT, backgroundColor: ACCENT + '18' },
+  whyCardText: { fontSize: 15, color: TEXT },
+  whyCardTextActive: { color: ACCENT_LIGHT, fontWeight: '600' },
+  toneInput: { width: '100%', backgroundColor: SURFACE, borderRadius: 12, borderWidth: 1, borderColor: ACCENT + '50', padding: 14, fontSize: 15, color: TEXT, minHeight: 80, marginTop: 12 },
+  toneBtn: { marginTop: 12, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 24, backgroundColor: ACCENT, alignItems: 'center' },
+  toneResult: { marginTop: 16, padding: 14, backgroundColor: SURFACE, borderRadius: 12, borderLeftWidth: 4, borderLeftColor: ACCENT },
+  toneResultLabel: { fontSize: 11, fontWeight: '700', color: TEXT_MUTED, marginBottom: 4 },
+  toneResultText: { fontSize: 15, color: TEXT, marginBottom: 8 },
+  toneResultAlt: { fontSize: 14, fontStyle: 'italic', color: ACCENT_LIGHT },
+  systemList: { width: '100%', marginTop: 16 },
+  systemItem: { fontSize: 15, color: TEXT, marginBottom: 12, lineHeight: 22 },
+  systemBold: { fontWeight: '700', color: TEXT },
+  systemCardList: { width: '100%', marginTop: 16, gap: 10 },
+  systemCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: SURFACE,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: TEXT_MUTED + '40',
+  },
+  systemCardIcon: { fontSize: 28, marginRight: 14 },
+  systemCardBody: { flex: 1 },
+  systemCardTitle: { fontSize: 16, fontWeight: '700', color: TEXT, marginBottom: 2 },
+  systemCardSubtitle: { fontSize: 14, color: TEXT_MUTED },
   legalTitle: { fontSize: 20, fontWeight: '700', color: TEXT, marginBottom: 16, textAlign: 'center' },
   legalScroll: { marginBottom: 16 },
   legalSection: { fontSize: 14, fontWeight: '700', color: ACCENT_LIGHT, marginTop: 12, marginBottom: 4 },

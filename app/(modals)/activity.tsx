@@ -29,7 +29,7 @@ import { BODY_ZONES } from '../../src/data/bodyScan';
 import { useJournalStore } from '../../src/stores/journalStore';
 import { useGratitudeStore } from '../../src/stores/gratitudeStore';
 import { useUserStore } from '../../src/stores/userStore';
-import { getOpenAIKey } from '../../src/services/ai';
+import { sendMessageWithSystemPromptOnly } from '../../src/services/ai';
 import { useCircleStore } from '../../src/stores/circleStore';
 import type { Temperature } from '../../src/stores/circleStore';
 import { trackCheckIn } from '../../src/hooks/useWrappedTracking';
@@ -56,23 +56,41 @@ Respond in JSON format only, no markdown:
 async function fetchThoughtChallengerStep(
   messages: { role: string; content: string }[]
 ): Promise<{ step: number; distortion?: string; message: string; reframe?: string; action?: string }> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) throw new Error('OpenAI API key not configured');
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'system', content: THOUGHT_CHALLENGER_SYSTEM }, ...messages],
-      max_tokens: 400,
-      temperature: 0.7,
-    }),
-  });
-  if (!res.ok) throw new Error(await res.text());
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const text = data.choices?.[0]?.message?.content?.trim() ?? '';
-  const parsed = JSON.parse(text) as { step: number; distortion?: string; message: string; reframe?: string; action?: string };
+  const msgList = messages.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+  const text = await sendMessageWithSystemPromptOnly(msgList, THOUGHT_CHALLENGER_SYSTEM, 400);
+  const cleaned = text.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}');
+  const parsed = JSON.parse(cleaned) as { step: number; distortion?: string; message: string; reframe?: string; action?: string };
   return parsed;
+}
+
+/** Non-AI fallback so thought challenger still helps when API is unavailable (CBT-based). */
+function thoughtChallengerFallback(
+  step: number,
+  thought: string,
+  _messages: { role: string; content: string }[]
+): { step: number; distortion?: string; message: string; reframe?: string; action?: string } {
+  if (step <= 1) {
+    return {
+      step: 1,
+      distortion: 'Possible unhelpful thinking pattern',
+      message: "Thoughts aren't facts. One question that helps: 'What would I tell a friend who had this thought?' Or: 'What's the evidence for and against this thought?' Take a breath, then try answering one of those.",
+    };
+  }
+  if (step === 2) {
+    return { step: 2, message: "No pressure to get it 'right.' What came up when you considered the evidence or what you'd tell a friend?" };
+  }
+  if (step === 3) {
+    return {
+      step: 3,
+      message: "Here's a gentler way to hold the same situation.",
+      reframe: thought.replace(/^I (am|can't|will never|always)/i, 'Right now it feels like I $1').replace(/\b(never|always|everyone|no one)\b/gi, 'sometimes') || thought,
+    };
+  }
+  return {
+    step: 4,
+    message: "One small step that often helps.",
+    action: "Do one thing that grounds you (e.g. 4-7-8 breath, or text one person you trust), or write the reframed thought down.",
+  };
 }
 
 // ----- Emotion Match scenarios (20 total, show 10 per session) -----
@@ -205,7 +223,7 @@ export default function ActivityScreen() {
   const convMessages = useConversationStore((s) => s.messages);
   const completedLessons = useEducationStore((s) => s.completedLessons);
 
-  // Fetch mood-patterns AI insights when viewing that activity
+  // Fetch mood-patterns AI insights when viewing that activity (uses central AI service)
   useEffect(() => {
     if (activity?.id !== 'mood-patterns') return;
     let cancelled = false;
@@ -216,28 +234,15 @@ export default function ActivityScreen() {
           const t = new Date(e.timestamp).getTime();
           return t >= Date.now() - 30 * 86400000;
         }).map((e) => ({ date: new Date(e.timestamp).toLocaleDateString(), mood: e.mood, note: e.note }));
-        const apiKey = await getOpenAIKey();
-        if (cancelled || !apiKey || last30.length === 0) {
+        if (cancelled || last30.length === 0) {
           if (!cancelled) setMpInsights(null);
           return;
         }
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [{
-              role: 'system',
-              content: `Analyze this user's mood data for the last 30 days. Data: ${JSON.stringify(last30)}. Provide 3 insights as JSON: { "pattern": "...", "positive": "...", "suggestion": "..." }. Be encouraging.`,
-            }, { role: 'user', content: 'Analyze.' }],
-            max_tokens: 350,
-            temperature: 0.6,
-          }),
-        });
-        if (!res.ok || cancelled) return;
-        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-        const text = data.choices?.[0]?.message?.content?.trim() ?? '';
-        const parsed = JSON.parse(text) as { pattern: string; positive: string; suggestion: string };
+        const systemPrompt = `Analyze this user's mood data for the last 30 days. Data: ${JSON.stringify(last30)}. Provide 3 insights as JSON: { "pattern": "...", "positive": "...", "suggestion": "..." }. Be encouraging.`;
+        const text = await sendMessageWithSystemPromptOnly([{ role: 'user', content: 'Analyze.' }], systemPrompt, 350);
+        if (cancelled) return;
+        const cleaned = text.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}');
+        const parsed = JSON.parse(cleaned) as { pattern: string; positive: string; suggestion: string };
         if (!cancelled) setMpInsights(parsed);
       } catch {
         if (!cancelled) setMpInsights(null);
@@ -513,7 +518,9 @@ export default function ActivityScreen() {
         setTcMessages([...initial, { role: 'assistant', content: JSON.stringify(next) }]);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch (e) {
-        Alert.alert('Error', 'Could not connect. Check your API key in Settings.');
+        const fallback = thoughtChallengerFallback(1, t, initial);
+        setTcResponse(fallback);
+        setTcMessages([...initial, { role: 'assistant', content: JSON.stringify(fallback) }]);
       } finally {
         setTcLoading(false);
       }
@@ -531,7 +538,10 @@ export default function ActivityScreen() {
         setTcMessages((prev) => [...prev, { role: 'assistant', content: JSON.stringify(next) }]);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch (e) {
-        Alert.alert('Error', 'Something went wrong.');
+        const fallback = thoughtChallengerFallback(Math.min((tcResponse?.step ?? 1) + 1, 4), originalThought, nextMessages);
+        setTcResponse(fallback);
+        setTcStep(fallback.step);
+        setTcMessages((prev) => [...prev, { role: 'assistant', content: JSON.stringify(fallback) }]);
       } finally {
         setTcLoading(false);
       }
@@ -781,35 +791,17 @@ export default function ActivityScreen() {
     const sendForAnalysis = async () => {
       setTmLoading(true);
       try {
-        const apiKey = await getOpenAIKey();
-        if (!apiKey) throw new Error('OpenAI API key not configured');
         const body = `Situation: ${tmSituation}\nEmotions: ${tmEmotions.join(', ')}\nBody: ${tmBodyZones.join(', ')}\nReaction: ${tmReaction}${tmOtherReaction ? ` (${tmOtherReaction})` : ''}`;
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              {
-                role: 'system',
-                content: `The user just completed a trigger mapping exercise. Based on their responses, provide:
+        const tmSystem = `The user just completed a trigger mapping exercise. Based on their responses, provide:
 1. A gentle validation of their experience (1 sentence)
 2. What pattern you notice (1-2 sentences)
 3. One alternative response they could try next time (2 sentences)
 4. An encouraging close (1 sentence)
 Be warm and specific. Reference their actual words.
-Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alternative": "...", "encouragement": "..." }`,
-              },
-              { role: 'user', content: body },
-            ],
-            max_tokens: 400,
-            temperature: 0.7,
-          }),
-        });
-        if (!res.ok) throw new Error(await res.text());
-        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-        const text = data.choices?.[0]?.message?.content?.trim() ?? '';
-        const parsed = JSON.parse(text) as { validation: string; pattern: string; alternative: string; encouragement: string };
+Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alternative": "...", "encouragement": "..." }`;
+        const text = await sendMessageWithSystemPromptOnly([{ role: 'user', content: body }], tmSystem, 400);
+        const cleaned = text.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}');
+        const parsed = JSON.parse(cleaned) as { validation: string; pattern: string; alternative: string; encouragement: string };
         setTmAiResult(parsed);
         setTmStep(5);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -1256,28 +1248,10 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
     const polishStatement = async () => {
       setCbPolishLoading(true);
       try {
-        const apiKey = await getOpenAIKey();
-        if (!apiKey) throw new Error('API key not set');
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              {
-                role: 'system',
-                content: `The user built this "I feel" statement: ${fullStatement}\nHelp them refine it. Offer:\n1. A polished version that sounds natural (not clinical)\n2. One tip for delivering it well\n3. What to do if the other person gets defensive\nRespond as JSON only, no markdown: { "polished": "...", "deliveryTip": "...", "ifDefensive": "..." }`,
-              },
-              { role: 'user', content: 'Polish my statement.' },
-            ],
-            max_tokens: 350,
-            temperature: 0.6,
-          }),
-        });
-        if (!res.ok) throw new Error(await res.text());
-        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-        const text = data.choices?.[0]?.message?.content?.trim() ?? '';
-        const parsed = JSON.parse(text) as { polished: string; deliveryTip: string; ifDefensive: string };
+        const cbSystem = `The user built this "I feel" statement: ${fullStatement}\nHelp them refine it. Offer:\n1. A polished version that sounds natural (not clinical)\n2. One tip for delivering it well\n3. What to do if the other person gets defensive\nRespond as JSON only, no markdown: { "polished": "...", "deliveryTip": "...", "ifDefensive": "..." }`;
+        const text = await sendMessageWithSystemPromptOnly([{ role: 'user', content: 'Polish my statement.' }], cbSystem, 350);
+        const cleaned = text.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}');
+        const parsed = JSON.parse(cleaned) as { polished: string; deliveryTip: string; ifDefensive: string };
         setCbPolish(parsed);
       } catch (e) {
         Alert.alert('Error', 'Could not connect. Check API key in Settings.');

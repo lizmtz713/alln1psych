@@ -187,7 +187,7 @@ export const en = {
   heartNotesSoftShare: 'Soft Share',
   
   // ============ Premium ============
-  premiumTitle: 'InGauge Pro',
+  premiumTitle: 'InGauge Premium',
   premiumFeature1: 'Unlimited AI conversations',
   premiumFeature2: 'Voice responses',
   premiumFeature3: 'Full Circle features',

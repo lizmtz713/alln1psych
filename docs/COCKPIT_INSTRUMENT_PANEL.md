@@ -10,29 +10,27 @@ The Cockpit must feel **calm, organized, instrument-like** — not busy, gamifie
 
 ---
 
-## 2. Layout (integrated system)
+## 2. Layout — Human System Wheel
 
-One cluster, not six cards:
+One cluster, science-based hierarchy with **YOU** at center and connection/direction visible on each side:
 
 ```
-        BODY
-
-  STATE        EMOTION
-
-      SYSTEM SCORE
-
- CONNECTION     DIRECTION
-
-      ALIGNMENT
+        ALIGNMENT
+            │
+CONNECTION ◄─ YOU ─► DIRECTION
+            │
+        EMOTION
+            │
+         STATE
+            │
+          BODY
 ```
 
-- **Body** — top
-- **State** and **Emotion** — middle left/right
-- **System Score** — center (single summary signal)
-- **Connection** and **Direction** — below center left/right
-- **Alignment** — bottom
+- **Alignment** — top (values, congruence)
+- **Connection** (left) and **Direction** (right) — flanking **YOU** (center score)
+- **Emotion** → **State** → **Body** — vertical flow down the middle
 
-Implementation: hexagonal positions (e.g. Body -90°, State -30°, Emotion 30°, Connection 90°, Direction 150°, Alignment 210°) so the brain sees one integrated system and recognizes imbalance quickly.
+Implementation: `CockpitCluster` uses a vertical wheel layout (WHEEL_SLOTS) so the user visually sees connection and direction as the two “wings” and the flow from alignment down to body. Dashboard-style strips under Connection/Direction allow future icons or signals.
 
 ---
 
@@ -141,7 +139,22 @@ These tie gauge states to behavior and context. Data can come from cross-system 
 
 ---
 
-## 11. Files
+## 11. Cockpit cleanup (layout rules — do not regress)
+
+The Cockpit cluster uses a **deliberately minimal** side layout. Keep it that way.
+
+| Element | Rule | Implementation |
+|--------|------|-----------------|
+| **Left** | One button only: **Rituals** (context-aware by time of day: Pre-Flight / Reset / Post-Flight / Wind Down). | `getRitualsSlot()` in `CockpitCluster.tsx`; route to `/rituals/pre-flight`, `/rituals/post-flight`, `/tools/quick-reset`, or `/(modals)/activity?id=breathing`. |
+| **Right** | One button only: **Support** (emergency / breathe / reach out). | `SUPPORT_SLOT` → `/emergency` in `CockpitCluster.tsx`. |
+| **Side tools** | No extra side tools. Only these two buttons. Do not add more columns or stacks to the left/right of the wheel. | `toolsLeft = [getRitualsSlot()]`, `toolsRight = [SUPPORT_SLOT]`. |
+| **Center ring** | One clear center (YOU + system score). Size tuned for readability. | `CENTER_SIZE = 100`; glow radius 95. Adjust only for accessibility/readability, not to add content. |
+
+**Why:** Simplifies navigation, improves main user experience, and makes the rest of the architecture easier to understand visually. Full tool grid lives on the **Tools** tab, not on the cluster.
+
+---
+
+## 12. Files
 
 - `src/components/CockpitCluster.tsx` — hex layout, center ring ("System" + score + band), gauge rings, tap handlers. Center label uses `getSystemScoreLabel` (Thriving / Stable / Strained / Needs support).
 - `src/utils/gaugeHelpers.ts` — `getSystemScoreLabel`, `getOverallStatusLabel`, `getGaugeColor`, `SYSTEM_SCORE_BANDS`

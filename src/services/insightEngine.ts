@@ -21,6 +21,7 @@ import type { DetectedPattern } from '../types/forecast';
 import { getLifeChapterLabel } from '../data/lifeChapters';
 import { detectBiasesInText } from './biasDetection';
 import { getBiasById } from '../data/biases';
+import { detectCascade } from './cascadeDetection';
 
 const GAUGE_LABELS: Record<GaugeKey, string> = {
   body: 'Body',
@@ -101,10 +102,16 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
   if (healthContext && (bodyLow || stateLow)) {
     const sleepHours = healthContext.lastNightSleepHours;
     if (sleepHours != null && sleepHours < 6) {
-      const sleepVariants = [
-        { title: 'Low sleep may be affecting you today', body: `You had about ${sleepHours.toFixed(1)} hours last night. Sleep strongly affects energy and nervous system state. Rest or an earlier bedtime tonight may help.` },
-        { title: 'Short sleep can show up in energy and focus', body: `About ${sleepHours.toFixed(1)} hours last night. Your body and state gauges often reflect that. A bit of rest or an earlier night can help.` },
-      ];
+      const useDriverPhrasing = daySeed % 3 === 0; // Occasionally: driver → system → gauge
+      const sleepVariants = useDriverPhrasing
+        ? [
+            { title: 'Sleep has been low', body: `You had about ${sleepHours.toFixed(1)} hours last night, which may be affecting your recovery and energy. Rest or an earlier bedtime tonight may help.` },
+            { title: 'Sleep has been low this week', body: `About ${sleepHours.toFixed(1)} hours last night, which may be affecting your recovery, body, and state. A bit of rest or an earlier night can help.` },
+          ]
+        : [
+            { title: 'Recovery has been low', body: `You had about ${sleepHours.toFixed(1)} hours last night, which may be affecting your energy. Rest or an earlier bedtime tonight may help.` },
+            { title: 'Recovery has been low this week', body: `About ${sleepHours.toFixed(1)} hours last night, which may be affecting your body and state. A bit of rest or an earlier night can help.` },
+          ];
       const v = sleepVariants[daySeed % sleepVariants.length];
       out.push({
         id: nanoid(),
@@ -119,8 +126,8 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
     }
     if (stateLow && healthContext.readinessScore != null && healthContext.readinessScore < 50) {
       const recoveryVariants = [
-        { title: 'Recovery may be affecting your state', body: 'Your readiness is lower than usual. Rest, light movement, or a short reset can support your nervous system today.' },
-        { title: 'Your body may need a gentler day', body: 'Readiness is down. Easing up—rest, a short walk, or a breathing reset—often helps your state gauge.' },
+        { title: 'Recovery has been low', body: 'Your readiness is lower than usual, which may be affecting your state. Rest, light movement, or a short reset can support your nervous system today.' },
+        { title: 'Recovery may need attention', body: 'Readiness is down, which often shows up in your state. Easing up—rest, a short walk, or a breathing reset—can help.' },
       ];
       const v = recoveryVariants[daySeed % recoveryVariants.length];
       out.push({
@@ -136,8 +143,8 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
     }
     if (stateLow && healthContext.hrvMs != null && healthContext.hrvMs < 35) {
       const hrvVariants = [
-        { title: 'Your nervous system may be under stress', body: 'HRV suggests your body could use support. Gentle breathing, rest, or reducing load today may help.' },
-        { title: 'Stress may be showing up in your body', body: 'HRV is lower than usual. A short reset—breathing or rest—can help your nervous system settle.' },
+        { title: 'Recovery has been strained', body: 'HRV suggests your nervous system could use support, which may be affecting your state. Gentle breathing, rest, or reducing load today may help.' },
+        { title: 'Recovery (nervous system) is low', body: 'HRV is lower than usual, which often shows up in state. A short reset—breathing or rest—can help.' },
       ];
       const v = hrvVariants[daySeed % hrvVariants.length];
       out.push({
@@ -196,8 +203,8 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
         out.push({
           id: nanoid(),
           kind: 'cause',
-          title: 'State dips often have a trigger',
-          body: 'Stress, sleep, or overwhelm can lower your nervous system state. Noticing what was different today can help next time.',
+          title: 'Recovery or Attention may be affecting State',
+          body: 'Stress, sleep, or overwhelm can lower your nervous system state, which may be affecting you today. Noticing what was different can help next time.',
           gauges: ['state'],
           confidence: 0.7,
           generatedAt: now(),
@@ -209,7 +216,7 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
           id: nanoid(),
           kind: 'cause',
           title: 'Connection and emotion are linked',
-          body: `It's been ${daysSinceConnection} days since you logged connection. Low connection often shows up as harder emotions.`,
+          body: `It's been ${daysSinceConnection} days since you logged connection, which often shows up as harder emotions.`,
           gauges: ['emotion', 'connection'],
           confidence: 0.75,
           generatedAt: now(),
@@ -225,8 +232,8 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
             out.push({
               id: nanoid(),
               kind: 'cause',
-              title: 'Sleep and Body are connected',
-              body: `You've logged ${poorSleepNights} night${poorSleepNights === 1 ? '' : 's'} with short or poor sleep. When sleep dips, Body often does too. Small improvements in sleep can help.`,
+              title: 'Recovery has been low this week',
+              body: `You've logged ${poorSleepNights} night${poorSleepNights === 1 ? '' : 's'} with short or poor sleep, which may be affecting your body. Small improvements in recovery can help.`,
               gauges: ['body'],
               confidence: 0.75,
               generatedAt: now(),
@@ -236,8 +243,8 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
             out.push({
               id: nanoid(),
               kind: 'cause',
-              title: 'When you sleep 7+ hours, Body tends to benefit',
-              body: `You've had ${goodSleepNights} night${goodSleepNights === 1 ? '' : 's'} with 7+ hours. Keeping a consistent sleep routine supports your Body gauge.`,
+              title: 'Recovery supports Body',
+              body: `You've had ${goodSleepNights} night${goodSleepNights === 1 ? '' : 's'} with 7+ hours, which often shows up in your body gauge. Keeping a consistent sleep routine helps.`,
               gauges: ['body'],
               confidence: 0.7,
               generatedAt: now(),
@@ -248,8 +255,8 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
         out.push({
           id: nanoid(),
           kind: 'cause',
-          title: 'Body gauge reflects basics',
-          body: 'Sleep, food, water, and movement directly affect how you feel. Small steps in any of these can shift the needle.',
+          title: 'Recovery affects Body',
+          body: 'Sleep, food, water, and movement are part of recovery; when recovery is low, that may be affecting your body. Small steps in any of these can help.',
           gauges: ['body'],
           confidence: 0.8,
           generatedAt: now(),
@@ -264,8 +271,8 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
       out.push({
         id: nanoid(),
         kind: 'cause',
-        title: 'Connection gaps can show up in emotion',
-        body: 'When we go too long without real connection, emotion gauge often dips. Reaching out—even briefly—can help.',
+        title: 'Connection reciprocity may be low',
+        body: 'Connection has been quiet recently, which may be affecting your mood. Reaching out—even briefly—can help.',
         gauges: ['connection', 'emotion'],
         confidence: 0.7,
         generatedAt: now(),
@@ -535,6 +542,7 @@ function getThemeForInsight(insight: GeneratedInsight): InsightTheme {
   const factor = 'factor' in insight ? (insight as CauseInsight).factor : undefined;
   const gauges = insight.gauges;
   if (factor === 'Sleep' || factor === 'Recovery' || factor === 'HRV') return 'sleep_recovery';
+  if (factor?.startsWith('Cascade')) return 'cascade';
   if (factor === 'Goal reflection' || factor === 'Values') return 'direction_friction';
   if (factor === 'Connection' || factor === 'Connection gap') return 'connection_support';
   if (factor === 'Stress / Sleep' || factor === 'Sleep / Nutrition / Movement') return 'body_basics';
@@ -561,6 +569,11 @@ function getSourceTypesForInsight(insight: GeneratedInsight, input: InsightEngin
   }
   if (factor === 'Connection' || factor === 'Connection gap') {
     out.push('signals');
+  }
+  if (factor?.startsWith('Cascade')) {
+    out.push('self-report');
+    if (input.healthContext) out.push('health');
+    if ((input.daysSinceConnection ?? 0) >= 2) out.push('signals');
   }
   if (factor === 'Life chapter' && input.lifeChapter) out.push('context');
   if (factor === 'Energy') out.push('context');
@@ -598,7 +611,8 @@ function rankScore(insight: GeneratedInsight, input: InsightEngineInput): number
   const patternStrengthBonus = insight.insightType === 'pattern' ? 12 : 0;
   const weeklyPatternGrowthBonus =
     input.context === 'weekly' && (insight.insightType === 'pattern' || insight.insightType === 'growth') ? 25 : 0;
-  return supportingSignals + lowGaugeBonus + actionabilityBonus + patternStrengthBonus + weeklyPatternGrowthBonus;
+  const cascadeBonus = insight.theme === 'cascade' ? 18 : 0;
+  return supportingSignals + lowGaugeBonus + actionabilityBonus + patternStrengthBonus + weeklyPatternGrowthBonus + cascadeBonus;
 }
 
 /** Keep one insight per theme (highest rank). Prevents duplicate sleep/recovery, direction, connection, etc. */
@@ -623,11 +637,27 @@ export function generateInsights(input: InsightEngineInput): GeneratedInsight[] 
 
   const pattern: GeneratedInsight[] = generatePatternInsightsFromDetected(detectedPatterns);
   const cause: GeneratedInsight[] = generateCauseInsights(input);
+  const cascadeInsight = detectCascade({
+    gaugeValues: input.gaugeValues,
+    healthContext: input.healthContext,
+    sleepByDay: input.sleepByDay,
+    daysSinceConnection: input.daysSinceConnection,
+    recentCheckInHistory: input.recentCheckInHistory,
+    currentDrivers: input.currentDrivers,
+    currentSystemImpact: input.currentSystemImpact,
+  });
   const timing: GeneratedInsight[] = generateTimingInsights(input, detectedPatterns);
   const growth: GeneratedInsight[] = generateGrowthInsights(input);
   const meaning: GeneratedInsight[] = generateMeaningInsights(input);
 
-  let combined = [...pattern, ...cause, ...timing, ...growth, ...meaning];
+  let combined = [
+    ...pattern,
+    ...cause,
+    ...(cascadeInsight ? [cascadeInsight] : []),
+    ...timing,
+    ...growth,
+    ...meaning,
+  ];
   combined = combined.map((i) => enrichWithMetadata(i, input));
 
   combined = dedupeByTheme(combined, input);

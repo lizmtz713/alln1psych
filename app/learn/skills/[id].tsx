@@ -10,8 +10,8 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../../src/lib/constants';
 import { getSkillById, getDomainById } from '../../../src/data/humanSkills';
-import { useHumanSkillsStore, SKILL_POINTS } from '../../../src/stores/humanSkillsStore';
-import type { SkillId } from '../../../src/types/human-skills';
+import { useHumanSkillsStore, SKILL_POINTS, LEVEL_THRESHOLDS } from '../../../src/stores/humanSkillsStore';
+import type { SkillId, SkillLevel } from '../../../src/types/human-skills';
 
 const BG = COLORS.background;
 const CARD_BG = COLORS.surface;
@@ -27,26 +27,43 @@ const LEVEL_LABELS: Record<string, string> = {
   integrated: 'Integrated',
 };
 
-const SOURCES: { key: 'checkIn' | 'quickReset' | 'postFlight' | 'aiTalk'; label: string; route: string }[] = [
+const LEVEL_ORDER: SkillLevel[] = ['exploring', 'developing', 'practiced', 'strong', 'integrated'];
+function getNextLevelThreshold(currentLevel: SkillLevel): number | null {
+  const idx = LEVEL_ORDER.indexOf(currentLevel);
+  if (idx < 0 || idx >= LEVEL_ORDER.length - 1) return null;
+  return LEVEL_THRESHOLDS[LEVEL_ORDER[idx + 1]];
+}
+
+type SourceKey = 'checkIn' | 'quickReset' | 'postFlight' | 'aiTalk' | 'lessonComplete' | 'rolePlay' | 'toolUse';
+const SOURCES: { key: SourceKey; label: string; route: string }[] = [
   { key: 'checkIn', label: 'Mood check-in', route: '/(modals)/mood-checkin' },
   { key: 'quickReset', label: 'Quick Reset', route: '/tools/quick-reset' },
   { key: 'postFlight', label: 'Post-Flight Debrief', route: '/rituals/post-flight' },
   { key: 'aiTalk', label: 'Talk with AI', route: '/(tabs)/talk' },
+  { key: 'lessonComplete', label: 'Complete a lesson', route: '/(tabs)/learn' },
+  { key: 'rolePlay', label: 'Conversation practice (Role-play)', route: '/(modals)/role-play' },
+  { key: 'toolUse', label: 'Decode or Resolve', route: '/(tabs)/tools' },
 ];
 
-const POINTS_MAP = {
+const POINTS_MAP: Record<SourceKey, number> = {
   checkIn: SKILL_POINTS.checkIn,
   quickReset: SKILL_POINTS.quickReset,
   postFlight: SKILL_POINTS.postFlight,
   aiTalk: SKILL_POINTS.aiTalk,
+  lessonComplete: SKILL_POINTS.lessonComplete,
+  rolePlay: SKILL_POINTS.conversationSimulation,
+  toolUse: SKILL_POINTS.toolUse,
 };
 
 /** Which skill IDs get points from each source (for "you earn from" section) */
-const SKILL_IDS_BY_SOURCE = {
-  checkIn: ['self-awareness', 'emotional-awareness', 'body-awareness', 'regulation'] as SkillId[],
-  quickReset: ['regulation', 'stress-tolerance', 'grounding', 'recovery'] as SkillId[],
-  postFlight: ['reflection', 'learning', 'intention', 'meaning', 'emotional-awareness'] as SkillId[],
-  aiTalk: ['communication', 'emotional-awareness', 'self-awareness', 'empathy'] as SkillId[],
+const SKILL_IDS_BY_SOURCE: Record<SourceKey, SkillId[]> = {
+  checkIn: ['self-awareness', 'emotional-awareness', 'body-awareness', 'regulation'],
+  quickReset: ['regulation', 'stress-tolerance', 'grounding', 'recovery'],
+  postFlight: ['reflection', 'learning', 'intention', 'meaning', 'emotional-awareness'],
+  aiTalk: ['communication', 'emotional-awareness', 'self-awareness', 'empathy'],
+  lessonComplete: ['emotional-awareness', 'self-awareness', 'regulation', 'communication', 'empathy', 'boundaries', 'repair'],
+  rolePlay: ['communication', 'empathy', 'stress-tolerance'],
+  toolUse: ['communication', 'empathy', 'self-awareness', 'reflection', 'regulation'],
 };
 
 export default function HumanSkillDetailScreen() {
@@ -68,6 +85,11 @@ export default function HumanSkillDetailScreen() {
   const points = skill ? getPoints(skill.id) : 0;
   const level = skill ? getLevel(skill.id) : 'exploring';
   const levelLabel = LEVEL_LABELS[level] ?? 'Exploring';
+  const nextThreshold = getNextLevelThreshold(level);
+  const showBadge = skill?.badgeName && (level === 'practiced' || level === 'strong' || level === 'integrated');
+  const progressPercent = nextThreshold != null && nextThreshold > 0
+    ? Math.min(100, (points / nextThreshold) * 100)
+    : 100;
 
   const earnFrom = SOURCES.filter((s) => SKILL_IDS_BY_SOURCE[s.key].includes(skillId));
 
@@ -108,8 +130,61 @@ export default function HumanSkillDetailScreen() {
               <Text style={styles.domainBadgeText}>{domain.emoji} {domain.shortTitle}</Text>
             </View>
           )}
+          {showBadge && skill.badgeName ? (
+            <View style={styles.badgeChip}>
+              <Text style={styles.badgeChipText}>🏅 {skill.badgeName}</Text>
+            </View>
+          ) : null}
           <Text style={styles.description}>{skill.description}</Text>
         </View>
+
+        {nextThreshold != null ? (
+          <View style={[styles.infoCard, styles.progressCard]}>
+            <Text style={styles.infoTitle}>Progress to {LEVEL_LABELS[LEVEL_ORDER[LEVEL_ORDER.indexOf(level) + 1] ?? 'developing']}</Text>
+            <View style={styles.progressBarBg}>
+              <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
+            </View>
+            <Text style={styles.progressLabel}>{points} / {nextThreshold} XP</Text>
+          </View>
+        ) : (
+          <View style={[styles.infoCard, styles.progressCard]}>
+            <Text style={styles.infoTitle}>Level complete</Text>
+            <Text style={styles.progressLabel}>You’ve reached the top level for this skill. Keep practicing to maintain it.</Text>
+          </View>
+        )}
+
+        {skill.practiceChallenge ? (
+          <View style={[styles.infoCard, styles.challengeCard]}>
+            <Text style={styles.infoTitle}>Practice challenge</Text>
+            <Text style={styles.infoText}>{skill.practiceChallenge}</Text>
+          </View>
+        ) : null}
+
+        {skill.whyItMatters ? (
+          <View style={styles.infoCard}>
+            <Text style={styles.infoTitle}>Why it matters</Text>
+            <Text style={styles.infoText}>{skill.whyItMatters}</Text>
+          </View>
+        ) : null}
+        {skill.whatResearchSays ? (
+          <View style={[styles.infoCard, styles.infoCardMuted]}>
+            <Text style={styles.infoTitle}>What science says</Text>
+            <Text style={styles.infoText}>{skill.whatResearchSays}</Text>
+          </View>
+        ) : null}
+        {skill.practiceTips && skill.practiceTips.length > 0 ? (
+          <View style={styles.infoCard}>
+            <Text style={styles.infoTitle}>Practice at your pace</Text>
+            {skill.practiceTips.map((tip, i) => (
+              <Text key={i} style={styles.tipBullet}>• {tip}</Text>
+            ))}
+          </View>
+        ) : null}
+        {skill.paceNote ? (
+          <View style={[styles.infoCard, styles.paceCard]}>
+            <Text style={styles.paceText}>{skill.paceNote}</Text>
+          </View>
+        ) : null}
 
         <View style={styles.statsCard}>
           <View style={styles.stat}>
@@ -142,7 +217,7 @@ export default function HumanSkillDetailScreen() {
         </View>
 
         <Text style={styles.footnote}>
-          Points are added automatically when you complete a check-in, Quick Reset exercise, Post-Flight debrief, or have a conversation with the AI.
+          Points are added automatically when you check in, use Quick Reset or Post-Flight, talk with the AI, complete lessons, or use tools like Role-play, Decode, and Resolve.
         </Text>
       </ScrollView>
     </View>
@@ -178,6 +253,44 @@ const styles = StyleSheet.create({
   },
   domainBadgeText: { fontSize: 13, color: TEXT_MUTED },
   description: { fontSize: 16, color: TEXT_MUTED, lineHeight: 24 },
+  infoCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.card,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  infoCardMuted: { backgroundColor: COLORS.surfaceElevated ?? CARD_BG },
+  infoTitle: { fontSize: 14, fontWeight: '600', color: COLORS.accent, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  infoText: { fontSize: 15, color: TEXT_MUTED, lineHeight: 22 },
+  tipBullet: { fontSize: 15, color: TEXT_MUTED, lineHeight: 24, marginBottom: 4 },
+  paceCard: { borderColor: COLORS.accent + '40' },
+  paceText: { fontSize: 14, color: TEXT_MUTED, fontStyle: 'italic', lineHeight: 20 },
+  badgeChip: {
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.accent + '22',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    marginBottom: 12,
+  },
+  badgeChipText: { fontSize: 14, fontWeight: '600', color: COLORS.accent },
+  progressCard: { marginBottom: SPACING.md },
+  progressBarBg: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.surfaceElevated ?? CARD_BG,
+    overflow: 'hidden',
+    marginTop: 8,
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 4,
+    backgroundColor: COLORS.accent,
+  },
+  progressLabel: { fontSize: 13, color: TEXT_MUTED, marginTop: 6 },
+  challengeCard: { borderColor: COLORS.accent + '50' },
   statsCard: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -16,7 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, BORDER_RADIUS } from '../lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, APP_CONFIG } from '../lib/constants';
 import { PRICING, usePremiumStore } from '../stores/premiumStore';
 
 interface PaywallModalProps {
@@ -80,7 +80,7 @@ export function PaywallModal({ visible, onClose, feature }: PaywallModalProps) {
         {/* Header */}
         <View style={styles.header}>
           <View style={{ width: 40 }} />
-          <Text style={styles.title}>Unlock InGauge</Text>
+          <Text style={styles.title}>Unlock {APP_CONFIG.name}</Text>
           <Pressable onPress={onClose} style={styles.closeBtn}>
             <Ionicons name="close" size={24} color={COLORS.text} />
           </Pressable>

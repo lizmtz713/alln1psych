@@ -17,7 +17,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { COLORS, SPACING, BORDER_RADIUS } from '../../src/lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, APP_CONFIG } from '../../src/lib/constants';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { useSpotifyStore } from '../../src/stores/spotifyStore';
 import { useWeatherStore } from '../../src/stores/weatherStore';
@@ -28,6 +28,7 @@ import { analyzePatterns, analyzeDirectionCorrelations, formatConfidence, type N
 import PurposeThroughPattern from '../../src/components/PurposeThroughPattern';
 import { usePatternReadiness } from '../../src/hooks/usePatternReadiness';
 import { PatternsBuildingState } from '../../src/components/PatternsBuildingState';
+import { PATTERN_DISCLAIMER } from '../../src/data/legalDisclaimers';
 
 const BG = COLORS.background;
 const CARD_BG = COLORS.surface;
@@ -289,7 +290,7 @@ export default function PatternsScreen() {
       `Alignment: ${alignment >= 0 ? alignment : 'not set'}`,
     ].join('\n');
 
-    let summary = `🧠 My InGauge Snapshot\n\n${gauges}`;
+    let summary = `🧠 My ${APP_CONFIG.name} Snapshot\n\n${gauges}`;
     
     if (crossSystemInsight) {
       summary += `\n\n💡 Insight: ${crossSystemInsight}`;
@@ -443,6 +444,7 @@ export default function PatternsScreen() {
             <Text style={styles.insightText}>{crossSystemInsight}</Text>
           )}
         </View>
+        <Text style={styles.patternDisclaimer}>{PATTERN_DISCLAIMER}</Text>
 
         {/* Gauges */}
         <Text style={styles.sectionTitle}>Your 6 Gauges</Text>
@@ -672,6 +674,12 @@ const styles = StyleSheet.create({
   overallValue: {
     fontSize: 48,
     fontWeight: '700',
+  },
+  patternDisclaimer: {
+    fontSize: 12,
+    color: TEXT_DIM,
+    fontStyle: 'italic',
+    marginBottom: 16,
   },
   insightText: {
     fontSize: 15,

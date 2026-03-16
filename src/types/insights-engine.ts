@@ -22,6 +22,7 @@ export type InsightTheme =
   | 'energy_regulation'
   | 'body_basics'
   | 'emotional_support'
+  | 'cascade'
   | 'general';
 
 export interface InsightMetadata {
@@ -150,4 +151,15 @@ export interface InsightEngineInput {
   energyContext?: { checkInsToday?: number; hour?: number };
   /** Recent free text (check-in note or last message) for bias detection */
   recentText?: string;
+  /** Last 5–10 check-ins (for cascade detection: drivers + system impact within 48h) */
+  recentCheckInHistory?: Array<{
+    timestamp: string;
+    systemImpact: GaugeKey[];
+    drivers: string[];
+    gauges?: Partial<Record<GaugeKey, number>>;
+  }>;
+  /** Current check-in drivers (if just logged) for cascade detection */
+  currentDrivers?: string[] | null;
+  /** Current check-in system impact for cascade detection */
+  currentSystemImpact?: GaugeKey[] | null;
 }

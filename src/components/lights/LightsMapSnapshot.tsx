@@ -55,7 +55,7 @@ export function LightsMapSnapshot({
         <Text style={styles.tempText}>{temperatureSummary.cool} cool</Text>
       </View>
 
-      <Text style={styles.footer}>AllN1 Psych · You Are Not Alone.</Text>
+      <Text style={styles.footer}>InGauge · The Human Cockpit</Text>
     </View>
   );
 }

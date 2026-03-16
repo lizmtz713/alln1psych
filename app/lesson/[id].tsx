@@ -46,6 +46,8 @@ import {
 } from '../../src/data/humanManual';
 import { ShareInsightButton, type ShareableContent } from '../../src/features/share-insight';
 import { runAchievementChecks } from '../../src/services/achievementChecker';
+import { awardSkillPointsForLesson } from '../../src/stores/humanSkillsStore';
+import { EDUCATIONAL_DISCLAIMER } from '../../src/data/legalDisclaimers';
 
 function renderBody(text: string): React.ReactNode[] {
   const lines = text.split(/\n\n+/);
@@ -173,6 +175,7 @@ export default function LessonScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     saveReflection(lesson.id, reflectionText);
     completeLesson(lesson.id, reflectionText);
+    awardSkillPointsForLesson(lesson.id);
     runAchievementChecks();
     if (reflectionText.trim()) {
       addJournalEntry(reflectionText.trim(), { source: 'manual' });
@@ -389,6 +392,7 @@ Do two things:
                 onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300)}
               />
             </View>
+            <Text style={styles.legalFooter}>{EDUCATIONAL_DISCLAIMER}</Text>
             {justCompleted ? (
               <>
                 <View style={styles.completeSuccess}>
@@ -476,7 +480,7 @@ Do two things:
             />
           </View>
         )}
-
+        <Text style={styles.legalFooter}>{EDUCATIONAL_DISCLAIMER}</Text>
         {justCompleted ? (
           <>
             <View style={styles.completeSuccess}>
@@ -666,5 +670,12 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '600',
     color: COLORS.text,
+  },
+  legalFooter: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+    marginTop: 16,
+    marginBottom: 24,
   },
 });

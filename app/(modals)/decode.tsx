@@ -34,6 +34,7 @@ import { detectBiases, type BiasFilterResult } from '../../src/services/biasFilt
 import BiasFilterCard, { BiasFilterBanner } from '../../src/components/BiasFilterCard';
 import { ToolIntro } from '../../src/components/tools/ToolIntro';
 import { getToolIntroContent } from '../../src/data/toolIntroContent';
+import { useHumanSkillsStore, DECODE_SKILL_IDS, SKILL_POINTS } from '../../src/stores/humanSkillsStore';
 
 // Lazy load ImagePicker to prevent crash on component mount
 let ImagePickerModule: typeof import('expo-image-picker') | null = null;
@@ -92,6 +93,22 @@ RESPONSE OPTIONS — Give 3 brief response options:
 • Option C (Minimal): [brief acknowledgment]
 
 Be direct, warm, concise.`;
+
+/** Non-AI fallback when API is unavailable — research-based prompts so the app still helps. */
+function getDecodeFallback(message: string, sender: string): string {
+  const from = sender || 'them';
+  return `WHAT THEY'RE SAYING — The message you shared.
+
+WHAT THEY MIGHT MEAN — Without AI we can't read subtext. Consider: Are they asking for connection, space, clarity, or action? Notice your own reaction — sometimes our gut picks up tone (anxious, hurt, defensive) even when words seem neutral.
+
+WHAT THEY WANT FROM YOU — Common needs in messages: reassurance, time to respond, a clear answer, repair after conflict, or simply to be heard. Reflect on what would feel true to you to offer.
+
+RED FLAGS — If something felt off (guilt-tripping, pressure, dismissal), trust that. You're not required to respond in a way that ignores your boundaries.
+
+SENDER STATE — Hard to say without AI. They might be REGULATED (calm), ACTIVATED (anxious/urgent), or SHUTDOWN (brief/withdrawn). Your reply can stay warm and clear either way.
+
+RESPONSE OPTIONS — You can: (A) Respond with warmth and connection, (B) Respond with a gentle boundary, or (C) Take time: "I need a moment to think — I'll get back to you."`;
+}
 
 // Intent options for trajectory calculator
 const INTENT_OPTIONS: Array<{ intent: ResponseIntent; label: string; emoji: string }> = [
@@ -223,10 +240,14 @@ export default function DecodeScreen() {
           [{ role: 'user', content: `Message: "${message}"\n\nFrom: ${sender || 'someone'}` }],
           DECODE_SYSTEM
         );
+        if (!result || result.startsWith('[AI Error') || result.includes('API key')) {
+          result = getDecodeFallback(message, sender);
+        }
       }
 
-      const fullResponse = result?.trim() ?? 'Could not analyze. Try again.';
+      const fullResponse = result?.trim() ?? getDecodeFallback(message, sender);
       setResponse(fullResponse);
+      useHumanSkillsStore.getState().addPoints(DECODE_SKILL_IDS, SKILL_POINTS.toolUse, 'tool');
 
       // Detect sender state from response (safely)
       try {
@@ -243,9 +264,14 @@ export default function DecodeScreen() {
 
     } catch (err) {
       console.warn('Decode error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(`Something went wrong: ${errorMessage}`);
-      setResponse('');
+      if (message.trim().length >= 3) {
+        setResponse(getDecodeFallback(message, sender));
+        useHumanSkillsStore.getState().addPoints(DECODE_SKILL_IDS, SKILL_POINTS.toolUse, 'tool');
+        setError('AI unavailable — here\'s a reflection guide you can use instead.');
+      } else {
+        setError(`Something went wrong. Try pasting the message text for a reflection guide.`);
+        setResponse('');
+      }
     } finally {
       setLoading(false);
     }

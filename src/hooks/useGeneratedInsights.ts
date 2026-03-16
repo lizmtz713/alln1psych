@@ -60,7 +60,7 @@ async function getInsightHealthContext(): Promise<InsightHealthContext | undefin
   const snapshot = useHealthStore.getState().snapshot;
   let lastNightSleepHours: number | undefined = snapshot?.sleep?.lastNight?.duration;
   let readinessScore: number | undefined;
-  let hrvMs: number | undefined = snapshot?.heart?.hrv;
+  let hrvMs: number | undefined = snapshot?.heart?.hrv ?? undefined;
   try {
     const { getCachedOuraData } = await import('../services/ouraIntegration');
     const oura = await getCachedOuraData();
@@ -68,7 +68,8 @@ async function getInsightHealthContext(): Promise<InsightHealthContext | undefin
       if (lastNightSleepHours == null && oura.sleep?.duration != null) {
         lastNightSleepHours = oura.sleep.duration / 3600;
       }
-      if (oura.readiness?.score != null) readinessScore = oura.readiness.score;
+      const raw = oura.readiness?.score;
+      readinessScore = raw !== undefined && raw !== null ? raw : undefined;
       if (hrvMs == null && oura.heart?.hrv != null) hrvMs = oura.heart.hrv;
     }
   } catch {
@@ -230,8 +231,8 @@ export function useGeneratedInsights(
           ? lastUserMessage.content
           : undefined;
 
-      const circle = useCircleStore.getState();
-      const lastCheckInNote = circle.moodHistory?.find((e) => e.note?.trim())?.note?.trim();
+      const circleState = useCircleStore.getState();
+      const lastCheckInNote = circleState.moodHistory?.find((e) => e.note?.trim())?.note?.trim();
       const cockpit = useCockpitStore.getState();
       const checkInContextText =
         cockpit.checkInContext &&
@@ -240,6 +241,14 @@ export function useGeneratedInsights(
           .join(' ');
       const recentText =
         conversationText ?? lastCheckInNote ?? (checkInContextText?.trim() || undefined);
+
+      const cockpitState = useCockpitStore.getState();
+      const recentCheckInHistory = (cockpitState.checkInHistory ?? []).slice(-8).map((h) => ({
+        timestamp: h.timestamp,
+        systemImpact: h.systemImpact,
+        drivers: h.drivers,
+        gauges: h.gauges,
+      }));
 
       const input = {
         context,
@@ -267,6 +276,9 @@ export function useGeneratedInsights(
         userValues,
         energyContext,
         recentText,
+        recentCheckInHistory,
+        currentDrivers: cockpitState.checkInDrivers ?? null,
+        currentSystemImpact: cockpitState.checkInSystemImpact ?? null,
       };
 
       const result = generateInsights(input);

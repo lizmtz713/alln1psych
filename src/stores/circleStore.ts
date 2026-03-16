@@ -212,7 +212,7 @@ export const useCircleStore = create<CircleState>((set) => ({
   myTemperatureLabel: TEMPERATURE_LABELS.green,
   myTemperatureNote: '',
   myTemperatureUpdatedAt: null,
-  temperatureVisibility: 'inner_circle',
+  temperatureVisibility: 'private',
   setTemperatureVisibility: (v) => set({ temperatureVisibility: v }),
   moodHistory: [],
   nudges: [

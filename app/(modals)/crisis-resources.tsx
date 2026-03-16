@@ -16,6 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { APP_CONFIG } from '../../src/lib/constants';
 
 interface Resource {
   emoji: string;
@@ -152,7 +153,7 @@ export default function CrisisResourcesScreen() {
         <View style={styles.noteBox}>
           <Ionicons name="information-circle" size={20} color="#888" />
           <Text style={styles.noteText}>
-            InGauge is not a substitute for professional help. If you're in immediate danger, please call 911 or go to your nearest emergency room.
+            {APP_CONFIG.name} is not a substitute for professional help. If you're in immediate danger, please call 911 or go to your nearest emergency room.
           </Text>
         </View>
 

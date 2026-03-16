@@ -21,7 +21,8 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
-import { getGaugeColor } from '../../src/utils/gaugeHelpers';
+import { getGaugeColor, GAUGE_CONFIG } from '../../src/utils/gaugeHelpers';
+import { DRIVERS_BY_GAUGE } from '../../src/data/driversByGauge';
 import { PostCheckInSuggestions } from '../../src/components/checkin/PostCheckInSuggestions';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 import { useGeneratedInsights } from '../../src/hooks/useGeneratedInsights';
@@ -68,7 +69,7 @@ const STATE_OPTIONS = [
 
 const EMOTION_OPTIONS = ['Calm', 'Happy', 'Sad', 'Anxious', 'Angry', 'Overwhelmed', 'Numb', 'Confused'] as const;
 
-const TOTAL_STEPS = 7; // 6 gauges + 1 context (Sleep, Social, Stress)
+const TOTAL_STEPS = 8; // 6 gauges + context + drivers (optional)
 
 function emotionToScore(selected: string[]): number {
   if (selected.length === 0) return 50;
@@ -78,6 +79,8 @@ function emotionToScore(selected: string[]): number {
   if (selected.length <= 2) return 80;
   return 50;
 }
+
+const GAUGE_KEYS: GaugeKey[] = ['body', 'state', 'emotion', 'connection', 'direction', 'alignment'];
 
 type AnswersRef = {
   body: Record<BodyKey, boolean>;
@@ -90,6 +93,8 @@ type AnswersRef = {
   sleepContext: string | null;
   socialContext: string | null;
   stressSourceContext: string | null;
+  checkInDriverIds: string[];
+  checkInSystemImpact: GaugeKey[];
 };
 
 const initialAnswers: AnswersRef = {
@@ -103,6 +108,8 @@ const initialAnswers: AnswersRef = {
   sleepContext: null,
   socialContext: null,
   stressSourceContext: null,
+  checkInDriverIds: [],
+  checkInSystemImpact: [],
 };
 
 const SLEEP_OPTIONS = ['Great', 'Okay', 'Poor', 'Very poor'] as const;
@@ -131,6 +138,9 @@ export default function CockpitCheckinScreen() {
   const updateAlignment = useCockpitStore((s) => s.updateAlignment);
   const setLastCheckInDate = useCockpitStore((s) => s.setLastCheckInDate);
   const setCheckInContext = useCockpitStore((s) => s.setCheckInContext);
+  const setCheckInDrivers = useCockpitStore((s) => s.setCheckInDrivers);
+  const setCheckInSystemImpact = useCockpitStore((s) => s.setCheckInSystemImpact);
+  const setLastCheckInSnapshot = useCockpitStore((s) => s.setLastCheckInSnapshot);
   const recordGaugesForDrift = useCockpitStore((s) => s.recordGaugesForDrift);
 
   const a = answersRef.current;
@@ -146,7 +156,7 @@ export default function CockpitCheckinScreen() {
     const cur = answersRef.current;
     setStep((prev) => {
       if (prev === TOTAL_STEPS - 1) {
-        // Step 6 (context): save context and finish
+        // Last step: save context + drivers + system impact, then finish
         setCheckInContext(
           cur.sleepContext || cur.socialContext || cur.stressSourceContext
             ? {
@@ -156,6 +166,24 @@ export default function CockpitCheckinScreen() {
               }
             : null
         );
+        setCheckInSystemImpact(cur.checkInSystemImpact?.length ? cur.checkInSystemImpact : null);
+        setCheckInDrivers(cur.checkInDriverIds?.length ? cur.checkInDriverIds : null);
+        const snap = useCockpitStore.getState();
+        const gauges: Partial<Record<GaugeKey, number>> = {};
+        if (snap.body.value >= 0) gauges.body = snap.body.value;
+        if (snap.state.value >= 0) gauges.state = snap.state.value;
+        if (snap.emotion.value >= 0) gauges.emotion = snap.emotion.value;
+        if (snap.connection.value >= 0) gauges.connection = snap.connection.value;
+        if (snap.direction.value >= 0) gauges.direction = snap.direction.value;
+        if (snap.alignment.value >= 0) gauges.alignment = snap.alignment.value;
+        setLastCheckInSnapshot({
+          state: snap.state.value >= 0 ? snap.state.value : 50,
+          emotion: snap.emotion.value >= 0 ? snap.emotion.value : 50,
+          systemImpact: cur.checkInSystemImpact ?? [],
+          drivers: cur.checkInDriverIds ?? [],
+          timestamp: new Date().toISOString(),
+          gauges: Object.keys(gauges).length > 0 ? gauges : undefined,
+        });
         setLastCheckInDate(new Date().toISOString().slice(0, 10));
         recordGaugesForDrift().catch(() => {});
         setTimeout(() => {
@@ -175,7 +203,7 @@ export default function CockpitCheckinScreen() {
       }
       return prev + 1;
     });
-  }, [setLastCheckInDate, setCheckInContext, recordGaugesForDrift]);
+  }, [setLastCheckInDate, setCheckInContext, setCheckInSystemImpact, setCheckInDrivers, setLastCheckInSnapshot, recordGaugesForDrift]);
 
   const handleNext = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -205,6 +233,22 @@ export default function CockpitCheckinScreen() {
     handleNext();
   }, [step, connectionScore, setBodyCheckIn, updateState, updateEmotion, updateConnection, updateDirection, updateAlignment, handleNext]);
 
+  const toggleCheckInSystemImpact = useCallback((g: GaugeKey) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const prev = answersRef.current.checkInSystemImpact;
+    answersRef.current.checkInSystemImpact = prev.includes(g)
+      ? prev.filter((k) => k !== g)
+      : [...prev, g];
+    tick();
+  }, []);
+
+  const toggleCheckInDriver = useCallback((id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const prev = answersRef.current.checkInDriverIds;
+    answersRef.current.checkInDriverIds = prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id];
+    tick();
+  }, []);
+
   const canProceed = useCallback(() => {
     if (step === 0) return true;
     if (step === 1) return a.stateValue !== null;
@@ -212,7 +256,7 @@ export default function CockpitCheckinScreen() {
     if (step === 3) return a.listenedToMe !== null && a.iListened !== null;
     if (step === 4) return a.directionValue !== null;
     if (step === 5) return a.alignmentValue !== null;
-    if (step === 6) return true; // Context optional
+    if (step === 6 || step === 7) return true; // Context and drivers optional
     return false;
   }, [step, a.stateValue, a.listenedToMe, a.iListened, a.directionValue, a.alignmentValue]);
 
@@ -545,6 +589,46 @@ export default function CockpitCheckinScreen() {
                   <Text style={[styles.optionChipText, a.stressSourceContext === opt && styles.optionChipTextSelected]}>{opt}</Text>
                 </Pressable>
               ))}
+            </View>
+          </>
+        )}
+
+        {/* ——— SCREEN 7: DRIVERS + SYSTEM IMPACT (optional) ——— */}
+        {step === 7 && (
+          <>
+            <Text style={styles.title}>What's influencing this?</Text>
+            <Text style={styles.sub}>Optional — same as quick log. Powers cross-system insights.</Text>
+            <Text style={styles.contextLabel}>Which parts of your system are affected?</Text>
+            <View style={styles.optionRow}>
+              {GAUGE_KEYS.map((g) => (
+                <Pressable
+                  key={g}
+                  style={[
+                    styles.optionChip,
+                    a.checkInSystemImpact.includes(g) && styles.optionChipSelected,
+                    { borderColor: GAUGE_CONFIG[g]?.color ?? CARD_BORDER },
+                  ]}
+                  onPress={() => toggleCheckInSystemImpact(g)}
+                >
+                  <Text style={[styles.optionChipText, a.checkInSystemImpact.includes(g) && styles.optionChipTextSelected]}>
+                    {GAUGE_CONFIG[g]?.label ?? g}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={styles.contextLabel}>What's influencing you? (tap any)</Text>
+            <View style={styles.optionRow}>
+              {(Object.values(DRIVERS_BY_GAUGE).flat() as { id: string; label: string }[])
+                .filter((d, i, arr) => arr.findIndex((x) => x.id === d.id) === i)
+                .map((d) => (
+                  <Pressable
+                    key={d.id}
+                    style={[styles.optionChip, a.checkInDriverIds.includes(d.id) && styles.optionChipSelected]}
+                    onPress={() => toggleCheckInDriver(d.id)}
+                  >
+                    <Text style={[styles.optionChipText, a.checkInDriverIds.includes(d.id) && styles.optionChipTextSelected]}>{d.label}</Text>
+                  </Pressable>
+                ))}
             </View>
           </>
         )}

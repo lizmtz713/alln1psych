@@ -169,13 +169,13 @@ export function hasVoiceSupport(): boolean {
   return true;
 }
 
-/** Play AI response using OpenAI TTS (Gauge's voice). Uses fetch + blob + FileReader for reliable binary in RN. */
+/** Play AI response using OpenAI TTS (Gauge's voice). Uses fetch + blob + FileReader for reliable binary in RN. Rejects if no API key so callers can show a hint. */
 export async function speakWithOpenAI(text: string): Promise<void> {
   try {
     const apiKey = await getOpenAIKey();
     if (!apiKey) {
       if (__DEV__) console.warn('TTS: No API key');
-      return;
+      throw new Error('NO_API_KEY');
     }
 
     if (__DEV__) console.log('TTS: Starting for:', text.slice(0, 40));

@@ -13,6 +13,7 @@ export interface DbProfile {
   age_group: string | null;
   communication_preference: string | null;
   love_language: string | null;
+  learning_style: string | null;
   onboarding_completed: boolean;
   push_token: string | null;
   created_at: string;

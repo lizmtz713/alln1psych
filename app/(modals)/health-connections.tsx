@@ -21,6 +21,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
+import { APP_CONFIG } from '../../src/lib/constants';
 import { useHealthStore } from '../../src/stores/healthStore';
 
 // Design System
@@ -218,7 +219,7 @@ export default function HealthConnectionsScreen() {
       } else {
         Alert.alert(
           'Permission Required',
-          'To use health data for gauge intelligence, please enable access in:\n\nSettings → Privacy & Security → Health → InGauge',
+          `To use health data for gauge intelligence, please enable access in:\n\nSettings → Privacy & Security → Health → ${APP_CONFIG.name}`,
           [
             { text: 'Cancel', style: 'cancel' },
             { text: 'Open Settings', onPress: () => Linking.openSettings() },
@@ -272,7 +273,7 @@ export default function HealthConnectionsScreen() {
             </View>
             <Text style={styles.heroTitle}>Body Data → Mind Intelligence</Text>
             <Text style={styles.heroText}>
-              Connect Apple Health to give InGauge access to your sleep, heart rate, activity, and cycle data. We transform raw numbers into personalized insights about your mental state.
+              Connect Apple Health to give {APP_CONFIG.name} access to your sleep, heart rate, activity, and cycle data. We transform raw numbers into personalized insights about your mental state.
             </Text>
             
             {/* Connection Status */}
@@ -404,7 +405,7 @@ export default function HealthConnectionsScreen() {
               
               <View style={styles.differenceRow}>
                 <View style={[styles.differenceLabel, { backgroundColor: COLORS.accentSoft }]}>
-                  <Text style={[styles.differenceLabelText, { color: COLORS.accent }]}>InGauge says:</Text>
+                  <Text style={[styles.differenceLabelText, { color: COLORS.accent }]}>{APP_CONFIG.name} says:</Text>
                 </View>
                 <Text style={styles.differenceValueHighlight}>
                   "You slept 5.5 hours, and you're on Day 24 of your cycle when energy naturally dips. Your State might feel 20% lower than usual today. That's not weakness — that's two systems working against you. What would 'good enough' look like?"

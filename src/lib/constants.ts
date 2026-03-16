@@ -381,11 +381,17 @@ export const COMPONENT_STYLES = {
 // ═══════════════════════════════════════════════════════════════════════
 // APP CONFIG
 // ═══════════════════════════════════════════════════════════════════════
+/** App display name, tagline, and framework name. InGauge = app; PHOSM = the body-mind/cockpit model. */
 export const APP_CONFIG = {
   name: 'InGauge',
   tagline: 'The Human Cockpit',
+  /** PHOSM = the framework/model (body–mind operating system) powering the cockpit. */
+  productName: 'PHOSM',
   accentColor: COLORS.accent,
 } as const;
+
+/** Alias for user-facing app name (use in UI) */
+export const APP_DISPLAY_NAME = APP_CONFIG.name;
 
 // ═══════════════════════════════════════════════════════════════════════
 // MUTED COLORS — Spectrum Mode / Accessibility

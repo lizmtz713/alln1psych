@@ -1,7 +1,7 @@
 /**
  * Me Tab — Profile & Settings
- * Reorganized: Identity, Your System, Insights, Goals, Sharing, Settings, Data Sources, Safety.
- * Collapsible sections, quick-jump, 6 gauges in 2-column grid.
+ * Five blocks: Identity, Growth, Foundations, Preferences & Data, Legal & Support.
+ * Me = who I am, what I'm working on, how my app is set up. Not a second Tools/Learn tab.
  */
 import { useState, useRef, useCallback } from 'react';
 import {
@@ -33,12 +33,14 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
+import { APP_CONFIG } from '../../src/lib/constants';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { useUserStore } from '../../src/stores/userStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { useCircleStore, type TemperatureVisibility } from '../../src/stores/circleStore';
 import { useEducationStore } from '../../src/stores/educationStore';
 import { useAchievementStore } from '../../src/stores/achievementStore';
+import { GLOBAL_DISCLAIMER } from '../../src/data/legalDisclaimers';
 
 // Design System
 const COLORS = {
@@ -62,17 +64,14 @@ const COLORS = {
 
 const APP_VERSION = '1.0.0';
 
-const SECTION_IDS = ['identity', 'system', 'insights', 'goals', 'share', 'settings', 'data', 'safety'] as const;
-const QUICK_JUMP_IDS = ['identity', 'system', 'insights', 'goals', 'share', 'settings'] as const;
+const SECTION_IDS = ['identity', 'growth', 'foundations', 'preferences', 'legal'] as const;
+const QUICK_JUMP_IDS = ['identity', 'growth', 'foundations', 'preferences', 'legal'] as const;
 const QUICK_JUMP_LABELS: Record<string, string> = {
   identity: 'Identity',
-  system: 'System',
-  insights: 'Insights',
-  goals: 'Goals',
-  share: 'Share',
-  settings: 'Settings',
-  data: 'Data',
-  safety: 'Safety',
+  growth: 'Growth',
+  foundations: 'Foundations',
+  preferences: 'Preferences',
+  legal: 'Legal',
 };
 
 const GAUGE_ROUTES: { id: string; route: string; emoji: string; title: string }[] = [
@@ -136,22 +135,58 @@ const TEMPERATURE_VISIBILITY_LABELS: Record<TemperatureVisibility, string> = {
 function TemperatureVisibilityRow() {
   const visibility = useCircleStore((s) => s.temperatureVisibility);
   const setVisibility = useCircleStore((s) => s.setTemperatureVisibility);
+  const onPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const allowSharing = (v: TemperatureVisibility) => {
+      setVisibility(v);
+    };
+    Alert.alert(
+      'Who can see your temperature?',
+      'Shared awareness, not monitoring. Choose who can see how you\'re doing.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: TEMPERATURE_VISIBILITY_LABELS.private, onPress: () => allowSharing('private') },
+        {
+          text: TEMPERATURE_VISIBILITY_LABELS.close_friends,
+          onPress: () => {
+            if (visibility === 'private') {
+              Alert.alert(
+                'Allow others to see your temperature?',
+                'Your temperature reflects how you\'re doing overall. You can change this anytime in Me → Preferences & Data.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Allow sharing', onPress: () => allowSharing('close_friends') },
+                ]
+              );
+            } else {
+              allowSharing('close_friends');
+            }
+          },
+        },
+        {
+          text: TEMPERATURE_VISIBILITY_LABELS.inner_circle,
+          onPress: () => {
+            if (visibility === 'private') {
+              Alert.alert(
+                'Allow others to see your temperature?',
+                'Your temperature reflects how you\'re doing overall. You can change this anytime in Me → Preferences & Data.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Allow sharing', onPress: () => allowSharing('inner_circle') },
+                ]
+              );
+            } else {
+              allowSharing('inner_circle');
+            }
+          },
+        },
+      ]
+    );
+  };
   return (
     <Pressable
       style={[styles.menuItemRow, styles.menuItemBorder]}
-      onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        Alert.alert(
-          'Who can see your temperature?',
-          'Shared awareness, not monitoring. Choose who can see how you\'re doing.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: TEMPERATURE_VISIBILITY_LABELS.private, onPress: () => setVisibility('private') },
-            { text: TEMPERATURE_VISIBILITY_LABELS.close_friends, onPress: () => setVisibility('close_friends') },
-            { text: TEMPERATURE_VISIBILITY_LABELS.inner_circle, onPress: () => setVisibility('inner_circle') },
-          ]
-        );
-      }}
+      onPress={onPress}
     >
       <View style={styles.menuItemLeft}>
         <View style={styles.menuIconWrap}><Ionicons name="thermometer-outline" size={20} color={COLORS.textSecondary} /></View>
@@ -183,13 +218,10 @@ export default function MeScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => ({
     identity: true,
-    system: true,
-    insights: false,
-    goals: false,
-    share: false,
-    settings: false,
-    data: false,
-    safety: false,
+    growth: true,
+    foundations: true,
+    preferences: false,
+    legal: false,
   }));
   
   const streak = getCheckInStreak();
@@ -253,7 +285,7 @@ export default function MeScreen() {
                   <Text style={styles.tierText}>Free Plan</Text>
                 </View>
               </View>
-              <Pressable style={[styles.avatar, { borderColor: tempColor }]} onPress={() => navigateTo('/(modals)/identity-setup')}>
+              <Pressable style={[styles.avatar, { borderColor: tempColor }]} onPress={() => navigateTo('/identity-setup')}>
                 <Text style={styles.avatarText}>{user.name?.charAt(0)?.toUpperCase() || '?'}</Text>
                 <View style={[styles.statusDot, { backgroundColor: tempColor }]} />
               </Pressable>
@@ -268,13 +300,9 @@ export default function MeScreen() {
               <View style={styles.statItem}><Text style={styles.statValue}>{members?.length || 0}</Text><Text style={styles.statLabel}>Circle</Text></View>
             </View>
             <View style={styles.profileActionsRow}>
-              <Pressable style={styles.editProfileBtn} onPress={() => navigateTo('/(modals)/identity-setup')}>
+              <Pressable style={styles.editProfileBtn} onPress={() => navigateTo('/identity-setup')}>
                 <Ionicons name="create-outline" size={18} color={COLORS.accent} />
                 <Text style={styles.editProfileText}>Edit Profile</Text>
-              </Pressable>
-              <Pressable style={[styles.editProfileBtn, styles.controlPanelBtn]} onPress={() => navigateTo('/profile')}>
-                <Ionicons name="options-outline" size={18} color={COLORS.accent} />
-                <Text style={styles.editProfileText}>Human Control Panel</Text>
               </Pressable>
             </View>
           </View>
@@ -303,24 +331,37 @@ export default function MeScreen() {
               <MenuItem icon="person-outline" label="Human Profile" subtitle="Life blueprint from the 12 questions" onPress={() => navigateTo('/profile/human-profile')} />
               <MenuItem icon="book-outline" label="Your Story" subtitle="Origins, culture, upbringing" onPress={() => navigateTo('/your-story')} />
               <MenuItem icon="id-card-outline" label="Identity" subtitle="Body, disability, gender" onPress={() => navigateTo('/profile/identity')} />
-              <MenuItem icon="people-outline" label="How You Connect" subtitle="Love language, communication" onPress={() => navigateTo('/profile/how-you-connect')} />
-              <MenuItem icon="sparkles-outline" label="What Gives You Life" subtitle="Interests, meaning, life chapter" onPress={() => navigateTo('/profile/what-gives-life')} />
-              <MenuItem icon="heart-outline" label="Personal Values" subtitle="What matters most — for alignment insights" onPress={() => navigateTo('/profile/values')} />
-              <MenuItem icon="shield-outline" label="Sensitive Topics" subtitle="Careful areas and triggers" onPress={() => navigateTo('/profile/sensitive')} />
-              <MenuItem icon="chatbubble-outline" label="In Your Own Words" subtitle="What makes you different" onPress={() => navigateTo('/profile/in-your-own-words')} isLast />
+              <MenuItem icon="options-outline" label="About you" subtitle="Values, how you connect, sensitive topics" onPress={() => navigateTo('/profile')} isLast />
             </View>
           </CollapsibleSection>
 
-          {/* 2. Your System — 6 gauges in 2-column grid */}
+          {/* 2. Growth */}
           <CollapsibleSection
-            id="system"
-            sectionLabel="YOUR SYSTEM"
-            title="Your System"
-            description="How your six gauges work together."
+            id="growth"
+            sectionLabel="GROWTH"
+            title="Growth"
+            description="What you're working on and how you're progressing."
             defaultOpen={true}
-            open={!!openSections.system}
-            onToggle={() => toggleSection('system')}
-            onLayout={captureSectionLayout('system')}
+            open={!!openSections.growth}
+            onToggle={() => toggleSection('growth')}
+            onLayout={captureSectionLayout('growth')}
+          >
+            <View style={styles.menuCard}>
+              <MenuItem icon="flag-outline" label="Goals" subtitle="What you're working toward" onPress={() => navigateTo('/profile/goals')} />
+              <MenuItem icon="trophy-outline" label="Achievements" badge={unlockedCount > 0 ? String(unlockedCount) : undefined} subtitle="Awards and progress" onPress={() => navigateTo('/profile/achievements')} isLast />
+            </View>
+          </CollapsibleSection>
+
+          {/* 3. Foundations — 6 gauges */}
+          <CollapsibleSection
+            id="foundations"
+            sectionLabel="FOUNDATIONS"
+            title="Foundations"
+            description="Your six gauges — body, state, emotion, connection, direction, alignment."
+            defaultOpen={true}
+            open={!!openSections.foundations}
+            onToggle={() => toggleSection('foundations')}
+            onLayout={captureSectionLayout('foundations')}
           >
             <View style={[styles.gaugeGrid, { gap: GAUGE_GRID_GAP }]}>
               {GAUGE_ROUTES.map((g) => (
@@ -332,100 +373,20 @@ export default function MeScreen() {
             </View>
           </CollapsibleSection>
 
-          {/* 3. Insights & History */}
+          {/* 4. Preferences & Data — two visual groups */}
           <CollapsibleSection
-            id="insights"
-            sectionLabel="INSIGHTS & HISTORY"
-            title="Insights & History"
-            description="Patterns, records, and your timeline over time."
+            id="preferences"
+            sectionLabel="PREFERENCES & DATA"
+            title="Preferences & Data"
+            description={`How ${APP_CONFIG.name} works for you — notifications, privacy, connected services.`}
             defaultOpen={false}
-            open={!!openSections.insights}
-            onToggle={() => toggleSection('insights')}
-            onLayout={captureSectionLayout('insights')}
+            open={!!openSections.preferences}
+            onToggle={() => toggleSection('preferences')}
+            onLayout={captureSectionLayout('preferences')}
           >
             <View style={styles.menuCard}>
-              <MenuItem icon="analytics-outline" label="Patterns & Insights" onPress={() => navigateTo('/(modals)/patterns')} />
-              <MenuItem icon="time-outline" label="Check-In History" onPress={() => navigateTo('/(modals)/history')} />
-              <MenuItem icon="calendar-outline" label="Your Human Timeline" subtitle="Your life record — patterns over time" onPress={() => navigateTo('/timeline')} />
-              <MenuItem icon="airplane-outline" label="Flight Log" subtitle="Pre-Flight & Post-Flight timeline" onPress={() => navigateTo('/flight-log')} />
-              <MenuItem icon="moon-outline" label="Cycle Intelligence" subtitle="Understand your cycle" onPress={() => navigateTo('/(modals)/cycle')} />
-              <MenuItem icon="trophy-outline" label="Awards & Achievements" badge={unlockedCount > 0 ? String(unlockedCount) : undefined} onPress={() => navigateTo('/profile/achievements')} isLast />
-            </View>
-          </CollapsibleSection>
-
-          {/* 4. Goals & Growth */}
-          <CollapsibleSection
-            id="goals"
-            sectionLabel="GOALS & GROWTH"
-            title="Goals & Growth"
-            description="Where you're headed and what you're building."
-            defaultOpen={false}
-            open={!!openSections.goals}
-            onToggle={() => toggleSection('goals')}
-            onLayout={captureSectionLayout('goals')}
-          >
-            <View style={styles.menuCard}>
-              <MenuItem icon="flag-outline" label="Active Goals" subtitle="What you are working toward" onPress={() => navigateTo('/profile/goals')} />
-              <MenuItem icon="bulb-outline" label="Goal Setter" subtitle="AI-assisted" onPress={() => navigateTo('/profile/goals')} />
-              <MenuItem icon="refresh-outline" label="Review & Reflect" subtitle="Look back and adjust" onPress={() => navigateTo('/profile/goals')} isLast />
-            </View>
-          </CollapsibleSection>
-
-          {/* 5. Sharing & Reports */}
-          <CollapsibleSection
-            id="share"
-            sectionLabel="SHARING & REPORTS"
-            title="Sharing & Reports"
-            description="What you can share with people who support you."
-            defaultOpen={false}
-            open={!!openSections.share}
-            onToggle={() => toggleSection('share')}
-            onLayout={captureSectionLayout('share')}
-          >
-            <View style={styles.menuCard}>
-              <TemperatureVisibilityRow />
-              <MenuItem icon="document-text-outline" label="Therapist Share" subtitle="Generate wellness reports" accentColor={COLORS.success} onPress={() => navigateTo('/(modals)/therapist-share')} />
-              <MenuItem icon="shield-checkmark-outline" label="Sovereignty Report" subtitle="Your full system overview" onPress={() => navigateTo('/(modals)/sovereignty-report')} />
-              <MenuItem icon="share-outline" label="Share Snapshot" subtitle="Share your current state" onPress={() => navigateTo('/(modals)/share-snapshot')} />
-              <MenuItem icon="star-outline" label="Personology Profile" subtitle="Your personality insights" onPress={() => navigateTo('/(modals)/relate')} isLast />
-            </View>
-          </CollapsibleSection>
-
-          {/* 6. Data Sources — moved above Settings */}
-          <CollapsibleSection
-            id="data"
-            sectionLabel="DATA SOURCES"
-            title="Data Sources"
-            description="The inputs that help your system learn."
-            defaultOpen={false}
-            open={!!openSections.data}
-            onToggle={() => toggleSection('data')}
-            onLayout={captureSectionLayout('data')}
-          >
-            <View style={styles.menuCard}>
-              <MenuItem icon="fitness-outline" label="Apple Health" subtitle="Sleep, activity, heart, cycle" accentColor={COLORS.success} onPress={() => navigateTo('/(modals)/health-connections')} />
-              <MenuItem icon="watch-outline" label="Apple Watch" subtitle="Real-time heart rate & HRV" onPress={() => navigateTo('/(modals)/health-connections')} />
-              <MenuItem icon="ellipse-outline" label="Oura Ring" subtitle="Sleep score, readiness, HRV" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', "Oura integration is in development. We'll notify you when it's ready!"); }} />
-              <MenuItem icon="pulse-outline" label="Whoop" subtitle="Strain, recovery, sleep" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', "Whoop integration is in development. We'll notify you when it's ready!"); }} />
-              <MenuItem icon="footsteps-outline" label="Fitbit" subtitle="Activity, sleep, stress" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', "Fitbit integration is in development. We'll notify you when it's ready!"); }} />
-              <MenuItem icon="navigate-outline" label="Garmin" subtitle="Training, body battery" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', "Garmin integration is in development. We'll notify you when it's ready!"); }} />
-              <MenuItem icon="calendar-outline" label="Calendar" subtitle="Context from your schedule" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', 'Calendar integration will help InGauge understand your day better. Coming soon!'); }} />
-              <MenuItem icon="location-outline" label="Location & Weather" subtitle="Environmental context" badge="Soon" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); Alert.alert('Coming Soon', 'Weather and location can affect your system. This integration is coming soon!'); }} isLast />
-            </View>
-          </CollapsibleSection>
-
-          {/* 7. Settings */}
-          <CollapsibleSection
-            id="settings"
-            sectionLabel="SETTINGS"
-            title="Settings"
-            description="How InGauge works for you."
-            defaultOpen={false}
-            open={!!openSections.settings}
-            onToggle={() => toggleSection('settings')}
-            onLayout={captureSectionLayout('settings')}
-          >
-            <View style={styles.menuCard}>
+              <Text style={styles.subgroupLabel}>App Preferences</Text>
+              <View style={styles.subgroupLine} />
               <View style={[styles.menuItemRow, styles.menuItemBorder]}>
                 <View style={styles.menuItemLeft}>
                   <View style={styles.menuIconWrap}><Ionicons name="notifications-outline" size={20} color={COLORS.textSecondary} /></View>
@@ -433,44 +394,56 @@ export default function MeScreen() {
                 </View>
                 <Switch value={notificationsEnabled} onValueChange={setNotificationsEnabled} trackColor={{ false: COLORS.border, true: COLORS.accent }} thumbColor="#fff" />
               </View>
+              <TemperatureVisibilityRow />
               <MenuItem icon="alarm-outline" label="Notifications & Reminders" onPress={() => navigateTo('/profile/preferences')} />
               <MenuItem icon="checkmark-circle-outline" label="Check-In Settings" onPress={() => navigateTo('/profile/preferences')} />
               <MenuItem icon="sparkles-outline" label="AI Preferences" onPress={() => navigateTo('/profile/preferences')} />
               <MenuItem icon="moon-outline" label="Appearance" subtitle="Dark mode" onPress={() => navigateTo('/(modals)/settings')} />
+              <MenuItem icon="newspaper-outline" label="News My Way" subtitle="Capacity-aware news & digest" onPress={() => navigateTo('/news-my-way')} isLast />
+            </View>
+            <View style={[styles.menuCard, styles.subgroupCard]}>
+              <Text style={styles.subgroupLabel}>Data & Integrations</Text>
+              <View style={styles.subgroupLine} />
+              <MenuItem icon="fitness-outline" label="Apple Health" subtitle="Sleep, activity, heart, cycle" accentColor={COLORS.success} onPress={() => navigateTo('/(modals)/health-connections')} />
+              <MenuItem icon="ellipse-outline" label="Oura Ring" subtitle="Sleep score, readiness, HRV" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(modals)/oura-connect'); }} />
+              <MenuItem icon="key-outline" label="Bring Your Own Key" subtitle="Use your OpenAI API key" onPress={() => navigateTo('/(modals)/settings')} />
               <MenuItem icon="shield-checkmark-outline" label="Privacy" onPress={() => navigateTo('/(modals)/settings')} />
               <MenuItem icon="diamond-outline" label="Upgrade to Pro" subtitle="Unlimited AI, voice, more" accentColor={COLORS.warning} onPress={() => navigateTo('/(modals)/settings')} />
-              <MenuItem icon="key-outline" label="Bring Your Own Key" subtitle="Use your OpenAI API key" onPress={() => navigateTo('/(modals)/settings')} />
               <MenuItem icon="person-outline" label="Account Settings" onPress={() => navigateTo('/(modals)/settings')} isLast />
             </View>
           </CollapsibleSection>
 
-          {/* 8. Safety / Data / Support */}
+          {/* 5. Legal & Support */}
           <CollapsibleSection
-            id="safety"
-            sectionLabel="SAFETY / DATA / SUPPORT"
-            title="Safety / Data / Support"
-            description="Privacy, support, and control."
+            id="legal"
+            sectionLabel="LEGAL & SUPPORT"
+            title="Legal & Support"
+            description="Safety, data use, and how to get help."
             defaultOpen={false}
-            open={!!openSections.safety}
-            onToggle={() => toggleSection('safety')}
-            onLayout={captureSectionLayout('safety')}
+            open={!!openSections.legal}
+            onToggle={() => toggleSection('legal')}
+            onLayout={captureSectionLayout('legal')}
           >
             <View style={styles.menuCard}>
               <MenuItem icon="heart-outline" label="Crisis Support (988)" subtitle="24/7 free support" accentColor={COLORS.error} onPress={() => Linking.openURL('tel:988')} showCall />
               <MenuItem icon="help-circle-outline" label="Help Center" onPress={() => Linking.openURL('https://docs.getingauge.com')} />
               <MenuItem icon="chatbox-outline" label="Send Feedback" onPress={() => Linking.openURL('mailto:feedback@getingauge.com')} />
-              <MenuItem icon="refresh-outline" label="Redo Onboarding" onPress={() => navigateTo('/(modals)/onboarding')} />
+              <MenuItem icon="refresh-outline" label="Redo Onboarding" onPress={() => navigateTo('/onboarding')} />
               <MenuItem icon="document-text-outline" label="Privacy Policy" onPress={() => Linking.openURL('https://getingauge.com/privacy')} />
               <MenuItem icon="document-text-outline" label="Terms & Conditions" onPress={() => Linking.openURL('https://getingauge.com/terms')} isLast />
             </View>
           </CollapsibleSection>
 
-          {/* Footer — Sign Out + Version only */}
+          {/* Footer — Disclaimer + Sign Out + Version */}
+          <Text style={styles.footerDisclaimer} numberOfLines={2}>{GLOBAL_DISCLAIMER.short}</Text>
+          <Pressable style={styles.footerLearnMore} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); navigateTo('/(modals)/disclaimer'); }}>
+            <Text style={styles.footerLink}>{GLOBAL_DISCLAIMER.learnMoreLabel}</Text>
+          </Pressable>
           <Pressable style={styles.signOutBtn} onPress={async () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); await signOut(); }}>
             <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
             <Text style={styles.signOutText}>Sign Out</Text>
           </Pressable>
-          <Text style={styles.versionText}>InGauge v{APP_VERSION}</Text>
+          <Text style={styles.versionText}>{APP_CONFIG.name} v{APP_VERSION}</Text>
         </ScrollView>
       </View>
     </ErrorBoundary>
@@ -623,14 +596,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
 
-  // Edit Profile + Human Control Panel
+  // Edit Profile
   profileActionsRow: {
-    flexDirection: 'row',
-    gap: 8,
     marginTop: 12,
   },
   editProfileBtn: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -639,7 +609,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 8,
   },
-  controlPanelBtn: {},
   editProfileText: {
     fontSize: 15,
     fontWeight: '600',
@@ -749,6 +718,25 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     overflow: 'hidden',
   },
+  subgroupLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+    letterSpacing: 1.2,
+    marginTop: 4,
+    marginBottom: 6,
+    marginHorizontal: 16,
+  },
+  subgroupLine: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginBottom: 8,
+    marginHorizontal: 16,
+  },
+  subgroupCard: {
+    marginTop: 0,
+    marginBottom: 24,
+  },
   menuItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -817,6 +805,16 @@ const styles = StyleSheet.create({
   },
 
   // Footer
+  footerDisclaimer: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginTop: 16,
+    paddingHorizontal: 24,
+  },
+  footerLearnMore: {
+    marginTop: 4,
+  },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',

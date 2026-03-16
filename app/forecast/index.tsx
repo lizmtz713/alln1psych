@@ -1,5 +1,5 @@
 /**
- * Life Forecast — Full week forecast screen.
+ * Human Weather Forecast — Full week: how you'll likely feel, from current system signals.
  */
 
 import React, { useMemo } from 'react';
@@ -8,12 +8,40 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getFullWeekForecast } from '../../src/services/forecastService';
+import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { COLORS, SPACING } from '../../src/lib/constants';
 
 export default function ForecastScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { days, patterns } = useMemo(() => getFullWeekForecast(), []);
+  const [body, state, emotion, connection, direction, alignment] = useCockpitStore((s) => [
+    s.body.value,
+    s.state.value,
+    s.emotion.value,
+    s.connection.value,
+    s.direction.value,
+    s.alignment.value,
+  ]) as [number, number, number, number, number, number];
+  const checkInContext = useCockpitStore((s) => s.checkInContext);
+  const gaugeValues = useMemo(
+    () => ({
+      ...(body >= 0 && { body }),
+      ...(state >= 0 && { state }),
+      ...(emotion >= 0 && { emotion }),
+      ...(connection >= 0 && { connection }),
+      ...(direction >= 0 && { direction }),
+      ...(alignment >= 0 && { alignment }),
+    }),
+    [body, state, emotion, connection, direction, alignment]
+  );
+  const { days, patterns } = useMemo(
+    () =>
+      getFullWeekForecast({
+        gauges: gaugeValues,
+        checkInContext,
+      }),
+    [gaugeValues, checkInContext]
+  );
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
@@ -21,7 +49,7 @@ export default function ForecastScreen() {
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
           <Ionicons name="chevron-back" size={24} color={COLORS.text} />
         </Pressable>
-        <Text style={styles.title}>Week Forecast</Text>
+        <Text style={styles.title}>Human Weather</Text>
         <View style={styles.placeholder} />
       </View>
       <ScrollView

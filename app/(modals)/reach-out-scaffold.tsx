@@ -145,6 +145,20 @@ export default function ReachOutScaffoldScreen() {
             <Ionicons name="chevron-forward" size={20} color={TEXT_MUTED} />
           </Pressable>
         ))}
+        <Pressable
+          style={({ pressed }) => [styles.optionCard, pressed && styles.cardPressed]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/tools/tone-check');
+          }}
+        >
+          <Text style={styles.optionEmoji}>🎯</Text>
+          <View style={styles.optionContent}>
+            <Text style={styles.optionTitle}>Check tone before you send</Text>
+            <Text style={styles.optionDescription}>See how your message might sound — then send a better one</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={TEXT_MUTED} />
+        </Pressable>
       </View>
 
       {/* Reassurance footer */}

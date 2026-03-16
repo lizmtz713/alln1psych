@@ -9,7 +9,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS } from '../lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, SHADOWS, APP_CONFIG } from '../lib/constants';
 import type { OperatingSnapshotInsight } from '../services/shareInsight';
 
 // ============================================
@@ -188,7 +188,7 @@ export default function OperatingSnapshotCard({ insight, compact = false }: Prop
       
       {/* Footer */}
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Shared with love via InGauge</Text>
+        <Text style={styles.footerText}>Shared with love via {APP_CONFIG.name}</Text>
         <Text style={styles.footerTagline}>Building relational literacy, together</Text>
       </View>
     </View>
