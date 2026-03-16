@@ -53,6 +53,11 @@ export function WrappedStoryCards({ cards, onComplete, onShare }: WrappedStoryCa
     setIndex(e.nativeEvent.position);
   }, []);
 
+  const goNext = useCallback(() => {
+    if (index >= cards.length - 1) return;
+    pagerRef.current?.setPage(index + 1);
+  }, [index, cards.length]);
+
   if (!cards.length) {
     return (
       <View style={[styles.container, { width, height }]}>
@@ -66,11 +71,6 @@ export function WrappedStoryCards({ cards, onComplete, onShare }: WrappedStoryCa
 
   const currentCard = cards[index];
   const isShareCard = currentCard?.id === 'end';
-
-  const goNext = useCallback(() => {
-    if (index >= cards.length - 1) return;
-    pagerRef.current?.setPage(index + 1);
-  }, [index, cards.length]);
 
   return (
     <View style={[styles.wrapper, { width, height }]}>

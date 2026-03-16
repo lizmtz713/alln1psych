@@ -62,7 +62,7 @@ const COLORS = {
   red: '#EF4444',
 };
 
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '0.1.0 (Internal Test)';
 
 const SECTION_IDS = ['identity', 'growth', 'foundations', 'preferences', 'legal'] as const;
 const QUICK_JUMP_IDS = ['identity', 'growth', 'foundations', 'preferences', 'legal'] as const;

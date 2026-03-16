@@ -9,6 +9,7 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "npx eslint .",
+    "lint:fix": "npx eslint . --fix",
     "test": "node scripts/run-tests.js",
     "audit:routes": "node scripts/audit-routes.js",
     "audit:ownership": "node scripts/audit-route-ownership.js",

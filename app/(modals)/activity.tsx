@@ -223,9 +223,33 @@ export default function ActivityScreen() {
   const convMessages = useConversationStore((s) => s.messages);
   const completedLessons = useEducationStore((s) => s.completedLessons);
 
+  // Recovery check (athlete mode) — hooks must be unconditional
+  const [rcSleep, setRcSleep] = useState<number>(3);
+  const [rcSoreness, setRcSoreness] = useState<number>(3);
+  const [rcEnergy, setRcEnergy] = useState<number>(3);
+  const [rcMood, setRcMood] = useState<number>(3);
+  const [rcSubmitted, setRcSubmitted] = useState(false);
+
+  // Pre-competition (athlete mode)
+  const [pcStep, setPcStep] = useState(1);
+  const [pcArousal, setPcArousal] = useState<'too-low' | 'optimal' | 'too-high' | null>(null);
+
+  // Sensory check (spectrum mode)
+  const [scVisual, setScVisual] = useState<number>(3);
+  const [scAuditory, setScAuditory] = useState<number>(3);
+  const [scTactile, setScTactile] = useState<number>(3);
+  const [scOlfactory, setScOlfactory] = useState<number>(3);
+  const [scProprioceptive, setScProprioceptive] = useState<number>(3);
+
+  // Emotion cards (spectrum mode)
+  const [selectedCard, setSelectedCard] = useState<{ emoji: string; name: string; color: string; body: string } | null>(null);
+
   // Fetch mood-patterns AI insights when viewing that activity (uses central AI service)
+  const actId = activity?.id;
+  const mpYear = mpMonth.getFullYear();
+  const mpMonthNum = mpMonth.getMonth();
   useEffect(() => {
-    if (activity?.id !== 'mood-patterns') return;
+    if (actId !== 'mood-patterns') return;
     let cancelled = false;
     const run = async () => {
       setMpInsightsLoading(true);
@@ -252,7 +276,7 @@ export default function ActivityScreen() {
     };
     run();
     return () => { cancelled = true; };
-  }, [activity?.id, mpMonth.getFullYear(), mpMonth.getMonth()]);
+  }, [actId, mpYear, mpMonthNum]);
 
   useEffect(() => {
     if (!running || activity?.id !== 'breathing') return;
@@ -1507,12 +1531,6 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
   // ============================================
 
   // ----- RECOVERY CHECK (Athlete Mode) -----
-  const [rcSleep, setRcSleep] = useState<number>(3);
-  const [rcSoreness, setRcSoreness] = useState<number>(3);
-  const [rcEnergy, setRcEnergy] = useState<number>(3);
-  const [rcMood, setRcMood] = useState<number>(3);
-  const [rcSubmitted, setRcSubmitted] = useState(false);
-
   if (activity.id === 'recovery-check') {
     const overallRecovery = Math.round((rcSleep + rcSoreness + rcEnergy + rcMood) / 4 * 20);
     const recoveryLabel = overallRecovery >= 80 ? 'Ready to train hard' : overallRecovery >= 60 ? 'Light training recommended' : overallRecovery >= 40 ? 'Active recovery day' : 'Rest day — prioritize recovery';
@@ -1587,9 +1605,6 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
   }
 
   // ----- PRE-COMPETITION PREP (Athlete Mode) -----
-  const [pcStep, setPcStep] = useState(1);
-  const [pcArousal, setPcArousal] = useState<'too-low' | 'optimal' | 'too-high' | null>(null);
-
   if (activity.id === 'pre-competition') {
     return (
       <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
@@ -1673,12 +1688,6 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
   // ============================================
 
   // ----- SENSORY CHECK (Spectrum Mode) -----
-  const [scVisual, setScVisual] = useState<number>(3);
-  const [scAuditory, setScAuditory] = useState<number>(3);
-  const [scTactile, setScTactile] = useState<number>(3);
-  const [scOlfactory, setScOlfactory] = useState<number>(3);
-  const [scProprioceptive, setScProprioceptive] = useState<number>(3);
-
   if (activity.id === 'sensory-check') {
     const sensorySuggestions = () => {
       const suggestions: string[] = [];
@@ -1859,8 +1868,6 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
   ];
 
   if (activity.id === 'emotion-cards') {
-    const [selectedCard, setSelectedCard] = useState<typeof EMOTION_CARDS[0] | null>(null);
-
     return (
       <ScrollView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]} contentContainerStyle={styles.scrollContent}>
         <Pressable style={styles.backBtn} onPress={() => router.back()}>

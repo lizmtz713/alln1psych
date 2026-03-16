@@ -138,6 +138,9 @@ export default function GaugeDetailScreen() {
     withHistory: true,
   });
 
+  const cycleData = useCycleData();
+  const getInsightsForGaugeFromStore = useCycleStore((s) => s.getInsightsForGauge);
+
   if (!config) {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -329,12 +332,9 @@ export default function GaugeDetailScreen() {
 
         {/* 4b. CYCLE CONTEXT — if cycle tracking enabled */}
         {(() => {
-          const { trackingEnabled, currentPhase, dayOfCycle, phaseInfo } = useCycleData();
-          const getInsightsForGauge = useCycleStore((s) => s.getInsightsForGauge);
-          
+          const { trackingEnabled, currentPhase, dayOfCycle, phaseInfo } = cycleData;
           if (!trackingEnabled || !currentPhase || !phaseInfo) return null;
-          
-          const cycleInsights = getInsightsForGauge(gaugeId);
+          const cycleInsights = getInsightsForGaugeFromStore(gaugeId);
           const contextInsight = cycleInsights.find((i) => i.type === 'context');
           const patternInsight = cycleInsights.find((i) => i.type === 'pattern');
           
