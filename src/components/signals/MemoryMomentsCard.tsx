@@ -43,7 +43,7 @@ export function MemoryMomentsCard({
             <Text style={styles.cta}>Want to plan something?</Text>
             {onPlanSomething ? (
               <Pressable
-                style={({ p }) => [styles.btn, p && styles.btnPressed]}
+                style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   onPlanSomething(birthday.light);
