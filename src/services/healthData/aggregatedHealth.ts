@@ -20,7 +20,7 @@ export interface AggregatedHealthResult {
   bodyScore: number | null;
   stateScore: number | null;
   note: string | null;
-  sources: ('healthkit' | 'oura')[];
+  sources: ('healthkit' | 'oura' | 'health_connect')[];
 }
 
 /**

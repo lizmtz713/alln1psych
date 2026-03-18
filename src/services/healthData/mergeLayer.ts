@@ -20,7 +20,7 @@ function mergePhysiology(
     preferOura: boolean
   ) => {
     const v = preferOura ? (ou ?? hk) : (hk ?? ou);
-    if (v != null) (out as Record<string, unknown>)[key] = v;
+    if (v != null) (out as unknown as Record<string, unknown>)[key] = v;
   };
 
   set('sleepDurationHours', healthKit.sleepDurationHours ?? undefined, oura.sleepDurationHours ?? undefined, true);

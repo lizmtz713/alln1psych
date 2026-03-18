@@ -3,7 +3,7 @@
  * Birthday reminders, last time you saw someone, CTAs to reconnect.
  */
 
-import type { Light } from '../types/lights';
+import type { Light, ConnectionEntry } from '../types/lights';
 
 export interface BirthdayReminder {
   light: Light;
@@ -70,21 +70,25 @@ export function getLastTimeMoments(lights: Light[], minDaysAgo: number = 21, max
 
   for (const light of lights) {
     if (light.tier === 'archived' || !light.connectionLog?.length) continue;
-    const sorted = [...light.connectionLog].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const sorted = ([...light.connectionLog] as ConnectionEntry[]).sort((a, b) => new Date(b.date as unknown as string).getTime() - new Date(a.date as unknown as string).getTime());
     const last = sorted[0];
-    const lastDate = new Date(last.date);
+    const lastDate = new Date(last.date as unknown as string);
     const diffMs = now.getTime() - lastDate.getTime();
     const daysAgo = Math.floor(diffMs / 86400000);
     if (daysAgo < minDaysAgo) continue;
 
     const activities: string[] = [];
-    for (const e of sorted.slice(0, 3)) {
-      if (e.type === 'in-person' && e.summary) activities.push(e.summary);
-      else if (e.type === 'in-person') activities.push('Got together');
-      else if (e.type === 'video') activities.push('Video call');
-      else if (e.type === 'call' && e.duration != null) activities.push(`${e.duration} min call`);
+    const recentEntries = sorted.slice(0, 3);
+    for (let i = 0; i < recentEntries.length; i++) {
+      const e = recentEntries[i];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const entryType = e.type as any;
+      if (entryType === 'in-person' && e.summary) activities.push(e.summary);
+      else if (entryType === 'in-person') activities.push('Got together');
+      else if (entryType === 'video') activities.push('Video call');
+      else if (entryType === 'call' && e.duration != null) activities.push(`${e.duration} min call`);
       else if (e.note && e.note.length <= 30) activities.push(e.note);
-      else if (e.type === 'in-person' || e.type === 'social') activities.push('Hangout');
+      else if (entryType === 'in-person' || entryType === 'social') activities.push('Hangout');
     }
     const lastActivities = [...new Set(activities)].slice(0, 3);
     out.push({ light, lastDate, lastActivities, daysAgo });
