@@ -12,7 +12,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../lib/constants';
+import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, APP_CONFIG } from '../lib/constants';
 
 type GaugeName = 'body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment';
 
@@ -78,7 +78,7 @@ export function GlanceWidgetSmall({ gauges, systemScore, onPress }: GlanceWidget
         <Text style={styles.smallScore}>
           {score >= 0 ? score : '—'}
         </Text>
-        <Text style={styles.smallLabel}>InGauge</Text>
+        <Text style={styles.smallLabel}>{APP_CONFIG.name}</Text>
       </LinearGradient>
     </Pressable>
   );
@@ -145,7 +145,7 @@ export function GlanceWidgetLarge({ gauges, onPress }: GlanceWidgetProps) {
             {score >= 0 ? score : '—'}
           </Text>
           <View>
-            <Text style={styles.largeTitle}>InGauge</Text>
+            <Text style={styles.largeTitle}>{APP_CONFIG.name}</Text>
             <Text style={[styles.largeStatus, { color: gradient[0] }]}>
               {getStatusText(score)}
             </Text>

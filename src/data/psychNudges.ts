@@ -110,7 +110,7 @@ export const MORNING_NUDGES: NudgeTemplate = {
     {
       text: "Morning. How are you waking up today? Not how you 'should' feel - how you actually feel.",
       followUp: "Want to do a quick check-in?",
-      action: { label: "Check in", route: "/checkin" },
+      action: { label: "Check in", route: "/(modals)/cockpit-checkin" },
     },
     {
       text: "Hey {name}. New day, clean slate. Whatever yesterday was, today is different.",
@@ -118,7 +118,7 @@ export const MORNING_NUDGES: NudgeTemplate = {
     },
     {
       text: "Good morning. Before the day takes over - how's your body feeling right now?",
-      action: { label: "Body scan", route: "/tools/body-scan" },
+      action: { label: "Body scan", route: "/(modals)/activity?id=body-scan" },
     },
     {
       text: "Rise and shine isn't mandatory. Rise and exist is enough. How are you?",
@@ -149,7 +149,7 @@ export const EVENING_NUDGES: NudgeTemplate = {
   messages: [
     {
       text: "Day's winding down. How did it go? Not the tasks - you. How are YOU?",
-      action: { label: "Evening check-in", route: "/checkin" },
+      action: { label: "Evening check-in", route: "/(modals)/cockpit-checkin" },
     },
     {
       text: "Hey {name}. Before you scroll or zone out - one thing that went okay today?",
@@ -200,7 +200,7 @@ export const LATE_NIGHT_NUDGES: NudgeTemplate = {
     },
     {
       text: "Late night thoughts hit different. If you need to process something, I'm awake.",
-      action: { label: "Journal", route: "/tools/journal" },
+      action: { label: "Journal", route: "/(modals)/new-journal" },
     },
     {
       text: "3am brain lies to you. Whatever feels huge right now might look different in daylight. But I hear you.",
@@ -231,7 +231,7 @@ export const STATE_DROP_NUDGES: NudgeTemplate = {
     },
     {
       text: "Your nervous system seems activated lately. That's exhausting. What would help right now?",
-      action: { label: "Breathing exercise", route: "/tools/breathing" },
+      action: { label: "Breathing exercise", route: "/(modals)/activity?id=breathing" },
     },
     {
       text: "Low State isn't weakness - it's data. Your system is telling you something. Want to explore what?",
@@ -269,7 +269,7 @@ export const BODY_DROP_NUDGES: NudgeTemplate = {
     },
     {
       text: "Physical state affects everything else. Even one small thing - a glass of water, a stretch - counts.",
-      action: { label: "Body scan", route: "/tools/body-scan" },
+      action: { label: "Body scan", route: "/(modals)/activity?id=body-scan" },
     },
   ],
 };
@@ -315,14 +315,14 @@ export const EMOTION_DROP_NUDGES: NudgeTemplate = {
   messages: [
     {
       text: "Emotions have been heavy, huh? You don't have to fix anything. But I'm here if you want to name what's going on.",
-      action: { label: "Emotion wheel", route: "/tools/emotion-wheel" },
+      action: { label: "Emotion wheel", route: "/(modals)/activity?id=emotion-wheel" },
     },
     {
       text: "Low Emotion gauge. That can mean sad, numb, overwhelmed, or something you can't name yet. All valid.",
     },
     {
       text: "When emotions are low for a while, sometimes writing helps. Not to solve - just to witness yourself.",
-      action: { label: "Journal", route: "/tools/journal" },
+      action: { label: "Journal", route: "/(modals)/new-journal" },
     },
     {
       text: "Whatever you're feeling - or not feeling - it's okay. Numbness is a feeling too. I see you.",
@@ -469,7 +469,7 @@ export const NO_CHECKIN_NUDGES: NudgeTemplate = {
     },
     {
       text: "Just checking in. You haven't logged in a couple days. Everything okay?",
-      action: { label: "Quick check-in", route: "/checkin" },
+      action: { label: "Quick check-in", route: "/(modals)/cockpit-checkin" },
     },
     {
       text: "Missing you over here. Whenever you want to check in, I'm around.",

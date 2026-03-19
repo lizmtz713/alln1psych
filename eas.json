@@ -17,6 +17,12 @@
         "simulator": false
       }
     },
+    "testflight": {
+      "distribution": "store",
+      "ios": {
+        "simulator": false
+      }
+    },
     "production": {
       "autoIncrement": true
     }

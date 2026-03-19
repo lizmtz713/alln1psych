@@ -36,9 +36,11 @@ import {
 import { getOpenAIKey, setOpenAIKey } from '../../src/services/ai';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, APP_CONFIG } from '../../src/lib/constants';
 import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
 import { useFocusMode } from '../../src/hooks/useOnboarding';
+import { useLegalConsentStore } from '../../src/stores/legalConsentStore';
+import { PRIVACY_DASHBOARD } from '../../src/data/legalDisclaimers';
 
 // Use design system colors
 const ACCENT = COLORS.accent;
@@ -676,7 +678,7 @@ function PremiumCard() {
         <View style={premiumStyles.row}>
           <Ionicons name="star" size={24} color="#FFD700" />
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={premiumStyles.title}>InGauge Premium</Text>
+            <Text style={premiumStyles.title}>{APP_CONFIG.name} Premium</Text>
             <Text style={premiumStyles.subtitle}>Unlimited access • All features</Text>
           </View>
         </View>
@@ -789,6 +791,10 @@ const premiumStyles = StyleSheet.create({
 });
 
 export default function SettingsScreen() {
+  const allowAiLearning = useLegalConsentStore((s) => s.allowAiLearning);
+  const voiceStorageEnabled = useLegalConsentStore((s) => s.voiceStorageEnabled);
+  const setAllowAiLearning = useLegalConsentStore((s) => s.setAllowAiLearning);
+  const setVoiceStorageEnabled = useLegalConsentStore((s) => s.setVoiceStorageEnabled);
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const settings = useSettingsStore();
@@ -966,7 +972,7 @@ export default function SettingsScreen() {
               value={settings.aiVoiceEnabled && usePremiumStore.getState().isPremium()}
               onValueChange={(v) => {
                 if (!usePremiumStore.getState().isPremium()) {
-                  Alert.alert('Premium Feature', 'Voice responses are available with InGauge Premium.', [
+                  Alert.alert('Premium Feature', `Voice responses are available with ${APP_CONFIG.name} Premium.`, [
                     { text: 'Maybe Later', style: 'cancel' },
                     { text: 'Upgrade', onPress: () => Alert.alert('Coming Soon', 'Premium subscriptions launching soon!') },
                   ]);
@@ -986,7 +992,7 @@ export default function SettingsScreen() {
         <>
           <Text style={styles.sectionTitle}>My PHOSM</Text>
           <View style={styles.card}>
-            <Pressable style={styles.row} onPress={() => router.push('/(modals)/foundation-body')}>
+            <Pressable style={styles.row} onPress={() => router.push('/foundation/body')}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <Text style={{ fontSize: 24 }}>🫀</Text>
                 <View style={{ flex: 1 }}>
@@ -997,7 +1003,7 @@ export default function SettingsScreen() {
               <Ionicons name="chevron-forward" size={20} color={TEXT_MUTED} />
             </Pressable>
             <View style={styles.divider} />
-            <Pressable style={styles.row} onPress={() => router.push('/(modals)/foundation-state')}>
+            <Pressable style={styles.row} onPress={() => router.push('/foundation/state')}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <Text style={{ fontSize: 24 }}>⚡</Text>
                 <View style={{ flex: 1 }}>
@@ -1008,7 +1014,7 @@ export default function SettingsScreen() {
               <Ionicons name="chevron-forward" size={20} color={TEXT_MUTED} />
             </Pressable>
             <View style={styles.divider} />
-            <Pressable style={styles.row} onPress={() => router.push('/(modals)/foundation-emotion')}>
+            <Pressable style={styles.row} onPress={() => router.push('/foundation/emotion')}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <Text style={{ fontSize: 24 }}>💛</Text>
                 <View style={{ flex: 1 }}>
@@ -1126,7 +1132,7 @@ export default function SettingsScreen() {
         <View style={styles.card}>
           <Pressable 
             style={styles.row} 
-            onPress={() => router.push('/(modals)/health-connections')}
+            onPress={() => router.push('/(modals)/oura-connect')}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
               <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#7C4DFF22', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
@@ -1221,22 +1227,75 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Data */}
-        <Text style={styles.sectionTitle}>Your Data</Text>
+        {/* Legal — always accessible */}
+        <Text style={styles.sectionTitle}>Legal</Text>
         <View style={styles.card}>
+          <Pressable
+            style={styles.row}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(modals)/disclaimer'); }}
+          >
+            <Text style={styles.rowLabel}>Disclaimer</Text>
+            <Text style={styles.rowHint}>What {APP_CONFIG.name} is and is not</Text>
+            <Ionicons name="chevron-forward" size={20} color={TEXT_DIM} />
+          </Pressable>
+          <View style={styles.divider} />
+          <Pressable
+            style={styles.row}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(modals)/data-use'); }}
+          >
+            <Text style={styles.rowLabel}>How your data is used</Text>
+            <Ionicons name="chevron-forward" size={20} color={TEXT_DIM} />
+          </Pressable>
+        </View>
+
+        {/* Privacy & Data — dashboard */}
+        <Text style={styles.sectionTitle}>{PRIVACY_DASHBOARD.title}</Text>
+        <View style={styles.card}>
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.rowLabel}>{PRIVACY_DASHBOARD.aiLearning}</Text>
+              <Text style={styles.rowHint}>{PRIVACY_DASHBOARD.aiLearningHint}</Text>
+            </View>
+            <Switch
+              value={allowAiLearning}
+              onValueChange={(v) => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setAllowAiLearning(v); }}
+              trackColor={{ false: '#2A2A3A', true: ACCENT + '60' }}
+              thumbColor={allowAiLearning ? ACCENT : TEXT_DIM}
+            />
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.rowLabel}>{PRIVACY_DASHBOARD.voiceStorage}</Text>
+              <Text style={styles.rowHint}>{PRIVACY_DASHBOARD.voiceStorageHint}</Text>
+            </View>
+            <Switch
+              value={voiceStorageEnabled}
+              onValueChange={(v) => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setVoiceStorageEnabled(v); }}
+              trackColor={{ false: '#2A2A3A', true: ACCENT + '60' }}
+              thumbColor={voiceStorageEnabled ? ACCENT : TEXT_DIM}
+            />
+          </View>
+          <View style={styles.divider} />
           <Pressable style={styles.row} onPress={handleExportData}>
-            <Text style={styles.rowLabel}>Export all data</Text>
+            <View>
+              <Text style={styles.rowLabel}>{PRIVACY_DASHBOARD.downloadData}</Text>
+              <Text style={styles.rowHint}>{PRIVACY_DASHBOARD.downloadDataHint}</Text>
+            </View>
             <Ionicons name="download-outline" size={22} color={TEXT_MUTED} />
+          </Pressable>
+          <View style={styles.divider} />
+          <Pressable style={styles.row} onPress={handleClearData}>
+            <View>
+              <Text style={[styles.rowLabel, { color: '#F87171' }]}>{PRIVACY_DASHBOARD.deleteData}</Text>
+              <Text style={styles.rowHint}>{PRIVACY_DASHBOARD.deleteDataHint}</Text>
+            </View>
+            <Ionicons name="trash-outline" size={22} color="#F87171" />
           </Pressable>
           <View style={styles.divider} />
           <Pressable style={styles.row} onPress={handleShareWithTherapist}>
             <Text style={styles.rowLabel}>Share with therapist</Text>
             <Ionicons name="share-outline" size={22} color={TEXT_MUTED} />
-          </Pressable>
-          <View style={styles.divider} />
-          <Pressable style={styles.row} onPress={handleClearData}>
-            <Text style={[styles.rowLabel, { color: '#F87171' }]}>Clear all data</Text>
-            <Ionicons name="trash-outline" size={22} color="#F87171" />
           </Pressable>
         </View>
 
@@ -1244,15 +1303,15 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>Safety & Ethics</Text>
         <View style={styles.card}>
           <View style={styles.disclaimerBox}>
-            <Text style={styles.disclaimerTitle}>What InGauge Is</Text>
+            <Text style={styles.disclaimerTitle}>What {APP_CONFIG.name} Is</Text>
             <Text style={styles.disclaimerText}>
-              InGauge is a self-awareness tool — an instrument panel for understanding your own system. 
+              {APP_CONFIG.name} is a self-awareness tool — an instrument panel for understanding your own system. 
               It observes and reflects, never judges or diagnoses.
             </Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.disclaimerBox}>
-            <Text style={styles.disclaimerTitle}>What InGauge Is Not</Text>
+            <Text style={styles.disclaimerTitle}>What {APP_CONFIG.name} Is Not</Text>
             <Text style={styles.disclaimerText}>
               • Not a medical device or diagnostic tool{'\n'}
               • Not a replacement for therapy or professional care{'\n'}

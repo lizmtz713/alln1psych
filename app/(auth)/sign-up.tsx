@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
+import { COLORS, BORDER_RADIUS, APP_CONFIG } from '../../src/lib/constants';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { GoogleSignInButton } from '../../src/components/GoogleSignInButton';
 import { supabase } from '../../src/lib/supabase';
@@ -23,10 +23,10 @@ import { useUserStore } from '../../src/stores/userStore';
 
 const HAS_GOOGLE = Boolean(process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim());
 
-async function routeAfterSignIn(userId: string): Promise<'/(tabs)' | '/(modals)/onboarding' | '/'> {
+async function routeAfterSignIn(userId: string): Promise<'/(tabs)' | '/onboarding' | '/'> {
   const { data: profile } = await supabase.from('profiles').select('onboarding_completed, name, age_group').eq('id', userId).single();
   if (profile?.onboarding_completed) return '/(tabs)';
-  if (profile && (profile.name || profile.age_group)) return '/(modals)/onboarding';
+  if (profile && (profile.name || profile.age_group)) return '/onboarding';
   return '/';
 }
 
@@ -86,7 +86,7 @@ export default function SignUpScreen() {
       }
 
       const route = data?.user?.id ? await routeAfterSignIn(data.user.id) : '/';
-      if (route === '/(tabs)' || route === '/(modals)/onboarding') {
+      if (route === '/(tabs)' || route === '/onboarding') {
         router.replace(route as any);
       } else {
         router.replace('/');
@@ -222,7 +222,7 @@ export default function SignUpScreen() {
           <Text style={styles.ageLabel}>I confirm I am 13 years of age or older</Text>
         </Pressable>
         {!ageConfirm && (
-          <Text style={styles.ageHint}>InGauge is available for users 13 and older. We're working on a family plan for younger users.</Text>
+          <Text style={styles.ageHint}>{APP_CONFIG.name} is available for users 13 and older. We're working on a family plan for younger users.</Text>
         )}
 
         <Pressable

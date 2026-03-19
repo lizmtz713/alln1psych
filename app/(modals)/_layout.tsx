@@ -10,15 +10,15 @@ export default function ModalsLayout() {
         animationTypeForReplace: 'push',
       }}
     >
-      <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
       <Stack.Screen name="mood-checkin" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="invite-circle" options={{ presentation: 'modal' }} />
       <Stack.Screen name="new-journal" options={{ presentation: 'modal' }} />
       <Stack.Screen name="role-play" options={{ presentation: 'modal' }} />
       <Stack.Screen name="activity" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="help-someone" options={{ presentation: 'modal' }} />
       <Stack.Screen name="cockpit-checkin" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="quick-log" options={{ presentation: 'modal' }} />
       <Stack.Screen name="gauge-detail" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="body-maintenance" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="body-maintenance-edit" options={{ presentation: 'modal' }} />
       <Stack.Screen name="replay" options={{ presentation: 'modal' }} />
       <Stack.Screen name="decode" options={{ presentation: 'modal' }} />
       <Stack.Screen name="relate" options={{ presentation: 'modal' }} />
@@ -28,6 +28,7 @@ export default function ModalsLayout() {
       <Stack.Screen name="weekly-insight" options={{ presentation: 'modal' }} />
       <Stack.Screen name="resolve" options={{ presentation: 'modal' }} />
       <Stack.Screen name="health-connections" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="oura-connect" options={{ presentation: 'modal' }} />
       <Stack.Screen name="notification-settings" options={{ presentation: 'modal' }} />
       <Stack.Screen name="heart-inbox" options={{ presentation: 'modal' }} />
       <Stack.Screen name="heart-mail-detail" options={{ presentation: 'modal' }} />
@@ -39,15 +40,12 @@ export default function ModalsLayout() {
       <Stack.Screen name="cycle" options={{ presentation: 'modal' }} />
       <Stack.Screen name="debrief" options={{ presentation: 'modal' }} />
       <Stack.Screen name="drift-detector" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="identity-setup" options={{ presentation: 'modal' }} />
       <Stack.Screen name="learning-style-quiz" options={{ presentation: 'modal' }} />
       <Stack.Screen name="patterns" options={{ presentation: 'modal' }} />
       <Stack.Screen name="pre-conversation-check" options={{ presentation: 'modal' }} />
       <Stack.Screen name="prompt-generator" options={{ presentation: 'modal' }} />
       <Stack.Screen name="quick-reset" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="reach-out-scaffold" options={{ presentation: 'modal' }} />
       <Stack.Screen name="referee" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="relational-bridge" options={{ presentation: 'modal' }} />
       <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
       <Stack.Screen name="share-insight" options={{ presentation: 'modal' }} />
       <Stack.Screen name="share-snapshot" options={{ presentation: 'modal' }} />
@@ -55,18 +53,15 @@ export default function ModalsLayout() {
       <Stack.Screen name="therapist-share" options={{ presentation: 'modal' }} />
       <Stack.Screen name="therapist-share-create" options={{ presentation: 'modal' }} />
       <Stack.Screen name="heart-notes" options={{ presentation: "modal" }} />
-      <Stack.Screen name="foundation-values" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="foundation-directions" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="foundation-people" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="foundation-body" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="foundation-state" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="foundation-emotion" options={{ presentation: 'modal' }} />
       <Stack.Screen name="attraction" options={{ presentation: 'modal' }} />
       <Stack.Screen name="attachment-style" options={{ presentation: 'modal' }} />
       <Stack.Screen name="boundaries" options={{ presentation: 'modal' }} />
       <Stack.Screen name="difficult-people" options={{ presentation: 'modal' }} />
       <Stack.Screen name="critical-thinking" options={{ presentation: 'modal' }} />
       <Stack.Screen name="red-green-flags" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="ask-gauge" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="disclaimer" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="data-use" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

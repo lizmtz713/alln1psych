@@ -309,7 +309,7 @@ export default function CircleScreen() {
       <View style={styles.section}>
         <View style={styles.sectionRow}>
           <Text style={styles.sectionTitle}>Your Circle</Text>
-          <Pressable style={styles.inviteButton} onPress={() => router.push('/(modals)/invite-circle')}>
+          <Pressable style={styles.inviteButton} onPress={() => router.push('/invite-circle')}>
             <Ionicons name="add" size={22} color={COLORS.accent} />
             <Text style={styles.inviteButtonText}>Invite +</Text>
           </Pressable>
@@ -325,7 +325,7 @@ export default function CircleScreen() {
             </Text>
             <Pressable
               style={styles.emptyButton}
-              onPress={() => router.push('/(modals)/invite-circle')}
+              onPress={() => router.push('/invite-circle')}
             >
               <Text style={styles.emptyButtonText}>Invite Someone</Text>
             </Pressable>

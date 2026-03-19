@@ -55,7 +55,7 @@ export default function BodyMaintenanceIndex() {
         <Text style={styles.emptyHint}>Add routines and providers to see what’s due.</Text>
       ) : (
         comingUp.slice(0, 5).map((entry, i) => {
-          if ('item' in entry) {
+          if ('item' in entry && entry.item) {
             const r = entry.item;
             return (
               <Pressable
@@ -81,6 +81,7 @@ export default function BodyMaintenanceIndex() {
             );
           }
           const p = entry.provider;
+          if (!p) return null;
           return (
             <Pressable
               key={p.id}

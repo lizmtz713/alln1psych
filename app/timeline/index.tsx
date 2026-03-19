@@ -10,7 +10,7 @@ import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING } from '../../src/lib/constants';
+import { COLORS, SPACING, APP_CONFIG } from '../../src/lib/constants';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useLightsStore } from '../../src/stores/lightsStore';
 import { useConversationSummaryStore } from '../../src/stores/conversationSummaryStore';
@@ -92,7 +92,7 @@ export default function HumanTimelineScreen() {
       >
         {grouped.length === 0 ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>Your timeline will grow as you use InGauge</Text>
+            <Text style={styles.emptyTitle}>Your timeline will grow as you use {APP_CONFIG.name}</Text>
             <Text style={styles.emptySub}>
               Check in, reach out to people, talk with Gauge, and add journal entries. They’ll appear here so you can see patterns over time.
             </Text>

@@ -33,6 +33,7 @@ import { ToolIntro } from '../../src/components/tools/ToolIntro';
 import { getToolIntroContent } from '../../src/data/toolIntroContent';
 import { sendMessageWithSystemPrompt } from '../../src/services/ai';
 import type { GaugeKey } from '../../src/stores/cockpitStore';
+import { useHumanSkillsStore, RESOLVE_SKILL_IDS, SKILL_POINTS } from '../../src/stores/humanSkillsStore';
 
 const BG = '#09090F';
 const CARD_BG = '#111118';
@@ -147,10 +148,12 @@ export default function ResolveScreen() {
       );
       setIntegrationText(response?.trim() ?? '');
       setPhase('integration');
+      useHumanSkillsStore.getState().addPoints(RESOLVE_SKILL_IDS, SKILL_POINTS.toolUse, 'tool');
     } catch (e) {
       if (__DEV__) console.warn('Resolve integration error:', e);
       setIntegrationText("I couldn't generate an integration path right now. Try again in a moment.");
       setPhase('integration');
+      useHumanSkillsStore.getState().addPoints(RESOLVE_SKILL_IDS, SKILL_POINTS.toolUse, 'tool');
     } finally {
       setLoading(false);
     }

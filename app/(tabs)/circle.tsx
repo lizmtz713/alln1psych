@@ -285,6 +285,15 @@ export default function MindMailInboxScreen() {
             }
           >
             <View style={styles.connectionsContent}>
+              <Pressable
+                style={({ pressed }) => [styles.inviteRow, pressed && { opacity: 0.8 }]}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/invite-circle'); }}
+                accessibilityLabel="Invite to Circle"
+              >
+                <Text style={styles.inviteRowEmoji}>💛</Text>
+                <Text style={styles.inviteRowText}>Invite someone to your Circle</Text>
+                <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+              </Pressable>
               <DailyConnectionPrompt />
               <ConnectionsList members={members} onSelectPerson={handleSelectPerson} />
             </View>
@@ -453,6 +462,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: SPACING.xl,
   },
+  inviteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  inviteRowEmoji: { fontSize: 20, marginRight: 10 },
+  inviteRowText: { flex: 1, fontSize: 15, fontWeight: '500', color: COLORS.text },
   tabs: {
     flexDirection: 'row',
     paddingHorizontal: 16,

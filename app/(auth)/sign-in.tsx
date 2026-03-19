@@ -23,10 +23,10 @@ import { useUserStore } from '../../src/stores/userStore';
 
 const HAS_GOOGLE = Boolean(process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim());
 
-async function routeAfterSignIn(userId: string): Promise<'/(tabs)' | '/(modals)/onboarding' | '/'> {
+async function routeAfterSignIn(userId: string): Promise<'/(tabs)' | '/onboarding' | '/'> {
   const { data: profile } = await supabase.from('profiles').select('onboarding_completed, name, age_group').eq('id', userId).single();
   if (profile?.onboarding_completed) return '/(tabs)';
-  if (profile && (profile.name || profile.age_group)) return '/(modals)/onboarding';
+  if (profile && (profile.name || profile.age_group)) return '/onboarding';
   return '/';
 }
 
@@ -83,7 +83,7 @@ export default function SignInScreen() {
       }
 
       const route = data?.user?.id ? await routeAfterSignIn(data.user.id) : '/';
-      if (route === '/(tabs)' || route === '/(modals)/onboarding') {
+      if (route === '/(tabs)' || route === '/onboarding') {
         router.replace(route as any);
       } else {
         router.replace('/');

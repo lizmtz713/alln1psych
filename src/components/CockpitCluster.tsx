@@ -1,8 +1,8 @@
 /**
- * CockpitCluster — The visual centerpiece of InGauge
- * 
- * A hexagonal arrangement of 6 gauge circles surrounding a central status ring.
- * Tesla/Rivian inspired cockpit aesthetic with glows, gradients, and premium feel.
+ * CockpitCluster — Human System Dashboard (PHOSM)
+ *
+ * Scientific model: Alignment → YOU → (Connection | Direction) → Emotion → State → Body.
+ * Animated center-to-center connection lines. Vertical tool columns. Bottom signal/actions.
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -10,7 +10,7 @@ import { View, Text, Pressable, StyleSheet, Dimensions, Animated } from 'react-n
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Line } from 'react-native-svg';
 import { BodyGauge, StateGauge, EmotionGauge, ConnectionGauge, DirectionGauge, AlignmentGauge } from './gauges';
 import { getGaugeColor, getSystemScoreLabel, GAUGE_CONFIG } from '../utils/gaugeHelpers';
 import { BiometricIndicator, type BiometricSource } from './BiometricIndicator';
@@ -18,11 +18,54 @@ import { COLORS, TYPOGRAPHY } from '../lib/constants';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Layout constants — hexagonal cockpit with breathing room (gauges not compressed)
-const CLUSTER_SIZE = Math.min(SCREEN_WIDTH - 32, 360);
-const CENTER_SIZE = 120;
-const GAUGE_SIZE = 72;
-const GAUGE_RADIUS = (CLUSTER_SIZE - GAUGE_SIZE) / 2 - 4; // More space between center and gauge circles
+// Cluster is the anchor — fixed width, always centered
+const CLUSTER_WIDTH = Math.min(SCREEN_WIDTH - 48, 320);
+const GAUGE_SIZE = 60;
+const CENTER_SIZE = 100; // Slightly larger for better YOU/score readability
+const YOU_RADIUS = CENTER_SIZE / 2;
+// Connection/Direction never overlap YOU — +20px outward from previous (no intersection)
+const CONNECTION_DIRECTION_OFFSET = Math.round(1.75 * YOU_RADIUS) + 20; // 100
+
+// Vertical rhythm: more Alignment→YOU; even Emotion→State→Body cascade
+const ALIGNMENT_CENTER_Y = 38;
+const ROW_1_CENTER_Y = 154;   // YOU row (+10px below Alignment)
+const CASCADE_GAP = 100;      // ~24px between Emotion/State/Body for readability
+const EMOTION_CENTER_Y = ROW_1_CENTER_Y + 88;
+const STATE_CENTER_Y = EMOTION_CENTER_Y + CASCADE_GAP;
+const BODY_CENTER_Y = STATE_CENTER_Y + CASCADE_GAP;
+const WHEEL_HEIGHT = BODY_CENTER_Y + 48;
+
+// Tool columns attach under gauges: gaugeCenterY + gaugeRadius + labelHeight + gap
+const GAUGE_LABEL_HEIGHT = 16;
+const TOOLS_GAP_BELOW_GAUGE = 8;
+const TOOLS_TOP = ROW_1_CENTER_Y + GAUGE_SIZE / 2 + GAUGE_LABEL_HEIGHT + TOOLS_GAP_BELOW_GAUGE;
+
+type ToolItem = { icon: string; route: string; label: string; params?: string };
+
+/** Rituals slot: one context-aware action by time of day (upper-left). */
+function getRitualsSlot(): ToolItem {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return { icon: '☀️', route: '/rituals/pre-flight', label: 'Pre-Flight' };
+  if (hour >= 12 && hour < 17) return { icon: '↻', route: '/tools/quick-reset', label: 'Reset' };
+  if (hour >= 17 && hour < 21) return { icon: '🌙', route: '/rituals/post-flight', label: 'Post-Flight' };
+  return { icon: '✨', route: '/(modals)/activity', label: 'Wind Down', params: '?id=breathing' };
+}
+
+/** Support slot: single entry to emergency/support flow (upper-right). */
+const SUPPORT_SLOT: ToolItem = { icon: '🆘', route: '/emergency', label: 'Support' };
+
+const SIDE_STACK_WIDTH = 44;
+const STACK_ICON_SIZE = 32;
+const STACK_ITEM_GAP = 6;
+const BOTTOM_ROW_HEIGHT = 52;
+const LINE_STROKE = 1;
+const LINE_COLOR = '#39e7c6';
+const LINE_OPACITY_STRONG = 0.18;  // Alignment→YOU, Emotion→State, State→Body
+const LINE_OPACITY_MEDIUM = 0.14; // YOU→Connection, YOU→Direction
+const LINE_OPACITY_SOFT = 0.08;   // Connection→Emotion, Direction→Emotion
+const FIELD_GLOW_OPACITY = 0.05;
+const FIELD_GLOW_RADIUS = 95;   // Slightly larger to match bigger center ring
+const TOOL_ICON_LIGHT = '#E0E0E5';
 
 const TEXT_PRIMARY = COLORS.text;
 const TEXT_SECONDARY = COLORS.textSecondary;
@@ -39,16 +82,110 @@ const GAUGE_COMPONENTS: Record<string, React.FC<{ value: number; size?: number }
   alignment: AlignmentGauge,
 };
 
-// Hex positions: top, top-right, bottom-right, bottom, bottom-left, top-left
-// Angles: -90°, -30°, 30°, 90°, 150°, 210° (starting from top, going clockwise)
-const GAUGE_POSITIONS = [
-  { key: 'body', angle: -90 },      // Top
-  { key: 'state', angle: -30 },     // Top-right
-  { key: 'emotion', angle: 30 },    // Bottom-right
-  { key: 'connection', angle: 90 }, // Bottom
-  { key: 'direction', angle: 150 }, // Bottom-left
-  { key: 'alignment', angle: 210 }, // Top-left
+// Human System Wheel positions (row 0 = top). Center row (1): Connection (left), YOU (center), Direction (right).
+// Row 0: Alignment | Row 1: Connection, YOU, Direction | Row 2: Emotion | Row 3: State | Row 4: Body
+type WheelSlot = { key: string; row: number; col: number }; // col 0=left, 1=center, 2=right
+const WHEEL_SLOTS: WheelSlot[] = [
+  { key: 'alignment', row: 0, col: 1 },
+  { key: 'connection', row: 1, col: 0 },
+  { key: 'direction', row: 1, col: 2 },
+  { key: 'emotion', row: 2, col: 1 },
+  { key: 'state', row: 3, col: 1 },
+  { key: 'body', row: 4, col: 1 },
 ];
+
+const cx = () => CLUSTER_WIDTH / 2;
+
+function slotToPosition(slot: WheelSlot): { x: number; y: number } {
+  const centerX = cx();
+  const connX = centerX - CONNECTION_DIRECTION_OFFSET - GAUGE_SIZE / 2;
+  const dirX = centerX + CONNECTION_DIRECTION_OFFSET - GAUGE_SIZE / 2;
+  const topFor = (centerY: number) => centerY - GAUGE_SIZE / 2;
+  switch (slot.key) {
+    case 'alignment': return { x: centerX - GAUGE_SIZE / 2, y: topFor(ALIGNMENT_CENTER_Y) };
+    case 'connection': return { x: connX, y: topFor(ROW_1_CENTER_Y) };
+    case 'direction': return { x: dirX, y: topFor(ROW_1_CENTER_Y) };
+    case 'emotion': return { x: centerX - GAUGE_SIZE / 2, y: topFor(EMOTION_CENTER_Y) };
+    case 'state': return { x: centerX - GAUGE_SIZE / 2, y: topFor(STATE_CENTER_Y) };
+    case 'body': return { x: centerX - GAUGE_SIZE / 2, y: topFor(BODY_CENTER_Y) };
+    default: return { x: centerX - GAUGE_SIZE / 2, y: topFor(ROW_1_CENTER_Y) };
+  }
+}
+
+/** Gauge center positions for connection lines — center-to-center only. */
+function getGaugeCenters() {
+  const c = cx();
+  return {
+    alignment: { x: c, y: ALIGNMENT_CENTER_Y },
+    connection: { x: c - CONNECTION_DIRECTION_OFFSET, y: ROW_1_CENTER_Y },
+    you: { x: c, y: ROW_1_CENTER_Y },
+    direction: { x: c + CONNECTION_DIRECTION_OFFSET, y: ROW_1_CENTER_Y },
+    emotion: { x: c, y: EMOTION_CENTER_Y },
+    state: { x: c, y: STATE_CENTER_Y },
+    body: { x: c, y: BODY_CENTER_Y },
+  };
+}
+
+const PARTICLE_SIZE = 3;
+const PARTICLE_OPACITY = 0.7;
+const FLOW_DURATION = 2800;
+
+type Point = { x: number; y: number };
+
+/** Subtle moving particles along connection lines to show influence direction. */
+function LineFlowParticles({ centers }: { centers: ReturnType<typeof getGaugeCenters> }) {
+  const progress = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(progress, { toValue: 1, duration: FLOW_DURATION, useNativeDriver: false }),
+        Animated.timing(progress, { toValue: 0, duration: 0, useNativeDriver: false }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [progress]);
+
+  // Scientific flow: Alignment → YOU → Connection/Direction → Emotion → State → Body
+  const segments: [Point, Point][] = [
+    [centers.alignment, centers.you],
+    [centers.you, centers.connection],
+    [centers.you, centers.direction],
+    [centers.connection, centers.emotion],
+    [centers.direction, centers.emotion],
+    [centers.emotion, centers.state],
+    [centers.state, centers.body],
+  ];
+
+  return (
+    <>
+      {segments.map(([from, to], i) => (
+        <Animated.View
+          key={i}
+          pointerEvents="none"
+            style={[
+            {
+              position: 'absolute',
+              width: PARTICLE_SIZE,
+              height: PARTICLE_SIZE,
+              borderRadius: PARTICLE_SIZE / 2,
+              backgroundColor: LINE_COLOR,
+              opacity: PARTICLE_OPACITY,
+              left: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [from.x - PARTICLE_SIZE / 2, to.x - PARTICLE_SIZE / 2],
+              }),
+              top: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [from.y - PARTICLE_SIZE / 2, to.y - PARTICLE_SIZE / 2],
+              }),
+            },
+          ]}
+        />
+      ))}
+    </>
+  );
+}
 
 // Animated gauge ring — pulses/blinks for low values
 function AnimatedGaugeRing({ 
@@ -147,11 +284,18 @@ interface CockpitClusterProps {
   bodyBiometricSource?: BiometricSource | null;
   /** When set, show Oura/Apple Health badge on State gauge */
   stateBiometricSource?: BiometricSource | null;
-  /** Pulse badge when Body data is fresh (e.g. synced in last 15 min) */
   bodyBiometricFresh?: boolean;
-  /** Pulse badge when State data is fresh */
   stateBiometricFresh?: boolean;
+  /** Left micro-signal panel lines (e.g. Sleep, Recovery, HRV) */
+  leftSignalLines?: string[];
+  /** Right micro-signal panel lines (e.g. Focus load, Connection days) */
+  rightSignalLines?: string[];
+  /** When true, status hint (e.g. "6/6 online") is not shown inside cluster — parent can show it above */
+  hideStatusHint?: boolean;
 }
+
+const DEFAULT_LEFT_SIGNALS = ['Sleep: —', 'Recovery: —', 'HRV: —'];
+const DEFAULT_RIGHT_SIGNALS = ['Focus load: —', 'Connection days: —', 'Task pressure: —'];
 
 export function CockpitCluster({ 
   gaugeValues, 
@@ -162,13 +306,18 @@ export function CockpitCluster({
   stateBiometricSource,
   bodyBiometricFresh = false,
   stateBiometricFresh = false,
+  leftSignalLines = DEFAULT_LEFT_SIGNALS,
+  rightSignalLines = DEFAULT_RIGHT_SIGNALS,
+  hideStatusHint = false,
 }: CockpitClusterProps) {
   const router = useRouter();
   const centerPulse = useRef(new Animated.Value(1)).current;
+  const centers = getGaugeCenters();
   
   const overallLabel = getSystemScoreLabel(overall);
   const ringColor = overall < 0 ? (TEXT_MUTED + '90') : getGaugeColor(overall);
   const activeCount = Object.values(gaugeValues).filter(v => v >= 0).length;
+  const cascadeActive = gaugeValues.emotion >= 0 && gaugeValues.emotion < 50 && gaugeValues.state >= 0 && gaugeValues.state < 50;
 
   // Subtle breathing animation for center ring
   useEffect(() => {
@@ -198,15 +347,70 @@ export function CockpitCluster({
     }
   };
 
+  const centerRingLeft = cx() - CENTER_SIZE / 2;
+  const centerRingTop = ROW_1_CENTER_Y - CENTER_SIZE / 2;
+
+  const pushTool = (item: ToolItem) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const path = item.params ? `${item.route}${item.params}` : item.route;
+    router.push(path as any);
+  };
+
+  const connectionCenterX = cx() - CONNECTION_DIRECTION_OFFSET;
+  const directionCenterX = cx() + CONNECTION_DIRECTION_OFFSET;
+  const TOOLS_NUDGE = 4; // slight outward nudge so columns don't feel crowded by glow
+  const toolsLeftX = connectionCenterX - SIDE_STACK_WIDTH / 2 - TOOLS_NUDGE;
+  const toolsRightX = directionCenterX - SIDE_STACK_WIDTH / 2 + TOOLS_NUDGE;
+
+  // Two contextual side actions only: Rituals (time-of-day) and Support (same spacing as before)
+  const toolsLeft = [getRitualsSlot()];
+  const toolsRight = [SUPPORT_SLOT];
+
   return (
     <View style={styles.container}>
-      {/* Center Status Ring with Glow */}
+      <View style={styles.clusterWrap}>
+          {/* System field: soft radial glow behind YOU */}
+          <View
+            style={[
+              styles.systemFieldGlow,
+              {
+                left: CLUSTER_WIDTH / 2 - FIELD_GLOW_RADIUS,
+                top: ROW_1_CENTER_Y - FIELD_GLOW_RADIUS,
+                width: FIELD_GLOW_RADIUS * 2,
+                height: FIELD_GLOW_RADIUS * 2,
+                borderRadius: FIELD_GLOW_RADIUS,
+                backgroundColor: overall >= 0 ? ringColor : COLORS.surface,
+                opacity: FIELD_GLOW_OPACITY,
+              },
+            ]}
+            pointerEvents="none"
+          />
+          {/* Scientific connection lines: Alignment→YOU→Connection/Direction→Emotion→State→Body (animated, center-to-center) */}
+          <View style={styles.svgWrap} pointerEvents="none">
+            <Svg width={CLUSTER_WIDTH} height={WHEEL_HEIGHT} style={styles.svg}>
+              <Line x1={centers.alignment.x} y1={centers.alignment.y} x2={centers.you.x} y2={centers.you.y} stroke={LINE_COLOR} strokeWidth={LINE_STROKE} opacity={LINE_OPACITY_STRONG} />
+              <Line x1={centers.you.x} y1={centers.you.y} x2={centers.connection.x} y2={centers.connection.y} stroke={LINE_COLOR} strokeWidth={LINE_STROKE} opacity={LINE_OPACITY_MEDIUM} />
+              <Line x1={centers.you.x} y1={centers.you.y} x2={centers.direction.x} y2={centers.direction.y} stroke={LINE_COLOR} strokeWidth={LINE_STROKE} opacity={LINE_OPACITY_MEDIUM} />
+              <Line x1={centers.connection.x} y1={centers.connection.y} x2={centers.emotion.x} y2={centers.emotion.y} stroke={LINE_COLOR} strokeWidth={LINE_STROKE} opacity={LINE_OPACITY_SOFT} />
+              <Line x1={centers.direction.x} y1={centers.direction.y} x2={centers.emotion.x} y2={centers.emotion.y} stroke={LINE_COLOR} strokeWidth={LINE_STROKE} opacity={LINE_OPACITY_SOFT} />
+              <Line x1={centers.emotion.x} y1={centers.emotion.y} x2={centers.state.x} y2={centers.state.y} stroke={LINE_COLOR} strokeWidth={LINE_STROKE} opacity={LINE_OPACITY_STRONG} />
+              <Line x1={centers.state.x} y1={centers.state.y} x2={centers.body.x} y2={centers.body.y} stroke={LINE_COLOR} strokeWidth={LINE_STROKE} opacity={LINE_OPACITY_STRONG} />
+            </Svg>
+            <LineFlowParticles centers={centers} />
+          </View>
+
+          {/* Center "YOU" glow — anchors cockpit */}
       <Animated.View
-        style={[
+          style={[
           styles.centerGlow,
           {
+            left: centerRingLeft - 16,
+            top: centerRingTop - 16,
+            width: CENTER_SIZE + 32,
+            height: CENTER_SIZE + 32,
+            borderRadius: (CENTER_SIZE + 32) / 2,
             backgroundColor: overall >= 0 ? ringColor : 'transparent',
-            opacity: overall >= 0 ? 0.15 : 0,
+            opacity: overall >= 75 ? 0.12 : overall >= 50 ? 0.08 : overall >= 0 ? 0.06 : 0,
             transform: [{ scale: centerPulse }],
           },
         ]}
@@ -214,87 +418,153 @@ export function CockpitCluster({
       <Pressable
         style={({ pressed }) => [
           styles.centerRing,
-          { borderColor: ringColor },
+          {
+            left: centerRingLeft,
+            top: centerRingTop,
+            width: CENTER_SIZE,
+            height: CENTER_SIZE,
+            borderRadius: CENTER_SIZE / 2,
+            borderColor: ringColor,
+            borderWidth: overall >= 0 && overall < 60 ? 6 : 5,
+            backgroundColor: overall >= 0 && overall < 60 ? `${ringColor}0A` : CARD_BG,
+          },
           pressed && styles.centerRingPressed,
         ]}
         onPress={handleCenterPress}
       >
         {overall >= 0 ? (
           <>
-            <Text style={styles.centerTitle}>System</Text>
+            <Text style={styles.centerTitle}>YOU</Text>
             <Text style={[styles.centerValue, { color: ringColor }]}>{Math.round(overall)}</Text>
             <Text style={styles.centerLabel}>{overallLabel}</Text>
           </>
         ) : (
           <>
-            <Text style={styles.centerTitle}>System</Text>
-            <Ionicons name="add-circle-outline" size={28} color={TEXT_MUTED} />
-            <Text style={styles.centerLabel}>Check In</Text>
+            <Text style={styles.centerTitle}>YOU</Text>
+            <Text style={styles.centerCta}>Check in</Text>
           </>
         )}
       </Pressable>
 
-      {/* 6 Gauge Circles — Simplified: single ring + value + label */}
-      {GAUGE_POSITIONS.map(({ key, angle }) => {
+      {/* 6 Gauges — Alignment label 10px above circle; cascade: circle → value → label below */}
+      {WHEEL_SLOTS.map((slot) => {
+        const key = slot.key;
         const gaugeValue = gaugeValues[key as keyof typeof gaugeValues];
         const config = GAUGE_CONFIG[key as keyof typeof GAUGE_CONFIG];
         const isSet = gaugeValue >= 0;
         const gaugeColor = isSet ? getGaugeColor(gaugeValue) : '#3A3A4A';
-        
-        // Calculate position
-        const radians = (angle * Math.PI) / 180;
-        const x = Math.cos(radians) * GAUGE_RADIUS;
-        const y = Math.sin(radians) * GAUGE_RADIUS;
+        const { x, y } = slotToPosition(slot);
+        const isAlignment = key === 'alignment';
+        const isCascade = key === 'emotion' || key === 'state' || key === 'body';
 
         return (
           <Pressable
             key={key}
             style={({ pressed }) => ({
               position: 'absolute',
-              left: CLUSTER_SIZE / 2 + x - GAUGE_SIZE / 2,
-              top: CLUSTER_SIZE / 2 + y - GAUGE_SIZE / 2,
+              left: x,
+              top: y,
               width: GAUGE_SIZE,
-              height: GAUGE_SIZE + 18,
+              height: GAUGE_SIZE + (isCascade ? 34 : 28),
               alignItems: 'center',
-              justifyContent: 'flex-start',
+              justifyContent: isAlignment ? 'flex-end' : 'flex-start',
               opacity: pressed ? 0.8 : 1,
             })}
             onPress={() => handleGaugePress(key)}
           >
-            {/* Animated ring — pulses/blinks for low values */}
+            {isAlignment && (
+              <>
+                <Text style={[styles.gaugeLabelAbove, styles.alignmentLabelSpacing, { color: isSet ? gaugeColor : '#666' }]}>{config.label}</Text>
+                <Text style={styles.gaugeMicroLabel}>{config.microLabel}</Text>
+              </>
+            )}
             <AnimatedGaugeRing value={gaugeValue} color={gaugeColor} size={GAUGE_SIZE}>
               <Text style={{
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: '700',
                 color: isSet ? gaugeColor : '#666',
+                textAlign: 'center',
               }}>
                 {isSet ? gaugeValue : '—'}
               </Text>
             </AnimatedGaugeRing>
-            {/* Label below */}
-            <Text style={{
-              marginTop: 4,
-              fontSize: 10,
-              fontWeight: '600',
-              color: isSet ? gaugeColor : '#666',
-              textTransform: 'capitalize',
-            }}>
-              {config.label}
-            </Text>
+            {!isAlignment && (
+              <>
+                <Text style={[styles.gaugeLabelBelow, { color: isSet ? gaugeColor : '#666' }]}>{config.label}</Text>
+                <Text style={styles.gaugeMicroLabel}>{config.microLabel}</Text>
+              </>
+            )}
           </Pressable>
         );
       })}
 
-      {/* Alert is rendered above the gauge by the parent (Home) so the gauge is never covered. */}
+          {/* Status hint — only when checked in and not shown by parent */}
+          {overall >= 0 && !hideStatusHint && (
+            <View style={styles.hintContainer}>
+              <Text style={styles.hintText}>{activeCount}/6 online • {overallLabel}</Text>
+            </View>
+          )}
 
-      {/* Status hint below */}
-      <View style={styles.hintContainer}>
-        <Text style={styles.hintText}>
-          {overall >= 0 
-            ? `${activeCount}/6 online • ${overallLabel}`
-            : 'Tap center to check in'
-          }
-        </Text>
+          {/* Left tool column — Rituals (context-aware by time of day) */}
+          <View style={[styles.toolsUnderGauge, { left: toolsLeftX, top: TOOLS_TOP }]}>
+            {toolsLeft.map((item) => (
+              <Pressable
+                key={item.label}
+                style={({ pressed }) => [styles.stackItem, pressed && styles.stackItemPressed]}
+                onPress={() => pushTool(item)}
+                accessibilityRole="button"
+                accessibilityLabel={item.label}
+              >
+                <View style={styles.stackIconWrap}>
+                  <Text style={styles.stackIcon}>{item.icon}</Text>
+                </View>
+                <Text style={styles.stackLabel}>{item.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {/* Right tool column — Support (emergency / breathe / reach out) */}
+          <View style={[styles.toolsUnderGauge, { left: toolsRightX, top: TOOLS_TOP }]}>
+            {toolsRight.map((item) => (
+              <Pressable
+                key={item.label}
+                style={({ pressed }) => [styles.stackItem, pressed && styles.stackItemPressed]}
+                onPress={() => pushTool(item)}
+                accessibilityRole="button"
+                accessibilityLabel={item.label}
+              >
+                <View style={styles.stackIconWrap}>
+                  <Text style={styles.stackIcon}>{item.icon}</Text>
+                </View>
+                <Text style={styles.stackLabel}>{item.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+      {/* Bottom: left readouts | neutral actions (Message, Reflect, History) | right readouts */}
+      <View style={styles.bottomRow}>
+        <View style={styles.readoutBlock}>
+          {leftSignalLines.map((line, i) => (
+            <Text key={i} style={styles.readoutLine}>{line}</Text>
+          ))}
+        </View>
+        <View style={styles.utilityRail}>
+          <Pressable style={({ pressed }) => [styles.quickActionBtn, pressed && styles.quickActionPressed]} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/talk'); }} accessibilityLabel="Talk">
+            <Ionicons name="chatbubble-outline" size={18} color={TEXT_PRIMARY} />
+          </Pressable>
+          <Pressable style={({ pressed }) => [styles.quickActionBtn, pressed && styles.quickActionPressed]} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/me'); }} accessibilityLabel="Reflect">
+            <Ionicons name="journal-outline" size={18} color={TEXT_PRIMARY} />
+          </Pressable>
+          <Pressable style={({ pressed }) => [styles.quickActionBtn, pressed && styles.quickActionPressed]} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/me'); }} accessibilityLabel="History">
+            <Ionicons name="time-outline" size={18} color={TEXT_PRIMARY} />
+          </Pressable>
+        </View>
+        <View style={styles.readoutBlock}>
+          {rightSignalLines.map((line, i) => (
+            <Text key={i} style={styles.readoutLine}>{line}</Text>
+          ))}
+        </View>
       </View>
     </View>
   );
@@ -302,30 +572,111 @@ export function CockpitCluster({
 
 const styles = StyleSheet.create({
   container: {
-    width: CLUSTER_SIZE,
-    minHeight: CLUSTER_SIZE + 40,
+    width: '100%',
     alignSelf: 'center',
-    position: 'relative',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    minHeight: WHEEL_HEIGHT + 32 + BOTTOM_ROW_HEIGHT + 16,
   },
+  toolsUnderGauge: {
+    position: 'absolute',
+    width: SIDE_STACK_WIDTH,
+    alignItems: 'center',
+  },
+  sideStack: {
+    width: SIDE_STACK_WIDTH,
+    alignItems: 'center',
+  },
+  stackItem: {
+    alignItems: 'center',
+    marginBottom: STACK_ITEM_GAP,
+  },
+  stackItemPressed: { opacity: 0.8 },
+  stackIconWrap: {
+    width: STACK_ICON_SIZE,
+    height: STACK_ICON_SIZE,
+    borderRadius: STACK_ICON_SIZE / 2,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stackIcon: { fontSize: 16, color: TOOL_ICON_LIGHT },
+  stackLabel: { fontSize: 9, color: TEXT_MUTED, marginTop: 2 },
+  bottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.06)',
+    minHeight: BOTTOM_ROW_HEIGHT,
+  },
+  readoutBlock: {
+    flex: 1,
+    maxWidth: 90,
+  },
+  readoutLine: {
+    fontSize: 9,
+    color: TEXT_MUTED,
+    marginBottom: 1,
+  },
+  utilityRail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  clusterWrap: {
+    width: CLUSTER_WIDTH,
+    position: 'relative',
+    minHeight: WHEEL_HEIGHT + 40,
+  },
+  systemFieldGlow: {
+    position: 'absolute',
+  },
+  svgWrap: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: CLUSTER_WIDTH,
+    height: WHEEL_HEIGHT,
+  },
+  svg: { position: 'absolute', left: 0, top: 0 },
+  gaugeLabelAbove: { fontSize: 9, fontWeight: '600', textTransform: 'capitalize', marginBottom: 2 },
+  alignmentLabelSpacing: { marginBottom: 6 },
+  gaugeLabelBelow: { fontSize: 9, fontWeight: '600', textTransform: 'capitalize', marginTop: 10 },
+  gaugeMicroLabel: { fontSize: 8, color: TEXT_MUTED, marginTop: 2, marginBottom: 2 },
+  centerCta: {
+    fontSize: 10,
+    color: TEXT_MUTED,
+    marginTop: 4,
+    textTransform: 'none',
+    textAlign: 'center',
+  },
+  quickActionBtn: {
+    width: 44,
+    height: 44,
+    marginHorizontal: 6,
+    borderRadius: 22,
+    backgroundColor: CARD_BG,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickActionPressed: { opacity: 0.85 },
+  sosBtn: { backgroundColor: '#B91C1C', borderColor: 'rgba(255,255,255,0.2)' },
+  sosBtnText: { fontSize: 12, fontWeight: '800', color: '#FFF' },
   centerGlow: {
     position: 'absolute',
-    width: CENTER_SIZE + 48,
-    height: CENTER_SIZE + 48,
-    borderRadius: (CENTER_SIZE + 48) / 2,
-    left: CLUSTER_SIZE / 2 - (CENTER_SIZE + 48) / 2,
-    top: CLUSTER_SIZE / 2 - (CENTER_SIZE + 48) / 2,
   },
   centerRing: {
     position: 'absolute',
-    width: CENTER_SIZE,
-    height: CENTER_SIZE,
-    borderRadius: CENTER_SIZE / 2,
-    borderWidth: 4,
+    borderWidth: 5,
     backgroundColor: CARD_BG,
     alignItems: 'center',
     justifyContent: 'center',
-    left: CLUSTER_SIZE / 2 - CENTER_SIZE / 2,
-    top: CLUSTER_SIZE / 2 - CENTER_SIZE / 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
@@ -342,20 +693,23 @@ const styles = StyleSheet.create({
   },
   centerTitle: {
     fontSize: 9,
-    color: TEXT_MUTED,
+    fontWeight: '600',
+    color: TEXT_PRIMARY,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 2,
     textAlign: 'center',
+    opacity: 0.9,
   },
   centerLabel: {
-    fontSize: 9,
-    color: TEXT_SECONDARY,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: 2,
+    fontSize: 7,
+    color: TEXT_MUTED,
+    textTransform: 'capitalize',
+    letterSpacing: 0.3,
+    marginTop: 6,
     textAlign: 'center',
     maxWidth: 80,
+    opacity: 0.6,
   },
   gaugeBubble: {
     width: GAUGE_SIZE,

@@ -130,7 +130,7 @@ export default function WorldTemperatureScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       await RNShare.share({
-        message: `World Temperature today: ${data.worldAverageValue}° ${data.worldAverageLabel}. ${data.totalCheckInsToday.toLocaleString()} check-ins. We're all in this together. AllN1 Psych — You Are Not Alone.`,
+        message: `World Temperature today: ${data.worldAverageValue}° ${data.worldAverageLabel}. ${data.totalCheckInsToday.toLocaleString()} check-ins. We're all in this together. InGauge · The Human Cockpit`,
         title: 'World Temperature',
       });
     } catch (e) {

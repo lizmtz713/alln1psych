@@ -10,10 +10,13 @@
  * - Body & Health
  * - Life Transitions
  * - Growth & Healing
+ * - Family Fleet Rituals (Pre-Flight / Post-Flight)
  * 
  * Each lesson is grounded in psychology research and designed to meet
  * people where they actually are - not where we wish they were.
  */
+
+import { familyRitualsLessons } from './familyRitualsLessons';
 
 export interface HumanManualLesson {
   id: string;
@@ -6777,6 +6780,13 @@ export const humanManualCategories: HumanManualCategory[] = [
     emoji: '🏗️',
     description: 'Financial foundations, environment, safety, and the balance between stability and growth.',
     lessons: buildingStabilityLessons,
+  },
+  {
+    id: 'family-fleet',
+    title: 'Family Fleet Rituals',
+    emoji: '🛫',
+    description: 'Pre-Flight (morning gauge sync + fleet forecast + driving style) and Post-Flight (odometer, pothole report, mechanic’s thanks). Co-regulation before the day starts and narrative repair at day’s end.',
+    lessons: familyRitualsLessons,
   },
 ];
 

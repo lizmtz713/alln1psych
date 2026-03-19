@@ -1,18 +1,48 @@
 /**
- * Life Forecast — Pre-Flight integration: today's forecast with factors and suggestion.
+ * Human Weather — Pre-Flight: today's forecast from current system signals.
  */
 
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { getTodayForecast } from '../../services/forecastService';
+import { useCockpitStore } from '../../stores/cockpitStore';
 import { COLORS } from '../../lib/constants';
 
 export interface PreFlightForecastProps {
   onAck?: () => void;
+  healthContext?: { lastNightSleepHours?: number; readinessScore?: number };
 }
 
-export function PreFlightForecast({ onAck }: PreFlightForecastProps) {
-  const forecast = useMemo(() => getTodayForecast(), []);
+export function PreFlightForecast({ onAck, healthContext }: PreFlightForecastProps) {
+  const [body, state, emotion, connection, direction, alignment] = useCockpitStore((s) => [
+    s.body.value,
+    s.state.value,
+    s.emotion.value,
+    s.connection.value,
+    s.direction.value,
+    s.alignment.value,
+  ]) as [number, number, number, number, number, number];
+  const checkInContext = useCockpitStore((s) => s.checkInContext);
+  const gaugeValues = useMemo(
+    () => ({
+      ...(body >= 0 && { body }),
+      ...(state >= 0 && { state }),
+      ...(emotion >= 0 && { emotion }),
+      ...(connection >= 0 && { connection }),
+      ...(direction >= 0 && { direction }),
+      ...(alignment >= 0 && { alignment }),
+    }),
+    [body, state, emotion, connection, direction, alignment]
+  );
+  const forecast = useMemo(
+    () =>
+      getTodayForecast({
+        gauges: gaugeValues,
+        checkInContext,
+        healthContext,
+      }),
+    [gaugeValues, checkInContext, healthContext]
+  );
 
   const hasRisks = forecast.riskFactors.length > 0;
   const suggestion = forecast.suggestions[0]?.text;

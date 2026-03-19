@@ -48,7 +48,7 @@ export function ConstellationShareCard({
         {nodeCount} people I care about
       </Text>
       <Text style={styles.tagline}>A radar for human connection</Text>
-      <Text style={styles.footer}>AllN1 Psych · You Are Not Alone.</Text>
+      <Text style={styles.footer}>InGauge · The Human Cockpit</Text>
     </View>
   );
 }

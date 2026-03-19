@@ -193,7 +193,7 @@ export const es = {
   heartNotesSoftShare: 'Compartir Suave',
   
   // ============ Premium ============
-  premiumTitle: 'InGauge Pro',
+  premiumTitle: 'InGauge Premium',
   premiumFeature1: 'Conversaciones ilimitadas con IA',
   premiumFeature2: 'Respuestas de voz',
   premiumFeature3: 'Todas las funciones del Círculo',

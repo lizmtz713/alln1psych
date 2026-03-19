@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
 import { useHeartNotesStore, type HeartNote, type NoteStatus } from '../../stores/heartNotesStore';
 import { format } from 'date-fns';
@@ -83,6 +84,7 @@ function NoteCard({ note, onPress }: { note: HeartNote; onPress: () => void }) {
 }
 
 export default function HeartNotesScreen() {
+  const router = useRouter();
   const navigation = useNavigation<any>();
   const { notes, loading, loadNotes } = useHeartNotesStore();
   const [refreshing, setRefreshing] = useState(false);
@@ -102,6 +104,9 @@ export default function HeartNotesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn} hitSlop={12}>
+          <Ionicons name="close" size={26} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.title}>Heart Notes</Text>
         <TouchableOpacity
           style={styles.inboxButton}
@@ -162,6 +167,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
   },
+  closeBtn: { padding: 8 },
   title: {
     fontSize: 28,
     fontWeight: 'bold',

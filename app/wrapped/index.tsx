@@ -54,7 +54,7 @@ export default function WrappedScreen() {
 
   const handleShare = () => {
     Share.share({
-      message: `My ${WRAPPED_YEAR} Life Wrapped — ${report?.stats ? report.stats.checkIns + report.stats.journalEntries + report.stats.connectionLogs + report.stats.preFlights + report.stats.postFlights : 0} moments. AllN1 Psych · You Are Not Alone.`,
+      message: `My ${WRAPPED_YEAR} Life Wrapped — ${report?.stats ? report.stats.checkIns + report.stats.journalEntries + report.stats.connectionLogs + report.stats.preFlights + report.stats.postFlights : 0} moments. InGauge · The Human Cockpit`,
       title: `${WRAPPED_YEAR} Life Wrapped`,
     }).catch(() => {});
   };

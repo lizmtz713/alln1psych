@@ -46,6 +46,8 @@ import {
   GAUGE_SYSTEM_INTRO,
   SELF_INGAUGED,
 } from '../../src/data/gaugeSystem';
+import { HUMAN_MANUAL_PARTS, type ManualPart, type ManualTopic } from '../../src/data/humanManualToc';
+import { CURRICULUM_TAGLINE } from '../../src/data/psychologyForRealLifeCurriculum';
 import { ShareInsight } from '../../src/features/share-insight';
 import { buildDiscoveryShareContent } from '../../src/features/share-insight';
 import { useUserStore } from '../../src/stores/userStore';
@@ -139,6 +141,7 @@ export default function LearnScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [expandedGaugeId, setExpandedGaugeId] = useState<string | null>(null);
+  const [expandedManualPartId, setExpandedManualPartId] = useState<string | null>(null);
   const [expandedLibraryGroupId, setExpandedLibraryGroupId] = useState<string | null>(null);
   const [expandedDiscoveryId, setExpandedDiscoveryId] = useState<string | null>(null);
   const [visibleDiscoveries, setVisibleDiscoveries] = useState(() => getDiscoveriesForDay());
@@ -186,14 +189,31 @@ export default function LearnScreen() {
     setExpandedLibraryGroupId((prev) => (prev === groupId ? null : groupId));
   }, []);
 
+  const toggleManualPart = useCallback((partId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedManualPartId((prev) => (prev === partId ? null : partId));
+  }, []);
+
+  const openManualTopic = useCallback((topic: ManualTopic) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (topic.type === 'gauge') {
+      openGaugeDetail(topic.target);
+    } else if (topic.type === 'route') {
+      router.push(topic.target as any);
+    } else {
+      router.push(`/learn/manual/${topic.target}`);
+    }
+  }, [router, openGaugeDetail]);
+
   return (
     <ErrorBoundary>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Manual</Text>
+          <Text style={styles.headerTitle}>The Human Manual</Text>
           <Text style={styles.headerSubtitle}>
-            The operating manual for being human.
+            The manual nobody was given for life. Simple. Honest. Practical.
           </Text>
         </View>
 
@@ -204,17 +224,21 @@ export default function LearnScreen() {
         >
           {/* ═══ SECTION 1: INTRO / HUMAN OS FRAME ═══ */}
           <View style={styles.introBlock}>
+            <Text style={styles.introTagline}>The human operating manual. Learn how your system works.</Text>
             <Text style={styles.introHeadline}>You are not broken.</Text>
             <Text style={styles.introHeadline}>You are a system.</Text>
             <Text style={styles.introSupporting}>
-              Manual helps you understand how it works.
+              Everything in life fits into six systems. This is your map.
+            </Text>
+            <Text style={styles.introGuiding}>
+              What's happening in your system right now — and what to do next.
             </Text>
           </View>
 
-          {/* ═══ SECTION 2: THE SYSTEM (6 GAUGES) ═══ */}
-          <Text style={styles.sectionBlockTitle}>The System</Text>
+          {/* ═══ PART 1: THE HUMAN SYSTEM (6 GAUGES) ═══ */}
+          <Text style={styles.sectionBlockTitle}>Part 1 — The Human System</Text>
           <Text style={styles.sectionBlockSubtitle}>
-            Start here to learn what each gauge means and what affects it.
+            Body · State · Emotion · Connection · Direction · Alignment. How your biology, nervous system, and life interact.
           </Text>
           {GAUGES.map((gauge) => {
             const isExpanded = expandedGaugeId === gauge.id;
@@ -271,11 +295,112 @@ export default function LearnScreen() {
           {/* Your System Patterns — small card tied to their data */}
           <YourSystemPatternsCard />
 
-          {/* ═══ SECTION 3: THE MANUAL (KNOWLEDGE LIBRARY) ═══ */}
-          <Text style={styles.sectionBlockTitle}>The Manual</Text>
+          {/* ═══ PARTS 2–5: SIGNALS, CASCADES, REPAIRS, ROLES (Table of Contents) ═══ */}
+          {HUMAN_MANUAL_PARTS.filter((p) => p.partNumber >= 2 && p.partNumber <= 5).map((part) => {
+            const isExpanded = expandedManualPartId === part.id;
+            return (
+              <View key={part.id} style={styles.manualPartWrap}>
+                <Pressable
+                  style={[styles.manualPartCard, isExpanded && styles.manualPartCardExpanded]}
+                  onPress={() => toggleManualPart(part.id)}
+                >
+                  <Text style={styles.manualPartEmoji}>{part.emoji}</Text>
+                  <View style={styles.manualPartBody}>
+                    <Text style={styles.manualPartTitle}>Part {part.partNumber} — {part.title}</Text>
+                    <Text style={styles.manualPartSubtitle}>{part.subtitle}</Text>
+                  </View>
+                  <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={20} color={COLORS.textMuted} />
+                </Pressable>
+                {isExpanded && (
+                  <View style={styles.manualPartTopics}>
+                    {part.topics.map((topic) => (
+                      <Pressable
+                        key={topic.id}
+                        style={styles.manualTopicRow}
+                        onPress={() => openManualTopic(topic)}
+                      >
+                        <Text style={styles.manualTopicEmoji}>{topic.emoji}</Text>
+                        <Text style={styles.manualTopicTitle}>{topic.title}</Text>
+                        <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+              </View>
+            );
+          })}
+
+          {/* ═══ THE MANUAL — Full library (all existing lessons, unchanged) ═══ */}
+          <Text style={styles.sectionBlockTitle}>The Manual — Full library</Text>
           <Text style={styles.sectionBlockSubtitle}>
-            A structured library. Pick a group, then explore.
+            All lessons by topic. Read Your System · Know Yourself · Know Your People · Know Your Path · Navigate Challenges. Explore below.
           </Text>
+          <Text style={styles.curriculumTagline}>{CURRICULUM_TAGLINE}</Text>
+          <Text style={[styles.sectionBlockTitle, { marginTop: 8 }]}>Self-Discovery</Text>
+          <Text style={styles.sectionBlockSubtitle}>
+            Short, research-backed quizzes. Not labels — insight into how you operate. 2–3 min each.
+          </Text>
+          <Pressable
+            style={styles.selfDiscoveryCard}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/learn/self-discovery'); }}
+          >
+            <Text style={styles.selfDiscoveryEmoji}>🔬</Text>
+            <View style={styles.selfDiscoveryBody}>
+              <Text style={styles.selfDiscoveryTitle}>Self-Discovery</Text>
+              <Text style={styles.selfDiscoverySub}>Big Five, Stress Response, Decision Style, Motivation, Social Energy, Thinking Bias, Conflict Style, Attachment</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
+          </Pressable>
+          <View style={styles.alsoExploreRow}>
+            <Pressable
+              style={styles.alsoExploreCard}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/learn/skills'); }}
+            >
+              <Text style={styles.alsoExploreEmoji}>🛠️</Text>
+              <Text style={styles.alsoExploreTitle}>16 Human Skills</Text>
+              <Text style={styles.alsoExploreSub}>Core life skills — learn by doing</Text>
+            </Pressable>
+            <Pressable
+              style={styles.alsoExploreCard}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/learn/questions'); }}
+            >
+              <Text style={styles.alsoExploreEmoji}>❓</Text>
+              <Text style={styles.alsoExploreTitle}>12 Questions</Text>
+              <Text style={styles.alsoExploreSub}>Life blueprint — who you are</Text>
+            </Pressable>
+            <Pressable
+              style={styles.alsoExploreCard}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/tools/human-roles'); }}
+            >
+              <Text style={styles.alsoExploreEmoji}>👥</Text>
+              <Text style={styles.alsoExploreTitle}>Human Roles</Text>
+              <Text style={styles.alsoExploreSub}>How to show up in relationships — by role</Text>
+            </Pressable>
+            <Pressable
+              style={styles.alsoExploreCard}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/learn/life-literacy'); }}
+            >
+              <Text style={styles.alsoExploreEmoji}>📚</Text>
+              <Text style={styles.alsoExploreTitle}>Life Literacy</Text>
+              <Text style={styles.alsoExploreSub}>What to know to navigate life well</Text>
+            </Pressable>
+            <Pressable
+              style={styles.alsoExploreCard}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/learn/relationship-repair'); }}
+            >
+              <Text style={styles.alsoExploreEmoji}>🔧</Text>
+              <Text style={styles.alsoExploreTitle}>Relationship repair</Text>
+              <Text style={styles.alsoExploreSub}>Short lessons — fix arguments, repair after a fight</Text>
+            </Pressable>
+            <Pressable
+              style={styles.alsoExploreCard}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/learn/modern-manners'); }}
+            >
+              <Text style={styles.alsoExploreEmoji}>🤝</Text>
+              <Text style={styles.alsoExploreTitle}>Modern Manners</Text>
+              <Text style={styles.alsoExploreSub}>10 skills that make relationships and societies work</Text>
+            </Pressable>
+          </View>
           <ManualSearch />
           <SuggestedLessons />
           {MANUAL_LIBRARY_GROUPS.map((group) => {
@@ -355,7 +480,42 @@ export default function LearnScreen() {
             );
           })}
 
-          {/* ═══ SECTION 4: DISCOVERIES ═══ */}
+          {/* ═══ PARTS 6–7: LONG GAME, BIG QUESTIONS ═══ */}
+          {HUMAN_MANUAL_PARTS.filter((p) => p.partNumber >= 6).map((part) => {
+            const isExpanded = expandedManualPartId === part.id;
+            return (
+              <View key={part.id} style={styles.manualPartWrap}>
+                <Pressable
+                  style={[styles.manualPartCard, isExpanded && styles.manualPartCardExpanded]}
+                  onPress={() => toggleManualPart(part.id)}
+                >
+                  <Text style={styles.manualPartEmoji}>{part.emoji}</Text>
+                  <View style={styles.manualPartBody}>
+                    <Text style={styles.manualPartTitle}>Part {part.partNumber} — {part.title}</Text>
+                    <Text style={styles.manualPartSubtitle}>{part.subtitle}</Text>
+                  </View>
+                  <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={20} color={COLORS.textMuted} />
+                </Pressable>
+                {isExpanded && (
+                  <View style={styles.manualPartTopics}>
+                    {part.topics.map((topic) => (
+                      <Pressable
+                        key={topic.id}
+                        style={styles.manualTopicRow}
+                        onPress={() => openManualTopic(topic)}
+                      >
+                        <Text style={styles.manualTopicEmoji}>{topic.emoji}</Text>
+                        <Text style={styles.manualTopicTitle}>{topic.title}</Text>
+                        <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+              </View>
+            );
+          })}
+
+          {/* ═══ DISCOVERIES (unchanged) ═══ */}
           <Text style={styles.sectionBlockTitle}>Discoveries</Text>
           <Text style={styles.sectionBlockSubtitle}>
             Small insights about how humans work.
@@ -446,6 +606,12 @@ const styles = StyleSheet.create({
     padding: 24,
     marginBottom: 24,
   },
+  introTagline: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.accent,
+    marginBottom: 12,
+  },
   introHeadline: {
     fontSize: 22,
     fontWeight: '700',
@@ -458,6 +624,63 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 12,
   },
+  introGuiding: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+    lineHeight: 20,
+    marginTop: 10,
+  },
+  manualPartWrap: {
+    marginBottom: 12,
+  },
+  manualPartCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  manualPartCardExpanded: {
+    borderColor: COLORS.accent + '50',
+    backgroundColor: COLORS.accentSoft,
+  },
+  manualPartEmoji: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  manualPartBody: { flex: 1, minWidth: 0 },
+  manualPartTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  manualPartSubtitle: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    lineHeight: 16,
+  },
+  manualPartTopics: {
+    marginTop: 4,
+    paddingLeft: 8,
+    paddingRight: 8,
+    paddingBottom: 8,
+  },
+  manualTopicRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  manualTopicEmoji: { fontSize: 18, marginRight: 10 },
+  manualTopicTitle: { flex: 1, fontSize: 14, fontWeight: '500', color: COLORS.text },
   sectionBlockTitle: {
     fontSize: 20,
     fontWeight: '700',
@@ -471,6 +694,45 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     lineHeight: 20,
   },
+  curriculumTagline: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+    marginTop: -8,
+    marginBottom: 16,
+  },
+
+  // Also explore: 16 Skills + 12 Questions
+  alsoExploreRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  selfDiscoveryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 12,
+  },
+  selfDiscoveryEmoji: { fontSize: 32, marginRight: 14 },
+  selfDiscoveryBody: { flex: 1, minWidth: 0 },
+  selfDiscoveryTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text, marginBottom: 4 },
+  selfDiscoverySub: { fontSize: 13, color: COLORS.textMuted, lineHeight: 18 },
+  alsoExploreCard: {
+    flex: 1,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  alsoExploreEmoji: { fontSize: 24, marginBottom: 6 },
+  alsoExploreTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, marginBottom: 2 },
+  alsoExploreSub: { fontSize: 12, color: COLORS.textMuted },
 
   // Library group cards (Section 3)
   libraryGroupWrap: {

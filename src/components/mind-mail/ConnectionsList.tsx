@@ -20,7 +20,7 @@ export function ConnectionsList({ members, onSelectPerson }: ConnectionsListProp
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyText}>No one in your Circle yet.</Text>
-        <Text style={styles.emptySub}>Add people in Lights or Circle to send Mind Mail.</Text>
+        <Text style={styles.emptySub}>Add people in People or Circle to send Mind Mail.</Text>
       </View>
     );
   }

@@ -6,7 +6,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { COLORS, BORDER_RADIUS } from '../lib/constants';
+import { COLORS, BORDER_RADIUS, APP_CONFIG } from '../lib/constants';
 import { usePremiumStore, TESTING_MODE } from '../stores/premiumStore';
 
 interface PremiumGateProps {
@@ -81,7 +81,7 @@ export function PremiumGate({ visible, onClose, feature = 'ai' }: PremiumGatePro
 
           {/* Features list */}
           <View style={styles.features}>
-            <Text style={styles.featuresTitle}>InGauge Premium includes:</Text>
+            <Text style={styles.featuresTitle}>{APP_CONFIG.name} Premium includes:</Text>
             {PREMIUM_FEATURES.map((f, i) => (
               <View key={i} style={styles.featureRow}>
                 <Ionicons name={f.icon as any} size={20} color={COLORS.accent} />

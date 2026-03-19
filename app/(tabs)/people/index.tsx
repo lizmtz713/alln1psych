@@ -17,22 +17,22 @@ import * as Haptics from 'expo-haptics';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { ErrorBoundary } from '../../src/components/ErrorBoundary';
-import { useCircleStore } from '../../src/stores/circleStore';
-import { useLightsStore } from '../../src/stores/lightsStore';
-import { useDailyAnchorsStore } from '../../src/stores/dailyAnchorsStore';
-import { getDailyReachOuts } from '../../src/services/friendshipMaintenance';
-import { RelationshipRing } from '../../src/components/signals/RelationshipRing';
-import { PersonDetailSheet } from '../../src/components/signals/PersonDetailSheet';
-import { TransmitComposerSheet } from '../../src/components/signals/TransmitComposerSheet';
-import { COLORS, BORDER_RADIUS, SPACING } from '../../src/lib/constants';
+import { ErrorBoundary } from '../../../src/components/ErrorBoundary';
+import { useCircleStore } from '../../../src/stores/circleStore';
+import { useLightsStore } from '../../../src/stores/lightsStore';
+import { useDailyAnchorsStore } from '../../../src/stores/dailyAnchorsStore';
+import { getDailyReachOuts } from '../../../src/services/friendshipMaintenance';
+import { RelationshipRing } from '../../../src/components/signals/RelationshipRing';
+import { PersonDetailSheet } from '../../../src/components/signals/PersonDetailSheet';
+import { TransmitComposerSheet } from '../../../src/components/signals/TransmitComposerSheet';
+import { COLORS, BORDER_RADIUS, SPACING } from '../../../src/lib/constants';
 import {
   getRelationshipStatusLabel,
   getRelationshipScoreFromLight,
   getTemperatureRingColorForLight,
-} from '../../src/lib/signalsCopy';
-import type { Light, LightTier } from '../../src/types/lights';
-import type { MindMailIntent } from '../../src/types/mindMail';
+} from '../../../src/lib/signalsCopy';
+import type { Light, LightTier } from '../../../src/types/lights';
+import type { MindMailIntent } from '../../../src/types/mindMail';
 
 const CARD_WIDTH = 88;
 const CARD_MARGIN = 10;
@@ -391,10 +391,66 @@ export default function SignalsScreen() {
           </Pressable>
         )}
 
-        {/* Understand People — Learn, Map (Relationship Universe), World Temperature */}
+        {/* Understand People — Fleet Management, Learn, Map, World Temperature, Family Fleet */}
         <View style={styles.understandSection}>
           <Text style={styles.sectionTitle}>Understand People</Text>
+          <Pressable
+            style={styles.fleetManagementCard}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/people/fleet-management'); }}
+            accessibilityLabel="Fleet Management: Link devices and manage crew"
+          >
+            <Text style={styles.fleetManagementCardTitle}>Fleet Management</Text>
+            <Text style={styles.fleetManagementCardSub}>Link devices and manage crew</Text>
+          </Pressable>
+          <Pressable
+            style={styles.fleetSynergyCard}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/people/fleet-synergy'); }}
+            accessibilityLabel="Fleet Synergy: Mechanic's Thanks and positive fleet logs"
+          >
+            <Text style={styles.fleetSynergyCardIcon}>🔧</Text>
+            <View style={styles.fleetSynergyCardBody}>
+              <Text style={styles.fleetSynergyCardTitle}>Fleet Synergy</Text>
+              <Text style={styles.fleetSynergyCardSub}>Review the Mechanic's Thanks and positive fleet logs.</Text>
+            </View>
+            <Text style={styles.fleetSynergyCardArrow}>→</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.fleetSynergyCard, { borderLeftColor: COLORS.border }]}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/people/black-box'); }}
+            accessibilityLabel="Black Box: 30-day fuel trend"
+          >
+            <Text style={styles.fleetSynergyCardIcon}>📦</Text>
+            <View style={styles.fleetSynergyCardBody}>
+              <Text style={styles.fleetSynergyCardTitle}>Black Box</Text>
+              <Text style={styles.fleetSynergyCardSub}>30-day fuel trend from Post-Flight debriefs.</Text>
+            </View>
+            <Text style={[styles.fleetSynergyCardArrow, { color: COLORS.textMuted }]}>→</Text>
+          </Pressable>
           <View style={styles.moreRow}>
+            <Pressable
+              style={styles.moreCard}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/people/copilot-radar'); }}
+              accessibilityLabel="Co-Pilot Radar (sibling view)"
+            >
+              <Text style={styles.moreEmoji}>🛸</Text>
+              <Text style={styles.moreLabel}>Radar</Text>
+            </Pressable>
+            <Pressable
+              style={styles.moreCard}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(tabs)/people/family-fleet'); }}
+              accessibilityLabel="Family Fleet (Ground Control)"
+            >
+              <Text style={styles.moreEmoji}>🛰️</Text>
+              <Text style={styles.moreLabel}>Fleet</Text>
+            </Pressable>
+            <Pressable
+              style={styles.moreCard}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/invite-circle'); }}
+              accessibilityLabel="Invite to Circle"
+            >
+              <Text style={styles.moreEmoji}>💛</Text>
+              <Text style={styles.moreLabel}>Invite</Text>
+            </Pressable>
             <Pressable
               style={styles.moreCard}
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/lights/learn'); }}
@@ -603,19 +659,45 @@ const styles = StyleSheet.create({
   },
   transmitBtnText: { fontSize: 13, fontWeight: '600', color: COLORS.accent },
   understandSection: { marginBottom: SPACING.lg },
-  moreRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
-  moreCard: {
-    width: 56,
+  fleetManagementCard: {
     backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.card,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: 4,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  fleetManagementCardTitle: { fontSize: 16, fontWeight: '600', color: COLORS.text, marginBottom: 2 },
+  fleetManagementCardSub: { fontSize: 13, color: COLORS.textMuted },
+  fleetSynergyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderLeftWidth: 4,
+    borderColor: COLORS.border,
+    borderLeftColor: '#10b981',
+  },
+  fleetSynergyCardIcon: { fontSize: 24, marginRight: SPACING.md },
+  fleetSynergyCardBody: { flex: 1 },
+  fleetSynergyCardTitle: { fontSize: 16, fontWeight: '600', color: COLORS.text, marginBottom: 2 },
+  fleetSynergyCardSub: { fontSize: 13, color: COLORS.textMuted },
+  fleetSynergyCardArrow: { fontSize: 18, color: '#10b981', marginLeft: SPACING.sm },
+  moreRow: { flexDirection: 'row', gap: 12 },
+  moreCard: {
+    flex: 1,
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.card,
+    padding: SPACING.md,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  moreEmoji: { fontSize: 22, marginBottom: 4 },
-  moreLabel: { fontSize: 10, fontWeight: '600', color: COLORS.textSecondary, textAlign: 'center' },
+  moreEmoji: { fontSize: 24, marginBottom: 6 },
+  moreLabel: { fontSize: 12, fontWeight: '600', color: COLORS.textSecondary },
   // Horizontal circle strips
   hStripSection: { marginBottom: SPACING.lg },
   hStripContent: { paddingRight: SPACING.lg },

@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -13,6 +13,7 @@ import { COLORS, SPACING, BORDER_RADIUS } from '../../../src/lib/constants';
 import { useDecisionStore } from '../../../src/stores/decisionStore';
 import type { DecisionOption, DecisionRisk } from '../../../src/types/decision';
 import { runAchievementChecks } from '../../../src/services/achievementChecker';
+import { sendMessageWithSystemPromptOnly, hasOpenAIKey } from '../../../src/services/ai';
 
 const BG = COLORS.background;
 const CARD_BG = COLORS.surface;
@@ -43,6 +44,8 @@ export default function DecisionNewScreen() {
   const [step, setStep] = useState(1);
   const [question, setQuestion] = useState('');
   const [clarify, setClarify] = useState('');
+  const [aiClarity, setAiClarity] = useState<string | null>(null);
+  const [aiClarityLoading, setAiClarityLoading] = useState(false);
   const [options, setOptions] = useState<DecisionOption[]>([{ id: genId(), label: '' }, { id: genId(), label: '' }]);
   const [values, setValues] = useState<string[]>(['']);
   const [evaluateNotes, setEvaluateNotes] = useState('');
@@ -136,7 +139,7 @@ export default function DecisionNewScreen() {
               placeholder="e.g. Whether to change jobs"
               placeholderTextColor={TEXT_MUTED}
               value={question}
-              onChangeText={setQuestion}
+              onChangeText={(t) => { setQuestion(t); setAiClarity(null); }}
             />
             <Text style={styles.prompt}>Clarify it in one sentence (optional).</Text>
             <TextInput
@@ -147,6 +150,35 @@ export default function DecisionNewScreen() {
               onChangeText={setClarify}
               multiline
             />
+            {question.trim() && (
+              <Pressable
+                style={[styles.aiClarityBtn, aiClarityLoading && styles.aiClarityBtnDisabled]}
+                onPress={async () => {
+                  const hasKey = await hasOpenAIKey();
+                  if (!hasKey) { Alert.alert('API key needed', 'Add your OpenAI API key in Settings to use AI clarity.'); return; }
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setAiClarityLoading(true);
+                  setAiClarity(null);
+                  try {
+                    const sys = 'Help the user clarify this decision. Offer 1–2 short clarifying questions or a one-sentence reframe. Be brief and warm. Reply with plain text only.';
+                    const content = (question.trim() + (clarify.trim() ? '\nContext: ' + clarify.trim() : ''));
+                    const res = await sendMessageWithSystemPromptOnly([{ role: 'user', content }], sys, 200);
+                    if (res && !res.startsWith('[')) setAiClarity(res.trim());
+                  } catch { Alert.alert('Could not get clarity', 'Check your connection and try again.'); }
+                  finally { setAiClarityLoading(false); }
+                }}
+                disabled={aiClarityLoading}
+              >
+                {aiClarityLoading ? <ActivityIndicator size="small" color={COLORS.accent} /> : <Ionicons name="sparkles" size={18} color={COLORS.accent} />}
+                <Text style={styles.aiClarityBtnText}>{aiClarityLoading ? '…' : 'Get AI clarity'}</Text>
+              </Pressable>
+            )}
+            {aiClarity && (
+              <View style={styles.aiClarityCard}>
+                <Text style={styles.aiClarityLabel}>AI reflection</Text>
+                <Text style={styles.aiClarityText}>{aiClarity}</Text>
+              </View>
+            )}
           </>
         )}
 
@@ -316,6 +348,12 @@ const styles = StyleSheet.create({
   input: { backgroundColor: CARD_BG, borderRadius: BORDER_RADIUS.md, borderWidth: 1, borderColor: BORDER, padding: 14, fontSize: 16, color: TEXT, marginBottom: SPACING.md },
   inputMultiline: { minHeight: 88, textAlignVertical: 'top' },
   inputSmall: { marginBottom: 8 },
+  aiClarityBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, marginBottom: 16, borderWidth: 1, borderColor: COLORS.accent, borderRadius: BORDER_RADIUS?.card ?? 12 },
+  aiClarityBtnDisabled: { opacity: 0.6 },
+  aiClarityBtnText: { fontSize: 15, fontWeight: '600', color: COLORS.accent },
+  aiClarityCard: { backgroundColor: CARD_BG, borderRadius: BORDER_RADIUS?.card ?? 12, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: BORDER },
+  aiClarityLabel: { fontSize: 12, color: TEXT_MUTED, marginBottom: 6 },
+  aiClarityText: { fontSize: 15, color: TEXT, lineHeight: 22 },
   optionRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   removeBtn: { padding: 4 },
   addOptionBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: SPACING.md },

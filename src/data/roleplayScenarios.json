@@ -1,0 +1,65 @@
+[
+    {
+      "id": "rp-001",
+      "domain": "Tools",
+      "title": "The Post-School Stall",
+      "focus": "Tier 1 (Body/State) vs. Tier 3 (Direction)",
+      "context": "Pilot (Teen) arrives home. Their 'State' gauge is Amber (Stabilization). Ground Control (Parent) wants to discuss a missing assignment ('Direction').",
+      "roles": {
+        "pilot": "You are running on fumes. Your social battery is dead, and your brain is foggy.",
+        "groundControl": "You just got an email from the teacher and are anxious to fix the problem."
+      },
+      "theCrash": {
+        "parent": "Why didn't you turn in your history paper? You always do this.",
+        "teen": "Leave me alone! I just got home, why are you always on my case?",
+        "outcome": "System Overload. Both vehicles sustain damage."
+      },
+      "theInGaugeOptimization": {
+        "parent": "I see your 'State' gauge is Amber right now. I have a 'Direction' question about history, but I'll park it until you've had time to refuel.",
+        "teen": "Copy that. My system is lagging. Give me a 30-minute Garage Reset, and then we can look at the Road Map.",
+        "outcome": "Collision Avoided. Tier 1 capacity is restored before Tier 3 demands are made."
+      }
+    },
+    {
+      "id": "rp-002",
+      "domain": "Tools",
+      "title": "The Radar Drop",
+      "focus": "Connection Gauge & Rule 9 (Probabilistic Language)",
+      "context": "Pilot's 'Connection' gauge has been Red for two days. They are isolating in their room. Ground Control is getting anxious about the disconnect.",
+      "roles": {
+        "pilot": "You feel overwhelmed by friends and just want the Privacy Curtain closed.",
+        "groundControl": "You feel shut out and worried that something is deeply wrong."
+      },
+      "theCrash": {
+        "parent": "Why are you hiding in your room? You never talk to us anymore. What is wrong with you?",
+        "teen": "Nothing is wrong! Stop spying on me!",
+        "outcome": "Defensive Escapism. The Pilot locks the doors; Ground Control panics."
+      },
+      "theInGaugeOptimization": {
+        "parent": "Hey Pilot, the dashboard shows your 'Connection' gauge has been Red for a bit. In the past, this tends to mean you just need solo maintenance. 5 out of 7 times, a low-pressure movie night helps. Want to try that later, or stay in solo mode?",
+        "teen": "Solo mode for now. The system is just heavy. I'll drop the Privacy Curtain a bit tomorrow.",
+        "outcome": "Autonomy Preserved. Parent offers support without interrogation; Teen acknowledges the data without shame."
+      }
+    },
+    {
+      "id": "rp-003",
+      "domain": "Tools",
+      "title": "The Mutual Overheating",
+      "focus": "Dual-Red Lockdown Protocol",
+      "context": "It's 10:00 PM. Both Pilot and Ground Control have Red 'Emotion' and 'State' gauges after a disagreement about curfew.",
+      "roles": {
+        "pilot": "You feel unfairly controlled and your RPMs are maxed out.",
+        "groundControl": "You feel disrespected and your patience (Fuel) is at zero."
+      },
+      "theCrash": {
+        "parent": "You are grounded! Give me your phone right now!",
+        "teen": "I hate living here! You don't trust me!",
+        "outcome": "Head-On Collision. Severe damage to long-term trust."
+      },
+      "theInGaugeOptimization": {
+        "parent": "Warning light. My 'State' is Red and yours is too. We don't have the capacity for this maneuver right now. I'm initiating a 20-minute Fleet Lockdown.",
+        "teen": "Fine. Pulling over.",
+        "outcome": "Emergency Brakes Engaged. The conflict is paused before permanent relational damage occurs."
+      }
+    }
+  ]

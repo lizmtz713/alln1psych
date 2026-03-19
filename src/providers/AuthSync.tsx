@@ -13,7 +13,7 @@ import {
   getCircleMembers,
   getNudges,
 } from '../services/database';
-import type { AgeGroup } from '../stores/userStore';
+import type { AgeGroup, LearningStyle } from '../stores/userStore';
 import { TEMPERATURE_LABELS } from '../stores/circleStore';
 import type { Temperature } from '../stores/circleStore';
 
@@ -49,6 +49,7 @@ export function AuthSync({ children }: { children: React.ReactNode }) {
           (profile.communication_preference as 'voice' | 'text') ?? null,
         loveLanguage:
           (profile.love_language as 'words' | 'quality-time' | 'acts-of-service' | 'physical-touch' | 'gifts' | 'unknown') ?? null,
+        learningStyle: (profile.learning_style as LearningStyle) ?? null,
         onboardingCompleted: profile.onboarding_completed ?? false,
         profileHydrated: true,
       });

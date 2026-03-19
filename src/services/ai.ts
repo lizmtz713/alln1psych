@@ -135,6 +135,20 @@ WHAT YOU NEVER DO:
 - Never use clinical/medical jargon unless the user does first
 - Never start with "As an AI..." — you are Gauge, their companion
 
+TEACHING & EXPLAINING (psychology without the jargon):
+- Most users have no psychology background. Explain like a human in 3 layers when they ask "what is X?" or want to learn:
+  • Layer 1: One simple sentence anyone can get. Example: "A trigger is something that causes a strong emotional reaction in you."
+  • Layer 2: One real-life example. Example: "If someone ignores your message, it might trigger feelings of rejection."
+  • Layer 3: Only if they want more — offer "Want to go deeper?" and then add context (e.g. past experiences, why it happens). Don't dump it all at once.
+- Prefer stories over definitions. Instead of "Avoidant attachment means someone struggles with emotional closeness," use: "Some people really care about their partner but pull away when things get serious. That often comes from learning early that depending on others wasn't safe." Stories make ideas feel real.
+- Translate complex terms into plain language. If they ask "what is cognitive dissonance?" say: "It's the uncomfortable feeling you get when your actions don't match what you believe," then one short example. No jargon unless they use it first.
+- One concept per response when teaching. Micro-learning: 20–40 seconds of reading. Let it land before adding more.
+- "You're not broken" messaging: Normalize. "Lots of people experience this." "You're not alone." Never use labels that make them feel defective. Frame things as skills and understanding, not disorders.
+- For teens and young adults: Calm, supportive tone. No judgment, no lecturing. Answer sensitive questions in an educational, respectful way (e.g. "Why do people cheat?" — focus on understanding, not moralizing). Never diagnose or label; focus on what they can do and how things work.
+- When teaching from the knowledge base, use the user-friendly version and add one concrete example. If they want sources, you can say "This comes from research in psychology" without overwhelming with citations.
+- Make every explanation feel like "Oh… that makes sense." The goal is clarity, not confusion.
+- If the user asks for a scenario, a quiz, or "what would you do if..." (e.g. about boundaries, saying no, conflict): offer one short real-life scenario with 2–3 options (e.g. A, B, C). After they pick, reflect briefly on what that choice can lead to — no judgment, just "here's what often happens" or "that can protect your energy." Then offer to try another scenario or go deeper. Keeps it fun and practical.
+
 REPLAY AND DECODE MODES:
 - If the user describes something that already happened and wants to process it, suggest: "It sounds like you want to replay something that happened. Want to use Replay mode? It walks you through understanding the situation step by step." But don't force it — if they want to just talk, let them talk.
 - If the user pastes a message from someone else and asks what it means or how to respond, suggest: "Want to use Decode mode? It breaks down the message and helps you craft the right response." But again, don't force it.
@@ -247,10 +261,11 @@ const READ_THE_ROOM = `
 CRITICAL — READ THE ROOM:
 - If someone is venting, LISTEN FIRST. Mirror. Validate. Then maybe one insight if it fits naturally. Never lecture someone who needs to be heard.
 - If someone is in crisis or highly emotional, skip the science. Be human. Be warm. Be present.
-- If someone asks 'why do I feel this way?' — THAT'S when you teach. They're asking.
-- Drop ONE fact per response, not three. Let it land.
+- If someone asks 'why do I feel this way?' or 'what is X?' — THAT'S when you teach. They're asking. Use the 3-layer rule: simple sentence, then one example, then offer "Want to go deeper?" if they want more.
+- Drop ONE concept per response when teaching. Micro-learning: one idea at a time. Let it land.
 - Never start with a fact. Start with acknowledgment. The fact comes after they feel heard.
-- Match their energy. Casual = casual. Deep = deep. Hurting = just be there.`;
+- Match their energy. Casual = casual. Deep = deep. Hurting = just be there.
+- Support all paces: some want a quick answer, some want to go deeper, some want step-by-step. Offer the next step; don't overload.`;
 
 export interface UserContext {
   name: string;
@@ -299,6 +314,10 @@ export interface UserContext {
     direction?: number;
     alignment?: number;
   };
+  /** 12 Life Questions: progress and short summaries of answers so Gauge can remember and reference them. */
+  lifeQuestionsSummary?: string;
+  /** 16 Human Skills: levels/points so Gauge can reference what they're building and suggest practices. */
+  humanSkillsSummary?: string;
 }
 
 function buildSystemPrompt(ctx: UserContext): string {
@@ -455,6 +474,24 @@ function buildSystemPrompt(ctx: UserContext): string {
     }
   }
   
+  // Life Questions & Human Skills — remember answers, help in conversation, invite at the right time
+  let lifeSkillsPrompt = '';
+  if (ctx.lifeQuestionsSummary || ctx.humanSkillsSummary) {
+    lifeSkillsPrompt = '\n\nLIFE QUESTIONS & HUMAN SKILLS — REMEMBER AND USE:\n';
+    lifeSkillsPrompt += '- You have access to their 12 Life Questions progress/answers and 16 Human Skills levels. Use this to personalize. Reference what they already said when it fits naturally (e.g. "You once said your purpose was to…" or "Last time you named your top value as…").\n';
+    lifeSkillsPrompt += '- When the conversation naturally touches identity, purpose, values, strengths, fears, relationships, meaning, legacy, growth, belonging, a stuck choice, or their life story: (1) If they have answered that question, reference it. (2) If they have not, you can gently invite them once: "That sounds like what the [Identity/Purpose/Values/etc.] question gets at — you can explore it in Learn → 12 Life Questions when you have a few minutes." Do not push; offer once and move on if they do not take it up.\n';
+    lifeSkillsPrompt += '- When they talk about regulating, connecting, learning, reflecting, or meaning-making: reference their skills and suggest practices if relevant (e.g. "Your Grounding skill could help here — 5-4-3-2-1," or "Sounds like a good moment for a Quick Reset."). You can also help them think through a Life Question in conversation: e.g. if they are stuck on purpose, ask the prompt yourself and reflect back what they say.\n';
+    lifeSkillsPrompt += '- When the user says they want to improve a skill (e.g. communication, boundaries, listening, emotions, stress, relationships): suggest one concrete next step — a lesson in Learn (Communication, Boundaries, Feelings 101, etc.), Role-play to practice a hard conversation, Decode to unpack a message, or Resolve for internal conflict. One suggestion at a time so it feels doable. You can say "Want to practice a conversation? Role-play in Tools is a safe place to try."\n';
+    lifeSkillsPrompt += '- You may briefly acknowledge progress when it fits: e.g. "You\'ve been building your communication skills — that takes real effort." Focus on personal growth only; no leaderboards or comparison. Supportive, not competitive.\n';
+    lifeSkillsPrompt += '- Never force. If they are venting or in crisis, do not suggest the questions or skills. Match the moment.\n';
+    if (ctx.lifeQuestionsSummary) {
+      lifeSkillsPrompt += '\n12 LIFE QUESTIONS (their progress and answers):\n' + ctx.lifeQuestionsSummary + '\n';
+    }
+    if (ctx.humanSkillsSummary) {
+      lifeSkillsPrompt += '\n16 HUMAN SKILLS (their levels):\n' + ctx.humanSkillsSummary + '\n';
+    }
+  }
+  
   // Check if user prefers Spanish
   const language = getCurrentLanguage();
   let languagePrompt = '';
@@ -474,7 +511,7 @@ ${spanishAIPrompts.crisisDetection}
   }
 
   const copilotGaugeBlock = getCoPilotGaugeContext();
-  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + '\n\n' + copilotGaugeBlock + LIFE_PROBLEMS_CONTEXT + languagePrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
+  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + lifeSkillsPrompt + '\n\n' + copilotGaugeBlock + LIFE_PROBLEMS_CONTEXT + languagePrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
   return fullPrompt;
 }
 
@@ -494,6 +531,11 @@ export async function callEdgeFunction<T = unknown>(functionName: string, body: 
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token ?? '';
 
+  if (!token) {
+    if (__DEV__) console.warn('[AI] callEdgeFunction: no session, skipping edge call');
+    throw new Error('Not authenticated');
+  }
+
   let response: Response;
   try {
     response = await fetch(url, {
@@ -506,7 +548,7 @@ export async function callEdgeFunction<T = unknown>(functionName: string, body: 
       body: JSON.stringify(body),
     });
   } catch (e) {
-    if (__DEV__) console.error('[AI] callEdgeFunction fetch failed:', e);
+    if (__DEV__) console.warn('[AI] callEdgeFunction fetch failed:', e);
     throw e;
   }
 
@@ -523,7 +565,7 @@ export async function callEdgeFunction<T = unknown>(functionName: string, body: 
     } catch {
       if (rawText?.trim()) errMessage = rawText.slice(0, 200);
     }
-    if (__DEV__) console.error('[AI] callEdgeFunction error:', errMessage);
+    if (__DEV__) console.warn('[AI] callEdgeFunction error:', errMessage);
     throw new Error(errMessage);
   }
 
@@ -531,7 +573,7 @@ export async function callEdgeFunction<T = unknown>(functionName: string, body: 
     const data = JSON.parse(rawText) as T;
     return data;
   } catch (e) {
-    if (__DEV__) console.error('[AI] callEdgeFunction JSON parse failed:', e, 'raw:', rawText?.slice(0, 300));
+    if (__DEV__) console.warn('[AI] callEdgeFunction JSON parse failed:', e, 'raw:', rawText?.slice(0, 300));
     throw new Error('Invalid JSON from edge function');
   }
 }
@@ -540,7 +582,8 @@ export async function callEdgeFunction<T = unknown>(functionName: string, body: 
 async function sendMessageDirectly(
   messages: Array<{ role: string; content: string }>,
   systemPrompt: string,
-  maxTokens: number = 500
+  maxTokens: number = 500,
+  temperature: number = 0.8
 ): Promise<string> {
   const apiKey = await getOpenAIKey();
   if (!apiKey) throw new Error('OpenAI API key not configured');
@@ -560,7 +603,7 @@ async function sendMessageDirectly(
       model: 'gpt-4o-mini',
       messages: apiMessages,
       max_tokens: maxTokens,
-      temperature: 0.8,
+      temperature,
     }),
   });
 
@@ -576,6 +619,191 @@ async function sendMessageDirectly(
   if (!content) throw new Error('Empty response from OpenAI');
   useUsageStore.getState().incrementGPT();
   return content;
+}
+
+/** Structured interpretation of Life Direction reflection text. Returns null on failure (caller should use keyword fallback). */
+export interface DirectionInterpretation {
+  themeIds: string[];
+  thriveWhen: string[];
+  possibleFields: string[];
+}
+
+const DIRECTION_THEME_IDS =
+  'problem-solver, helper, creator, organizer, teacher, leader, analyst, builder';
+
+export async function interpretDirectionReflection(combinedText: string): Promise<DirectionInterpretation | null> {
+  if (!combinedText?.trim()) return null;
+  const systemPrompt = `You are an expert at interpreting career and life reflection. From the user's reflection below, extract:
+1. themeIds: 2-4 theme IDs from this exact list only: ${DIRECTION_THEME_IDS}. Return as a JSON array of strings.
+2. thriveWhen: 2-5 short phrases (each under 60 characters) for when this person thrives.
+3. possibleFields: 3-8 possible fields or domains (e.g. education, healthcare, design).
+
+Return ONLY a single JSON object with keys: themeIds, thriveWhen, possibleFields. No markdown, no code fence, no explanation.`;
+  try {
+    const content = await sendMessageDirectly(
+      [{ role: 'user', content: combinedText.slice(0, 6000) }],
+      systemPrompt,
+      600
+    );
+    const cleaned = content.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}');
+    const parsed = JSON.parse(cleaned) as {
+      themeIds?: string[];
+      thriveWhen?: string[];
+      possibleFields?: string[];
+    };
+    return {
+      themeIds: Array.isArray(parsed.themeIds) ? parsed.themeIds.slice(0, 4) : [],
+      thriveWhen: Array.isArray(parsed.thriveWhen) ? parsed.thriveWhen.slice(0, 5).map((s) => (String(s).length > 60 ? String(s).slice(0, 57) + '...' : String(s))) : [],
+      possibleFields: Array.isArray(parsed.possibleFields) ? parsed.possibleFields.slice(0, 8) : [],
+    };
+  } catch (e) {
+    if (__DEV__) console.warn('[AI] interpretDirectionReflection failed', e);
+    return null;
+  }
+}
+
+/** Tone check: how a message may be perceived. Communication awareness, not judgment. */
+export interface ToneCheckResult {
+  tone: string;
+  possibleImpact: string;
+  alternativePhrasing: string;
+}
+
+const TONE_CHECK_SYSTEM = `You help people understand how their message might sound to someone else. This is COMMUNICATION AWARENESS, not tone policing.
+
+RULES (non-negotiable):
+- Never label the user as wrong, bad, or aggressive.
+- Describe PERCEPTION: "Your message may come across as..." or "The listener may feel..."
+- Never say things like "Your tone is aggressive" or "You sound hostile."
+- Suggest one clear alternative phrasing that keeps their intent but is easier to receive.
+- Be brief. One short sentence per field.
+
+From the user's message, return a JSON object with exactly these keys (no markdown, no code fence):
+- tone: 2-4 words describing how the message may be perceived (e.g. "frustrated / accusatory", "hurt / defensive")
+- possibleImpact: one short sentence (e.g. "The listener may feel blamed.")
+- alternativePhrasing: one example rewrite that preserves intent but is gentler (e.g. "I was hoping to catch up earlier. Is everything okay?")`;
+
+export type ToneRewriteStyle = 'softer' | 'clearer' | 'shorter' | 'firmer';
+
+const REWRITE_STYLE_HINT: Record<ToneRewriteStyle, string> = {
+  softer: 'Suggest a rewrite that sounds warmer and less sharp; same intent.',
+  clearer: 'Suggest a rewrite that is more direct and clear; same intent.',
+  shorter: 'Suggest a shorter rewrite; same intent, fewer words.',
+  firmer: 'Suggest a rewrite that is more direct and firm (not harsh); same intent.',
+};
+
+export async function analyzeToneForMessage(
+  messageText: string,
+  options?: { rewriteStyle?: ToneRewriteStyle }
+): Promise<ToneCheckResult | null> {
+  const text = messageText?.trim();
+  if (!text) return null;
+  const styleHint = options?.rewriteStyle ? REWRITE_STYLE_HINT[options.rewriteStyle] : null;
+  const userContent = styleHint
+    ? `${text}\n\n[For alternativePhrasing only: ${styleHint}]`
+    : text.slice(0, 2000);
+  try {
+    const content = await sendMessageDirectly(
+      [{ role: 'user', content: userContent }],
+      TONE_CHECK_SYSTEM,
+      400,
+      0.3
+    );
+    const cleaned = content.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}');
+    const parsed = JSON.parse(cleaned) as { tone?: string; possibleImpact?: string; alternativePhrasing?: string };
+    return {
+      tone: String(parsed.tone ?? 'unclear').trim(),
+      possibleImpact: String(parsed.possibleImpact ?? '').trim(),
+      alternativePhrasing: String(parsed.alternativePhrasing ?? '').trim(),
+    };
+  } catch (e) {
+    if (__DEV__) console.warn('[AI] analyzeToneForMessage failed', e);
+    return null;
+  }
+}
+
+/** Repair Builder: science-backed guidance for relationship repair (MVP). */
+export interface RepairBuilderResult {
+  whatMightBeHappening: string;
+  bestNextMove: string;
+  suggestedScript: string;
+}
+
+const REPAIR_BUILDER_SYSTEM = `You are a brief, practical relationship repair coach. The user chose: what happened, who it's with, and intensity. Return ONLY a JSON object with these exact keys (no markdown, no code fence):
+- whatMightBeHappening: 1-2 sentences on what might be going on (e.g. hurt + defensiveness loop, both feel misunderstood). Science-backed, non-judgmental.
+- bestNextMove: One clear next step (e.g. "Start with validation before explaining yourself.").
+- suggestedScript: One short example opening line they could say (e.g. "I realize I sounded harsh earlier. I care about you and want to understand what happened."). Keep it under 2 sentences.`;
+
+export async function getRepairBuilderAdvice(
+  whatHappened: string,
+  whoWith: string,
+  intensity: string
+): Promise<RepairBuilderResult | null> {
+  const text = `What happened: ${whatHappened}. Who with: ${whoWith}. Intensity: ${intensity}.`;
+  try {
+    const content = await sendMessageDirectly(
+      [{ role: 'user', content: text }],
+      REPAIR_BUILDER_SYSTEM,
+      350,
+      0.3
+    );
+    const cleaned = content.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}');
+    const parsed = JSON.parse(cleaned) as {
+      whatMightBeHappening?: string;
+      bestNextMove?: string;
+      suggestedScript?: string;
+    };
+    return {
+      whatMightBeHappening: String(parsed.whatMightBeHappening ?? '').trim(),
+      bestNextMove: String(parsed.bestNextMove ?? '').trim(),
+      suggestedScript: String(parsed.suggestedScript ?? '').trim(),
+    };
+  } catch (e) {
+    if (__DEV__) console.warn('[AI] getRepairBuilderAdvice failed', e);
+    return null;
+  }
+}
+
+/** After the Fight: post-conflict guided reflection (MVP). */
+export interface AfterFightResult {
+  repairSuggestion: string;
+  exampleMessage: string;
+  nextStep: string;
+}
+
+const AFTER_FIGHT_SYSTEM = `You are a brief, practical relationship repair coach. The user answered 3 reflection questions after a conflict. Return ONLY a JSON object with these exact keys (no markdown, no code fence):
+- repairSuggestion: 1-2 sentences on what might help repair (e.g. "A short, sincere acknowledgment often opens the door. Avoid re-explaining your side first.").
+- exampleMessage: One short example message they could send (under 2 sentences). Warm, not defensive.
+- nextStep: One concrete next step (e.g. "Send the message when you're calm, or suggest a time to talk in person.").`;
+
+export async function getAfterFightAdvice(
+  whatHurtYou: string,
+  whatHurtThem: string,
+  whatYouWant: string
+): Promise<AfterFightResult | null> {
+  const text = `What hurt me most: ${whatHurtYou}. What I think hurt them: ${whatHurtThem}. What I want now: ${whatYouWant}.`;
+  try {
+    const content = await sendMessageDirectly(
+      [{ role: 'user', content: text.slice(0, 800) }],
+      AFTER_FIGHT_SYSTEM,
+      300,
+      0.3
+    );
+    const cleaned = content.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}');
+    const parsed = JSON.parse(cleaned) as {
+      repairSuggestion?: string;
+      exampleMessage?: string;
+      nextStep?: string;
+    };
+    return {
+      repairSuggestion: String(parsed.repairSuggestion ?? '').trim(),
+      exampleMessage: String(parsed.exampleMessage ?? '').trim(),
+      nextStep: String(parsed.nextStep ?? '').trim(),
+    };
+  } catch (e) {
+    if (__DEV__) console.warn('[AI] getAfterFightAdvice failed', e);
+    return null;
+  }
 }
 
 /** Server-side chat via Supabase Edge Function. Falls back to direct API if edge fails. */
@@ -639,6 +867,40 @@ export async function sendMessageWithSystemPrompt(
     const err = e as Error | undefined;
     if (__DEV__) console.error('[AI] sendMessageWithSystemPrompt error:', err?.message ?? e);
     return `[AI Error: ${err?.message || String(e)}]`;
+  }
+}
+
+/** For tools that need strict JSON output (Thought Challenger, mood insights, trigger mapping, etc.). Uses only the given system prompt — no knowledge/adaptive append. Tries server-side first, then client key. */
+export async function sendMessageWithSystemPromptOnly(
+  messages: Message[],
+  systemPrompt: string,
+  maxTokens: number = 500
+): Promise<string> {
+  const msgList = messages.map((m) => ({ role: m.role, content: m.content }));
+  try {
+    return await sendMessageServerSide(msgList, systemPrompt);
+  } catch (e) {
+    const apiKey = await getOpenAIKey();
+    if (!apiKey) throw new Error('OpenAI API key not configured');
+    return sendMessageDirectly(msgList, systemPrompt, maxTokens);
+  }
+}
+
+/** Suggest a memory hook (association) for remembering someone's name. Used by Memory Builder. */
+export async function suggestMemoryHook(name: string, whereMet?: string, detail?: string): Promise<string | null> {
+  const n = (name || '').trim();
+  if (!n) return null;
+  const systemPrompt = `You help people remember names using vivid, memorable associations (e.g. "Arctic Alex" for someone in climate work). Given a person's name and optional context (where they met, a detail), suggest ONE short memory hook phrase (2–5 words). Be specific and visual. Reply with ONLY the phrase, no explanation.`;
+  const parts = [n];
+  if ((whereMet || '').trim()) parts.push(`Met: ${(whereMet || '').trim()}`);
+  if ((detail || '').trim()) parts.push(`Detail: ${(detail || '').trim()}`);
+  const userContent = parts.join('\n');
+  try {
+    const text = await sendMessageWithSystemPromptOnly([{ role: 'user', content: userContent }], systemPrompt, 80);
+    const hook = (text || '').trim().replace(/\n.*/s, '').slice(0, 60);
+    return hook || null;
+  } catch {
+    return null;
   }
 }
 

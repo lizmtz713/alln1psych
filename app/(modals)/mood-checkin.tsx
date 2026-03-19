@@ -24,6 +24,7 @@ import { trackCheckIn } from '../../src/hooks/useWrappedTracking';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useHumanSkillsStore, CHECKIN_SKILL_IDS, SKILL_POINTS } from '../../src/stores/humanSkillsStore';
 import { runAchievementChecks } from '../../src/services/achievementChecker';
+import { VoiceTextInput } from '../../src/components/VoiceTextInput';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_SIZE = (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.md) / 2;
@@ -214,9 +215,9 @@ export default function MoodCheckinScreen() {
           </Pressable>
           
           {showNote && (
-            <TextInput
+            <VoiceTextInput
               style={styles.input}
-              placeholder="What's on your mind?"
+              placeholder="What's on your mind? (or tap mic to speak)"
               placeholderTextColor={COLORS.textMuted}
               value={note}
               onChangeText={setNote}

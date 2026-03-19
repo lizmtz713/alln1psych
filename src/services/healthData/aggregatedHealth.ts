@@ -47,7 +47,7 @@ export function getAggregatedBodyState(
     bodyScore: inputs.bodyScore,
     stateScore: inputs.stateScore,
     note: inputs.note,
-    sources: canonicalDay.sources,
+    sources: canonicalDay.sources as ('healthkit' | 'oura')[],
   };
 }
 

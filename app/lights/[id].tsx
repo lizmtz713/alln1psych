@@ -89,7 +89,7 @@ export default function PersonProfileScreen() {
   const handleMindMail = () => router.push({ pathname: '/mind-mail/compose', params: { recipientId: light.id, recipientName: light.name } } as any);
   const handleLogInteraction = () => router.push(`/lights/log-entry?id=${encodeURIComponent(light.id)}`);
   const handleChangeTier = (tier: string) => { setTier(light.id, tier as keyof typeof TIER_LABELS); setShowTierPicker(false); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); };
-  const handleArchive = () => Alert.alert('Archive this light?', `${light.name} will be moved to archived.`, [{ text: 'Cancel', style: 'cancel' }, { text: 'Archive', onPress: () => { setTier(light.id, 'archived'); router.back(); } }]);
+  const handleArchive = () => Alert.alert('Archive this person?', `${light.name} will be moved to archived.`, [{ text: 'Cancel', style: 'cancel' }, { text: 'Archive', onPress: () => { setTier(light.id, 'archived'); router.back(); } }]);
   const handleRemove = () => Alert.alert('Remove this person?', `${light.name} will be permanently removed.`, [{ text: 'Cancel', style: 'cancel' }, { text: 'Remove', style: 'destructive', onPress: () => { removeLight(light.id); router.replace('/(tabs)/lights'); } }]);
 
   const formatLogDate = (date: Date | string) => formatDate(typeof date === 'string' ? date : new Date(date).toISOString().slice(0, 10));

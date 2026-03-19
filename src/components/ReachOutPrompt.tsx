@@ -69,7 +69,7 @@ export default function ReachOutPrompt({ onDismiss }: Props) {
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push({
-      pathname: '/(modals)/reach-out-scaffold',
+      pathname: '/tools/reach-out',
       params: {
         days: daysBelowThreshold.toString(),
         level: connectionLevel.toString(),

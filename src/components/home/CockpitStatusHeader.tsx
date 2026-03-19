@@ -49,7 +49,7 @@ export function CockpitStatusHeader({
         <Text style={styles.statusValue}>{systemStatusLabel}</Text>
       </View>
       {summaryLine && summaryLine.trim() ? (
-        <Text style={styles.summary} numberOfLines={2}>
+        <Text style={styles.summary} numberOfLines={1}>
           {summaryLine.trim()}
         </Text>
       ) : null}
@@ -60,20 +60,20 @@ export function CockpitStatusHeader({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: SPACING.md,
+    paddingTop: 4,
+    paddingBottom: SPACING.sm,
   },
   greeting: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     color: COLORS.text,
     letterSpacing: -0.3,
   },
   date: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textMuted,
     marginTop: 2,
-    marginBottom: SPACING.sm,
+    marginBottom: 4,
   },
   statusRow: {
     flexDirection: 'row',
@@ -81,21 +81,21 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   statusLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textMuted,
     fontWeight: '500',
   },
   statusValue: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.accent,
     fontWeight: '700',
     textTransform: 'capitalize',
   },
   summary: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textSecondary,
-    marginTop: 6,
-    lineHeight: 20,
+    marginTop: 4,
+    lineHeight: 18,
     fontStyle: 'italic',
   },
 });

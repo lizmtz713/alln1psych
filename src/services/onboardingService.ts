@@ -86,7 +86,7 @@ const INVITATION_TRIGGERS: Array<{
     check: (ctx) => ctx.connectionValue >= 0 && ctx.connectionValue < 40 && !ctx.hasSeenLowConnection,
     title: 'Connection could use a boost',
     body: 'Reach Out helps you send a quick message or plan a call with someone who matters.',
-    route: '/(modals)/reach-out-scaffold',
+    route: '/tools/reach-out',
     ctaLabel: 'Reach out',
   },
   {

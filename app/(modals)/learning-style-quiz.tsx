@@ -16,6 +16,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLORS } from '../../src/lib/constants';
 import { useUserStore, type LearningStyle } from '../../src/stores/userStore';
+import { useAuth } from '../../src/providers/AuthProvider';
+import { updateExtendedProfile } from '../../src/services/profileService';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 
 const ACCENT = '#7C4DFF';
@@ -165,6 +167,7 @@ const STYLE_INFO: Record<LearningStyle, { emoji: string; title: string; descript
 export default function LearningStyleQuizScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { user: authUser } = useAuth();
   const setLearningStyle = useUserStore((s) => s.setLearningStyle);
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -197,6 +200,9 @@ export default function LearningStyleQuizScreen() {
       const finalStyle = topStyles[0];
       setResult(finalStyle);
       setLearningStyle(finalStyle);
+      if (authUser?.id && finalStyle !== 'unknown') {
+        updateExtendedProfile(authUser.id, { learning_style: finalStyle }).catch(() => {});
+      }
     }
   };
   

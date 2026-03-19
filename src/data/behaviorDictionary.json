@@ -1,0 +1,20 @@
+[
+  {
+    "id": "bt-1",
+    "surfaceBehavior": "Slamming doors / Stomping",
+    "systemicTranslation": "Tier 1 (Nervous System) Overload. The body is flooded with cortisol and adrenaline. The system lacks the vocabulary or capacity for Tier 3 (Logical) expression.",
+    "optimization": "Do not engage with logic or ask 'Why are you acting like this?' Deploy 'Silent Parking' until RPMs drop. Address the issue only when the State gauge returns to Green."
+  },
+  {
+    "id": "bt-2",
+    "surfaceBehavior": "One-word answers / 'I don't know'",
+    "systemicTranslation": "Cognitive Bottleneck. The Connection or Alignment gauges are running low. The Pilot is conserving energy by dropping non-essential background processes (conversation).",
+    "optimization": "Use Probabilistic Language. Say: 'I notice you're running in low-power mode. Want to do a low-demand Garage Reset (watch a show), or just need solo time?'"
+  },
+  {
+    "id": "bt-3",
+    "surfaceBehavior": "Refusing to start homework",
+    "systemicTranslation": "Direction Gauge Misalignment. The task requires high Tier 3 execution, but the Pilot's Tier 1 State is likely Amber or Red. The engine cannot engage the transmission.",
+    "optimization": "Check the Odometer. Have they had downtime since school? Offer 'High-Octane Fuel' (snacks/water) and ask to co-pilot the first 5 minutes of the task to break the friction."
+  }
+]

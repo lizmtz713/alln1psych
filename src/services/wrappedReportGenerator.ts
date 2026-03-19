@@ -212,7 +212,7 @@ function buildStoryCards(
       insight: insights[i] ?? undefined,
       emoji: d.emoji,
     })) as WrappedStoryCard[],
-    { id: 'outro', title: 'Thank you', subtitle: 'AllN1 Psych · ' + WRAPPED_YEAR, emoji: '🌟' },
+    { id: 'outro', title: 'Thank you', subtitle: 'InGauge · ' + WRAPPED_YEAR, emoji: '🌟' },
     { id: 'end', title: 'See you next year', subtitle: 'Keep wrapping', emoji: '✨' },
   ];
 }

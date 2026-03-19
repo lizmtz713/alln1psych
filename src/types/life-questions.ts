@@ -24,6 +24,8 @@ export interface LifeQuestionPrompt {
   text: string;
   /** Optional sub-prompt or reflection hint */
   hint?: string;
+  /** Optional "need help?" expandable — why we ask, or how to approach */
+  helpText?: string;
 }
 
 /** An exercise within a question module (e.g. "Write three words that describe you") */
@@ -38,6 +40,8 @@ export interface LifeQuestionExercise {
   scaleLabels?: [string, string];
   /** Max items for list type */
   maxItems?: number;
+  /** Optional tip to help user answer (e.g. what to focus on). */
+  tip?: string;
 }
 
 /** One of the 12 inquiry modules */
@@ -52,6 +56,14 @@ export interface LifeQuestionModule {
   exercises: LifeQuestionExercise[];
   /** Output type this feeds (Identity Snapshot, Purpose Hypothesis, etc.) */
   outputLabel: string;
+  /** Why we ask this question — helps user engage at their pace. */
+  whyWeAsk?: string;
+  /** Brief science or evidence note. */
+  whatResearchSays?: string;
+  /** Rough time to complete, e.g. "5–10 min". */
+  timeEstimate?: string;
+  /** Pacing message, e.g. "Your answers are saved; return anytime." */
+  paceNote?: string;
 }
 
 /** User's response to one exercise (stored per questionId + exerciseId) */

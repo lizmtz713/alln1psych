@@ -49,6 +49,18 @@ export interface HumanSkill {
   shortTitle: string;
   emoji: string;
   description: string;
+  /** Why this skill matters (benefit / outcome). Shown to help user engage. */
+  whyItMatters?: string;
+  /** Short, science-backed note (research or evidence). */
+  whatResearchSays?: string;
+  /** Concrete ways to practice — user can do at their own pace. */
+  practiceTips?: string[];
+  /** Pacing message, e.g. "Build at your own pace — no rush." */
+  paceNote?: string;
+  /** Optional badge name at "practiced" level and above (e.g. "Clear Communicator") */
+  badgeName?: string;
+  /** One real-life practice challenge (e.g. "Say no to something that drains your energy") */
+  practiceChallenge?: string;
 }
 
 /** Domain definition (id, display info, skill ids) */
@@ -69,6 +81,6 @@ export type SkillPoints = Partial<Record<SkillId, number>>;
 export interface SkillPointEvent {
   skillId: SkillId;
   points: number;
-  source: 'check-in' | 'quick-reset' | 'post-flight' | 'ai-talk' | 'manual';
+  source: 'check-in' | 'quick-reset' | 'post-flight' | 'ai-talk' | 'manual' | 'lesson' | 'tool';
   at: string; // ISO
 }

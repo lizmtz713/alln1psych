@@ -101,7 +101,7 @@ export default function ConstellationScreen() {
   const handleShare = async () => {
     try {
       await RNShare.share({
-        message: `My constellation — ${nodes.length} connection${nodes.length !== 1 ? 's' : ''} I care about. A radar for human connection. AllN1 Psych · You Are Not Alone.`,
+        message: `My constellation — ${nodes.length} connection${nodes.length !== 1 ? 's' : ''} I care about. A radar for human connection. InGauge · The Human Cockpit`,
         title: 'My Constellation',
       });
     } catch (e) {

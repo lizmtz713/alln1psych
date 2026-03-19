@@ -40,6 +40,38 @@ interface CockpitState {
   checkInDates: string[];
   /** Optional context from last check-in (sleep, social, stress) for insights. */
   checkInContext: { sleep?: string; social?: string; stressSource?: string } | null;
+  /** Which gauges user said were affected (quick log / system impact). For pattern detection and actions. */
+  checkInSystemImpact: GaugeKey[] | null;
+  /** Which drivers (influences) user tagged. For pattern detection and actions. */
+  checkInDrivers: string[] | null;
+  /** Unified snapshot for AI: one blob per check-in. Set when saving quick log or full check-in. */
+  lastCheckInSnapshot: {
+    state: number;
+    emotion: number;
+    systemImpact: GaugeKey[];
+    drivers: string[];
+    timestamp: string;
+    /** Gauge values at check-in (for Personal Strategy: outcome linkage). */
+    gauges?: Partial<Record<GaugeKey, number>>;
+  } | null;
+  /** Last N check-in snapshots (systemImpact + drivers + gauges) for pattern insights. Max 30. */
+  checkInHistory: Array<{
+    timestamp: string;
+    systemImpact: GaugeKey[];
+    drivers: string[];
+    gauges?: Partial<Record<GaugeKey, number>>;
+  }>;
+  /** When user taps a suggested action (for learning what helps). Max 50. Context used for personalization. */
+  suggestedActionsTaken: Array<{
+    actionId: string;
+    route: string;
+    label?: string;
+    takenAt: string;
+    systemImpact?: GaugeKey[];
+    drivers?: string[];
+    /** Gauge values at time of action (for Personal Strategy: before/after). */
+    gaugesAtTime?: Partial<Record<GaugeKey, number>>;
+  }>;
   /** Cached AI-generated cross-system insight; set by fetchCrossSystemInsight() */
   crossSystemInsight: string | null;
   /** Capacity vs stabilization mode (affects Share Insight, JIT lessons, etc.) */
@@ -70,6 +102,28 @@ interface CockpitState {
   setLastCheckInDate: (date: string) => void;
   /** Set context from check-in (Sleep, Social, Stress source). */
   setCheckInContext: (ctx: { sleep?: string; social?: string; stressSource?: string } | null) => void;
+  /** Set which gauges were reported affected (quick log). */
+  setCheckInSystemImpact: (gauges: GaugeKey[] | null) => void;
+  /** Set which drivers were tagged (quick log). */
+  setCheckInDrivers: (driverIds: string[] | null) => void;
+  /** Set unified check-in snapshot (state, emotion, systemImpact, drivers, timestamp, gauges) for AI analysis. */
+  setLastCheckInSnapshot: (snapshot: {
+    state: number;
+    emotion: number;
+    systemImpact: GaugeKey[];
+    drivers: string[];
+    timestamp: string;
+    gauges?: Partial<Record<GaugeKey, number>>;
+  } | null) => void;
+  /** Record when user tapped a suggested action (for future insight learning). Pass context and gaugesAtTime for personalization/strategy. */
+  recordSuggestedActionTaken: (payload: {
+    actionId: string;
+    route: string;
+    label?: string;
+    systemImpact?: GaugeKey[] | null;
+    drivers?: string[] | null;
+    gaugesAtTime?: Partial<Record<GaugeKey, number>> | null;
+  }) => void;
   /** Consecutive days with check-in ending today. Rewards consistency; never punishes missed days. */
   getCheckInStreak: () => number;
   /** Sync Body gauge from Apple Health data */
@@ -111,6 +165,11 @@ export const useCockpitStore = create<CockpitState>()(
   lastCheckInDate: null,
   checkInDates: [],
   checkInContext: null,
+  checkInSystemImpact: null,
+  checkInDrivers: null,
+  lastCheckInSnapshot: null,
+  checkInHistory: [],
+  suggestedActionsTaken: [],
   crossSystemInsight: null,
   systemMode: 'capacity' as SystemMode,
   stabilizationTriggers: [],
@@ -322,9 +381,30 @@ export const useCockpitStore = create<CockpitState>()(
     } catch (e) {
       // Weather store not available
     }
-    
-    const insight = await generateCrossSystemInsight(gauges, healthData, spotifyData, weatherData);
-    set({ crossSystemInsight: insight });
+
+    // Resolve check-in drivers and system impact for AI (driver-aware insights)
+    let driverContext: { driverLabels: string[]; systemImpactLabels: string[] } | undefined;
+    if (s.checkInDrivers?.length || s.checkInSystemImpact?.length) {
+      const { ALL_DRIVERS } = require('../data/driversByGauge');
+      const { GAUGE_CONFIG } = require('../utils/gaugeHelpers');
+      const driverLabels =
+        (s.checkInDrivers ?? [])
+          .map((id: string) => ALL_DRIVERS.find((d: { id: string; label: string }) => d.id === id)?.label)
+          .filter(Boolean) as string[];
+      const systemImpactLabels =
+        (s.checkInSystemImpact ?? []).map((key: GaugeKey) => GAUGE_CONFIG[key]?.label ?? key);
+      if (driverLabels.length || systemImpactLabels.length) {
+        driverContext = { driverLabels, systemImpactLabels };
+      }
+    }
+
+    try {
+      const insight = await generateCrossSystemInsight(gauges, healthData, spotifyData, weatherData, driverContext);
+      set({ crossSystemInsight: insight });
+    } catch (err) {
+      if (__DEV__) console.warn('[Cockpit] AI insight unavailable', err);
+      set({ crossSystemInsight: 'Your system snapshot is updated. Small steps count.' });
+    }
   },
 
   setLastCheckInDate: (date) =>
@@ -336,6 +416,35 @@ export const useCockpitStore = create<CockpitState>()(
     }),
 
   setCheckInContext: (ctx) => set({ checkInContext: ctx }),
+  setCheckInSystemImpact: (gauges) => set({ checkInSystemImpact: gauges }),
+  setCheckInDrivers: (driverIds) => set({ checkInDrivers: driverIds }),
+  setLastCheckInSnapshot: (snapshot) =>
+    set((s) => {
+      const history = snapshot
+        ? [{
+            timestamp: snapshot.timestamp,
+            systemImpact: snapshot.systemImpact,
+            drivers: snapshot.drivers,
+            gauges: snapshot.gauges,
+          }, ...s.checkInHistory].slice(0, 30)
+        : s.checkInHistory;
+      return { lastCheckInSnapshot: snapshot, checkInHistory: history };
+    }),
+
+  recordSuggestedActionTaken: (payload) =>
+    set((s) => {
+      const entry = {
+        actionId: payload.actionId,
+        route: payload.route,
+        label: payload.label,
+        takenAt: new Date().toISOString(),
+        systemImpact: payload.systemImpact ?? undefined,
+        drivers: payload.drivers ?? undefined,
+        gaugesAtTime: payload.gaugesAtTime ?? undefined,
+      };
+      const next = [entry, ...s.suggestedActionsTaken].slice(0, 50);
+      return { suggestedActionsTaken: next };
+    }),
 
   getCheckInStreak: () => {
     const dateSet = new Set(get().checkInDates);
@@ -485,6 +594,11 @@ export const useCockpitStore = create<CockpitState>()(
         lastCheckInDate: null,
         checkInDates: s.checkInDates,
         checkInContext: null,
+        checkInSystemImpact: null,
+        checkInDrivers: null,
+        lastCheckInSnapshot: null,
+        checkInHistory: s.checkInHistory,
+        suggestedActionsTaken: s.suggestedActionsTaken,
         crossSystemInsight: null,
         systemMode: 'capacity' as SystemMode,
         stabilizationTriggers: [] as GaugeKey[],
@@ -508,6 +622,11 @@ export const useCockpitStore = create<CockpitState>()(
         lastCheckInDate: state.lastCheckInDate,
         checkInDates: state.checkInDates,
         checkInContext: state.checkInContext,
+        checkInSystemImpact: state.checkInSystemImpact,
+        checkInDrivers: state.checkInDrivers,
+        lastCheckInSnapshot: state.lastCheckInSnapshot,
+        checkInHistory: state.checkInHistory,
+        suggestedActionsTaken: state.suggestedActionsTaken,
         systemMode: state.systemMode,
         stabilizationTriggers: state.stabilizationTriggers,
         centerScore: state.centerScore,

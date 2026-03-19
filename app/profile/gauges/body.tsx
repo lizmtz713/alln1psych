@@ -49,7 +49,7 @@ function BodyMaintenancePreview() {
         {overdueCount > 0 ? ` · ${overdueCount} overdue` : ''}
       </Text>
       {comingUp.slice(0, 3).map((entry, i) => {
-        if ('item' in entry) {
+        if ('item' in entry && entry.item) {
           const r = entry.item;
           return (
             <Text key={r.id} style={styles.maintenanceBullet}>
@@ -58,6 +58,7 @@ function BodyMaintenancePreview() {
           );
         }
         const p = entry.provider;
+        if (!p) return null;
         return (
           <Text key={p.id} style={styles.maintenanceBullet}>
             {p.type === 'hair' ? '💇' : p.type === 'nails' ? '💅' : '📋'} {p.businessName} — {entry.dueLabel}

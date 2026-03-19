@@ -93,6 +93,20 @@ export default function RelationalBridgeModal() {
           </Text>
         </View>
 
+        {/* Check tone entry */}
+        <TouchableOpacity
+          style={styles.toneCheckRow}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push('/tools/tone-check');
+          }}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.toneCheckEmoji}>🎯</Text>
+          <Text style={styles.toneCheckLabel}>Check tone before you send</Text>
+          <Ionicons name="chevron-forward" size={20} color="#9E9E9E" />
+        </TouchableOpacity>
+
         {/* Member Selection */}
         {!selectedMember && (
           <View style={styles.section}>
@@ -325,6 +339,28 @@ const styles = StyleSheet.create({
     color: '#AAA',
     textAlign: 'center',
     lineHeight: 20,
+  },
+  toneCheckRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginHorizontal: 16,
+    marginTop: 12,
+    backgroundColor: '#1E1E1E',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  toneCheckEmoji: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+  toneCheckLabel: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFF',
   },
   section: {
     paddingHorizontal: 16,

@@ -5,6 +5,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { APP_CONFIG } from '../lib/constants';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -121,7 +122,7 @@ export function SplashScreen({ onFinish, duration = 2000 }: SplashScreenProps) {
           </View>
           
           {/* App name */}
-          <Text style={styles.appName}>InGauge</Text>
+          <Text style={styles.appName}>{APP_CONFIG.name}</Text>
           
           {/* Tagline */}
           <Text style={styles.tagline}>Your personal cockpit</Text>
