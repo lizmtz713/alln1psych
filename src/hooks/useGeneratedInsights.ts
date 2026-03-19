@@ -58,7 +58,7 @@ function getRecentGoalReflections(): RecentGoalReflections | undefined {
 /** Health/wearable context for Body/State cause (sleep, readiness, HRV) */
 async function getInsightHealthContext(): Promise<InsightHealthContext | undefined> {
   const snapshot = useHealthStore.getState().snapshot;
-  let lastNightSleepHours: number | undefined = snapshot?.sleep?.lastNight?.duration;
+  let lastNightSleepHours: number | undefined = snapshot?.sleep?.lastNight?.duration ?? undefined;
   let readinessScore: number | undefined;
   let hrvMs: number | undefined = snapshot?.heart?.hrv ?? undefined;
   try {
@@ -126,7 +126,8 @@ export function useGeneratedInsights(
   const [error, setError] = useState<Error | null>(null);
 
   const cockpit = useCockpitStore();
-  const circle = useCircleStore();
+  const circleStore = useCircleStore();
+  const circleMoodHistory = circleStore.moodHistory;
   const rituals = useRitualsStore();
   const reflections = useGoalsStore((s) => s.reflections);
   // Subscribe to stable state; derive in useMemo to avoid selector-induced re-renders
@@ -188,7 +189,7 @@ export function useGeneratedInsights(
     setError(null);
     setIsLoading(true);
     try {
-      const checkInDates = (circle.moodHistory ?? []).map((m) =>
+      const checkInDates = (circleMoodHistory ?? []).map((m) =>
         new Date(m.timestamp).toISOString().slice(0, 10)
       );
       const cutoff = addDays(todayStr(), -90);
@@ -295,7 +296,7 @@ export function useGeneratedInsights(
     withHistory,
     gaugeValues,
     gaugeTrends,
-    circle.moodHistory,
+    circleMoodHistory,
     rituals.getPreFlightsSince,
     rituals.getPostFlightsSince,
     winsThisWeek,

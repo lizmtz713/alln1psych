@@ -13,7 +13,7 @@ module.exports = {
     scheme: 'alln1-psych',
     newArchEnabled: true,
     splash: {
-      image: './assets/splash-icon.png',
+      image: './assets/splash.png',
       resizeMode: 'contain',
       backgroundColor: '#0F0B1E',
     },
@@ -21,21 +21,16 @@ module.exports = {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'com.alln1network.psych',
-      buildNumber: '14',
+      buildNumber: '1',
       usesAppleSignIn: true,
-      entitlements: {
-        'com.apple.developer.healthkit': true,
-        'com.apple.developer.healthkit.access': ['health-records'],
-        'com.apple.developer.healthkit.background-delivery': true,
-      },
       infoPlist: {
         NSMicrophoneUsageDescription:
           'InGauge uses your microphone so you can talk to Gauge by voice.',
         NSCameraUsageDescription: 'InGauge uses your camera for profile photos.',
         NSHealthShareUsageDescription:
-          'InGauge reads your health data (sleep, activity, heart rate, cycle) to power your Body gauge and give personalized insights.',
+          'InGauge reads your health data (sleep, heart rate, activity) to help you understand how your body affects your mood and energy.',
         NSHealthUpdateUsageDescription:
-          'InGauge may write wellness data to Health.',
+          'InGauge can save mindfulness minutes and other wellness data to Apple Health.',
       },
     },
     android: {
@@ -64,14 +59,6 @@ module.exports = {
       'expo-secure-store',
       'expo-font',
       'expo-apple-authentication',
-      'expo-web-browser',
-      [
-        'expo-location',
-        {
-          locationWhenInUsePermission:
-            'InGauge uses your location to provide weather-based mood insights.',
-        },
-      ],
       [
         'expo-notifications',
         {
@@ -84,7 +71,7 @@ module.exports = {
         {
           microphonePermission:
             'InGauge needs microphone access so you can talk to Gauge.',
-        },
+        }
       ],
     ],
   },

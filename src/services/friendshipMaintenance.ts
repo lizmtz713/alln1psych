@@ -116,7 +116,7 @@ export interface DailyReachOut {
 }
 
 export function getDailyReachOuts(lights: Light[], maxSuggestions: number = 5): DailyReachOut {
-  const activeLights = lights.filter(l => l.tier !== 'archived');
+  const activeLights = lights.filter((l): l is Light & { tier: Exclude<LightTier, 'archived'> } => l.tier !== 'archived');
 
   const nudges = activeLights
     .map(getNudgeForLight)
@@ -161,7 +161,7 @@ export interface DriftWarning {
 
 /** Top drifter: someone past their normal contact rhythm. For "X is drifting" card. */
 export function getDriftWarning(lights: Light[]): DriftWarning | null {
-  const active = lights.filter((l) => l.tier !== 'archived');
+  const active = lights.filter((l): l is Light & { tier: Exclude<LightTier, 'archived'> } => l.tier !== 'archived');
   let best: DriftWarning | null = null;
   for (const light of active) {
     const normalRhythm = light.averageContactDays ?? (light.tier === 'archived' ? 999 : IDEAL_CONTACT_DAYS[light.tier]);
@@ -258,7 +258,7 @@ const TIER_NAMES: Record<Exclude<LightTier, 'archived'>, string> = {
 
 export function getSocialHealthScore(lights: Light[]): SocialHealthResult {
   const tierHealth = getTierHealth(lights);
-  const activeLights = lights.filter((l) => l.tier !== 'archived');
+  const activeLights = lights.filter((l): l is Light & { tier: Exclude<LightTier, 'archived'> } => l.tier !== 'archived');
   const tierSummaries: TierSummary[] = TIER_DISPLAY_ORDER.map((tier) => {
     const th = tierHealth.find((t) => t.tier === tier);
     const total = th?.total ?? 0;
