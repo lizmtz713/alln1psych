@@ -1,25 +1,22 @@
 /**
- * Perspective Translator — Say it in a way they're most likely to hear.
- * Developmental language based on role and stage. No shaming or labeling.
- * Route: /tools/perspective-translator
+ * Perspective Translator v2 — AI-powered message translation
+ * Type what you want to say → Get it translated for your audience
+ * Multiple tones, "how they'll hear it", practice mode
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
+// Using button-based tone selector instead of slider (no extra dependency)
 import { COLORS, SPACING, BORDER_RADIUS } from '../../../src/lib/constants';
 import {
   PERSPECTIVE_ROLES,
   PERSPECTIVE_STAGES,
-  PERSPECTIVE_INTENTS,
-  getTranslationExample,
   getRoleById,
-  getIntentById,
 } from '../../../src/data/perspectiveTranslator';
-import { useCockpitStore } from '../../../src/stores/cockpitStore';
 import { sendMessageWithSystemPromptOnly, hasOpenAIKey } from '../../../src/services/ai';
 
 const BG = COLORS.background;
@@ -29,28 +26,142 @@ const TEXT = COLORS.text;
 const TEXT_MUTED = COLORS.textSecondary;
 const ACCENT = COLORS.accent;
 
+interface TranslationResult {
+  soft: string;
+  direct: string;
+  firm: string;
+  howTheyHear: string;
+  avoid: string;
+  tip: string;
+}
+
 export default function PerspectiveTranslatorScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [step1Role, setStep1Role] = useState<string | null>(null);
-  const [step2Stage, setStep2Stage] = useState<string | null>(null);
-  const [step3Intent, setStep3Intent] = useState<string | null>(null);
-  const [customContext, setCustomContext] = useState('');
-  const [customPhrase, setCustomPhrase] = useState<string | null>(null);
-  const [customPhraseLoading, setCustomPhraseLoading] = useState(false);
-
-  const connection = useCockpitStore((s) => s.connection.value);
-  const emotion = useCockpitStore((s) => s.emotion.value);
+  
+  // Step 1: Who
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  // Step 2: Stage
+  const [selectedStage, setSelectedStage] = useState<string | null>(null);
+  // Step 3: Your message
+  const [userMessage, setUserMessage] = useState('');
+  // Step 4: Results
+  const [translation, setTranslation] = useState<TranslationResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  // Tone slider (0 = soft, 1 = direct, 2 = firm)
+  const [toneIndex, setToneIndex] = useState(1);
+  
+  const role = selectedRole ? getRoleById(selectedRole) : null;
+  const stage = PERSPECTIVE_STAGES.find(s => s.id === selectedStage);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.back();
   };
 
-  const showGaugeTip = connection >= 0 && connection < 50 && emotion >= 0 && emotion > 50;
-  const role = step1Role ? getRoleById(step1Role) : null;
-  const intent = step3Intent ? getIntentById(step3Intent) : null;
-  const translation = step1Role && step3Intent ? getTranslationExample(step1Role, step3Intent) : null;
+  const translateMessage = useCallback(async () => {
+    if (!selectedRole || !userMessage.trim()) {
+      Alert.alert('Missing info', 'Select who you\'re talking to and enter your message.');
+      return;
+    }
+    
+    const hasKey = await hasOpenAIKey();
+    if (!hasKey) {
+      Alert.alert('API key needed', 'Add your OpenAI API key in Settings to use AI translation.');
+      return;
+    }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setLoading(true);
+    setTranslation(null);
+
+    try {
+      const roleInfo = role ? `${role.label} (responds to: ${role.respondsTo.join(', ')})` : selectedRole;
+      const stageInfo = stage ? `${stage.label} - ${stage.hint}` : 'adult';
+      
+      const systemPrompt = `You are a communication coach helping people say difficult things in ways that land better.
+
+The user wants to say something to: ${roleInfo}
+Their developmental stage: ${stageInfo}
+
+The user's raw message (what they feel like saying): "${userMessage.trim()}"
+
+Translate this into THREE versions at different intensities, plus analysis.
+
+Respond in this exact JSON format:
+{
+  "soft": "Gentlest version - validates first, very indirect, opens dialogue",
+  "direct": "Clear and respectful - states the need plainly without blame",
+  "firm": "Assertive but not aggressive - clear boundary, consequences if needed",
+  "howTheyHear": "What they'll likely hear/feel when you say the direct version",
+  "avoid": "One thing to avoid saying (common mistake)",
+  "tip": "One tactical tip for this specific conversation"
+}
+
+Make translations natural, not clinical. Use contractions. Sound human.`;
+
+      const response = await sendMessageWithSystemPromptOnly(
+        [{ role: 'user', content: 'Translate my message.' }],
+        systemPrompt,
+        500
+      );
+
+      if (response) {
+        // Extract JSON from response
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]) as TranslationResult;
+          setTranslation(parsed);
+        } else {
+          throw new Error('Invalid response format');
+        }
+      }
+    } catch (e) {
+      console.error('Translation error:', e);
+      Alert.alert('Translation failed', 'Check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedRole, selectedStage, userMessage, role, stage]);
+
+  const getCurrentTranslation = () => {
+    if (!translation) return null;
+    if (toneIndex === 0) return translation.soft;
+    if (toneIndex === 1) return translation.direct;
+    return translation.firm;
+  };
+
+  const getToneColor = () => {
+    if (toneIndex === 0) return '#60A5FA'; // blue
+    if (toneIndex === 1) return ACCENT; // green
+    return '#FB923C'; // orange
+  };
+
+  const openPractice = () => {
+    if (!translation || !role) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Navigate to role play with context
+    router.push({
+      pathname: '/(modals)/role-play',
+      params: {
+        prefillScenario: `Practice saying to ${role.label}: "${getCurrentTranslation()}"`,
+        prefillRole: role.label,
+      },
+    });
+  };
+
+  const copyToClipboard = async () => {
+    const text = getCurrentTranslation();
+    if (!text) return;
+    try {
+      const Clipboard = await import('expo-clipboard');
+      await Clipboard.setStringAsync(text);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert('Copied', 'Translation copied to clipboard');
+    } catch {
+      Alert.alert('Copy failed', 'Could not copy to clipboard');
+    }
+  };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
@@ -66,152 +177,186 @@ export default function PerspectiveTranslatorScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.intro}>
-          Frame your message so the other person is more likely to understand and accept it. This doesn't change what you need—it helps you say it in a way that lands.
+          Type what you want to say. AI translates it so the other person actually hears it.
         </Text>
 
-        {showGaugeTip && (
-          <View style={styles.gaugeTip}>
-            <Ionicons name="bulb-outline" size={18} color={COLORS.accent} />
-            <Text style={styles.gaugeTipText}>
-              When connection and emotion are strained, people often respond better if you start with validation before your main point.
-            </Text>
-          </View>
-        )}
-
-        {/* Step 1: Who are you talking to? */}
-        <Text style={styles.stepLabel}>Step 1 — Who are you talking to?</Text>
+        {/* Step 1: Who */}
+        <Text style={styles.stepLabel}>1. Who are you talking to?</Text>
         <View style={styles.chipRow}>
           {PERSPECTIVE_ROLES.map((r) => (
             <Pressable
               key={r.id}
-              style={[styles.chip, step1Role === r.id && styles.chipActive]}
+              style={[styles.chip, selectedRole === r.id && styles.chipActive]}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setStep1Role(step1Role === r.id ? null : r.id);
-                setStep2Stage(null);
-                setStep3Intent(null);
+                setSelectedRole(selectedRole === r.id ? null : r.id);
+                setTranslation(null);
               }}
             >
               <Text style={styles.chipEmoji}>{r.emoji}</Text>
-              <Text style={[styles.chipText, step1Role === r.id && styles.chipTextActive]}>{r.shortLabel}</Text>
+              <Text style={[styles.chipText, selectedRole === r.id && styles.chipTextActive]}>{r.shortLabel}</Text>
             </Pressable>
           ))}
         </View>
 
-        {/* Step 2: Their developmental stage */}
-        {step1Role && (
+        {/* Step 2: Stage (optional) */}
+        {selectedRole && (
           <>
-            <Text style={styles.stepLabel}>Step 2 — Their developmental stage</Text>
-            <Text style={styles.stepHint}>This adjusts how we phrase things. It doesn't judge the person.</Text>
+            <Text style={styles.stepLabel}>2. Their stage <Text style={styles.optional}>(optional)</Text></Text>
             <View style={styles.chipRow}>
               {PERSPECTIVE_STAGES.map((s) => (
                 <Pressable
                   key={s.id}
-                  style={[styles.chipSmall, step2Stage === s.id && styles.chipActive]}
+                  style={[styles.chipSmall, selectedStage === s.id && styles.chipActive]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setStep2Stage(step2Stage === s.id ? null : s.id);
-                    setStep3Intent(null);
+                    setSelectedStage(selectedStage === s.id ? null : s.id);
+                    setTranslation(null);
                   }}
                 >
-                  <Text style={[styles.chipSmallText, step2Stage === s.id && styles.chipTextActive]} numberOfLines={1}>{s.label}</Text>
+                  <Text style={[styles.chipSmallText, selectedStage === s.id && styles.chipTextActive]}>{s.label}</Text>
                 </Pressable>
               ))}
             </View>
           </>
         )}
 
-        {/* Step 3: What do you want to say? */}
-        {step1Role && (
+        {/* Step 3: Your message */}
+        {selectedRole && (
           <>
-            <Text style={styles.stepLabel}>Step 3 — What do you want to say?</Text>
-            <View style={styles.intentList}>
-              {PERSPECTIVE_INTENTS.map((i) => (
-                <Pressable
-                  key={i.id}
-                  style={[styles.intentCard, step3Intent === i.id && styles.intentCardActive]}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setStep3Intent(step3Intent === i.id ? null : i.id);
-                  }}
-                >
-                  <Text style={[styles.intentLabel, step3Intent === i.id && styles.chipTextActive]}>{i.label}</Text>
-                </Pressable>
-              ))}
-            </View>
+            <Text style={styles.stepLabel}>3. What do you want to say?</Text>
+            <Text style={styles.stepHint}>Be honest. Type what you're actually feeling.</Text>
+            <TextInput
+              style={styles.messageInput}
+              placeholder="e.g. I need you to stop borrowing my stuff without asking"
+              placeholderTextColor={TEXT_MUTED}
+              value={userMessage}
+              onChangeText={(t) => { setUserMessage(t); setTranslation(null); }}
+              multiline
+              textAlignVertical="top"
+            />
+            
+            <Pressable
+              style={[styles.translateBtn, loading && styles.translateBtnDisabled]}
+              onPress={translateMessage}
+              disabled={loading || !userMessage.trim()}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <Ionicons name="language" size={20} color="#fff" />
+                  <Text style={styles.translateBtnText}>Translate</Text>
+                </>
+              )}
+            </Pressable>
           </>
         )}
 
-        {/* Step 4: Translate */}
-        {step1Role && step3Intent && role && intent && (
-          <View style={styles.translateBlock}>
-            <Text style={styles.stepLabel}>Step 4 — Translated message</Text>
-            <View style={styles.directCard}>
-              <Text style={styles.directLabel}>What you might feel like saying</Text>
-              <Text style={styles.directText}>"{intent.exampleDirect}"</Text>
+        {/* Step 4: Results */}
+        {translation && (
+          <View style={styles.resultsBlock}>
+            <Text style={styles.stepLabel}>4. Translated message</Text>
+            
+            {/* Tone selector */}
+            <Text style={styles.toneLabel}>Choose your tone:</Text>
+            <View style={styles.toneButtonRow}>
+              <Pressable
+                style={[styles.toneButton, toneIndex === 0 && styles.toneButtonActive, toneIndex === 0 && { borderColor: '#60A5FA' }]}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setToneIndex(0); }}
+              >
+                <Text style={[styles.toneButtonText, toneIndex === 0 && { color: '#60A5FA' }]}>Soft</Text>
+                <Text style={styles.toneButtonHint}>Gentle, validating</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.toneButton, toneIndex === 1 && styles.toneButtonActive, toneIndex === 1 && { borderColor: ACCENT }]}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setToneIndex(1); }}
+              >
+                <Text style={[styles.toneButtonText, toneIndex === 1 && { color: ACCENT }]}>Direct</Text>
+                <Text style={styles.toneButtonHint}>Clear, respectful</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.toneButton, toneIndex === 2 && styles.toneButtonActive, toneIndex === 2 && { borderColor: '#FB923C' }]}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setToneIndex(2); }}
+              >
+                <Text style={[styles.toneButtonText, toneIndex === 2 && { color: '#FB923C' }]}>Firm</Text>
+                <Text style={styles.toneButtonHint}>Assertive, boundaried</Text>
+              </Pressable>
             </View>
-            {translation ? (
-              <>
-                <Text style={styles.translatedLabel}>People often respond better to messages framed like this:</Text>
-                <View style={[styles.translatedCard, { borderLeftColor: ACCENT, borderLeftWidth: 4 }]}>
-                  <Text style={styles.translatedText}>"{translation.translated}"</Text>
-                </View>
-                <Text style={styles.whyLabel}>Why it works</Text>
-                <Text style={styles.whyText}>{translation.whyItWorks}</Text>
-                {role.respondsTo.length > 0 && (
-                  <Text style={styles.respondsToLabel}>What they tend to respond to: {role.respondsTo.join(', ').toLowerCase()}.</Text>
-                )}
-                <Text style={[styles.stepLabel, { marginTop: 16 }]}>Custom phrasing (optional)</Text>
-                <TextInput
-                  style={styles.customInput}
-                  placeholder="e.g. We've argued about this before and they get defensive"
-                  placeholderTextColor={TEXT_MUTED}
-                  value={customContext}
-                  onChangeText={(t) => { setCustomContext(t); setCustomPhrase(null); }}
-                  multiline
-                />
-                <Pressable
-                  style={[styles.customPhraseBtn, customPhraseLoading && styles.customPhraseBtnDisabled]}
-                  onPress={async () => {
-                    const hasKey = await hasOpenAIKey();
-                    if (!hasKey) { Alert.alert('API key needed', 'Add your OpenAI API key in Settings for custom phrasing.'); return; }
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setCustomPhraseLoading(true);
-                    setCustomPhrase(null);
-                    try {
-                      const sys = `You help people phrase messages for difficult conversations. Given: who they're talking to (${role?.shortLabel ?? step1Role}), what they want to say (${intent?.label ?? step3Intent}). ${customContext.trim() ? `Their context: ${customContext.trim()}.` : ''} Suggest ONE short sentence they could say (natural, not clinical). Reply with only that sentence.`;
-                      const res = await sendMessageWithSystemPromptOnly([{ role: 'user', content: 'Give me one phrase.' }], sys, 120);
-                      if (res?.trim() && !res.startsWith('[')) setCustomPhrase(res.trim().replace(/^["']|["']$/g, ''));
-                    } catch { Alert.alert('Could not get phrase', 'Check your connection and try again.'); }
-                    finally { setCustomPhraseLoading(false); }
-                  }}
-                  disabled={customPhraseLoading}
-                >
-                  {customPhraseLoading ? <ActivityIndicator size="small" color={ACCENT} /> : <Ionicons name="sparkles" size={18} color={ACCENT} />}
-                  <Text style={styles.customPhraseBtnText}>{customPhraseLoading ? '…' : 'Phrase it for my situation'}</Text>
-                </Pressable>
-                {customPhrase && (
-                  <View style={styles.customPhraseCard}>
-                    <Text style={styles.customPhraseLabel}>Suggested phrase</Text>
-                    <Text style={styles.customPhraseText}>"{customPhrase}"</Text>
-                  </View>
-                )}
-              </>
-            ) : (
-              <View style={styles.translatedCard}>
-                <Text style={styles.translatedText}>
-                  Focus on: {role.respondsTo.slice(0, 3).join(', ').toLowerCase()}. Name your need without blame. Invite them into the conversation ("Can we...?" or "I'd like to...").
-                </Text>
+
+            {/* Main translation */}
+            <View style={[styles.translationCard, { borderLeftColor: getToneColor() }]}>
+              <Text style={styles.translationText}>"{getCurrentTranslation()}"</Text>
+            </View>
+
+            {/* How they'll hear it */}
+            <View style={styles.hearCard}>
+              <View style={styles.hearHeader}>
+                <Ionicons name="ear-outline" size={18} color={TEXT_MUTED} />
+                <Text style={styles.hearLabel}>How they'll hear it</Text>
               </View>
-            )}
+              <Text style={styles.hearText}>{translation.howTheyHear}</Text>
+            </View>
+
+            {/* Avoid */}
+            <View style={styles.avoidCard}>
+              <View style={styles.avoidHeader}>
+                <Ionicons name="close-circle-outline" size={18} color={COLORS.error} />
+                <Text style={styles.avoidLabel}>Avoid</Text>
+              </View>
+              <Text style={styles.avoidText}>{translation.avoid}</Text>
+            </View>
+
+            {/* Tip */}
+            <View style={styles.tipCard}>
+              <View style={styles.tipHeader}>
+                <Ionicons name="bulb-outline" size={18} color={ACCENT} />
+                <Text style={styles.tipLabel}>Tip</Text>
+              </View>
+              <Text style={styles.tipText}>{translation.tip}</Text>
+            </View>
+
+            {/* Action buttons */}
+            <View style={styles.actionRow}>
+              <Pressable style={styles.actionBtn} onPress={copyToClipboard}>
+                <Ionicons name="copy-outline" size={20} color={ACCENT} />
+                <Text style={styles.actionBtnText}>Copy</Text>
+              </Pressable>
+              <Pressable style={styles.actionBtn} onPress={openPractice}>
+                <Ionicons name="chatbubbles-outline" size={20} color={ACCENT} />
+                <Text style={styles.actionBtnText}>Practice</Text>
+              </Pressable>
+              <Pressable style={styles.actionBtn} onPress={() => { setTranslation(null); setUserMessage(''); }}>
+                <Ionicons name="refresh-outline" size={20} color={TEXT_MUTED} />
+                <Text style={[styles.actionBtnText, { color: TEXT_MUTED }]}>New</Text>
+              </Pressable>
+            </View>
+
+            {/* All three versions expandable */}
+            <View style={styles.allVersionsCard}>
+              <Text style={styles.allVersionsTitle}>All versions</Text>
+              <View style={styles.versionRow}>
+                <Text style={styles.versionLabel}>Soft:</Text>
+                <Text style={styles.versionText}>{translation.soft}</Text>
+              </View>
+              <View style={styles.versionRow}>
+                <Text style={styles.versionLabel}>Direct:</Text>
+                <Text style={styles.versionText}>{translation.direct}</Text>
+              </View>
+              <View style={styles.versionRow}>
+                <Text style={styles.versionLabel}>Firm:</Text>
+                <Text style={styles.versionText}>{translation.firm}</Text>
+              </View>
+            </View>
           </View>
         )}
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            This tool is based on developmental psychology and communication research. It helps you adapt your message—it doesn't label or judge the other person.
+            Based on developmental psychology and communication research. Adapts your message without changing your need.
           </Text>
         </View>
       </ScrollView>
@@ -234,20 +379,10 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 16, fontWeight: '600', color: TEXT, flex: 1, textAlign: 'center' },
   scroll: { flex: 1 },
   scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
-  intro: { fontSize: 15, color: TEXT_MUTED, lineHeight: 22, marginBottom: SPACING.md },
-  gaugeTip: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: COLORS.accentBg,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 12,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.borderAccent,
-  },
-  gaugeTipText: { flex: 1, fontSize: 13, color: TEXT, lineHeight: 19, marginLeft: 8 },
+  intro: { fontSize: 15, color: TEXT_MUTED, lineHeight: 22, marginBottom: SPACING.lg },
   stepLabel: { fontSize: 14, fontWeight: '700', color: TEXT, marginBottom: 8, marginTop: 16 },
   stepHint: { fontSize: 13, color: TEXT_MUTED, marginBottom: 8 },
+  optional: { fontWeight: '400', color: TEXT_MUTED },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
     flexDirection: 'row',
@@ -272,47 +407,111 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
   },
   chipSmallText: { fontSize: 13, color: TEXT_MUTED },
-  intentList: { gap: 8 },
-  intentCard: {
+  messageInput: {
     backgroundColor: CARD_BG,
     borderRadius: BORDER_RADIUS.card,
-    padding: 14,
     borderWidth: 1,
     borderColor: BORDER,
+    padding: 14,
+    fontSize: 15,
+    color: TEXT,
+    minHeight: 100,
+    lineHeight: 22,
   },
-  intentCardActive: { borderColor: ACCENT, backgroundColor: COLORS.accentBg },
-  intentLabel: { fontSize: 14, color: TEXT },
-  translateBlock: { marginTop: 8 },
-  directCard: {
+  translateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: ACCENT,
+    paddingVertical: 14,
+    borderRadius: BORDER_RADIUS.button,
+    marginTop: 12,
+    gap: 8,
+  },
+  translateBtnDisabled: { opacity: 0.6 },
+  translateBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  resultsBlock: { marginTop: 8 },
+  toneLabel: { fontSize: 14, fontWeight: '600', color: TEXT, marginBottom: 8 },
+  toneButtonRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+  toneButton: {
+    flex: 1,
     backgroundColor: CARD_BG,
     borderRadius: BORDER_RADIUS.card,
-    padding: 14,
+    padding: 12,
+    borderWidth: 2,
+    borderColor: BORDER,
+    alignItems: 'center',
+  },
+  toneButtonActive: { backgroundColor: 'rgba(52, 211, 153, 0.08)' },
+  toneButtonText: { fontSize: 14, fontWeight: '700', color: TEXT, marginBottom: 2 },
+  toneButtonHint: { fontSize: 10, color: TEXT_MUTED },
+  translationCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderLeftWidth: 4,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: BORDER,
   },
-  directLabel: { fontSize: 12, fontWeight: '600', color: TEXT_MUTED, marginBottom: 4 },
-  directText: { fontSize: 15, color: TEXT, fontStyle: 'italic', lineHeight: 22 },
-  translatedLabel: { fontSize: 13, color: TEXT_MUTED, marginBottom: 6 },
-  translatedCard: {
-    backgroundColor: CARD_BG,
+  translationText: { fontSize: 17, color: TEXT, lineHeight: 26, fontStyle: 'italic' },
+  hearCard: {
+    backgroundColor: 'rgba(96, 165, 250, 0.08)',
     borderRadius: BORDER_RADIUS.card,
-    padding: 14,
+    padding: 12,
     marginBottom: 10,
     borderWidth: 1,
+    borderColor: 'rgba(96, 165, 250, 0.2)',
+  },
+  hearHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  hearLabel: { fontSize: 12, fontWeight: '600', color: TEXT_MUTED },
+  hearText: { fontSize: 14, color: TEXT, lineHeight: 20 },
+  avoidCard: {
+    backgroundColor: 'rgba(239, 83, 80, 0.06)',
+    borderRadius: BORDER_RADIUS.card,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 83, 80, 0.15)',
+  },
+  avoidHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  avoidLabel: { fontSize: 12, fontWeight: '600', color: COLORS.error },
+  avoidText: { fontSize: 14, color: TEXT, lineHeight: 20 },
+  tipCard: {
+    backgroundColor: COLORS.accentBg,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.borderAccent,
+  },
+  tipHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  tipLabel: { fontSize: 12, fontWeight: '600', color: ACCENT },
+  tipText: { fontSize: 14, color: TEXT, lineHeight: 20 },
+  actionRow: { flexDirection: 'row', justifyContent: 'center', gap: 16, marginBottom: 16 },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.card,
+    borderWidth: 1,
     borderColor: BORDER,
   },
-  translatedText: { fontSize: 15, color: TEXT, lineHeight: 22 },
-  whyLabel: { fontSize: 12, fontWeight: '600', color: TEXT_MUTED, marginBottom: 4 },
-  whyText: { fontSize: 14, color: TEXT_MUTED, lineHeight: 20 },
-  respondsToLabel: { fontSize: 12, color: COLORS.textMuted, marginTop: 8, fontStyle: 'italic' },
-  customInput: { backgroundColor: CARD_BG, borderRadius: BORDER_RADIUS.card, borderWidth: 1, borderColor: BORDER, padding: 12, fontSize: 14, color: TEXT, minHeight: 56, textAlignVertical: 'top', marginBottom: 10 },
-  customPhraseBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, marginBottom: 12, borderWidth: 1, borderColor: ACCENT, borderRadius: BORDER_RADIUS.card },
-  customPhraseBtnDisabled: { opacity: 0.6 },
-  customPhraseBtnText: { fontSize: 14, fontWeight: '600', color: ACCENT },
-  customPhraseCard: { backgroundColor: COLORS.accentBg, borderRadius: BORDER_RADIUS.card, padding: 14, borderWidth: 1, borderColor: COLORS.borderAccent },
-  customPhraseLabel: { fontSize: 12, color: TEXT_MUTED, marginBottom: 4 },
-  customPhraseText: { fontSize: 15, color: TEXT, lineHeight: 22, fontStyle: 'italic' },
+  actionBtnText: { fontSize: 14, fontWeight: '600', color: ACCENT },
+  allVersionsCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.card,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  allVersionsTitle: { fontSize: 13, fontWeight: '700', color: TEXT_MUTED, marginBottom: 10 },
+  versionRow: { marginBottom: 10 },
+  versionLabel: { fontSize: 12, fontWeight: '600', color: TEXT_MUTED, marginBottom: 2 },
+  versionText: { fontSize: 14, color: TEXT, lineHeight: 20 },
   footer: { marginTop: 24 },
   footerText: { fontSize: 12, color: COLORS.textMuted, lineHeight: 18, fontStyle: 'italic' },
 });
