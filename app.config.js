@@ -27,6 +27,10 @@ module.exports = {
         NSMicrophoneUsageDescription:
           'InGauge uses your microphone so you can talk to Gauge by voice.',
         NSCameraUsageDescription: 'InGauge uses your camera for profile photos.',
+        NSHealthShareUsageDescription:
+          'InGauge reads your health data (sleep, heart rate, activity) to help you understand how your body affects your mood and energy.',
+        NSHealthUpdateUsageDescription:
+          'InGauge can save mindfulness minutes and other wellness data to Apple Health.',
       },
     },
     android: {
