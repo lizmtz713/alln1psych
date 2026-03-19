@@ -26,7 +26,8 @@ function formatDate(iso: string): string {
 export default function DecisionIndexScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const decisions = useDecisionStore((s) => s.getDecisions());
+  // Select raw state to avoid potential infinite loop
+  const decisions = useDecisionStore((s) => s.decisions);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

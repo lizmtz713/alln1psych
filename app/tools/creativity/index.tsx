@@ -22,7 +22,8 @@ const TEXT_MUTED = COLORS.textSecondary;
 export default function CreativityIndexScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const ideasCount = useCreativityStore((s) => s.getIdeas().length);
+  // Select raw state to avoid infinite loop (don't call methods in selector)
+  const ideasCount = useCreativityStore((s) => s.ideas.length);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

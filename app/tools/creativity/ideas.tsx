@@ -29,7 +29,8 @@ function formatDate(iso: string): string {
 export default function CreativityIdeasScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const ideas = useCreativityStore((s) => s.getIdeas());
+  // Select raw state to avoid infinite loop (don't call methods in selector)
+  const ideas = useCreativityStore((s) => s.ideas);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
