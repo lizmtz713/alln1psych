@@ -2,7 +2,7 @@
  * Difficult People tool — Type Identifier, Type Browser, Strategy Cards, Scripts Library, AI Coach.
  * Safety: crisis resources at top; when to walk away per type.
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,9 @@ import {
   Pressable,
   ScrollView,
   Linking,
+  TextInput,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,6 +35,7 @@ import {
 import { useDifficultPeopleStore } from '../../src/stores/difficultPeopleStore';
 import type { DifficultPersonTypeId } from '../../src/types/difficultPeople';
 import type { ContextTag } from '../../src/types/difficultPeople';
+import { sendMessageWithSystemPromptOnly, hasOpenAIKey } from '../../src/services/ai';
 
 const BG = COLORS.background;
 const CARD_BG = COLORS.surface;
@@ -64,6 +68,17 @@ export default function DifficultPeopleScreen() {
   const [lastTopTypes, setLastTopTypes] = useState<DifficultPersonTypeId[]>([]);
 
   const { setAssessmentResult, getAIContext } = useDifficultPeopleStore();
+  
+  // AI custom response state
+  const [customTheySay, setCustomTheySay] = useState('');
+  const [customPersonType, setCustomPersonType] = useState<DifficultPersonTypeId | null>(null);
+  const [customResponseLoading, setCustomResponseLoading] = useState(false);
+  const [customResponse, setCustomResponse] = useState<{
+    response: string;
+    why: string;
+    avoid: string;
+    ifTheyEscalate: string;
+  } | null>(null);
 
   const currentQuestion =
     assessmentStep >= 1 && assessmentStep <= DIFFICULT_PERSON_ASSESSMENT_QUESTIONS.length
@@ -99,6 +114,67 @@ export default function DifficultPeopleScreen() {
     router.back();
     setTimeout(() => router.push('/(tabs)/talk'), 100);
   };
+
+  // AI custom response generator
+  const generateCustomResponse = useCallback(async () => {
+    if (!customTheySay.trim()) return;
+    
+    const hasKey = await hasOpenAIKey();
+    if (!hasKey) {
+      Alert.alert('API key needed', 'Add your OpenAI API key in Settings for custom responses.');
+      return;
+    }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setCustomResponseLoading(true);
+    setCustomResponse(null);
+
+    try {
+      const personType = customPersonType 
+        ? DIFFICULT_PERSON_TYPES.find(t => t.id === customPersonType)
+        : null;
+      
+      const typeContext = personType 
+        ? `The person shows "${personType.label}" patterns (${personType.tagline}). They typically: ${personType.redFlags.slice(0, 3).join(', ')}.`
+        : 'Type unknown - general difficult person.';
+
+      const systemPrompt = `You are a communication coach specializing in difficult conversations. The user is dealing with a difficult person.
+
+${typeContext}
+
+The difficult person said: "${customTheySay.trim()}"
+
+Generate a response the user can say, plus tactical advice.
+
+Respond in this exact JSON format:
+{
+  "response": "What to say back - clear, boundaried, doesn't escalate",
+  "why": "Why this works (1 sentence)",
+  "avoid": "What NOT to say and why (1 sentence)",
+  "ifTheyEscalate": "What to say if they push back or escalate"
+}
+
+Keep responses natural, not clinical. Use "I" statements where helpful.`;
+
+      const response = await sendMessageWithSystemPromptOnly(
+        [{ role: 'user', content: 'Help me respond.' }],
+        systemPrompt,
+        400
+      );
+
+      if (response) {
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          setCustomResponse(parsed);
+        }
+      }
+    } catch (e) {
+      Alert.alert('Generation failed', 'Check your connection and try again.');
+    } finally {
+      setCustomResponseLoading(false);
+    }
+  }, [customTheySay, customPersonType]);
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: 'identifier', label: 'Identify', icon: 'search-outline' },
@@ -367,7 +443,75 @@ export default function DifficultPeopleScreen() {
         {/* ─── Scripts Library ─── */}
         {tab === 'scripts' && (
           <>
-            <Text style={styles.sectionTitle}>Scripts — what to say</Text>
+            {/* AI Custom Response Generator */}
+            <View style={styles.customSection}>
+              <Text style={styles.sectionTitle}>✨ Get a custom response</Text>
+              <Text style={styles.customHint}>What did they say to you?</Text>
+              <TextInput
+                style={styles.customInput}
+                placeholder="e.g. You're being too sensitive about this"
+                placeholderTextColor={TEXT_MUTED}
+                value={customTheySay}
+                onChangeText={(t) => { setCustomTheySay(t); setCustomResponse(null); }}
+                multiline
+                textAlignVertical="top"
+              />
+              
+              <Text style={styles.customHint}>What type are they? (optional)</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.typePickerScroll}>
+                <View style={styles.typePickerRow}>
+                  {DIFFICULT_PERSON_TYPES.map((t) => (
+                    <Pressable
+                      key={t.id}
+                      style={[styles.typePickerChip, customPersonType === t.id && styles.typePickerChipActive]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setCustomPersonType(customPersonType === t.id ? null : t.id);
+                        setCustomResponse(null);
+                      }}
+                    >
+                      <Text style={styles.typePickerEmoji}>{t.emoji}</Text>
+                      <Text style={[styles.typePickerLabel, customPersonType === t.id && styles.typePickerLabelActive]} numberOfLines={1}>{t.label}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+              
+              <Pressable
+                style={[styles.generateBtn, (customResponseLoading || !customTheySay.trim()) && styles.generateBtnDisabled]}
+                onPress={generateCustomResponse}
+                disabled={customResponseLoading || !customTheySay.trim()}
+              >
+                {customResponseLoading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="sparkles" size={18} color="#fff" />
+                    <Text style={styles.generateBtnText}>Generate response</Text>
+                  </>
+                )}
+              </Pressable>
+
+              {customResponse && (
+                <View style={styles.customResultCard}>
+                  <Text style={styles.customResultLabel}>Say this:</Text>
+                  <Text style={styles.customResultResponse}>"{customResponse.response}"</Text>
+                  
+                  <Text style={styles.customResultLabel}>Why it works:</Text>
+                  <Text style={styles.customResultText}>{customResponse.why}</Text>
+                  
+                  <View style={styles.avoidBox}>
+                    <Ionicons name="close-circle-outline" size={16} color={COLORS.error ?? '#EF5350'} />
+                    <Text style={styles.avoidText}>Avoid: {customResponse.avoid}</Text>
+                  </View>
+                  
+                  <Text style={styles.customResultLabel}>If they escalate:</Text>
+                  <Text style={styles.customResultResponse}>"{customResponse.ifTheyEscalate}"</Text>
+                </View>
+              )}
+            </View>
+
+            <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Common scripts</Text>
             {DIFFICULT_PERSON_SCRIPTS.map((s) => (
               <View key={s.id} style={styles.scriptCard}>
                 <Text style={styles.scriptTheySay}>They say: "{s.theySay}"</Text>
@@ -551,4 +695,24 @@ const styles = StyleSheet.create({
   },
   copilotBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   crisisInline: { fontSize: 13, color: TEXT_MUTED, marginTop: 20, lineHeight: 20 },
+  // Custom response styles
+  customSection: { marginBottom: 16 },
+  customHint: { fontSize: 13, color: TEXT_MUTED, marginBottom: 8, lineHeight: 18 },
+  customInput: { backgroundColor: CARD_BG, borderRadius: BORDER_RADIUS.card ?? 12, borderWidth: 1, borderColor: CARD_BORDER, padding: 14, fontSize: 15, color: TEXT_PRIMARY, minHeight: 70, textAlignVertical: 'top', marginBottom: 12 },
+  typePickerScroll: { marginBottom: 12 },
+  typePickerRow: { flexDirection: 'row', gap: 8 },
+  typePickerChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 12, backgroundColor: CARD_BG, borderRadius: 20, borderWidth: 1, borderColor: CARD_BORDER },
+  typePickerChipActive: { borderColor: ACCENT, backgroundColor: COLORS.accentBg ?? 'rgba(124,77,255,0.12)' },
+  typePickerEmoji: { fontSize: 16 },
+  typePickerLabel: { fontSize: 13, color: TEXT_MUTED },
+  typePickerLabelActive: { color: ACCENT, fontWeight: '600' },
+  generateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: ACCENT, borderRadius: BORDER_RADIUS.button ?? 12, paddingVertical: 14 },
+  generateBtnDisabled: { opacity: 0.5 },
+  generateBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  customResultCard: { backgroundColor: CARD_BG, borderRadius: BORDER_RADIUS.card ?? 12, padding: 16, marginTop: 16, borderWidth: 1, borderColor: ACCENT, borderLeftWidth: 4 },
+  customResultLabel: { fontSize: 12, fontWeight: '600', color: TEXT_MUTED, marginTop: 12, marginBottom: 4 },
+  customResultResponse: { fontSize: 16, color: TEXT_PRIMARY, fontWeight: '500', lineHeight: 24, fontStyle: 'italic' },
+  customResultText: { fontSize: 14, color: TEXT_SECONDARY, lineHeight: 20 },
+  avoidBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 12, padding: 10, backgroundColor: 'rgba(239,83,80,0.08)', borderRadius: 8 },
+  avoidText: { flex: 1, fontSize: 13, color: TEXT_PRIMARY, lineHeight: 18 },
 });

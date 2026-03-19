@@ -2,7 +2,7 @@
  * Boundaries tool — 8 types, scripts, blocks, myths, 17-question assessment, log, affirmations.
  * Science: Tawwab, Cloud & Townsend, Brené Brown.
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
   Pressable,
   ScrollView,
   TextInput,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,6 +31,7 @@ import { useBoundariesStore } from '../../src/stores/boundariesStore';
 import type { ScriptContext } from '../../src/types/boundaries';
 import { ToolIntro } from '../../src/components/tools/ToolIntro';
 import { getToolIntroContent } from '../../src/data/toolIntroContent';
+import { sendMessageWithSystemPromptOnly, hasOpenAIKey } from '../../src/services/ai';
 
 const BG = COLORS.background;
 const CARD_BG = COLORS.surface;
@@ -56,6 +59,16 @@ export default function BoundariesScreen() {
 
   const [logNote, setLogNote] = useState('');
   const [logTypeId, setLogTypeId] = useState<string>('time');
+  
+  // AI custom script state
+  const [customSituation, setCustomSituation] = useState('');
+  const [customScriptLoading, setCustomScriptLoading] = useState(false);
+  const [customScriptResult, setCustomScriptResult] = useState<{
+    soft: string;
+    firm: string;
+    brokenRecord: string;
+    tip: string;
+  } | null>(null);
 
   const { assessmentScores: savedScores, setAssessmentScores: setSavedScores, log, addLogEntry } = useBoundariesStore();
 
@@ -86,6 +99,55 @@ export default function BoundariesScreen() {
   };
 
   const dailyAffirmation = BOUNDARY_AFFIRMATIONS[new Date().getDate() % BOUNDARY_AFFIRMATIONS.length];
+
+  // AI custom boundary script generator
+  const generateCustomScript = useCallback(async () => {
+    if (!customSituation.trim()) return;
+    
+    const hasKey = await hasOpenAIKey();
+    if (!hasKey) {
+      Alert.alert('API key needed', 'Add your OpenAI API key in Settings for custom scripts.');
+      return;
+    }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setCustomScriptLoading(true);
+    setCustomScriptResult(null);
+
+    try {
+      const systemPrompt = `You are a boundary-setting coach based on Nedra Tawwab's work. The user describes a situation where they need to set a boundary.
+
+Generate 3 scripts at different intensities, plus one tactical tip.
+
+Respond in this exact JSON format:
+{
+  "soft": "Gentle version - validates their perspective while stating your need",
+  "firm": "Clear and direct - states the boundary plainly without over-explaining", 
+  "brokenRecord": "Repeat version - for when they push back, same boundary different words",
+  "tip": "One tactical tip for delivering this specific boundary"
+}
+
+Make scripts natural and conversational. Use "I" statements. No clinical language.`;
+
+      const response = await sendMessageWithSystemPromptOnly(
+        [{ role: 'user', content: `Situation: ${customSituation.trim()}` }],
+        systemPrompt,
+        400
+      );
+
+      if (response) {
+        const jsonMatch = response.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          setCustomScriptResult(parsed);
+        }
+      }
+    } catch (e) {
+      Alert.alert('Generation failed', 'Check your connection and try again.');
+    } finally {
+      setCustomScriptLoading(false);
+    }
+  }, [customSituation]);
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: 'learn', label: 'Learn', icon: 'book-outline' },
@@ -189,6 +251,50 @@ export default function BoundariesScreen() {
                 <Text style={styles.scriptText}>"{s.brokenRecord}"</Text>
               </View>
             ))}
+            {/* AI Custom Script Generator */}
+            <View style={styles.customScriptSection}>
+              <Text style={styles.sectionTitle}>✨ Custom script for your situation</Text>
+              <Text style={styles.customHint}>Describe what's happening and who you need to set a boundary with.</Text>
+              <TextInput
+                style={styles.customInput}
+                placeholder="e.g. My coworker keeps assigning me extra work without asking"
+                placeholderTextColor={TEXT_MUTED}
+                value={customSituation}
+                onChangeText={(t) => { setCustomSituation(t); setCustomScriptResult(null); }}
+                multiline
+                textAlignVertical="top"
+              />
+              <Pressable
+                style={[styles.generateBtn, (customScriptLoading || !customSituation.trim()) && styles.generateBtnDisabled]}
+                onPress={generateCustomScript}
+                disabled={customScriptLoading || !customSituation.trim()}
+              >
+                {customScriptLoading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="sparkles" size={18} color="#fff" />
+                    <Text style={styles.generateBtnText}>Generate my script</Text>
+                  </>
+                )}
+              </Pressable>
+
+              {customScriptResult && (
+                <View style={styles.customResultCard}>
+                  <Text style={styles.scriptLabel}>Soft</Text>
+                  <Text style={styles.scriptText}>"{customScriptResult.soft}"</Text>
+                  <Text style={styles.scriptLabel}>Firm</Text>
+                  <Text style={styles.scriptText}>"{customScriptResult.firm}"</Text>
+                  <Text style={styles.scriptLabel}>Broken record</Text>
+                  <Text style={styles.scriptText}>"{customScriptResult.brokenRecord}"</Text>
+                  <View style={styles.tipCard}>
+                    <Ionicons name="bulb-outline" size={16} color={ACCENT} />
+                    <Text style={styles.tipText}>{customScriptResult.tip}</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+
             <Pressable style={styles.practiceBtn} onPress={() => { router.back(); setTimeout(() => router.push('/(modals)/role-play'), 100); }}>
               <Ionicons name="people" size={20} color={ACCENT} />
               <Text style={styles.practiceBtnText}>Practice with Role Play</Text>
@@ -400,4 +506,14 @@ const styles = StyleSheet.create({
   copilotBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
   secondaryBtn: { alignItems: 'center', paddingVertical: 14, marginTop: 8 },
   secondaryBtnText: { fontSize: 15, color: ACCENT, fontWeight: '500' },
+  // Custom script styles
+  customScriptSection: { marginTop: 24, marginBottom: 16, paddingTop: 20, borderTopWidth: 1, borderTopColor: CARD_BORDER },
+  customHint: { fontSize: 13, color: TEXT_MUTED, marginBottom: 12, lineHeight: 18 },
+  customInput: { backgroundColor: CARD_BG, borderRadius: BORDER_RADIUS.card ?? 12, borderWidth: 1, borderColor: CARD_BORDER, padding: 14, fontSize: 15, color: TEXT_PRIMARY, minHeight: 80, textAlignVertical: 'top', marginBottom: 12 },
+  generateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: ACCENT, borderRadius: BORDER_RADIUS.button ?? 12, paddingVertical: 14 },
+  generateBtnDisabled: { opacity: 0.5 },
+  generateBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  customResultCard: { backgroundColor: CARD_BG, borderRadius: BORDER_RADIUS.card ?? 12, padding: 16, marginTop: 16, borderWidth: 1, borderColor: ACCENT, borderLeftWidth: 4 },
+  tipCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: CARD_BORDER },
+  tipText: { flex: 1, fontSize: 14, color: TEXT_PRIMARY, lineHeight: 20 },
 });
