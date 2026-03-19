@@ -228,7 +228,36 @@ Make translations natural, not clinical. Use contractions. Sound human.`;
         {selectedRole && (
           <>
             <Text style={styles.stepLabel}>3. What do you want to say?</Text>
-            <Text style={styles.stepHint}>Be honest. Type what you're actually feeling.</Text>
+            <Text style={styles.stepHint}>Type what you're actually feeling — AI will translate it.</Text>
+            
+            {/* Quick start ideas */}
+            {!userMessage && (
+              <View style={styles.quickStartSection}>
+                <Text style={styles.quickStartLabel}>Quick starts:</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickStartScroll}>
+                  {[
+                    'I need you to stop...',
+                    'I feel hurt when...',
+                    "I need more help with...",
+                    "Can we talk about...",
+                    "I'm frustrated that...",
+                    "I need space to...",
+                  ].map((idea, i) => (
+                    <Pressable
+                      key={i}
+                      style={styles.quickStartChip}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setUserMessage(idea);
+                      }}
+                    >
+                      <Text style={styles.quickStartText}>{idea}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+            
             <TextInput
               style={styles.messageInput}
               placeholder="e.g. I need you to stop borrowing my stuff without asking"
@@ -240,7 +269,7 @@ Make translations natural, not clinical. Use contractions. Sound human.`;
             />
             
             <Pressable
-              style={[styles.translateBtn, loading && styles.translateBtnDisabled]}
+              style={[styles.translateBtn, (loading || !userMessage.trim()) && styles.translateBtnDisabled]}
               onPress={translateMessage}
               disabled={loading || !userMessage.trim()}
             >
@@ -248,8 +277,8 @@ Make translations natural, not clinical. Use contractions. Sound human.`;
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <>
-                  <Ionicons name="language" size={20} color="#fff" />
-                  <Text style={styles.translateBtnText}>Translate</Text>
+                  <Ionicons name="sparkles" size={20} color="#fff" />
+                  <Text style={styles.translateBtnText}>Translate for {role?.shortLabel || 'them'}</Text>
                 </>
               )}
             </Pressable>
@@ -407,6 +436,19 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
   },
   chipSmallText: { fontSize: 13, color: TEXT_MUTED },
+  quickStartSection: { marginBottom: 12 },
+  quickStartLabel: { fontSize: 12, color: TEXT_MUTED, marginBottom: 8 },
+  quickStartScroll: { marginHorizontal: -SPACING.lg },
+  quickStartChip: {
+    backgroundColor: CARD_BG,
+    borderRadius: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  quickStartText: { fontSize: 14, color: TEXT },
   messageInput: {
     backgroundColor: CARD_BG,
     borderRadius: BORDER_RADIUS.card,
