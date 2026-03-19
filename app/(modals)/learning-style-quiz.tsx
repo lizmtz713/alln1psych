@@ -9,16 +9,16 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
+  Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { COLORS } from '../../src/lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS } from '../../src/lib/constants';
 import { useUserStore, type LearningStyle } from '../../src/stores/userStore';
 import { useAuth } from '../../src/providers/AuthProvider';
 import { updateExtendedProfile } from '../../src/services/profileService';
-import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 
 const ACCENT = '#7C4DFF';
 
@@ -164,12 +164,15 @@ const STYLE_INFO: Record<LearningStyle, { emoji: string; title: string; descript
   },
 };
 
+type ScreenMode = 'intro' | 'quiz' | 'result';
+
 export default function LearningStyleQuizScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user: authUser } = useAuth();
   const setLearningStyle = useUserStore((s) => s.setLearningStyle);
   
+  const [mode, setMode] = useState<ScreenMode>('intro');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [scores, setScores] = useState<Record<LearningStyle, number>>({
     reading: 0,
@@ -179,6 +182,11 @@ export default function LearningStyleQuizScreen() {
     unknown: 0,
   });
   const [result, setResult] = useState<LearningStyle | null>(null);
+  
+  const handleStartQuiz = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setMode('quiz');
+  };
   
   const handleAnswer = (style: LearningStyle) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -199,6 +207,7 @@ export default function LearningStyleQuizScreen() {
       // If there's a clear winner, use it. Otherwise, pick the first tied style.
       const finalStyle = topStyles[0];
       setResult(finalStyle);
+      setMode('result');
       setLearningStyle(finalStyle);
       if (authUser?.id && finalStyle !== 'unknown') {
         updateExtendedProfile(authUser.id, { learning_style: finalStyle }).catch(() => {});
@@ -211,44 +220,85 @@ export default function LearningStyleQuizScreen() {
     setCurrentQuestion(0);
     setScores({ reading: 0, listening: 0, doing: 0, talking: 0, unknown: 0 });
     setResult(null);
+    setMode('intro');
   };
   
   const question = QUIZ_QUESTIONS[currentQuestion];
   const resultInfo = result ? STYLE_INFO[result] : null;
+  const progress = (currentQuestion + 1) / QUIZ_QUESTIONS.length;
   
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable 
-          style={styles.backBtn} 
+          style={styles.closeBtn} 
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             router.back();
           }}
         >
-          <Ionicons name="arrow-back" size={24} color={ACCENT} />
-        </Pressable>
-        <View style={styles.progressContainer}>
-          {!result && (
-            <StepProgressIndicator 
-              currentStep={currentQuestion + 1} 
-              totalSteps={QUIZ_QUESTIONS.length} 
-              accentColor={ACCENT}
-            />
-          )}
-        </View>
-        <Pressable style={styles.closeBtn} onPress={() => router.back()}>
           <Ionicons name="close" size={24} color={COLORS.textMuted} />
         </Pressable>
+        
+        {mode === 'quiz' && (
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>Learning Style</Text>
+          </View>
+        )}
+        
+        <View style={{ width: 40 }} />
       </View>
+      
+      {/* Progress bar - only in quiz mode */}
+      {mode === 'quiz' && (
+        <View style={styles.progressBarContainer}>
+          <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+        </View>
+      )}
       
       <ScrollView 
         style={styles.scroll} 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {!result ? (
+        {/* INTRO SCREEN */}
+        {mode === 'intro' && (
+          <View style={styles.introContainer}>
+            <Text style={styles.introEmoji}>📚</Text>
+            <Text style={styles.introTitle}>Discover Your Learning Style</Text>
+            <Text style={styles.introSubtitle}>
+              Everyone absorbs information differently. This quick quiz helps identify how you learn best — so InGauge can communicate with you more effectively.
+            </Text>
+            
+            <View style={styles.introInfoCard}>
+              <View style={styles.introInfoRow}>
+                <Ionicons name="time-outline" size={20} color={ACCENT} />
+                <Text style={styles.introInfoText}>Takes about 2 minutes</Text>
+              </View>
+              <View style={styles.introInfoRow}>
+                <Ionicons name="help-circle-outline" size={20} color={ACCENT} />
+                <Text style={styles.introInfoText}>8 quick questions</Text>
+              </View>
+              <View style={styles.introInfoRow}>
+                <Ionicons name="sparkles-outline" size={20} color={ACCENT} />
+                <Text style={styles.introInfoText}>Personalized tips at the end</Text>
+              </View>
+            </View>
+            
+            <Text style={styles.introHint}>
+              There are no wrong answers — just pick what feels most natural to you.
+            </Text>
+            
+            <Pressable style={styles.startBtn} onPress={handleStartQuiz}>
+              <Text style={styles.startBtnText}>Start Quiz</Text>
+              <Ionicons name="arrow-forward" size={20} color="#fff" />
+            </Pressable>
+          </View>
+        )}
+        
+        {/* QUIZ SCREEN */}
+        {mode === 'quiz' && (
           <>
             {/* Question */}
             <Text style={styles.questionNumber}>Question {currentQuestion + 1} of {QUIZ_QUESTIONS.length}</Text>
@@ -270,7 +320,10 @@ export default function LearningStyleQuizScreen() {
               ))}
             </View>
           </>
-        ) : (
+        )}
+        
+        {/* RESULT SCREEN */}
+        {mode === 'result' && (
           <>
             {/* Result */}
             <View style={styles.resultCard}>
@@ -336,15 +389,104 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
-  backBtn: { width: 40, padding: 8 },
-  progressContainer: { flex: 1, alignItems: 'center' },
-  closeBtn: { width: 40, alignItems: 'flex-end', padding: 8 },
+  closeBtn: { 
+    width: 40, 
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  
+  // Progress bar
+  progressBarContainer: {
+    height: 3,
+    backgroundColor: COLORS.border,
+    marginHorizontal: 16,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: ACCENT,
+    borderRadius: 2,
+  },
   
   scroll: { flex: 1 },
   scrollContent: { padding: 24, paddingBottom: 40 },
+  
+  // Intro screen
+  introContainer: {
+    flex: 1,
+    alignItems: 'center',
+    paddingTop: 40,
+  },
+  introEmoji: {
+    fontSize: 64,
+    marginBottom: 24,
+  },
+  introTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: COLORS.text,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  introSubtitle: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 32,
+    paddingHorizontal: 16,
+  },
+  introInfoCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    marginBottom: 24,
+    gap: 16,
+  },
+  introInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  introInfoText: {
+    fontSize: 15,
+    color: COLORS.text,
+  },
+  introHint: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginBottom: 32,
+    paddingHorizontal: 16,
+  },
+  startBtn: {
+    backgroundColor: ACCENT,
+    paddingVertical: 18,
+    paddingHorizontal: 48,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  startBtnText: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#fff',
+  },
   
   // Question
   questionNumber: {
