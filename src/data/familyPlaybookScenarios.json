@@ -1,0 +1,662 @@
+{
+  "categories": [
+    {
+      "id": "after-school",
+      "name": "After School & Homework",
+      "emoji": "📚",
+      "description": "Grades, assignments, study habits"
+    },
+    {
+      "id": "screen-time",
+      "name": "Screen Time & Technology",
+      "emoji": "📱",
+      "description": "Phones, gaming, social media"
+    },
+    {
+      "id": "social-life",
+      "name": "Social Life",
+      "emoji": "👥",
+      "description": "Friends, parties, dating, peer pressure"
+    },
+    {
+      "id": "chores",
+      "name": "Chores & Responsibilities",
+      "emoji": "🧹",
+      "description": "Cleaning, helping out, accountability"
+    },
+    {
+      "id": "rules-boundaries",
+      "name": "Rules & Boundaries",
+      "emoji": "🚧",
+      "description": "Curfew, permissions, house rules"
+    },
+    {
+      "id": "emotions",
+      "name": "Emotions & Mental Health",
+      "emoji": "💭",
+      "description": "Mood, isolation, anxiety, big feelings"
+    },
+    {
+      "id": "communication",
+      "name": "Communication Breakdowns",
+      "emoji": "💬",
+      "description": "Lying, attitude, not sharing"
+    },
+    {
+      "id": "money",
+      "name": "Money & Independence",
+      "emoji": "💰",
+      "description": "Spending, jobs, allowance, car"
+    },
+    {
+      "id": "future",
+      "name": "Future & Big Decisions",
+      "emoji": "🎓",
+      "description": "College, career, life choices"
+    },
+    {
+      "id": "family-dynamics",
+      "name": "Family Dynamics",
+      "emoji": "👨‍👩‍👧‍👦",
+      "description": "Siblings, divorce, blended families"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "fp-001",
+      "category": "after-school",
+      "title": "The Post-School Stall",
+      "focus": "State gauge vs. Direction demands",
+      "context": "Teen arrives home exhausted. Parent wants to discuss a missing assignment.",
+      "pilot": "Running on fumes. Social battery dead, brain foggy.",
+      "groundControl": "Got an email from teacher, anxious to fix the problem.",
+      "crash": {
+        "parent": "Why didn't you turn in your history paper? You always do this.",
+        "teen": "Leave me alone! I just got home, why are you always on my case?",
+        "outcome": "System Overload. Both vehicles sustain damage."
+      },
+      "optimization": {
+        "parent": "I see your State gauge is Amber right now. I have a Direction question about history, but I'll park it until you've had time to refuel.",
+        "teen": "Copy that. My system is lagging. Give me a 30-minute reset, and then we can look at it.",
+        "outcome": "Collision Avoided. Capacity restored before demands made."
+      }
+    },
+    {
+      "id": "fp-002",
+      "category": "after-school",
+      "title": "The Grade Drop",
+      "focus": "Shame spiral vs. diagnostic approach",
+      "context": "Parent discovers teen's grades have dropped significantly this semester.",
+      "pilot": "Already feeling like a failure. Dreading this conversation.",
+      "groundControl": "Worried about teen's future. Feeling like you've failed as a parent.",
+      "crash": {
+        "parent": "A D in math?! What have you been doing all semester? No more phone until this is fixed!",
+        "teen": "I tried! You don't understand how hard it is! I'm not smart like you think!",
+        "outcome": "Shame spiral activated. Teen shuts down, problem gets worse."
+      },
+      "optimization": {
+        "parent": "I noticed the math grade dropped. Before we talk solutions, I want to understand what's been happening in your system. What's your read on it?",
+        "teen": "I don't know... I got lost after chapter 3 and was too embarrassed to ask for help.",
+        "outcome": "Root cause identified. Now we can actually solve it together."
+      }
+    },
+    {
+      "id": "fp-003",
+      "category": "after-school",
+      "title": "The Homework Battle",
+      "focus": "Nagging vs. autonomy support",
+      "context": "Teen hasn't started homework. Parent has reminded them three times.",
+      "pilot": "Planning to do it later. Feeling micromanaged.",
+      "groundControl": "Worried they'll stay up too late again. Pattern repeating.",
+      "crash": {
+        "parent": "I've told you THREE times! Start your homework NOW!",
+        "teen": "FINE! God, you never trust me to do anything!",
+        "outcome": "Homework done with resentment. Relationship damaged."
+      },
+      "optimization": {
+        "parent": "I notice homework isn't started yet. What's your flight plan for tonight?",
+        "teen": "I'm gonna start at 7 after I decompress a bit.",
+        "parent": "Works for me. I'll check in at 7 to see if you need any support.",
+        "outcome": "Autonomy respected. Clear agreement made."
+      }
+    },
+    {
+      "id": "fp-004",
+      "category": "screen-time",
+      "title": "The Phone at Dinner",
+      "focus": "Rules vs. connection",
+      "context": "Teen is scrolling during family dinner. Parent is frustrated.",
+      "pilot": "Friends are texting about drama. Feels urgent.",
+      "groundControl": "Feels disrespected. Misses real conversation.",
+      "crash": {
+        "parent": "Put that phone away RIGHT NOW! How many times do I have to tell you?",
+        "teen": "*eye roll* It's important!",
+        "outcome": "Tense dinner. No real connection. Same fight tomorrow."
+      },
+      "optimization": {
+        "parent": "Hey, I'm noticing the phone is pulling you away. Something going on?",
+        "teen": "Friend drama. Can I just send one text then put it away?",
+        "parent": "One text, then phone in the basket. Deal?",
+        "outcome": "Need acknowledged. Boundary maintained. Dinner saved."
+      }
+    },
+    {
+      "id": "fp-005",
+      "category": "screen-time",
+      "title": "The Late Night Gaming",
+      "focus": "Sleep hygiene vs. autonomy",
+      "context": "It's 1am. Parent discovers teen still gaming.",
+      "pilot": "In the middle of a match with friends. Finally unwinding.",
+      "groundControl": "Has school tomorrow. This keeps happening.",
+      "crash": {
+        "parent": "It's 1am! Turn that off NOW! You're going to be a zombie tomorrow!",
+        "teen": "I can't just quit in the middle! You don't understand!",
+        "outcome": "Forced shutdown. Resentment. Same thing next week."
+      },
+      "optimization": {
+        "parent": "Hey. It's past 1am. I get you're in a game — how much longer to finish this match?",
+        "teen": "Like 10 more minutes.",
+        "parent": "Okay. Finish this match, then we need to talk about a sustainable gaming schedule tomorrow. Your system needs sleep to function.",
+        "outcome": "Dignity preserved. Real conversation scheduled."
+      }
+    },
+    {
+      "id": "fp-006",
+      "category": "screen-time",
+      "title": "The Social Media Discovery",
+      "focus": "Trust violation vs. safety concern",
+      "context": "Parent saw concerning content on teen's social media.",
+      "pilot": "Feels like privacy was violated. Embarrassed.",
+      "groundControl": "Scared about what they saw. Wants to protect.",
+      "crash": {
+        "parent": "What is THIS? Who are you talking to? I'm taking your phone!",
+        "teen": "You went through my stuff?! I can't trust you!",
+        "outcome": "Trust shattered both ways. No actual safety addressed."
+      },
+      "optimization": {
+        "parent": "I saw something that worried me online. I'm not here to punish — I'm here because I care about your safety. Can we talk about it?",
+        "teen": "How did you see that?",
+        "parent": "That's fair to ask. Let's both be honest. I'm worried, not angry.",
+        "outcome": "Safety concern addressed. Trust repair begins."
+      }
+    },
+    {
+      "id": "fp-007",
+      "category": "social-life",
+      "title": "The Party Request",
+      "focus": "Control vs. negotiation",
+      "context": "Teen wants to go to a party. Parent has concerns.",
+      "pilot": "Everyone's going. Doesn't want to be left out.",
+      "groundControl": "Doesn't know the parents. Worried about what happens at parties.",
+      "crash": {
+        "parent": "Absolutely not. I don't know those people. End of discussion.",
+        "teen": "You NEVER let me do anything! I hate this!",
+        "outcome": "Teen feels trapped. May sneak out. Trust broken."
+      },
+      "optimization": {
+        "parent": "Tell me more about this party. I have some concerns, but I want to understand what's important to you about going.",
+        "teen": "Everyone from the team is going. I don't want to be the only one who can't.",
+        "parent": "Connection matters. Let's figure out what would make this work for both of us. What if I drove and picked up?",
+        "outcome": "Compromise found. Safety addressed. Relationship intact."
+      }
+    },
+    {
+      "id": "fp-008",
+      "category": "social-life",
+      "title": "The New Friend Concern",
+      "focus": "Judgment vs. curiosity",
+      "context": "Teen is hanging out with someone parent doesn't like.",
+      "pilot": "This friend actually gets them. Feels judged by parent.",
+      "groundControl": "Sees red flags. Worried about influence.",
+      "crash": {
+        "parent": "I don't want you hanging out with Jake anymore. He's a bad influence.",
+        "teen": "You don't even know him! You judge everyone!",
+        "outcome": "Teen defends friend harder. Hides the friendship. Parent loses visibility."
+      },
+      "optimization": {
+        "parent": "I've noticed you're spending a lot of time with Jake. I don't know him well — what do you like about him?",
+        "teen": "He's funny and doesn't care what people think.",
+        "parent": "That sounds freeing. I have some concerns I'd like to share when you're open to it. Not to control you — just to share my perspective.",
+        "outcome": "Conversation stays open. Parent remains informed."
+      }
+    },
+    {
+      "id": "fp-009",
+      "category": "social-life",
+      "title": "The Dating Conversation",
+      "focus": "Intrusion vs. support",
+      "context": "Parent suspects teen is dating someone. Teen hasn't shared.",
+      "pilot": "Wants privacy. Worried about parent's reaction.",
+      "groundControl": "Feels left out. Wants to protect and guide.",
+      "crash": {
+        "parent": "Are you dating someone? Who is it? Why didn't you tell me?",
+        "teen": "It's none of your business!",
+        "outcome": "Wall goes up. Teen shares nothing. Parent worries more."
+      },
+      "optimization": {
+        "parent": "I've noticed you seem happier lately. Whatever's going on, I'm here if you ever want to talk about relationship stuff. No pressure.",
+        "teen": "...maybe later.",
+        "parent": "Door's open. I just want you to know I'm on your team.",
+        "outcome": "Seed planted. Trust builds. Teen may share when ready."
+      }
+    },
+    {
+      "id": "fp-010",
+      "category": "chores",
+      "title": "The Messy Room",
+      "focus": "Nagging vs. natural consequences",
+      "context": "Teen's room is a disaster. Parent has asked many times.",
+      "pilot": "Knows where everything is. Doesn't see the problem.",
+      "groundControl": "Stressed by the mess. Feels disrespected.",
+      "crash": {
+        "parent": "This room is DISGUSTING! Clean it NOW or no friends this weekend!",
+        "teen": "It's MY room! Why do you care so much?!",
+        "outcome": "Power struggle. Clean room but damaged relationship."
+      },
+      "optimization": {
+        "parent": "I notice the room hasn't been cleaned. What's your plan? I need it done before the weekend.",
+        "teen": "I'll do it Saturday morning.",
+        "parent": "Works for me. If it's not done by noon Saturday, no plans until it is. Deal?",
+        "outcome": "Clear expectation. Natural consequence. Teen's choice."
+      }
+    },
+    {
+      "id": "fp-011",
+      "category": "chores",
+      "title": "The Forgotten Chore",
+      "focus": "Shame vs. problem-solving",
+      "context": "Teen forgot to do their one chore — again.",
+      "pilot": "Genuinely forgot. Feels bad but defensive.",
+      "groundControl": "Fed up with reminding. Feels like a nag.",
+      "crash": {
+        "parent": "You had ONE thing to do! I can't rely on you for anything!",
+        "teen": "I FORGOT, okay?! You act like I'm the worst person ever!",
+        "outcome": "Shame spiral. No solution. Will forget again."
+      },
+      "optimization": {
+        "parent": "The dishes didn't get done. I know you didn't mean to forget. What's getting in the way of remembering?",
+        "teen": "I don't know... I just forget.",
+        "parent": "Would a phone reminder help? Or doing it right when you get home before anything else?",
+        "outcome": "System problem gets system solution."
+      }
+    },
+    {
+      "id": "fp-012",
+      "category": "rules-boundaries",
+      "title": "The Curfew Push",
+      "focus": "Control vs. trust-building",
+      "context": "Teen wants a later curfew. Parent says no.",
+      "pilot": "Friends all have later curfews. Feels babied.",
+      "groundControl": "Worried about safety. Current curfew feels right.",
+      "crash": {
+        "parent": "10pm is the rule. End of story.",
+        "teen": "That's so unfair! I'm not a little kid anymore!",
+        "outcome": "Resentment builds. Teen may start lying about whereabouts."
+      },
+      "optimization": {
+        "parent": "I hear you want a later curfew. Let's talk about it. What time are you thinking, and why?",
+        "teen": "11pm. Everyone else stays out that late and nothing bad happens.",
+        "parent": "Here's my concern: safety. What if we try 10:30 for a month and see how it goes? If you're home on time and check in, we can revisit.",
+        "outcome": "Trust ladder. Teen earns more freedom through demonstrated responsibility."
+      }
+    },
+    {
+      "id": "fp-013",
+      "category": "rules-boundaries",
+      "title": "The Privacy Demand",
+      "focus": "Surveillance vs. reasonable boundaries",
+      "context": "Teen demands more privacy. Parent wants to monitor.",
+      "pilot": "Feels constantly watched. Needs space.",
+      "groundControl": "Worried about what they don't know. Wants to protect.",
+      "crash": {
+        "parent": "While you live under my roof, I have the right to know everything!",
+        "teen": "I have NO privacy! This is like a prison!",
+        "outcome": "Teen hides everything. Parent knows nothing. Both unsafe."
+      },
+      "optimization": {
+        "parent": "I hear you need more privacy, and that makes sense as you get older. I also have a need to know you're safe. Where's the middle ground?",
+        "teen": "I don't know... just don't go through my stuff?",
+        "parent": "I can respect that. In return, I need you to come to me if something serious is happening. Deal?",
+        "outcome": "Mutual respect. Safety net intact."
+      }
+    },
+    {
+      "id": "fp-014",
+      "category": "emotions",
+      "title": "The Isolation",
+      "focus": "Interrogation vs. gentle presence",
+      "context": "Teen has been in their room for days. Barely talking.",
+      "pilot": "Overwhelmed. Doesn't have words for it. Wants to be alone.",
+      "groundControl": "Scared something is really wrong. Feels helpless.",
+      "crash": {
+        "parent": "What is WRONG with you?! Why are you hiding? Talk to me!",
+        "teen": "Nothing! Leave me alone!",
+        "outcome": "Wall goes higher. Parent panics more. No connection."
+      },
+      "optimization": {
+        "parent": "Hey. I notice you've been in your room a lot. I'm not here to interrogate. Just wanted to drop off a snack and let you know I'm here if you want company. No talking required.",
+        "teen": "...thanks.",
+        "outcome": "Pressure-free presence. Door stays open."
+      }
+    },
+    {
+      "id": "fp-015",
+      "category": "emotions",
+      "title": "The Anxiety Reveal",
+      "focus": "Dismissal vs. validation",
+      "context": "Teen admits they've been feeling really anxious.",
+      "pilot": "Vulnerable. Scared of parent's reaction.",
+      "groundControl": "Wants to fix it. May minimize unintentionally.",
+      "crash": {
+        "parent": "Anxious about what? You have nothing to worry about! Just think positive!",
+        "teen": "You don't understand. Forget I said anything.",
+        "outcome": "Teen never shares again. Anxiety worsens in isolation."
+      },
+      "optimization": {
+        "parent": "Thank you for telling me that. Anxiety is hard. I'm not going to try to fix it right away — I just want to understand. What does it feel like for you?",
+        "teen": "Like... my chest is tight all the time. And my brain won't stop.",
+        "parent": "That sounds exhausting. I'm glad you told me. Let's figure out some support together.",
+        "outcome": "Teen feels heard. Professional help becomes possible."
+      }
+    },
+    {
+      "id": "fp-016",
+      "category": "emotions",
+      "title": "The Big Emotion",
+      "focus": "Suppression vs. co-regulation",
+      "context": "Teen is having a meltdown over something that seems small.",
+      "pilot": "Overwhelmed. This was the last straw.",
+      "groundControl": "Confused by intensity. Wants it to stop.",
+      "crash": {
+        "parent": "You're crying over THAT? Come on, it's not a big deal!",
+        "teen": "*cries harder* You don't get it!",
+        "outcome": "Emotion dismissed. Teen feels alone. Shame about feelings."
+      },
+      "optimization": {
+        "parent": "Whoa, this is hitting hard. I can see you're really upset. I'm right here.",
+        "teen": "*still crying*",
+        "parent": "You don't have to explain. Let's just breathe together for a sec.",
+        "outcome": "Co-regulation. Emotion moves through. Connection strengthens."
+      }
+    },
+    {
+      "id": "fp-017",
+      "category": "communication",
+      "title": "The Lie Discovered",
+      "focus": "Punishment vs. understanding",
+      "context": "Parent catches teen in a lie about where they were.",
+      "pilot": "Got caught. Scared of consequences. Has reasons for lying.",
+      "groundControl": "Feels betrayed. Trust is shattered.",
+      "crash": {
+        "parent": "You LIED to me! I can never trust you again! You're grounded for a month!",
+        "teen": "I lied because you never let me do anything!",
+        "outcome": "Punishment without understanding. Teen lies better next time."
+      },
+      "optimization": {
+        "parent": "I found out you weren't where you said you'd be. I'm hurt, and we need to talk about this. But first — help me understand why you felt you couldn't tell me the truth.",
+        "teen": "...because you would have said no.",
+        "parent": "So the lie felt safer than the conversation. That tells me we need to work on how we negotiate. The lie still has consequences, but I hear you.",
+        "outcome": "Root cause addressed. Consequences AND repair."
+      }
+    },
+    {
+      "id": "fp-018",
+      "category": "communication",
+      "title": "The Silent Treatment",
+      "focus": "Escalation vs. patience",
+      "context": "After an argument, teen won't speak to parent.",
+      "pilot": "Too angry to talk. Needs space to cool down.",
+      "groundControl": "Wants resolution. Silence feels like punishment.",
+      "crash": {
+        "parent": "Don't you ignore me! We're going to talk about this RIGHT NOW!",
+        "teen": "*silence*",
+        "outcome": "Escalation. Both dig in. Days of tension."
+      },
+      "optimization": {
+        "parent": "I can see you're not ready to talk, and that's okay. I'll give you space. When you're ready, I'm here. No ambush.",
+        "teen": "*nods slightly*",
+        "outcome": "Space given. Teen comes back when regulated."
+      }
+    },
+    {
+      "id": "fp-019",
+      "category": "communication",
+      "title": "The Attitude",
+      "focus": "Reaction vs. curiosity",
+      "context": "Teen is being short and snappy with everything parent says.",
+      "pilot": "Bad day. Taking it out on safe people.",
+      "groundControl": "Feels disrespected. Patience running thin.",
+      "crash": {
+        "parent": "Don't you take that tone with me! I'm your parent!",
+        "teen": "Whatever.",
+        "outcome": "Power struggle. Attitude continues. Everyone's day ruined."
+      },
+      "optimization": {
+        "parent": "Okay, I'm noticing some edge in your responses. Bad day, or is something going on with us?",
+        "teen": "...I don't know. Just a bad day I guess.",
+        "parent": "Got it. I'll give you some space. Let me know if you want to vent later.",
+        "outcome": "De-escalation. Teen feels seen. Attitude softens."
+      }
+    },
+    {
+      "id": "fp-020",
+      "category": "money",
+      "title": "The Money Ask",
+      "focus": "Dismissal vs. teaching moment",
+      "context": "Teen wants money for something parent thinks is unnecessary.",
+      "pilot": "Really wants it. All their friends have it.",
+      "groundControl": "Thinks it's a waste. Money is tight.",
+      "crash": {
+        "parent": "Absolutely not! That's a waste of money! You don't need that!",
+        "teen": "You never get me anything! You don't understand!",
+        "outcome": "Teen feels dismissed. Resentment about money builds."
+      },
+      "optimization": {
+        "parent": "Tell me more about why this matters to you.",
+        "teen": "Everyone has one. I feel left out.",
+        "parent": "I hear that. Here's the deal: I won't buy it, but if you save half, I'll match it. Or we can brainstorm ways you could earn it.",
+        "outcome": "Value of money taught. Teen has agency. Goal achieved together."
+      }
+    },
+    {
+      "id": "fp-021",
+      "category": "money",
+      "title": "The Job Debate",
+      "focus": "Control vs. development",
+      "context": "Teen wants a part-time job. Parent worried about school.",
+      "pilot": "Wants independence and own money.",
+      "groundControl": "Worried grades will slip. Teen already busy.",
+      "crash": {
+        "parent": "No job until you graduate. School is your job.",
+        "teen": "But I want my own money! You control everything!",
+        "outcome": "Teen feels trapped. May get job and hide it."
+      },
+      "optimization": {
+        "parent": "I think wanting your own money is mature. My concern is your bandwidth. How would you balance school?",
+        "teen": "I'd only work weekends. Like 10 hours max.",
+        "parent": "Let's try it for one grading period. If grades stay up, we're good. If they drop, we reassess. Fair?",
+        "outcome": "Trial period. Teen proves responsibility. Win-win."
+      }
+    },
+    {
+      "id": "fp-022",
+      "category": "future",
+      "title": "The College Pressure",
+      "focus": "Expectations vs. exploration",
+      "context": "Teen isn't sure they want to go to college. Parent assumes they will.",
+      "pilot": "Doesn't know what they want. Feels pressured.",
+      "groundControl": "Worried about teen's future. College seems essential.",
+      "crash": {
+        "parent": "Of course you're going to college! That's not up for debate!",
+        "teen": "Maybe I don't want to! Why does everyone assume?!",
+        "outcome": "Teen feels unheard. May comply resentfully or rebel entirely."
+      },
+      "optimization": {
+        "parent": "I realized I've been assuming college is the plan. Is that what you want? I'd love to hear what you're actually thinking about for your future.",
+        "teen": "I don't know... maybe something with my hands? Trade school?",
+        "parent": "That's a valid path. Let's explore options together. What matters most to me is that you have a plan, not that it looks a certain way.",
+        "outcome": "Teen feels heard. Explores options authentically."
+      }
+    },
+    {
+      "id": "fp-023",
+      "category": "future",
+      "title": "The Career Dream",
+      "focus": "Dismissal vs. support",
+      "context": "Teen shares a career dream parent thinks is unrealistic.",
+      "pilot": "Excited to share. Wants parent's support.",
+      "groundControl": "Worried teen is being unrealistic. Wants to protect from failure.",
+      "crash": {
+        "parent": "A YouTuber? That's not a real career. You need a backup plan.",
+        "teen": "You never believe in me! Forget I said anything!",
+        "outcome": "Dream crushed. Teen stops sharing aspirations."
+      },
+      "optimization": {
+        "parent": "Tell me more about what draws you to that. What would your life look like if it worked out?",
+        "teen": "I love creating stuff. And some people actually make it!",
+        "parent": "I can see the passion. What if we research together what it actually takes? I want to support you with eyes wide open.",
+        "outcome": "Dream respected. Reality explored together."
+      }
+    },
+    {
+      "id": "fp-024",
+      "category": "family-dynamics",
+      "title": "The Sibling Fight",
+      "focus": "Picking sides vs. mediating",
+      "context": "Siblings are fighting. Both want parent to take their side.",
+      "pilot": "Feels like sibling always gets away with things.",
+      "groundControl": "Exhausted by constant fighting. Wants peace.",
+      "crash": {
+        "parent": "Stop fighting! You're older, you should know better!",
+        "teen": "Why am I always the one in trouble?! They started it!",
+        "outcome": "Older child resentful. Fighting continues."
+      },
+      "optimization": {
+        "parent": "Both of you, separate corners for 5 minutes. Then we'll have a mediation where each person gets to share without interruption.",
+        "teen": "Fine.",
+        "parent": "[After 5 min] Okay, Teen A, what happened from your perspective? Teen B, just listen...",
+        "outcome": "Both heard. Conflict resolution modeled."
+      }
+    },
+    {
+      "id": "fp-025",
+      "category": "family-dynamics",
+      "title": "The Divorce Adjustment",
+      "focus": "Dismissal vs. validation",
+      "context": "Teen is struggling with parents' divorce.",
+      "pilot": "Grieving. Angry. Caught in the middle.",
+      "groundControl": "Also struggling. May accidentally burden teen.",
+      "crash": {
+        "parent": "Stop being so dramatic. Lots of kids have divorced parents. You'll adjust.",
+        "teen": "You don't care how I feel! You only care about yourself!",
+        "outcome": "Teen's grief invalidated. Acting out increases."
+      },
+      "optimization": {
+        "parent": "I know this divorce has been hard on you. Your feelings about it are valid — the anger, the sadness, all of it. How are you doing today?",
+        "teen": "I hate going back and forth. I hate that everything changed.",
+        "parent": "I hate that for you too. This wasn't the plan. What would make the back and forth easier?",
+        "outcome": "Grief witnessed. Practical solutions explored."
+      }
+    },
+    {
+      "id": "fp-026",
+      "category": "family-dynamics",
+      "title": "The Step-Parent Tension",
+      "focus": "Forcing vs. time",
+      "context": "Teen resists new step-parent's authority.",
+      "pilot": "Didn't ask for this. Feels loyalty to other parent.",
+      "groundControl": "Wants family to blend. Frustrated by resistance.",
+      "crash": {
+        "parent": "You WILL respect [step-parent]! They're part of this family now!",
+        "teen": "They're not my real parent and they never will be!",
+        "outcome": "Resistance hardens. Step-parent relationship damaged."
+      },
+      "optimization": {
+        "parent": "I know having [step-parent] around is an adjustment. No one's asking you to replace anyone. It's okay if it takes time. What would help this feel less weird?",
+        "teen": "I don't know... just don't force it, I guess.",
+        "parent": "Fair. We'll take it slow. Your relationship with them is yours to figure out.",
+        "outcome": "Pressure removed. Natural relationship can develop."
+      }
+    },
+    {
+      "id": "fp-027",
+      "category": "after-school",
+      "title": "The Extracurricular Quit",
+      "focus": "Forcing vs. understanding",
+      "context": "Teen wants to quit an activity they've done for years.",
+      "pilot": "Burned out. Doesn't enjoy it anymore.",
+      "groundControl": "Invested time and money. Worried about quitting pattern.",
+      "crash": {
+        "parent": "You can't quit! You've put in years! What about the scholarship potential?",
+        "teen": "I hate it! You care more about the activity than me!",
+        "outcome": "Teen continues resentfully or quits explosively."
+      },
+      "optimization": {
+        "parent": "I hear you want to quit. That's a big decision. Help me understand what changed.",
+        "teen": "It used to be fun. Now it's just pressure and I dread it.",
+        "parent": "That's important information. Let's talk about whether this is burnout that needs a break, or genuinely being done. Both are okay.",
+        "outcome": "Thoughtful decision made together."
+      }
+    },
+    {
+      "id": "fp-028",
+      "category": "emotions",
+      "title": "The Comparison Spiral",
+      "focus": "Dismissal vs. validation",
+      "context": "Teen is comparing themselves negatively to peers.",
+      "pilot": "Feeling not good enough. Everyone else seems to have it together.",
+      "groundControl": "Wants teen to see their worth. May accidentally dismiss.",
+      "crash": {
+        "parent": "Don't compare yourself to others! You're perfect just the way you are!",
+        "teen": "You have to say that. You're my parent.",
+        "outcome": "Feelings dismissed. Comparison continues in silence."
+      },
+      "optimization": {
+        "parent": "Comparison is brutal. What specifically are you comparing?",
+        "teen": "Everyone else seems smarter, more popular, better at everything.",
+        "parent": "That sounds exhausting. You know what's interesting? I bet some of them look at you and think the same thing. What if we focused on what YOU value, not what everyone else has?",
+        "outcome": "Feeling normalized. Redirect to values, not comparison."
+      }
+    },
+    {
+      "id": "fp-029",
+      "category": "rules-boundaries",
+      "title": "The Double Standard",
+      "focus": "Defensiveness vs. ownership",
+      "context": "Teen calls out parent for not following their own rules.",
+      "pilot": "Frustrated by hypocrisy. Wants fairness.",
+      "groundControl": "Defensive. 'I'm the adult' instinct kicks in.",
+      "crash": {
+        "parent": "That's different! I'm an adult! Do as I say, not as I do!",
+        "teen": "That's so unfair! Rules don't count when it's you?",
+        "outcome": "Teen loses respect. Rules feel arbitrary."
+      },
+      "optimization": {
+        "parent": "You know what, you're right. I have been doing that. Thanks for calling it out. I'll work on it.",
+        "teen": "...wait, really?",
+        "parent": "Really. Fair is fair.",
+        "outcome": "Respect earned. Modeling accountability."
+      }
+    },
+    {
+      "id": "fp-030",
+      "category": "communication",
+      "title": "The Apology Needed",
+      "focus": "Pride vs. repair",
+      "context": "Parent said something hurtful in the heat of the moment.",
+      "pilot": "Hurt. Waiting to see if parent will acknowledge it.",
+      "groundControl": "Knows they were wrong. Pride makes it hard.",
+      "crash": {
+        "parent": "*silence, pretends it didn't happen*",
+        "teen": "*distant, trust eroded*",
+        "outcome": "Wound festers. Teen learns not to expect accountability."
+      },
+      "optimization": {
+        "parent": "Hey, I need to talk to you. Yesterday when I said [thing], that was wrong. I was frustrated but that's not an excuse. I'm sorry.",
+        "teen": "...it really hurt.",
+        "parent": "I know. You didn't deserve that. I'll do better.",
+        "outcome": "Repair modeled. Trust rebuilt. Teen learns healthy apologies."
+      }
+    }
+  ]
+}
