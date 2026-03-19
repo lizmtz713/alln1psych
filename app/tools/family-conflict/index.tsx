@@ -1,10 +1,10 @@
 /**
- * Family Conflict Navigator v2 — AI-powered family conflict support
- * Two modes: Guide (static steps) + AI Mediator (personalized analysis)
+ * Family Conflict Support — Interactive guided flow
+ * Helps users work through family conflicts step by step
  * Route: /tools/family-conflict
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,58 +15,186 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../../src/lib/constants';
-import {
-  FAMILY_CONFLICT_GAUGES,
-  FAMILY_CONFLICT_PATTERNS,
-  BOUNDARY_EXAMPLES,
-  PATHS,
-  CONVERSATION_STRUCTURE,
-  RESOURCES,
-} from '../../../src/data/familyConflictNavigator';
-import { sendMessageWithSystemPromptOnly, hasOpenAIKey } from '../../../src/services/ai';
+import { callAI, hasOpenAIKey } from '../../../src/services/ai';
 
 const BG = COLORS.background;
-const CARD_BG = COLORS.surface;
+const SURFACE = COLORS.surface;
 const BORDER = COLORS.border;
 const TEXT_COLOR = COLORS.text;
 const TEXT_MUTED = COLORS.textSecondary;
-const ACCENT = COLORS.accent;
+const ACCENT = '#14b8a6'; // teal
 
-type Tab = 'mediator' | 'guide';
+// Data
+const GAUGES = [
+  { id: 'emotion', emoji: '🧠', label: 'Emotion', desc: 'Anger, hurt, guilt, sadness' },
+  { id: 'connection', emoji: '💕', label: 'Connection', desc: 'Relationship strain' },
+  { id: 'alignment', emoji: '✨', label: 'Alignment', desc: 'Values conflict (loyalty, respect)' },
+  { id: 'state', emoji: '🫠', label: 'State', desc: 'Stress, nervous system' },
+];
 
-interface MediatorResult {
-  yourPerspective: string;
-  theirPerspective: string;
-  pattern: string;
+const PATTERNS = [
+  { id: 'communication', label: 'Communication breakdown', desc: 'Misunderstandings, not feeling heard' },
+  { id: 'boundaries', label: 'Boundary violations', desc: 'Limits not respected' },
+  { id: 'roles', label: 'Old family roles', desc: 'Falling back into childhood dynamics' },
+  { id: 'unresolved', label: 'Unresolved past', desc: 'History repeating' },
+  { id: 'expectations', label: 'Mismatched expectations', desc: 'Different views of family' },
+];
+
+const PATHS = [
+  { id: 'repair', emoji: '🤝', label: 'Have a repair conversation', desc: 'Address it directly with care' },
+  { id: 'boundary', emoji: '🛡️', label: 'Set a boundary', desc: 'Clearly state your limits' },
+  { id: 'space', emoji: '↔️', label: 'Take space first', desc: 'Step back before engaging' },
+  { id: 'support', emoji: '👥', label: 'Seek support', desc: 'Talk to someone neutral' },
+];
+
+const CRISIS_RESOURCES = [
+  { label: 'National Domestic Violence Hotline', phone: '1-800-799-7233', url: 'tel:1-800-799-7233' },
+  { label: '988 Suicide & Crisis Lifeline', phone: '988', url: 'tel:988' },
+  { label: 'Crisis Text Line', phone: 'Text HOME to 741741', url: 'sms:741741' },
+];
+
+type Step = 1 | 2 | 3 | 4 | 5 | 6;
+
+interface UserSelections {
+  affectedGauges: string[];
+  patterns: string[];
+  whatHappened: string;
   whatYouNeed: string;
-  whatTheySay: string;
-  whatYouSay: string;
-  boundary: string;
-  path: string;
-  warning: string | null;
+  boundaryToSet: string;
+  chosenPath: string | null;
+  conversationScript: {
+    whatHappened: string;
+    howYouFelt: string;
+    whatYouNeed: string;
+  };
 }
 
-export default function FamilyConflictNavigatorScreen() {
+export default function FamilyConflictScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const scrollRef = useRef<ScrollView>(null);
   
-  const [tab, setTab] = useState<Tab>('mediator');
-  
-  // AI Mediator state
-  const [situation, setSituation] = useState('');
-  const [familyMember, setFamilyMember] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<MediatorResult | null>(null);
+  const [step, setStep] = useState<Step>(1);
+  const [selections, setSelections] = useState<UserSelections>({
+    affectedGauges: [],
+    patterns: [],
+    whatHappened: '',
+    whatYouNeed: '',
+    boundaryToSet: '',
+    chosenPath: null,
+    conversationScript: { whatHappened: '', howYouFelt: '', whatYouNeed: '' },
+  });
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+
+  const progress = step / 6;
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.back();
+    if (step > 1) {
+      setStep((s) => (s - 1) as Step);
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    } else {
+      router.back();
+    }
+  };
+
+  const handleNext = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (step < 6) {
+      setStep((s) => (s + 1) as Step);
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    }
+  };
+
+  const toggleGauge = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelections((s) => ({
+      ...s,
+      affectedGauges: s.affectedGauges.includes(id)
+        ? s.affectedGauges.filter((g) => g !== id)
+        : [...s.affectedGauges, id],
+    }));
+  };
+
+  const togglePattern = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelections((s) => ({
+      ...s,
+      patterns: s.patterns.includes(id)
+        ? s.patterns.filter((p) => p !== id)
+        : [...s.patterns, id],
+    }));
+  };
+
+  const selectPath = (id: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setSelections((s) => ({ ...s, chosenPath: id }));
+  };
+
+  const getAIHelp = useCallback(async (type: 'boundary' | 'script') => {
+    const hasKey = await hasOpenAIKey();
+    if (!hasKey) {
+      Alert.alert('API Key Needed', 'Add your OpenAI key in Settings to use AI assistance.');
+      return;
+    }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setAiLoading(true);
+    setAiSuggestion(null);
+
+    try {
+      const context = `
+Situation: ${selections.whatHappened || 'Family conflict'}
+Affected areas: ${selections.affectedGauges.join(', ') || 'Not specified'}
+Patterns: ${selections.patterns.join(', ') || 'Not specified'}
+What they need: ${selections.whatYouNeed || 'Not specified'}
+`;
+
+      let prompt = '';
+      if (type === 'boundary') {
+        prompt = `${context}
+
+Help me phrase a healthy boundary for this family situation. Be specific and actionable. Use "I" statements. Keep it to 2-3 sentences. Just give me the boundary text, nothing else.`;
+      } else {
+        prompt = `${context}
+
+Help me prepare what to say in a repair conversation. Give me:
+1. How to describe what happened (factual, not accusatory) - 1 sentence
+2. How to share my feelings (using "I felt...") - 1 sentence  
+3. What I need going forward - 1 sentence
+
+Format as three short lines. Be warm but direct.`;
+      }
+
+      const response = await callAI([{ role: 'user', content: prompt }], {
+        temperature: 0.7,
+        max_tokens: 300,
+      });
+
+      setAiSuggestion(response || null);
+    } catch (e) {
+      Alert.alert('Error', 'Could not get AI suggestion. Try again.');
+    } finally {
+      setAiLoading(false);
+    }
+  }, [selections]);
+
+  const applyAISuggestion = (type: 'boundary' | 'script') => {
+    if (!aiSuggestion) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    if (type === 'boundary') {
+      setSelections((s) => ({ ...s, boundaryToSet: aiSuggestion }));
+    }
+    setAiSuggestion(null);
   };
 
   const openLink = (url: string) => {
@@ -74,352 +202,419 @@ export default function FamilyConflictNavigatorScreen() {
     Linking.openURL(url).catch(() => {});
   };
 
-  const analyzeConflict = useCallback(async () => {
-    if (!situation.trim()) {
-      Alert.alert('Missing info', 'Describe what happened.');
-      return;
+  const canProceed = () => {
+    switch (step) {
+      case 1: return selections.affectedGauges.length > 0;
+      case 2: return selections.patterns.length > 0;
+      case 3: return selections.whatHappened.trim().length > 0;
+      case 4: return selections.chosenPath !== null;
+      case 5: return true;
+      default: return true;
     }
-
-    const hasKey = await hasOpenAIKey();
-    if (!hasKey) {
-      Alert.alert('API key needed', 'Add your OpenAI API key in Settings for AI analysis.');
-      return;
-    }
-
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setLoading(true);
-    setResult(null);
-
-    try {
-      const memberContext = familyMember.trim() ? `Family member: ${familyMember.trim()}` : 'Family member not specified';
-      
-      const systemPrompt = `You are a family therapist helping someone navigate a difficult family conflict. Be warm but direct. Never take sides, but validate the user's experience while helping them see the full picture.
-
-${memberContext}
-Situation: ${situation.trim()}
-
-Analyze this conflict and provide guidance. Check for any safety concerns.
-
-Respond in this exact JSON format:
-{
-  "yourPerspective": "What you're experiencing and feeling (validate this, 2-3 sentences)",
-  "theirPerspective": "What might be going on for the family member - not to excuse, but to understand (2-3 sentences)",
-  "pattern": "The underlying family dynamic or pattern at play (1-2 sentences)",
-  "whatYouNeed": "What you seem to need from this relationship right now (1 sentence)",
-  "whatTheySay": "What they might say that triggers you (example phrase)",
-  "whatYouSay": "What you could say in response - boundaried but not aggressive",
-  "boundary": "A specific boundary you could set (concrete, actionable)",
-  "path": "Recommended path: 'conversation', 'space', 'support', or 'distance' with brief explanation",
-  "warning": "If there are safety concerns (abuse, danger), put a warning here. Otherwise null"
-}
-
-Be specific to their situation. No generic advice.`;
-
-      const response = await sendMessageWithSystemPromptOnly(
-        [{ role: 'user', content: 'Analyze my family conflict.' }],
-        systemPrompt,
-        600
-      );
-
-      if (response) {
-        const jsonMatch = response.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]) as MediatorResult;
-          setResult(parsed);
-        }
-      }
-    } catch (e) {
-      Alert.alert('Analysis failed', 'Check your connection and try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [situation, familyMember]);
+  };
 
   const handlePractice = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push('/(modals)/role-play');
   };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={handleBack} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={TEXT_COLOR} />
+        <Pressable onPress={handleBack} style={styles.headerBtn}>
+          <Ionicons name={step > 1 ? 'arrow-back' : 'close'} size={24} color={TEXT_COLOR} />
         </Pressable>
-        <Text style={styles.headerTitle}>Family Conflict</Text>
-        <View style={styles.backBtn} />
+        <Text style={styles.headerTitle}>Family Conflict Support</Text>
+        <View style={styles.headerBtn} />
       </View>
 
-      {/* Tab switcher */}
-      <View style={styles.tabRow}>
-        <Pressable
-          style={[styles.tab, tab === 'mediator' && styles.tabActive]}
-          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setTab('mediator'); }}
-        >
-          <Ionicons name="sparkles" size={18} color={tab === 'mediator' ? ACCENT : TEXT_MUTED} />
-          <Text style={[styles.tabLabel, tab === 'mediator' && styles.tabLabelActive]}>AI Mediator</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.tab, tab === 'guide' && styles.tabActive]}
-          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setTab('guide'); }}
-        >
-          <Ionicons name="book-outline" size={18} color={tab === 'guide' ? ACCENT : TEXT_MUTED} />
-          <Text style={[styles.tabLabel, tab === 'guide' && styles.tabLabelActive]}>Guide</Text>
-        </Pressable>
+      {/* Progress bar */}
+      <View style={styles.progressContainer}>
+        <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
       </View>
 
       <ScrollView
+        ref={scrollRef}
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* ─── AI Mediator ─── */}
-        {tab === 'mediator' && (
-          <>
-            <Text style={styles.intro}>
-              Describe your family conflict. AI will help you understand both sides and find a path forward.
+        {/* Safety notice - always visible */}
+        {step === 1 && (
+          <View style={styles.safetyCard}>
+            <Ionicons name="shield-checkmark" size={20} color="#f97316" />
+            <Text style={styles.safetyText}>
+              If you're in danger, your safety comes first. Skip to Step 6 for crisis resources.
             </Text>
+            <Pressable onPress={() => setStep(6)}>
+              <Text style={styles.safetyLink}>Go to resources →</Text>
+            </Pressable>
+          </View>
+        )}
 
-            {/* Safety notice */}
-            <View style={styles.safetyNotice}>
-              <Ionicons name="shield-checkmark" size={18} color={COLORS.warning} />
-              <Text style={styles.safetyText}>
-                If you're in danger, your safety comes first. Crisis resources are in the Guide tab.
-              </Text>
+        {/* STEP 1: What's affected */}
+        {step === 1 && (
+          <View style={styles.stepContent}>
+            <Text style={styles.stepLabel}>Step 1 of 6</Text>
+            <Text style={styles.stepTitle}>What parts of you are affected?</Text>
+            <Text style={styles.stepDesc}>Tap all that apply. This helps identify what needs attention.</Text>
+
+            <View style={styles.optionsGrid}>
+              {GAUGES.map((g) => {
+                const selected = selections.affectedGauges.includes(g.id);
+                return (
+                  <Pressable
+                    key={g.id}
+                    style={[styles.optionCard, selected && styles.optionCardSelected]}
+                    onPress={() => toggleGauge(g.id)}
+                  >
+                    <Text style={styles.optionEmoji}>{g.emoji}</Text>
+                    <Text style={[styles.optionLabel, selected && styles.optionLabelSelected]}>{g.label}</Text>
+                    <Text style={styles.optionDesc}>{g.desc}</Text>
+                    {selected && (
+                      <View style={styles.checkBadge}>
+                        <Ionicons name="checkmark" size={14} color="#fff" />
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
             </View>
+          </View>
+        )}
 
-            <Text style={styles.label}>Who is this about?</Text>
+        {/* STEP 2: Identify patterns */}
+        {step === 2 && (
+          <View style={styles.stepContent}>
+            <Text style={styles.stepLabel}>Step 2 of 6</Text>
+            <Text style={styles.stepTitle}>What patterns do you notice?</Text>
+            <Text style={styles.stepDesc}>Family conflicts often follow patterns. Which feel familiar?</Text>
+
+            <View style={styles.optionsList}>
+              {PATTERNS.map((p) => {
+                const selected = selections.patterns.includes(p.id);
+                return (
+                  <Pressable
+                    key={p.id}
+                    style={[styles.listOption, selected && styles.listOptionSelected]}
+                    onPress={() => togglePattern(p.id)}
+                  >
+                    <View style={styles.listOptionContent}>
+                      <Text style={[styles.listOptionLabel, selected && styles.listOptionLabelSelected]}>
+                        {p.label}
+                      </Text>
+                      <Text style={styles.listOptionDesc}>{p.desc}</Text>
+                    </View>
+                    <View style={[styles.checkbox, selected && styles.checkboxSelected]}>
+                      {selected && <Ionicons name="checkmark" size={16} color="#fff" />}
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
+        {/* STEP 3: Describe & needs */}
+        {step === 3 && (
+          <View style={styles.stepContent}>
+            <Text style={styles.stepLabel}>Step 3 of 6</Text>
+            <Text style={styles.stepTitle}>What happened & what do you need?</Text>
+            <Text style={styles.stepDesc}>Writing it out helps process. This is just for you.</Text>
+
+            <Text style={styles.inputLabel}>What happened?</Text>
             <TextInput
-              style={styles.input}
-              placeholder="e.g. My mother, My brother, My in-laws"
+              style={styles.textArea}
+              placeholder="Describe the situation briefly..."
               placeholderTextColor={TEXT_MUTED}
-              value={familyMember}
-              onChangeText={setFamilyMember}
+              value={selections.whatHappened}
+              onChangeText={(t) => setSelections((s) => ({ ...s, whatHappened: t }))}
+              multiline
+              textAlignVertical="top"
             />
 
-            <Text style={styles.label}>What's happening?</Text>
+            <Text style={styles.inputLabel}>What do you need from this relationship?</Text>
             <TextInput
-              style={[styles.input, styles.inputLarge]}
-              placeholder="Describe the conflict, what was said, how you're feeling..."
+              style={styles.textInput}
+              placeholder="e.g., To be heard, respect for my choices, space..."
               placeholderTextColor={TEXT_MUTED}
-              value={situation}
-              onChangeText={(t) => { setSituation(t); setResult(null); }}
+              value={selections.whatYouNeed}
+              onChangeText={(t) => setSelections((s) => ({ ...s, whatYouNeed: t }))}
+            />
+
+            <Text style={styles.inputLabel}>Boundary to set (optional)</Text>
+            <TextInput
+              style={styles.textArea}
+              placeholder="e.g., I won't discuss politics at dinner..."
+              placeholderTextColor={TEXT_MUTED}
+              value={selections.boundaryToSet}
+              onChangeText={(t) => setSelections((s) => ({ ...s, boundaryToSet: t }))}
               multiline
               textAlignVertical="top"
             />
 
             <Pressable
-              style={[styles.analyzeBtn, (loading || !situation.trim()) && styles.analyzeBtnDisabled]}
-              onPress={analyzeConflict}
-              disabled={loading || !situation.trim()}
+              style={styles.aiHelpBtn}
+              onPress={() => getAIHelp('boundary')}
+              disabled={aiLoading}
             >
-              {loading ? (
-                <ActivityIndicator size="small" color="#fff" />
+              {aiLoading ? (
+                <ActivityIndicator size="small" color={ACCENT} />
               ) : (
                 <>
-                  <Ionicons name="sparkles" size={18} color="#fff" />
-                  <Text style={styles.analyzeBtnText}>Analyze conflict</Text>
+                  <Ionicons name="sparkles" size={16} color={ACCENT} />
+                  <Text style={styles.aiHelpText}>Help me phrase a boundary</Text>
                 </>
               )}
             </Pressable>
 
-            {/* Results */}
-            {result && (
-              <View style={styles.resultSection}>
-                {/* Warning if present */}
-                {result.warning && (
-                  <View style={styles.warningCard}>
-                    <Ionicons name="warning" size={20} color={COLORS.error} />
-                    <Text style={styles.warningText}>{result.warning}</Text>
-                  </View>
-                )}
-
-                {/* Your perspective */}
-                <View style={styles.resultCard}>
-                  <View style={styles.resultHeader}>
-                    <Ionicons name="person" size={18} color={ACCENT} />
-                    <Text style={styles.resultLabel}>Your experience</Text>
-                  </View>
-                  <Text style={styles.resultText}>{result.yourPerspective}</Text>
-                </View>
-
-                {/* Their perspective */}
-                <View style={styles.resultCard}>
-                  <View style={styles.resultHeader}>
-                    <Ionicons name="people" size={18} color="#8B5CF6" />
-                    <Text style={styles.resultLabel}>Their side (not excusing, understanding)</Text>
-                  </View>
-                  <Text style={styles.resultText}>{result.theirPerspective}</Text>
-                </View>
-
-                {/* Pattern */}
-                <View style={styles.resultCard}>
-                  <View style={styles.resultHeader}>
-                    <Ionicons name="git-branch" size={18} color="#F59E0B" />
-                    <Text style={styles.resultLabel}>The pattern</Text>
-                  </View>
-                  <Text style={styles.resultText}>{result.pattern}</Text>
-                </View>
-
-                {/* What you need */}
-                <View style={styles.resultCard}>
-                  <View style={styles.resultHeader}>
-                    <Ionicons name="heart" size={18} color="#EC4899" />
-                    <Text style={styles.resultLabel}>What you need</Text>
-                  </View>
-                  <Text style={styles.resultText}>{result.whatYouNeed}</Text>
-                </View>
-
-                {/* Script */}
-                <View style={[styles.resultCard, styles.scriptCard]}>
-                  <Text style={styles.scriptLabel}>If they say:</Text>
-                  <Text style={styles.scriptTheySay}>"{result.whatTheySay}"</Text>
-                  <Text style={styles.scriptLabel}>You could say:</Text>
-                  <Text style={styles.scriptYouSay}>"{result.whatYouSay}"</Text>
-                </View>
-
-                {/* Boundary */}
-                <View style={styles.resultCard}>
-                  <View style={styles.resultHeader}>
-                    <Ionicons name="shield" size={18} color={ACCENT} />
-                    <Text style={styles.resultLabel}>Boundary to set</Text>
-                  </View>
-                  <Text style={styles.resultText}>{result.boundary}</Text>
-                </View>
-
-                {/* Recommended path */}
-                <View style={[styles.resultCard, styles.pathCard]}>
-                  <View style={styles.resultHeader}>
-                    <Ionicons name="compass" size={18} color={ACCENT} />
-                    <Text style={styles.resultLabel}>Recommended path</Text>
-                  </View>
-                  <Text style={styles.resultText}>{result.path}</Text>
-                </View>
-
-                {/* Actions */}
-                <View style={styles.actionRow}>
-                  <Pressable style={styles.actionBtn} onPress={handlePractice}>
-                    <Ionicons name="chatbubbles-outline" size={18} color={ACCENT} />
-                    <Text style={styles.actionBtnText}>Practice conversation</Text>
-                  </Pressable>
-                  <Pressable style={styles.actionBtn} onPress={() => { setSituation(''); setFamilyMember(''); setResult(null); }}>
-                    <Ionicons name="refresh-outline" size={18} color={TEXT_MUTED} />
-                    <Text style={[styles.actionBtnText, { color: TEXT_MUTED }]}>New situation</Text>
-                  </Pressable>
-                </View>
+            {aiSuggestion && (
+              <View style={styles.aiSuggestionCard}>
+                <Text style={styles.aiSuggestionLabel}>Suggestion:</Text>
+                <Text style={styles.aiSuggestionText}>{aiSuggestion}</Text>
+                <Pressable style={styles.useSuggestionBtn} onPress={() => applyAISuggestion('boundary')}>
+                  <Text style={styles.useSuggestionText}>Use this</Text>
+                </Pressable>
               </View>
             )}
-          </>
+          </View>
         )}
 
-        {/* ─── Guide Tab (original content) ─── */}
-        {tab === 'guide' && (
-          <>
-            <Text style={styles.intro}>
-              A calm, step-by-step way to reflect on difficult family relationships and choose a path that respects your safety and autonomy.
-            </Text>
+        {/* STEP 4: Choose path */}
+        {step === 4 && (
+          <View style={styles.stepContent}>
+            <Text style={styles.stepLabel}>Step 4 of 6</Text>
+            <Text style={styles.stepTitle}>Choose your path forward</Text>
+            <Text style={styles.stepDesc}>There's no "correct" answer. Pick what fits your situation.</Text>
 
-            {/* Safety first */}
-            <View style={styles.safetyNotice}>
-              <Ionicons name="shield-checkmark" size={20} color={COLORS.warning} />
-              <Text style={styles.safetyText}>
-                If you are in emotional or physical danger, your safety comes first. You do not have to stay in harmful situations.
-              </Text>
+            <View style={styles.optionsList}>
+              {PATHS.map((p) => {
+                const selected = selections.chosenPath === p.id;
+                return (
+                  <Pressable
+                    key={p.id}
+                    style={[styles.pathOption, selected && styles.pathOptionSelected]}
+                    onPress={() => selectPath(p.id)}
+                  >
+                    <Text style={styles.pathEmoji}>{p.emoji}</Text>
+                    <View style={styles.pathContent}>
+                      <Text style={[styles.pathLabel, selected && styles.pathLabelSelected]}>{p.label}</Text>
+                      <Text style={styles.pathDesc}>{p.desc}</Text>
+                    </View>
+                    <View style={[styles.radio, selected && styles.radioSelected]}>
+                      {selected && <View style={styles.radioDot} />}
+                    </View>
+                  </Pressable>
+                );
+              })}
             </View>
+          </View>
+        )}
 
-            {/* Step 1 */}
-            <View style={styles.stepBlock}>
-              <Text style={styles.stepBadge}>Step 1</Text>
-              <Text style={styles.stepTitle}>What's happening?</Text>
-              <Text style={styles.stepDesc}>A quick self-check. No right answers—just notice.</Text>
-              <View style={styles.gaugesRow}>
-                {FAMILY_CONFLICT_GAUGES.map((g) => (
-                  <View key={g.id} style={styles.gaugeChip}>
-                    <Text style={styles.gaugeChipEmoji}>{g.emoji}</Text>
-                    <Text style={styles.gaugeChipLabel}>{g.label}</Text>
-                  </View>
-                ))}
+        {/* STEP 5: Prepare conversation */}
+        {step === 5 && (
+          <View style={styles.stepContent}>
+            <Text style={styles.stepLabel}>Step 5 of 6</Text>
+            <Text style={styles.stepTitle}>Prepare for a conversation</Text>
+            <Text style={styles.stepDesc}>Use this structure to keep it productive. Skip if you're not ready.</Text>
+
+            <View style={styles.scriptCard}>
+              <View style={styles.scriptStep}>
+                <View style={styles.scriptNum}><Text style={styles.scriptNumText}>1</Text></View>
+                <View style={styles.scriptContent}>
+                  <Text style={styles.scriptLabel}>Describe what happened</Text>
+                  <Text style={styles.scriptHint}>Stick to facts, not accusations</Text>
+                  <TextInput
+                    style={styles.scriptInput}
+                    placeholder="When [specific event]..."
+                    placeholderTextColor={TEXT_MUTED}
+                    value={selections.conversationScript.whatHappened}
+                    onChangeText={(t) => setSelections((s) => ({
+                      ...s,
+                      conversationScript: { ...s.conversationScript, whatHappened: t },
+                    }))}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.scriptStep}>
+                <View style={styles.scriptNum}><Text style={styles.scriptNumText}>2</Text></View>
+                <View style={styles.scriptContent}>
+                  <Text style={styles.scriptLabel}>Share how you felt</Text>
+                  <Text style={styles.scriptHint}>"I felt..." keeps it about your experience</Text>
+                  <TextInput
+                    style={styles.scriptInput}
+                    placeholder="I felt..."
+                    placeholderTextColor={TEXT_MUTED}
+                    value={selections.conversationScript.howYouFelt}
+                    onChangeText={(t) => setSelections((s) => ({
+                      ...s,
+                      conversationScript: { ...s.conversationScript, howYouFelt: t },
+                    }))}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.scriptStep}>
+                <View style={styles.scriptNum}><Text style={styles.scriptNumText}>3</Text></View>
+                <View style={styles.scriptContent}>
+                  <Text style={styles.scriptLabel}>State what you need</Text>
+                  <Text style={styles.scriptHint}>One clear request</Text>
+                  <TextInput
+                    style={styles.scriptInput}
+                    placeholder="What I need is..."
+                    placeholderTextColor={TEXT_MUTED}
+                    value={selections.conversationScript.whatYouNeed}
+                    onChangeText={(t) => setSelections((s) => ({
+                      ...s,
+                      conversationScript: { ...s.conversationScript, whatYouNeed: t },
+                    }))}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.scriptStep}>
+                <View style={[styles.scriptNum, { backgroundColor: '#8b5cf6' }]}>
+                  <Text style={styles.scriptNumText}>4</Text>
+                </View>
+                <View style={styles.scriptContent}>
+                  <Text style={styles.scriptLabel}>Invite their perspective</Text>
+                  <Text style={styles.scriptHint}>"I'd like to hear how you see it."</Text>
+                </View>
               </View>
             </View>
 
-            {/* Step 2 */}
-            <View style={styles.stepBlock}>
-              <Text style={styles.stepBadge}>Step 2</Text>
-              <Text style={styles.stepTitle}>Identify the pattern</Text>
-              {FAMILY_CONFLICT_PATTERNS.map((p) => (
-                <View key={p.id} style={styles.patternCard}>
-                  <Text style={styles.patternLabel}>{p.label}</Text>
-                  <Text style={styles.patternShort}>{p.short}</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Step 3 */}
-            <View style={styles.stepBlock}>
-              <Text style={styles.stepBadge}>Step 3</Text>
-              <Text style={styles.stepTitle}>Healthy boundaries</Text>
-              {BOUNDARY_EXAMPLES.map((ex, i) => (
-                <Text key={i} style={styles.bullet}>• {ex}</Text>
-              ))}
-            </View>
-
-            {/* Step 4 */}
-            <View style={styles.stepBlock}>
-              <Text style={styles.stepBadge}>Step 4</Text>
-              <Text style={styles.stepTitle}>Choose a path</Text>
-              {PATHS.map((p) => (
-                <View key={p.id} style={styles.pathOptionCard}>
-                  <Text style={styles.pathEmoji}>{p.emoji}</Text>
-                  <View style={styles.pathBody}>
-                    <Text style={styles.pathLabel}>{p.label}</Text>
-                    <Text style={styles.pathDesc}>{p.description}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-
-            {/* Step 5 */}
-            <View style={styles.stepBlock}>
-              <Text style={styles.stepBadge}>Step 5</Text>
-              <Text style={styles.stepTitle}>Conversation structure</Text>
-              {CONVERSATION_STRUCTURE.map((c) => (
-                <View key={c.step} style={styles.convRow}>
-                  <Text style={styles.convStepNum}>{c.step}</Text>
-                  <View style={styles.convBody}>
-                    <Text style={styles.convLabel}>{c.label}</Text>
-                    <Text style={styles.convPrompt}>{c.prompt}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-
-            {/* Step 6 - Resources */}
-            <View style={styles.stepBlock}>
-              <Text style={styles.stepBadge}>Step 6</Text>
-              <Text style={styles.stepTitle}>Resources</Text>
-              {RESOURCES.map((r) => (
-                <View key={r.id} style={[styles.resourceCard, r.emphasis && styles.resourceCardEmphasis]}>
-                  <Text style={[styles.resourceLabel, r.emphasis && styles.resourceLabelEmphasis]}>{r.label}</Text>
-                  <Text style={styles.resourceDesc}>{r.description}</Text>
-                  {r.links?.map((link, i) => (
-                    <Pressable key={i} style={styles.resourceLink} onPress={() => openLink(link.url)}>
-                      <Text style={styles.resourceLinkText}>{link.label}</Text>
-                      {link.phone && <Text style={styles.resourcePhone}> {link.phone}</Text>}
-                    </Pressable>
-                  ))}
-                </View>
-              ))}
-            </View>
-          </>
+            <Pressable style={styles.practiceBtn} onPress={handlePractice}>
+              <Ionicons name="chatbubbles-outline" size={20} color={ACCENT} />
+              <Text style={styles.practiceBtnText}>Practice this conversation with AI</Text>
+            </Pressable>
+          </View>
         )}
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            This tool is for reflection and support, not a substitute for professional help.
-          </Text>
-        </View>
+        {/* STEP 6: Summary & Resources */}
+        {step === 6 && (
+          <View style={styles.stepContent}>
+            <Text style={styles.stepLabel}>Step 6 of 6</Text>
+            <Text style={styles.stepTitle}>Your Plan & Resources</Text>
+
+            {/* Summary card */}
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryTitle}>📋 Your Reflection</Text>
+              
+              {selections.affectedGauges.length > 0 && (
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Affected:</Text>
+                  <Text style={styles.summaryValue}>
+                    {selections.affectedGauges.map((id) => GAUGES.find((g) => g.id === id)?.label).join(', ')}
+                  </Text>
+                </View>
+              )}
+
+              {selections.patterns.length > 0 && (
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Patterns:</Text>
+                  <Text style={styles.summaryValue}>
+                    {selections.patterns.map((id) => PATTERNS.find((p) => p.id === id)?.label).join(', ')}
+                  </Text>
+                </View>
+              )}
+
+              {selections.whatYouNeed && (
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>You need:</Text>
+                  <Text style={styles.summaryValue}>{selections.whatYouNeed}</Text>
+                </View>
+              )}
+
+              {selections.boundaryToSet && (
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Boundary:</Text>
+                  <Text style={styles.summaryValue}>{selections.boundaryToSet}</Text>
+                </View>
+              )}
+
+              {selections.chosenPath && (
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Path:</Text>
+                  <Text style={styles.summaryValue}>
+                    {PATHS.find((p) => p.id === selections.chosenPath)?.label}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Professional support */}
+            <View style={styles.resourceSection}>
+              <Text style={styles.resourceTitle}>Professional Support</Text>
+              
+              <View style={styles.resourceCard}>
+                <Ionicons name="people" size={20} color={ACCENT} />
+                <View style={styles.resourceContent}>
+                  <Text style={styles.resourceLabel}>Family or individual therapy</Text>
+                  <Text style={styles.resourceDesc}>
+                    A therapist can help with communication, boundaries, and processing hurt.
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.resourceCard}>
+                <Ionicons name="git-compare" size={20} color={ACCENT} />
+                <View style={styles.resourceContent}>
+                  <Text style={styles.resourceLabel}>Conflict mediation</Text>
+                  <Text style={styles.resourceDesc}>
+                    A neutral mediator can help family members have structured conversations.
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Crisis resources */}
+            <View style={styles.crisisSection}>
+              <Text style={styles.crisisTitle}>🚨 Safety & Crisis Support</Text>
+              <Text style={styles.crisisDesc}>
+                If you're in emotional or physical danger, your safety comes first.
+              </Text>
+              
+              {CRISIS_RESOURCES.map((r, i) => (
+                <Pressable key={i} style={styles.crisisLink} onPress={() => openLink(r.url)}>
+                  <Text style={styles.crisisLinkLabel}>{r.label}</Text>
+                  <Text style={styles.crisisLinkPhone}>{r.phone}</Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>
+                This tool is for reflection and support, not a substitute for professional help.
+              </Text>
+            </View>
+          </View>
+        )}
       </ScrollView>
+
+      {/* Bottom navigation */}
+      {step < 6 && (
+        <View style={[styles.bottomNav, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+          <Pressable
+            style={[styles.nextBtn, !canProceed() && styles.nextBtnDisabled]}
+            onPress={handleNext}
+            disabled={!canProceed()}
+          >
+            <Text style={styles.nextBtnText}>
+              {step === 5 ? 'See Summary' : 'Continue'}
+            </Text>
+            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          </Pressable>
+          
+          {step > 1 && step < 6 && (
+            <Pressable style={styles.skipBtn} onPress={() => setStep(6)}>
+              <Text style={styles.skipBtnText}>Skip to resources</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
     </View>
   );
 }
@@ -432,186 +627,317 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
   },
-  backBtn: { width: 40, padding: 8 },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: TEXT_COLOR, flex: 1, textAlign: 'center' },
-  tabRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
+  headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 17, fontWeight: '600', color: TEXT_COLOR },
+  
+  // Progress
+  progressContainer: {
+    height: 3,
+    backgroundColor: BORDER,
+    marginHorizontal: 16,
   },
-  tab: {
-    flex: 1,
+  progressBar: {
+    height: '100%',
+    backgroundColor: ACCENT,
+  },
+
+  scroll: { flex: 1 },
+  scrollContent: { padding: 20, paddingBottom: 120 },
+
+  // Safety
+  safetyCard: {
+    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(249, 115, 22, 0.25)',
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 10,
+  },
+  safetyText: { flex: 1, fontSize: 14, color: TEXT_COLOR, lineHeight: 20 },
+  safetyLink: { fontSize: 14, color: '#f97316', fontWeight: '600' },
+
+  // Step content
+  stepContent: {},
+  stepLabel: { fontSize: 12, fontWeight: '600', color: ACCENT, marginBottom: 6, letterSpacing: 0.5 },
+  stepTitle: { fontSize: 24, fontWeight: '700', color: TEXT_COLOR, marginBottom: 8 },
+  stepDesc: { fontSize: 15, color: TEXT_MUTED, lineHeight: 22, marginBottom: 24 },
+
+  // Options grid (Step 1)
+  optionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  optionCard: {
+    width: '47%',
+    backgroundColor: SURFACE,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    position: 'relative',
+  },
+  optionCardSelected: {
+    borderColor: ACCENT,
+    backgroundColor: 'rgba(20, 184, 166, 0.08)',
+  },
+  optionEmoji: { fontSize: 28, marginBottom: 8 },
+  optionLabel: { fontSize: 15, fontWeight: '600', color: TEXT_COLOR, marginBottom: 4 },
+  optionLabelSelected: { color: ACCENT },
+  optionDesc: { fontSize: 12, color: TEXT_MUTED, lineHeight: 16 },
+  checkBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: ACCENT,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    borderRadius: 8,
   },
-  tabActive: { backgroundColor: COLORS.accentBg || 'rgba(13,148,136,0.12)' },
-  tabLabel: { fontSize: 14, color: TEXT_MUTED, fontWeight: '500' },
-  tabLabelActive: { color: ACCENT, fontWeight: '600' },
-  scroll: { flex: 1 },
-  scrollContent: { padding: SPACING.lg, paddingBottom: 40 },
-  intro: { fontSize: 15, color: TEXT_MUTED, lineHeight: 22, marginBottom: SPACING.md },
-  safetyNotice: {
+
+  // Options list (Step 2)
+  optionsList: { gap: 10 },
+  listOption: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: 'rgba(224, 122, 95, 0.12)',
-    borderRadius: BORDER_RADIUS.card,
-    padding: 12,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(224, 122, 95, 0.25)',
+    alignItems: 'center',
+    backgroundColor: SURFACE,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
-  safetyText: { flex: 1, fontSize: 13, color: TEXT_COLOR, lineHeight: 19, marginLeft: 8 },
-  label: { fontSize: 14, fontWeight: '600', color: TEXT_COLOR, marginBottom: 8, marginTop: 8 },
-  input: {
-    backgroundColor: CARD_BG,
-    borderRadius: BORDER_RADIUS.card,
+  listOptionSelected: {
+    borderColor: ACCENT,
+    backgroundColor: 'rgba(20, 184, 166, 0.08)',
+  },
+  listOptionContent: { flex: 1 },
+  listOptionLabel: { fontSize: 15, fontWeight: '600', color: TEXT_COLOR },
+  listOptionLabelSelected: { color: ACCENT },
+  listOptionDesc: { fontSize: 13, color: TEXT_MUTED, marginTop: 2 },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: BORDER,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxSelected: {
+    backgroundColor: ACCENT,
+    borderColor: ACCENT,
+  },
+
+  // Text inputs (Step 3)
+  inputLabel: { fontSize: 14, fontWeight: '600', color: TEXT_COLOR, marginBottom: 8, marginTop: 16 },
+  textInput: {
+    backgroundColor: SURFACE,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: BORDER,
     padding: 14,
     fontSize: 15,
     color: TEXT_COLOR,
-    marginBottom: 12,
   },
-  inputLarge: { minHeight: 120, textAlignVertical: 'top' },
-  analyzeBtn: {
+  textArea: {
+    backgroundColor: SURFACE,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 14,
+    fontSize: 15,
+    color: TEXT_COLOR,
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  aiHelpBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    marginTop: 12,
+  },
+  aiHelpText: { fontSize: 14, color: ACCENT, fontWeight: '500' },
+  aiSuggestionCard: {
+    backgroundColor: 'rgba(20, 184, 166, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(20, 184, 166, 0.25)',
+  },
+  aiSuggestionLabel: { fontSize: 12, fontWeight: '600', color: ACCENT, marginBottom: 8 },
+  aiSuggestionText: { fontSize: 15, color: TEXT_COLOR, lineHeight: 22 },
+  useSuggestionBtn: {
+    alignSelf: 'flex-end',
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: ACCENT,
+    borderRadius: 8,
+  },
+  useSuggestionText: { fontSize: 14, fontWeight: '600', color: '#fff' },
+
+  // Path options (Step 4)
+  pathOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: SURFACE,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  pathOptionSelected: {
+    borderColor: ACCENT,
+    backgroundColor: 'rgba(20, 184, 166, 0.08)',
+  },
+  pathEmoji: { fontSize: 24, marginRight: 14 },
+  pathContent: { flex: 1 },
+  pathLabel: { fontSize: 15, fontWeight: '600', color: TEXT_COLOR },
+  pathLabelSelected: { color: ACCENT },
+  pathDesc: { fontSize: 13, color: TEXT_MUTED, marginTop: 2 },
+  radio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: BORDER,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioSelected: { borderColor: ACCENT },
+  radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: ACCENT },
+
+  // Script builder (Step 5)
+  scriptCard: {
+    backgroundColor: SURFACE,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+  },
+  scriptStep: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  scriptNum: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  scriptNumText: { fontSize: 14, fontWeight: '700', color: '#fff' },
+  scriptContent: { flex: 1 },
+  scriptLabel: { fontSize: 15, fontWeight: '600', color: TEXT_COLOR, marginBottom: 2 },
+  scriptHint: { fontSize: 13, color: TEXT_MUTED, marginBottom: 8 },
+  scriptInput: {
+    backgroundColor: BG,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 12,
+    fontSize: 14,
+    color: TEXT_COLOR,
+  },
+  practiceBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(20, 184, 166, 0.1)',
+    borderRadius: 12,
+    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(20, 184, 166, 0.25)',
+  },
+  practiceBtnText: { fontSize: 15, fontWeight: '600', color: ACCENT },
+
+  // Summary (Step 6)
+  summaryCard: {
+    backgroundColor: SURFACE,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+  },
+  summaryTitle: { fontSize: 18, fontWeight: '700', color: TEXT_COLOR, marginBottom: 16 },
+  summaryRow: { marginBottom: 12 },
+  summaryLabel: { fontSize: 12, fontWeight: '600', color: ACCENT, marginBottom: 4 },
+  summaryValue: { fontSize: 15, color: TEXT_COLOR, lineHeight: 22 },
+
+  // Resources
+  resourceSection: { marginBottom: 24 },
+  resourceTitle: { fontSize: 16, fontWeight: '700', color: TEXT_COLOR, marginBottom: 12 },
+  resourceCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: SURFACE,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+    gap: 12,
+  },
+  resourceContent: { flex: 1 },
+  resourceLabel: { fontSize: 15, fontWeight: '600', color: TEXT_COLOR },
+  resourceDesc: { fontSize: 13, color: TEXT_MUTED, marginTop: 4, lineHeight: 19 },
+
+  // Crisis
+  crisisSection: {
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+    marginBottom: 20,
+  },
+  crisisTitle: { fontSize: 16, fontWeight: '700', color: '#ef4444', marginBottom: 8 },
+  crisisDesc: { fontSize: 14, color: TEXT_COLOR, lineHeight: 20, marginBottom: 16 },
+  crisisLink: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(239, 68, 68, 0.15)',
+  },
+  crisisLinkLabel: { fontSize: 14, color: ACCENT, fontWeight: '500' },
+  crisisLinkPhone: { fontSize: 14, color: TEXT_COLOR },
+
+  footer: { marginTop: 8, paddingTop: 16, borderTopWidth: 1, borderTopColor: BORDER },
+  footerText: { fontSize: 12, color: TEXT_MUTED, lineHeight: 18, fontStyle: 'italic', textAlign: 'center' },
+
+  // Bottom nav
+  bottomNav: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
+    backgroundColor: BG,
+  },
+  nextBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     backgroundColor: ACCENT,
-    paddingVertical: 14,
-    borderRadius: BORDER_RADIUS.button,
-    marginTop: 8,
+    paddingVertical: 16,
+    borderRadius: 12,
   },
-  analyzeBtnDisabled: { opacity: 0.5 },
-  analyzeBtnText: { fontSize: 16, fontWeight: '600', color: '#fff' },
-  resultSection: { marginTop: 24 },
-  warningCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    backgroundColor: 'rgba(239, 83, 80, 0.12)',
-    borderRadius: BORDER_RADIUS.card,
-    padding: 14,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(239, 83, 80, 0.3)',
-  },
-  warningText: { flex: 1, fontSize: 14, color: TEXT_COLOR, lineHeight: 20, fontWeight: '500' },
-  resultCard: {
-    backgroundColor: CARD_BG,
-    borderRadius: BORDER_RADIUS.card,
-    padding: 14,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  resultLabel: { fontSize: 13, fontWeight: '600', color: TEXT_MUTED },
-  resultText: { fontSize: 15, color: TEXT_COLOR, lineHeight: 22 },
-  scriptCard: { borderLeftWidth: 4, borderLeftColor: ACCENT },
-  scriptLabel: { fontSize: 12, color: TEXT_MUTED, marginBottom: 4, marginTop: 8 },
-  scriptTheySay: { fontSize: 14, color: TEXT_MUTED, fontStyle: 'italic' },
-  scriptYouSay: { fontSize: 15, color: TEXT_COLOR, fontWeight: '500' },
-  pathCard: { backgroundColor: COLORS.accentBg || 'rgba(13,148,136,0.08)' },
-  actionRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
-  actionBtn: {
-    flex: 1,
-    flexDirection: 'row',
+  nextBtnDisabled: { opacity: 0.5 },
+  nextBtnText: { fontSize: 17, fontWeight: '600', color: '#fff' },
+  skipBtn: {
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
     paddingVertical: 12,
-    backgroundColor: CARD_BG,
-    borderRadius: BORDER_RADIUS.card,
-    borderWidth: 1,
-    borderColor: BORDER,
   },
-  actionBtnText: { fontSize: 13, fontWeight: '600', color: ACCENT },
-  stepBlock: { marginBottom: SPACING.xl },
-  stepBadge: { fontSize: 11, fontWeight: '700', color: ACCENT, letterSpacing: 0.5, marginBottom: 4 },
-  stepTitle: { fontSize: 18, fontWeight: '700', color: TEXT_COLOR, marginBottom: 8 },
-  stepDesc: { fontSize: 14, color: TEXT_MUTED, lineHeight: 20, marginBottom: 12 },
-  gaugesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  gaugeChip: {
-    minWidth: '30%',
-    backgroundColor: CARD_BG,
-    borderRadius: 12,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  gaugeChipEmoji: { fontSize: 16, marginBottom: 2 },
-  gaugeChipLabel: { fontSize: 12, fontWeight: '600', color: TEXT_COLOR },
-  patternCard: {
-    backgroundColor: CARD_BG,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  patternLabel: { fontSize: 14, fontWeight: '600', color: TEXT_COLOR },
-  patternShort: { fontSize: 13, color: TEXT_MUTED, marginTop: 2 },
-  bullet: { fontSize: 14, color: TEXT_MUTED, lineHeight: 21, marginBottom: 4, paddingLeft: 4 },
-  pathOptionCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: CARD_BG,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  pathEmoji: { fontSize: 22, marginRight: 12 },
-  pathBody: { flex: 1 },
-  pathLabel: { fontSize: 14, fontWeight: '600', color: TEXT_COLOR },
-  pathDesc: { fontSize: 13, color: TEXT_MUTED, marginTop: 2, lineHeight: 19 },
-  convRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
-  convStepNum: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: ACCENT,
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginRight: 10,
-  },
-  convBody: { flex: 1 },
-  convLabel: { fontSize: 14, fontWeight: '600', color: TEXT_COLOR },
-  convPrompt: { fontSize: 13, color: TEXT_MUTED, marginTop: 2 },
-  resourceCard: {
-    backgroundColor: CARD_BG,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  resourceCardEmphasis: {
-    borderColor: 'rgba(224, 122, 95, 0.4)',
-    backgroundColor: 'rgba(224, 122, 95, 0.08)',
-  },
-  resourceLabel: { fontSize: 14, fontWeight: '600', color: TEXT_COLOR },
-  resourceLabelEmphasis: { color: COLORS.warning },
-  resourceDesc: { fontSize: 13, color: TEXT_MUTED, marginTop: 4, lineHeight: 19 },
-  resourceLink: { marginTop: 6 },
-  resourceLinkText: { fontSize: 13, color: ACCENT, fontWeight: '500' },
-  resourcePhone: { fontSize: 13, color: TEXT_COLOR },
-  footer: { marginTop: 8, paddingTop: 16, borderTopWidth: 1, borderTopColor: BORDER },
-  footerText: { fontSize: 12, color: COLORS.textMuted, lineHeight: 18, fontStyle: 'italic' },
+  skipBtnText: { fontSize: 14, color: TEXT_MUTED },
 });
