@@ -174,6 +174,8 @@ function ActivityDetail({
   onStartTimer: () => void; 
   onBack: () => void;
 }) {
+  const router = useRouter();
+
   const handleDoThis = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     
@@ -184,10 +186,31 @@ function ActivityDetail({
       Linking.openURL(activity.externalLink);
     } else {
       await recordAweCompleted(activity.id);
-      // Just mark as done
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
   };
+
+  const handleAskCoPilot = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await recordAweCompleted(activity.id);
+    
+    // Build an awe-themed prompt for CoPilot
+    const awePrompts: Record<string, string> = {
+      'human-triumph': "Tell me an inspiring true story of someone who overcame impossible odds. Something that reminds me what humans are capable of.",
+      'deep-time': "Help me feel the scale of deep time. Put my life and problems in cosmic perspective — the universe is 13.8 billion years old, and I'm here for a blink.",
+      'stargazing': "I'm looking at the stars tonight. Tell me something beautiful and mind-expanding about what I'm seeing up there.",
+    };
+    
+    const prompt = awePrompts[activity.id] || `Help me experience awe through ${activity.title.toLowerCase()}. ${activity.description}`;
+    
+    // Navigate to CoPilot with the prompt
+    router.push({
+      pathname: '/(modals)/copilot',
+      params: { initialMessage: prompt, context: 'awe' },
+    });
+  };
+
+  const showBothOptions = activity.hasAiOption && activity.externalLink;
 
   return (
     <ScrollView 
@@ -220,19 +243,44 @@ function ActivityDetail({
         <Text style={styles.whyText}>{activity.whyItWorks}</Text>
       </View>
 
-      {/* CTA */}
-      <Pressable style={styles.doThisButton} onPress={handleDoThis}>
-        <Text style={styles.doThisText}>
-          {activity.hasTimer ? 'Start Timer' : activity.externalLink ? 'Open Link' : 'Do This Now'}
-        </Text>
-        <Ionicons 
-          name={activity.hasTimer ? 'timer-outline' : activity.externalLink ? 'open-outline' : 'checkmark-circle-outline'} 
-          size={20} 
-          color="#fff" 
-        />
-      </Pressable>
+      {/* CTAs - show both if hasAiOption */}
+      {showBothOptions ? (
+        <View style={styles.dualButtonContainer}>
+          <Pressable style={styles.doThisButton} onPress={handleDoThis}>
+            <Text style={styles.doThisText}>
+              {activity.linkText || 'Open Link'}
+            </Text>
+            <Ionicons name="open-outline" size={20} color="#fff" />
+          </Pressable>
+          
+          <Pressable style={styles.aiButton} onPress={handleAskCoPilot}>
+            <Ionicons name="sparkles" size={18} color={AWE_ACCENT} />
+            <Text style={styles.aiButtonText}>Ask CoPilot</Text>
+          </Pressable>
+        </View>
+      ) : activity.hasAiOption && !activity.externalLink ? (
+        // Only AI option (no link)
+        <View style={styles.dualButtonContainer}>
+          <Pressable style={styles.doThisButton} onPress={handleAskCoPilot}>
+            <Text style={styles.doThisText}>Ask CoPilot</Text>
+            <Ionicons name="sparkles" size={20} color="#fff" />
+          </Pressable>
+        </View>
+      ) : (
+        // Standard single button
+        <Pressable style={styles.doThisButton} onPress={handleDoThis}>
+          <Text style={styles.doThisText}>
+            {activity.hasTimer ? 'Start Timer' : activity.externalLink ? 'Do This Now' : 'Mark Complete'}
+          </Text>
+          <Ionicons 
+            name={activity.hasTimer ? 'timer-outline' : activity.externalLink ? 'open-outline' : 'checkmark-circle-outline'} 
+            size={20} 
+            color="#fff" 
+          />
+        </Pressable>
+      )}
 
-      {activity.externalLink && (
+      {activity.externalLink && !showBothOptions && (
         <Text style={styles.linkHint}>Opens in browser</Text>
       )}
     </ScrollView>
@@ -644,6 +692,9 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 21,
   },
+  dualButtonContainer: {
+    gap: SPACING.md,
+  },
   doThisButton: {
     backgroundColor: AWE_ACCENT,
     borderRadius: BORDER_RADIUS.md,
@@ -657,6 +708,22 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '600',
     color: '#fff',
+  },
+  aiButton: {
+    backgroundColor: AWE_BG,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    borderWidth: 1,
+    borderColor: AWE_BORDER,
+  },
+  aiButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: AWE_ACCENT,
   },
   linkHint: {
     fontSize: 12,

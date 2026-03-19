@@ -39,6 +39,8 @@ export interface AweActivity {
   hasTimer?: boolean;
   /** Timer duration in minutes */
   timerMinutes?: number;
+  /** Whether to also offer AI-generated content option */
+  hasAiOption?: boolean;
 }
 
 /**
@@ -70,6 +72,9 @@ export const AWE_ACTIVITIES: AweActivity[] = [
     duration: '5-10 min',
     emoji: '✨',
     whyItWorks: 'The night sky confronts us with incomprehensible scale. This cosmic perspective naturally shrinks our daily problems.',
+    externalLink: 'https://stellarium-web.org/',
+    linkText: 'Explore the sky',
+    hasAiOption: true,
   },
   {
     id: 'nature-timelapse',
@@ -114,6 +119,10 @@ export const AWE_ACTIVITIES: AweActivity[] = [
     duration: '5 min',
     emoji: '⏳',
     whyItWorks: 'Contemplating deep time dislodges us from the tyranny of the present moment. Our problems become part of a much larger story.',
+    externalLink: 'https://www.youtube.com/results?search_query=history+of+the+universe+timelapse',
+    linkText: 'Watch on YouTube',
+    /** If true, also offer AI reflection option */
+    hasAiOption: true,
   },
   
   // Music
@@ -173,6 +182,10 @@ export const AWE_ACTIVITIES: AweActivity[] = [
     duration: '10 min',
     emoji: '🏆',
     whyItWorks: 'Stories of virtue expand our sense of what\'s possible. We feel elevated and inspired — what researchers call "moral elevation."',
+    externalLink: 'https://www.reddit.com/r/GetMotivated/top/?t=month',
+    linkText: 'Browse stories',
+    /** If true, also offer AI reflection option */
+    hasAiOption: true,
   },
   {
     id: 'collective-humanity',
