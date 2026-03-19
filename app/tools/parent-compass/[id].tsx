@@ -4,13 +4,41 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Linking } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../../src/lib/constants';
 import { getParentCompassEntryById } from '../../../src/data/parentCompass';
+
+// Generate search/resource URLs for learn more topics
+function getLearnMoreUrl(topic: string): string {
+  // Check for specific book/author references
+  const lowerTopic = topic.toLowerCase();
+  
+  if (lowerTopic.includes('dan siegel') || lowerTopic.includes('whole-brain child')) {
+    return 'https://www.drdansiegel.com/books/the_whole_brain_child/';
+  }
+  if (lowerTopic.includes('gottman') || lowerTopic.includes('emotion coaching')) {
+    return 'https://www.gottman.com/blog/an-introduction-to-emotion-coaching/';
+  }
+  if (lowerTopic.includes('attachment theory')) {
+    return 'https://www.attachmentproject.com/blog/what-is-attachment-theory/';
+  }
+  if (lowerTopic.includes('positive discipline')) {
+    return 'https://www.positivediscipline.com/';
+  }
+  if (lowerTopic.includes('baumrind')) {
+    return 'https://www.parentingscience.com/parenting-styles.html';
+  }
+  if (lowerTopic.includes('nonviolent communication')) {
+    return 'https://www.cnvc.org/';
+  }
+  
+  // Default to Google search
+  return `https://www.google.com/search?q=${encodeURIComponent(topic + ' parenting')}`;
+}
 
 const BG = COLORS.background;
 const CARD_BG = COLORS.surface;
@@ -81,23 +109,22 @@ export default function ParentCompassEntryScreen() {
 
         {entry.learnMore.length > 0 && (
           <View style={styles.section}>
-            <Pressable
-              style={styles.learnMoreHeader}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setLearnMoreOpen((v) => !v);
-              }}
-            >
-              <Text style={styles.sectionLabel}>Learn more</Text>
-              <Ionicons name={learnMoreOpen ? 'chevron-up' : 'chevron-down'} size={20} color={TEXT_MUTED} />
-            </Pressable>
-            {learnMoreOpen && (
-              <View style={styles.learnMoreBody}>
-                {entry.learnMore.map((item, i) => (
-                  <Text key={i} style={styles.learnMoreItem}>• {item}</Text>
-                ))}
-              </View>
-            )}
+            <Text style={styles.sectionLabel}>Learn more</Text>
+            <View style={styles.learnMoreBody}>
+              {entry.learnMore.map((item, i) => (
+                <Pressable
+                  key={i}
+                  style={styles.learnMoreLink}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    Linking.openURL(getLearnMoreUrl(item));
+                  }}
+                >
+                  <Ionicons name="open-outline" size={16} color={ACCENT} />
+                  <Text style={styles.learnMoreItem}>{item}</Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
         )}
 
@@ -147,9 +174,18 @@ const styles = StyleSheet.create({
   },
   paragraph: { fontSize: 15, color: TEXT_MUTED, lineHeight: 22 },
   bullet: { fontSize: 15, color: TEXT, lineHeight: 22, marginBottom: 4 },
-  learnMoreHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  learnMoreBody: { marginTop: 8 },
-  learnMoreItem: { fontSize: 14, color: TEXT_MUTED, lineHeight: 20, marginBottom: 4 },
+  learnMoreBody: { gap: 10 },
+  learnMoreLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.sm,
+    padding: 12,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  learnMoreItem: { fontSize: 14, color: ACCENT, flex: 1 },
   footer: { marginTop: 16 },
   footerText: { fontSize: 12, color: COLORS.textMuted, lineHeight: 18, fontStyle: 'italic' },
 });
