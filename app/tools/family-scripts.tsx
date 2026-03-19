@@ -1,8 +1,8 @@
 /**
- * Role Play — Family Edition
- * Route: /tools/role-play
+ * Family Scripts — Crash vs. Optimization Examples
+ * Route: /tools/family-scripts
  *
- * Shows how a typical argument ("The Crash") can be resolved using
+ * Shows how typical family arguments ("The Crash") can be resolved using
  * systemic, probabilistic language ("The InGauge Optimization").
  * Flight-manual / vehicle-diagnostic vibe: dark, clean typography, neon accents.
  */
@@ -134,7 +134,7 @@ export default function RolePlayScreen() {
         <Pressable onPress={handleBack} style={styles.backBtn} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={TEXT} />
         </Pressable>
-        <Text style={styles.headerTitle}>Role Play</Text>
+        <Text style={styles.headerTitle}>Family Scripts</Text>
         <View style={styles.backBtn} />
       </View>
 

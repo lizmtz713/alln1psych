@@ -39,7 +39,7 @@ const TOOLS: ToolItem[] = [
   { key: 'attraction', label: 'Attraction', icon: '💫', route: '/(modals)/attraction' },
   // Take action
   { key: 'resolve', label: 'Resolve', icon: '🤝', route: '/(modals)/resolve' },
-  { key: 'roleplay', label: 'Role Play', icon: '🎭', route: '/tools/role-play' },
+  { key: 'roleplay', label: 'Role Play', icon: '🎭', route: '/(modals)/role-play' },
   { key: 'referee', label: 'Referee', icon: '⚖️', route: '/(modals)/referee' },
   { key: 'relationship-repair', label: 'Relationship Repair', icon: '🤝', route: '/tools/relationship-repair' },
   { key: 'relational-bridge', label: 'Relational Bridge', icon: '🌉', route: '/tools/relational-bridge' },
