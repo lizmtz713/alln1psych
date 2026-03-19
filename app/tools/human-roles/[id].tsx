@@ -4,13 +4,52 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Linking } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../../src/lib/constants';
 import { getHumanRoleById } from '../../../src/data/humanRoles';
+
+// Generate URLs for learn more topics
+function getLearnMoreUrl(topic: string): string {
+  const lower = topic.toLowerCase();
+  
+  if (lower.includes('attachment theory')) {
+    return 'https://www.attachmentproject.com/blog/what-is-attachment-theory/';
+  }
+  if (lower.includes('gottman')) {
+    return 'https://www.gottman.com/about/research/';
+  }
+  if (lower.includes('developmental psychology')) {
+    return 'https://www.verywellmind.com/developmental-psychology-4157180';
+  }
+  if (lower.includes('child development')) {
+    return 'https://www.cdc.gov/ncbddd/childdevelopment/positiveparenting/index.html';
+  }
+  if (lower.includes('family systems')) {
+    return 'https://www.verywellmind.com/family-systems-therapy-definition-techniques-and-efficacy-5213897';
+  }
+  if (lower.includes('relationship neuroscience')) {
+    return 'https://www.psychologytoday.com/us/basics/neuroscience/the-neuroscience-of-relationships';
+  }
+  if (lower.includes('social baseline theory')) {
+    return 'https://journals.sagepub.com/doi/10.1177/1948550617693060';
+  }
+  if (lower.includes('sibling')) {
+    return 'https://www.apa.org/topics/parenting/sibling-relationships';
+  }
+  if (lower.includes('grandparent')) {
+    return 'https://www.grandparents.com/health-and-wellbeing/relationships';
+  }
+  if (lower.includes('mentor')) {
+    return 'https://www.mentoring.org/resource/elements-of-effective-practice/';
+  }
+  
+  // Default to Google search
+  return `https://www.google.com/search?q=${encodeURIComponent(topic + ' psychology research')}`;
+}
 
 const BG = COLORS.background;
 const CARD_BG = COLORS.surface;
@@ -119,23 +158,22 @@ export default function HumanRoleGuideScreen() {
         {/* Layer 4: Learn more (optional) */}
         {role.learnMoreTopics && role.learnMoreTopics.length > 0 && (
           <View style={styles.section}>
-            <Pressable
-              style={styles.learnMoreHeader}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setExpandedLearnMore((v) => !v);
-              }}
-            >
-              <Text style={styles.sectionTitle}>Learn deeper</Text>
-              <Ionicons name={expandedLearnMore ? 'chevron-up' : 'chevron-down'} size={20} color={TEXT_MUTED} />
-            </Pressable>
-            {expandedLearnMore && (
-              <View style={styles.bulletList}>
-                {role.learnMoreTopics.map((topic, i) => (
-                  <Text key={i} style={styles.bulletItemMuted}>• {topic}</Text>
-                ))}
-              </View>
-            )}
+            <Text style={styles.sectionTitle}>Learn deeper</Text>
+            <View style={styles.learnMoreList}>
+              {role.learnMoreTopics.map((topic, i) => (
+                <Pressable
+                  key={i}
+                  style={styles.learnMoreLink}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    Linking.openURL(getLearnMoreUrl(topic));
+                  }}
+                >
+                  <Ionicons name="open-outline" size={16} color={ACCENT} />
+                  <Text style={styles.learnMoreText}>{topic}</Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
         )}
 
@@ -179,7 +217,18 @@ const styles = StyleSheet.create({
   },
   actionBtnPressed: { opacity: 0.9 },
   actionBtnText: { fontSize: 14, fontWeight: '600', color: ACCENT },
-  learnMoreHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
+  learnMoreList: { gap: 10, marginTop: 4 },
+  learnMoreLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CARD_BG,
+    borderRadius: BORDER_RADIUS.sm,
+    padding: 12,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  learnMoreText: { fontSize: 14, color: ACCENT, flex: 1 },
   disclaimer: {
     fontSize: 12,
     color: COLORS.textMuted,
