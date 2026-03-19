@@ -29,7 +29,8 @@ export default function MemoryBuilderExerciseScreen() {
   const exercise = params.exercise;
   const personId = params.personId;
 
-  const people = useMemoryBuilderStore((s) => s.getPeople());
+  // Select raw state + methods separately to avoid infinite loop
+  const people = useMemoryBuilderStore((s) => s.people);
   const getPersonById = useMemoryBuilderStore((s) => s.getPersonById);
   const getPeopleDueForRecall = useMemoryBuilderStore((s) => s.getPeopleDueForRecall);
   const recordRecall = useMemoryBuilderStore((s) => s.recordRecall);

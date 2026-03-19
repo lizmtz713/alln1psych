@@ -32,9 +32,15 @@ function getInitials(name: string): string {
 export default function MemoryBuilderIndexScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const people = useMemoryBuilderStore((s) => s.getPeople());
-  const dueForRecall = useMemoryBuilderStore((s) => s.getPeopleDueForRecall());
-  const metThisWeek = useMemoryBuilderStore((s) => s.getPeopleMetThisWeek());
+  
+  // Select raw state, not methods (methods create new arrays → infinite loop)
+  const people = useMemoryBuilderStore((s) => s.people);
+  const getPeopleDueForRecall = useMemoryBuilderStore((s) => s.getPeopleDueForRecall);
+  const getPeopleMetThisWeek = useMemoryBuilderStore((s) => s.getPeopleMetThisWeek);
+  
+  // Compute derived values outside selector
+  const dueForRecall = getPeopleDueForRecall();
+  const metThisWeek = getPeopleMetThisWeek();
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

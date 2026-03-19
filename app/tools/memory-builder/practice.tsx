@@ -30,8 +30,13 @@ const EXERCISES = [
 export default function MemoryBuilderPracticeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const dueCount = useMemoryBuilderStore((s) => s.getPeopleDueForRecall()).length;
-  const peopleCount = useMemoryBuilderStore((s) => s.getPeople()).length;
+  
+  // Select raw state + methods separately to avoid infinite loop
+  const people = useMemoryBuilderStore((s) => s.people);
+  const getPeopleDueForRecall = useMemoryBuilderStore((s) => s.getPeopleDueForRecall);
+  
+  const dueCount = getPeopleDueForRecall().length;
+  const peopleCount = people.length;
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
