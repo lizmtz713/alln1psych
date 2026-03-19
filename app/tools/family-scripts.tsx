@@ -134,7 +134,7 @@ export default function RolePlayScreen() {
         <Pressable onPress={handleBack} style={styles.backBtn} hitSlop={12}>
           <Ionicons name="arrow-back" size={24} color={TEXT} />
         </Pressable>
-        <Text style={styles.headerTitle}>Family Scripts</Text>
+        <Text style={styles.headerTitle}>Family Playbook</Text>
         <View style={styles.backBtn} />
       </View>
 
@@ -144,7 +144,7 @@ export default function RolePlayScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.intro}>
-          See how a typical argument becomes a clean resolution using fleet language and telemetry.
+          Example scripts showing how typical family arguments can become productive conversations. Tap each scenario to see the difference.
         </Text>
 
         {(roleplayScenarios as Scenario[]).map((scenario) => (

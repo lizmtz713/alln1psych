@@ -32,6 +32,7 @@ const TOOLS: ToolItem[] = [
   { key: 'flags', label: 'Flags', icon: '🚩', route: '/(modals)/red-green-flags' },
   { key: 'human-roles', label: 'Human Roles', icon: '📖', route: '/tools/human-roles' },
   { key: 'family-conflict', label: 'Family Conflict', icon: '🏠', route: '/tools/family-conflict' },
+  { key: 'family-playbook', label: 'Family Playbook', icon: '📖', route: '/tools/family-scripts' },
   { key: 'parent-compass', label: 'Parent Compass', icon: '🧭', route: '/tools/parent-compass' },
   { key: 'memory-builder', label: 'Memory Builder', icon: '🧠', route: '/tools/memory-builder' },
   { key: 'perspective-translator', label: 'Perspective Translator', icon: '🔄', route: '/tools/perspective-translator' },
@@ -95,7 +96,7 @@ const SECTIONS: { id: SectionId; title: string; toolKeys: string[] }[] = [
   {
     id: 'navigatePeople',
     title: 'Navigate People',
-    toolKeys: ['tone-check', 'relate', 'boundaries', 'difficult', 'flags', 'human-roles', 'family-conflict', 'parent-compass', 'memory-builder', 'perspective-translator', 'relational-bridge', 'attachment', 'attraction'],
+    toolKeys: ['tone-check', 'relate', 'boundaries', 'difficult', 'flags', 'human-roles', 'family-conflict', 'family-playbook', 'parent-compass', 'memory-builder', 'perspective-translator', 'relational-bridge', 'attachment', 'attraction'],
   },
   {
     id: 'takeAction',
