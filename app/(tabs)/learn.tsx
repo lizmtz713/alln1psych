@@ -867,11 +867,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   lessonCard: {
-    width: 120,
+    width: 140,
+    minHeight: 140,
     backgroundColor: COLORS.card,
     borderRadius: 16,
-    padding: 16,
+    padding: 14,
     alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   lessonCardDone: {
     borderWidth: 1,
@@ -893,11 +895,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   lessonTitle: {
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 12,
+    fontWeight: '600',
     color: COLORS.text,
     textAlign: 'center',
-    lineHeight: 17,
+    lineHeight: 16,
+    maxWidth: '100%',
   },
 
   // Tool Categories
