@@ -957,12 +957,7 @@ export default function HomeScreen() {
         );
       })()}
 
-      {/* Status line: above cluster, centered (avoids collision with Alignment) */}
-      {sections.showCockpit && overall >= 0 && (
-        <View style={styles.clusterStatusLine}>
-          <Text style={styles.clusterStatusText}>{activeGaugeCount}/6 online · {getSystemScoreLabel(overall)}</Text>
-        </View>
-      )}
+      {/* Status line removed — "6/6 online" was unclear; green gauges already signal health */}
 
       {/* Moment of stillness — Pause opens breathing */}
       {sections.showCockpit && (
@@ -975,7 +970,7 @@ export default function HomeScreen() {
             }}
             accessibilityLabel="Pause — Before you react, breathe"
           >
-            <Text style={styles.pauseBtnText}>Pause</Text>
+            <Text style={styles.pauseBtnText}>Pause check-ins</Text>
           </Pressable>
         </View>
       )}

@@ -51,8 +51,8 @@ function getRitualsSlot(): ToolItem {
   return { icon: '✨', route: '/(modals)/activity', label: 'Wind Down', params: '?id=breathing' };
 }
 
-/** Support slot: single entry to emergency/support flow (upper-right). */
-const SUPPORT_SLOT: ToolItem = { icon: '🆘', route: '/emergency', label: 'Support' };
+/** Support slot: single entry to emergency/support flow (upper-right). Subtle but always present. */
+const SUPPORT_SLOT: ToolItem = { icon: '🛟', route: '/emergency', label: 'Support' };
 
 const SIDE_STACK_WIDTH = 44;
 const STACK_ICON_SIZE = 32;
@@ -498,12 +498,7 @@ export function CockpitCluster({
         );
       })}
 
-          {/* Status hint — only when checked in and not shown by parent */}
-          {overall >= 0 && !hideStatusHint && (
-            <View style={styles.hintContainer}>
-              <Text style={styles.hintText}>{activeCount}/6 online • {overallLabel}</Text>
-            </View>
-          )}
+          {/* Status hint removed — green gauges already signal health */}
 
           {/* Left tool column — Rituals (context-aware by time of day) */}
           <View style={[styles.toolsUnderGauge, { left: toolsLeftX, top: TOOLS_TOP }]}>

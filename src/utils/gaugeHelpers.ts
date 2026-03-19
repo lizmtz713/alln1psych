@@ -1,7 +1,7 @@
 export const GAUGE_CONFIG: Record<string, { label: string; microLabel: string; subtitle: string; icon: string; description: string; color: string }> = {
   body: {
     label: 'Body',
-    microLabel: 'Energy / health',
+    microLabel: 'Energy',
     subtitle: 'Sleep · Fuel · Movement',
     icon: '🫀',
     description: 'Your biological regulation. If this is off, everything feels off.',
@@ -9,7 +9,7 @@ export const GAUGE_CONFIG: Record<string, { label: string; microLabel: string; s
   },
   state: {
     label: 'State',
-    microLabel: 'Stress / calm',
+    microLabel: 'Calm',
     subtitle: 'Nervous System',
     icon: '⚡',
     description: 'Your nervous system regulation. Calm, alert, threatened, or overstimulated.',
@@ -17,7 +17,7 @@ export const GAUGE_CONFIG: Record<string, { label: string; microLabel: string; s
   },
   emotion: {
     label: 'Emotion',
-    microLabel: 'Mood / feelings',
+    microLabel: 'Mood',
     subtitle: 'Emotional Clarity',
     icon: '💎',
     description: 'How clearly you can identify what you actually feel.',
@@ -25,7 +25,7 @@ export const GAUGE_CONFIG: Record<string, { label: string; microLabel: string; s
   },
   connection: {
     label: 'Connection',
-    microLabel: 'Relationships',
+    microLabel: 'People',
     subtitle: 'Belonging & Support',
     icon: '🤝',
     description: 'Connection reflects how supported and connected you feel with people.',
@@ -33,7 +33,7 @@ export const GAUGE_CONFIG: Record<string, { label: string; microLabel: string; s
   },
   direction: {
     label: 'Direction',
-    microLabel: 'Purpose / goals',
+    microLabel: 'Purpose',
     subtitle: 'Purpose & Momentum',
     icon: '🧭',
     description: 'Your sense of agency, purpose, and forward movement.',
@@ -41,7 +41,7 @@ export const GAUGE_CONFIG: Record<string, { label: string; microLabel: string; s
   },
   alignment: {
     label: 'Alignment',
-    microLabel: 'Living my values',
+    microLabel: 'Values',
     subtitle: 'Integrity & Congruence',
     icon: '⚖️',
     description: 'Whether your actions match your values.',
