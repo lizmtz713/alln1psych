@@ -110,12 +110,12 @@ export function DeepCheckIn({
         </ScrollView>
       )}
       
-      {step === 'reflection' && (
+      {step === 'reflection" && (
         <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>
           <Text style={styles.emoji}>✍️</Text>
           <Text style={styles.title}>Reflection</Text>
           <Text style={styles.subtitle}>
-            What's one thing you've noticed about yourself this week?
+            What's one thing you"ve noticed about yourself this week?
           </Text>
           
           <TextInput
@@ -145,7 +145,7 @@ export function DeepCheckIn({
         </ScrollView>
       )}
       
-      {step === 'insight' && (
+      {step === 'insight" && (
         <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>
           <Text style={styles.emoji}>💡</Text>
           <Text style={styles.title}>Insight</Text>
@@ -157,7 +157,7 @@ export function DeepCheckIn({
             style={styles.textInput}
             value={insight}
             onChangeText={setInsight}
-            placeholder="One small change..."
+            placeholder=\"One small change...\"
             placeholderTextColor={COLORS.textMuted}
             multiline
             numberOfLines={3}
@@ -183,7 +183,7 @@ export function DeepCheckIn({
   );
 }
 
-function getDayPart(): 'morning' | 'afternoon' | 'evening' | 'night' {
+function getDayPart(): "morning' | 'afternoon' | 'evening' | 'night' {
   const hour = new Date().getHours();
   if (hour >= 5 && hour < 12) return 'morning';
   if (hour >= 12 && hour < 17) return 'afternoon';

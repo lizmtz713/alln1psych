@@ -94,7 +94,7 @@ function GaugeStatusCard({ insight, compact }: { insight: GaugeStatusInsight; co
   return (
     <View style={[styles.card, compact && styles.cardCompact]}>
       <LinearGradient
-        colors={[COLORS.accentBg, 'transparent']}
+        colors={[COLORS.accentBg, 'transparent"]}
         style={styles.cardGradient}
       />
       
@@ -107,7 +107,7 @@ function GaugeStatusCard({ insight, compact }: { insight: GaugeStatusInsight; co
       {/* Mode Badge */}
       <View style={[
         styles.modeBadge,
-        insight.systemMode === 'stabilization' && styles.modeBadgeStabilization
+        insight.systemMode === "stabilization' && styles.modeBadgeStabilization
       ]}>
         <Ionicons
           name={insight.systemMode === 'capacity' ? 'checkmark-circle' : 'alert-circle'}

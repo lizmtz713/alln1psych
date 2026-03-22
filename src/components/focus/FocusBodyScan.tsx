@@ -6,7 +6,7 @@ import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { COLORS, SPACING } from '../../lib/constants';
 
-const REGIONS = ['feet', 'legs', 'belly', 'chest', 'shoulders', 'face', 'top of head'];
+const REGIONS = ['feet', 'legs', 'belly', 'chest', 'shoulders', 'face', 'top of head"];
 
 export interface FocusBodyScanProps {
   onComplete: (durationSeconds: number) => void;
@@ -56,7 +56,7 @@ export function FocusBodyScan({ onComplete }: FocusBodyScanProps) {
       <Text style={styles.stepLabel}>Notice your {REGIONS[step]}</Text>
       <Text style={styles.hint}>Take a few breaths here.</Text>
       <Pressable style={styles.nextBtn} onPress={handleNext}>
-        <Text style={styles.nextBtnText}>{step < REGIONS.length - 1 ? 'Next' : 'Finish'}</Text>
+        <Text style={styles.nextBtnText}>{step < REGIONS.length - 1 ? "Next' : 'Finish'}</Text>
       </Pressable>
       <Pressable style={styles.doneBtn} onPress={handleCompleteEarly}>
         <Text style={styles.doneBtnText}>Complete early</Text>

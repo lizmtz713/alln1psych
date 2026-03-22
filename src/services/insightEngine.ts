@@ -172,9 +172,9 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
       out.push({
         id: nanoid(),
         kind: 'cause',
-        title: 'Your reflections point to what gets in the way',
+        title: 'Your reflections point to what gets in the way",
         body: `You've noted that ${short} tends to get in the way. Naming it is the first step; choosing one small priority today may help.`,
-        gauges: directionLow ? ['direction'] : ['alignment'],
+        gauges: directionLow ? ["direction'] : ['alignment'],
         confidence: 0.72,
         generatedAt: now(),
         factor: 'Goal reflection',
@@ -215,9 +215,9 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
         out.push({
           id: nanoid(),
           kind: 'cause',
-          title: 'Connection and emotion are linked',
+          title: 'Connection and emotion are linked",
           body: `It's been ${daysSinceConnection} days since you logged connection, which often shows up as harder emotions.`,
-          gauges: ['emotion', 'connection'],
+          gauges: ["emotion', 'connection'],
           confidence: 0.75,
           generatedAt: now(),
           factor: 'Connection gap',
@@ -232,8 +232,8 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
             out.push({
               id: nanoid(),
               kind: 'cause',
-              title: 'Recovery has been low this week',
-              body: `You've logged ${poorSleepNights} night${poorSleepNights === 1 ? '' : 's'} with short or poor sleep, which may be affecting your body. Small improvements in recovery can help.`,
+              title: 'Recovery has been low this week",
+              body: `You've logged ${poorSleepNights} night${poorSleepNights === 1 ? "' : 's'} with short or poor sleep, which may be affecting your body. Small improvements in recovery can help.`,
               gauges: ['body'],
               confidence: 0.75,
               generatedAt: now(),
@@ -243,8 +243,8 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
             out.push({
               id: nanoid(),
               kind: 'cause',
-              title: 'Recovery supports Body',
-              body: `You've had ${goodSleepNights} night${goodSleepNights === 1 ? '' : 's'} with 7+ hours, which often shows up in your body gauge. Keeping a consistent sleep routine helps.`,
+              title: 'Recovery supports Body",
+              body: `You've had ${goodSleepNights} night${goodSleepNights === 1 ? "' : 's'} with 7+ hours, which often shows up in your body gauge. Keeping a consistent sleep routine helps.`,
               gauges: ['body'],
               confidence: 0.7,
               generatedAt: now(),
@@ -288,8 +288,8 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
     out.push({
       id: nanoid(),
       kind: 'cause',
-      title: 'Life chapters affect your gauges',
-      body: `During "${label}", it's common for connection and direction to fluctuate. You're not broken — you're in transition.`,
+      title: 'Life chapters affect your gauges",
+      body: `During \"${label}\", it's common for connection and direction to fluctuate. You"re not broken — you're in transition.`,
       gauges: directionLow ? ['direction'] : ['connection'],
       confidence: 0.72,
       generatedAt: now(),
@@ -394,18 +394,18 @@ function generateTimingInsights(input: InsightEngineInput, patterns: DetectedPat
       gauges: ['state'],
       confidence: trend.confidence,
       generatedAt: now(),
-      timeLabel: 'recent trend',
+      timeLabel: 'recent trend",
     });
   }
   return out;
 }
 
-/** Growth insights: "How you're changing" */
+/** Growth insights: \"How you're changing\" */
 function generateGrowthInsights(input: InsightEngineInput): GrowthInsight[] {
   const out: GrowthInsight[] = [];
   const { gaugeTrends, gaugeValues, checkInDates, recentGoalReflections } = input;
   const improving = (Object.entries(gaugeTrends ?? {}) as [GaugeKey, string][]).filter(
-    ([, t]) => t === 'improving'
+    ([, t]) => t === "improving'
   );
   if (improving.length > 0) {
     const gauges = improving.map(([g]) => g);

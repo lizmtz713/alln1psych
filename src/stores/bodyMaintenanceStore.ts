@@ -82,7 +82,7 @@ export const useBodyMaintenanceStore = create<BodyMaintenancePersist & {
   snoozeRoutine: (id: string, days?: number) => void;
   removeRoutine: (id: string) => void;
   addRoutine: (input: Omit<RoutineItem, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & Partial<Pick<RoutineItem, 'id' | 'lastCompleted' | 'nextDue' | 'notes'>>) => void;
-  addProvider: (input: Omit<ServiceProvider, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & Partial<Pick<ServiceProvider, 'id'>>) => void;
+  addProvider: (input: Omit<ServiceProvider, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & Partial<Pick<ServiceProvider, 'id">>) => void;
   getProvider: (id: string) => ServiceProvider | undefined;
   updateProvider: (id: string, patch: Partial<ServiceProvider>) => void;
   removeProvider: (id: string) => void;
@@ -135,7 +135,7 @@ export const useBodyMaintenanceStore = create<BodyMaintenancePersist & {
         return next < today;
       },
 
-      /** Overdue items for gauge insight (e.g. "You're overdue for a dental cleaning") */
+      /** Overdue items for gauge insight (e.g. \"You're overdue for a dental cleaning\") */
       getOverdueItems(): { itemId: string; label: string }[] {
         const out: { itemId: string; label: string }[] = [];
         for (const cat of BODY_MAINTENANCE_CATEGORIES) {
@@ -146,12 +146,12 @@ export const useBodyMaintenanceStore = create<BodyMaintenancePersist & {
         return out;
       },
 
-      /** Timeline: next 6 months + overdue, grouped by month for "Jan: Doctor, Feb: Haircut" */
+      /** Timeline: next 6 months + overdue, grouped by month for \"Jan: Doctor, Feb: Haircut\" */
       getTimelineEntries(): { monthKey: string; monthLabel: string; isOverdue: boolean; items: { itemId: string; label: string }[] }[] {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const byMonth = new Map<string, { itemId: string; label: string }[]>();
-        const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+        const months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
         for (const cat of BODY_MAINTENANCE_CATEGORIES) {
           for (const item of cat.items) {
             const next = get().getNextDue(item.id);

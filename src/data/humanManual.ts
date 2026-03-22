@@ -67,16 +67,16 @@ const relationshipsLessons: HumanManualLesson[] = [
     duration: 8,
     emoji: '🩹',
     content: {
-      introduction: `The family you grew up in taught you how to be human - for better or worse. Attachment researchers have found that the way your caregivers responded to your needs in the first few years of life literally wired your nervous system for how you'd experience relationships forever after. This isn't destiny. It's just the starting point.
+      introduction: `The family you grew up in taught you how to be human - for better or worse. Attachment researchers have found that the way your caregivers responded to your needs in the first few years of life literally wired your nervous system for how you"d experience relationships forever after. This isn't destiny. It"s just the starting point.
 
-Family wounds don't always look like abuse. Sometimes they look like a parent who was physically present but emotionally absent. A home where anger was explosive and unpredictable. A family where emotions were never discussed, so you learned they weren't acceptable. A parent who used you as their therapist. A sibling who was favored. Neglect doesn't require intention.
+Family wounds don"t always look like abuse. Sometimes they look like a parent who was physically present but emotionally absent. A home where anger was explosive and unpredictable. A family where emotions were never discussed, so you learned they weren't acceptable. A parent who used you as their therapist. A sibling who was favored. Neglect doesn"t require intention.
 
-The wound isn't just what happened - it's what DIDN'T happen. You might have missed the experience of being truly seen, of having your emotions validated, of feeling unconditionally loved. And you can't miss what you never knew was supposed to be there, which is why many people don't recognize family wounds until much later.
+The wound isn"t just what happened - it's what DIDN"T happen. You might have missed the experience of being truly seen, of having your emotions validated, of feeling unconditionally loved. And you can"t miss what you never knew was supposed to be there, which is why many people don't recognize family wounds until much later.
 
-Healing doesn't require your family to acknowledge what happened. It doesn't require reconciliation. It starts with recognizing the wound, grieving what you didn't get, and slowly learning to give it to yourself.`,
+Healing doesn"t require your family to acknowledge what happened. It doesn"t require reconciliation. It starts with recognizing the wound, grieving what you didn't get, and slowly learning to give it to yourself.`,
       keyInsights: [
         { 
-          title: 'The wound and the adaptation', 
+          title: "The wound and the adaptation', 
           explanation: 'Every family wound comes with an adaptation - a survival strategy you developed. People-pleasing, hyper-independence, emotional shutdown, perfectionism - these aren\'t character flaws. They\'re how you survived.' 
         },
         { 
@@ -115,13 +115,13 @@ Healing doesn't require your family to acknowledge what happened. It doesn't req
     duration: 10,
     emoji: '💔',
     content: {
-      introduction: `Discovering a partner's affair isn't just heartbreak - it's trauma. Research by Dr. Shirley Glass and others has shown that infidelity produces symptoms similar to PTSD: intrusive thoughts, hypervigilance, emotional flooding, difficulty trusting your own perception. This isn't an overreaction. Your attachment system has been fundamentally shaken.
+      introduction: `Discovering a partner"s affair isn't just heartbreak - it"s trauma. Research by Dr. Shirley Glass and others has shown that infidelity produces symptoms similar to PTSD: intrusive thoughts, hypervigilance, emotional flooding, difficulty trusting your own perception. This isn"t an overreaction. Your attachment system has been fundamentally shaken.
 
 Betrayal trauma is unique because the person who was your source of safety became the source of danger. Your brain is now trying to reconcile these two incompatible realities. This is why it can feel like you're going crazy - obsessive thoughts, checking behaviors, mood swings, physical symptoms. Your nervous system is trying to regain control in a world that suddenly feels unpredictable.
 
-The betrayed partner often gets blamed - for being "too controlling" with their need to know details, for not "moving on" fast enough, for their emotional reactions. But these responses are neurobiologically normal. The brain needs information to update its threat assessment. The emotions need space to process.
+The betrayed partner often gets blamed - for being \"too controlling\" with their need to know details, for not \"moving on\" fast enough, for their emotional reactions. But these responses are neurobiologically normal. The brain needs information to update its threat assessment. The emotions need space to process.
 
-Whether you stay or leave, healing is possible. But it's a process measured in years, not months. The relationship either ends, or a new relationship forms between the same two people. The old one is gone either way.`,
+Whether you stay or leave, healing is possible. But it"s a process measured in years, not months. The relationship either ends, or a new relationship forms between the same two people. The old one is gone either way.`,
       keyInsights: [
         { 
           title: 'Betrayal trauma is real trauma', 
@@ -166,15 +166,15 @@ Whether you stay or leave, healing is possible. But it's a process measured in y
     title: 'Adult Friendships Are Hard',
     category: 'relationships',
     duration: 7,
-    emoji: '👯',
+    emoji: '👯",
     content: {
       introduction: `Making and keeping friends as an adult is legitimately difficult, and it's not your fault. Research shows that friendship requires three things: proximity (being near each other regularly), repeated unplanned interaction, and a setting that encourages vulnerability. School and college naturally provided all three. Adult life provides almost none.
 
-After school, you have to manufacture opportunities that used to happen automatically. You have to text people to hang out, which feels vulnerable. You have to show up tired after work, which feels hard. You have to be the one to reach out, which feels one-sided. This is normal. It's not that you're bad at friendship - it's that the conditions for friendship have fundamentally changed.
+After school, you have to manufacture opportunities that used to happen automatically. You have to text people to hang out, which feels vulnerable. You have to show up tired after work, which feels hard. You have to be the one to reach out, which feels one-sided. This is normal. It"s not that you"re bad at friendship - it's that the conditions for friendship have fundamentally changed.
 
-The research is clear: adults need friends for health and wellbeing. Loneliness is as harmful as smoking 15 cigarettes a day. But knowing this doesn't make it easier. The solution isn't to try harder - it's to create structures that allow friendship to develop naturally: recurring activities, shared interests, built-in time together.
+The research is clear: adults need friends for health and wellbeing. Loneliness is as harmful as smoking 15 cigarettes a day. But knowing this doesn"t make it easier. The solution isn"t to try harder - it's to create structures that allow friendship to develop naturally: recurring activities, shared interests, built-in time together.
 
-And sometimes the hardest part is grieving the friendships that didn't survive the transition to adulthood. People grow in different directions. It's not anyone's fault. But the loss is real.`,
+And sometimes the hardest part is grieving the friendships that didn"t survive the transition to adulthood. People grow in different directions. It's not anyone's fault. But the loss is real.`,
       keyInsights: [
         { 
           title: 'Friendship requires structure', 
@@ -216,15 +216,15 @@ And sometimes the hardest part is grieving the friendships that didn't survive t
     title: 'Boundaries Protect - They Don\'t Punish',
     category: 'relationships',
     duration: 6,
-    emoji: '🚧',
+    emoji: '🚧",
     content: {
-      introduction: `Boundaries are not about controlling other people - they're about what YOU will do. "You can't talk to me that way" isn't a boundary. "I will leave the conversation if you yell at me" is. See the difference? One tries to control their behavior. The other defines yours.
+      introduction: `Boundaries are not about controlling other people - they're about what YOU will do. \"You can"t talk to me that way" isn"t a boundary. \"I will leave the conversation if you yell at me\" is. See the difference? One tries to control their behavior. The other defines yours.
 
-Many people struggle with boundaries because they were taught that having needs is selfish, that love means tolerating harm, or that keeping the peace is more important than protecting yourself. These beliefs are survival adaptations from families or relationships where your boundaries weren't respected. They're understandable - and they can change.
+Many people struggle with boundaries because they were taught that having needs is selfish, that love means tolerating harm, or that keeping the peace is more important than protecting yourself. These beliefs are survival adaptations from families or relationships where your boundaries weren't respected. They"re understandable - and they can change.
 
-Setting boundaries often feels mean at first. If you've been boundaryless, even reasonable limits will feel harsh. If others are used to unlimited access to you, they will often react badly when you start having limits. This doesn't mean you're wrong. It means they got used to a dynamic that wasn't sustainable.
+Setting boundaries often feels mean at first. If you"ve been boundaryless, even reasonable limits will feel harsh. If others are used to unlimited access to you, they will often react badly when you start having limits. This doesn't mean you"re wrong. It means they got used to a dynamic that wasn"t sustainable.
 
-You are allowed to change the terms of access to your time, energy, and self. Some relationships won't survive your boundaries. That's information about those relationships.`,
+You are allowed to change the terms of access to your time, energy, and self. Some relationships won't survive your boundaries. That"s information about those relationships.`,
       keyInsights: [
         { 
           title: 'Boundaries define YOUR behavior, not theirs', 
@@ -263,13 +263,13 @@ You are allowed to change the terms of access to your time, energy, and self. So
     title: 'Breaking Toxic Relationship Patterns',
     category: 'relationships',
     duration: 8,
-    emoji: '🔄',
+    emoji: '🔄",
     content: {
-      introduction: `If you keep ending up in the same types of difficult relationships, you're not unlucky - you're running a pattern. This isn't blame; it's recognition. The patterns we learned in childhood about what love looks like, what we deserve, and how relationships work tend to replay until we consciously interrupt them.
+      introduction: `If you keep ending up in the same types of difficult relationships, you're not unlucky - you"re running a pattern. This isn"t blame; it's recognition. The patterns we learned in childhood about what love looks like, what we deserve, and how relationships work tend to replay until we consciously interrupt them.
 
-Maybe you're drawn to people who are emotionally unavailable because that's what love felt like growing up. Maybe you choose partners who need rescuing because being needed feels like love. Maybe you tolerate treatment you'd never accept for a friend because somewhere you learned that your needs don't matter. The pattern made sense once. It kept you connected to caregivers who weren't always safe or present. But what was adaptive then is destructive now.
+Maybe you"re drawn to people who are emotionally unavailable because that's what love felt like growing up. Maybe you choose partners who need rescuing because being needed feels like love. Maybe you tolerate treatment you"d never accept for a friend because somewhere you learned that your needs don't matter. The pattern made sense once. It kept you connected to caregivers who weren"t always safe or present. But what was adaptive then is destructive now.
 
-Breaking the pattern starts with seeing it. Not judging it - just seeing it. What do your relationships have in common? What role do you tend to play? What dynamics feel "comfortable" even when they're harmful? Comfort isn't the same as healthy. Sometimes healthy feels uncomfortable precisely because it's new.
+Breaking the pattern starts with seeing it. Not judging it - just seeing it. What do your relationships have in common? What role do you tend to play? What dynamics feel "comfortable" even when they"re harmful? Comfort isn't the same as healthy. Sometimes healthy feels uncomfortable precisely because it"s new.
 
 Change is possible. But it requires staying conscious during the moments when your pattern wants to take over. It means tolerating the discomfort of choosing differently. And it often means grieving the fantasy that the next person with the same pattern will give you what the others couldn't.`,
       keyInsights: [
@@ -310,18 +310,18 @@ Change is possible. But it requires staying conscious during the moments when yo
     title: 'The Loneliness Epidemic',
     category: 'relationships',
     duration: 6,
-    emoji: '🏝️',
+    emoji: '🏝️",
     content: {
       introduction: `Loneliness has reached epidemic levels, and it's not because people are flawed. Our society has been systematically dismantled of the structures that used to create connection: extended families, neighborhoods, religious communities, third places, even front porches. We now have to individually solve what used to be collectively provided.
 
-Loneliness isn't the same as being alone. You can feel lonely in a crowd, in a marriage, or surrounded by family. Loneliness is the gap between the connection you have and the connection you need. And your nervous system treats this gap like a threat - because evolutionarily, isolation WAS a threat to survival.
+Loneliness isn"t the same as being alone. You can feel lonely in a crowd, in a marriage, or surrounded by family. Loneliness is the gap between the connection you have and the connection you need. And your nervous system treats this gap like a threat - because evolutionarily, isolation WAS a threat to survival.
 
-Chronic loneliness changes the brain. It increases inflammation, disrupts sleep, and triggers hypervigilance. It can make you interpret neutral social cues as negative, creating a cycle where loneliness breeds more isolation. This isn't weakness - it's neurobiology.
+Chronic loneliness changes the brain. It increases inflammation, disrupts sleep, and triggers hypervigilance. It can make you interpret neutral social cues as negative, creating a cycle where loneliness breeds more isolation. This isn"t weakness - it's neurobiology.
 
-The solution isn't just "put yourself out there." It's recognizing that the loneliness epidemic is a societal problem requiring individual workarounds until we rebuild the village we've lost.`,
+The solution isn"t just "put yourself out there." It"s recognizing that the loneliness epidemic is a societal problem requiring individual workarounds until we rebuild the village we've lost.`,
       keyInsights: [
         { 
-          title: 'Loneliness is a biological alarm', 
+          title: "Loneliness is a biological alarm', 
           explanation: 'Your brain treats social disconnection like hunger or thirst - a signal that a survival need isn\'t being met. Take it seriously.' 
         },
         { 
@@ -361,18 +361,18 @@ The solution isn't just "put yourself out there." It's recognizing that the lone
     title: 'Dealing with Difficult People',
     category: 'relationships',
     duration: 7,
-    emoji: '⚔️',
+    emoji: '⚔️",
     content: {
       introduction: `Some people in your life are genuinely difficult - not because of a misunderstanding you could solve with better communication, but because of who they are. They might be narcissistic, manipulative, chronically negative, or simply incompatible with your wellbeing. Recognizing this is not being judgmental; it's being realistic.
 
-The tricky part is that many of these people can't be removed from your life - they're family members, coworkers, or co-parents. The strategy shifts from "get away from them" to "limit their impact on your nervous system." This requires accepting that you can't change them, only your response to them.
+The tricky part is that many of these people can"t be removed from your life - they"re family members, coworkers, or co-parents. The strategy shifts from \"get away from them\" to \"limit their impact on your nervous system.\" This requires accepting that you can't change them, only your response to them.
 
-The "gray rock" method works for some situations: becoming so boring and non-reactive that you stop being an interesting target. Strict boundaries work for others. Sometimes the only solution is radical acceptance that this person will always be difficult, and restructuring your life to minimize contact.
+The \"gray rock\" method works for some situations: becoming so boring and non-reactive that you stop being an interesting target. Strict boundaries work for others. Sometimes the only solution is radical acceptance that this person will always be difficult, and restructuring your life to minimize contact.
 
 Your energy is finite. Difficult people often consume disproportionate amounts of it. Choosing where to spend that energy is an act of self-preservation, not selfishness.`,
       keyInsights: [
         { 
-          title: 'You can\'t change them', 
+          title: "You can\'t change them', 
           explanation: 'This is both devastating and liberating. The fantasy that if you just explain it right, they\'ll understand - let it go. Channel that energy into managing your own response.' 
         },
         { 
@@ -409,18 +409,18 @@ Your energy is finite. Difficult people often consume disproportionate amounts o
     title: 'Sibling Relationships: The Longest Ties',
     category: 'relationships',
     duration: 9,
-    emoji: '👫',
+    emoji: '👫",
     content: {
       introduction: `Sibling relationships are the longest relationships most people will ever have - longer than friendships, longer than marriages, longer than parent-child bonds. And yet we often underestimate how profoundly these relationships shape us. Your siblings witnessed your childhood. They were there for the family dysfunction you might still be processing. They hold memories no one else has.
 
 Sibling relationships can be sources of deep love and support, or lasting wounds and rivalry. Often, they're both. The dynamics you developed as children - the golden child and the scapegoat, the caretaker and the baby, the peacemaker and the troublemaker - tend to persist into adulthood unless actively examined.
 
-Sibling rivalry isn't childish. It often reflects real competition for limited parental attention, approval, or resources. If your parents explicitly or implicitly compared you to your siblings, that wound runs deep. If one sibling was favored, the others carry that rejection. If one sibling was parentified (made responsible for the others), that shapes every relationship that follows.
+Sibling rivalry isn"t childish. It often reflects real competition for limited parental attention, approval, or resources. If your parents explicitly or implicitly compared you to your siblings, that wound runs deep. If one sibling was favored, the others carry that rejection. If one sibling was parentified (made responsible for the others), that shapes every relationship that follows.
 
-Adult sibling relationships require renegotiation. You're not the same people you were at 8 or 15. But many siblings never update their perception of each other, still relating through the roles assigned in childhood. Healing sibling relationships - or accepting they can't be healed - is part of adult growth.`,
+Adult sibling relationships require renegotiation. You"re not the same people you were at 8 or 15. But many siblings never update their perception of each other, still relating through the roles assigned in childhood. Healing sibling relationships - or accepting they can't be healed - is part of adult growth.`,
       keyInsights: [
         { 
-          title: 'Childhood roles persist', 
+          title: "Childhood roles persist', 
           explanation: 'The "responsible one," the "problem child," the "favorite" - these labels often stick into adulthood unless deliberately examined. You may still be playing out dynamics from 20 years ago.' 
         },
         { 
@@ -462,13 +462,13 @@ Adult sibling relationships require renegotiation. You're not the same people yo
     title: 'Gender Identity and Coming Out',
     category: 'relationships',
     duration: 10,
-    emoji: '🏳️‍⚧️',
+    emoji: '🏳️‍⚧️",
     content: {
       introduction: `Gender identity - your internal sense of your own gender - is one of the most fundamental aspects of who you are. For cisgender people (those whose gender identity matches their sex assigned at birth), this usually goes unexamined. For transgender, non-binary, and gender-diverse people, understanding and expressing your true gender can be a lifelong journey.
 
 Coming out as trans or non-binary is not a single event but an ongoing process. You may come out to yourself first, then to close friends, family, coworkers, and the world - each step carrying its own risks and rewards. Some people will embrace you. Others will struggle. Some relationships will deepen. Others will end. This is profoundly unfair, but it's the reality many trans people navigate.
 
-Gender dysphoria - the distress caused by the mismatch between your gender identity and your body or how others perceive you - can range from mild discomfort to severe anguish. Not all trans people experience dysphoria, and the absence of dysphoria doesn't make someone "less trans." Gender euphoria - the joy of being seen and expressed as your true gender - is equally valid as an indicator.
+Gender dysphoria - the distress caused by the mismatch between your gender identity and your body or how others perceive you - can range from mild discomfort to severe anguish. Not all trans people experience dysphoria, and the absence of dysphoria doesn"t make someone "less trans." Gender euphoria - the joy of being seen and expressed as your true gender - is equally valid as an indicator.
 
 Transition looks different for everyone. Social transition (name, pronouns, presentation), medical transition (hormones, surgeries), or no medical transition at all - there's no "right" way to be trans. What matters is living authentically.`,
       keyInsights: [
@@ -518,13 +518,13 @@ Transition looks different for everyone. Social transition (name, pronouns, pres
     duration: 10,
     emoji: '🔗',
     content: {
-      introduction: `Your attachment style is the operating system running beneath all your relationships. Developed in the first years of life based on how your caregivers responded to your needs, it shapes how you experience intimacy, handle conflict, and interpret your partner's behavior. Understanding it is like finally reading the manual for your relationship brain.
+      introduction: `Your attachment style is the operating system running beneath all your relationships. Developed in the first years of life based on how your caregivers responded to your needs, it shapes how you experience intimacy, handle conflict, and interpret your partner"s behavior. Understanding it is like finally reading the manual for your relationship brain.
 
-There are four main attachment styles: Secure attachment develops when caregivers were consistently responsive and attuned - you learned that your needs matter and others can be trusted. Anxious attachment forms when caregiving was inconsistent - sometimes responsive, sometimes not - creating hypervigilance about the relationship and fear of abandonment. Avoidant attachment develops when emotional needs were dismissed or punished - you learned to suppress needs and maintain distance. Disorganized attachment emerges from frightening or abusive caregiving - the person who was supposed to be your safe haven was also your source of fear, creating a "come here, go away" pattern.
+There are four main attachment styles: Secure attachment develops when caregivers were consistently responsive and attuned - you learned that your needs matter and others can be trusted. Anxious attachment forms when caregiving was inconsistent - sometimes responsive, sometimes not - creating hypervigilance about the relationship and fear of abandonment. Avoidant attachment develops when emotional needs were dismissed or punished - you learned to suppress needs and maintain distance. Disorganized attachment emerges from frightening or abusive caregiving - the person who was supposed to be your safe haven was also your source of fear, creating a \"come here, go away\" pattern.
 
 Your attachment style isn't your destiny. Research by Dr. Sue Johnson and others shows that attachment can change through corrective emotional experiences - either in therapy or in relationships with securely attached partners. The brain that learned insecure patterns can learn new ones. But first, you have to see the pattern.
 
-About 50% of the population is securely attached. The rest are split between anxious, avoidant, and disorganized. If you're reading this, you're probably trying to understand your own patterns. That awareness itself is the first step toward change.`,
+About 50% of the population is securely attached. The rest are split between anxious, avoidant, and disorganized. If you"re reading this, you're probably trying to understand your own patterns. That awareness itself is the first step toward change.`,
       keyInsights: [
         { 
           title: 'Secure attachment: the gold standard', 
@@ -569,13 +569,13 @@ About 50% of the population is securely attached. The rest are split between anx
     title: 'The Anxious-Avoidant Trap',
     category: 'relationships',
     duration: 9,
-    emoji: '🎭',
+    emoji: '🎭",
     content: {
-      introduction: `It's almost magnetic: the anxiously attached person who craves closeness pairs with the avoidantly attached person who needs space. This isn't coincidence - it's a trap built from complementary wounds that initially feel like perfect fit but become exhausting cycles of pursuit and withdrawal.
+      introduction: `It's almost magnetic: the anxiously attached person who craves closeness pairs with the avoidantly attached person who needs space. This isn"t coincidence - it's a trap built from complementary wounds that initially feel like perfect fit but become exhausting cycles of pursuit and withdrawal.
 
 The dynamic works like this: The anxious partner seeks reassurance and connection. The avoidant partner, feeling pressured, withdraws. The withdrawal activates the anxious partner's abandonment fears, intensifying pursuit. This intensified pursuit triggers the avoidant partner's suffocation fears, deepening withdrawal. Each person's coping strategy triggers the other's wound. Both feel terrible. Neither feels heard. The relationship becomes a painful dance that neither consciously chose.
 
-What makes this pairing so common? Anxious and avoidant partners each validate the other's worldview. The avoidant's distance confirms the anxious partner's belief that they're too much and will be abandoned. The anxious partner's pursuit confirms the avoidant's belief that intimacy is overwhelming and people are too needy. Both get to be "right" about relationships - and miserable.
+What makes this pairing so common? Anxious and avoidant partners each validate the other's worldview. The avoidant's distance confirms the anxious partner"s belief that they're too much and will be abandoned. The anxious partner"s pursuit confirms the avoidant's belief that intimacy is overwhelming and people are too needy. Both get to be "right" about relationships - and miserable.
 
 Breaking this cycle requires both partners to recognize their part. The anxious partner must learn to self-soothe and tolerate uncertainty without pursuing. The avoidant partner must learn to move toward connection even when uncomfortable. Both must understand that their instincts are relics of childhood that no longer serve them.`,
       keyInsights: [
@@ -617,15 +617,15 @@ Breaking this cycle requires both partners to recognize their part. The anxious 
     title: 'Emotional Unavailability',
     category: 'relationships',
     duration: 8,
-    emoji: '🚪',
+    emoji: '🚪",
     content: {
       introduction: `Emotional unavailability is the inability or unwillingness to connect on an emotional level. It can show up as avoiding deep conversations, being physically present but emotionally absent, prioritizing everything over the relationship, or being unable to provide emotional support. And the hardest truth: sometimes the emotionally unavailable person is you.
 
-Recognizing emotional unavailability in a partner is painful. You're in a relationship but feel alone. You share a life but not your inner worlds. You've tried everything to reach them - being patient, being demanding, being perfect, being less - and nothing works. Because you can't create emotional availability in another person. They have to develop it themselves.
+Recognizing emotional unavailability in a partner is painful. You're in a relationship but feel alone. You share a life but not your inner worlds. You"ve tried everything to reach them - being patient, being demanding, being perfect, being less - and nothing works. Because you can"t create emotional availability in another person. They have to develop it themselves.
 
-Recognizing emotional unavailability in yourself is harder. Maybe you're proud of being "low-maintenance" and "not needy." Maybe intimacy makes you uncomfortable but you don't know why. Maybe you've been told by multiple partners that you're distant, walled-off, or hard to reach. These patterns usually trace back to early experiences where emotional openness wasn't safe.
+Recognizing emotional unavailability in yourself is harder. Maybe you're proud of being \"low-maintenance\" and \"not needy.\" Maybe intimacy makes you uncomfortable but you don"t know why. Maybe you"ve been told by multiple partners that you're distant, walled-off, or hard to reach. These patterns usually trace back to early experiences where emotional openness wasn"t safe.
 
-Emotional availability is a skill that can be developed, but only by the person who's unavailable. If you're with someone emotionally unavailable, you can't fix them. If you're the unavailable one, you can do the work - but only if you genuinely want to, not just to keep a partner from leaving.`,
+Emotional availability is a skill that can be developed, but only by the person who"s unavailable. If you're with someone emotionally unavailable, you can"t fix them. If you're the unavailable one, you can do the work - but only if you genuinely want to, not just to keep a partner from leaving.`,
       keyInsights: [
         { 
           title: 'Signs of emotional unavailability', 
@@ -665,11 +665,11 @@ Emotional availability is a skill that can be developed, but only by the person 
     title: 'Love Bombing & Idealization',
     category: 'relationships',
     duration: 7,
-    emoji: '💐',
+    emoji: '💐",
     content: {
-      introduction: `In the beginning, it feels like a dream. Constant attention, overwhelming affection, declarations of love within weeks, making you feel like the most special person in the world. They "just know" you're the one. They've never felt this way before. It's intoxicating - and it's a red flag.
+      introduction: `In the beginning, it feels like a dream. Constant attention, overwhelming affection, declarations of love within weeks, making you feel like the most special person in the world. They \"just know\" you're the one. They"ve never felt this way before. It"s intoxicating - and it's a red flag.
 
-Love bombing is excessive attention and affection early in a relationship, often used (consciously or unconsciously) to fast-forward intimacy and create emotional dependence before you've had time to truly know each other. It feels like being chosen, but it's actually being captured. The intensity isn't about you - it's about their need to secure attachment quickly.
+Love bombing is excessive attention and affection early in a relationship, often used (consciously or unconsciously) to fast-forward intimacy and create emotional dependence before you"ve had time to truly know each other. It feels like being chosen, but it"s actually being captured. The intensity isn't about you - it"s about their need to secure attachment quickly.
 
 The problem becomes clear later: the person who loved you intensely often becomes the person who devalues you just as intensely. The pedestals built during idealization inevitably crumble. No human can sustain the projected perfection, and the fall is devastating. This cycle of idealize-devalue-discard is particularly associated with narcissistic relationship patterns.
 
@@ -714,9 +714,9 @@ Normal healthy love builds gradually. It includes curiosity about who you actual
     title: 'Healthy Conflict: How Secure Couples Fight',
     category: 'relationships',
     duration: 8,
-    emoji: '⚖️',
+    emoji: '⚖️",
     content: {
-      introduction: `Conflict is inevitable in intimate relationships. The question isn't whether you'll disagree - it's how you'll handle it. Dr. John Gottman's research, spanning decades and thousands of couples, shows that the difference between couples who thrive and those who divorce isn't the amount of conflict - it's how they fight.
+      introduction: `Conflict is inevitable in intimate relationships. The question isn't whether you"ll disagree - it"s how you'll handle it. Dr. John Gottman"s research, spanning decades and thousands of couples, shows that the difference between couples who thrive and those who divorce isn"t the amount of conflict - it's how they fight.
 
 Healthy conflict has a pattern: soft startup, accepting influence, repair attempts, and compromise. Toxic conflict has a different pattern: harsh startup, defensiveness, contempt, and stonewalling. The first predicts relationship success. The second predicts divorce with over 90% accuracy.
 
@@ -725,7 +725,7 @@ Secure couples fight about the same things everyone fights about: money, sex, ch
 Learning to fight well is a skill. Most of us were never taught - we just absorbed whatever our parents modeled. The good news: these are learnable patterns. The bad news: they require both partners to be willing to learn.`,
       keyInsights: [
         { 
-          title: 'The soft startup', 
+          title: "The soft startup', 
           explanation: 'How you bring up an issue predicts how the conversation will go. "I feel overwhelmed with the dishes" lands differently than "You never help around here." Starting gentle - with "I" statements, without blame - sets up repair rather than escalation.' 
         },
         { 
@@ -767,15 +767,15 @@ Learning to fight well is a skill. Most of us were never taught - we just absorb
     title: 'Stonewalling & Shutting Down',
     category: 'relationships',
     duration: 7,
-    emoji: '🧱',
+    emoji: '🧱",
     content: {
-      introduction: `They go silent. They won't look at you. They leave the room. They give one-word answers. You're trying to talk about something important, and they've turned to stone. This is stonewalling - one of the "Four Horsemen" that predict relationship failure - and it's devastating to be on the receiving end.
+      introduction: `They go silent. They won't look at you. They leave the room. They give one-word answers. You"re trying to talk about something important, and they"ve turned to stone. This is stonewalling - one of the \"Four Horsemen\" that predict relationship failure - and it's devastating to be on the receiving end.
 
-But here's what the stonewaller is experiencing: flooding. Their heart rate has exceeded 100 beats per minute, stress hormones are coursing through their system, and their capacity for productive conversation has shut down. They're not choosing to be cruel - they're physiologically overwhelmed and their nervous system has hit the emergency brake.
+But here"s what the stonewaller is experiencing: flooding. Their heart rate has exceeded 100 beats per minute, stress hormones are coursing through their system, and their capacity for productive conversation has shut down. They"re not choosing to be cruel - they're physiologically overwhelmed and their nervous system has hit the emergency brake.
 
-This doesn't excuse stonewalling, but it explains it. The stonewaller isn't consciously thinking "I'll hurt them by ignoring them." They're thinking - or more accurately, not thinking clearly at all - something like "I can't handle this, I need out." Their withdrawal feels like self-protection to them, even as it feels like abandonment to you.
+This doesn"t excuse stonewalling, but it explains it. The stonewaller isn"t consciously thinking \"I'll hurt them by ignoring them.\" They"re thinking - or more accurately, not thinking clearly at all - something like "I can"t handle this, I need out.\" Their withdrawal feels like self-protection to them, even as it feels like abandonment to you.
 
-The solution isn't for the stonewaller to "just stay and talk" - that's often impossible when flooded. It's for both partners to recognize when flooding is happening, take a structured break, and return to the conversation when both nervous systems have calmed down. Stonewalling only becomes toxic when the conversation never resumes.`,
+The solution isn't for the stonewaller to \"just stay and talk\" - that"s often impossible when flooded. It's for both partners to recognize when flooding is happening, take a structured break, and return to the conversation when both nervous systems have calmed down. Stonewalling only becomes toxic when the conversation never resumes.`,
       keyInsights: [
         { 
           title: 'Flooding vs. choosing to stonewall', 
@@ -815,13 +815,13 @@ The solution isn't for the stonewaller to "just stay and talk" - that's often im
     title: 'Contempt: The Relationship Killer',
     category: 'relationships',
     duration: 7,
-    emoji: '🗡️',
+    emoji: '🗡️",
     content: {
-      introduction: `Of all the toxic relationship patterns, contempt is the most destructive. It's the single greatest predictor of divorce. It's eye-rolls and sneers, mockery and ridicule, name-calling and hostile humor. It's not just being angry at something your partner did - it's communicating disgust at who they are.
+      introduction: `Of all the toxic relationship patterns, contempt is the most destructive. It's the single greatest predictor of divorce. It"s eye-rolls and sneers, mockery and ridicule, name-calling and hostile humor. It"s not just being angry at something your partner did - it's communicating disgust at who they are.
 
-Contempt comes from a position of superiority. It says: "You're beneath me. You're stupid, worthless, incompetent." It might be obvious ("You're such an idiot") or subtle (sighing heavily, mimicking mockingly). Either way, it treats your partner not as someone you disagree with, but as someone deserving of scorn.
+Contempt comes from a position of superiority. It says: \"You"re beneath me. You"re stupid, worthless, incompetent.\" It might be obvious (\"You're such an idiot\") or subtle (sighing heavily, mimicking mockingly). Either way, it treats your partner not as someone you disagree with, but as someone deserving of scorn.
 
-Dr. Gottman's research shows that couples with high levels of contempt have worse physical health outcomes - including weakened immune systems. Contempt literally makes you sick, on top of destroying your relationship.
+Dr. Gottman"s research shows that couples with high levels of contempt have worse physical health outcomes - including weakened immune systems. Contempt literally makes you sick, on top of destroying your relationship.
 
 The antidote to contempt is building a culture of appreciation. This doesn't mean ignoring problems - it means approaching your partner's flaws from a place of understanding rather than superiority, and actively nurturing respect even during disagreement. If contempt has become your norm, the relationship needs immediate intervention.`,
       keyInsights: [
@@ -864,18 +864,18 @@ The antidote to contempt is building a culture of appreciation. This doesn't mea
     title: 'Rebuilding Trust After Betrayal',
     category: 'relationships',
     duration: 10,
-    emoji: '🔨',
+    emoji: '🔨",
     content: {
-      introduction: `Trust is like a bone: it can heal after being broken, but it takes time, proper care, and it's never quite the same. Rebuilding trust after betrayal - whether from an affair, lies, or other violations - is one of the hardest things a couple can do. It's not impossible, but it requires both people fully committed to a long, painful process.
+      introduction: `Trust is like a bone: it can heal after being broken, but it takes time, proper care, and it's never quite the same. Rebuilding trust after betrayal - whether from an affair, lies, or other violations - is one of the hardest things a couple can do. It"s not impossible, but it requires both people fully committed to a long, painful process.
 
-The betrayed partner didn't choose this. They're now expected to do the hard work of healing from something that was done to them. This is profoundly unfair. The betraying partner may be eager to "move on" while the betrayed is still processing. Understanding that recovery takes years, not months, is essential.
+The betrayed partner didn"t choose this. They're now expected to do the hard work of healing from something that was done to them. This is profoundly unfair. The betraying partner may be eager to \"move on\" while the betrayed is still processing. Understanding that recovery takes years, not months, is essential.
 
-True reconciliation requires the betraying partner to tolerate the betrayed partner's pain without defensiveness - for a long time. It requires full honesty about what happened (trickle truth extends trauma). It requires demonstrated change, not just promises. And it requires the betrayed partner to eventually make the choice to trust again, knowing that trust can never be fully guaranteed.
+True reconciliation requires the betraying partner to tolerate the betrayed partner"s pain without defensiveness - for a long time. It requires full honesty about what happened (trickle truth extends trauma). It requires demonstrated change, not just promises. And it requires the betrayed partner to eventually make the choice to trust again, knowing that trust can never be fully guaranteed.
 
-Some relationships don't survive betrayal, and that's okay. Choosing not to reconcile is valid. But for those who choose to try, research shows many couples emerge with relationships that are different but can be deeply satisfying.`,
+Some relationships don"t survive betrayal, and that's okay. Choosing not to reconcile is valid. But for those who choose to try, research shows many couples emerge with relationships that are different but can be deeply satisfying.`,
       keyInsights: [
         { 
-          title: 'Full disclosure is essential', 
+          title: "Full disclosure is essential', 
           explanation: 'Research by Dr. Shirley Glass and others shows that trickle truth - revealing information bit by bit - prolongs trauma. Full, honest disclosure (ideally with a therapist\'s guidance) is the foundation of rebuilding.' 
         },
         { 
@@ -917,11 +917,11 @@ Some relationships don't survive betrayal, and that's okay. Choosing not to reco
     title: 'Emotional vs Physical Intimacy',
     category: 'relationships',
     duration: 7,
-    emoji: '💞',
+    emoji: '💞",
     content: {
       introduction: `Emotional intimacy and physical intimacy are two different needs that often get confused. You can have one without the other. You can crave one and fear the other. Many relationship struggles stem from partners having different relationships to each type - or not realizing they're even different things.
 
-Emotional intimacy is the experience of being fully known and accepted. It's sharing your inner world - fears, dreams, wounds, joys - and having someone receive that with care. It develops through conversation, time, and consistent emotional availability. For many people, emotional intimacy must come before physical intimacy feels safe or meaningful.
+Emotional intimacy is the experience of being fully known and accepted. It"s sharing your inner world - fears, dreams, wounds, joys - and having someone receive that with care. It develops through conversation, time, and consistent emotional availability. For many people, emotional intimacy must come before physical intimacy feels safe or meaningful.
 
 Physical intimacy is connection through the body. Sex is part of it, but not all of it - touch, affection, physical presence, and sexual connection all contribute. Some people feel most connected through physical intimacy; for them, it's their primary language of love and a precondition for emotional openness.
 
@@ -965,13 +965,13 @@ Problems arise when partners have different needs or different orders of operati
     title: 'Desire Differences: When Partners Don\'t Match',
     category: 'relationships',
     duration: 8,
-    emoji: '🔥',
+    emoji: '🔥",
     content: {
-      introduction: `In almost every long-term relationship, there's a higher-desire partner and a lower-desire partner. This is normal. The problem isn't that desire differs - it's how couples handle the difference. When managed poorly, desire discrepancy leads to one partner feeling rejected and undesirable while the other feels pressured and inadequate. Both suffer.
+      introduction: `In almost every long-term relationship, there's a higher-desire partner and a lower-desire partner. This is normal. The problem isn"t that desire differs - it"s how couples handle the difference. When managed poorly, desire discrepancy leads to one partner feeling rejected and undesirable while the other feels pressured and inadequate. Both suffer.
 
-Desire is complex and influenced by many factors: hormones, stress, relationship satisfaction, individual sexuality, life stage, medication, health, and more. Labeling the lower-desire partner as "the problem" misses this complexity - and usually makes things worse by adding shame to already challenged intimacy.
+Desire is complex and influenced by many factors: hormones, stress, relationship satisfaction, individual sexuality, life stage, medication, health, and more. Labeling the lower-desire partner as \"the problem\" misses this complexity - and usually makes things worse by adding shame to already challenged intimacy.
 
-Researcher Emily Nagoski distinguishes between "spontaneous" desire (desire that arises out of nowhere) and "responsive" desire (desire that emerges in response to arousal). Many people, especially women, have primarily responsive desire - they don't feel sexual until something gets them started. This isn't low desire; it's a different pathway to desire that requires different conditions.
+Researcher Emily Nagoski distinguishes between \"spontaneous\" desire (desire that arises out of nowhere) and \"responsive\" desire (desire that emerges in response to arousal). Many people, especially women, have primarily responsive desire - they don't feel sexual until something gets them started. This isn"t low desire; it's a different pathway to desire that requires different conditions.
 
 Working with desire differences requires both partners to take responsibility: the higher-desire partner for creating conditions that nurture their partner's desire rather than pressuring, and the lower-desire partner for actively engaging with their own sexuality rather than avoiding it entirely.`,
       keyInsights: [
@@ -1014,18 +1014,18 @@ Working with desire differences requires both partners to take responsibility: t
     title: 'Porn & Intimacy: The Complicated Impact',
     category: 'relationships',
     duration: 8,
-    emoji: '📱',
+    emoji: '📱",
     content: {
       introduction: `Pornography is the elephant in many bedrooms. Some couples watch it together with no issues. Others are destroyed by it. Some individuals use it casually; others feel enslaved by it. The research is contested, the cultural narratives are polarized, and the truth is: it's complicated.
 
-Potential issues with porn are real: it can create unrealistic expectations about sex, contribute to erectile dysfunction in young men (porn-induced ED), reduce desire for real partners, and become compulsive in ways that feel like addiction. For some, it represents betrayal; for others, it's a healthy outlet. Context and use patterns matter enormously.
+Potential issues with porn are real: it can create unrealistic expectations about sex, contribute to erectile dysfunction in young men (porn-induced ED), reduce desire for real partners, and become compulsive in ways that feel like addiction. For some, it represents betrayal; for others, it"s a healthy outlet. Context and use patterns matter enormously.
 
-At the same time, catastrophizing about porn isn't helpful either. Occasional use doesn't automatically mean addiction. Masturbation is normal. And shame-based approaches tend to make compulsive use worse, not better. The question isn't "is porn good or bad" - it's "what role is it playing in this specific person's life and this specific relationship?"
+At the same time, catastrophizing about porn isn"t helpful either. Occasional use doesn't automatically mean addiction. Masturbation is normal. And shame-based approaches tend to make compulsive use worse, not better. The question isn"t "is porn good or bad" - it's "what role is it playing in this specific person"s life and this specific relationship?\"
 
-If porn is causing problems - impacting your relationship, escalating to concerning content, feeling out of control - it's worth addressing. If both partners are comfortable with how it's used and it's not interfering with real intimacy, moral panic isn't necessary. Honest conversation between partners is essential.`,
+If porn is causing problems - impacting your relationship, escalating to concerning content, feeling out of control - it's worth addressing. If both partners are comfortable with how it"s used and it"s not interfering with real intimacy, moral panic isn't necessary. Honest conversation between partners is essential.`,
       keyInsights: [
         { 
-          title: 'Impact varies widely', 
+          title: "Impact varies widely', 
           explanation: 'For some, porn enhances their sex life. For others, it replaces it. For some, it\'s casual entertainment. For others, it becomes compulsive. Individual differences, relationship context, and use patterns all matter.' 
         },
         { 
@@ -1066,18 +1066,18 @@ If porn is causing problems - impacting your relationship, escalating to concern
     title: 'Polyamory & Non-Monogamy: Different Structures',
     category: 'relationships',
     duration: 8,
-    emoji: '💜',
+    emoji: '💜",
     content: {
       introduction: `Not all relationships are monogamous, and that doesn't make them less valid. Consensual non-monogamy - including polyamory, open relationships, and other structures - works well for some people and relationships. The key word is consensual: all involved parties know about and agree to the arrangement.
 
-Polyamory specifically refers to having multiple romantic relationships simultaneously with the knowledge and consent of everyone involved. It's different from cheating (which involves deception) and different from casual non-monogamy (which may not involve emotional relationships). Other structures include open relationships (primary partnership with outside sexual connections), relationship anarchy (rejecting hierarchy in all relationships), and various other arrangements.
+Polyamory specifically refers to having multiple romantic relationships simultaneously with the knowledge and consent of everyone involved. It"s different from cheating (which involves deception) and different from casual non-monogamy (which may not involve emotional relationships). Other structures include open relationships (primary partnership with outside sexual connections), relationship anarchy (rejecting hierarchy in all relationships), and various other arrangements.
 
-Common misconceptions: that poly people can't commit, that they're afraid of intimacy, that it's just an excuse to cheat, or that someone is always secretly jealous. Research shows that polyamorous relationships can be as satisfying and stable as monogamous ones - when they fit the people involved and are practiced ethically.
+Common misconceptions: that poly people can"t commit, that they're afraid of intimacy, that it"s just an excuse to cheat, or that someone is always secretly jealous. Research shows that polyamorous relationships can be as satisfying and stable as monogamous ones - when they fit the people involved and are practiced ethically.
 
-That said, non-monogamy isn't for everyone. It requires excellent communication, emotional regulation, and security. It's not a fix for relationship problems - it tends to amplify whatever dynamics already exist. And it takes significant time and energy to maintain multiple relationships well.`,
+That said, non-monogamy isn"t for everyone. It requires excellent communication, emotional regulation, and security. It's not a fix for relationship problems - it tends to amplify whatever dynamics already exist. And it takes significant time and energy to maintain multiple relationships well.`,
       keyInsights: [
         { 
-          title: 'Structure diversity', 
+          title: "Structure diversity', 
           explanation: 'Non-monogamy includes many structures: hierarchical polyamory (primary partner with secondaries), non-hierarchical polyamory, open relationships, swinging, relationship anarchy, and more. Different structures suit different people.' 
         },
         { 
@@ -1115,18 +1115,18 @@ That said, non-monogamy isn't for everyone. It requires excellent communication,
     title: 'Long-Distance Relationships: Maintaining Connection',
     category: 'relationships',
     duration: 7,
-    emoji: '🌍',
+    emoji: '🌍",
     content: {
-      introduction: `Long-distance relationships get a bad reputation, but research shows they can be just as satisfying as geographically close ones - sometimes more so. What makes the difference isn't distance; it's how couples manage communication, trust, and the unique challenges distance creates.
+      introduction: `Long-distance relationships get a bad reputation, but research shows they can be just as satisfying as geographically close ones - sometimes more so. What makes the difference isn't distance; it"s how couples manage communication, trust, and the unique challenges distance creates.
 
 LDR couples often develop stronger communication skills out of necessity. Without physical presence, you must articulate feelings and needs more explicitly. You can't rely on physical touch to smooth over conflicts or express love. This forced verbal intimacy can become a relationship strength.
 
-The hardest parts: loneliness, jealousy, FOMO on each other's lives, lack of physical intimacy, and the uncertainty about when it will end. Distance is usually sustainable when there's a light at the end of the tunnel - a plan to eventually be together. Indefinite long-distance, with no end date, strains most relationships past their limits.
+The hardest parts: loneliness, jealousy, FOMO on each other"s lives, lack of physical intimacy, and the uncertainty about when it will end. Distance is usually sustainable when there's a light at the end of the tunnel - a plan to eventually be together. Indefinite long-distance, with no end date, strains most relationships past their limits.
 
 Making it work requires intentionality: scheduled communication that you both protect, visits that you prioritize, honest conversations about fears and needs, and creative ways to maintain connection across miles. It also requires trust - long-distance amplifies insecurity, and constant checking or jealousy will destroy it.`,
       keyInsights: [
         { 
-          title: 'Quality over quantity in communication', 
+          title: "Quality over quantity in communication', 
           explanation: 'Some LDR couples burn out on constant texting. What matters more is having meaningful conversations where you actually connect - not just checking in or performing availability.' 
         },
         { 
@@ -1163,15 +1163,15 @@ Making it work requires intentionality: scheduled communication that you both pr
     title: 'When to Leave: Recognizing It\'s Over',
     category: 'relationships',
     duration: 9,
-    emoji: '🚶',
+    emoji: '🚶",
     content: {
       introduction: `Knowing when to leave a relationship is one of the hardest calls in human experience. Stay too long and you waste years in misery. Leave too soon and you might abandon something that could have been repaired. There's no formula, but there are indicators worth examining.
 
 Some things are clear: violence, abuse, chronic infidelity with no real accountability, addiction with no genuine recovery effort. These are reasons to leave regardless of love, history, or hope. Your safety and wellbeing are not negotiable.
 
-The harder cases: relationships that aren't abusive but aren't good either. Chronic disconnection. Growing in different directions. Persistent unhappiness despite efforts. Incompatible visions for the future. The resentment that won't dissolve. These require honest assessment of whether the relationship is worth saving and whether both people are genuinely working to save it.
+The harder cases: relationships that aren"t abusive but aren"t good either. Chronic disconnection. Growing in different directions. Persistent unhappiness despite efforts. Incompatible visions for the future. The resentment that won't dissolve. These require honest assessment of whether the relationship is worth saving and whether both people are genuinely working to save it.
 
-Staying for the wrong reasons - fear of being alone, guilt, financial dependence, the kids - creates its own suffering. So does leaving for the wrong reasons - conflict avoidance, grass-is-greener fantasy, or running from intimacy. The question is: given who you both are and where you're headed, is this relationship a yes, a no, or a maybe that deserves more effort?`,
+Staying for the wrong reasons - fear of being alone, guilt, financial dependence, the kids - creates its own suffering. So does leaving for the wrong reasons - conflict avoidance, grass-is-greener fantasy, or running from intimacy. The question is: given who you both are and where you"re headed, is this relationship a yes, a no, or a maybe that deserves more effort?`,
       keyInsights: [
         { 
           title: 'Clear reasons to leave', 
@@ -1216,18 +1216,18 @@ Staying for the wrong reasons - fear of being alone, guilt, financial dependence
     title: 'Divorce Recovery: Rebuilding After Ending',
     category: 'relationships',
     duration: 9,
-    emoji: '🌱',
+    emoji: '🌱",
     content: {
       introduction: `Divorce or the end of a long-term relationship is one of the most stressful life events humans experience - ranking near death of a loved one. And yet, people are expected to keep functioning: show up at work, care for children, make major decisions about housing and finances. All while your heart is shattered and your identity is in flux.
 
-The loss isn't just the person - it's the future you planned, the daily routines, the shared history, the identity of being part of a "we." You're grieving multiple losses simultaneously while being forced to build a new life structure. This is brutal, and there's no shortcut through it.
+The loss isn't just the person - it"s the future you planned, the daily routines, the shared history, the identity of being part of a "we." You"re grieving multiple losses simultaneously while being forced to build a new life structure. This is brutal, and there's no shortcut through it.
 
-Recovery happens in stages, though not linearly. There's the acute crisis - the immediate aftermath with its shock, pain, and survival mode. Then the middle phase - where you're functioning but still processing, having good days and bad. Finally, integration - where the divorce becomes part of your story rather than the whole story, and you've built a life that feels genuinely yours.
+Recovery happens in stages, though not linearly. There"s the acute crisis - the immediate aftermath with its shock, pain, and survival mode. Then the middle phase - where you"re functioning but still processing, having good days and bad. Finally, integration - where the divorce becomes part of your story rather than the whole story, and you've built a life that feels genuinely yours.
 
 The timeline is longer than you want. Research suggests 2-5 years for full adjustment. Rushing recovery, immediately dating to avoid pain, or refusing to grieve all extend the process rather than shortening it.`,
       keyInsights: [
         { 
-          title: 'Multiple losses compound', 
+          title: "Multiple losses compound', 
           explanation: 'You\'re not just losing a partner. You may be losing your home, daily contact with kids, financial security, mutual friends, a vision of your future. Each loss deserves acknowledgment.' 
         },
         { 
@@ -1270,15 +1270,15 @@ The timeline is longer than you want. Research suggests 2-5 years for full adjus
     title: 'Narcissistic Parents: Growing Up Unseen',
     category: 'relationships',
     duration: 10,
-    emoji: '🪞',
+    emoji: '🪞",
     content: {
       introduction: `Growing up with a narcissistic parent means growing up as an extension of someone else rather than as your own person. Narcissistic parents view their children as sources of narcissistic supply - vehicles for admiration, accomplishment, and validation - rather than as separate individuals with their own needs, feelings, and identities.
 
-The impact is profound and often invisible until adulthood. You may have been the "golden child" - idealized and pressured to reflect well on the parent - or the "scapegoat" - blamed for family dysfunction and treated as defective. Sometimes children alternate between roles, never knowing which version of the parent they'll encounter. This unpredictability creates hypervigilance that persists long after childhood.
+The impact is profound and often invisible until adulthood. You may have been the \"golden child\" - idealized and pressured to reflect well on the parent - or the \"scapegoat\" - blamed for family dysfunction and treated as defective. Sometimes children alternate between roles, never knowing which version of the parent they'll encounter. This unpredictability creates hypervigilance that persists long after childhood.
 
-Children of narcissistic parents often struggle with core questions: Am I allowed to have needs? Are my feelings real? Am I good enough? These questions arise because narcissistic parents systematically invalidate their children's inner experiences. Your feelings were wrong, inconvenient, or about them. Your needs were selfish. Your accomplishments were either co-opted or minimized. The real you was never quite acceptable.
+Children of narcissistic parents often struggle with core questions: Am I allowed to have needs? Are my feelings real? Am I good enough? These questions arise because narcissistic parents systematically invalidate their children"s inner experiences. Your feelings were wrong, inconvenient, or about them. Your needs were selfish. Your accomplishments were either co-opted or minimized. The real you was never quite acceptable.
 
-Recovery involves grieving the parent you needed but didn't have, learning to trust your own perceptions after years of gaslighting, and developing a sense of self that wasn't allowed to form naturally. This is hard, long work - but it's possible.`,
+Recovery involves grieving the parent you needed but didn"t have, learning to trust your own perceptions after years of gaslighting, and developing a sense of self that wasn't allowed to form naturally. This is hard, long work - but it"s possible.`,
       keyInsights: [
         { 
           title: 'You were a mirror, not a person', 
@@ -1323,18 +1323,18 @@ Recovery involves grieving the parent you needed but didn't have, learning to tr
     title: 'Enmeshment: When Families Have No Boundaries',
     category: 'relationships',
     duration: 9,
-    emoji: '🕸️',
+    emoji: '🕸️",
     content: {
       introduction: `In enmeshed families, boundaries between members are blurred or nonexistent. Individuality is threatening. Separation is betrayal. Family therapist Salvador Minuchin, who identified this pattern, described enmeshed families as systems where everyone feels everyone else's feelings, where privacy is suspicious, and where differentiation is punished.
 
-Enmeshment often masquerades as closeness. "We're just a really close family" can mean genuine intimacy - or it can mean nobody is allowed to have their own feelings, opinions, or life. The difference is whether separation and individuality are possible without guilt, punishment, or family crisis.
+Enmeshment often masquerades as closeness. \"We"re just a really close family" can mean genuine intimacy - or it can mean nobody is allowed to have their own feelings, opinions, or life. The difference is whether separation and individuality are possible without guilt, punishment, or family crisis.
 
-Children raised in enmeshed families struggle to develop a coherent sense of self. They may not know what they actually feel versus what they're supposed to feel. They may experience intense guilt around normal developmental milestones like dating, moving out, or making independent choices. Success and happiness separate from the family can feel like betrayal.
+Children raised in enmeshed families struggle to develop a coherent sense of self. They may not know what they actually feel versus what they"re supposed to feel. They may experience intense guilt around normal developmental milestones like dating, moving out, or making independent choices. Success and happiness separate from the family can feel like betrayal.
 
 Differentiation - developing a clear sense of where you end and others begin - is the antidote to enmeshment. This doesn't mean becoming cold or distant. It means being able to stay connected while also being yourself.`,
       keyInsights: [
         { 
-          title: 'Closeness vs. enmeshment', 
+          title: "Closeness vs. enmeshment', 
           explanation: 'Close families support individuality while staying connected. Enmeshed families require sameness and punish differentiation. If having your own feelings, opinions, or life choices triggers family crisis, that\'s enmeshment.' 
         },
         { 
@@ -1373,18 +1373,18 @@ Differentiation - developing a clear sense of where you end and others begin - i
   },
   {
     id: 'hm-rel-codependency',
-    title: 'Codependency: Losing Yourself in Others',
-    category: 'relationships',
+    title: "Codependency: Losing Yourself in Others',
+    category: "relationships',
     duration: 9,
-    emoji: '🎭',
+    emoji: '🎭",
     content: {
-      introduction: `Codependency is when your sense of self becomes dependent on managing, helping, or controlling someone else. It often develops in families with addiction, mental illness, or dysfunction - where children learn to focus outward on others' needs because their own needs weren't safe to have. You became the caretaker, the fixer, the one who holds everything together.
+      introduction: `Codependency is when your sense of self becomes dependent on managing, helping, or controlling someone else. It often develops in families with addiction, mental illness, or dysfunction - where children learn to focus outward on others' needs because their own needs weren"t safe to have. You became the caretaker, the fixer, the one who holds everything together.
 
-The codependent person's identity revolves around being needed. Their self-worth depends on being helpful, self-sacrificing, and essential to others. This sounds noble, but it comes at a devastating cost: you may have no idea who you are outside of your relationships. Your feelings, needs, and preferences became secondary so long ago that you may not know what they are.
+The codependent person"s identity revolves around being needed. Their self-worth depends on being helpful, self-sacrificing, and essential to others. This sounds noble, but it comes at a devastating cost: you may have no idea who you are outside of your relationships. Your feelings, needs, and preferences became secondary so long ago that you may not know what they are.
 
-Codependency creates relationships that look like love but function like addiction. You're drawn to people who need fixing because that's where you feel valuable. You may stay in harmful relationships because leaving feels like abandoning your purpose. You give and give until you're empty, then feel resentful - but can't stop giving.
+Codependency creates relationships that look like love but function like addiction. You're drawn to people who need fixing because that"s where you feel valuable. You may stay in harmful relationships because leaving feels like abandoning your purpose. You give and give until you"re empty, then feel resentful - but can't stop giving.
 
-Recovery from codependency involves turning the caretaking energy inward. Learning to have needs. Tolerating the anxiety of not being needed. Discovering who you are when you're not managing someone else's life.`,
+Recovery from codependency involves turning the caretaking energy inward. Learning to have needs. Tolerating the anxiety of not being needed. Discovering who you are when you"re not managing someone else's life.`,
       keyInsights: [
         { 
           title: 'Caretaking as identity', 
@@ -1429,13 +1429,13 @@ Recovery from codependency involves turning the caretaking energy inward. Learni
     title: 'Emotional Abuse: The Invisible Wounds',
     category: 'relationships',
     duration: 10,
-    emoji: '🩹',
+    emoji: '🩹",
     content: {
       introduction: `Emotional abuse doesn't leave bruises, which makes it easier to deny, minimize, and doubt. But research is clear: psychological abuse can be as damaging as physical abuse, sometimes more so. It attacks your sense of reality, self-worth, and trust in your own perceptions. The wounds are invisible but deep.
 
-Emotional abuse takes many forms: constant criticism, humiliation, threats, isolation from friends and family, controlling behaviors, manipulation, gaslighting, withholding affection as punishment, explosive rage, and chronic invalidation. The common thread is that the abuser systematically undermines the victim's sense of self, autonomy, and connection to others.
+Emotional abuse takes many forms: constant criticism, humiliation, threats, isolation from friends and family, controlling behaviors, manipulation, gaslighting, withholding affection as punishment, explosive rage, and chronic invalidation. The common thread is that the abuser systematically undermines the victim"s sense of self, autonomy, and connection to others.
 
-Recognizing emotional abuse is hard when you're in it. Abusers don't abuse constantly - they intersperse cruelty with kindness, keeping you off-balance and hoping. They often present a different face to the outside world, making you doubt whether anyone would believe you. And they frequently convince you that you're the problem, that if you were just better, the abuse would stop.
+Recognizing emotional abuse is hard when you"re in it. Abusers don't abuse constantly - they intersperse cruelty with kindness, keeping you off-balance and hoping. They often present a different face to the outside world, making you doubt whether anyone would believe you. And they frequently convince you that you"re the problem, that if you were just better, the abuse would stop.
 
 The damage extends beyond the relationship. Survivors often struggle with trust, self-worth, and forming healthy attachments. They may repeat the pattern or swing to the opposite extreme. Recovery requires recognizing what happened, processing the trauma, and rebuilding a sense of self that was systematically dismantled.`,
       keyInsights: [
@@ -1482,13 +1482,13 @@ The damage extends beyond the relationship. Survivors often struggle with trust,
     title: 'Gaslighting: When Your Reality Is Denied',
     category: 'relationships',
     duration: 8,
-    emoji: '🔦',
+    emoji: '🔦",
     content: {
-      introduction: `Gaslighting is a form of psychological manipulation where someone makes you question your own perception of reality. The term comes from a 1944 film where a husband manipulates his wife into believing she's going insane. It's not just disagreeing with you - it's systematically undermining your trust in your own mind.
+      introduction: `Gaslighting is a form of psychological manipulation where someone makes you question your own perception of reality. The term comes from a 1944 film where a husband manipulates his wife into believing she's going insane. It"s not just disagreeing with you - it"s systematically undermining your trust in your own mind.
 
-Common gaslighting tactics include: denying events that happened ("That never happened"), minimizing your feelings ("You're overreacting"), shifting blame ("You made me do it"), countering your memory ("You're remembering it wrong"), trivializing your concerns ("You're too sensitive"), and using others against you ("Everyone thinks you're crazy").
+Common gaslighting tactics include: denying events that happened (\"That never happened\"), minimizing your feelings (\"You're overreacting\"), shifting blame (\"You made me do it\"), countering your memory (\"You"re remembering it wrong"), trivializing your concerns ("You"re too sensitive\"), and using others against you (\"Everyone thinks you're crazy\").
 
-The insidious power of gaslighting is that it attacks your most fundamental tool for navigating reality: your own perception. When someone persistently tells you that what you see, hear, feel, and remember isn't real, you begin to doubt yourself. This doubt is the point. It makes you easier to control and harder to leave.
+The insidious power of gaslighting is that it attacks your most fundamental tool for navigating reality: your own perception. When someone persistently tells you that what you see, hear, feel, and remember isn"t real, you begin to doubt yourself. This doubt is the point. It makes you easier to control and harder to leave.
 
 Recovery from gaslighting requires rebuilding trust in yourself - which is exactly what was targeted. This often needs outside support: people who validate your reality, therapists who help you distinguish between your perceptions and the gaslighter's version, and time away from the person who scrambled your sense of self.`,
       keyInsights: [
@@ -1531,18 +1531,18 @@ Recovery from gaslighting requires rebuilding trust in yourself - which is exact
     title: 'Parent-Child Estrangement: When Cutting Contact Is Necessary',
     category: 'relationships',
     duration: 10,
-    emoji: '🚪',
+    emoji: '🚪",
     content: {
-      introduction: `Estrangement from family - particularly from parents - is one of the most stigmatized choices a person can make. Society assumes that family bonds are sacred and permanent. "But they're your parents" is offered as if it ends all discussion. What this ignores is that some family relationships are so harmful that maintaining them requires ongoing self-destruction.
+      introduction: `Estrangement from family - particularly from parents - is one of the most stigmatized choices a person can make. Society assumes that family bonds are sacred and permanent. \"But they're your parents\" is offered as if it ends all discussion. What this ignores is that some family relationships are so harmful that maintaining them requires ongoing self-destruction.
 
-The decision to go no-contact or low-contact with a parent is rarely made lightly. Most adult children who estrange have tried repeatedly to make the relationship work. They've set boundaries that were ignored, communicated needs that were dismissed, and endured ongoing harm while hoping things would change. Estrangement is usually a last resort, not a first reaction.
+The decision to go no-contact or low-contact with a parent is rarely made lightly. Most adult children who estrange have tried repeatedly to make the relationship work. They"ve set boundaries that were ignored, communicated needs that were dismissed, and endured ongoing harm while hoping things would change. Estrangement is usually a last resort, not a first reaction.
 
-The grief of estrangement is complex and often unrecognized. You grieve the parent you needed but didn't have. You grieve the relationship that could have been. You may grieve when they die, realizing that change is now truly impossible. And you do this grieving while society tells you you're wrong, selfish, or unforgiving.
+The grief of estrangement is complex and often unrecognized. You grieve the parent you needed but didn"t have. You grieve the relationship that could have been. You may grieve when they die, realizing that change is now truly impossible. And you do this grieving while society tells you you're wrong, selfish, or unforgiving.
 
-Research on estrangement is growing. Studies show that most people who estrange from family members report improved wellbeing after the initial grief and adjustment. This doesn't mean it's easy or painless - it means sometimes it's necessary.`,
+Research on estrangement is growing. Studies show that most people who estrange from family members report improved wellbeing after the initial grief and adjustment. This doesn"t mean it"s easy or painless - it means sometimes it's necessary.`,
       keyInsights: [
         { 
-          title: 'Estrangement is often a last resort', 
+          title: "Estrangement is often a last resort', 
           explanation: 'Most adult children who cut contact have tried everything else first. Years of attempts at communication, boundary-setting, and hoping for change typically precede the decision.' 
         },
         { 
@@ -1584,18 +1584,18 @@ Research on estrangement is growing. Studies show that most people who estrange 
     title: 'LGBTQ+ Family Rejection: Surviving Non-Acceptance',
     category: 'relationships',
     duration: 10,
-    emoji: '🏳️‍🌈',
+    emoji: '🏳️‍🌈",
     content: {
       introduction: `Coming out to family as LGBTQ+ can result in acceptance, rejection, or something complicated in between. For those who face rejection - ranging from subtle withdrawal to explicit disownment - the pain is profound. The people who were supposed to love you unconditionally have made that love conditional on being someone you're not.
 
-The impact of family rejection on LGBTQ+ youth is well-documented and severe. Research shows dramatically increased rates of depression, suicidality, substance abuse, and homelessness among rejected LGBTQ+ young people. But family rejection doesn't only affect youth - adults who come out later also face this pain, sometimes losing decades-long relationships.
+The impact of family rejection on LGBTQ+ youth is well-documented and severe. Research shows dramatically increased rates of depression, suicidality, substance abuse, and homelessness among rejected LGBTQ+ young people. But family rejection doesn"t only affect youth - adults who come out later also face this pain, sometimes losing decades-long relationships.
 
-Some families need time to adjust. Their initial rejection softens as they process, learn, and adjust their expectations. For these families, patience, education, and continued presence can lead to eventual acceptance. Other families never come around. Knowing which situation you're in - and how long to wait for possible change - is one of the hardest judgments to make.
+Some families need time to adjust. Their initial rejection softens as they process, learn, and adjust their expectations. For these families, patience, education, and continued presence can lead to eventual acceptance. Other families never come around. Knowing which situation you"re in - and how long to wait for possible change - is one of the hardest judgments to make.
 
-The concept of "chosen family" becomes essential for many LGBTQ+ people. When biological family fails, community becomes family. The connections formed in LGBTQ+ spaces, with partners, with accepting friends - these relationships can provide the belonging and support that family of origin couldn't give.`,
+The concept of \"chosen family\" becomes essential for many LGBTQ+ people. When biological family fails, community becomes family. The connections formed in LGBTQ+ spaces, with partners, with accepting friends - these relationships can provide the belonging and support that family of origin couldn't give.`,
       keyInsights: [
         { 
-          title: 'Conditional vs. unconditional love', 
+          title: "Conditional vs. unconditional love', 
           explanation: 'Rejection reveals that family love was conditional on meeting certain expectations. This is a profound wound - the realization that being yourself makes you unacceptable to those who should accept you most.' 
         },
         { 
@@ -1638,15 +1638,15 @@ The concept of "chosen family" becomes essential for many LGBTQ+ people. When bi
     title: 'Divorce Impact on Adult Children',
     category: 'relationships',
     duration: 8,
-    emoji: '💔',
+    emoji: '💔",
     content: {
-      introduction: `We often focus on how divorce affects children, but parents divorcing when you're an adult brings its own pain - pain that's often minimized or ignored. "At least you were grown" misses that your family of origin dissolving shakes your foundation regardless of age. The family you knew no longer exists. The story you told about your childhood is rewritten.
+      introduction: `We often focus on how divorce affects children, but parents divorcing when you're an adult brings its own pain - pain that"s often minimized or ignored. "At least you were grown" misses that your family of origin dissolving shakes your foundation regardless of age. The family you knew no longer exists. The story you told about your childhood is rewritten.
 
 Adult children of divorce face unique challenges. You may be triangulated into parental conflicts, asked to take sides, or treated as a therapist for one or both parents. You may have to navigate holidays, weddings, and family events where your parents can't be in the same room. You may learn things about your parents' marriage that shift your understanding of your entire childhood.
 
 Perhaps hardest is the retroactive questioning. If they were unhappy for decades, what was real? Were the family memories genuine? Were you living in a lie? This destabilization of your history can shake your sense of reality and trust in your own perception of relationships.
 
-Your feelings about your parents' divorce are valid even if you're 25, 35, or 55. Grief doesn't require youth. The loss of the intact family, however imperfect it was, deserves acknowledgment.`,
+Your feelings about your parents" divorce are valid even if you're 25, 35, or 55. Grief doesn"t require youth. The loss of the intact family, however imperfect it was, deserves acknowledgment.`,
       keyInsights: [
         { 
           title: 'Age doesn\'t eliminate impact', 
@@ -1686,18 +1686,18 @@ Your feelings about your parents' divorce are valid even if you're 25, 35, or 55
     title: 'Blended Families: Navigating Complex Loyalties',
     category: 'relationships',
     duration: 9,
-    emoji: '👨‍👩‍👧‍👦',
+    emoji: '👨‍👩‍👧‍👦",
     content: {
       introduction: `Blended families - families formed by remarriage or partnership when one or both partners have children from previous relationships - are increasingly common and perpetually challenging. The fantasy of seamlessly merging into one happy family rarely matches reality. Real blending involves divided loyalties, resentment, jealousy, competing parenting styles, and the ongoing presence of ex-partners.
 
-For children, a stepparent can feel like an intruder, a replacement for a beloved parent, or a symbol of family upheaval they didn't choose. Resistance to stepparents isn't necessarily defiance - it's often loyalty to the biological parent (even an absent or difficult one) and grief about the original family's dissolution.
+For children, a stepparent can feel like an intruder, a replacement for a beloved parent, or a symbol of family upheaval they didn't choose. Resistance to stepparents isn"t necessarily defiance - it's often loyalty to the biological parent (even an absent or difficult one) and grief about the original family"s dissolution.
 
 For stepparents, the role is uniquely challenging. You're expected to parent children who may not want your parenting, love children who may not love you back, and navigate a co-parenting relationship with someone who may view you as an enemy. The biological parent is caught in the middle, often trying to please everyone and succeeding with no one.
 
 Research shows blended families typically take 5-7 years to feel genuinely integrated. Expecting instant bonding or harmony creates failure. What works is patience, realistic expectations, and allowing relationships to develop naturally rather than forcing them.`,
       keyInsights: [
         { 
-          title: 'Loyalty binds are real', 
+          title: "Loyalty binds are real', 
           explanation: 'Children often feel that accepting a stepparent means betraying their biological parent. This is especially powerful if the biological parent reinforces this guilt. These binds aren\'t manipulative - they\'re developmentally normal.' 
         },
         { 
@@ -1738,18 +1738,18 @@ Research shows blended families typically take 5-7 years to feel genuinely integ
     title: 'Adoption & Abandonment Wounds: The Primal Experience',
     category: 'relationships',
     duration: 10,
-    emoji: '🔗',
+    emoji: '🔗",
     content: {
-      introduction: `Adoption, regardless of circumstances, begins with a loss. Before any love from adoptive parents, before any positive outcomes, there is the foundational experience of separation from birth parents. Psychologist Nancy Verrier calls this "the primal wound" - a pre-verbal, body-level experience of abandonment that shapes development in ways often invisible but profound.
+      introduction: `Adoption, regardless of circumstances, begins with a loss. Before any love from adoptive parents, before any positive outcomes, there is the foundational experience of separation from birth parents. Psychologist Nancy Verrier calls this \"the primal wound\" - a pre-verbal, body-level experience of abandonment that shapes development in ways often invisible but profound.
 
-This doesn't mean adoption is bad or that adoptees are damaged. It means that adoption involves complexity that is often minimized or denied. The cultural narrative of the "chosen child" who should feel grateful can silence the legitimate grief, confusion, and questions about identity and belonging that many adoptees experience.
+This doesn't mean adoption is bad or that adoptees are damaged. It means that adoption involves complexity that is often minimized or denied. The cultural narrative of the \"chosen child\" who should feel grateful can silence the legitimate grief, confusion, and questions about identity and belonging that many adoptees experience.
 
-Adoptees may struggle with issues of identity, belonging, and fear of abandonment throughout life. They may idealize birth parents or feel rage toward them. They may feel guilty for searching for birth family, as if it betrays adoptive parents. They may struggle to trust that people won't leave. These aren't universal experiences, but they're common enough to deserve recognition.
+Adoptees may struggle with issues of identity, belonging, and fear of abandonment throughout life. They may idealize birth parents or feel rage toward them. They may feel guilty for searching for birth family, as if it betrays adoptive parents. They may struggle to trust that people won"t leave. These aren"t universal experiences, but they're common enough to deserve recognition.
 
 The adoptee experience exists on a spectrum. Some feel deeply secure and have no interest in birth family. Others feel unmoored and desperate to find their origins. Most fall somewhere in between, and their feelings may shift throughout life. All of these experiences are valid.`,
       keyInsights: [
         { 
-          title: 'The primal wound is pre-verbal', 
+          title: "The primal wound is pre-verbal', 
           explanation: 'Separation from birth mother happens before language, before conscious memory. But the nervous system registers it. This may manifest as deep-seated abandonment fears without clear origin.' 
         },
         { 
@@ -1791,7 +1791,7 @@ The adoptee experience exists on a spectrum. Some feel deeply secure and have no
     title: 'Only Child Dynamics: Unique Patterns',
     category: 'relationships',
     duration: 7,
-    emoji: '👤',
+    emoji: '👤",
     content: {
       introduction: `Only children occupy a unique position in family dynamics - no siblings to share parental attention, no peers in the household to socialize with, no buffer between themselves and parental focus. The stereotypes (spoiled, lonely, socially awkward) are largely myths disproven by research. But being an only child does create distinct experiences worth understanding.
 
@@ -1802,7 +1802,7 @@ The concentrated parental attention can be nurturing or overwhelming - sometimes
 As adults, only children face the prospect of sole responsibility for aging parents - a practical and emotional burden that siblings share. They also navigate adulthood without the sibling relationships that serve as lifelong peers for others. This isn't tragedy - just difference worth acknowledging.`,
       keyInsights: [
         { 
-          title: 'Stereotypes aren\'t supported by research', 
+          title: "Stereotypes aren\'t supported by research', 
           explanation: 'Studies consistently fail to show that only children are more selfish, lonely, or maladjusted than those with siblings. The "spoiled only child" is a cultural myth more than empirical reality.' 
         },
         { 
@@ -1839,13 +1839,13 @@ As adults, only children face the prospect of sole responsibility for aging pare
     title: 'Eldest Child & Parentification: When Kids Raise Kids',
     category: 'relationships',
     duration: 9,
-    emoji: '👑',
+    emoji: '👑",
     content: {
       introduction: `Eldest children often carry burdens invisible to the rest of the family. Expected to be responsible, to model good behavior, to help with younger siblings, to understand when parents are stressed - they learn early that their job is to be dependable. For some, this extends into parentification: taking on caregiving responsibilities that should belong to adults.
 
-Parentification isn't just helping out. It's when a child becomes functionally responsible for the emotional or practical wellbeing of siblings or parents. The parentified child may manage household tasks, care for siblings while parents work or are impaired, mediate parental conflicts, serve as emotional support for a parent, or hold the family together through crisis. They're children doing adult jobs.
+Parentification isn't just helping out. It"s when a child becomes functionally responsible for the emotional or practical wellbeing of siblings or parents. The parentified child may manage household tasks, care for siblings while parents work or are impaired, mediate parental conflicts, serve as emotional support for a parent, or hold the family together through crisis. They"re children doing adult jobs.
 
-The cost comes due later. Parentified children often become hyper-responsible adults who don't know how to let others care for them. They may feel compelled to fix everyone's problems while neglecting their own needs. They may struggle to play, relax, or not be useful. Achievement may feel mandatory rather than optional. Asking for help may feel impossible.
+The cost comes due later. Parentified children often become hyper-responsible adults who don't know how to let others care for them. They may feel compelled to fix everyone"s problems while neglecting their own needs. They may struggle to play, relax, or not be useful. Achievement may feel mandatory rather than optional. Asking for help may feel impossible.
 
 Recovery involves grieving the childhood that was lost to premature responsibility, learning to have needs without shame, and releasing the pattern of over-functioning that felt essential for survival but now limits life.`,
       keyInsights: [
@@ -1891,9 +1891,9 @@ Recovery involves grieving the childhood that was lost to premature responsibili
     title: 'Middle Child Invisibility: Finding Your Place',
     category: 'relationships',
     duration: 7,
-    emoji: '🙈',
+    emoji: '🙈",
     content: {
-      introduction: `Middle children exist in a unique structural position: neither the trailblazing eldest nor the babied youngest. Research on "middle child syndrome" is mixed, but the lived experience of many middle children includes feeling overlooked, having to fight harder for attention, and developing particular strengths from that position.
+      introduction: `Middle children exist in a unique structural position: neither the trailblazing eldest nor the babied youngest. Research on \"middle child syndrome\" is mixed, but the lived experience of many middle children includes feeling overlooked, having to fight harder for attention, and developing particular strengths from that position.
 
 The potential positives: middle children often become skilled negotiators and peacemakers, having spent childhood navigating between older and younger siblings. They may be more independent, having received less direct parental attention. They often develop strong peer relationships to compensate for less family centrality.
 
@@ -1902,7 +1902,7 @@ The potential challenges: feeling invisible in the family, having to create an i
 As adults, middle children may continue patterns from childhood - being the mediator, downplaying their needs, or feeling overlooked in groups. Or they may have developed a strong independent identity precisely because they weren't as closely monitored. The experience varies widely based on family dynamics, gender, and the specific siblings involved.`,
       keyInsights: [
         { 
-          title: 'The squeeze is real', 
+          title: "The squeeze is real', 
           explanation: 'Eldest children get parental attention through novelty and high expectations. Youngest get it through being the baby. Middle children must compete for attention without built-in structural advantages.' 
         },
         { 
@@ -1938,13 +1938,13 @@ As adults, middle children may continue patterns from childhood - being the medi
     title: 'Youngest Child: Forever the Baby',
     category: 'relationships',
     duration: 7,
-    emoji: '🍼',
+    emoji: '🍼",
     content: {
-      introduction: `The youngest child in a family occupies a special position - they're the "baby" who may never quite outgrow that role, regardless of how many decades pass. Parents are often more relaxed by the last child, having learned from previous kids. But the youngest also inherits a permanent identity that can be hard to escape.
+      introduction: `The youngest child in a family occupies a special position - they're the \"baby\" who may never quite outgrow that role, regardless of how many decades pass. Parents are often more relaxed by the last child, having learned from previous kids. But the youngest also inherits a permanent identity that can be hard to escape.
 
 The benefits of youngest-child status often include more relaxed parenting, extended childhood in some ways, and multiple older people invested in their wellbeing. Youngest children are often charming, creative, and skilled at getting attention and navigating social dynamics.
 
-The challenges include being taken less seriously, having achievements minimized ("the oldest did it first"), struggling to establish adult identity within the family, and potentially being overprotected or babied well into adulthood. The youngest may also carry grief about the family's "golden age" - they missed the years when siblings were all home, when parents were younger, when the family was more intact.
+The challenges include being taken less seriously, having achievements minimized (\"the oldest did it first\"), struggling to establish adult identity within the family, and potentially being overprotected or babied well into adulthood. The youngest may also carry grief about the family"s "golden age" - they missed the years when siblings were all home, when parents were younger, when the family was more intact.
 
 As adults, youngest children may rebel against the baby role or unconsciously continue it. They may seek partners who take care of them or compensate by becoming fiercely independent. Understanding how birth order shaped you is the first step to choosing whether to continue those patterns.`,
       keyInsights: [
@@ -1985,18 +1985,18 @@ As adults, youngest children may rebel against the baby role or unconsciously co
     title: 'Addiction in the Family: The Whole System Is Sick',
     category: 'relationships',
     duration: 10,
-    emoji: '🌀',
+    emoji: '🌀",
     content: {
-      introduction: `Addiction isn't an individual disease - it's a family disease. When one person is addicted, the entire family system reorganizes around that addiction. Roles shift, communication becomes distorted, emotions get suppressed or amplified, and everyone develops survival strategies that may not serve them outside the addicted system.
+      introduction: `Addiction isn't an individual disease - it"s a family disease. When one person is addicted, the entire family system reorganizes around that addiction. Roles shift, communication becomes distorted, emotions get suppressed or amplified, and everyone develops survival strategies that may not serve them outside the addicted system.
 
 Family systems theory identifies common roles in addicted families: the Hero (often the eldest, who achieves to provide good news), the Scapegoat (who acts out and draws attention away from addiction), the Lost Child (who disappears and asks for nothing), the Mascot (who uses humor to defuse tension), and the Enabler (who protects the addict from consequences). These roles serve the dysfunctional system but create lasting patterns.
 
-Growing up in an addicted family teaches you unreliable lessons: that promises can't be trusted, that feelings must be managed or hidden, that crises are normal, that you're responsible for others' behavior. You may have learned hypervigilance, emotional numbing, people-pleasing, or your own addictive patterns. These adaptations made sense then; they may create problems now.
+Growing up in an addicted family teaches you unreliable lessons: that promises can"t be trusted, that feelings must be managed or hidden, that crises are normal, that you're responsible for others" behavior. You may have learned hypervigilance, emotional numbing, people-pleasing, or your own addictive patterns. These adaptations made sense then; they may create problems now.
 
-Recovery from family addiction isn't just about the addicted person getting sober. It's about the entire family learning healthier patterns - which is why Al-Anon, Adult Children of Alcoholics, and family therapy exist. The family members need recovery too.`,
+Recovery from family addiction isn"t just about the addicted person getting sober. It's about the entire family learning healthier patterns - which is why Al-Anon, Adult Children of Alcoholics, and family therapy exist. The family members need recovery too.`,
       keyInsights: [
         { 
-          title: 'Addiction reorganizes the family', 
+          title: "Addiction reorganizes the family', 
           explanation: 'The addicted person becomes the center around which everything revolves - schedules, finances, emotions, decisions. Even when trying to ignore the addiction, the family is shaped by it.' 
         },
         { 
@@ -2038,18 +2038,18 @@ Recovery from family addiction isn't just about the addicted person getting sobe
     title: 'Growing Up with a Mentally Ill Parent',
     category: 'relationships',
     duration: 10,
-    emoji: '🎭',
+    emoji: '🎭",
     content: {
       introduction: `Growing up with a parent who has mental illness - depression, bipolar disorder, schizophrenia, severe anxiety, personality disorders - creates a childhood marked by unpredictability and often by role reversal. You may have been caring for your parent rather than being cared for. You may have grown up fast, learned to read moods hypervigilantly, and developed survival skills that now feel like personality traits.
 
-The impact depends on many factors: which illness, how severe, whether treated, whether the other parent was present and stable, and whether anyone explained what was happening. Children often don't have words for what they're experiencing - they just know that their parent is different, unavailable, frightening, or that they must walk on eggshells.
+The impact depends on many factors: which illness, how severe, whether treated, whether the other parent was present and stable, and whether anyone explained what was happening. Children often don't have words for what they"re experiencing - they just know that their parent is different, unavailable, frightening, or that they must walk on eggshells.
 
-Without explanation, children often blame themselves. "If I were a better kid, mom wouldn't be sad." They may also develop a distorted sense of what's normal: if your parent had paranoid delusions, you may have normalized suspiciousness; if they were severely depressed, you may have normalized emotional unavailability. These calibrations need recalibrating.
+Without explanation, children often blame themselves. "If I were a better kid, mom wouldn"t be sad.\" They may also develop a distorted sense of what's normal: if your parent had paranoid delusions, you may have normalized suspiciousness; if they were severely depressed, you may have normalized emotional unavailability. These calibrations need recalibrating.
 
-Compassion for your parent and acknowledgment of your own wounds can coexist. Mental illness isn't a parent's fault, but its impact on you wasn't your fault either. Both are true.`,
+Compassion for your parent and acknowledgment of your own wounds can coexist. Mental illness isn"t a parent"s fault, but its impact on you wasn't your fault either. Both are true.`,
       keyInsights: [
         { 
-          title: 'Children become caretakers', 
+          title: "Children become caretakers', 
           explanation: 'When a parent is impaired, children often step into caregiving roles - emotional support, practical management, monitoring for crisis. This parentification has lasting effects.' 
         },
         { 
@@ -2145,16 +2145,16 @@ The term "emotionally immature" can feel kinder than "narcissistic" or "abusive"
     duration: 9,
     emoji: '🙏',
     content: {
-      introduction: `For many people, family identity is inseparable from cultural or religious identity. Your family's expectations aren't just personal preferences - they're tied to generations of tradition, community belonging, and deeply held beliefs about right and wrong. Navigating between your authentic self and these expectations is one of the most complex challenges humans face.
+      introduction: `For many people, family identity is inseparable from cultural or religious identity. Your family"s expectations aren't just personal preferences - they"re tied to generations of tradition, community belonging, and deeply held beliefs about right and wrong. Navigating between your authentic self and these expectations is one of the most complex challenges humans face.
 
 The pressure manifests in many areas: who you can marry (same culture/religion), career expectations (certain professions bring honor, others shame), gender roles (how a "proper" daughter or son behaves), religious practice (attending services, observing traditions), and life choices (when to marry, whether to have children). Deviation doesn't just disappoint your family - it threatens their standing in community and their sense of successful parenting.
 
-The bind is real: rejecting family expectations can mean losing community, disappointing people you love, and grieving the belonging you'd have if you fit. But suppressing yourself to meet expectations means living inauthentically, building resentment, and potentially passing the same pressures to your own children.
+The bind is real: rejecting family expectations can mean losing community, disappointing people you love, and grieving the belonging you"d have if you fit. But suppressing yourself to meet expectations means living inauthentically, building resentment, and potentially passing the same pressures to your own children.
 
-There's no easy answer. Some people find ways to honor cultural roots while carving out space for authentic expression. Others must choose, grieving what they lose either way. What helps is recognizing this as a genuine dilemma, not a simple matter of "just be yourself" or "respect your elders."`,
+There's no easy answer. Some people find ways to honor cultural roots while carving out space for authentic expression. Others must choose, grieving what they lose either way. What helps is recognizing this as a genuine dilemma, not a simple matter of \"just be yourself\" or \"respect your elders.\"`,
       keyInsights: [
         { 
-          title: 'Expectations are tied to survival', 
+          title: "Expectations are tied to survival', 
           explanation: 'In many cultures, family expectations aren\'t arbitrary preferences - they evolved to ensure survival, community cohesion, and intergenerational continuity. This doesn\'t make them right for you, but it contextualizes their intensity.' 
         },
         { 
@@ -2196,11 +2196,11 @@ There's no easy answer. Some people find ways to honor cultural roots while carv
     title: 'Interracial & Intercultural Relationships: Navigating Differences',
     category: 'relationships',
     duration: 9,
-    emoji: '🌍',
+    emoji: '🌍",
     content: {
       introduction: `Love doesn't care about cultural lines - but families, communities, and society often do. Interracial and intercultural relationships involve navigating not just two individuals but two sets of cultural expectations, potential family disapproval, and social dynamics that monocultural couples never face.
 
-Cultural differences show up everywhere: communication styles (direct vs. indirect), family involvement (nuclear vs. extended family centrality), gender role expectations, attitudes toward money, parenting approaches, religious practices, food, holidays, and countless daily negotiations. What feels normal to one partner may feel foreign to the other. Neither is wrong - they're just different.
+Cultural differences show up everywhere: communication styles (direct vs. indirect), family involvement (nuclear vs. extended family centrality), gender role expectations, attitudes toward money, parenting approaches, religious practices, food, holidays, and countless daily negotiations. What feels normal to one partner may feel foreign to the other. Neither is wrong - they"re just different.
 
 Beyond internal differences, couples often face external challenges: family members who oppose the relationship, microaggressions from strangers, having to navigate each other's cultural contexts as an outsider, and for interracial couples, having children whose racial identity requires thoughtful navigation.
 
@@ -2248,15 +2248,15 @@ Successful intercultural relationships require curiosity over judgment, ongoing 
     title: 'When Your Family Doesn\'t Like Your Partner',
     category: 'relationships',
     duration: 8,
-    emoji: '😬',
+    emoji: '😬",
     content: {
-      introduction: `Few situations are more uncomfortable than realizing your family dislikes your partner. Family gatherings become minefields. You feel caught between people you love. You may start wondering if your family sees something you don't - or resenting them for not supporting your choice. This is genuinely hard, and there's no simple answer.
+      introduction: `Few situations are more uncomfortable than realizing your family dislikes your partner. Family gatherings become minefields. You feel caught between people you love. You may start wondering if your family sees something you don't - or resenting them for not supporting your choice. This is genuinely hard, and there"s no simple answer.
 
-First, assess whether the concern has merit. Sometimes families see red flags love is blinding you to. If multiple people who love you have reservations, at least consider why. Are there concerning patterns they're noticing? Substance use? Controlling behavior? Fundamental incompatibility you're minimizing? Families aren't always right, but they're not always wrong either.
+First, assess whether the concern has merit. Sometimes families see red flags love is blinding you to. If multiple people who love you have reservations, at least consider why. Are there concerning patterns they"re noticing? Substance use? Controlling behavior? Fundamental incompatibility you're minimizing? Families aren"t always right, but they"re not always wrong either.
 
-Sometimes the issue isn't the partner but the family. Families with enmeshment issues may reject anyone who isn't sufficiently deferential. Families with control dynamics may oppose any partner who threatens their influence over you. And families with explicit or implicit biases (racial, religious, class-based) may reject partners who don't fit their picture of acceptable.
+Sometimes the issue isn't the partner but the family. Families with enmeshment issues may reject anyone who isn"t sufficiently deferential. Families with control dynamics may oppose any partner who threatens their influence over you. And families with explicit or implicit biases (racial, religious, class-based) may reject partners who don"t fit their picture of acceptable.
 
-The goal isn't necessarily getting your family to love your partner or ditching the partner to please your family. It's understanding the actual dynamics at play and making conscious choices about how to navigate them.`,
+The goal isn't necessarily getting your family to love your partner or ditching the partner to please your family. It"s understanding the actual dynamics at play and making conscious choices about how to navigate them.`,
       keyInsights: [
         { 
           title: 'Consider the feedback', 
@@ -2296,15 +2296,15 @@ The goal isn't necessarily getting your family to love your partner or ditching 
     title: 'Surviving Toxic Family Gatherings',
     category: 'relationships',
     duration: 7,
-    emoji: '🎄',
+    emoji: '🎄",
     content: {
-      introduction: `For people from difficult families, holidays and family gatherings aren't joyful reunions - they're emotional endurance tests. The pressure to perform family harmony, the regression to childhood dynamics, the proximity to people who harm you, the impossible expectations - it's no wonder so many people dread what's supposed to be "the happiest time of year."
+      introduction: `For people from difficult families, holidays and family gatherings aren't joyful reunions - they"re emotional endurance tests. The pressure to perform family harmony, the regression to childhood dynamics, the proximity to people who harm you, the impossible expectations - it"s no wonder so many people dread what's supposed to be \"the happiest time of year.\"
 
-The first step is releasing the fantasy. If your family has never been functional during gatherings, this year won't magically be different. Hoping for warmth when history predicts conflict only sets you up for disappointment. Managing expectations isn't pessimism - it's protection.
+The first step is releasing the fantasy. If your family has never been functional during gatherings, this year won"t magically be different. Hoping for warmth when history predicts conflict only sets you up for disappointment. Managing expectations isn"t pessimism - it's protection.
 
 You have more options than you might realize. You can limit the duration of visits. You can stay in a hotel instead of the family home. You can decide which gatherings to attend and which to skip. You can bring a supportive partner or friend as buffer. You can plan self-care before, during, and after. You can, if necessary, create your own traditions with people who actually feel like family.
 
-The guilt will likely come. "But it's family." "But it's Christmas." The guilt is part of the dysfunction, not evidence that you're wrong. Protecting yourself from predictable harm isn't betrayal - it's survival.`,
+The guilt will likely come. \"But it"s family." "But it"s Christmas.\" The guilt is part of the dysfunction, not evidence that you're wrong. Protecting yourself from predictable harm isn"t betrayal - it's survival.`,
       keyInsights: [
         { 
           title: 'Holidays amplify existing dynamics', 
@@ -2344,18 +2344,18 @@ The guilt will likely come. "But it's family." "But it's Christmas." The guilt i
     title: 'Family Pressure About Children: To Have or Not Have',
     category: 'relationships',
     duration: 8,
-    emoji: '👶',
+    emoji: '👶",
     content: {
-      introduction: `"When are you having kids?" may be the most invasive question people ask casually, as if it's their business. For people who are childfree by choice, struggling with infertility, not financially or emotionally ready, or ambivalent, this pressure from family and society is exhausting. Your reproductive choices are yours - but family often doesn't see it that way.
+      introduction: `\"When are you having kids?\" may be the most invasive question people ask casually, as if it's their business. For people who are childfree by choice, struggling with infertility, not financially or emotionally ready, or ambivalent, this pressure from family and society is exhausting. Your reproductive choices are yours - but family often doesn"t see it that way.
 
-Childfree people face persistent assumptions that they'll change their minds, that they're selfish, or that their lives are incomplete. This dismissal of a legitimate life choice reflects pronatalist cultural bias more than reality. Research shows childfree people are no less happy than parents - often happier, by some measures.
+Childfree people face persistent assumptions that they"ll change their minds, that they're selfish, or that their lives are incomplete. This dismissal of a legitimate life choice reflects pronatalist cultural bias more than reality. Research shows childfree people are no less happy than parents - often happier, by some measures.
 
-For those struggling with infertility, family pressure adds injury to injury. The questions remind you of painful reality. The suggestions ("just relax," "have you tried...") minimize the complexity. The assumption that of course you want children forces you to either disclose private medical struggles or absorb assumptions about your choices.
+For those struggling with infertility, family pressure adds injury to injury. The questions remind you of painful reality. The suggestions (\"just relax,\" \"have you tried...\") minimize the complexity. The assumption that of course you want children forces you to either disclose private medical struggles or absorb assumptions about your choices.
 
 Setting boundaries about reproductive topics is challenging when family feels entitled to weigh in. But your reproductive life - whether you have children, when, how many, through what means - is fundamentally not their decision.`,
       keyInsights: [
         { 
-          title: 'Reproductive choices are personal', 
+          title: "Reproductive choices are personal', 
           explanation: 'Who has children and how many is not a family decision, a cultural obligation, or open for debate. It\'s a deeply personal choice belonging to the individuals involved.' 
         },
         { 
@@ -2399,18 +2399,18 @@ const mentalHealthLessons: HumanManualLesson[] = [
     title: 'Depression: What It Really Is',
     category: 'mental-health',
     duration: 8,
-    emoji: '🌧️',
+    emoji: '🌧️",
     content: {
-      introduction: `Depression isn't sadness. Sadness is a normal emotion with a beginning, middle, and end. Depression is a disorder that flattens everything - not just your mood, but your energy, motivation, sleep, appetite, concentration, and sense of self. It's not "being sad" that you should "snap out of." It's a neurobiological state that requires intervention.
+      introduction: `Depression isn't sadness. Sadness is a normal emotion with a beginning, middle, and end. Depression is a disorder that flattens everything - not just your mood, but your energy, motivation, sleep, appetite, concentration, and sense of self. It"s not "being sad" that you should "snap out of." It"s a neurobiological state that requires intervention.
 
-The symptoms can be confusing because they don't always look like the stereotype. Sometimes depression looks like irritability, not tears. Sometimes it's numbness, not sadness. Sometimes it's exhaustion, not crying in bed. Sometimes you can still function at work while feeling hollow inside. "High-functioning depression" is still depression.
+The symptoms can be confusing because they don't always look like the stereotype. Sometimes depression looks like irritability, not tears. Sometimes it"s numbness, not sadness. Sometimes it"s exhaustion, not crying in bed. Sometimes you can still function at work while feeling hollow inside. \"High-functioning depression\" is still depression.
 
 Depression lies. It tells you this is permanent. It tells you you're a burden. It tells you nothing will help. It tells you people would be better off without you. These are symptoms of the illness, not truths about reality. The cruelest thing about depression is that it attacks the very parts of you that could seek help - motivation, hope, self-worth.
 
 Treatment works for most people. Medication helps many. Therapy helps many. The combination helps most. Exercise, sleep, connection, and meaning matter too. But first: recognizing depression for what it is - a treatable condition, not a character flaw.`,
       keyInsights: [
         { 
-          title: 'Depression lies', 
+          title: "Depression lies', 
           explanation: 'The hopelessness, worthlessness, and belief that nothing will help are symptoms of the disorder. They feel like truth because depression hijacks the parts of your brain that evaluate reality.' 
         },
         { 
@@ -2456,13 +2456,13 @@ Treatment works for most people. Medication helps many. Therapy helps many. The 
     title: 'Anxiety: When the Alarm Won\'t Stop',
     category: 'mental-health',
     duration: 8,
-    emoji: '⚡',
+    emoji: '⚡",
     content: {
-      introduction: `Anxiety is your threat-detection system stuck in "on" position. It evolved to keep you alive - to notice danger and respond quickly. The problem is that your ancient alarm system can't tell the difference between a bear attack and an email from your boss. It responds to uncertainty, social evaluation, and "what ifs" with the same intensity as physical danger.
+      introduction: `Anxiety is your threat-detection system stuck in \"on\" position. It evolved to keep you alive - to notice danger and respond quickly. The problem is that your ancient alarm system can't tell the difference between a bear attack and an email from your boss. It responds to uncertainty, social evaluation, and \"what ifs\" with the same intensity as physical danger.
 
-There are many flavors of anxiety: Generalized Anxiety Disorder (constant worry about everything), Social Anxiety (fear of judgment), Panic Disorder (sudden intense panic attacks), Health Anxiety (constant worry about illness), and more. They share a common thread: the alarm is too sensitive, fires too often, or won't turn off.
+There are many flavors of anxiety: Generalized Anxiety Disorder (constant worry about everything), Social Anxiety (fear of judgment), Panic Disorder (sudden intense panic attacks), Health Anxiety (constant worry about illness), and more. They share a common thread: the alarm is too sensitive, fires too often, or won"t turn off.
 
-Anxiety becomes a disorder when it significantly impairs your life - when you're avoiding things, when your worry is disproportionate to actual risk, when physical symptoms are constant, when you can't stop the loop no matter what you try. The threshold isn't "any anxiety is bad" - it's "this anxiety is no longer serving me and is actively harming me."
+Anxiety becomes a disorder when it significantly impairs your life - when you"re avoiding things, when your worry is disproportionate to actual risk, when physical symptoms are constant, when you can't stop the loop no matter what you try. The threshold isn"t "any anxiety is bad" - it's "this anxiety is no longer serving me and is actively harming me."
 
 The good news: anxiety is highly treatable. Exposure therapy, cognitive behavioral therapy, medication, and nervous system regulation techniques all have strong evidence. The bad news: untreated anxiety tends to expand. The things you avoid grow.`,
       keyInsights: [
@@ -2509,15 +2509,15 @@ The good news: anxiety is highly treatable. Exposure therapy, cognitive behavior
     title: 'Suicidal Thoughts: You\'re Not Alone',
     category: 'mental-health',
     duration: 10,
-    emoji: '🆘',
+    emoji: '🆘",
     content: {
-      introduction: `Having thoughts of suicide doesn't make you crazy, weak, or broken. It makes you human in pain. Suicidal ideation exists on a spectrum - from passive thoughts ("I wouldn't mind if I didn't wake up") to active plans with intent. All points on this spectrum deserve attention and care, but they require different levels of intervention.
+      introduction: `Having thoughts of suicide doesn't make you crazy, weak, or broken. It makes you human in pain. Suicidal ideation exists on a spectrum - from passive thoughts (\"I wouldn"t mind if I didn"t wake up\") to active plans with intent. All points on this spectrum deserve attention and care, but they require different levels of intervention.
 
-The stigma around suicidal thoughts prevents people from talking about them, which is exactly the wrong thing. Thoughts that stay hidden grow in power. Speaking them - to a therapist, a crisis line, sometimes a trusted person - reduces their grip. Talking about suicide doesn't "plant the idea" - research has thoroughly debunked this myth. Talking about it saves lives.
+The stigma around suicidal thoughts prevents people from talking about them, which is exactly the wrong thing. Thoughts that stay hidden grow in power. Speaking them - to a therapist, a crisis line, sometimes a trusted person - reduces their grip. Talking about suicide doesn't \"plant the idea\" - research has thoroughly debunked this myth. Talking about it saves lives.
 
-Suicidal thoughts often emerge when pain exceeds coping resources. The solution isn't always to reduce the pain (though that helps). It's also to increase coping resources: support, skills, meaning, connection, treatment. When the balance tips back, the thoughts often recede.
+Suicidal thoughts often emerge when pain exceeds coping resources. The solution isn"t always to reduce the pain (though that helps). It"s also to increase coping resources: support, skills, meaning, connection, treatment. When the balance tips back, the thoughts often recede.
 
-If you're having these thoughts, please know: this state is temporary, even though it doesn't feel that way. Treatment works. People survive this and go on to live meaningful lives. The thought that everyone would be better off without you is a symptom of the pain, not an accurate assessment of reality.`,
+If you're having these thoughts, please know: this state is temporary, even though it doesn"t feel that way. Treatment works. People survive this and go on to live meaningful lives. The thought that everyone would be better off without you is a symptom of the pain, not an accurate assessment of reality.`,
       keyInsights: [
         { 
           title: 'It\'s a symptom, not a character trait', 
@@ -2563,13 +2563,13 @@ If you're having these thoughts, please know: this state is temporary, even thou
     title: 'Panic Attacks: Intense but Not Dangerous',
     category: 'mental-health',
     duration: 7,
-    emoji: '💨',
+    emoji: '💨",
     content: {
       introduction: `A panic attack feels like dying. Racing heart, chest pain, difficulty breathing, dizziness, tingling, sweating, shaking, a sense of doom - your body is fully convinced something catastrophic is happening. But here's the crucial truth: panic attacks, while terrifying, are not medically dangerous. They cannot cause heart attacks, make you stop breathing, make you go crazy, or kill you.
 
-Panic attacks are your fight-or-flight system misfiring with full intensity. All the symptoms are just adrenaline and stress hormones doing what they're designed to do when you face mortal danger. The problem is there's no actual danger - just your alarm system gone haywire.
+Panic attacks are your fight-or-flight system misfiring with full intensity. All the symptoms are just adrenaline and stress hormones doing what they"re designed to do when you face mortal danger. The problem is there's no actual danger - just your alarm system gone haywire.
 
-Understanding this is the first step to reducing panic's power. When you're in a panic attack and you add fear of the panic attack itself, it escalates. When you can recognize "this is a panic attack, it's awful but not dangerous, and it will pass" - you've interrupted the escalation cycle.
+Understanding this is the first step to reducing panic"s power. When you're in a panic attack and you add fear of the panic attack itself, it escalates. When you can recognize \"this is a panic attack, it"s awful but not dangerous, and it will pass" - you've interrupted the escalation cycle.
 
 Panic disorder develops when you start fearing and avoiding situations where panic might strike. The avoidance seems protective but actually trains your brain that those situations ARE dangerous. Treatment focuses on breaking this cycle through exposure and learning that panic, while miserable, is survivable.`,
       keyInsights: [
@@ -2611,11 +2611,11 @@ Panic disorder develops when you start fearing and avoiding situations where pan
     title: 'Trauma: What Actually Happens',
     category: 'mental-health',
     duration: 9,
-    emoji: '🌪️',
+    emoji: '🌪️",
     content: {
-      introduction: `Trauma isn't defined by the event - it's defined by how your nervous system responded to it. Two people can experience the same event; one walks away shaken but okay, the other develops lasting symptoms. This isn't weakness or strength - it's about circumstances, support, prior history, and biology.
+      introduction: `Trauma isn't defined by the event - it"s defined by how your nervous system responded to it. Two people can experience the same event; one walks away shaken but okay, the other develops lasting symptoms. This isn"t weakness or strength - it's about circumstances, support, prior history, and biology.
 
-Trauma occurs when your nervous system gets overwhelmed and can't complete its natural stress response. The event gets encoded differently - fragments of sensory memory without the normal narrative structure. That's why trauma survivors have flashbacks rather than regular memories, why triggers hit like time machines, why the body keeps reacting as if the past is happening now.
+Trauma occurs when your nervous system gets overwhelmed and can"t complete its natural stress response. The event gets encoded differently - fragments of sensory memory without the normal narrative structure. That's why trauma survivors have flashbacks rather than regular memories, why triggers hit like time machines, why the body keeps reacting as if the past is happening now.
 
 Not all difficult experiences are trauma. Trauma has a specific neurobiological signature: the memory remains "hot," easily triggered, poorly integrated into your life story. It intrudes through flashbacks, nightmares, and physical symptoms. It leads to avoidance, hypervigilance, and changes in how you see yourself and the world.
 
@@ -2663,15 +2663,15 @@ The good news: trauma is one of the most treatable conditions we know how to tre
     title: 'Psychiatric Medication: Facts vs. Fear',
     category: 'mental-health',
     duration: 7,
-    emoji: '💊',
+    emoji: '💊",
     content: {
-      introduction: `There's more stigma around psychiatric medication than almost any other type of medicine. People who would take blood pressure medication without shame feel embarrassed about antidepressants. People worry medication will "change who they are" or become a "crutch." Let's address these fears with facts.
+      introduction: `There's more stigma around psychiatric medication than almost any other type of medicine. People who would take blood pressure medication without shame feel embarrassed about antidepressants. People worry medication will \"change who they are\" or become a \"crutch.\" Let"s address these fears with facts.
 
-Psychiatric medications work on brain chemistry - neurotransmitters, receptors, neural pathways. They don't give you a fake version of happiness. They correct chemical imbalances that are making your normal brain function impossible. For many people, medication provides the floor of stability needed to do the work of therapy and lifestyle change.
+Psychiatric medications work on brain chemistry - neurotransmitters, receptors, neural pathways. They don"t give you a fake version of happiness. They correct chemical imbalances that are making your normal brain function impossible. For many people, medication provides the floor of stability needed to do the work of therapy and lifestyle change.
 
 Yes, finding the right medication can take time. Side effects are real and worth discussing with your doctor. Some medications require careful management. But these are medical decisions to make with professionals, not reasons to reject an entire category of treatment that helps millions of people function.
 
-Medication isn't for everyone, and it's not the only treatment. But refusing to consider it because of stigma - when you might benefit - is letting shame make medical decisions for you.`,
+Medication isn't for everyone, and it"s not the only treatment. But refusing to consider it because of stigma - when you might benefit - is letting shame make medical decisions for you.`,
       keyInsights: [
         { 
           title: 'It\'s medicine for a medical condition', 
@@ -2711,18 +2711,18 @@ Medication isn't for everyone, and it's not the only treatment. But refusing to 
     title: 'Intrusive Thoughts: You\'re Not Your Thoughts',
     category: 'mental-health',
     duration: 6,
-    emoji: '💭',
+    emoji: '💭",
     content: {
-      introduction: `Everyone has intrusive thoughts - sudden, unwanted thoughts that pop into your mind, often disturbing or against your values. The new parent who imagines dropping the baby. The kind person who has violent flashes. The religious person with blasphemous thoughts. These thoughts don't mean anything about who you are. They're neural noise.
+      introduction: `Everyone has intrusive thoughts - sudden, unwanted thoughts that pop into your mind, often disturbing or against your values. The new parent who imagines dropping the baby. The kind person who has violent flashes. The religious person with blasphemous thoughts. These thoughts don't mean anything about who you are. They"re neural noise.
 
-The brain generates thousands of thoughts a day, most of which we don't notice or take seriously. Intrusive thoughts become a problem not because of their content but because of how we respond to them. When you take them as meaningful - "I must be a terrible person for thinking this" - you give them power. When you try to suppress them, they come back stronger.
+The brain generates thousands of thoughts a day, most of which we don"t notice or take seriously. Intrusive thoughts become a problem not because of their content but because of how we respond to them. When you take them as meaningful - \"I must be a terrible person for thinking this\" - you give them power. When you try to suppress them, they come back stronger.
 
-Intrusive thoughts are especially common in OCD, anxiety, depression, and postpartum periods. They become clinical problems when they cause significant distress, when you can't stop engaging with them, or when they lead to compulsive behaviors to "neutralize" them.
+Intrusive thoughts are especially common in OCD, anxiety, depression, and postpartum periods. They become clinical problems when they cause significant distress, when you can't stop engaging with them, or when they lead to compulsive behaviors to \"neutralize\" them.
 
-The counterintuitive solution: let the thoughts come without fighting them. Notice them, label them ("oh, there's an intrusive thought"), and let them pass. Don't engage, analyze, or try to make them stop. Thoughts don't require response.`,
+The counterintuitive solution: let the thoughts come without fighting them. Notice them, label them (\"oh, there"s an intrusive thought"), and let them pass. Don"t engage, analyze, or try to make them stop. Thoughts don't require response.`,
       keyInsights: [
         { 
-          title: 'Having a thought doesn\'t mean you want it', 
+          title: "Having a thought doesn\'t mean you want it', 
           explanation: 'Intrusive thoughts are often the exact opposite of what you want. The parent terrified of harming their child has those thoughts BECAUSE they care so much, not because they\'re dangerous.' 
         },
         { 
@@ -2759,13 +2759,13 @@ The counterintuitive solution: let the thoughts come without fighting them. Noti
     title: 'PTSD vs Complex PTSD: Different Wounds, Different Healing',
     category: 'mental-health',
     duration: 10,
-    emoji: '🌊',
+    emoji: '🌊",
     content: {
-      introduction: `Post-Traumatic Stress Disorder (PTSD) and Complex PTSD (C-PTSD) both emerge from trauma, but they're different conditions requiring different approaches. Understanding which you're dealing with matters because the wrong treatment can be ineffective or even harmful.
+      introduction: `Post-Traumatic Stress Disorder (PTSD) and Complex PTSD (C-PTSD) both emerge from trauma, but they're different conditions requiring different approaches. Understanding which you"re dealing with matters because the wrong treatment can be ineffective or even harmful.
 
 PTSD typically develops from single-incident traumas: accidents, assaults, disasters, combat events - experiences that were overwhelming but had clear beginnings and endings. The hallmarks are intrusive re-experiencing (flashbacks, nightmares), avoidance of reminders, hypervigilance, and negative changes in mood and cognition. The treatment is well-established: trauma-focused therapies like EMDR and Prolonged Exposure that help process the specific traumatic memory.
 
-Complex PTSD, recognized by the WHO's ICD-11, develops from prolonged, repeated trauma - typically during childhood, in captivity, or in situations where escape wasn't possible. It includes everything in PTSD plus three additional features: difficulties regulating emotions, persistent negative self-concept ("I'm fundamentally damaged"), and disturbances in relationships. C-PTSD shapes who you believe you are and how you relate to others at a foundational level.
+Complex PTSD, recognized by the WHO"s ICD-11, develops from prolonged, repeated trauma - typically during childhood, in captivity, or in situations where escape wasn't possible. It includes everything in PTSD plus three additional features: difficulties regulating emotions, persistent negative self-concept (\"I"m fundamentally damaged"), and disturbances in relationships. C-PTSD shapes who you believe you are and how you relate to others at a foundational level.
 
 The distinction matters because C-PTSD requires more than processing memories. It requires rebuilding a sense of self, learning emotional regulation skills that weren't developed in childhood, and slowly creating new templates for safe connection. This is longer, deeper work - often measured in years rather than months.`,
       keyInsights: [
@@ -2813,15 +2813,15 @@ The distinction matters because C-PTSD requires more than processing memories. I
     title: 'Childhood Emotional Neglect: The Invisible Wound',
     category: 'mental-health',
     duration: 9,
-    emoji: '👻',
+    emoji: '👻",
     content: {
-      introduction: `Childhood Emotional Neglect (CEN) is what didn't happen. Not abuse - absence. Not violence - void. It's growing up with parents who failed to notice, respond to, or validate your emotional experience. They might have been loving in other ways. They might have provided everything material. But your emotions were consistently unwitnessed, dismissed, or simply not seen.
+      introduction: `Childhood Emotional Neglect (CEN) is what didn't happen. Not abuse - absence. Not violence - void. It"s growing up with parents who failed to notice, respond to, or validate your emotional experience. They might have been loving in other ways. They might have provided everything material. But your emotions were consistently unwitnessed, dismissed, or simply not seen.
 
 CEN is particularly insidious because there's nothing to point to. No bruises, no obvious dysfunction, often no intention to harm. Your parents might have done their best - and still left you emotionally alone. This makes it hard to recognize: "My childhood was fine, so why do I feel this way?" The answer is that something crucial was missing, not that something was added.
 
-The effects are profound. As Dr. Jonice Webb's research shows, CEN adults often feel empty, disconnected, self-blaming, and fundamentally different from others. They struggle to identify and express emotions, have difficulty with self-care and self-compassion, and often feel like something is wrong with them without knowing what. They learned their emotions don't matter - so they stopped trusting them.
+The effects are profound. As Dr. Jonice Webb"s research shows, CEN adults often feel empty, disconnected, self-blaming, and fundamentally different from others. They struggle to identify and express emotions, have difficulty with self-care and self-compassion, and often feel like something is wrong with them without knowing what. They learned their emotions don't matter - so they stopped trusting them.
 
-The healing path involves learning what was supposed to happen: that emotions are valid information, that your needs matter, that you deserve attunement. This is essentially reparenting yourself - giving your emotional self what it never received. It's learnable, but it takes time to rewire what decades of neglect installed.`,
+The healing path involves learning what was supposed to happen: that emotions are valid information, that your needs matter, that you deserve attunement. This is essentially reparenting yourself - giving your emotional self what it never received. It"s learnable, but it takes time to rewire what decades of neglect installed.`,
       keyInsights: [
         { 
           title: 'Absence is hard to see', 
@@ -2864,9 +2864,9 @@ The healing path involves learning what was supposed to happen: that emotions ar
     duration: 10,
     emoji: '🧒',
     content: {
-      introduction: `Developmental trauma occurs when chronic adversity happens during the formative years of brain development - roughly ages 0-25, with the most sensitive periods in early childhood. Unlike single-event trauma, developmental trauma shapes the brain's architecture itself. It doesn't just create memories; it creates neural pathways, stress response patterns, and attachment templates that become the foundation for everything else.
+      introduction: `Developmental trauma occurs when chronic adversity happens during the formative years of brain development - roughly ages 0-25, with the most sensitive periods in early childhood. Unlike single-event trauma, developmental trauma shapes the brain"s architecture itself. It doesn't just create memories; it creates neural pathways, stress response patterns, and attachment templates that become the foundation for everything else.
 
-Dr. Bruce Perry's neurosequential model shows how trauma affects the brain differently depending on when it occurs. Trauma in infancy affects the brainstem (regulation, arousal). Trauma in early childhood affects the limbic system (relationships, emotional regulation). Trauma in later childhood affects the cortex (thinking, learning, self-reflection). The earlier the trauma, the more fundamental the impact.
+Dr. Bruce Perry"s neurosequential model shows how trauma affects the brain differently depending on when it occurs. Trauma in infancy affects the brainstem (regulation, arousal). Trauma in early childhood affects the limbic system (relationships, emotional regulation). Trauma in later childhood affects the cortex (thinking, learning, self-reflection). The earlier the trauma, the more fundamental the impact.
 
 What constitutes developmental trauma? Abuse (physical, emotional, sexual). Neglect. Witnessing violence. Unpredictable caregiving. Loss of primary caregivers. Household dysfunction (mental illness, addiction, incarceration, domestic violence). Medical procedures. Bullying. Immigration and displacement. Poverty. Discrimination. The ACE (Adverse Childhood Experiences) research documented how common these experiences are and how profoundly they affect lifelong health.
 
@@ -2917,16 +2917,16 @@ The good news: the brain remains plastic throughout life. Developmental trauma c
     duration: 11,
     emoji: '💜',
     content: {
-      introduction: `Sexual trauma - assault, abuse, coercion, violations of consent - leaves marks that extend beyond memory into the body itself. This is where van der Kolk's phrase "the body keeps the score" is most viscerally true. Survivors often experience bodily intrusions: sensations, tension patterns, reactions during intimacy, and physical symptoms that seem disconnected from conscious memory but are deeply connected to what the body endured.
+      introduction: `Sexual trauma - assault, abuse, coercion, violations of consent - leaves marks that extend beyond memory into the body itself. This is where van der Kolk"s phrase \"the body keeps the score\" is most viscerally true. Survivors often experience bodily intrusions: sensations, tension patterns, reactions during intimacy, and physical symptoms that seem disconnected from conscious memory but are deeply connected to what the body endured.
 
-The spectrum of sexual trauma is wide: childhood sexual abuse, rape, date rape, coerced sex in relationships, unwanted sexual contact, sexual harassment, and violations that may not fit neat categories but still left wounds. The impact doesn't always correlate with the "severity" of the event - what matters is how your system experienced it. A "minor" incident can be deeply traumatic; a "major" one might be processed with less lasting impact. Your response is valid regardless.
+The spectrum of sexual trauma is wide: childhood sexual abuse, rape, date rape, coerced sex in relationships, unwanted sexual contact, sexual harassment, and violations that may not fit neat categories but still left wounds. The impact doesn't always correlate with the \"severity\" of the event - what matters is how your system experienced it. A \"minor\" incident can be deeply traumatic; a \"major\" one might be processed with less lasting impact. Your response is valid regardless.
 
-Sexual trauma often creates complex relationships with the body, sexuality, and intimacy. Some survivors disconnect from their bodies entirely. Some experience compulsive sexuality. Some freeze during intimate moments. Some find certain touches, positions, or situations triggering decades later. These are not dysfunction - they are the body's memory and protection system.
+Sexual trauma often creates complex relationships with the body, sexuality, and intimacy. Some survivors disconnect from their bodies entirely. Some experience compulsive sexuality. Some freeze during intimate moments. Some find certain touches, positions, or situations triggering decades later. These are not dysfunction - they are the body"s memory and protection system.
 
-Healing is possible, but it requires approaches that include the body, not just the mind. Talk therapy alone often can't reach what is held somatically. The body needs to complete the defensive responses it couldn't complete during the trauma. It needs to learn safety again through experience, not just understanding.`,
+Healing is possible, but it requires approaches that include the body, not just the mind. Talk therapy alone often can"t reach what is held somatically. The body needs to complete the defensive responses it couldn't complete during the trauma. It needs to learn safety again through experience, not just understanding.`,
       keyInsights: [
         { 
-          title: 'The body holds what the mind may not remember', 
+          title: "The body holds what the mind may not remember', 
           explanation: 'Sexual trauma often involves dissociation during the event, meaning explicit memory may be fragmented or absent while the body stores the experience in sensations, tension, and reflexive responses.' 
         },
         { 
@@ -2969,13 +2969,13 @@ Healing is possible, but it requires approaches that include the body, not just 
     title: 'Medical Trauma: When Healthcare Hurts',
     category: 'mental-health',
     duration: 8,
-    emoji: '🏥',
+    emoji: '🏥",
     content: {
       introduction: `Medical trauma is a paradox: the systems designed to help can also wound. Invasive procedures, lack of informed consent, dismissal of pain, medical emergencies, life-threatening diagnoses, procedures done without adequate anesthesia, traumatic births, ICU stays, chronic illness management - all of these can leave lasting psychological marks.
 
 What makes medical trauma particularly complex is that it often involves well-meaning people doing necessary things. The surgery that saved your life also traumatized you. The procedure that was medically routine was experienced by your nervous system as assault. This creates cognitive dissonance: how can you be grateful AND traumatized? The answer is: both are true simultaneously.
 
-Medical trauma is often unrecognized because we frame healthcare as inherently good. Patients who are traumatized may be seen as "difficult" or "overreacting." The medical system itself may not acknowledge its capacity to harm even while helping. This lack of recognition compounds the trauma - you can't heal what isn't acknowledged.
+Medical trauma is often unrecognized because we frame healthcare as inherently good. Patients who are traumatized may be seen as \"difficult\" or \"overreacting.\" The medical system itself may not acknowledge its capacity to harm even while helping. This lack of recognition compounds the trauma - you can't heal what isn"t acknowledged.
 
 The impacts include healthcare avoidance (which can endanger health), panic during procedures, chronic mistrust of providers, PTSD symptoms triggered by medical settings, and complicated relationships with your own body and its vulnerabilities. Understanding medical trauma helps you advocate for trauma-informed care and process experiences that have been affecting you.`,
       keyInsights: [
@@ -3023,11 +3023,11 @@ The impacts include healthcare avoidance (which can endanger health), panic duri
     content: {
       introduction: `Birth can be traumatic - for the person giving birth, for partners who witness it, and even for infants. This reality gets buried under cultural expectations that birth is "natural" and new parenthood is "the happiest time." When the experience is terrifying, painful, out of control, or life-threatening, the gap between expectation and reality compounds the wound.
 
-For birthing parents, trauma can stem from: emergency procedures, loss of control or autonomy, severe pain inadequately managed, feeling unheard by providers, fearing for your life or your baby's life, physical injury, and the cascade of interventions that can feel violating. Even births that end with healthy babies can be traumatic - outcome doesn't determine experience.
+For birthing parents, trauma can stem from: emergency procedures, loss of control or autonomy, severe pain inadequately managed, feeling unheard by providers, fearing for your life or your baby"s life, physical injury, and the cascade of interventions that can feel violating. Even births that end with healthy babies can be traumatic - outcome doesn't determine experience.
 
 Partners and support people can be traumatized too. Witnessing someone you love in danger, feeling helpless, making terrifying decisions, holding fear alone - these leave marks. Partner trauma often goes unrecognized because focus is on the birthing person and baby.
 
-Infants can experience birth trauma, especially with complicated deliveries. While they don't form explicit memories, the nervous system records the experience. Some practitioners believe early intervention can help, though this is a specialized field.
+Infants can experience birth trauma, especially with complicated deliveries. While they don"t form explicit memories, the nervous system records the experience. Some practitioners believe early intervention can help, though this is a specialized field.
 
 Postpartum PTSD is estimated to affect 4-6% of births, with higher rates for complicated deliveries. It often gets misdiagnosed as postpartum depression or anxiety, meaning proper treatment is delayed. Birth trauma deserves recognition and specialized support.`,
       keyInsights: [
@@ -3121,18 +3121,18 @@ Additionally, religious trauma often carries spiritual wounds: damage to the cap
     title: 'Workplace Trauma & Harassment',
     category: 'mental-health',
     duration: 8,
-    emoji: '💼',
+    emoji: '💼",
     content: {
-      introduction: `The workplace can be a site of significant trauma. Sexual harassment, bullying, discrimination, hostile work environments, witnessing or experiencing violence, catastrophic failures, and toxic leadership can all leave lasting psychological wounds. And because we spend so much of our lives at work, workplace trauma often receives repeated exposure - you can't just "walk away" without losing your livelihood.
+      introduction: `The workplace can be a site of significant trauma. Sexual harassment, bullying, discrimination, hostile work environments, witnessing or experiencing violence, catastrophic failures, and toxic leadership can all leave lasting psychological wounds. And because we spend so much of our lives at work, workplace trauma often receives repeated exposure - you can't just \"walk away\" without losing your livelihood.
 
 Workplace trauma is complicated by power dynamics. Reporting can mean retaliation. Speaking up can mean losing your job. The person harming you may control your performance reviews, raises, and career advancement. This trapped quality - needing to stay for economic survival while being harmed - echoes the dynamics of other captivity traumas.
 
-The gaslighting that often accompanies workplace harm compounds the wound. "You're being too sensitive." "That's just how he is." "You must have misunderstood." When entire cultures normalize abuse, individuals start doubting their own perceptions. You're not crazy - you're in a crazy-making environment.
+The gaslighting that often accompanies workplace harm compounds the wound. \"You"re being too sensitive." "That"s just how he is.\" \"You must have misunderstood.\" When entire cultures normalize abuse, individuals start doubting their own perceptions. You're not crazy - you"re in a crazy-making environment.
 
-The impacts extend beyond the workplace: sleep disruption, relationship strain, anxiety that persists after leaving, difficulty trusting future employers, and sometimes full PTSD. Workplace trauma is often minimized because "it's just work" - but there's no "just" about spending 40+ hours a week in a threatening environment.`,
+The impacts extend beyond the workplace: sleep disruption, relationship strain, anxiety that persists after leaving, difficulty trusting future employers, and sometimes full PTSD. Workplace trauma is often minimized because "it"s just work\" - but there's no \"just\" about spending 40+ hours a week in a threatening environment.`,
       keyInsights: [
         { 
-          title: 'Economic coercion creates captivity', 
+          title: "Economic coercion creates captivity', 
           explanation: 'When you can\'t leave without losing your income, you\'re in a trapped situation. This changes the trauma dynamic - you\'re enduring ongoing harm without escape.' 
         },
         { 
@@ -3176,14 +3176,14 @@ The impacts extend beyond the workplace: sleep disruption, relationship strain, 
     content: {
       introduction: `Racial trauma, also called race-based traumatic stress, is the psychological and emotional injury caused by encounters with racial discrimination, racism, and hate crimes. For people of color, this is not occasional - it is constant, cumulative, and often begins in childhood. It is both the acute incidents (being called a slur, being profiled, witnessing violence against people who look like you) and the chronic weight of navigating a world that sees you as threat or lesser.
 
-Dr. Robert Carter's research established that racism can meet clinical definitions of trauma, producing PTSD-like symptoms. But racial trauma differs from single-incident trauma because it is ongoing, inescapable, and often unacknowledged by the dominant culture. There is no "post" in post-traumatic when the threat continues.
+Dr. Robert Carter"s research established that racism can meet clinical definitions of trauma, producing PTSD-like symptoms. But racial trauma differs from single-incident trauma because it is ongoing, inescapable, and often unacknowledged by the dominant culture. There is no \"post\" in post-traumatic when the threat continues.
 
 The lived experience includes: hypervigilance (constantly assessing safety), exhaustion from code-switching and performing non-threatening, the psychological burden of having your reality denied or gaslit, grief after each publicized act of racial violence, and the intergenerational transmission of trauma from ancestors who endured slavery, colonization, genocide, or displacement.
 
 Healing racial trauma requires both individual psychological work AND collective, community-based healing. Individual therapy helps, but it can't resolve systemic oppression. Community, activism, cultural connection, and spaces where your experience is understood without explanation are equally essential.`,
       keyInsights: [
         { 
-          title: 'It\'s cumulative, not single-incident', 
+          title: "It\'s cumulative, not single-incident', 
           explanation: 'Each microaggression, each act of discrimination, each news story of racist violence adds to the load. It\'s death by a thousand cuts, not one wound.' 
         },
         { 
@@ -3226,15 +3226,15 @@ Healing racial trauma requires both individual psychological work AND collective
     title: 'Vicarious/Secondary Trauma: Absorbing Others\' Pain',
     category: 'mental-health',
     duration: 8,
-    emoji: '🪞',
+    emoji: '🪞",
     content: {
-      introduction: `You don't have to directly experience trauma to be traumatized by it. Vicarious trauma (also called secondary traumatic stress) occurs when you're exposed to others' traumatic experiences - as a helper, witness, or empathic listener. Therapists, healthcare workers, first responders, journalists, social workers, and anyone who regularly absorbs others' suffering can develop trauma symptoms themselves.
+      introduction: `You don't have to directly experience trauma to be traumatized by it. Vicarious trauma (also called secondary traumatic stress) occurs when you"re exposed to others" traumatic experiences - as a helper, witness, or empathic listener. Therapists, healthcare workers, first responders, journalists, social workers, and anyone who regularly absorbs others' suffering can develop trauma symptoms themselves.
 
-This isn't about being "too sensitive." The capacity for empathy that makes you good at helping also makes you vulnerable to absorbing pain. Mirror neurons, emotional attunement, and deep listening mean you're not just hearing about trauma - you're partially experiencing it. Over time, this accumulates.
+This isn"t about being "too sensitive." The capacity for empathy that makes you good at helping also makes you vulnerable to absorbing pain. Mirror neurons, emotional attunement, and deep listening mean you"re not just hearing about trauma - you're partially experiencing it. Over time, this accumulates.
 
-The symptoms mirror PTSD: intrusive images (of clients' stories, not your own experiences), hypervigilance, avoidance, emotional numbing, changes in worldview (the world seems more dangerous), and disrupted spirituality or meaning. You might also experience compassion fatigue - the gradual erosion of your ability to care.
+The symptoms mirror PTSD: intrusive images (of clients" stories, not your own experiences), hypervigilance, avoidance, emotional numbing, changes in worldview (the world seems more dangerous), and disrupted spirituality or meaning. You might also experience compassion fatigue - the gradual erosion of your ability to care.
 
-What makes vicarious trauma insidious is that helpers often ignore their own needs. There's a professional or moral imperative to keep showing up, to prioritize others' suffering over your own. But you cannot pour from an empty cup, and untreated vicarious trauma makes you less effective at the work you're trying to do.`,
+What makes vicarious trauma insidious is that helpers often ignore their own needs. There"s a professional or moral imperative to keep showing up, to prioritize others' suffering over your own. But you cannot pour from an empty cup, and untreated vicarious trauma makes you less effective at the work you"re trying to do.`,
       keyInsights: [
         { 
           title: 'Empathy has a cost', 
@@ -3276,15 +3276,15 @@ What makes vicarious trauma insidious is that helpers often ignore their own nee
     title: 'Trauma Bonding: Why You Stay',
     category: 'mental-health',
     duration: 9,
-    emoji: '⛓️',
+    emoji: '⛓️",
     content: {
-      introduction: `Trauma bonding is the powerful emotional attachment that forms between an abused person and their abuser. It's the reason people stay in dangerous relationships, return after leaving, defend their abusers, and feel genuinely attached despite the harm. It's not weakness, stupidity, or masochism - it's a neurobiological response to cycles of abuse.
+      introduction: `Trauma bonding is the powerful emotional attachment that forms between an abused person and their abuser. It's the reason people stay in dangerous relationships, return after leaving, defend their abusers, and feel genuinely attached despite the harm. It"s not weakness, stupidity, or masochism - it's a neurobiological response to cycles of abuse.
 
-The pattern works like this: periods of abuse alternate with periods of kindness, remorse, or normalcy. This intermittent reinforcement is the most powerful conditioning schedule known to psychology - more powerful than consistent reward. The unpredictability creates hope: maybe this time will be different. The kindness feels more intense against the backdrop of abuse. You become addicted to the relationship's highs because they contrast so sharply with the lows.
+The pattern works like this: periods of abuse alternate with periods of kindness, remorse, or normalcy. This intermittent reinforcement is the most powerful conditioning schedule known to psychology - more powerful than consistent reward. The unpredictability creates hope: maybe this time will be different. The kindness feels more intense against the backdrop of abuse. You become addicted to the relationship"s highs because they contrast so sharply with the lows.
 
 Your attachment system becomes weaponized against you. The very person who is your source of fear becomes your source of comfort when the fear temporarily subsides. This creates a bond that is paradoxically strengthened by the abuse itself. The more intense the cycles, the stronger the bond.
 
-Understanding trauma bonding is essential for self-compassion. If you've struggled to leave, gone back, or found yourself defending someone who hurt you - this isn't a character flaw. It's how human psychology responds to this particular pattern of abuse. Breaking the bond requires understanding it, not just willpower.`,
+Understanding trauma bonding is essential for self-compassion. If you've struggled to leave, gone back, or found yourself defending someone who hurt you - this isn"t a character flaw. It's how human psychology responds to this particular pattern of abuse. Breaking the bond requires understanding it, not just willpower.`,
       keyInsights: [
         { 
           title: 'Intermittent reinforcement is addictive', 
@@ -3327,18 +3327,18 @@ Understanding trauma bonding is essential for self-compassion. If you've struggl
     title: 'The Freeze Response Deep Dive: Shutdown Explained',
     category: 'mental-health',
     duration: 8,
-    emoji: '🧊',
+    emoji: '🧊",
     content: {
-      introduction: `You've heard of fight-or-flight, but freeze is the response that often carries the most shame. It's the immobility that takes over when your nervous system decides that fighting and fleeing won't work - when threat is inescapable. Polyvagal theory, developed by Dr. Stephen Porges, calls this "dorsal vagal shutdown": the most primitive survival response, shared with reptiles, involving immobility and metabolic conservation.
+      introduction: `You've heard of fight-or-flight, but freeze is the response that often carries the most shame. It"s the immobility that takes over when your nervous system decides that fighting and fleeing won"t work - when threat is inescapable. Polyvagal theory, developed by Dr. Stephen Porges, calls this \"dorsal vagal shutdown\": the most primitive survival response, shared with reptiles, involving immobility and metabolic conservation.
 
-Freeze isn't a choice. It's not cowardice. It's an automatic nervous system response that happens faster than conscious thought. When your amygdala perceives overwhelming threat, it can bypass the cortex entirely and trigger freeze before you have any chance to decide otherwise. The survivor who froze during assault, who went numb during abuse, who couldn't speak up during harassment - their body made that "decision" without them.
+Freeze isn't a choice. It"s not cowardice. It"s an automatic nervous system response that happens faster than conscious thought. When your amygdala perceives overwhelming threat, it can bypass the cortex entirely and trigger freeze before you have any chance to decide otherwise. The survivor who froze during assault, who went numb during abuse, who couldn't speak up during harassment - their body made that \"decision\" without them.
 
-The aftermath of freeze often includes profound shame. "Why didn't I fight back? Why didn't I run? Why did I just... stop?" Understanding freeze neurobiology can help release this shame. You didn't choose to freeze - your nervous system chose for you, based on an instant assessment that freezing gave you the best chance of survival.
+The aftermath of freeze often includes profound shame. \"Why didn"t I fight back? Why didn"t I run? Why did I just... stop?\" Understanding freeze neurobiology can help release this shame. You didn't choose to freeze - your nervous system chose for you, based on an instant assessment that freezing gave you the best chance of survival.
 
-Chronic freeze states are also possible. People with extensive trauma may live in a low-grade freeze: depressed, unmotivated, disconnected, feeling "dead inside." This is the nervous system stuck in dorsal vagal shutdown. Coming out requires slowly building a sense of safety, not demanding the body "just snap out of it."`,
+Chronic freeze states are also possible. People with extensive trauma may live in a low-grade freeze: depressed, unmotivated, disconnected, feeling \"dead inside.\" This is the nervous system stuck in dorsal vagal shutdown. Coming out requires slowly building a sense of safety, not demanding the body \"just snap out of it.\"`,
       keyInsights: [
         { 
-          title: 'Freeze is automatic and protective', 
+          title: "Freeze is automatic and protective', 
           explanation: 'Your nervous system\'s job is survival, not dignity. Freeze reduces injury, decreases attention from predators, and conserves resources. It\'s ancient, adaptive, and not a reflection of your character.' 
         },
         { 
@@ -3378,13 +3378,13 @@ Chronic freeze states are also possible. People with extensive trauma may live i
     duration: 9,
     emoji: '🌫️',
     content: {
-      introduction: `Dissociation is a disconnection from yourself, your body, your surroundings, or your sense of reality. It ranges from common experiences (highway hypnosis, daydreaming, feeling unreal when exhausted) to severe clinical conditions (dissociative identity disorder). In trauma contexts, dissociation is your mind's protective exit when physical escape isn't possible.
+      introduction: `Dissociation is a disconnection from yourself, your body, your surroundings, or your sense of reality. It ranges from common experiences (highway hypnosis, daydreaming, feeling unreal when exhausted) to severe clinical conditions (dissociative identity disorder). In trauma contexts, dissociation is your mind"s protective exit when physical escape isn't possible.
 
-During overwhelming experiences, dissociation serves as psychological anesthesia. If you can't flee the situation, you flee within - disconnecting from the body that's being harmed, floating away from the present moment, or splitting off the part of you that's experiencing this. It's brilliant survival strategy in the moment. The problem is when it persists.
+During overwhelming experiences, dissociation serves as psychological anesthesia. If you can"t flee the situation, you flee within - disconnecting from the body that"s being harmed, floating away from the present moment, or splitting off the part of you that's experiencing this. It"s brilliant survival strategy in the moment. The problem is when it persists.
 
 Trauma-related dissociation includes: depersonalization (feeling detached from yourself, like watching yourself from outside), derealization (the world feeling unreal, dreamlike, or foggy), emotional numbing (inability to feel emotions), gaps in memory (dissociative amnesia), and in severe cases, identity fragmentation (distinct self-states or alters).
 
-Dissociation often goes unrecognized because it's subtle. You might not realize you're "gone" - you just notice gaps in memory, feeling spacey, or others saying you seemed "checked out." Chronic dissociation can feel normal because it's been your default for so long. Recognition is the first step toward learning to stay present - slowly, carefully, and with support.`,
+Dissociation often goes unrecognized because it"s subtle. You might not realize you're \"gone\" - you just notice gaps in memory, feeling spacey, or others saying you seemed \"checked out.\" Chronic dissociation can feel normal because it"s been your default for so long. Recognition is the first step toward learning to stay present - slowly, carefully, and with support.`,
       keyInsights: [
         { 
           title: 'It\'s a creative survival strategy', 
@@ -3426,18 +3426,18 @@ Dissociation often goes unrecognized because it's subtle. You might not realize 
     title: 'Flashbacks & Triggers: Understanding the Alarm System',
     category: 'mental-health',
     duration: 8,
-    emoji: '⚡',
+    emoji: '⚡",
     content: {
-      introduction: `Flashbacks are time machines of the worst kind. A smell, a sound, a phrase, a situation - and suddenly you're not just remembering the past, you're reliving it. Your body responds as if the threat is happening now. Your heart races, your muscles tense, emotions flood you. This isn't a normal memory; it's trauma memory intruding into the present.
+      introduction: `Flashbacks are time machines of the worst kind. A smell, a sound, a phrase, a situation - and suddenly you're not just remembering the past, you"re reliving it. Your body responds as if the threat is happening now. Your heart races, your muscles tense, emotions flood you. This isn"t a normal memory; it's trauma memory intruding into the present.
 
-The neuroscience: traumatic memories are stored differently. Normally, the hippocampus processes memories with time stamps - you know the memory is in the past. But during overwhelming trauma, the hippocampus goes offline, and memories are stored raw in the amygdala without proper time-coding. When triggered, these memories emerge without the "this was then, I'm safe now" context. Your brain and body literally don't know it's a memory.
+The neuroscience: traumatic memories are stored differently. Normally, the hippocampus processes memories with time stamps - you know the memory is in the past. But during overwhelming trauma, the hippocampus goes offline, and memories are stored raw in the amygdala without proper time-coding. When triggered, these memories emerge without the \"this was then, I"m safe now" context. Your brain and body literally don"t know it's a memory.
 
-Triggers are the cues that set off this alarm system. They're often sensory: a particular cologne, the quality of light, a sound, a texture. They can be contextual: locations, relationship dynamics, power differentials. They can be emotional: feeling trapped, helpless, or criticized. Triggers are personal - what activates one person's trauma may mean nothing to another.
+Triggers are the cues that set off this alarm system. They"re often sensory: a particular cologne, the quality of light, a sound, a texture. They can be contextual: locations, relationship dynamics, power differentials. They can be emotional: feeling trapped, helpless, or criticized. Triggers are personal - what activates one person"s trauma may mean nothing to another.
 
 Understanding triggers and flashbacks is the first step to managing them. You can learn to recognize you're being triggered, use grounding to anchor in the present, and over time, with treatment, reduce the intensity and frequency of these intrusions.`,
       keyInsights: [
         { 
-          title: 'Flashbacks aren\'t memories - they\'re re-experiencing', 
+          title: "Flashbacks aren\'t memories - they\'re re-experiencing', 
           explanation: 'Your brain doesn\'t know it\'s past. The emotional and physical responses are happening NOW as far as your nervous system is concerned. This is why "just don\'t think about it" doesn\'t work.' 
         },
         { 
@@ -3475,15 +3475,15 @@ Understanding triggers and flashbacks is the first step to managing them. You ca
     title: 'Post-Traumatic Growth: How People Transform Pain',
     category: 'mental-health',
     duration: 9,
-    emoji: '🌱',
+    emoji: '🌱",
     content: {
-      introduction: `Post-Traumatic Growth (PTG) is the positive psychological change that can emerge from struggling with highly challenging life circumstances. It's not that trauma is "good" or that suffering is necessary for growth - it's that humans have a remarkable capacity to find meaning, develop strength, and transform even in the aftermath of terrible experiences.
+      introduction: `Post-Traumatic Growth (PTG) is the positive psychological change that can emerge from struggling with highly challenging life circumstances. It's not that trauma is \"good\" or that suffering is necessary for growth - it"s that humans have a remarkable capacity to find meaning, develop strength, and transform even in the aftermath of terrible experiences.
 
-Researchers Richard Tedeschi and Lawrence Calhoun identified five domains of PTG: Greater appreciation of life, new possibilities, increased personal strength, improved relationships, and spiritual or existential change. Trauma survivors often report that they value life more, discovered abilities they didn't know they had, deepened relationships, opened new paths, and revised their understanding of life's meaning.
+Researchers Richard Tedeschi and Lawrence Calhoun identified five domains of PTG: Greater appreciation of life, new possibilities, increased personal strength, improved relationships, and spiritual or existential change. Trauma survivors often report that they value life more, discovered abilities they didn't know they had, deepened relationships, opened new paths, and revised their understanding of life"s meaning.
 
-Crucial clarification: PTG is not about finding a silver lining or claiming trauma was "worth it." It's not about toxic positivity or pressure to grow. It's about acknowledging that some people, through the struggle to rebuild after trauma, develop in ways they wouldn't have otherwise. Growth and pain coexist; one doesn't cancel the other.
+Crucial clarification: PTG is not about finding a silver lining or claiming trauma was \"worth it.\" It's not about toxic positivity or pressure to grow. It"s about acknowledging that some people, through the struggle to rebuild after trauma, develop in ways they wouldn"t have otherwise. Growth and pain coexist; one doesn't cancel the other.
 
-PTG is also not universal or guaranteed. Some people don't experience significant growth, and that's okay. Growth is not a measure of your worth or your effort. It emerges from particular conditions: supportive relationships, deliberate rumination (making meaning), narrative development (creating a story), and often from the shattering of previous assumptions that creates space for new understandings.`,
+PTG is also not universal or guaranteed. Some people don"t experience significant growth, and that's okay. Growth is not a measure of your worth or your effort. It emerges from particular conditions: supportive relationships, deliberate rumination (making meaning), narrative development (creating a story), and often from the shattering of previous assumptions that creates space for new understandings.`,
       keyInsights: [
         { 
           title: 'Growth doesn\'t mean trauma was good', 
@@ -3535,18 +3535,18 @@ const stressSurvivalLessons: HumanManualLesson[] = [
     title: 'Burnout: When the Engine Fails',
     category: 'stress-survival',
     duration: 8,
-    emoji: '🔥',
+    emoji: '🔥",
     content: {
-      introduction: `Burnout isn't being tired. Tired recovers with rest. Burnout is a state of chronic stress that has depleted you physically, emotionally, and mentally. The World Health Organization recognizes it as an occupational phenomenon characterized by exhaustion, cynicism, and reduced efficacy. You're not just out of energy - you're out of capacity to care.
+      introduction: `Burnout isn't being tired. Tired recovers with rest. Burnout is a state of chronic stress that has depleted you physically, emotionally, and mentally. The World Health Organization recognizes it as an occupational phenomenon characterized by exhaustion, cynicism, and reduced efficacy. You"re not just out of energy - you're out of capacity to care.
 
 The Maslach Burnout Inventory identifies three dimensions: Exhaustion (nothing left to give), Cynicism (detachment and negativity), and Inefficacy (feeling incompetent and like nothing matters). You might have one or all three. Any combination is damaging.
 
-Burnout usually develops gradually. You start by overworking to compensate for something - impossible demands, values mismatch, lack of control, insufficient reward, unfairness, or conflict with the work. You push through tiredness, then push through exhaustion, then push through your body's escalating warnings until the system fails.
+Burnout usually develops gradually. You start by overworking to compensate for something - impossible demands, values mismatch, lack of control, insufficient reward, unfairness, or conflict with the work. You push through tiredness, then push through exhaustion, then push through your body"s escalating warnings until the system fails.
 
 Recovery requires more than vacation. Vacation helps symptoms but doesn't address causes. Real recovery requires changing the equation: either changing the environment (job, boundaries, expectations) or changing your relationship to the demands (values clarification, boundaries, support).`,
       keyInsights: [
         { 
-          title: 'Burnout vs. tired', 
+          title: "Burnout vs. tired', 
           explanation: 'Tired improves with rest. Burnout often doesn\'t - you take a vacation and come back feeling the same. That\'s a sign it\'s structural, not just a need for sleep.' 
         },
         { 
@@ -3587,13 +3587,13 @@ Recovery requires more than vacation. Vacation helps symptoms but doesn't addres
     title: 'The Freeze Response: When Shutdown Happens',
     category: 'stress-survival',
     duration: 7,
-    emoji: '🧊',
+    emoji: '🧊",
     content: {
-      introduction: `You've heard of fight-or-flight. But there's a third response that often gets overlooked: freeze. When your nervous system determines that fighting or fleeing won't work - when the threat is too overwhelming - it shuts down. You go numb. You dissociate. You can't think, can't act, can't feel. You freeze.
+      introduction: `You've heard of fight-or-flight. But there"s a third response that often gets overlooked: freeze. When your nervous system determines that fighting or fleeing won"t work - when the threat is too overwhelming - it shuts down. You go numb. You dissociate. You can't think, can"t act, can"t feel. You freeze.
 
-Freeze is a survival mechanism, not a choice. It's the nervous system's last-ditch effort to protect you, similar to an animal playing dead. In humans, it can look like spacing out during a stressful conversation, being unable to move during a confrontation, emotional numbness, or that foggy feeling where you're present but not really "there."
+Freeze is a survival mechanism, not a choice. It's the nervous system"s last-ditch effort to protect you, similar to an animal playing dead. In humans, it can look like spacing out during a stressful conversation, being unable to move during a confrontation, emotional numbness, or that foggy feeling where you"re present but not really \"there.\"
 
-The freeze response explains why trauma survivors often ask "why didn't I fight back?" or "why didn't I run?" The answer: your nervous system chose for you, and freeze was its best option given the circumstances. This was never a conscious decision - and blaming yourself for it compounds the trauma.
+The freeze response explains why trauma survivors often ask \"why didn't I fight back?\" or \"why didn"t I run?" The answer: your nervous system chose for you, and freeze was its best option given the circumstances. This was never a conscious decision - and blaming yourself for it compounds the trauma.
 
 Coming out of freeze requires gentleness. Forcing yourself to act when you're frozen often backfires. The nervous system needs to feel safe before it releases. Small movements, warmth, presence of safe people, and gentle stimulation of the senses can help. Rushing makes it worse.`,
       keyInsights: [
@@ -3636,18 +3636,18 @@ Coming out of freeze requires gentleness. Forcing yourself to act when you're fr
     title: 'Overwhelm: Too Much, Too Fast',
     category: 'stress-survival',
     duration: 6,
-    emoji: '🌊',
+    emoji: '🌊",
     content: {
-      introduction: `Overwhelm happens when input exceeds processing capacity. It's not about the absolute amount of stress - it's about the ratio of demands to resources. A single task can be overwhelming if you're already depleted. A hundred tasks might be manageable if you're resourced and supported.
+      introduction: `Overwhelm happens when input exceeds processing capacity. It's not about the absolute amount of stress - it"s about the ratio of demands to resources. A single task can be overwhelming if you"re already depleted. A hundred tasks might be manageable if you're resourced and supported.
 
-The problem is that overwhelm often triggers more overwhelm. When you're overwhelmed, your executive function - the part of your brain that prioritizes, plans, and makes decisions - goes offline. So you can't figure out what to do about being overwhelmed, which makes you more overwhelmed. It's a trap.
+The problem is that overwhelm often triggers more overwhelm. When you"re overwhelmed, your executive function - the part of your brain that prioritizes, plans, and makes decisions - goes offline. So you can"t figure out what to do about being overwhelmed, which makes you more overwhelmed. It's a trap.
 
-Breaking the cycle requires stepping back from trying to solve the overwhelm and instead stabilizing your nervous system first. You cannot think your way out of overwhelm when the thinking parts of your brain aren't functioning. Regulate first, then prioritize.
+Breaking the cycle requires stepping back from trying to solve the overwhelm and instead stabilizing your nervous system first. You cannot think your way out of overwhelm when the thinking parts of your brain aren"t functioning. Regulate first, then prioritize.
 
-Most overwhelm is also a boundaries problem. If you're constantly overwhelmed, something is out of balance: you're taking on too much, not delegating, not saying no, or not building in recovery time. The solution isn't just getting through this current wave - it's restructuring so the waves don't keep crashing.`,
+Most overwhelm is also a boundaries problem. If you"re constantly overwhelmed, something is out of balance: you're taking on too much, not delegating, not saying no, or not building in recovery time. The solution isn"t just getting through this current wave - it"s restructuring so the waves don't keep crashing.`,
       keyInsights: [
         { 
-          title: 'Overwhelm tanks executive function', 
+          title: "Overwhelm tanks executive function', 
           explanation: 'The part of your brain that could solve this problem - planning, prioritizing, deciding - goes offline when you\'re overwhelmed. That\'s why "just make a list" doesn\'t help when you\'re in the middle of it.' 
         },
         { 
@@ -3687,17 +3687,17 @@ Most overwhelm is also a boundaries problem. If you're constantly overwhelmed, s
     title: 'Your Nervous System: The Control Center',
     category: 'stress-survival',
     duration: 8,
-    emoji: '⚡',
+    emoji: '⚡",
     content: {
       introduction: `Everything in your emotional life runs through your nervous system. Polyvagal theory, developed by Dr. Stephen Porges, describes three states your autonomic nervous system moves between: ventral vagal (safe and social), sympathetic (fight-or-flight), and dorsal vagal (freeze and shutdown).
 
 When you're in ventral vagal, you feel safe, connected, and able to engage with the world. You can think clearly, connect with others, and access creativity. This is where you want to spend most of your time.
 
-Sympathetic activation is the fight-or-flight state: increased heart rate, rapid breathing, tension, anxiety, irritability. It's designed for short-term threat response. Problems arise when you get stuck here - chronic sympathetic activation leads to anxiety, health problems, and relationship difficulties.
+Sympathetic activation is the fight-or-flight state: increased heart rate, rapid breathing, tension, anxiety, irritability. It"s designed for short-term threat response. Problems arise when you get stuck here - chronic sympathetic activation leads to anxiety, health problems, and relationship difficulties.
 
-Dorsal vagal is shutdown: freeze, dissociation, collapse, depression, numbness. It's the nervous system's last resort when fighting and fleeing don't seem viable. Getting stuck here leads to depression, lack of motivation, and feeling disconnected from life.
+Dorsal vagal is shutdown: freeze, dissociation, collapse, depression, numbness. It's the nervous system"s last resort when fighting and fleeing don't seem viable. Getting stuck here leads to depression, lack of motivation, and feeling disconnected from life.
 
-Understanding your nervous system helps you work with it instead of against it. You can't think your way to calm, but you can use body-based tools to shift your state.`,
+Understanding your nervous system helps you work with it instead of against it. You can"t think your way to calm, but you can use body-based tools to shift your state.`,
       keyInsights: [
         { 
           title: 'State drives story', 
@@ -3740,15 +3740,15 @@ Understanding your nervous system helps you work with it instead of against it. 
     title: 'Chronic Stress: The Slow Poison',
     category: 'stress-survival',
     duration: 7,
-    emoji: '⏰',
+    emoji: '⏰",
     content: {
       introduction: `Acute stress is designed to be temporary - you face a threat, your body mobilizes, you deal with it, and then you recover. Chronic stress breaks this cycle. The threat never ends, so the stress response never turns off. Your body is designed for sprints, not marathons of activation.
 
 Chronic stress damages nearly every system in your body. It keeps cortisol elevated, which over time impairs immune function, disrupts sleep, increases inflammation, affects memory and cognition, contributes to weight gain, raises blood pressure, and increases risk of heart disease. It's a slow poison that accumulates.
 
-The tricky part is that chronic stress becomes normal. You adapt to it. You don't notice how much tension you're holding, how shallow your breathing is, how compromised your sleep has become. You think this is just how life is. It's not. It's how your life has been - and it can change.
+The tricky part is that chronic stress becomes normal. You adapt to it. You don"t notice how much tension you"re holding, how shallow your breathing is, how compromised your sleep has become. You think this is just how life is. It's not. It"s how your life has been - and it can change.
 
-Addressing chronic stress requires both symptom management (regulation techniques, sleep, exercise) and root cause intervention (changing the stressors, boundaries, support systems). You can't meditate your way out of an impossible situation, but you also can't change your situation if you're too depleted to act.`,
+Addressing chronic stress requires both symptom management (regulation techniques, sleep, exercise) and root cause intervention (changing the stressors, boundaries, support systems). You can"t meditate your way out of an impossible situation, but you also can't change your situation if you"re too depleted to act.`,
       keyInsights: [
         { 
           title: 'Stress was designed to be temporary', 
@@ -3796,13 +3796,13 @@ const workMoneyLessons: HumanManualLesson[] = [
     title: 'When Your Job Becomes Your Identity',
     category: 'work-money',
     duration: 7,
-    emoji: '💼',
+    emoji: '💼",
     content: {
-      introduction: `"What do you do?" is often the first question we ask when meeting someone. It's also a trap. When work becomes too central to identity, you're vulnerable in ways you might not recognize until something disrupts that identity - layoff, burnout, retirement, career change, or simply losing passion for what you do.
+      introduction: `\"What do you do?\" is often the first question we ask when meeting someone. It's also a trap. When work becomes too central to identity, you"re vulnerable in ways you might not recognize until something disrupts that identity - layoff, burnout, retirement, career change, or simply losing passion for what you do.
 
 Enmeshment with work can look like success. The dedicated employee, the passionate entrepreneur, the person who "loves what they do." But when work IS identity rather than part of identity, any threat to work becomes a threat to self. Job criticism feels like personal criticism. Failure at work feels like failure as a human. Time away from work feels like losing yourself.
 
-This isn't to say work can't be meaningful or central to your life. But there's a difference between work being deeply important and work being all you are. The goal is developing what researchers call "identity complexity" - having multiple sources of meaning and value so that no single domain can devastate you.
+This isn"t to say work can't be meaningful or central to your life. But there"s a difference between work being deeply important and work being all you are. The goal is developing what researchers call "identity complexity" - having multiple sources of meaning and value so that no single domain can devastate you.
 
 If you lost your job tomorrow and someone asked "who are you?" - could you answer without mentioning what you do for work?`,
       keyInsights: [
@@ -3843,9 +3843,9 @@ If you lost your job tomorrow and someone asked "who are you?" - could you answe
     title: 'Financial Trauma and Money Wounds',
     category: 'work-money',
     duration: 8,
-    emoji: '💰',
+    emoji: '💰",
     content: {
-      introduction: `Money isn't just numbers - it's tied to survival, safety, worth, and deep emotional history. Financial trauma can come from growing up with scarcity, sudden financial loss, financial abuse, debt, or shame around money. It shows up as anxiety about spending, hoarding, over-giving, avoidance of looking at accounts, or self-sabotaging financial decisions.
+      introduction: `Money isn't just numbers - it"s tied to survival, safety, worth, and deep emotional history. Financial trauma can come from growing up with scarcity, sudden financial loss, financial abuse, debt, or shame around money. It shows up as anxiety about spending, hoarding, over-giving, avoidance of looking at accounts, or self-sabotaging financial decisions.
 
 Your earliest experiences with money created a template. If money was scarce and stressful, your nervous system may always associate money with threat. If money was used to control you, freedom around money may feel dangerous. If your worth was tied to financial success, money becomes identity rather than tool.
 
@@ -3891,15 +3891,15 @@ Healing financial trauma is both practical and emotional. You need financial lit
     title: 'Imposter Syndrome: Feeling Like a Fraud',
     category: 'work-money',
     duration: 6,
-    emoji: '🎭',
+    emoji: '🎭",
     content: {
-      introduction: `Imposter syndrome is the persistent feeling that you've fooled everyone and are about to be exposed as incompetent, despite evidence of your accomplishments. It's remarkably common - research suggests about 70% of people experience it at some point. You're not alone, and you're not actually a fraud.
+      introduction: `Imposter syndrome is the persistent feeling that you've fooled everyone and are about to be exposed as incompetent, despite evidence of your accomplishments. It"s remarkably common - research suggests about 70% of people experience it at some point. You"re not alone, and you're not actually a fraud.
 
-Imposter feelings often intensify during transitions: new job, promotion, entering a new field, or being the "first" or "only" in a space. They're particularly common among high achievers (who always expect more of themselves) and among people from marginalized groups (who receive constant cultural messaging that they don't belong).
+Imposter feelings often intensify during transitions: new job, promotion, entering a new field, or being the \"first\" or \"only\" in a space. They"re particularly common among high achievers (who always expect more of themselves) and among people from marginalized groups (who receive constant cultural messaging that they don"t belong).
 
 The painful irony is that imposter syndrome tends to hit the competent and conscientious hardest. The truly incompetent often have inflated self-assessments (the Dunning-Kruger effect). Your very ability to recognize the gaps in your knowledge - the complexity of your field, the expertise of others - creates the conditions for feeling like an imposter.
 
-This doesn't mean imposter feelings should be ignored. They're information about what you value, what you fear, and where you might benefit from support, mentorship, or skill development. But they're not accurate assessments of your worth or your right to be where you are.`,
+This doesn't mean imposter feelings should be ignored. They"re information about what you value, what you fear, and where you might benefit from support, mentorship, or skill development. But they're not accurate assessments of your worth or your right to be where you are.`,
       keyInsights: [
         { 
           title: 'Evidence doesn\'t cure it', 
@@ -3938,15 +3938,15 @@ This doesn't mean imposter feelings should be ignored. They're information about
     title: 'Work Boundaries in an Always-On World',
     category: 'work-money',
     duration: 6,
-    emoji: '🚫',
+    emoji: '🚫",
     content: {
       introduction: `The boundaries between work and life have never been more blurred. Emails at midnight, Slack messages on weekends, the expectation of constant availability, remote work that means work is always accessible - the structures that used to protect personal time have eroded.
 
-This is bad for your health, relationships, and ironically, your work performance. Research consistently shows that working more hours past a certain point leads to declining productivity and increasing errors. Rest isn't a luxury - it's a performance requirement. But try telling that to a culture that celebrates hustle.
+This is bad for your health, relationships, and ironically, your work performance. Research consistently shows that working more hours past a certain point leads to declining productivity and increasing errors. Rest isn't a luxury - it"s a performance requirement. But try telling that to a culture that celebrates hustle.
 
-Setting work boundaries often feels risky. Will you be passed over for promotion? Will colleagues judge you? Will you lose your job? These fears are sometimes valid and sometimes projections. The truth is usually more nuanced: some workplaces punish boundaries, some respect them, and many are waiting for someone to model that it's possible.
+Setting work boundaries often feels risky. Will you be passed over for promotion? Will colleagues judge you? Will you lose your job? These fears are sometimes valid and sometimes projections. The truth is usually more nuanced: some workplaces punish boundaries, some respect them, and many are waiting for someone to model that it"s possible.
 
-You don't have to announce your boundaries - you can just keep them. Don't respond to emails after hours. Don't apologize for not being available on weekends. Let people adjust to your rhythms rather than abandoning yours to match theirs.`,
+You don't have to announce your boundaries - you can just keep them. Don"t respond to emails after hours. Don't apologize for not being available on weekends. Let people adjust to your rhythms rather than abandoning yours to match theirs.`,
       keyInsights: [
         { 
           title: 'Boundaries are a skill, not a personality trait', 
@@ -3986,9 +3986,9 @@ You don't have to announce your boundaries - you can just keep them. Don't respo
     title: 'When Work Loses Meaning',
     category: 'work-money',
     duration: 7,
-    emoji: '🔍',
+    emoji: '🔍",
     content: {
-      introduction: `There's a particular kind of suffering that comes from doing work that feels meaningless. You might be well-paid, successful by external measures, even good at what you do - and still feel empty about it. This isn't ingratitude. It's a legitimate form of distress.
+      introduction: `There's a particular kind of suffering that comes from doing work that feels meaningless. You might be well-paid, successful by external measures, even good at what you do - and still feel empty about it. This isn"t ingratitude. It"s a legitimate form of distress.
 
 Meaning in work can come from many sources: the work itself (craft, challenge, creativity), its impact (helping others, making a difference), its alignment with values (doing something you believe in), or its role in a larger vision (career path, legacy). When none of these are present, work becomes something you endure rather than something you engage with.
 
@@ -3997,7 +3997,7 @@ Sometimes loss of meaning signals burnout - you cared once but the caring got de
 You have options: find meaning in the work differently, find meaning outside work, change the work, or change jobs. None of these are easy, and all require clarity about what actually matters to you - which you may have lost touch with along the way.`,
       keyInsights: [
         { 
-          title: 'Not everyone can "do what they love"', 
+          title: "Not everyone can "do what they love"', 
           explanation: 'Sometimes work is how you fund a life that has meaning elsewhere. There\'s no shame in having a job that\'s just a job while you invest meaning in other domains.' 
         },
         { 
@@ -4043,9 +4043,9 @@ const worldSocietyLessons: HumanManualLesson[] = [
     title: 'Collective Trauma: When the World Wounds',
     category: 'world-society',
     duration: 8,
-    emoji: '🌍',
+    emoji: '🌍",
     content: {
-      introduction: `Trauma isn't always individual. Pandemics, wars, economic collapses, mass violence, political upheaval - these events traumatize entire populations. Collective trauma operates differently than personal trauma: it's shared, it shapes culture, and it often goes unrecognized because when everyone's affected, the abnormal becomes normal.
+      introduction: `Trauma isn't always individual. Pandemics, wars, economic collapses, mass violence, political upheaval - these events traumatize entire populations. Collective trauma operates differently than personal trauma: it"s shared, it shapes culture, and it often goes unrecognized because when everyone"s affected, the abnormal becomes normal.
 
 The COVID-19 pandemic is a recent example of collective trauma. Years later, many people still carry effects they don't recognize as trauma-related: increased anxiety, changed relationships with mortality, erosion of trust, hypervigilance about health, grief that never had space, changes in how they relate to society and each other.
 
@@ -4054,7 +4054,7 @@ Collective trauma can bind communities together (shared experience, solidarity) 
 Healing from collective trauma requires acknowledgment at the collective level - but since that rarely happens, individuals are often left to process alone what was never theirs alone to carry.`,
       keyInsights: [
         { 
-          title: 'Collective trauma is invisible', 
+          title: "Collective trauma is invisible', 
           explanation: 'When everyone is affected, there\'s no "normal" to contrast against. Effects become the new baseline. You might not recognize what you\'re carrying as trauma.' 
         },
         { 
@@ -4090,15 +4090,15 @@ Healing from collective trauma requires acknowledgment at the collective level -
     title: 'News and Doomscrolling: Information as Trauma',
     category: 'world-society',
     duration: 6,
-    emoji: '📱',
+    emoji: '📱",
     content: {
-      introduction: `Your nervous system can't distinguish between danger that's in front of you and danger you're reading about on a screen. Every terrible news story activates the same threat response as if it were happening to you personally. This is why consuming news - especially the algorithmic, attention-maximizing, conflict-optimized news of social media - can genuinely traumatize you.
+      introduction: `Your nervous system can't distinguish between danger that"s in front of you and danger you"re reading about on a screen. Every terrible news story activates the same threat response as if it were happening to you personally. This is why consuming news - especially the algorithmic, attention-maximizing, conflict-optimized news of social media - can genuinely traumatize you.
 
-Doomscrolling - the compulsive consumption of negative news - isn't just a bad habit. It's often an attempt at control: if I know about all the threats, I can prepare for them. But you can't prepare for everything, and the knowing doesn't make you safer - it just keeps your nervous system in chronic activation.
+Doomscrolling - the compulsive consumption of negative news - isn't just a bad habit. It"s often an attempt at control: if I know about all the threats, I can prepare for them. But you can"t prepare for everything, and the knowing doesn't make you safer - it just keeps your nervous system in chronic activation.
 
-This doesn't mean you should be uninformed. But there's a difference between being informed and being saturated. You can know what's happening in the world without watching every video, reading every thread, absorbing every atrocity in real-time detail.
+This doesn"t mean you should be uninformed. But there"s a difference between being informed and being saturated. You can know what's happening in the world without watching every video, reading every thread, absorbing every atrocity in real-time detail.
 
-The world has always been full of suffering. What's new is the algorithmic delivery of that suffering directly to your pocket, optimized for maximum engagement (which often means maximum distress).`,
+The world has always been full of suffering. What"s new is the algorithmic delivery of that suffering directly to your pocket, optimized for maximum engagement (which often means maximum distress).`,
       keyInsights: [
         { 
           title: 'Your body responds to screens like reality', 
@@ -4138,11 +4138,11 @@ The world has always been full of suffering. What's new is the algorithmic deliv
     title: 'Generational Trauma: What Gets Passed Down',
     category: 'world-society',
     duration: 8,
-    emoji: '🌳',
+    emoji: '🌳",
     content: {
       introduction: `Trauma doesn't end with the person who experienced it. Research shows that the effects of traumatic experiences can be transmitted across generations - through parenting behaviors, through epigenetic changes, through family systems, and through cultural patterns. You may be carrying grief, fear, or survival adaptations from events that happened before you were born.
 
-This is particularly relevant for descendants of genocide survivors, enslaved peoples, refugees, famine victims, war veterans, and anyone whose ancestors experienced massive collective trauma. The silence around the trauma often makes it more powerful: what can't be spoken is felt more deeply by the next generation.
+This is particularly relevant for descendants of genocide survivors, enslaved peoples, refugees, famine victims, war veterans, and anyone whose ancestors experienced massive collective trauma. The silence around the trauma often makes it more powerful: what can"t be spoken is felt more deeply by the next generation.
 
 Recognizing generational trauma isn't about blame. Your parents did the best they could with what their parents gave them. Understanding the lineage helps you have compassion for them AND recognize what you might be carrying that was never yours to begin with.
 
@@ -4186,7 +4186,7 @@ The good news is that transmission can work in both directions. Healing can also
     title: 'Minority Stress: When the World Is Hostile',
     category: 'world-society',
     duration: 7,
-    emoji: '⚠️',
+    emoji: '⚠️",
     content: {
       introduction: `Minority stress theory explains the unique stressors faced by people who belong to stigmatized groups - based on race, ethnicity, sexual orientation, gender identity, disability, or other marginalized identities. This stress is chronic, comes from external sources, and is layered on top of the general stress everyone faces.
 
@@ -4194,10 +4194,10 @@ This stress shows up as: direct discrimination (being denied jobs, services, saf
 
 Minority stress has measurable health effects. Research consistently shows higher rates of depression, anxiety, substance use, and physical health problems among minority populations - not because of anything inherent to those identities, but because of how society treats those identities.
 
-This is important context because mental health struggles in marginalized communities are often treated as individual problems when they're actually reasonable responses to unreasonable conditions. You're not broken - you're responding to a world that hasn't been built for you.`,
+This is important context because mental health struggles in marginalized communities are often treated as individual problems when they're actually reasonable responses to unreasonable conditions. You"re not broken - you"re responding to a world that hasn't been built for you.`,
       keyInsights: [
         { 
-          title: 'It\'s not in your head - it\'s in the world', 
+          title: "It\'s not in your head - it\'s in the world', 
           explanation: 'Minority stress comes from real, external sources: discrimination, prejudice, systemic barriers. Your anxiety and hypervigilance are adaptive responses to real threats.' 
         },
         { 
@@ -4234,18 +4234,18 @@ This is important context because mental health struggles in marginalized commun
     title: 'Climate Anxiety: Grieving the Future',
     category: 'world-society',
     duration: 6,
-    emoji: '🌡️',
+    emoji: '🌡️",
     content: {
-      introduction: `Climate anxiety (sometimes called eco-anxiety or solastalgia) is the chronic fear and distress related to environmental destruction and climate change. It's not a clinical disorder - it's a rational response to a real threat. The challenge is living with this awareness without being paralyzed by it.
+      introduction: `Climate anxiety (sometimes called eco-anxiety or solastalgia) is the chronic fear and distress related to environmental destruction and climate change. It's not a clinical disorder - it"s a rational response to a real threat. The challenge is living with this awareness without being paralyzed by it.
 
-Young people report especially high rates of climate anxiety, which makes sense: they'll live with the worst consequences. But people of all ages experience it, particularly those connected to nature, future-oriented in their thinking, or aware of the science.
+Young people report especially high rates of climate anxiety, which makes sense: they"ll live with the worst consequences. But people of all ages experience it, particularly those connected to nature, future-oriented in their thinking, or aware of the science.
 
-The grief is complex: you're mourning losses that haven't fully happened yet, mourning what you'll never know (what the world could have been), mourning on behalf of future generations. There's also rage at the systems and decisions that created this, and despair at the scale of the problem.
+The grief is complex: you're mourning losses that haven"t fully happened yet, mourning what you"ll never know (what the world could have been), mourning on behalf of future generations. There's also rage at the systems and decisions that created this, and despair at the scale of the problem.
 
-How you respond to climate anxiety matters. Denial numbs but doesn't help. Doom and paralysis feel appropriate but also don't help. The goal is what researchers call "active hope" - acknowledging the reality, grieving what's lost, and still engaging in meaningful action.`,
+How you respond to climate anxiety matters. Denial numbs but doesn"t help. Doom and paralysis feel appropriate but also don"t help. The goal is what researchers call \"active hope\" - acknowledging the reality, grieving what's lost, and still engaging in meaningful action.`,
       keyInsights: [
         { 
-          title: 'This anxiety is rational', 
+          title: "This anxiety is rational', 
           explanation: 'Unlike many anxieties, climate anxiety is a response to real, documented, scientifically verified threats. You\'re not catastrophizing - you\'re observing.' 
         },
         { 
@@ -4289,15 +4289,15 @@ const bodyHealthLessons: HumanManualLesson[] = [
     title: 'Chronic Illness: When Your Body Is the Problem',
     category: 'body-health',
     duration: 8,
-    emoji: '🏥',
+    emoji: '🏥",
     content: {
-      introduction: `Living with chronic illness means living in a body that doesn't work the way bodies "should." This creates unique psychological challenges: grief over lost capacity, rage at a body that betrays you, isolation from a world designed for healthy people, exhaustion from managing symptoms AND the medical system, and the endless work of explaining and justifying your experience.
+      introduction: `Living with chronic illness means living in a body that doesn't work the way bodies \"should.\" This creates unique psychological challenges: grief over lost capacity, rage at a body that betrays you, isolation from a world designed for healthy people, exhaustion from managing symptoms AND the medical system, and the endless work of explaining and justifying your experience.
 
-Chronic illness is often invisible. You may look fine while feeling terrible, which creates its own problems: disbelief from others, pressure to perform wellness, guilt about not being "sick enough" to deserve accommodations. The illness is isolating and the invisibility is isolating too.
+Chronic illness is often invisible. You may look fine while feeling terrible, which creates its own problems: disbelief from others, pressure to perform wellness, guilt about not being \"sick enough\" to deserve accommodations. The illness is isolating and the invisibility is isolating too.
 
 The medical system often fails people with chronic illness. Conditions are dismissed as psychosomatic, particularly for women and people of color. Diagnosis can take years. Treatment may be inadequate. You end up becoming your own researcher, advocate, and case manager - exhausting work you never asked for.
 
-Acceptance of chronic illness is not the same as giving up. It's recognizing what is, grieving what was, and finding meaning and quality of life within new constraints. This is an ongoing process, not a destination.`,
+Acceptance of chronic illness is not the same as giving up. It"s recognizing what is, grieving what was, and finding meaning and quality of life within new constraints. This is an ongoing process, not a destination.`,
       keyInsights: [
         { 
           title: 'Grief for the body you lost', 
@@ -4338,18 +4338,18 @@ Acceptance of chronic illness is not the same as giving up. It's recognizing wha
     title: 'Medication Stigma: The Shame of Needing Help',
     category: 'body-health',
     duration: 6,
-    emoji: '💊',
+    emoji: '💊",
     content: {
-      introduction: `There's a particular kind of shame attached to psychiatric medication that doesn't exist for other types of medicine. People who wouldn't hesitate to take blood pressure medication or insulin feel embarrassed about antidepressants. This stigma prevents people from getting help, stops them from being honest about their needs, and adds shame to an already difficult experience.
+      introduction: `There's a particular kind of shame attached to psychiatric medication that doesn"t exist for other types of medicine. People who wouldn"t hesitate to take blood pressure medication or insulin feel embarrassed about antidepressants. This stigma prevents people from getting help, stops them from being honest about their needs, and adds shame to an already difficult experience.
 
 The beliefs underlying this stigma are deep and often unconscious: mental illness is weakness, medication is a crutch, you should be able to handle it yourself, taking medication means you've failed. These beliefs come from a culture that sees mental health as separate from physical health, mind as superior to body, and needing help as shameful.
 
 The reality: the brain is an organ. Mental health conditions often have neurobiological components. Medication can correct chemical imbalances that make normal function impossible. For many people, medication is what makes therapy possible, what makes daily function possible, what makes life livable.
 
-Choosing medication is a medical decision between you and your provider. It doesn't make you weak. It doesn't change who you "really" are. It's a tool for managing a medical condition. Full stop.`,
+Choosing medication is a medical decision between you and your provider. It doesn"t make you weak. It doesn"t change who you \"really\" are. It's a tool for managing a medical condition. Full stop.`,
       keyInsights: [
         { 
-          title: 'Brain is an organ too', 
+          title: "Brain is an organ too', 
           explanation: 'We don\'t shame people for treating heart disease or diabetes. The brain is equally physical, equally subject to dysfunction, equally deserving of treatment.' 
         },
         { 
@@ -4385,15 +4385,15 @@ Choosing medication is a medical decision between you and your provider. It does
     title: 'Sleep and Mental Health: The Foundation',
     category: 'body-health',
     duration: 6,
-    emoji: '😴',
+    emoji: '😴",
     content: {
       introduction: `Sleep and mental health form a bidirectional relationship so strong that it's sometimes hard to tell which is causing which. Poor sleep worsens depression, anxiety, and emotional regulation. Depression and anxiety disrupt sleep. It becomes a vicious cycle where each problem feeds the other.
 
-Sleep deprivation affects the brain in measurable ways: the amygdala (emotional alarm center) becomes up to 60% more reactive, while the prefrontal cortex (rational control center) goes partially offline. You're literally less capable of emotional regulation when you're sleep-deprived. Those mood swings aren't weakness - they're sleep debt.
+Sleep deprivation affects the brain in measurable ways: the amygdala (emotional alarm center) becomes up to 60% more reactive, while the prefrontal cortex (rational control center) goes partially offline. You"re literally less capable of emotional regulation when you"re sleep-deprived. Those mood swings aren't weakness - they"re sleep debt.
 
-Sleep is also when the brain processes emotions and consolidates memories. Without adequate REM sleep, emotional experiences don't get properly processed. Trauma survivors often have disrupted REM sleep, which may explain why traumatic memories stay so "hot."
+Sleep is also when the brain processes emotions and consolidates memories. Without adequate REM sleep, emotional experiences don"t get properly processed. Trauma survivors often have disrupted REM sleep, which may explain why traumatic memories stay so \"hot.\"
 
-Protecting sleep is often the highest-leverage mental health intervention available. It's also one of the hardest, because life conspires against it: work, kids, screens, stress, the feeling that sleep is "unproductive" time. But sleep IS productive - it's when your brain does essential maintenance.`,
+Protecting sleep is often the highest-leverage mental health intervention available. It's also one of the hardest, because life conspires against it: work, kids, screens, stress, the feeling that sleep is \"unproductive\" time. But sleep IS productive - it"s when your brain does essential maintenance.`,
       keyInsights: [
         { 
           title: 'Sleep deprivation mimics mental illness', 
@@ -4435,15 +4435,15 @@ Protecting sleep is often the highest-leverage mental health intervention availa
     title: 'Movement and Mood: The Body-Mind Loop',
     category: 'body-health',
     duration: 5,
-    emoji: '🏃',
+    emoji: '🏃",
     content: {
-      introduction: `Exercise is one of the most effective interventions for depression and anxiety - in some studies comparable to medication. This isn't "just go for a run and you'll feel better" toxic positivity. It's neuroscience: movement releases endorphins, reduces cortisol, promotes neurogenesis, and activates the body's natural regulation systems.
+      introduction: `Exercise is one of the most effective interventions for depression and anxiety - in some studies comparable to medication. This isn't \"just go for a run and you"ll feel better" toxic positivity. It's neuroscience: movement releases endorphins, reduces cortisol, promotes neurogenesis, and activates the body"s natural regulation systems.
 
-But here's the cruel irony: when you're depressed or anxious, motivation and energy for movement are exactly what's missing. Telling someone with depression to exercise can feel like telling someone with a broken leg to walk it off. The solution is also blocked by the problem.
+But here's the cruel irony: when you"re depressed or anxious, motivation and energy for movement are exactly what"s missing. Telling someone with depression to exercise can feel like telling someone with a broken leg to walk it off. The solution is also blocked by the problem.
 
-The way through is behavioral activation: doing things even when you don't feel like it, knowing that feeling often follows action rather than preceding it. Start smaller than you think necessary. A five-minute walk counts. Movement doesn't have to be exercise - it can be stretching, dancing, cleaning, anything that gets the body moving.
+The way through is behavioral activation: doing things even when you don't feel like it, knowing that feeling often follows action rather than preceding it. Start smaller than you think necessary. A five-minute walk counts. Movement doesn"t have to be exercise - it can be stretching, dancing, cleaning, anything that gets the body moving.
 
-And it's not about achievement or fitness goals. It's about the mood regulation effects of being in motion. The bar is "moved a bit" not "worked out hard." Lower the bar until it's something you can actually do, then do it consistently.`,
+And it"s not about achievement or fitness goals. It's about the mood regulation effects of being in motion. The bar is \"moved a bit\" not \"worked out hard.\" Lower the bar until it"s something you can actually do, then do it consistently.`,
       keyInsights: [
         { 
           title: 'The evidence is strong', 
@@ -4482,15 +4482,15 @@ And it's not about achievement or fitness goals. It's about the mood regulation 
     title: 'Substances and Self-Medication',
     category: 'body-health',
     duration: 7,
-    emoji: '🍷',
+    emoji: '🍷",
     content: {
       introduction: `Many people use substances - alcohol, cannabis, other drugs - to cope with emotional pain, anxiety, depression, or trauma. This is self-medication: using substances to manage symptoms that aren't being addressed another way. It works, in the short term, which is exactly the problem.
 
-Self-medication isn't stupidity or weakness. It's an attempt to solve a real problem with the tools available. Alcohol does reduce anxiety (temporarily). Cannabis does numb emotional pain (temporarily). The problem is that the temporary relief creates longer-term problems: dependency, tolerance, physical health effects, and often a worsening of the original symptoms.
+Self-medication isn"t stupidity or weakness. It"s an attempt to solve a real problem with the tools available. Alcohol does reduce anxiety (temporarily). Cannabis does numb emotional pain (temporarily). The problem is that the temporary relief creates longer-term problems: dependency, tolerance, physical health effects, and often a worsening of the original symptoms.
 
 The question isn't whether substances provide relief - they often do. The question is whether the relief is worth the costs, and whether better solutions exist. For most self-medication patterns, the answer is: there are better solutions, but they require access to treatment, resources, and support that not everyone has.
 
-If you're self-medicating, the path forward involves both addressing the substance use AND addressing what you've been using substances to manage. Just stopping the substance without addressing the underlying issue often leads either to relapse or to the underlying issue getting worse.`,
+If you"re self-medicating, the path forward involves both addressing the substance use AND addressing what you've been using substances to manage. Just stopping the substance without addressing the underlying issue often leads either to relapse or to the underlying issue getting worse.`,
       keyInsights: [
         { 
           title: 'Self-medication is problem-solving', 
@@ -4537,15 +4537,15 @@ const lifeTransitionsLessons: HumanManualLesson[] = [
     title: 'Grief Comes in Many Forms',
     category: 'life-transitions',
     duration: 8,
-    emoji: '🕯️',
+    emoji: '🕯️",
     content: {
       introduction: `Grief is the normal response to loss - but loss comes in more forms than death. You can grieve the end of a relationship, the loss of a job, the life you expected, a friendship that faded, your health, your youth, a version of yourself that no longer exists. These are real losses that deserve real grief.
 
-Our culture is bad at grief. We want it to have stages that progress neatly, a timeline, an endpoint. But grief is not linear. It comes in waves. It can ambush you years later. The "stages" model (denial, anger, bargaining, depression, acceptance) was never meant to be sequential - the person who created it said it described common experiences, not a roadmap.
+Our culture is bad at grief. We want it to have stages that progress neatly, a timeline, an endpoint. But grief is not linear. It comes in waves. It can ambush you years later. The \"stages\" model (denial, anger, bargaining, depression, acceptance) was never meant to be sequential - the person who created it said it described common experiences, not a roadmap.
 
-Disenfranchised grief - grief that society doesn't recognize as legitimate - is particularly painful. The loss of a pet, a pregnancy, a friendship, an opportunity, a home. When others don't acknowledge your loss as "real," you may feel you don't have permission to grieve. You do.
+Disenfranchised grief - grief that society doesn't recognize as legitimate - is particularly painful. The loss of a pet, a pregnancy, a friendship, an opportunity, a home. When others don"t acknowledge your loss as "real," you may feel you don"t have permission to grieve. You do.
 
-Grief doesn't require getting over it. It requires learning to carry it. The loss remains. You grow around it. Over time, the grief may soften, but the love doesn't have to.`,
+Grief doesn't require getting over it. It requires learning to carry it. The loss remains. You grow around it. Over time, the grief may soften, but the love doesn"t have to.`,
       keyInsights: [
         { 
           title: 'Grief is not just for death', 
@@ -4586,18 +4586,18 @@ Grief doesn't require getting over it. It requires learning to carry it. The los
     title: 'When Who You Are Changes',
     category: 'life-transitions',
     duration: 7,
-    emoji: '🦋',
+    emoji: '🦋",
     content: {
-      introduction: `Identity isn't fixed - it evolves across the lifespan. Sometimes the evolution is gradual. Sometimes it's sudden: a life event forces you to become someone different, or you realize who you've been is no longer who you want to be. These identity shifts are disorienting, even when they're chosen.
+      introduction: `Identity isn't fixed - it evolves across the lifespan. Sometimes the evolution is gradual. Sometimes it"s sudden: a life event forces you to become someone different, or you realize who you"ve been is no longer who you want to be. These identity shifts are disorienting, even when they're chosen.
 
-Major life transitions often trigger identity restructuring: becoming a parent, retiring, divorce, illness, career change, loss of a role or relationship that defined you, coming out, recovery from addiction, or any major change in circumstances. The old "you" no longer applies, but the new one hasn't solidified.
+Major life transitions often trigger identity restructuring: becoming a parent, retiring, divorce, illness, career change, loss of a role or relationship that defined you, coming out, recovery from addiction, or any major change in circumstances. The old \"you\" no longer applies, but the new one hasn"t solidified.
 
-The space between identities - what William Bridges called the "neutral zone" - is uncomfortable. You don't know who you are yet. The old answers to "who am I?" don't fit, and the new answers haven't arrived. This in-between time can feel like falling apart even when it's actually falling into place.
+The space between identities - what William Bridges called the "neutral zone" - is uncomfortable. You don"t know who you are yet. The old answers to \"who am I?\" don't fit, and the new answers haven"t arrived. This in-between time can feel like falling apart even when it"s actually falling into place.
 
 Allow the transition. Resisting it prolongs the disorientation. The new identity will emerge, but it requires letting go of the old one - and that's a grief process too.`,
       keyInsights: [
         { 
-          title: 'Identity is always in process', 
+          title: "Identity is always in process', 
           explanation: 'You\'re not the same person at 40 that you were at 20. Growth means changing, and changing means grieving who you were.' 
         },
         { 
@@ -4634,18 +4634,18 @@ Allow the transition. Resisting it prolongs the disorientation. The new identity
     title: 'Starting Over After Loss',
     category: 'life-transitions',
     duration: 7,
-    emoji: '🌱',
+    emoji: '🌱",
     content: {
       introduction: `Starting over is one of the hardest things humans do. After divorce, job loss, death of a partner, major health crisis, or any event that destroys your previous life structure - you face the task of rebuilding from scratch while grieving what was lost.
 
-The simultaneous grief and reconstruction is exhausting. You're supposed to be moving forward while still processing what happened. Society often wants you to "bounce back" on a timeline that has nothing to do with reality. There's pressure to be inspirational, to find the silver lining, to turn pain into growth on command.
+The simultaneous grief and reconstruction is exhausting. You're supposed to be moving forward while still processing what happened. Society often wants you to \"bounce back\" on a timeline that has nothing to do with reality. There"s pressure to be inspirational, to find the silver lining, to turn pain into growth on command.
 
-Here's permission to not be okay for a while. Starting over doesn't mean pretending the loss didn't happen. It means building a new life that acknowledges the loss, that has room for grief alongside new growth. The new life will be different from what you planned. It can still be good - but it will be different.
+Here"s permission to not be okay for a while. Starting over doesn't mean pretending the loss didn"t happen. It means building a new life that acknowledges the loss, that has room for grief alongside new growth. The new life will be different from what you planned. It can still be good - but it will be different.
 
-Take it day by day when long-term vision feels impossible. Do the next small thing. Let people help. Lower the bar for what counts as success. You're not just building a life - you're doing it while carrying grief. That deserves massive compassion.`,
+Take it day by day when long-term vision feels impossible. Do the next small thing. Let people help. Lower the bar for what counts as success. You"re not just building a life - you're doing it while carrying grief. That deserves massive compassion.`,
       keyInsights: [
         { 
-          title: 'Rebuilding while grieving is exhausting', 
+          title: "Rebuilding while grieving is exhausting', 
           explanation: 'You\'re doing two of the hardest things at once. Cut yourself enormous slack.' 
         },
         { 
@@ -4682,15 +4682,15 @@ Take it day by day when long-term vision feels impossible. Do the next small thi
     title: 'Aging: The Transition Nobody Escapes',
     category: 'life-transitions',
     duration: 7,
-    emoji: '⏳',
+    emoji: '⏳",
     content: {
       introduction: `Aging is the one major life transition that applies to everyone who doesn't die young. Yet we rarely prepare for it, avoid thinking about it, and treat it as something that happens to other people until it happens to us.
 
 The psychological challenges of aging include: adjusting to changing physical capacity, processing accumulated losses, finding meaning without roles that defined you, facing mortality, dealing with a culture that devalues older people, and maintaining connection when your social network naturally shrinks.
 
-But aging also comes with advantages often overlooked: emotional regulation generally improves with age, older adults tend to focus more on meaningful relationships, research shows increases in wellbeing in later life for many people, and accumulated wisdom is real. The "U-curve" of happiness suggests wellbeing often increases after middle age.
+But aging also comes with advantages often overlooked: emotional regulation generally improves with age, older adults tend to focus more on meaningful relationships, research shows increases in wellbeing in later life for many people, and accumulated wisdom is real. The \"U-curve\" of happiness suggests wellbeing often increases after middle age.
 
-The transition of aging goes better when acknowledged than when denied. Pretending you're still 35 when you're 65 creates its own suffering. Accepting the reality of this life stage, with its losses AND its gifts, allows you to live it fully rather than fighting it constantly.`,
+The transition of aging goes better when acknowledged than when denied. Pretending you"re still 35 when you're 65 creates its own suffering. Accepting the reality of this life stage, with its losses AND its gifts, allows you to live it fully rather than fighting it constantly.`,
       keyInsights: [
         { 
           title: 'Denial doesn\'t help', 
@@ -4730,18 +4730,18 @@ The transition of aging goes better when acknowledged than when denied. Pretendi
     title: 'Divorce and Relationship Endings',
     category: 'life-transitions',
     duration: 8,
-    emoji: '💔',
+    emoji: '💔",
     content: {
       introduction: `Divorce and major relationship endings involve loss on multiple levels: loss of the person, loss of the future you planned, loss of daily routines and shared life, loss of identity as part of a couple, sometimes loss of home or financial security, and often loss of mutual friends and extended family connections.
 
-Even when the relationship needed to end - even when you're the one who ended it - grief is normal. You can be relieved AND grieving. You can know it was right AND still mourn. These aren't contradictions; they're the complexity of real human experience.
+Even when the relationship needed to end - even when you're the one who ended it - grief is normal. You can be relieved AND grieving. You can know it was right AND still mourn. These aren"t contradictions; they"re the complexity of real human experience.
 
 The practical challenges (where to live, finances, custody if children are involved) layer on top of emotional devastation. You're supposed to make major life decisions while your capacity for decision-making is at its lowest. This is a setup for struggle, and giving yourself grace is essential.
 
-Recovery takes longer than you expect or want. Research suggests 2-5 years for full adjustment to divorce. Rushing to "get over it" or jumping into a new relationship to avoid the pain typically extends the recovery, not shortens it.`,
+Recovery takes longer than you expect or want. Research suggests 2-5 years for full adjustment to divorce. Rushing to \"get over it\" or jumping into a new relationship to avoid the pain typically extends the recovery, not shortens it.`,
       keyInsights: [
         { 
-          title: 'Multiple losses at once', 
+          title: "Multiple losses at once', 
           explanation: 'You\'re not just losing a person - you\'re losing a life structure, a future, an identity. Each of these deserves grief.' 
         },
         { 
@@ -4780,16 +4780,16 @@ Recovery takes longer than you expect or want. Research suggests 2-5 years for f
     duration: 7,
     emoji: '👶',
     content: {
-      introduction: `Becoming a parent is one of the most profound identity transitions a person can undergo. In an instant, you become responsible for another human's survival and wellbeing. Your time, body, relationships, work, and sense of self all fundamentally restructure. This is true even when deeply wanted - and especially complicated when it wasn't.
+      introduction: `Becoming a parent is one of the most profound identity transitions a person can undergo. In an instant, you become responsible for another human"s survival and wellbeing. Your time, body, relationships, work, and sense of self all fundamentally restructure. This is true even when deeply wanted - and especially complicated when it wasn't.
 
 The cultural narrative says you should feel overwhelming love and joy. The reality often includes exhaustion, identity loss, relationship strain, grief for your former life, sometimes ambivalence, and the terrifying responsibility of keeping a tiny human alive. Admitting any of this feels taboo, which isolates new parents in their struggle.
 
-Postpartum depression and anxiety are common (affecting 10-20% of new mothers and a significant percentage of fathers) but still under-discussed. Intrusive thoughts about harm coming to the baby are extremely common and don't mean you're dangerous - they're a feature of the hypervigilant postpartum brain.
+Postpartum depression and anxiety are common (affecting 10-20% of new mothers and a significant percentage of fathers) but still under-discussed. Intrusive thoughts about harm coming to the baby are extremely common and don"t mean you"re dangerous - they're a feature of the hypervigilant postpartum brain.
 
 The identity shift of parenthood is permanent. You will never not be a parent again. This can be beautiful and it can feel like a trap. Both are valid experiences of the same reality.`,
       keyInsights: [
         { 
-          title: 'Identity reconstruction is normal', 
+          title: "Identity reconstruction is normal', 
           explanation: 'You\'re not the same person you were before. Mourning your pre-parent self - your freedom, your sleep, your identity - is allowed and doesn\'t mean you don\'t love your child.' 
         },
         { 
@@ -4826,17 +4826,17 @@ The identity shift of parenthood is permanent. You will never not be a parent ag
     title: 'Infertility & Pregnancy Loss: Grief Often Minimized',
     category: 'life-transitions',
     duration: 9,
-    emoji: '🥀',
+    emoji: '🥀",
     content: {
-      introduction: `Infertility and pregnancy loss are among the most isolating forms of grief because they're so often minimized, hidden, or misunderstood. "At least you can try again." "It wasn't meant to be." "You're still young." These well-meaning phrases communicate something devastating: your loss doesn't count.
+      introduction: `Infertility and pregnancy loss are among the most isolating forms of grief because they're so often minimized, hidden, or misunderstood. \"At least you can try again.\" \"It wasn"t meant to be." "You"re still young.\" These well-meaning phrases communicate something devastating: your loss doesn't count.
 
-But it does count. A miscarriage is the loss of a hoped-for child, a future you'd already begun imagining, a family that won't exist as planned. Infertility is a series of losses - each month, each failed treatment, each time someone asks when you're having kids. These are real griefs that deserve real acknowledgment.
+But it does count. A miscarriage is the loss of a hoped-for child, a future you"d already begun imagining, a family that won"t exist as planned. Infertility is a series of losses - each month, each failed treatment, each time someone asks when you're having kids. These are real griefs that deserve real acknowledgment.
 
-The physical experience compounds the emotional one. Pregnancy loss is a bodily trauma. Infertility treatments are invasive, hormonal, and exhausting. Your body, which you may have trusted, becomes a site of failure and betrayal. The disconnect between what your body is supposed to do and what it's doing creates a particular kind of anguish.
+The physical experience compounds the emotional one. Pregnancy loss is a bodily trauma. Infertility treatments are invasive, hormonal, and exhausting. Your body, which you may have trusted, becomes a site of failure and betrayal. The disconnect between what your body is supposed to do and what it"s doing creates a particular kind of anguish.
 
-Relationships are tested. Partners may grieve differently, creating distance when you need closeness. Friends with children become painful to be around. Baby showers and pregnancy announcements feel like personal attacks even though they're not. The isolation grows because talking about it feels like burdening others with something they can't fix.
+Relationships are tested. Partners may grieve differently, creating distance when you need closeness. Friends with children become painful to be around. Baby showers and pregnancy announcements feel like personal attacks even though they"re not. The isolation grows because talking about it feels like burdening others with something they can't fix.
 
-Healing doesn't require "getting over it" or finding the silver lining. It requires having your loss witnessed, your grief validated, and your experience recognized as significant. Because it is.`,
+Healing doesn"t require "getting over it" or finding the silver lining. It requires having your loss witnessed, your grief validated, and your experience recognized as significant. Because it is.`,
       keyInsights: [
         { 
           title: 'This is real loss', 
@@ -4883,17 +4883,17 @@ Healing doesn't require "getting over it" or finding the silver lining. It requi
     title: 'Chronic Pain: When Your Body Won\'t Stop Hurting',
     category: 'life-transitions',
     duration: 9,
-    emoji: '🔥',
+    emoji: '🔥",
     content: {
-      introduction: `Living with chronic pain means waking up each day to a body that won't stop signaling danger. It's exhausting in a way that people without chronic pain can't fully understand - not just the pain itself, but the relentlessness of it, the way it colors every moment, the mental energy required just to function.
+      introduction: `Living with chronic pain means waking up each day to a body that won't stop signaling danger. It"s exhausting in a way that people without chronic pain can"t fully understand - not just the pain itself, but the relentlessness of it, the way it colors every moment, the mental energy required just to function.
 
 Chronic pain changes everything. It changes your capabilities, your relationships, your work, your mood, your sense of self. Activities you once did without thinking become calculations: Is this worth the pain it will cost? Will I pay for this tomorrow? The constant negotiation with your body is draining.
 
-Adding to the burden is how often chronic pain is dismissed or disbelieved. "Have you tried yoga?" "It's probably stress." "You don't look sick." When medical professionals and loved ones don't believe your pain, you start doubting yourself. Gaslighting about your own body is its own form of trauma.
+Adding to the burden is how often chronic pain is dismissed or disbelieved. \"Have you tried yoga?\" \"It's probably stress.\" \"You don"t look sick." When medical professionals and loved ones don't believe your pain, you start doubting yourself. Gaslighting about your own body is its own form of trauma.
 
-Pain science has evolved significantly. We now understand that chronic pain involves changes in the nervous system - the pain is real, even when scans show nothing. The brain's pain processing has become sensitized. This isn't "all in your head" in the dismissive sense - it's in your nervous system, which is very real and very physical.
+Pain science has evolved significantly. We now understand that chronic pain involves changes in the nervous system - the pain is real, even when scans show nothing. The brain"s pain processing has become sensitized. This isn't \"all in your head\" in the dismissive sense - it"s in your nervous system, which is very real and very physical.
 
-Living well with chronic pain isn't about pretending it doesn't exist. It's about building a life that acknowledges the pain while not letting it define everything. This is incredibly hard, and anyone doing it deserves recognition for fighting a battle others can't see.`,
+Living well with chronic pain isn"t about pretending it doesn't exist. It"s about building a life that acknowledges the pain while not letting it define everything. This is incredibly hard, and anyone doing it deserves recognition for fighting a battle others can't see.`,
       keyInsights: [
         { 
           title: 'Chronic pain is exhausting beyond the pain itself', 
@@ -4941,17 +4941,17 @@ Living well with chronic pain isn't about pretending it doesn't exist. It's abou
     title: 'Disability: Visible and Invisible',
     category: 'life-transitions',
     duration: 10,
-    emoji: '♿',
+    emoji: '♿",
     content: {
       introduction: `Disability affects how you move through the world - not just physically or cognitively, but socially, economically, and psychologically. Whether your disability is visible (using a wheelchair, having a visible difference) or invisible (chronic illness, learning disabilities, mental health conditions), it shapes your daily experience in ways non-disabled people rarely understand.
 
-The social model of disability distinguishes between impairment (the condition itself) and disability (the barriers society creates). Much of what makes disability hard isn't the condition - it's the stairs without ramps, the websites without accessibility, the jobs that won't accommodate, the assumptions that you're less capable. Disability is as much about how society is designed as about your body or mind.
+The social model of disability distinguishes between impairment (the condition itself) and disability (the barriers society creates). Much of what makes disability hard isn't the condition - it"s the stairs without ramps, the websites without accessibility, the jobs that won"t accommodate, the assumptions that you're less capable. Disability is as much about how society is designed as about your body or mind.
 
-Invisible disabilities carry their own challenges. You may "look fine," leading others to doubt your experience. You have to decide constantly whether to disclose - and face either disbelief or discrimination either way. The energy spent managing others' perceptions is exhausting.
+Invisible disabilities carry their own challenges. You may \"look fine,\" leading others to doubt your experience. You have to decide constantly whether to disclose - and face either disbelief or discrimination either way. The energy spent managing others" perceptions is exhausting.
 
-Identity around disability is complex. Some people embrace disability identity and find community in disability culture. Others resist the label or grieve the life they expected. Many feel both. Your relationship to your disability can change over time, and there's no "right" way to feel about it.
+Identity around disability is complex. Some people embrace disability identity and find community in disability culture. Others resist the label or grieve the life they expected. Many feel both. Your relationship to your disability can change over time, and there"s no \"right\" way to feel about it.
 
-What's true across the spectrum: disabled people deserve full participation in life, not charity. Accessibility isn't a special favor - it's equity. And the lived expertise of disabled people about their own experience matters more than what non-disabled "experts" assume.`,
+What's true across the spectrum: disabled people deserve full participation in life, not charity. Accessibility isn"t a special favor - it's equity. And the lived expertise of disabled people about their own experience matters more than what non-disabled "experts" assume.`,
       keyInsights: [
         { 
           title: 'The social model of disability', 
@@ -4999,13 +4999,13 @@ What's true across the spectrum: disabled people deserve full participation in l
     duration: 8,
     emoji: '🥪',
     content: {
-      introduction: `The "sandwich generation" refers to adults caught between caring for aging parents and raising their own children - squeezed from both directions at once. But even without kids, caring for aging parents is one of life's most challenging transitions. The role reversal alone is disorienting: the people who once took care of you now depend on you.
+      introduction: `The "sandwich generation" refers to adults caught between caring for aging parents and raising their own children - squeezed from both directions at once. But even without kids, caring for aging parents is one of life"s most challenging transitions. The role reversal alone is disorienting: the people who once took care of you now depend on you.
 
-This transition often happens gradually, then suddenly. First it's helping with bills or driving to appointments. Then it's managing medications, navigating healthcare systems, making difficult decisions about living situations. You may find yourself becoming a nurse, care coordinator, financial manager, and emotional support - roles you never trained for.
+This transition often happens gradually, then suddenly. First it's helping with bills or driving to appointments. Then it"s managing medications, navigating healthcare systems, making difficult decisions about living situations. You may find yourself becoming a nurse, care coordinator, financial manager, and emotional support - roles you never trained for.
 
-The emotional complexity is immense. You're grieving your parent's decline while they're still alive. You may feel guilty for resenting the burden, for not doing enough, for having a life of your own. Old family dynamics resurface under stress. Siblings may not share the load equally, creating conflict. You're mourning the relationship you had and the parent you're losing, even as they're physically present.
+The emotional complexity is immense. You're grieving your parent"s decline while they're still alive. You may feel guilty for resenting the burden, for not doing enough, for having a life of your own. Old family dynamics resurface under stress. Siblings may not share the load equally, creating conflict. You"re mourning the relationship you had and the parent you"re losing, even as they're physically present.
 
-Self-sacrifice is not sustainable. The cultural expectation that you should give everything - your time, your finances, your health - to caregiving is a setup for burnout and resentment. Caring for yourself isn't selfish; it's how you stay capable of caring for anyone.`,
+Self-sacrifice is not sustainable. The cultural expectation that you should give everything - your time, your finances, your health - to caregiving is a setup for burnout and resentment. Caring for yourself isn"t selfish; it's how you stay capable of caring for anyone.`,
       keyInsights: [
         { 
           title: 'Role reversal is disorienting', 
@@ -5052,18 +5052,18 @@ Self-sacrifice is not sustainable. The cultural expectation that you should give
     title: 'Caregiver Burnout: You Can\'t Pour From Empty',
     category: 'life-transitions',
     duration: 8,
-    emoji: '🪫',
+    emoji: '🪫",
     content: {
-      introduction: `Caregiving - whether for a child with special needs, a sick partner, an aging parent, or anyone who depends on you - is one of the most demanding roles a person can occupy. It's also one of the most isolating, because the needs of the person you're caring for often eclipse your own until there's nothing left.
+      introduction: `Caregiving - whether for a child with special needs, a sick partner, an aging parent, or anyone who depends on you - is one of the most demanding roles a person can occupy. It's also one of the most isolating, because the needs of the person you"re caring for often eclipse your own until there"s nothing left.
 
-Caregiver burnout isn't just being tired. It's a state of physical, emotional, and mental exhaustion that comes from prolonged caregiving without adequate support. Signs include feeling overwhelmed, hopeless, resentful toward the person you're caring for, withdrawn from others, unable to relax even when you have a break, physically ill more often, and finding no joy in things that used to matter.
+Caregiver burnout isn't just being tired. It"s a state of physical, emotional, and mental exhaustion that comes from prolonged caregiving without adequate support. Signs include feeling overwhelmed, hopeless, resentful toward the person you"re caring for, withdrawn from others, unable to relax even when you have a break, physically ill more often, and finding no joy in things that used to matter.
 
 The cruel irony is that the most dedicated caregivers are most vulnerable to burnout. The ones who give everything, who never take breaks, who feel guilty for having any needs of their own - they're the ones who crash hardest. And in the crash, they often become unable to provide care at all, which is exactly what they were trying to prevent.
 
-Society romanticizes selfless caregiving while providing almost no support for caregivers. The expectation that you should sacrifice your health, career, relationships, and identity on the altar of caregiving is not noble - it's unsustainable and unfair. Caring for yourself is not a betrayal of the person you're caring for. It's what makes continued caregiving possible.`,
+Society romanticizes selfless caregiving while providing almost no support for caregivers. The expectation that you should sacrifice your health, career, relationships, and identity on the altar of caregiving is not noble - it"s unsustainable and unfair. Caring for yourself is not a betrayal of the person you"re caring for. It's what makes continued caregiving possible.`,
       keyInsights: [
         { 
-          title: 'Burnout is a state, not a character flaw', 
+          title: "Burnout is a state, not a character flaw', 
           explanation: 'You\'re not burned out because you\'re weak. You\'re burned out because the demands exceeded the resources for too long. It\'s physics, not moral failure.' 
         },
         { 
@@ -5108,18 +5108,18 @@ Society romanticizes selfless caregiving while providing almost no support for c
     title: 'Empty Nest: When Kids Leave',
     category: 'life-transitions',
     duration: 7,
-    emoji: '🪹',
+    emoji: '🪹",
     content: {
-      introduction: `For years or decades, your identity has been intertwined with being a parent. The rhythm of daily life revolved around your children - their needs, their schedules, their presence. And then, gradually or suddenly, the house is quiet. They're gone. And you're left wondering who you are now.
+      introduction: `For years or decades, your identity has been intertwined with being a parent. The rhythm of daily life revolved around your children - their needs, their schedules, their presence. And then, gradually or suddenly, the house is quiet. They're gone. And you"re left wondering who you are now.
 
-Empty nest syndrome isn't a clinical diagnosis, but the experience is real: grief, loneliness, loss of purpose, even depression when children leave home. It can feel like losing your job, your meaning, and your closest daily companions all at once. The absence is physical - empty rooms, quiet dinners - and existential: what am I for now?
+Empty nest syndrome isn"t a clinical diagnosis, but the experience is real: grief, loneliness, loss of purpose, even depression when children leave home. It can feel like losing your job, your meaning, and your closest daily companions all at once. The absence is physical - empty rooms, quiet dinners - and existential: what am I for now?
 
-This transition is complicated by conflicting emotions. You might feel proud of raising independent humans, relieved to have more freedom, and devastated by the loss all at the same time. You might feel guilty for struggling when you're "supposed" to be happy for them. You might grieve the daily connection while genuinely wanting them to thrive independently.
+This transition is complicated by conflicting emotions. You might feel proud of raising independent humans, relieved to have more freedom, and devastated by the loss all at the same time. You might feel guilty for struggling when you're \"supposed\" to be happy for them. You might grieve the daily connection while genuinely wanting them to thrive independently.
 
-The task of this transition is reinvention. Who are you when you're not actively parenting? What does your relationship with your partner look like now? What interests did you set aside that you could reclaim? The nest is empty, but that's not the end - it's a new beginning that requires intentional creation.`,
+The task of this transition is reinvention. Who are you when you"re not actively parenting? What does your relationship with your partner look like now? What interests did you set aside that you could reclaim? The nest is empty, but that"s not the end - it's a new beginning that requires intentional creation.`,
       keyInsights: [
         { 
-          title: 'This is real grief', 
+          title: "This is real grief', 
           explanation: 'You\'re grieving a role that defined you, daily presence you relied on, a phase of life that\'s over. The fact that it\'s developmentally normal doesn\'t make it less painful.' 
         },
         { 
@@ -5157,18 +5157,18 @@ The task of this transition is reinvention. Who are you when you're not actively
     title: 'Retirement Identity: Who Am I Without Work?',
     category: 'life-transitions',
     duration: 8,
-    emoji: '🏖️',
+    emoji: '🏖️",
     content: {
       introduction: `Retirement is sold as the golden finish line - rest, freedom, endless vacation. But for many people, it triggers an identity crisis. When your work was not just what you did but who you were, leaving it creates a void that golf and grandchildren may not fill.
 
-In our culture, "What do you do?" is how we introduce ourselves. Your work provided structure, purpose, social connection, intellectual stimulation, and a sense of contribution. Remove all of that at once, and the freedom that sounded wonderful can feel like formlessness. The relief of no longer working can coexist with the loss of everything work provided.
+In our culture, \"What do you do?\" is how we introduce ourselves. Your work provided structure, purpose, social connection, intellectual stimulation, and a sense of contribution. Remove all of that at once, and the freedom that sounded wonderful can feel like formlessness. The relief of no longer working can coexist with the loss of everything work provided.
 
-This is particularly acute for people whose identity was deeply tied to their profession: doctors, executives, teachers, anyone who answered "I am a ___" rather than "I work as a ___." The title wasn't just a job - it was a self-concept. Without it, you may feel you've lost not just your schedule but your significance.
+This is particularly acute for people whose identity was deeply tied to their profession: doctors, executives, teachers, anyone who answered \"I am a ___\" rather than \"I work as a ___.\" The title wasn't just a job - it was a self-concept. Without it, you may feel you"ve lost not just your schedule but your significance.
 
-Successful retirement isn't about doing nothing - it's about finding new sources of the things work provided: structure, purpose, connection, contribution, and identity. This requires active creation, not passive waiting. The retirees who thrive are those who approach retirement as a new chapter to author, not just an ending to endure.`,
+Successful retirement isn"t about doing nothing - it's about finding new sources of the things work provided: structure, purpose, connection, contribution, and identity. This requires active creation, not passive waiting. The retirees who thrive are those who approach retirement as a new chapter to author, not just an ending to endure.`,
       keyInsights: [
         { 
-          title: 'Work provides more than money', 
+          title: "Work provides more than money', 
           explanation: 'Structure, identity, social connection, purpose, intellectual engagement - work provides many things besides income. Retirement removes all of them simultaneously.' 
         },
         { 
@@ -5212,18 +5212,18 @@ Successful retirement isn't about doing nothing - it's about finding new sources
     title: 'Midlife Crisis: The Reevaluation',
     category: 'life-transitions',
     duration: 8,
-    emoji: '🔄',
+    emoji: '🔄",
     content: {
-      introduction: `The term "midlife crisis" has become a punchline - the sports car, the affair, the desperate grasp at youth. But beneath the clichés is a legitimate psychological experience: a profound reassessment of life that often happens somewhere between 40 and 60, when mortality becomes real and the question "Is this all there is?" demands an answer.
+      introduction: `The term \"midlife crisis\" has become a punchline - the sports car, the affair, the desperate grasp at youth. But beneath the clichés is a legitimate psychological experience: a profound reassessment of life that often happens somewhere between 40 and 60, when mortality becomes real and the question \"Is this all there is?\" demands an answer.
 
-At midlife, you've lived long enough to see what choices led where. Dreams pursued and dreams abandoned. Relationships that worked and ones that didn't. A career that fulfilled or one that just paid bills. You may have achieved what you thought you wanted and found it hollow, or failed to achieve it and faced the grief of closed doors. Either way, the question of meaning becomes urgent.
+At midlife, you've lived long enough to see what choices led where. Dreams pursued and dreams abandoned. Relationships that worked and ones that didn"t. A career that fulfilled or one that just paid bills. You may have achieved what you thought you wanted and found it hollow, or failed to achieve it and faced the grief of closed doors. Either way, the question of meaning becomes urgent.
 
-This is actually developmentally normal. Erik Erikson called the midlife task "generativity vs. stagnation" - the need to contribute something that outlasts you, to matter beyond yourself. When that need isn't met, or when you realize your life hasn't matched your values, crisis emerges.
+This is actually developmentally normal. Erik Erikson called the midlife task "generativity vs. stagnation" - the need to contribute something that outlasts you, to matter beyond yourself. When that need isn"t met, or when you realize your life hasn't matched your values, crisis emerges.
 
-The "crisis" can be destructive - impulsive decisions that blow up your life without addressing the underlying questions. Or it can be generative - a genuine reassessment that leads to more authentic living. The difference is whether you react impulsively to escape the discomfort, or sit with the questions long enough to find real answers.`,
+The \"crisis\" can be destructive - impulsive decisions that blow up your life without addressing the underlying questions. Or it can be generative - a genuine reassessment that leads to more authentic living. The difference is whether you react impulsively to escape the discomfort, or sit with the questions long enough to find real answers.`,
       keyInsights: [
         { 
-          title: 'The crisis is a question, not a diagnosis', 
+          title: "The crisis is a question, not a diagnosis', 
           explanation: '"Is this life worth living? Is this who I want to be? What do I want my remaining years to mean?" These are legitimate questions that deserve serious engagement.' 
         },
         { 
@@ -5266,13 +5266,13 @@ The "crisis" can be destructive - impulsive decisions that blow up your life wit
     title: 'Aging & Mortality: Facing the End',
     category: 'life-transitions',
     duration: 9,
-    emoji: '🕯️',
+    emoji: '🕯️",
     content: {
       introduction: `Death is the one certainty we spend most of our lives avoiding. But as you age - as your body changes, as friends and family members die, as your own mortality becomes undeniable - the avoidance becomes impossible. Facing death is perhaps the most profound psychological task a human can undertake.
 
 Existentialists suggest that death awareness can either paralyze us with anxiety or liberate us to live more fully. When you truly accept that your time is limited, trivial concerns fall away. What matters becomes clear. Many people report that confronting mortality - through illness, loss, or simply aging - fundamentally reorients their priorities toward what's actually meaningful.
 
-But getting to that clarity often requires passing through terror. The fear of non-existence, of leaving loved ones, of suffering, of the unknown - these are universal human fears that become more present as death becomes more proximate. There's no shame in fearing death. The question is whether fear will dominate your remaining life or whether you can find a way to hold it while still living fully.
+But getting to that clarity often requires passing through terror. The fear of non-existence, of leaving loved ones, of suffering, of the unknown - these are universal human fears that become more present as death becomes more proximate. There"s no shame in fearing death. The question is whether fear will dominate your remaining life or whether you can find a way to hold it while still living fully.
 
 Preparation matters - not just the practical kind (wills, advance directives) but the psychological kind. Processing your relationship to death, having conversations with loved ones, deciding how you want to live in whatever time remains. These are not morbid preoccupations but essential preparations for the one experience no one escapes.`,
       keyInsights: [
@@ -5320,15 +5320,15 @@ Preparation matters - not just the practical kind (wills, advance directives) bu
     title: 'Poverty & Financial Insecurity: Survival Mode',
     category: 'life-transitions',
     duration: 9,
-    emoji: '💸',
+    emoji: '💸",
     content: {
       introduction: `Poverty is not a moral failing. It's a circumstance that affects every dimension of life - not just your bank account, but your health, relationships, mental state, and opportunities. Living in financial insecurity means living in survival mode, where the cognitive load of constant scarcity makes everything else harder.
 
-Research shows that poverty taxes cognitive bandwidth. When you're worried about whether you can pay rent or buy groceries, there's less mental capacity for anything else. This isn't a character defect - it's a predictable effect of scarcity on the brain. Poor people aren't worse at decisions; they're making decisions under conditions that make everyone worse at decisions.
+Research shows that poverty taxes cognitive bandwidth. When you"re worried about whether you can pay rent or buy groceries, there"s less mental capacity for anything else. This isn't a character defect - it"s a predictable effect of scarcity on the brain. Poor people aren"t worse at decisions; they're making decisions under conditions that make everyone worse at decisions.
 
-The stress of financial insecurity is chronic and relentless. It's not knowing if you'll have enough this month. It's choosing between medications and heat. It's the shame when you can't give your kids what others have. It's being one emergency away from disaster. This constant stress has documented effects on physical health, mental health, and relationships.
+The stress of financial insecurity is chronic and relentless. It"s not knowing if you"ll have enough this month. It's choosing between medications and heat. It"s the shame when you can"t give your kids what others have. It's being one emergency away from disaster. This constant stress has documented effects on physical health, mental health, and relationships.
 
-Society often blames individuals for poverty while ignoring systemic causes: wage stagnation, housing costs, healthcare costs, lack of social safety nets. The narrative that anyone can make it with hard work ignores that many people work extremely hard and still can't get ahead. Understanding poverty as a systemic issue, not a personal failing, is essential for both policy change and self-compassion.`,
+Society often blames individuals for poverty while ignoring systemic causes: wage stagnation, housing costs, healthcare costs, lack of social safety nets. The narrative that anyone can make it with hard work ignores that many people work extremely hard and still can"t get ahead. Understanding poverty as a systemic issue, not a personal failing, is essential for both policy change and self-compassion.`,
       keyInsights: [
         { 
           title: 'Poverty is cognitively expensive', 
@@ -5374,15 +5374,15 @@ Society often blames individuals for poverty while ignoring systemic causes: wag
     title: 'Homelessness & Housing Instability',
     category: 'life-transitions',
     duration: 9,
-    emoji: '🏚️',
+    emoji: '🏚️",
     content: {
       introduction: `Housing instability exists on a spectrum - from living in shelters or on the street, to couch surfing with friends, to constantly fearing eviction. All forms of housing insecurity create profound stress and make every other aspect of life harder. A stable address is the foundation that most other stability builds on.
 
 Homelessness is dehumanizing in ways that are hard to understand without experiencing it. The lack of privacy, the constant vulnerability, the way people look through you or around you, the impossibility of doing basic things like showering or storing belongings. The message from society is clear: you don't matter. Fighting against that message while trying to survive is exhausting.
 
-The causes of homelessness are complex: mental illness, addiction, job loss, domestic violence, lack of affordable housing, medical bankruptcy, and more. But whatever the pathway into homelessness, the experience itself creates additional trauma and barriers to escape. It's hard to get a job without an address. It's hard to stay sober without stability. The system creates obstacles at every turn.
+The causes of homelessness are complex: mental illness, addiction, job loss, domestic violence, lack of affordable housing, medical bankruptcy, and more. But whatever the pathway into homelessness, the experience itself creates additional trauma and barriers to escape. It"s hard to get a job without an address. It"s hard to stay sober without stability. The system creates obstacles at every turn.
 
-Recovery from housing instability is not just about getting a roof overhead - it's about recovering from the trauma of instability itself. The hypervigilance, the shame, the grief for what was lost, and the difficulty trusting stability when you've learned that security can vanish. These psychological wounds need attention alongside practical housing solutions.`,
+Recovery from housing instability is not just about getting a roof overhead - it's about recovering from the trauma of instability itself. The hypervigilance, the shame, the grief for what was lost, and the difficulty trusting stability when you"ve learned that security can vanish. These psychological wounds need attention alongside practical housing solutions.`,
       keyInsights: [
         { 
           title: 'Housing is foundation', 
@@ -5429,11 +5429,11 @@ Recovery from housing instability is not just about getting a roof overhead - it
     title: 'Immigration & Cultural Displacement',
     category: 'life-transitions',
     duration: 10,
-    emoji: '🌍',
+    emoji: '🌍",
     content: {
-      introduction: `Immigration is one of the most profound upheavals a person can experience. Whether you left by choice seeking opportunity, or by necessity fleeing danger, you've been uprooted from everything familiar - language, culture, relationships, landscapes, foods, the way things work. You're building a new life while grieving the old one, navigating a foreign system while processing loss.
+      introduction: `Immigration is one of the most profound upheavals a person can experience. Whether you left by choice seeking opportunity, or by necessity fleeing danger, you've been uprooted from everything familiar - language, culture, relationships, landscapes, foods, the way things work. You"re building a new life while grieving the old one, navigating a foreign system while processing loss.
 
-The stress of immigration goes beyond practical challenges. There's the grief of leaving home, family, and everything you knew. The disorientation of existing in a culture you don't fully understand. The exhaustion of everything requiring extra effort - simple tasks become complicated when you don't know the language, the systems, the unwritten rules. And often, the experience of being treated as "other" in ways that range from subtle to dangerous.
+The stress of immigration goes beyond practical challenges. There"s the grief of leaving home, family, and everything you knew. The disorientation of existing in a culture you don't fully understand. The exhaustion of everything requiring extra effort - simple tasks become complicated when you don"t know the language, the systems, the unwritten rules. And often, the experience of being treated as "other" in ways that range from subtle to dangerous.
 
 For refugees and asylum seekers, trauma precedes and compounds the immigration stress. You may be processing violence, persecution, loss of family members, dangerous journeys - all while trying to establish yourself in a new country that may not welcome you. The cumulative burden is immense.
 
@@ -5485,20 +5485,20 @@ Despite all this, immigrants demonstrate remarkable resilience. Building a life 
     title: 'Military/Veteran Transition',
     category: 'life-transitions',
     duration: 9,
-    emoji: '🎖️',
+    emoji: '🎖️",
     content: {
-      introduction: `Military service creates a unique identity - one built on structure, mission, brotherhood and sisterhood, physical challenge, and a clear sense of purpose. Transitioning out of the military means losing all of that simultaneously. The question "Who am I as a civilian?" can feel impossible to answer after years of being defined by service.
+      introduction: `Military service creates a unique identity - one built on structure, mission, brotherhood and sisterhood, physical challenge, and a clear sense of purpose. Transitioning out of the military means losing all of that simultaneously. The question \"Who am I as a civilian?\" can feel impossible to answer after years of being defined by service.
 
 The military provided total structure: when to wake, what to wear, where to be, what to do. It provided purpose: a mission larger than yourself. It provided belonging: the intense bonds formed under shared hardship. Civilian life offers none of this automatically. You're suddenly responsible for creating your own structure, finding your own purpose, and building connections without the accelerant of shared service.
 
-For many veterans, the transition involves processing experiences that civilians can't understand. Combat, moral injury, loss of fellow service members, things witnessed or done - these experiences may have been compartmentalized during service and emerge during transition. The isolation of being unable to share these experiences with civilians who weren't there compounds the difficulty.
+For many veterans, the transition involves processing experiences that civilians can"t understand. Combat, moral injury, loss of fellow service members, things witnessed or done - these experiences may have been compartmentalized during service and emerge during transition. The isolation of being unable to share these experiences with civilians who weren"t there compounds the difficulty.
 
-Mental health challenges are common: PTSD, depression, anxiety, substance use, and tragically, suicide. These aren't weaknesses - they're predictable responses to extraordinary experiences and a difficult transition. Seeking help is not failure; it's the same mission adaptation that got you through service.
+Mental health challenges are common: PTSD, depression, anxiety, substance use, and tragically, suicide. These aren't weaknesses - they"re predictable responses to extraordinary experiences and a difficult transition. Seeking help is not failure; it"s the same mission adaptation that got you through service.
 
 The transition is not just leaving a job - it's leaving an identity, a community, and a way of being in the world. Treating it as a profound life transition, rather than just a career change, is essential.`,
       keyInsights: [
         { 
-          title: 'It\'s an identity crisis, not just job change', 
+          title: "It\'s an identity crisis, not just job change', 
           explanation: 'Military service becomes who you are, not just what you do. Leaving it creates a vacuum of identity, purpose, and belonging that civilian employment doesn\'t automatically fill.' 
         },
         { 
@@ -5542,18 +5542,18 @@ The transition is not just leaving a job - it's leaving an identity, a community
     title: 'Incarceration Impact: On Individuals and Families',
     category: 'life-transitions',
     duration: 10,
-    emoji: '🔒',
+    emoji: '🔒",
     content: {
-      introduction: `Incarceration doesn't just affect the person behind bars - it ripples through families, communities, and generations. Whether you've been incarcerated yourself or you're dealing with the incarceration of a family member, the impacts are profound, lasting, and often invisible to those who haven't experienced them.
+      introduction: `Incarceration doesn't just affect the person behind bars - it ripples through families, communities, and generations. Whether you"ve been incarcerated yourself or you"re dealing with the incarceration of a family member, the impacts are profound, lasting, and often invisible to those who haven't experienced them.
 
-For those who've been incarcerated: The experience is traumatic. The loss of freedom, the violence and dehumanization of the prison environment, the separation from everyone you love. And then reentry compounds the trauma with impossible obstacles: employment discrimination, housing restrictions, probation requirements, lost relationships, and a society that treats "ex-con" as a permanent identity. The barriers to rebuilding a life are systemic and relentless.
+For those who"ve been incarcerated: The experience is traumatic. The loss of freedom, the violence and dehumanization of the prison environment, the separation from everyone you love. And then reentry compounds the trauma with impossible obstacles: employment discrimination, housing restrictions, probation requirements, lost relationships, and a society that treats "ex-con" as a permanent identity. The barriers to rebuilding a life are systemic and relentless.
 
-For families: The incarceration of a parent, partner, child, or sibling creates cascading crises. Financial hardship from lost income and costs of maintaining contact. Children's trauma from parental separation and stigma. Relationship strain from enforced distance and the changes that occur on both sides. The grief of losing someone who's still alive but inaccessible. And the stigma - the way society treats families of incarcerated people as tainted by association.
+For families: The incarceration of a parent, partner, child, or sibling creates cascading crises. Financial hardship from lost income and costs of maintaining contact. Children"s trauma from parental separation and stigma. Relationship strain from enforced distance and the changes that occur on both sides. The grief of losing someone who's still alive but inaccessible. And the stigma - the way society treats families of incarcerated people as tainted by association.
 
-Mass incarceration is a public health crisis, not just a criminal justice issue. The trauma, family disruption, community destruction, and intergenerational effects are massive. Understanding incarceration as a life circumstance that affects whole systems - not just individuals who "deserve" it - is essential for healing.`,
+Mass incarceration is a public health crisis, not just a criminal justice issue. The trauma, family disruption, community destruction, and intergenerational effects are massive. Understanding incarceration as a life circumstance that affects whole systems - not just individuals who \"deserve\" it - is essential for healing.`,
       keyInsights: [
         { 
-          title: 'Incarceration is trauma', 
+          title: "Incarceration is trauma', 
           explanation: 'The prison environment itself is traumatizing: violence, dehumanization, powerlessness, separation from loved ones. PTSD and other trauma responses are common and expected.' 
         },
         { 
@@ -5602,16 +5602,16 @@ Mass incarceration is a public health crisis, not just a criminal justice issue.
     duration: 9,
     emoji: '💊',
     content: {
-      introduction: `A chronic illness diagnosis divides your life into before and after. Before, you could take your health for granted, make plans without considering your body's limitations, assume that wellness was your default state. After, everything requires recalibration. Your body is no longer a reliable partner but something that needs constant management, monitoring, and accommodation.
+      introduction: `A chronic illness diagnosis divides your life into before and after. Before, you could take your health for granted, make plans without considering your body"s limitations, assume that wellness was your default state. After, everything requires recalibration. Your body is no longer a reliable partner but something that needs constant management, monitoring, and accommodation.
 
-The grief is enormous and ongoing. You grieve the healthy self you were. You grieve the future you expected. You grieve spontaneity, energy, the ability to do what others do without thinking. And because you're still alive, people may not recognize this as grief. "At least you're not dying." But living with chronic illness is its own kind of loss that deserves acknowledgment.
+The grief is enormous and ongoing. You grieve the healthy self you were. You grieve the future you expected. You grieve spontaneity, energy, the ability to do what others do without thinking. And because you're still alive, people may not recognize this as grief. \"At least you"re not dying." But living with chronic illness is its own kind of loss that deserves acknowledgment.
 
 Chronic illness affects every domain of life: work (can you still do your job? will your employer accommodate?), relationships (will people stay? can you be the partner/parent/friend you want to be?), finances (medical costs, reduced work capacity), identity (who are you if not the active/healthy/productive person you were?), and daily existence (medication schedules, symptom management, good days and bad days).
 
-The uncertainty is particularly hard. Will it progress? Are these symptoms normal or concerning? Can you commit to plans when you don't know how you'll feel? Living with uncertainty while also trying to build a meaningful life is an ongoing challenge that healthy people rarely appreciate.`,
+The uncertainty is particularly hard. Will it progress? Are these symptoms normal or concerning? Can you commit to plans when you don"t know how you'll feel? Living with uncertainty while also trying to build a meaningful life is an ongoing challenge that healthy people rarely appreciate.`,
       keyInsights: [
         { 
-          title: 'This is a major life transition', 
+          title: "This is a major life transition', 
           explanation: 'Chronic illness diagnosis is not just a medical event - it\'s a before/after divide in your life that affects identity, relationships, work, and purpose.' 
         },
         { 
@@ -5664,16 +5664,16 @@ const growthHealingLessons: HumanManualLesson[] = [
     duration: 7,
     emoji: '💚',
     content: {
-      introduction: `Self-compassion is treating yourself with the same kindness you'd offer a good friend who was struggling. It's not self-pity, self-indulgence, or letting yourself off the hook. Research by Dr. Kristin Neff shows it's actually associated with greater motivation, resilience, and wellbeing than self-criticism.
+      introduction: `Self-compassion is treating yourself with the same kindness you"d offer a good friend who was struggling. It's not self-pity, self-indulgence, or letting yourself off the hook. Research by Dr. Kristin Neff shows it"s actually associated with greater motivation, resilience, and wellbeing than self-criticism.
 
-Most of us are far harsher with ourselves than we'd ever be with someone we care about. We say things to ourselves we'd never say to a friend. We hold ourselves to standards we'd recognize as unreasonable for anyone else. This isn't motivating - it's demoralizing.
+Most of us are far harsher with ourselves than we'd ever be with someone we care about. We say things to ourselves we'd never say to a friend. We hold ourselves to standards we"d recognize as unreasonable for anyone else. This isn't motivating - it"s demoralizing.
 
 Self-compassion has three components: self-kindness (being gentle rather than harsh with yourself), common humanity (recognizing that suffering and imperfection are part of the shared human experience), and mindfulness (being aware of pain without over-identifying with it).
 
-The critic in your head probably believes it's helping. It's not. Research consistently shows that self-compassion leads to better outcomes than self-criticism: more motivation, less anxiety, greater resilience, and improved mental health.`,
+The critic in your head probably believes it"s helping. It's not. Research consistently shows that self-compassion leads to better outcomes than self-criticism: more motivation, less anxiety, greater resilience, and improved mental health.`,
       keyInsights: [
         { 
-          title: 'It\'s not soft or weak', 
+          title: "It\'s not soft or weak', 
           explanation: 'Self-compassion is associated with greater resilience, not less. People who practice it bounce back from failure faster and are more willing to try again.' 
         },
         { 
@@ -5712,18 +5712,18 @@ The critic in your head probably believes it's helping. It's not. Research consi
     title: 'Reparenting: Giving Yourself What You Didn\'t Get',
     category: 'growth-healing',
     duration: 8,
-    emoji: '🌱',
+    emoji: '🌱",
     content: {
-      introduction: `Reparenting is the practice of consciously providing for yourself the emotional needs that weren't met in childhood. If you didn't receive consistent love, validation, boundaries, or safety from your caregivers, you can learn to give these things to yourself as an adult.
+      introduction: `Reparenting is the practice of consciously providing for yourself the emotional needs that weren't met in childhood. If you didn"t receive consistent love, validation, boundaries, or safety from your caregivers, you can learn to give these things to yourself as an adult.
 
-This isn't about blaming your parents or dwelling in victimhood. It's about recognizing that some needs went unmet - for whatever reason - and taking responsibility for meeting them now. You can't change the past, but you can change what happens from here.
+This isn"t about blaming your parents or dwelling in victimhood. It's about recognizing that some needs went unmet - for whatever reason - and taking responsibility for meeting them now. You can"t change the past, but you can change what happens from here.
 
-Reparenting involves developing an "inner nurturing parent" - a part of you that can offer comfort, set healthy boundaries, provide encouragement, and offer the unconditional regard you may have missed. This takes practice because you're building neural pathways that weren't developed in childhood.
+Reparenting involves developing an "inner nurturing parent" - a part of you that can offer comfort, set healthy boundaries, provide encouragement, and offer the unconditional regard you may have missed. This takes practice because you"re building neural pathways that weren't developed in childhood.
 
 It can feel strange or even silly at first. But over time, reparenting work can fundamentally change your relationship with yourself - from one of neglect or criticism to one of care and support.`,
       keyInsights: [
         { 
-          title: 'You can meet your own needs now', 
+          title: "You can meet your own needs now', 
           explanation: 'What you didn\'t receive as a child can be provided by yourself as an adult. The need doesn\'t have to stay unmet forever.' 
         },
         { 
@@ -5760,15 +5760,15 @@ It can feel strange or even silly at first. But over time, reparenting work can 
     title: 'Inner Child Work: Healing the Past in the Present',
     category: 'growth-healing',
     duration: 7,
-    emoji: '👶',
+    emoji: '👶",
     content: {
-      introduction: `The "inner child" is a concept in psychology representing the part of your psyche that retains the feelings, memories, and experiences from childhood. When childhood needs went unmet or childhood wounds went unhealed, this part can continue to influence your adult life in ways you might not recognize.
+      introduction: `The \"inner child\" is a concept in psychology representing the part of your psyche that retains the feelings, memories, and experiences from childhood. When childhood needs went unmet or childhood wounds went unhealed, this part can continue to influence your adult life in ways you might not recognize.
 
-Inner child work involves connecting with this younger part of yourself, understanding its needs and fears, and providing the care and healing that wasn't available then. It's not about being childish - it's about integrating a part of yourself that's been carrying unprocessed pain.
+Inner child work involves connecting with this younger part of yourself, understanding its needs and fears, and providing the care and healing that wasn't available then. It"s not about being childish - it"s about integrating a part of yourself that's been carrying unprocessed pain.
 
-Signs of an unhealed inner child include: overreacting to situations that remind you of childhood, patterns of self-sabotage, difficulty with intimacy, shame about having needs, perfectionism, people-pleasing, and feeling fundamentally flawed. These are often the inner child's strategies for coping with what was too much to handle at the time.
+Signs of an unhealed inner child include: overreacting to situations that remind you of childhood, patterns of self-sabotage, difficulty with intimacy, shame about having needs, perfectionism, people-pleasing, and feeling fundamentally flawed. These are often the inner child"s strategies for coping with what was too much to handle at the time.
 
-Healing the inner child doesn't mean the past didn't happen or that those responsible are absolved. It means you're no longer leaving a wounded part of yourself alone in the past. You're bringing them forward into safety.`,
+Healing the inner child doesn"t mean the past didn't happen or that those responsible are absolved. It means you"re no longer leaving a wounded part of yourself alone in the past. You're bringing them forward into safety.`,
       keyInsights: [
         { 
           title: 'The child is still there', 
@@ -5816,15 +5816,15 @@ const identitySelfLessons: HumanManualLesson[] = [
     title: 'The Sexuality Spectrum: Understanding Your Orientation',
     category: 'identity-self',
     duration: 8,
-    emoji: '🌈',
+    emoji: '🌈",
     content: {
-      introduction: `Sexual orientation isn't a simple binary - it exists on a spectrum that researchers have been mapping since Alfred Kinsey's groundbreaking work in the 1940s. The Kinsey Scale, later expanded by others, suggests orientation ranges from exclusively heterosexual to exclusively homosexual, with most people falling somewhere in between. And that's just the start of the complexity.
+      introduction: `Sexual orientation isn't a simple binary - it exists on a spectrum that researchers have been mapping since Alfred Kinsey"s groundbreaking work in the 1940s. The Kinsey Scale, later expanded by others, suggests orientation ranges from exclusively heterosexual to exclusively homosexual, with most people falling somewhere in between. And that"s just the start of the complexity.
 
 Beyond gay, straight, and bisexual, terms like pansexual (attraction regardless of gender), asexual (little or no sexual attraction), demisexual (attraction only after emotional connection), and queer (an umbrella term reclaimed by many) help capture the full range of human experience. Your orientation might also shift over time - sexual fluidity is a documented phenomenon, particularly among women.
 
-Understanding your orientation is about self-knowledge, not about fitting into boxes. Labels can be helpful for finding community and communicating about yourself, but they're tools, not constraints. If no label fits perfectly, that's okay. If your orientation feels complicated or changes over time, that's okay too.
+Understanding your orientation is about self-knowledge, not about fitting into boxes. Labels can be helpful for finding community and communicating about yourself, but they're tools, not constraints. If no label fits perfectly, that"s okay. If your orientation feels complicated or changes over time, that"s okay too.
 
-The key insight from modern sexuality research: there's no "normal" to deviate from. Human sexuality has always been diverse. What's new is having language for that diversity and the social freedom to explore it.`,
+The key insight from modern sexuality research: there's no \"normal\" to deviate from. Human sexuality has always been diverse. What"s new is having language for that diversity and the social freedom to explore it.`,
       keyInsights: [
         { 
           title: 'Orientation is a spectrum, not a binary', 
@@ -5864,15 +5864,15 @@ The key insight from modern sexuality research: there's no "normal" to deviate f
     title: 'Questioning Your Identity: It\'s Okay Not to Know',
     category: 'identity-self',
     duration: 7,
-    emoji: '❓',
+    emoji: '❓",
     content: {
-      introduction: `We live in a culture that demands certainty. "What are you?" "Who are you?" "What do you want?" We're expected to know ourselves fully and declare it confidently. But the truth is: not knowing is a valid place to be. Questioning your identity - whether it's sexuality, gender, career, beliefs, or fundamental sense of self - isn't a failure of self-awareness. It's often a sign of growth.
+      introduction: `We live in a culture that demands certainty. \"What are you?\" \"Who are you?\" \"What do you want?\" We're expected to know ourselves fully and declare it confidently. But the truth is: not knowing is a valid place to be. Questioning your identity - whether it"s sexuality, gender, career, beliefs, or fundamental sense of self - isn"t a failure of self-awareness. It's often a sign of growth.
 
-Erik Erikson, the developmental psychologist who gave us the concept of "identity crisis," saw questioning as essential to identity formation. You can't develop a solid sense of self without first exploring, experimenting, and questioning what you've been given. The crisis IS the process, not a problem to be solved as quickly as possible.
+Erik Erikson, the developmental psychologist who gave us the concept of \"identity crisis,\" saw questioning as essential to identity formation. You can"t develop a solid sense of self without first exploring, experimenting, and questioning what you"ve been given. The crisis IS the process, not a problem to be solved as quickly as possible.
 
 Pressure to know yourself can paradoxically make self-knowledge harder. When questioning feels unsafe, when others need you to have an answer, when you need certainty to feel okay - you might grab a label prematurely or deny what you're actually experiencing. True self-knowledge requires the safety to not know.
 
-Sitting with uncertainty is uncomfortable. Our brains crave resolution. But some of the most important questions about who you are don't have quick answers. The ability to tolerate "I don't know yet" is a skill worth developing.`,
+Sitting with uncertainty is uncomfortable. Our brains crave resolution. But some of the most important questions about who you are don"t have quick answers. The ability to tolerate "I don't know yet" is a skill worth developing.`,
       keyInsights: [
         { 
           title: 'Questioning is the process', 
@@ -5912,13 +5912,13 @@ Sitting with uncertainty is uncomfortable. Our brains crave resolution. But some
     title: 'Internalized Shame: When You Hate Parts of Yourself',
     category: 'identity-self',
     duration: 9,
-    emoji: '😞',
+    emoji: '😞",
     content: {
       introduction: `Internalized shame happens when you absorb negative messages about some aspect of your identity and turn them against yourself. You don't just feel ashamed when others judge you - you become your own harshest critic, policing and punishing parts of yourself that were never wrong in the first place.
 
-This is particularly insidious for marginalized identities. Internalized homophobia, internalized racism, internalized ableism, internalized misogyny - these aren't personal failures. They're the predictable result of growing up in a society that devalues your identity. The shame isn't yours; it was given to you. But it now operates from inside, which makes it harder to recognize and resist.
+This is particularly insidious for marginalized identities. Internalized homophobia, internalized racism, internalized ableism, internalized misogyny - these aren"t personal failures. They"re the predictable result of growing up in a society that devalues your identity. The shame isn't yours; it was given to you. But it now operates from inside, which makes it harder to recognize and resist.
 
-The cruelty of internalized shame is that it disguises itself as your own voice. It doesn't feel like prejudice - it feels like truth, like reality, like "I just know this about myself." Recognizing that these beliefs came from outside, that they were absorbed rather than discovered, is the beginning of untangling them.
+The cruelty of internalized shame is that it disguises itself as your own voice. It doesn"t feel like prejudice - it feels like truth, like reality, like "I just know this about myself." Recognizing that these beliefs came from outside, that they were absorbed rather than discovered, is the beginning of untangling them.
 
 Healing internalized shame requires both external work (finding community, changing inputs, experiencing acceptance) and internal work (compassion, challenging beliefs, grieving what the shame cost you). Neither alone is sufficient.`,
       keyInsights: [
@@ -5961,13 +5961,13 @@ Healing internalized shame requires both external work (finding community, chang
     title: 'People-Pleasing: The Fawn Response',
     category: 'identity-self',
     duration: 8,
-    emoji: '🙏',
+    emoji: '🙏",
     content: {
-      introduction: `You've heard of fight, flight, and freeze. But there's a fourth trauma response: fawn. Fawning means appeasing, pleasing, and merging with others' needs to stay safe. People-pleasing isn't just being nice - when it's compulsive and self-abandoning, it's a survival strategy that developed when pleasing others was literally necessary to survive.
+      introduction: `You've heard of fight, flight, and freeze. But there"s a fourth trauma response: fawn. Fawning means appeasing, pleasing, and merging with others" needs to stay safe. People-pleasing isn't just being nice - when it"s compulsive and self-abandoning, it"s a survival strategy that developed when pleasing others was literally necessary to survive.
 
 For many people, particularly those raised in chaotic, abusive, or emotionally unpredictable homes, fawning was adaptive. If you could read the room, anticipate needs, and make yourself useful or agreeable, you might avoid harm. The problem is that the strategy continues long after the original danger has passed.
 
-Adult people-pleasers often struggle with knowing their own needs (they've been focused outward for so long), saying no (it feels dangerous), tolerating others' disappointment (it triggers survival panic), and feeling worthy without being useful (their value was conditional).
+Adult people-pleasers often struggle with knowing their own needs (they've been focused outward for so long), saying no (it feels dangerous), tolerating others" disappointment (it triggers survival panic), and feeling worthy without being useful (their value was conditional).
 
 Breaking the people-pleasing pattern requires understanding that it was survival, not weakness. It requires grieving the self that had to be abandoned to stay safe. And it requires slowly, carefully learning that you can have needs, have opinions, and disappoint people without catastrophe.`,
       keyInsights: [
@@ -6009,9 +6009,9 @@ Breaking the people-pleasing pattern requires understanding that it was survival
     title: 'Perfectionism: The Impossible Standard',
     category: 'identity-self',
     duration: 8,
-    emoji: '✨',
+    emoji: '✨",
     content: {
-      introduction: `Perfectionism isn't about having high standards. It's about believing your worth depends on being perfect. It's the difference between "I want to do well" and "If I don't do perfectly, I'm worthless." One is healthy striving. The other is a psychological trap.
+      introduction: `Perfectionism isn't about having high standards. It"s about believing your worth depends on being perfect. It"s the difference between \"I want to do well\" and \"If I don't do perfectly, I"m worthless." One is healthy striving. The other is a psychological trap.
 
 Research by Dr. Brené Brown and others shows perfectionism is actually correlated with worse outcomes: more anxiety, more depression, more procrastination (it's often safer not to try than to try and fail), and paradoxically, lower performance over time (burnout is inevitable when the standard is inhuman).
 
@@ -6057,13 +6057,13 @@ Unlearning perfectionism means accepting that you are inherently worthy, regardl
     title: 'Rejection Sensitive Dysphoria: When Rejection Devastates',
     category: 'identity-self',
     duration: 8,
-    emoji: '💥',
+    emoji: '💥",
     content: {
-      introduction: `Rejection Sensitive Dysphoria (RSD) is the extreme emotional pain triggered by the perception of being rejected, criticized, or failing to meet expectations. It's not just feeling bad about rejection - it's an intense, often unbearable flood of emotion that can feel like physical pain.
+      introduction: `Rejection Sensitive Dysphoria (RSD) is the extreme emotional pain triggered by the perception of being rejected, criticized, or failing to meet expectations. It's not just feeling bad about rejection - it"s an intense, often unbearable flood of emotion that can feel like physical pain.
 
-RSD was initially identified in research on ADHD, where it affects up to 99% of adults with the condition. But the experience isn't limited to ADHD - it can occur with depression, anxiety, autism, and trauma histories. The common thread is a nervous system that processes perceived rejection as an emergency.
+RSD was initially identified in research on ADHD, where it affects up to 99% of adults with the condition. But the experience isn"t limited to ADHD - it can occur with depression, anxiety, autism, and trauma histories. The common thread is a nervous system that processes perceived rejection as an emergency.
 
-The key word is "perceived." RSD can be triggered by actual rejection or by the anticipation of rejection or by interpreting neutral events as rejection. The emotional response is the same regardless of whether the rejection was real or imagined. This makes it particularly difficult, because you can't always trust your perception of whether you're being rejected.
+The key word is \"perceived.\" RSD can be triggered by actual rejection or by the anticipation of rejection or by interpreting neutral events as rejection. The emotional response is the same regardless of whether the rejection was real or imagined. This makes it particularly difficult, because you can't always trust your perception of whether you"re being rejected.
 
 Living with RSD often means managing a hair-trigger emotional response. People may avoid risk (fear of rejection), people-please (prevent rejection), or rage (defensive response to rejection pain). Understanding RSD can help you respond to these intense emotions with more skill and less shame.`,
       keyInsights: [
@@ -6106,13 +6106,13 @@ Living with RSD often means managing a hair-trigger emotional response. People m
     title: 'ADHD & Identity: More Than Just Attention',
     category: 'identity-self',
     duration: 9,
-    emoji: '🧠',
+    emoji: '🧠",
     content: {
-      introduction: `ADHD (Attention-Deficit/Hyperactivity Disorder) isn't just about attention problems - it's a different way of having a brain that affects every aspect of life. Executive function challenges, emotional regulation difficulties, time blindness, rejection sensitivity, interest-based motivation, and a nervous system that works differently are all part of the picture.
+      introduction: `ADHD (Attention-Deficit/Hyperactivity Disorder) isn't just about attention problems - it"s a different way of having a brain that affects every aspect of life. Executive function challenges, emotional regulation difficulties, time blindness, rejection sensitivity, interest-based motivation, and a nervous system that works differently are all part of the picture.
 
-Many people with ADHD grow up being told they're lazy, unmotivated, not trying hard enough, or not living up to their potential. They internalize these messages, developing deep shame about their brains. Late diagnosis (especially common in women, who were underdiagnosed for decades) often brings both relief ("there's a reason!") and grief ("I could have known sooner").
+Many people with ADHD grow up being told they"re lazy, unmotivated, not trying hard enough, or not living up to their potential. They internalize these messages, developing deep shame about their brains. Late diagnosis (especially common in women, who were underdiagnosed for decades) often brings both relief (\"there's a reason!\") and grief (\"I could have known sooner\").
 
-ADHD isn't a character flaw or a lack of willpower. Neuroimaging studies show structural and functional brain differences. The prefrontal cortex, which handles executive functions, develops differently. Dopamine regulation works differently. It's not that you're not trying - it's that your brain is running different software.
+ADHD isn"t a character flaw or a lack of willpower. Neuroimaging studies show structural and functional brain differences. The prefrontal cortex, which handles executive functions, develops differently. Dopamine regulation works differently. It"s not that you're not trying - it"s that your brain is running different software.
 
 Understanding ADHD as part of your identity means neither using it as an excuse nor pretending it doesn't exist. It means learning how your brain works, building systems that work with it rather than against it, and releasing the shame of being different from neurotypical expectations.`,
       keyInsights: [
@@ -6156,15 +6156,15 @@ Understanding ADHD as part of your identity means neither using it as an excuse 
     title: 'Autism & Masking: The Exhaustion of Fitting In',
     category: 'identity-self',
     duration: 9,
-    emoji: '🎭',
+    emoji: '🎭",
     content: {
-      introduction: `Masking is the process by which autistic people consciously or unconsciously hide their autistic traits to appear more neurotypical. It involves suppressing stims, forcing eye contact, scripting social interactions, mimicking facial expressions, and generally performing a version of "normal" that doesn't come naturally.
+      introduction: `Masking is the process by which autistic people consciously or unconsciously hide their autistic traits to appear more neurotypical. It involves suppressing stims, forcing eye contact, scripting social interactions, mimicking facial expressions, and generally performing a version of \"normal\" that doesn't come naturally.
 
-Many autistic people, especially those diagnosed late in life or those who "pass" as neurotypical, have been masking for so long they don't know who they are underneath. The mask becomes automatic, and removing it feels terrifying. But masking has costs: exhaustion, burnout, anxiety, depression, and a fundamental disconnection from authentic self.
+Many autistic people, especially those diagnosed late in life or those who \"pass\" as neurotypical, have been masking for so long they don"t know who they are underneath. The mask becomes automatic, and removing it feels terrifying. But masking has costs: exhaustion, burnout, anxiety, depression, and a fundamental disconnection from authentic self.
 
-Autism wasn't recognized in many people - particularly women, BIPOC individuals, and those without intellectual disabilities - until recently. Many were missed because their masking was successful. They struggled without knowing why, often developing anxiety, depression, or burnout that was really autistic burnout misunderstood.
+Autism wasn"t recognized in many people - particularly women, BIPOC individuals, and those without intellectual disabilities - until recently. Many were missed because their masking was successful. They struggled without knowing why, often developing anxiety, depression, or burnout that was really autistic burnout misunderstood.
 
-Understanding autism as part of identity means recognizing that autistic ways of being aren't wrong or disordered - they're different. Unmasking, where it's safe to do so, means allowing yourself to be authentically autistic: to stim, to rest when needed, to communicate naturally, to stop performing neurotypicality.`,
+Understanding autism as part of identity means recognizing that autistic ways of being aren't wrong or disordered - they"re different. Unmasking, where it's safe to do so, means allowing yourself to be authentically autistic: to stim, to rest when needed, to communicate naturally, to stop performing neurotypicality.`,
       keyInsights: [
         { 
           title: 'Masking is exhausting', 
@@ -6205,15 +6205,15 @@ Understanding autism as part of identity means recognizing that autistic ways of
     title: 'Highly Sensitive Person (HSP): Not a Flaw, a Trait',
     category: 'identity-self',
     duration: 7,
-    emoji: '🌸',
+    emoji: '🌸",
     content: {
       introduction: `High sensitivity is a trait found in about 15-20% of the population - and it's found across species, not just humans. Dr. Elaine Aron, who pioneered research on Highly Sensitive People (HSPs), calls it Sensory Processing Sensitivity: the brain processes stimuli more deeply and notices more subtlety than less sensitive brains.
 
-HSPs notice things others miss: subtle changes in people's moods, details in environments, the emotional undercurrents of situations. This depth of processing makes them insightful, empathetic, and often creative. But it also means overwhelm comes faster - more input means more to process.
+HSPs notice things others miss: subtle changes in people"s moods, details in environments, the emotional undercurrents of situations. This depth of processing makes them insightful, empathetic, and often creative. But it also means overwhelm comes faster - more input means more to process.
 
-The problem isn't the sensitivity itself - it's that we live in a culture that doesn't honor it. "Don't be so sensitive" is an insult. Toughness is rewarded; sensitivity is pathologized. HSPs often internalize shame about their trait, trying to be less sensitive rather than learning to work with their nature.
+The problem isn"t the sensitivity itself - it's that we live in a culture that doesn"t honor it. "Don"t be so sensitive\" is an insult. Toughness is rewarded; sensitivity is pathologized. HSPs often internalize shame about their trait, trying to be less sensitive rather than learning to work with their nature.
 
-Understanding HSP as a neutral trait - with both advantages and challenges - can shift shame into self-acceptance. You're not weak or broken. Your nervous system is wired for deep processing. That's a feature, not a bug, even when it's hard to manage in an overstimulating world.`,
+Understanding HSP as a neutral trait - with both advantages and challenges - can shift shame into self-acceptance. You're not weak or broken. Your nervous system is wired for deep processing. That"s a feature, not a bug, even when it's hard to manage in an overstimulating world.`,
       keyInsights: [
         { 
           title: 'It\'s biological, not weakness', 
@@ -6234,8 +6234,8 @@ Understanding HSP as a neutral trait - with both advantages and challenges - can
       ],
       whatHelps: [
         'Reframe sensitivity as a neutral trait with pros and cons',
-        'Build in recovery time - you need more downtime than others',
-        'Create low-stimulation environments where possible',
+        "Build in recovery time - you need more downtime than others',
+        "Create low-stimulation environments where possible',
         'Protect yourself from overstimulating inputs (news, crowds, etc.)',
         'Read Elaine Aron\'s work for research-based understanding',
         'Connect with other HSPs - being understood helps',
@@ -6253,18 +6253,18 @@ Understanding HSP as a neutral trait - with both advantages and challenges - can
     title: 'Introversion in an Extrovert World',
     category: 'identity-self',
     duration: 6,
-    emoji: '🏠',
+    emoji: '🏠",
     content: {
-      introduction: `Introversion isn't shyness, social anxiety, or not liking people. It's about where you get your energy. Introverts recharge through solitude; extroverts recharge through social interaction. Both need connection, and both need alone time - but the balance is different.
+      introduction: `Introversion isn't shyness, social anxiety, or not liking people. It"s about where you get your energy. Introverts recharge through solitude; extroverts recharge through social interaction. Both need connection, and both need alone time - but the balance is different.
 
 The Western world, and American culture in particular, strongly favors extroversion. Open offices, brainstorming sessions, team-building exercises, "networking" as a career requirement - these are all designed for extroverted energy styles. Introverts in this world are constantly being asked to function in ways that drain rather than energize them.
 
-Susan Cain's book "Quiet" brought attention to the extrovert bias and the hidden strengths of introverts: deep thinking, careful listening, ability to focus, and often more meaningful (if fewer) relationships. The problem isn't introversion - it's a culture that pathologizes it.
+Susan Cain"s book \"Quiet\" brought attention to the extrovert bias and the hidden strengths of introverts: deep thinking, careful listening, ability to focus, and often more meaningful (if fewer) relationships. The problem isn't introversion - it"s a culture that pathologizes it.
 
-Living as an introvert in an extrovert world requires both self-acceptance (this is who you are, and it's valid) and practical management (building in recovery time, setting boundaries, finding work environments that don't constantly drain you).`,
+Living as an introvert in an extrovert world requires both self-acceptance (this is who you are, and it"s valid) and practical management (building in recovery time, setting boundaries, finding work environments that don't constantly drain you).`,
       keyInsights: [
         { 
-          title: 'Energy, not social skill', 
+          title: "Energy, not social skill', 
           explanation: 'Introversion is about what drains and restores you, not whether you\'re good at social interaction. Many introverts are excellent socializers - they just need recovery afterward.' 
         },
         { 
@@ -6301,15 +6301,15 @@ Living as an introvert in an extrovert world requires both self-acceptance (this
     title: 'Body Image & Dysmorphia: The Distorted Mirror',
     category: 'identity-self',
     duration: 9,
-    emoji: '🪞',
+    emoji: '🪞",
     content: {
       introduction: `Body image is how you perceive, think about, and feel about your body. For many people, especially in cultures saturated with unrealistic images, body image is complicated at best and distorted at worst. Body dysmorphia takes this further: you become obsessed with perceived flaws that others can't see or see as minor.
 
 We live in an environment of constant body evaluation. Social media, advertising, and cultural norms send relentless messages about what bodies should look like - messages that are impossible for almost everyone to match. The thin ideal, the fitness ideal, the youth ideal, the whatever-is-trending ideal: these are manufactured standards, not natural ones.
 
-The distortion can become severe enough to be classified as Body Dysmorphic Disorder (BDD), where preoccupation with perceived defects causes significant distress and functional impairment. But even "subclinical" body image struggles affect quality of life, self-esteem, and relationship with your physical self.
+The distortion can become severe enough to be classified as Body Dysmorphic Disorder (BDD), where preoccupation with perceived defects causes significant distress and functional impairment. But even \"subclinical\" body image struggles affect quality of life, self-esteem, and relationship with your physical self.
 
-Healing body image isn't about loving how you look - it can be about neutrality, about appreciating function over form, about disconnecting worth from appearance. The goal is a relationship with your body that doesn't cause constant suffering.`,
+Healing body image isn"t about loving how you look - it can be about neutrality, about appreciating function over form, about disconnecting worth from appearance. The goal is a relationship with your body that doesn't cause constant suffering.`,
       keyInsights: [
         { 
           title: 'The standards are manufactured', 
@@ -6351,9 +6351,9 @@ Healing body image isn't about loving how you look - it can be about neutrality,
     title: 'Eating Patterns & Control: When Food Becomes Complicated',
     category: 'identity-self',
     duration: 9,
-    emoji: '🍽️',
+    emoji: '🍽️",
     content: {
-      introduction: `For many people, food isn't just fuel - it's a battleground. Disordered eating exists on a spectrum from restrictive dieting to binge eating to full eating disorders. The common thread is that food becomes about control, emotion, punishment, comfort, or identity rather than simple nourishment.
+      introduction: `For many people, food isn't just fuel - it"s a battleground. Disordered eating exists on a spectrum from restrictive dieting to binge eating to full eating disorders. The common thread is that food becomes about control, emotion, punishment, comfort, or identity rather than simple nourishment.
 
 Diet culture has normalized disordered eating patterns to such a degree that restriction, food guilt, and "clean eating" obsessions often go unquestioned. But chronic dieting is associated with worse long-term weight outcomes, eating disorders, depression, and a damaged relationship with food that can last a lifetime.
 
@@ -6401,15 +6401,15 @@ Healing your relationship with food is possible, but it's often not simple. It m
     title: 'Self-Worth vs Self-Esteem: Building a Stable Core',
     category: 'identity-self',
     duration: 8,
-    emoji: '💎',
+    emoji: '💎",
     content: {
       introduction: `Self-esteem and self-worth are often used interchangeably, but they're different. Self-esteem is how you evaluate yourself - it rises when you succeed and falls when you fail. Self-worth is the underlying belief that you have value simply because you exist, independent of what you achieve or how you perform.
 
-Self-esteem alone is unstable because it depends on constantly proving yourself. High self-esteem can tip into narcissism if it's contingent on superiority. Low self-esteem drives endless striving that never satisfies. The goal isn't higher self-esteem - it's stable self-worth: the belief that you're valuable regardless of performance.
+Self-esteem alone is unstable because it depends on constantly proving yourself. High self-esteem can tip into narcissism if it"s contingent on superiority. Low self-esteem drives endless striving that never satisfies. The goal isn"t higher self-esteem - it's stable self-worth: the belief that you"re valuable regardless of performance.
 
-This is hard in a culture that constantly reinforces conditional worth. We're told we're valuable when productive, successful, attractive, or useful. The message that you're inherently worthy - just for existing - is rarely emphasized. Most people have to unlearn conditional worth that was absorbed early.
+This is hard in a culture that constantly reinforces conditional worth. We"re told we're valuable when productive, successful, attractive, or useful. The message that you"re inherently worthy - just for existing - is rarely emphasized. Most people have to unlearn conditional worth that was absorbed early.
 
-Building self-worth is different from building self-esteem. It's not about collecting achievements or thinking positively about yourself. It's about fundamentally believing that your value doesn't fluctuate with your performance. This is a deep shift that takes time.`,
+Building self-worth is different from building self-esteem. It"s not about collecting achievements or thinking positively about yourself. It's about fundamentally believing that your value doesn"t fluctuate with your performance. This is a deep shift that takes time.`,
       keyInsights: [
         { 
           title: 'Esteem fluctuates; worth shouldn\'t', 
@@ -6449,18 +6449,18 @@ Building self-worth is different from building self-esteem. It's not about colle
     title: 'Comparison & Social Media: The Thief of Joy',
     category: 'identity-self',
     duration: 7,
-    emoji: '📱',
+    emoji: '📱",
     content: {
-      introduction: `"Comparison is the thief of joy," wrote Theodore Roosevelt, long before Instagram existed. Social media has supercharged comparison, giving us unlimited highlight reels to measure our behind-the-scenes against. The result is an epidemic of inadequacy that research links to depression, anxiety, and decreased life satisfaction.
+      introduction: `\"Comparison is the thief of joy,\" wrote Theodore Roosevelt, long before Instagram existed. Social media has supercharged comparison, giving us unlimited highlight reels to measure our behind-the-scenes against. The result is an epidemic of inadequacy that research links to depression, anxiety, and decreased life satisfaction.
 
-The comparison trap is particularly insidious because you're comparing your full reality to others' curated presentations. You see their achievements, not their struggles. Their best photos, not their average days. Their success, not their failures. The comparison is fundamentally unfair, but your brain doesn't factor that in.
+The comparison trap is particularly insidious because you're comparing your full reality to others" curated presentations. You see their achievements, not their struggles. Their best photos, not their average days. Their success, not their failures. The comparison is fundamentally unfair, but your brain doesn"t factor that in.
 
-Social media isn't neutral - it's designed to maximize engagement, which often means maximizing comparison, outrage, and inadequacy. The algorithms show you what keeps you scrolling, and inadequacy keeps people scrolling. You're not weak for being affected; you're responding as designed.
+Social media isn't neutral - it"s designed to maximize engagement, which often means maximizing comparison, outrage, and inadequacy. The algorithms show you what keeps you scrolling, and inadequacy keeps people scrolling. You"re not weak for being affected; you're responding as designed.
 
-Breaking free from comparison doesn't necessarily mean quitting social media, though that's one option. It means becoming aware of the comparison trap, curating your inputs more carefully, and developing an internal sense of value that doesn't depend on measuring yourself against others.`,
+Breaking free from comparison doesn"t necessarily mean quitting social media, though that"s one option. It means becoming aware of the comparison trap, curating your inputs more carefully, and developing an internal sense of value that doesn't depend on measuring yourself against others.`,
       keyInsights: [
         { 
-          title: 'Highlights vs. reality', 
+          title: "Highlights vs. reality', 
           explanation: 'You\'re comparing your full life to others\' curated presentations. The comparison is unfair by design.' 
         },
         { 
@@ -6497,18 +6497,18 @@ Breaking free from comparison doesn't necessarily mean quitting social media, th
     title: 'Finding Your Values: What Actually Matters to You',
     category: 'identity-self',
     duration: 8,
-    emoji: '🧭',
+    emoji: '🧭",
     content: {
-      introduction: `Values are what you want your life to be about - not goals to achieve but directions to travel. They're different from what you were taught to want, what society says is important, or what you think you "should" value. Discovering your actual values, distinct from inherited or imposed ones, is essential identity work.
+      introduction: `Values are what you want your life to be about - not goals to achieve but directions to travel. They're different from what you were taught to want, what society says is important, or what you think you \"should\" value. Discovering your actual values, distinct from inherited or imposed ones, is essential identity work.
 
-Many people have never explicitly identified their values. They live according to defaults: what their family valued, what culture rewards, what seems expected. This can work for a while, but eventually, living out of alignment with your actual values creates a sense of emptiness, inauthenticity, or "something's wrong but I don't know what."
+Many people have never explicitly identified their values. They live according to defaults: what their family valued, what culture rewards, what seems expected. This can work for a while, but eventually, living out of alignment with your actual values creates a sense of emptiness, inauthenticity, or \"something"s wrong but I don"t know what.\"
 
 Values work involves getting clear on what genuinely matters to you - not in theory but in practice. Do you value security or adventure? Connection or autonomy? Achievement or peace? There are no right answers, but there are honest and dishonest ones. Living according to someone else's values (even unconsciously) creates suffering.
 
-Clarifying values doesn't mean you'll always live them perfectly. It means you have a compass. When you're facing decisions, struggling with direction, or feeling lost, values provide orientation. "Is this aligned with what I care about?" becomes a usable question.`,
+Clarifying values doesn"t mean you"ll always live them perfectly. It means you have a compass. When you're facing decisions, struggling with direction, or feeling lost, values provide orientation. \"Is this aligned with what I care about?\" becomes a usable question.`,
       keyInsights: [
         { 
-          title: 'Values are directions, not destinations', 
+          title: "Values are directions, not destinations', 
           explanation: 'You don\'t achieve values - you live them. They\'re not items to check off but directions to travel in consistently.' 
         },
         { 
@@ -6555,15 +6555,15 @@ const buildingStabilityLessons: HumanManualLesson[] = [
     title: 'Financial Foundations and Your Nervous System',
     category: 'building-stability',
     duration: 6,
-    emoji: '💰',
+    emoji: '💰",
     content: {
-      introduction: `Money stress isn't just about the numbers. Financial insecurity activates the same threat systems in your brain as physical danger. When you don't know if you can pay rent or feed your family, your body stays in a state of vigilance. That makes it harder to think clearly, sleep, or regulate emotions.
+      introduction: `Money stress isn't just about the numbers. Financial insecurity activates the same threat systems in your brain as physical danger. When you don"t know if you can pay rent or feed your family, your body stays in a state of vigilance. That makes it harder to think clearly, sleep, or regulate emotions.
 
-Financial foundations aren't about being rich. They're about reducing the constant background alarm: a small buffer, knowing where your money goes, having a plan for the next emergency. Even small steps — one month of rent in savings, tracking spending for a week — can lower the volume on that alarm.
+Financial foundations aren"t about being rich. They're about reducing the constant background alarm: a small buffer, knowing where your money goes, having a plan for the next emergency. Even small steps — one month of rent in savings, tracking spending for a week — can lower the volume on that alarm.
 
-You're not bad with money because you're stressed. You're stressed partly because money has been unstable. Building stability is a form of self-care.`,
+You"re not bad with money because you"re stressed. You're stressed partly because money has been unstable. Building stability is a form of self-care.`,
       keyInsights: [
-        { title: 'Money stress is real stress', explanation: 'The brain treats financial threat like physical threat. Chronic money worry keeps the nervous system on high alert.' },
+        { title: "Money stress is real stress', explanation: 'The brain treats financial threat like physical threat. Chronic money worry keeps the nervous system on high alert.' },
         { title: 'Stability is psychological', explanation: 'Knowing you have a plan — even if the plan is small — can reduce anxiety more than the dollar amount alone.' },
         { title: 'Small steps count', explanation: 'One emergency fund dollar, one tracked week, one bill on autopay. Foundations are built in small, repeatable actions.' },
       ],
@@ -6588,9 +6588,9 @@ You're not bad with money because you're stressed. You're stressed partly becaus
     title: 'Your Environment Shapes Your State',
     category: 'building-stability',
     duration: 5,
-    emoji: '🏠',
+    emoji: '🏠",
     content: {
-      introduction: `Your physical environment isn't background. It's input. Clutter, noise, light, and the people in your space all send signals to your nervous system. A chaotic room can make it harder to think. A dark, isolated space can deepen low mood. A place that feels "yours" — even one corner — can become an anchor.
+      introduction: `Your physical environment isn't background. It"s input. Clutter, noise, light, and the people in your space all send signals to your nervous system. A chaotic room can make it harder to think. A dark, isolated space can deepen low mood. A place that feels "yours" — even one corner — can become an anchor.
 
 You don't need a perfect space. You need awareness. What in your environment drains you? What helps you feel a little more grounded? Small changes often matter more than big ones: one clear surface, one ritual (light a candle, open the curtain), one boundary with a roommate or family member.`,
       keyInsights: [
@@ -6618,11 +6618,11 @@ You don't need a perfect space. You need awareness. What in your environment dra
     title: 'What Safety Actually Means',
     category: 'building-stability',
     duration: 6,
-    emoji: '🛡️',
+    emoji: '🛡️",
     content: {
-      introduction: `Safety isn't just physical. Emotional safety is the sense that you can be yourself without being punished, abandoned, or shamed. Many people live in environments where they're physically okay but emotionally on edge — walking on eggshells, hiding feelings, or never quite trusting that they're accepted.
+      introduction: `Safety isn't just physical. Emotional safety is the sense that you can be yourself without being punished, abandoned, or shamed. Many people live in environments where they"re physically okay but emotionally on edge — walking on eggshells, hiding feelings, or never quite trusting that they"re accepted.
 
-You can't always change the people around you. But you can get clear on what safety would look like for you, and you can start to create pockets of it: one relationship where you don't edit yourself, one place or practice where you feel allowed to rest, one boundary that says "this is not okay." Building safety is often slow. It's still worth naming what you need.`,
+You can't always change the people around you. But you can get clear on what safety would look like for you, and you can start to create pockets of it: one relationship where you don"t edit yourself, one place or practice where you feel allowed to rest, one boundary that says "this is not okay." Building safety is often slow. It's still worth naming what you need.`,
       keyInsights: [
         { title: 'Emotional safety is real', explanation: 'Your nervous system needs to know it\'s safe to be seen. Without that, you stay in guard mode.' },
         { title: 'Safety can be partial', explanation: 'You might have safety in one relationship or one context. That still counts and can be expanded.' },
@@ -6649,11 +6649,11 @@ You can't always change the people around you. But you can get clear on what saf
     title: 'The Stability–Growth Tension',
     category: 'building-stability',
     duration: 5,
-    emoji: '⚖️',
+    emoji: '⚖️",
     content: {
       introduction: `Life asks for two things that sometimes conflict: stability (enough safety, routine, and predictability to function) and growth (change, risk, and newness). Too much stability and you stagnate. Too much growth without a base and you burn out or spiral.
 
-There's no universal right balance. But you can notice where you are. Are you so focused on surviving that you've stopped asking what you want? Or are you chasing change without a foundation? Often the answer is: build a little more stability first, then take one small growth step. Or: you've been stable for a while — what's one small risk you're ready for?`,
+There's no universal right balance. But you can notice where you are. Are you so focused on surviving that you"ve stopped asking what you want? Or are you chasing change without a foundation? Often the answer is: build a little more stability first, then take one small growth step. Or: you"ve been stable for a while — what's one small risk you"re ready for?`,
       keyInsights: [
         { title: 'Both matter', explanation: 'Stability gives you a base. Growth gives you a life. Neither alone is enough.' },
         { title: 'Order often helps', explanation: 'When in doubt, stability first. It\'s hard to grow when you\'re in survival mode.' },
@@ -6679,13 +6679,13 @@ There's no universal right balance. But you can notice where you are. Are you so
     title: 'Daily Foundations: Sleep, Food, Movement',
     category: 'building-stability',
     duration: 5,
-    emoji: '🌅',
+    emoji: '🌅",
     content: {
-      introduction: `Stability isn't only big picture. It's also what you do today. Sleep, food, and movement are the tripod. When one is off, the others wobble. When all three are roughly okay, everything else — mood, focus, relationships — has a better chance.
+      introduction: `Stability isn't only big picture. It"s also what you do today. Sleep, food, and movement are the tripod. When one is off, the others wobble. When all three are roughly okay, everything else — mood, focus, relationships — has a better chance.
 
-You don't need perfect. You need "good enough." One decent meal. One movement that isn't punishment. One night of slightly better sleep. Tracking or rituals (same wake time, one walk, one meal you look forward to) can turn chaos into a baseline. Start with one leg of the tripod and add from there.`,
+You don"t need perfect. You need \"good enough.\" One decent meal. One movement that isn't punishment. One night of slightly better sleep. Tracking or rituals (same wake time, one walk, one meal you look forward to) can turn chaos into a baseline. Start with one leg of the tripod and add from there.`,
       keyInsights: [
-        { title: 'Sleep, food, movement are foundational', explanation: 'They directly affect your nervous system and mood. Fixing "everything" often starts here.' },
+        { title: "Sleep, food, movement are foundational', explanation: 'They directly affect your nervous system and mood. Fixing "everything" often starts here.' },
         { title: 'Good enough beats perfect', explanation: 'One solid meal, one short walk, one slightly earlier bedtime. Consistency over intensity.' },
         { title: 'Ritual creates predictability', explanation: 'Same wake time, one daily walk, one meal you plan — these signal "I am taking care of myself."' },
       ],

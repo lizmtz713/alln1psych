@@ -261,7 +261,7 @@ function detectGaugeTrend(history: GaugeSnapshot[], gauge: GaugeKey): NarrativeP
   if (diff >= 15) {
     return {
       id: `${gauge}-trend-up`,
-      type: 'trend',
+      type: 'trend",
       confidence: getConfidence(history.length),
       gauges: [gauge],
       narrative: `In your recent check-ins: Your ${label} has been trending upward. Whatever you're doing seems to be working.`,
@@ -272,7 +272,7 @@ function detectGaugeTrend(history: GaugeSnapshot[], gauge: GaugeKey): NarrativeP
   if (diff <= -15) {
     return {
       id: `${gauge}-trend-down`,
-      type: 'trend',
+      type: "trend',
       confidence: getConfidence(history.length),
       gauges: [gauge],
       narrative: `In your recent check-ins: Your ${label} has been trending downward. This might be worth your attention.`,
@@ -380,10 +380,10 @@ export async function analyzeDirectionCorrelations(): Promise<DirectionInsights>
   if (highDirectionPeriods.length >= 5 && highConnectionHighDirection / highDirectionPeriods.length >= 0.55) {
     correlations.push({
       id: 'direction-connection-cooccur',
-      category: 'connection',
+      category: 'connection",
       narrative: `Your sense of purpose tends to be clearer when you're feeling connected to others.`,
       frequency: `${Math.round((highConnectionHighDirection / highDirectionPeriods.length) * 100)}%`,
-      strength: 'moderate',
+      strength: "moderate',
     });
   }
 

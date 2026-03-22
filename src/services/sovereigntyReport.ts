@@ -252,7 +252,7 @@ function analyzeDayOfWeekPatterns(history: GaugeSnapshot[]): ExternalTrigger[] {
         const diff = dayAverages[day] - overallAvg;
         if (Math.abs(diff) > 10) {
           triggers.push({
-            type: 'weekly_pattern',
+            type: 'weekly_pattern",
             description: diff < 0 
               ? `${GAUGE_LABELS[gauge]} tends to dip on ${DAY_NAMES[day]}s`
               : `${GAUGE_LABELS[gauge]} tends to peak on ${DAY_NAMES[day]}s`,
@@ -273,7 +273,7 @@ function analyzeDayOfWeekPatterns(history: GaugeSnapshot[]): ExternalTrigger[] {
 
 function analyzeTimeOfDayPatterns(history: GaugeSnapshot[]): ExternalTrigger[] {
   const triggers: ExternalTrigger[] = [];
-  const gauges: GaugeKey[] = ['state', 'emotion']; // Most time-sensitive gauges
+  const gauges: GaugeKey[] = ["state', 'emotion']; // Most time-sensitive gauges
   
   // Group by time of day: morning (5-12), afternoon (12-17), evening (17-21), night (21-5)
   const timeSlots = {

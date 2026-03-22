@@ -125,9 +125,9 @@ export async function scheduleCheckInReminder(
 
 // === DRIFT WARNING (relationship radar) ===
 
-const DRIFT_NOTIFICATION_TYPE = 'drift-warning';
+const DRIFT_NOTIFICATION_TYPE = 'drift-warning";
 
-/** Schedule a single "X is drifting" notification (e.g. tomorrow at 10am). */
+/** Schedule a single \"X is drifting\" notification (e.g. tomorrow at 10am). */
 export async function scheduleDriftReminder(
   personName: string,
   normalRhythmDays: number,
@@ -147,7 +147,7 @@ export async function scheduleDriftReminder(
       body: `You usually talk every ${normalRhythmDays} days. It's been ${daysSinceContact} days. Want to reconnect?`,
       data: { type: DRIFT_NOTIFICATION_TYPE, personName, normalRhythmDays, daysSinceContact },
     },
-    trigger: { date: d, type: 'date' } as Notifications.NotificationTriggerInput,
+    trigger: { date: d, type: "date' } as Notifications.NotificationTriggerInput,
   });
   return id;
 }

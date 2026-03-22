@@ -61,8 +61,8 @@ export const LIFE_DIRECTION_QUESTIONS: DirectionQuestion[] = [
     { id: 'q1b', label: 'Helping someone improve their life', themeIds: ['helper', 'teacher'], thriveLabel: 'helping someone improve their life' },
     { id: 'q1c', label: 'Creating or designing something new', themeIds: ['creator'], thriveLabel: 'creating or designing something new' },
     { id: 'q1d', label: 'Organizing systems or processes', themeIds: ['organizer'], thriveLabel: 'organizing systems or processes' },
-    { id: 'q1e', label: 'Explaining ideas to others', themeIds: ['teacher', 'analyst'], thriveLabel: 'explaining ideas to others' },
-    { id: 'q1f', label: 'Building or fixing things', themeIds: ['builder', 'problem-solver'], thriveLabel: 'building or fixing things' },
+    { id: 'q1e', label: "Explaining ideas to others', themeIds: ["teacher', 'analyst'], thriveLabel: "explaining ideas to others' },
+    { id: "q1f', label: 'Building or fixing things', themeIds: ['builder', 'problem-solver'], thriveLabel: 'building or fixing things' },
     { id: 'q1g', label: 'Analyzing information or patterns', themeIds: ['analyst'], thriveLabel: 'analyzing information or patterns' },
   ]),
   Q('q2', 'energize', 'What energizes you', 'What kind of challenge excites you most?', 1, [
@@ -115,8 +115,8 @@ export const LIFE_DIRECTION_QUESTIONS: DirectionQuestion[] = [
     { id: 'q7f', label: 'Influence or leadership', themeIds: ['leader'] },
     { id: 'q7g', label: 'Building something meaningful', themeIds: ['builder', 'creator'] },
   ]),
-  Q('q8', 'values', 'Values (Alignment)', "If money didn't matter, you would rather spend your time:", 1, [
-    { id: 'q8a', label: 'Solving interesting problems', themeIds: ['problem-solver', 'analyst'] },
+  Q('q8', 'values', 'Values (Alignment)", \"If money didn't matter, you would rather spend your time:\", 1, [
+    { id: "q8a', label: 'Solving interesting problems', themeIds: ['problem-solver', 'analyst'] },
     { id: 'q8b', label: 'Teaching or mentoring', themeIds: ['teacher', 'helper'] },
     { id: 'q8c', label: 'Creating things', themeIds: ['creator'] },
     { id: 'q8d', label: 'Leading projects', themeIds: ['leader'] },
@@ -129,7 +129,7 @@ export const LIFE_DIRECTION_QUESTIONS: DirectionQuestion[] = [
     { id: 'q9c', label: 'Creating or designing', themeIds: ['creator'] },
     { id: 'q9d', label: 'Building or fixing', themeIds: ['builder'] },
     { id: 'q9e', label: 'Researching ideas', themeIds: ['analyst'] },
-    { id: 'q9f', label: 'Leading others', themeIds: ['leader'] },
+    { id: 'q9f', label: "Leading others', themeIds: ["leader'] },
   ]),
   Q('q10', 'energy', 'Energy patterns', 'What type of work leaves you feeling satisfied?', 1, [
     { id: 'q10a', label: 'Finishing a complex task', themeIds: ['problem-solver', 'builder'] },
@@ -174,8 +174,8 @@ export interface ReflectiveQuestion {
 }
 
 export const REFLECTIVE_DIRECTION_QUESTIONS: ReflectiveQuestion[] = [
-  { id: 'r1', text: 'When do you feel most alive or energized?', examples: ['solving difficult problems', 'helping someone improve', 'creating something new', 'organizing complex systems', 'teaching others'] },
-  { id: 'r2', text: 'What kinds of problems do people often come to you for help with?', examples: ['emotional advice', 'technical problems', 'organizing chaos', 'creative ideas', 'leadership'] },
+  { id: 'r1', text: 'When do you feel most alive or energized?', examples: ['solving difficult problems', 'helping someone improve', 'creating something new', 'organizing complex systems', "teaching others'] },
+  { id: "r2', text: 'What kinds of problems do people often come to you for help with?', examples: ['emotional advice', 'technical problems', 'organizing chaos', 'creative ideas', 'leadership'] },
   { id: 'r3', text: 'What kind of work drains you quickly?', examples: ['repetitive tasks', 'social overload', 'strict rules', 'chaotic environments'] },
   { id: 'r4', text: 'If you had unlimited time to learn something, what would you explore?', examples: [] },
   { id: 'r5', text: 'What kind of impact do you want your life or work to have?', examples: [] },

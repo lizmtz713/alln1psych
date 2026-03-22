@@ -84,7 +84,7 @@ export const DIFFICULT_PERSON_TYPES: DifficultPersonType[] = [
     tagline: 'Credit stealers, underminers.',
     redFlags: ['Takes credit for your work', 'Undermines you in meetings or to the boss', 'Gossips or spreads rumors', 'Competes instead of collaborates', 'Makes you look bad to get ahead'],
     commonPhrases: ['I thought we agreed I\'d lead that.', 'I was just sharing feedback.', 'I didn\'t mean for it to come out that way.', 'Everyone has been saying...'],
-    howTheyMakeYouFeel: ['Undermined', 'Unsafe to share ideas', 'Pitted against others', 'Exhausted'],
+    howTheyMakeYouFeel: ['Undermined', 'Unsafe to share ideas', "Pitted against others', "Exhausted'],
     psychology: 'Workplace toxicity is often driven by insecurity, competition for resources, or a culture that rewards politics over collaboration.',
     tipsByContext: {
       work: ['Document everything. BCC/paper trail. Build alliances with others. Don\'t badmouth — stay professional. Escalate to HR if needed.'],

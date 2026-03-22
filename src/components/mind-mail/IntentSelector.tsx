@@ -7,7 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { COLORS, BORDER_RADIUS, SPACING } from '../../lib/constants';
-import { MIND_MAIL_INTENTS, type MindMailIntent } from '../../types/mindMail';
+import { MIND_MAIL_INTENTS, type MindMailIntent } from '../../types/mindMail";
 
 export interface IntentSelectorProps {
   selectedIntent: MindMailIntent | null;
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600',
     color: COLORS.textSecondary,
     marginBottom: SPACING.sm,
   },

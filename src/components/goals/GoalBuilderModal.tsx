@@ -118,7 +118,7 @@ export function GoalBuilderModal({ visible, onClose }: GoalBuilderModalProps) {
               {progressText ? <Text style={styles.selected}>Selected: {progressText}</Text> : null}
             </>
           )}
-          {step === 'barrier' && (
+          {step === 'barrier" && (
             <>
               <Text style={styles.prompt}>What's getting in the way right now?</Text>
               <View style={styles.chips}>
@@ -134,7 +134,7 @@ export function GoalBuilderModal({ visible, onClose }: GoalBuilderModalProps) {
               </View>
             </>
           )}
-          {step === 'suggestions' && (
+          {step === "suggestions' && (
             <>
               <Text style={styles.prompt}>Here are some goals that might fit. Choose one.</Text>
               {suggestions.map((s, i) => (

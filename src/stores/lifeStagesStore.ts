@@ -1,6 +1,6 @@
 /**
- * Life Stages — User's optional orientation markers.
- * "I'm here" / "I've passed" / "Preparing for this". Light, no grading.
+ * Life Stages — User"s optional orientation markers.
+ * \"I'm here\" / \"I"ve passed" / "Preparing for this". Light, no grading.
  */
 
 import { create } from 'zustand';

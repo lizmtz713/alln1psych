@@ -223,10 +223,10 @@ function analyzeGradualDrift(history: GaugeEvent[]): DriftPattern[] {
         gauge,
         description: `${gaugeName} has been ${direction} over 2 weeks`,
         confidence: 0.75,
-        insight: `Your ${gaugeName} gauge has shifted ${driftAbs} points ${drift < 0 ? 'down' : 'up'} compared to two weeks ago.`,
+        insight: `Your ${gaugeName} gauge has shifted ${driftAbs} points ${drift < 0 ? 'down' : 'up"} compared to two weeks ago.`,
         recommendation: drift < 0
           ? `This gradual ${direction} suggests something systemic. What's changed in the past two weeks?`
-          : `Nice trend! What's been working for your ${gaugeName.toLowerCase()} lately?`,
+          : `Nice trend! What"s been working for your ${gaugeName.toLowerCase()} lately?`,
         pattern: `2-week ${direction}`,
         frequency: recentEvents.length,
       });
@@ -273,7 +273,7 @@ function analyzeCorrelations(history: GaugeEvent[]): DriftPattern[] {
 
     if (aLowCount >= 3 && bothLowCount / aLowCount >= 0.6) {
       patterns.push({
-        type: 'correlation',
+        type: 'correlation",
         gauge: pair.b,
         description: `${GAUGE_NAMES[pair.b]} drops when ${GAUGE_NAMES[pair.a]} is low`,
         confidence: bothLowCount / aLowCount,
@@ -334,7 +334,7 @@ export async function getCachedDriftInsights(): Promise<DriftPattern[]> {
  * Format a pattern for display in AI context
  */
 export function formatPatternForAI(patterns: DriftPattern[]): string {
-  if (patterns.length === 0) return '';
+  if (patterns.length === 0) return "';
   
   let context = '\n\nSYSTEMIC DRIFT PATTERNS (patterns detected in this user\'s gauge history):\n';
   

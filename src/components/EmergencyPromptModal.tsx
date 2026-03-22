@@ -5,7 +5,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Modal, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, BORDER_RADIUS } from '../lib/constants';
+import { COLORS, SPACING, BORDER_RADIUS } from '../lib/constants";
 
 interface EmergencyPromptModalProps {
   visible: boolean;
@@ -17,7 +17,7 @@ export function EmergencyPromptModal({ visible, onYes, onNotNow }: EmergencyProm
   const insets = useSafeAreaInsets();
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType=\"fade\">
       <View style={styles.overlay}>
         <View style={[styles.card, { paddingBottom: insets.bottom + SPACING.lg }]}>
           <Text style={styles.title}>It seems like you're having a really hard time right now.</Text>
@@ -41,7 +41,7 @@ export function EmergencyPromptModal({ visible, onYes, onNotNow }: EmergencyProm
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: "rgba(0,0,0,0.6)',
     justifyContent: 'center',
     padding: SPACING.xl,
   },

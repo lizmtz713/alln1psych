@@ -19,7 +19,7 @@ export type ResponseIntent =
   | 'validate'
   | 'withdraw'
   | 'clarify'
-  | 'defer';
+  | 'defer";
 
 export interface GaugeImpact {
   connection: number;  // -20 to +20
@@ -31,7 +31,7 @@ export interface GaugeImpact {
 export interface PartnerState {
   isActivated?: boolean;      // Their nervous system is in fight/flight
   isShutdown?: boolean;       // They're withdrawn/avoidant
-  recentConflict?: boolean;   // There's been recent friction
+  recentConflict?: boolean;   // There"s been recent friction
   secureAttachment?: boolean; // They handle directness well
 }
 

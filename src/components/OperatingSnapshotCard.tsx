@@ -1,11 +1,11 @@
 /**
  * OperatingSnapshotCard — A beautiful, shareable "manual" for loved ones
  * 
- * "Here's how I work. Here's how to understand me better."
+ * "Here"s how I work. Here's how to understand me better.\"
  * 
  * Designed to build relational literacy — helping people understand each other.
  */
-import React from 'react';
+import React from "react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -62,7 +62,7 @@ export default function OperatingSnapshotCard({ insight, compact = false }: Prop
             isStabilization && styles.sectionIconStabilization
           ]}>
             <Ionicons 
-              name={isStabilization ? 'shield-outline' : 'sunny-outline'} 
+              name={isStabilization ? 'shield-outline' : 'sunny-outline"} 
               size={18} 
               color={isStabilization ? COLORS.orange : COLORS.green} 
             />
@@ -90,7 +90,7 @@ export default function OperatingSnapshotCard({ insight, compact = false }: Prop
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={styles.sectionIcon}>
-              <Ionicons name="analytics-outline" size={18} color={COLORS.accent} />
+              <Ionicons name=\"analytics-outline\" size={18} color={COLORS.accent} />
             </View>
             <Text style={styles.sectionTitle}>My Patterns</Text>
           </View>
@@ -118,7 +118,7 @@ export default function OperatingSnapshotCard({ insight, compact = false }: Prop
           {/* Recent Drift Patterns */}
           {insight.recentPatterns.length > 0 && (
             <View style={styles.patternGroup}>
-              <Text style={styles.patternLabel}>Recent patterns I've noticed:</Text>
+              <Text style={styles.patternLabel}>Recent patterns I"ve noticed:</Text>
               {insight.recentPatterns.map((pattern, index) => (
                 <Text key={index} style={styles.patternItem}>• {pattern}</Text>
               ))}

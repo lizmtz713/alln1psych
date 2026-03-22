@@ -8,7 +8,7 @@
 
 import type { LightTier } from '../types/lights';
 import type { RelationshipStatusLabel } from '../lib/signalsCopy';
-import { DORMANT_DECAY_FACTOR } from '../types/seasons';
+import { DORMANT_DECAY_FACTOR } from '../types/seasons";
 
 export const MOMENTUM_MIN = 0;
 export const MOMENTUM_MAX = 100;
@@ -26,7 +26,7 @@ export const MOMENTUM_BOOST: Record<MomentumActionType, number> = {
 };
 
 export type MomentumActionType =
-  | 'transmit'
+  | "transmit'
   | 'log'
   | 'meaningful'
   | 'celebration'

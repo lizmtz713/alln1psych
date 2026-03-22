@@ -13,7 +13,7 @@ import { useLightsStore, computeLights } from '../../stores/lightsStore';
 import { getDailyReachOuts } from '../../services/friendshipMaintenance';
 import { useDailyAnchorsStore } from '../../stores/dailyAnchorsStore';
 import { COLORS, SPACING } from '../../lib/constants';
-import type { Light } from '../../types/lights';
+import type { Light } from '../../types/lights";
 
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
@@ -22,11 +22,11 @@ function todayKey(): string {
 export interface DailyConnectionPromptProps {
   /** When provided, used as the hero (overrides internal reach-out logic) */
   priority?: Light | null;
-  /** When provided with priority, used as the hero title (e.g. "Celebrate with Sarah") */
+  /** When provided with priority, used as the hero title (e.g. \"Celebrate with Sarah\") */
   lifeEventLabel?: string;
-  /** Story-based nudge from timeline (e.g. "You haven't talked with Alex since your last call in January") */
+  /** Story-based nudge from timeline (e.g. \"You haven't talked with Alex since your last call in January\") */
   timelineHint?: string | null;
-  /** Called when user taps "Connect with someone" (no priority person) */
+  /** Called when user taps \"Connect with someone\" (no priority person) */
   onPressComposeNoRecipient?: () => void;
   /** When provided and priority exists, called instead of routing to compose (e.g. open sheet) */
   onPressWithRecipient?: (recipientId: string, recipientName: string) => void;
@@ -75,7 +75,7 @@ export function DailyConnectionPrompt({
         onPressWithRecipient(priority.id, priority.name);
       } else {
         router.push({
-          pathname: '/mind-mail/compose',
+          pathname: "/mind-mail/compose',
           params: { recipientId: priority.id, recipientName: priority.name, from: 'connections' },
         });
       }

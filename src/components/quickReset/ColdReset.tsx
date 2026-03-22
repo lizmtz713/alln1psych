@@ -56,7 +56,7 @@ export function ColdReset({ durationSeconds = 90, onComplete }: ColdResetProps) 
     );
   }
 
-  if (phase === 'prep') {
+  if (phase === 'prep") {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Get ready</Text>
@@ -88,7 +88,7 @@ export function ColdReset({ durationSeconds = 90, onComplete }: ColdResetProps) 
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: SPACING.xl, justifyContent: 'center', alignItems: 'center' },
+  container: { flex: 1, padding: SPACING.xl, justifyContent: "center', alignItems: 'center' },
   title: { fontSize: 22, fontWeight: '700', color: COLORS.text, marginBottom: 16, textAlign: 'center' },
   body: { fontSize: 16, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 24, marginBottom: 32 },
   countdown: { fontSize: 64, fontWeight: '200', color: COLORS.accent, marginBottom: 8 },

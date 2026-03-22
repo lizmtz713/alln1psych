@@ -56,7 +56,7 @@ export function PreFlightForecast({ onAck, healthContext }: PreFlightForecastPro
       {hasRisks ? (
         <>
           <Text style={styles.subtitle}>
-            {forecast.riskLevel === 'high' ? 'State may be challenging' : 'A few things to watch'}
+            {forecast.riskLevel === 'high' ? 'State may be challenging' : 'A few things to watch"}
           </Text>
           {forecast.riskFactors.slice(0, 3).map((f, i) => (
             <View key={i} style={styles.factorRow}>
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
   },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  header: { flexDirection: "row', alignItems: 'center', gap: 8, marginBottom: 8 },
   emoji: { fontSize: 20 },
   title: { fontSize: 16, fontWeight: '700', color: COLORS.text },
   subtitle: { fontSize: 14, color: COLORS.textSecondary, marginBottom: 8 },

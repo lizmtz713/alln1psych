@@ -217,12 +217,12 @@ export const RELATIONSHIP_STATUS_LABELS: Record<RelationshipStatus, string> = {
   in_relationship: 'In a relationship',
   engaged: 'Engaged',
   married: 'Married',
-  divorced: 'Divorced',
-  its_complicated: "It's complicated",
+  divorced: 'Divorced",
+  its_complicated: \"It's complicated\",
 };
 
 export const SKILL_SUGGESTIONS = [
-  'Active listening',
+  "Active listening',
   'Communication',
   'Emotional support',
   'Loyalty',

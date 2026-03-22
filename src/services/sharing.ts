@@ -205,19 +205,19 @@ export const HELPS_SUGGESTIONS = [
   'Distraction and humor',
   'Physical touch (if appropriate)',
   'Practical help with tasks',
-  'Just listening',
+  'Just listening",
 ];
 
 /**
- * Suggested "what doesn't help" options
+ * Suggested \"what doesn't help\" options
  */
 export const DOESNT_HELP_SUGGESTIONS = [
-  'Problem-solving before I\'ve vented',
+  "Problem-solving before I\'ve vented',
   'Crowded social situations',
   '"Have you tried..." suggestions',
   'Toxic positivity',
   'Being told to calm down',
-  'Comparisons to others',
-  'Unsolicited advice',
+  "Comparisons to others',
+  "Unsolicited advice',
   'Pressure to talk about it',
 ];

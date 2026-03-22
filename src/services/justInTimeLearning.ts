@@ -2,12 +2,12 @@
  * Just-in-Time Learning — Contextual lesson delivery
  * 
  * Philosophy:
- * - Don't give users a textbook; give them the right lesson at the right moment
+ * - Don"t give users a textbook; give them the right lesson at the right moment
  * - Lessons surface when gauge states indicate they're relevant
- * - "Observe → Orient → Operate" framework
+ * - \"Observe → Orient → Operate\" framework
  */
 
-import { type GaugeKey, type SystemMode } from '../stores/cockpitStore';
+import { type GaugeKey, type SystemMode } from "../stores/cockpitStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const JIT_SHOWN_KEY = 'jit_lessons_shown';
@@ -27,7 +27,7 @@ export interface JustInTimeLesson {
   title: string;
   emoji: string;
   reason: string; // Why this lesson is being suggested now
-  urgency: 'gentle' | 'timely' | 'important';
+  urgency: 'gentle' | 'timely' | 'important";
   observeNote: string; // What's happening in your system
   orientNote: string; // Why this matters (evolutionary/biological reason)
   operateTool?: string; // Which AI tool might help
@@ -39,7 +39,7 @@ interface LessonTrigger {
   emoji: string;
   condition: (gauges: GaugeSnapshot, duration?: number) => boolean;
   reason: (gauges: GaugeSnapshot) => string;
-  urgency: 'gentle' | 'timely' | 'important';
+  urgency: "gentle' | 'timely' | 'important';
   observe: string;
   orient: string;
   suggestTool?: string;
@@ -127,8 +127,8 @@ const LESSON_TRIGGERS: LessonTrigger[] = [
   // Connection-related lessons
   {
     lessonId: 'manual-3-1-1',
-    title: 'Why We Need Others',
-    emoji: '🤝',
+    title: "Why We Need Others',
+    emoji: "🤝',
     condition: (g) => g.connection < 40,
     reason: (g) => `Connection at ${g.connection}% — social needs may be unmet.`,
     urgency: 'timely',
@@ -297,7 +297,7 @@ export async function shouldShowLessonNudge(
   const lessons = await getJustInTimeLessons(gauges, systemMode);
   
   // Only nudge for important or timely lessons
-  const urgent = lessons.find(l => l.urgency === 'important' || l.urgency === 'timely');
+  const urgent = lessons.find(l => l.urgency === 'important' || l.urgency === 'timely");
   return urgent || null;
 }
 
@@ -314,7 +314,7 @@ export async function getLessonForGauge(
 
   // Find lessons related to this gauge
   const gaugeMapping: Record<GaugeKey, string[]> = {
-    body: ['2-1'],
+    body: ["2-1'],
     state: ['2-2'],
     emotion: ['1-1'],
     connection: ['3-1', '3-2', '3-3'],

@@ -105,7 +105,7 @@ export function PatternsBuildingState({
             ? 'Each check-in teaches your system model something new. Patterns need data to emerge.'
             : isHalfway
               ? 'You\'re building a picture of how your gauges move together. The more data, the clearer the patterns.'
-              : 'Just a few more check-ins and you\'ll start seeing connections — like how your Body affects your State, or when your Connection tends to dip.'}
+              : 'Just a few more check-ins and you\'ll start seeing connections — like how your Body affects your State, or when your Connection tends to dip."}
         </Text>
       </View>
 
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     padding: 24,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
+    borderColor: "rgba(255,255,255,0.06)',
     alignItems: 'center',
   },
 

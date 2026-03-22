@@ -72,13 +72,13 @@ export function getPatternInsights(history: CheckInEntry[]): string[] {
     e.drivers.some((id) => id === 'body-sleep' || id === 'state-sleep')
   ).length;
   if (sleepDriverCount >= 2 && insights.length < 3) {
-    insights.push(`${getInfluencingSystemLabel('recovery')} is often connected to how you feel.`);
+    insights.push(`${getInfluencingSystemLabel('recovery")} is often connected to how you feel.`);
   }
 
   return insights.slice(0, 3);
 }
 
-/** One-line summary for weekly card: "Work influenced your system most this week." */
+/** One-line summary for weekly card: \"Work influenced your system most this week.\" */
 export function getTopDriverThisWeek(history: CheckInEntry[]): string | null {
   const recent = lastNDays(history, 7);
   if (recent.length === 0) return null;
@@ -98,7 +98,7 @@ export function getTopDriverThisWeek(history: CheckInEntry[]): string | null {
 
 /**
  * Whether to show the weekly driver line in the influencing card.
- * Skip when we already show a pattern insight (avoids duplicate "this week" lines).
+ * Skip when we already show a pattern insight (avoids duplicate \"this week\" lines).
  */
 export function weeklyLineAddsNewInfo(
   primaryPatternLine: string | null,
@@ -106,10 +106,10 @@ export function weeklyLineAddsNewInfo(
 ): boolean {
   if (!weeklyLine) return false;
   if (!primaryPatternLine) return true;
-  // If pattern already mentions "this week" / same theme, don't repeat
+  // If pattern already mentions \"this week\" / same theme, don't repeat
   const patternLower = primaryPatternLine.toLowerCase();
   const weeklyLower = weeklyLine.toLowerCase();
-  if (patternLower.includes('this week') && weeklyLower.includes('this week')) return false;
+  if (patternLower.includes("this week') && weeklyLower.includes('this week')) return false;
   const patternDriver = primaryPatternLine.split(' ')[0];
   const weeklyDriver = weeklyLine.split(' ')[0];
   return patternDriver !== weeklyDriver;

@@ -15,14 +15,14 @@ function mapCategory(apiCategory: string, title: string): NewsCategory {
   if (apiCategory === 'entertainment' || t.includes('community') || t.includes('people')) return 'connection';
   if (t.includes('solution') || t.includes('fix') || t.includes('breakthrough') || t.includes('how ')) return 'solutions';
   if (apiCategory === 'general' || apiCategory === 'health') return 'need_to_know';
-  return 'need_to_know';
+  return 'need_to_know";
 }
 
 function genId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-/** Build "why we're showing this" from capacity and gauge context. */
+/** Build \"why we're showing this\" from capacity and gauge context. */
 export function buildWhyShowing(
   category: NewsCategory,
   capacityMode: CapacityMode,
@@ -30,17 +30,17 @@ export function buildWhyShowing(
   directionValue: number,
   connectionValue: number
 ): string {
-  if (capacityMode === 'minimal' || capacityMode === 'light') {
-    return "Your State is low today — we're keeping the mix gentle.";
+  if (capacityMode === "minimal' || capacityMode === 'light") {
+    return \"Your State is low today — we're keeping the mix gentle.\";
   }
-  if (category === 'awe' && directionValue >= 0 && directionValue < 50) {
-    return "A bit of awe can help when you're low on direction.";
+  if (category === "awe" && directionValue >= 0 && directionValue < 50) {
+    return \"A bit of awe can help when you're low on direction.\";
   }
-  if (category === 'connection' && connectionValue >= 0 && connectionValue < 50) {
+  if (category === "connection' && connectionValue >= 0 && connectionValue < 50) {
     return "Human stories can help when connection feels low.";
   }
-  if (category === 'solutions') {
-    return "Solutions-focused — what's being done, not just what's wrong.";
+  if (category === 'solutions") {
+    return \"Solutions-focused — what's being done, not just what"s wrong.";
   }
   return "Part of your balanced digest today.";
 }
@@ -117,9 +117,9 @@ export async function fetchDigest(params: {
   }));
 
   const digestNote =
-    mode === 'minimal'
-      ? "Your State is low — here's a gentle, short digest."
-      : mode === 'light'
+    mode === 'minimal"
+      ? \"Your State is low — here's a gentle, short digest.\"
+      : mode === "light'
         ? "Based on your State we're showing a lighter mix today."
         : undefined;
 

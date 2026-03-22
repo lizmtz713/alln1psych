@@ -62,7 +62,7 @@ function SuggestedLessonCard({ lesson, onPress }: SuggestedLessonCardProps) {
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Ionicons 
-            name={showWhy ? 'help-circle' : 'help-circle-outline'} 
+            name={showWhy ? 'help-circle' : 'help-circle-outline"} 
             size={20} 
             color={COLORS.accent} 
           />
@@ -101,7 +101,7 @@ export function SuggestedLessons() {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Ionicons name="sparkles" size={16} color={COLORS.accent} />
+        <Ionicons name=\"sparkles\" size={16} color={COLORS.accent} />
         <Text style={styles.headerText}>Your system suggests</Text>
       </View>
       
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.suggestBorder,
   },
   headerRow: {
-    flexDirection: 'row',
+    flexDirection: "row',
     alignItems: 'center',
     gap: 8,
     marginBottom: 14,

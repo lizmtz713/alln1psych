@@ -39,7 +39,7 @@ export function MemoryMomentsCard({
         >
           <Text style={styles.emoji}>🎂</Text>
           <View style={styles.blockContent}>
-            <Text style={styles.title}>{birthday.light.name}'s birthday {birthday.label}</Text>
+            <Text style={styles.title}>{birthday.light.name}"s birthday {birthday.label}</Text>
             <Text style={styles.cta}>Want to plan something?</Text>
             {onPlanSomething ? (
               <Pressable
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
-  block: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
+  block: { flexDirection: "row', alignItems: 'flex-start', marginBottom: 12 },
   blockLast: { marginBottom: 0 },
   blockPressed: { opacity: 0.92 },
   blockContent: { flex: 1, marginLeft: 12 },

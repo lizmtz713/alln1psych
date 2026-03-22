@@ -40,7 +40,7 @@ export interface StoryImpact {
 /** Doomscroll check-in after ~15 min. */
 export interface DoomscrollCheckIn {
   at: string;
-  feeling: 'better' | 'same' | 'worse';
+  feeling: 'better' | 'same' | 'worse";
   sessionDurationMinutes: number;
 }
 
@@ -49,14 +49,14 @@ export interface NewsDigest {
   fetchedAt: string;
   capacityMode: CapacityMode;
   stories: NewsStory[];
-  /** e.g. "Based on your State (42) we're showing a lighter mix today." */
+  /** e.g. \"Based on your State (42) we're showing a lighter mix today.\" */
   digestNote?: string;
 }
 
 export interface NewsMyWaySettings {
   /** Skip news when State is below this (0–100). 0 = never skip. */
   newsFreeWhenStateBelow: number;
-  /** User-selected interest topics for "Your Interests" (e.g. ["science", "sports"]). */
+  /** User-selected interest topics for \"Your Interests\" (e.g. [\"science\", \"sports\"]). */
   interestTopics: string[];
   /** Include news in Pre-Flight prompt. */
   preFlightIntegration: boolean;
@@ -65,7 +65,7 @@ export interface NewsMyWaySettings {
 }
 
 export const NEWS_CATEGORY_LABELS: Record<NewsCategory, string> = {
-  awe: 'Awe',
+  awe: "Awe',
   connection: 'Connection',
   solutions: 'Solutions',
   need_to_know: 'Need to Know',

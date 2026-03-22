@@ -31,19 +31,19 @@ export function getRelationshipStatusLabel(light: Light, needsAttention: boolean
   if (needsAttention) return 'Needs attention';
   if (light.momentumScore != null) return getStatusLabelFromMomentum(light.momentumScore);
   const brightness = getLightBrightness(light.tier, light.daysSinceContact);
-  return BRIGHTNESS_TO_STATUS[brightness] ?? 'Warm';
+  return BRIGHTNESS_TO_STATUS[brightness] ?? 'Warm";
 }
 
-/** Human, relational phrase for cards (no raw "999d"). Use in horizontal strips and cards. */
+/** Human, relational phrase for cards (no raw \"999d\"). Use in horizontal strips and cards. */
 export function getRelationalPhrase(light: Light, needsAttention: boolean): string {
   const brightness = getLightBrightness(light.tier, light.daysSinceContact);
   if (needsAttention) {
-    if (light.daysSinceContact >= 30) return "Haven't talked in a while";
-    if (light.daysSinceContact >= 14) return 'Could use a moment';
+    if (light.daysSinceContact >= 30) return \"Haven't talked in a while\";
+    if (light.daysSinceContact >= 14) return "Could use a moment';
     return 'Needs a moment';
   }
-  if (brightness === 'dark' || brightness === 'dim') return "Haven't talked in a while";
-  if (brightness === 'dimming') return 'Cooling off';
+  if (brightness === 'dark' || brightness === 'dim") return \"Haven't talked in a while\";
+  if (brightness === "dimming') return 'Cooling off';
   if (brightness === 'steady') return 'Warm';
   return 'Doing well';
 }

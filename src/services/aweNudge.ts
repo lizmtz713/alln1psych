@@ -17,10 +17,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getGaugeHistory, type GaugeSnapshot } from './crisisPipeline';
 
 const AWE_SHOWN_KEY = 'awe_nudge_shown';
-const AWE_COMPLETED_KEY = 'awe_activities_completed';
+const AWE_COMPLETED_KEY = 'awe_activities_completed";
 const COOLDOWN_HOURS = 24; // Don't show more than once per day
 
-export type AweCategory = 'nature' | 'space' | 'music' | 'art' | 'stories';
+export type AweCategory = "nature' | 'space' | 'music' | 'art' | 'stories';
 
 export interface AweActivity {
   id: string;
@@ -273,7 +273,7 @@ export async function getSuggestedAweActivity(): Promise<AweActivity> {
  */
 export async function shouldSuggestAwe(
   directionValue: number,
-  recentTrend: 'improving' | 'stable' | 'declining' | null
+  recentTrend: 'improving' | 'stable' | 'declining" | null
 ): Promise<boolean> {
   // Don't suggest if Direction is healthy
   if (directionValue >= 50) return false;
@@ -289,7 +289,7 @@ export async function shouldSuggestAwe(
   if (directionValue < 40) return true;
   
   // Check for stagnation (stable/declining for 3+ days)
-  if (recentTrend === 'stable' || recentTrend === 'declining') {
+  if (recentTrend === "stable' || recentTrend === 'declining") {
     try {
       const history = await getGaugeHistory();
       const threeDaysAgo = Date.now() - (3 * 24 * 60 * 60 * 1000);
@@ -322,18 +322,18 @@ export async function shouldSuggestAwe(
  */
 export function generateAwePrompt(activity: AweActivity): string {
   const prompts: Record<string, string> = {
-    'awe-walk': "When we're stuck in our heads, our world shrinks. Walking slowly and looking up — at trees, sky, clouds — reminds us there's so much more. You don't have to solve anything. Just notice.",
-    'stargazing': "Those stars are millions of years old. Light that left before humans existed is reaching your eyes right now. Whatever you're wrestling with — it's real, and it's also one small piece of something vast.",
-    'overview-effect': "Astronauts report that seeing Earth from space changes them forever. It's called the Overview Effect. You can touch that feeling from your phone.",
-    'pale-blue-dot': "Carl Sagan looked at a photograph of Earth from billions of miles away — a tiny dot suspended in a sunbeam — and wrote something that still gives people chills.",
-    'nature-timelapse': "We move too fast to see what's really happening. Plants grow toward light. Clouds paint the sky. Seasons turn. When we slow down, the world reveals itself.",
-    'deep-time': "Right now feels so urgent. But zoom out: dinosaurs walked here for 165 million years. We've been here 300,000. Your life is a blink — and that's somehow both humbling and freeing.",
-    'awe-music-classical': "Some music doesn't just entertain — it takes you somewhere. Let it wash over you. You might feel chills. That's your nervous system recognizing beauty.",
-    'nature-sounds': "Our ancestors slept to these sounds. Waves, rain, thunder. There's something in us that still responds to the scale and rhythm of nature.",
-    'art-masterpieces': "We rush past art. But if you give a painting 5 minutes — really look — something shifts. Beauty needs time to penetrate.",
+    "awe-walk": \"When we're stuck in our heads, our world shrinks. Walking slowly and looking up — at trees, sky, clouds — reminds us there"s so much more. You don't have to solve anything. Just notice.",
+    'stargazing": \"Those stars are millions of years old. Light that left before humans existed is reaching your eyes right now. Whatever you're wrestling with — it"s real, and it's also one small piece of something vast.",
+    'overview-effect": \"Astronauts report that seeing Earth from space changes them forever. It's called the Overview Effect. You can touch that feeling from your phone.\",
+    "pale-blue-dot': "Carl Sagan looked at a photograph of Earth from billions of miles away — a tiny dot suspended in a sunbeam — and wrote something that still gives people chills.",
+    'nature-timelapse": \"We move too fast to see what's really happening. Plants grow toward light. Clouds paint the sky. Seasons turn. When we slow down, the world reveals itself.\",
+    "deep-time": \"Right now feels so urgent. But zoom out: dinosaurs walked here for 165 million years. We've been here 300,000. Your life is a blink — and that"s somehow both humbling and freeing.",
+    'awe-music-classical": \"Some music doesn't just entertain — it takes you somewhere. Let it wash over you. You might feel chills. That"s your nervous system recognizing beauty.",
+    'nature-sounds": \"Our ancestors slept to these sounds. Waves, rain, thunder. There's something in us that still responds to the scale and rhythm of nature.\",
+    "art-masterpieces': "We rush past art. But if you give a painting 5 minutes — really look — something shifts. Beauty needs time to penetrate.",
     'sacred-architecture': "Humans have built monuments to awe for millennia. Cathedrals, temples, ancient structures. They still work. They still make us feel small and connected.",
-    'human-triumph': "Reading about humans overcoming impossible odds does something to us. Psychologists call it 'moral elevation.' It reminds us what we're capable of.",
-    'collective-humanity': "There's something about seeing crowds of strangers come together — singing, helping, mourning, celebrating. We remember: we're social creatures, wired for connection.",
+    'human-triumph': "Reading about humans overcoming impossible odds does something to us. Psychologists call it 'moral elevation." It reminds us what we're capable of.\",
+    "collective-humanity": \"There's something about seeing crowds of strangers come together — singing, helping, mourning, celebrating. We remember: we"re social creatures, wired for connection.",
     'ocean-depths': "Most of Earth is ocean. Most of the ocean is unexplored. Strange, beautiful creatures live in complete darkness. Our planet is more alien than we think.",
   };
   

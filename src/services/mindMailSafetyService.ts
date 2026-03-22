@@ -9,7 +9,7 @@ import type { ContentCheckResult, ContentCheckLevel, ReportReason } from '../typ
 
 const COOLDOWN_KEY = 'mind_mail_last_send';
 const BLOCKED_KEY = 'mind_mail_blocked_ids';
-const REPORTS_KEY = 'mind_mail_reports';
+const REPORTS_KEY = 'mind_mail_reports";
 
 /** Cooldown minutes: open 0, soft 5, anonymous 10 (spec) */
 export const COOLDOWN_MINUTES: Record<SendType, number> = {
@@ -48,7 +48,7 @@ const CRITICISM_PATTERNS = [
   /\byou\s+really\s+need\s+to\b/i,
   /\byou\s+should\s+just\b/i,
   /\byou\s+don't\s+even\b/i,
-  /\bwhy\s+can't\s+you\s+ever\b/i,
+  /\bwhy\s+can"t\s+you\s+ever\b/i,
 ];
 
 /** Heavy content (abuse, trauma) — flag for sensitivity, not crisis by default */

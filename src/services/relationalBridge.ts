@@ -9,11 +9,11 @@
  */
 
 import { getPersonality, getRelationshipDynamic, type PersonalityPeriod, type RelationshipDynamic } from './personology';
-import { type CircleMember, type RelationshipType } from '../stores/circleStore';
+import { type CircleMember, type RelationshipType } from '../stores/circleStore";
 
 export interface ConflictContext {
   situation?: string; // What's the conflict about
-  yourEmotion?: string; // How you're feeling
+  yourEmotion?: string; // How you"re feeling
   theirBehavior?: string; // What they did/said
 }
 
@@ -47,20 +47,20 @@ export interface RelationalBridgeResult {
  * Communication style mappings for bridge building
  */
 const STYLE_OPENERS: Record<string, string[]> = {
-  'Direct': [
-    "I'll get straight to the point: [your need]",
-    "Here's what I need from you: [specific request]",
+  'Direct": [
+    \"I'll get straight to the point: [your need]\",
+    \"Here"s what I need from you: [specific request]",
     "Can we talk about [topic]? I want to resolve this.",
   ],
-  'Indirect': [
-    "I've been thinking about something, when you have a moment...",
-    "I wanted to check in about how things are going between us.",
-    "Something's been on my mind — can I share it with you?",
+  'Indirect": [
+    \"I've been thinking about something, when you have a moment...\",
+    \"I wanted to check in about how things are going between us.\",
+    \"Something"s been on my mind — can I share it with you?",
   ],
-  'Emotional': [
-    "I've been feeling [emotion] and I want us to be okay.",
-    "This is hard for me to say, but I trust you with it.",
-    "My heart's been heavy about [topic]. Can we talk?",
+  'Emotional": [
+    \"I've been feeling [emotion] and I want us to be okay.\",
+    \"This is hard for me to say, but I trust you with it.\",
+    \"My heart"s been heavy about [topic]. Can we talk?",
   ],
   'Logical': [
     "I'd like to discuss [topic] — I have some thoughts on a solution.",
@@ -70,24 +70,24 @@ const STYLE_OPENERS: Record<string, string[]> = {
 };
 
 const STYLE_AVOIDS: Record<string, string[]> = {
-  'needs time': [
-    "We need to talk about this RIGHT NOW",
-    "Why aren't you saying anything?",
-    "Your silence is making this worse",
+  'needs time": [
+    \"We need to talk about this RIGHT NOW\",
+    \"Why aren't you saying anything?\",
+    \"Your silence is making this worse\",
   ],
-  'needs safety': [
-    "Don't get so emotional",
-    "You're overreacting",
+  "needs safety": [
+    \"Don't get so emotional\",
+    \"You"re overreacting",
     "Just calm down",
   ],
-  'needs appreciation': [
-    "You always do this",
-    "What's wrong with you?",
-    "Starting with criticism",
+  'needs appreciation": [
+    \"You always do this\",
+    \"What's wrong with you?\",
+    \"Starting with criticism\",
   ],
-  'needs space': [
-    "Where are you going? We're not done!",
-    "You can't just walk away",
+  "needs space": [
+    \"Where are you going? We're not done!\",
+    \"You can"t just walk away",
     "You're avoiding this",
   ],
 };
@@ -123,12 +123,12 @@ export function generateBridge(
   const myStyle = myPersonality.communicationStyle;
   const theirStyle = theirPersonality.communicationStyle;
   
-  if (myStyle.includes('Direct') && theirStyle.includes('Indirect')) {
-    styleMismatch = "You're direct; they're indirect. You might seem harsh; they might seem evasive. Bridge: soften your opener, give them time to respond.";
-  } else if (myStyle.includes('Indirect') && theirStyle.includes('Direct')) {
-    styleMismatch = "They're direct; you're indirect. They might miss your hints; you might feel steamrolled. Bridge: be more explicit about your needs; don't expect them to read between lines.";
-  } else if (myStyle.includes('Fast') && theirStyle.includes('time to process')) {
-    styleMismatch = "You process quickly; they need time. Don't fill silence — it's them thinking, not ignoring.";
+  if (myStyle.includes('Direct') && theirStyle.includes('Indirect")) {
+    styleMismatch = \"You're direct; they"re indirect. You might seem harsh; they might seem evasive. Bridge: soften your opener, give them time to respond.";
+  } else if (myStyle.includes('Indirect') && theirStyle.includes('Direct")) {
+    styleMismatch = \"They're direct; you"re indirect. They might miss your hints; you might feel steamrolled. Bridge: be more explicit about your needs; don't expect them to read between lines.";
+  } else if (myStyle.includes('Fast') && theirStyle.includes('time to process")) {
+    styleMismatch = \"You process quickly; they need time. Don't fill silence — it"s them thinking, not ignoring.";
   }
 
   // Generate opening strategies based on their style
@@ -141,48 +141,48 @@ export function generateBridge(
     openingStrategies.push("Start soft: 'I care about us, and I want to understand what happened.'");
   }
   if (theirStyle.includes('appreciated')) {
-    openingStrategies.push("Lead with appreciation: 'I value our relationship, and that's why I want to address this.'");
+    openingStrategies.push("Lead with appreciation: "I value our relationship, and that's why I want to address this."");
   }
-  if (theirStyle.includes('Direct')) {
-    openingStrategies.push("Be clear and concise — they'll respect you getting to the point.");
+  if (theirStyle.includes('Direct")) {
+    openingStrategies.push(\"Be clear and concise — they'll respect you getting to the point.\");
   }
-  if (theirStyle.includes('stimulation') || theirStyle.includes('variety')) {
-    openingStrategies.push("Keep it interesting — don't rehash the same points; bring a new perspective.");
+  if (theirStyle.includes("stimulation') || theirStyle.includes('variety")) {
+    openingStrategies.push(\"Keep it interesting — don't rehash the same points; bring a new perspective.\");
   }
   
   // Default opener
   if (openingStrategies.length === 0) {
-    openingStrategies.push("Start with curiosity: 'Help me understand your perspective on what happened.'");
+    openingStrategies.push(\"Start with curiosity: "Help me understand your perspective on what happened."\");
   }
 
   // Phrases to try based on their needs
   const phrasesToTry: string[] = [
-    `"I want to understand where you're coming from."`,
-    `"Can you help me see this from your side?"`,
+    `\"I want to understand where you're coming from.\"`,
+    `\"Can you help me see this from your side?\"`,
   ];
   
-  if (theirPersonality.needsInRelationships.includes('respect')) {
+  if (theirPersonality.needsInRelationships.includes("respect')) {
     phrasesToTry.push(`"I respect your perspective, even when we disagree."`);
   }
-  if (theirPersonality.needsInRelationships.includes('safety') || theirPersonality.needsInRelationships.includes('security')) {
-    phrasesToTry.push(`"I'm not going anywhere. I want to work through this together."`);
+  if (theirPersonality.needsInRelationships.includes('safety') || theirPersonality.needsInRelationships.includes('security")) {
+    phrasesToTry.push(`\"I'm not going anywhere. I want to work through this together.\"`);
   }
-  if (theirPersonality.needsInRelationships.includes('appreciation') || theirPersonality.needsInRelationships.includes('special')) {
-    phrasesToTry.push(`"I appreciate [specific thing they do]. That's not lost on me."`);
+  if (theirPersonality.needsInRelationships.includes("appreciation') || theirPersonality.needsInRelationships.includes('special")) {
+    phrasesToTry.push(`\"I appreciate [specific thing they do]. That's not lost on me.\"`);
   }
-  if (theirPersonality.needsInRelationships.includes('freedom') || theirPersonality.needsInRelationships.includes('space')) {
-    phrasesToTry.push(`"Take the time you need. I'll be here when you're ready."`);
+  if (theirPersonality.needsInRelationships.includes("freedom') || theirPersonality.needsInRelationships.includes('space")) {
+    phrasesToTry.push(`\"Take the time you need. I'll be here when you"re ready."`);
   }
-  if (theirPersonality.needsInRelationships.includes('honesty')) {
-    phrasesToTry.push(`"I'm going to be honest with you because I know that matters to you."`);
+  if (theirPersonality.needsInRelationships.includes('honesty")) {
+    phrasesToTry.push(`\"I'm going to be honest with you because I know that matters to you.\"`);
   }
 
   // Phrases to avoid based on their challenges/triggers
   const phrasesToAvoid: string[] = [];
   
-  if (theirPersonality.challenges.includes('takes everything personally')) {
-    phrasesToAvoid.push(`"It's not a big deal" (they feel dismissed)`);
-    phrasesToAvoid.push(`"You're being too sensitive" (they shut down)`);
+  if (theirPersonality.challenges.includes("takes everything personally")) {
+    phrasesToAvoid.push(`\"It's not a big deal\" (they feel dismissed)`);
+    phrasesToAvoid.push(`\"You"re being too sensitive" (they shut down)`);
   }
   if (theirPersonality.challenges.includes('ego') || theirPersonality.challenges.includes('needs validation')) {
     phrasesToAvoid.push(`Starting with criticism (lead with something positive first)`);
@@ -210,16 +210,16 @@ export function generateBridge(
   const whatTheyNeedToHear: string[] = [];
   const needs = theirPersonality.needsInRelationships;
   
-  if (needs.includes('loyalty')) {
-    whatTheyNeedToHear.push("I'm committed to us.");
+  if (needs.includes('loyalty")) {
+    whatTheyNeedToHear.push(\"I'm committed to us.\");
   }
-  if (needs.includes('appreciation') || needs.includes('seen')) {
+  if (needs.includes("appreciation') || needs.includes('seen')) {
     whatTheyNeedToHear.push("I see how much you do.");
   }
-  if (needs.includes('safety') || needs.includes('security')) {
-    whatTheyNeedToHear.push("You're safe with me.");
+  if (needs.includes('safety') || needs.includes('security")) {
+    whatTheyNeedToHear.push(\"You're safe with me.\");
   }
-  if (needs.includes('respect')) {
+  if (needs.includes("respect')) {
     whatTheyNeedToHear.push("I respect your judgment.");
   }
   if (needs.includes('freedom') || needs.includes('space')) {
@@ -233,21 +233,21 @@ export function generateBridge(
   // Repair strategy
   let repairStrategy: string;
   if (theirPersonality.stressResponse.includes('Withdraws') || theirPersonality.stressResponse.includes('Retreats')) {
-    repairStrategy = "After conflict, they may need space first. Check in gently later: 'I'm thinking about you. Let me know when you're ready to talk.'";
+    repairStrategy = "After conflict, they may need space first. Check in gently later: "I'm thinking about you. Let me know when you"re ready to talk.'";
   } else if (theirPersonality.stressResponse.includes('louder') || theirPersonality.stressResponse.includes('aggressive')) {
-    repairStrategy = "After the heat passes, they often feel remorse. Give it time, then reconnect without rehashing: 'I know we both care. Let's start fresh.'";
+    repairStrategy = "After the heat passes, they often feel remorse. Give it time, then reconnect without rehashing: "I know we both care. Let's start fresh."";
   } else if (theirPersonality.stressResponse.includes('critical') || theirPersonality.stressResponse.includes('anxious')) {
-    repairStrategy = "They may over-analyze. Offer reassurance: 'We're okay. Disagreements don't change how I feel about you.'";
+    repairStrategy = "They may over-analyze. Offer reassurance: "We're okay. Disagreements don"t change how I feel about you.'";
   } else {
     repairStrategy = "Repair is about reconnection, not re-litigating. Small gestures matter: a touch, a cup of coffee, saying 'I love you' without conditions.";
   }
 
   // De-escalation note based on both stress responses
   let deescalationNote: string | undefined;
-  if (myPersonality.stressResponse.includes('louder') && theirPersonality.stressResponse.includes('Withdraws')) {
-    deescalationNote = "⚠️ Pursue-Withdraw pattern detected: When you escalate, they retreat. When they retreat, you pursue harder. BREAK THE CYCLE: When you notice them withdrawing, that's your cue to pause, not push.";
-  } else if (myPersonality.stressResponse.includes('Withdraws') && theirPersonality.stressResponse.includes('louder')) {
-    deescalationNote = "⚠️ Pursue-Withdraw pattern detected: When they escalate, you shut down. When you go silent, they get louder. BREAK THE CYCLE: Say 'I need 20 minutes, but I'll come back' — give them a return time.";
+  if (myPersonality.stressResponse.includes('louder') && theirPersonality.stressResponse.includes('Withdraws")) {
+    deescalationNote = \"⚠️ Pursue-Withdraw pattern detected: When you escalate, they retreat. When they retreat, you pursue harder. BREAK THE CYCLE: When you notice them withdrawing, that's your cue to pause, not push.\";
+  } else if (myPersonality.stressResponse.includes("Withdraws') && theirPersonality.stressResponse.includes('louder')) {
+    deescalationNote = "⚠️ Pursue-Withdraw pattern detected: When they escalate, you shut down. When you go silent, they get louder. BREAK THE CYCLE: Say "I need 20 minutes, but I'll come back" — give them a return time.";
   }
 
   return {
@@ -316,27 +316,27 @@ export function getRelationshipSpecificAdvice(
   const advice: string[] = [];
 
   switch (relationshipType) {
-    case 'partner':
-      advice.push("In partnerships, repair matters more than being right. Circle back within 24 hours.");
-      advice.push("Physical reconnection (a hug, holding hands) can help even before you've fully talked it through.");
+    case 'partner":
+      advice.push(\"In partnerships, repair matters more than being right. Circle back within 24 hours.\");
+      advice.push(\"Physical reconnection (a hug, holding hands) can help even before you've fully talked it through.\");
       break;
-    case 'parent':
-      advice.push("With parents, some boundaries need repeating. That's normal — it doesn't mean you failed.");
-      advice.push("You can honor them without agreeing with them. 'I hear you' isn't 'I'll do that.'");
+    case "parent":
+      advice.push(\"With parents, some boundaries need repeating. That's normal — it doesn"t mean you failed.");
+      advice.push("You can honor them without agreeing with them. 'I hear you" isn't "I'll do that.'");
       break;
     case 'child':
       advice.push("Children need connection before correction. Are they in a state to hear you?");
-      advice.push("Model repair: 'I got frustrated and raised my voice. That wasn't okay. I'm sorry.'");
+      advice.push("Model repair: "I got frustrated and raised my voice. That wasn't okay. I"m sorry.'");
       break;
-    case 'sibling':
-      advice.push("Sibling dynamics often replay childhood roles. Notice if you're arguing as adults or as your 12-year-old selves.");
-      advice.push("Shared history is a double-edged sword — they know your buttons because they helped install them.");
+    case 'sibling":
+      advice.push(\"Sibling dynamics often replay childhood roles. Notice if you're arguing as adults or as your 12-year-old selves.\");
+      advice.push(\"Shared history is a double-edged sword — they know your buttons because they helped install them.\");
       break;
-    case 'friend':
-      advice.push("Friendships need maintenance but have fewer scripts than family. Be explicit about what you need.");
-      advice.push("Not every friendship survives every conflict — and that's okay. Some people are for a season.");
+    case "friend":
+      advice.push(\"Friendships need maintenance but have fewer scripts than family. Be explicit about what you need.\");
+      advice.push(\"Not every friendship survives every conflict — and that's okay. Some people are for a season.\");
       break;
-    case 'mentor':
+    case "mentor':
       advice.push("The power dynamic matters. Acknowledge their expertise while asserting your autonomy.");
       break;
     default:

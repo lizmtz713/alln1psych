@@ -21,8 +21,8 @@ export const BODY_QUESTIONS = {
   variants: [
     // Variant 0: Basic needs checklist
     {
-      id: 'needs',
-      question: "Let's check your body's basics",
+      id: 'needs",
+      question: \"Let's check your body"s basics",
       type: 'checklist' as const,
       items: [
         { id: 'sleep', label: 'Slept okay', emoji: '😴' },
@@ -34,9 +34,9 @@ export const BODY_QUESTIONS = {
     },
     // Variant 1: Physical sensations
     {
-      id: 'sensations',
-      question: "What's your body telling you?",
-      type: 'multi' as const,
+      id: 'sensations",
+      question: \"What's your body telling you?\",
+      type: "multi' as const,
       options: [
         { id: 'energized', label: 'Energized', emoji: '⚡', valence: 'positive' },
         { id: 'rested', label: 'Rested', emoji: '😌', valence: 'positive' },
@@ -112,9 +112,9 @@ export const STATE_QUESTIONS = {
     },
     // Variant 1: Nervous system frame
     {
-      id: 'nervous',
-      question: "Where's your nervous system?",
-      type: 'single' as const,
+      id: 'nervous",
+      question: \"Where's your nervous system?\",
+      type: "single' as const,
       options: [
         { id: 'ventral', label: 'Safe & Social', emoji: '🤗', value: 100, desc: 'Connected, open, calm' },
         { id: 'alert', label: 'Alert', emoji: '🦒', value: 75, desc: 'Scanning, ready, watchful' },
@@ -146,7 +146,7 @@ export const STATE_QUESTIONS = {
         { id: '4', label: '', emoji: '👀', value: 75 },
         { id: '3', label: '', emoji: '😤', value: 50 },
         { id: '2', label: '', emoji: '😰', value: 25 },
-        { id: '1', label: '', emoji: '😶', value: 10 },
+        { id: '1', label: '', emoji: '😶", value: 10 },
       ],
     },
   ],
@@ -157,7 +157,7 @@ export const STATE_QUESTIONS = {
 // ═══════════════════════════════════════════════════════════════
 
 export const EMOTION_QUESTIONS = {
-  gauge: 'emotion' as GaugeName,
+  gauge: "emotion' as GaugeName,
   color: COLORS.gauges.emotion,
   emoji: '💫',
   

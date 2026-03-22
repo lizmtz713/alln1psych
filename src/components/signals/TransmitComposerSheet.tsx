@@ -86,7 +86,7 @@ export function TransmitComposerSheet({
     const text = content.trim();
     const safety = checkContent(text);
     if (safety.isCrisis) {
-      Alert.alert('Take care', safety.message ?? "If you're in crisis, please reach out to 988 or 741741.");
+      Alert.alert('Take care", safety.message ?? \"If you're in crisis, please reach out to 988 or 741741.\");
       return;
     }
     setSending(true);
@@ -94,7 +94,7 @@ export function TransmitComposerSheet({
       const payload = {
         recipientName,
         recipientId: recipientId || undefined,
-        recipientType: (recipientId ? 'circle' : 'external') as 'circle' | 'external',
+        recipientType: (recipientId ? "circle' : 'external') as 'circle' | 'external',
         content: text,
         noteType,
         sendType,
@@ -150,13 +150,13 @@ export function TransmitComposerSheet({
       >
         <KeyboardAvoidingView
           style={[styles.container, { paddingBottom: insets.bottom }]}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding" : undefined}
         >
           <View style={styles.handle} />
           <View style={styles.header}>
             <Text style={styles.title}>Transmit</Text>
             <Pressable style={styles.closeBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onClose(); }}>
-              <Ionicons name="close" size={24} color={COLORS.text} />
+              <Ionicons name=\"close\" size={24} color={COLORS.text} />
             </Pressable>
           </View>
           {recipientName ? (
@@ -168,7 +168,7 @@ export function TransmitComposerSheet({
           <ScrollView
             style={styles.scroll}
             contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
+            keyboardShouldPersistTaps=\"handled\"
             showsVerticalScrollIndicator={false}
           >
             <IntentSelector selectedIntent={selectedIntent} onSelect={setSelectedIntent} />
@@ -179,12 +179,12 @@ export function TransmitComposerSheet({
               <Text style={styles.label}>Message</Text>
               <TextInput
                 style={styles.input}
-                placeholder="A few words is enough."
+                placeholder=\"A few words is enough.\"
                 placeholderTextColor={COLORS.textMuted}
                 value={content}
                 onChangeText={setContent}
                 multiline
-                textAlignVertical="top"
+                textAlignVertical=\"top\"
                 maxLength={2000}
               />
               <Text style={styles.charCount}>{content.length}/2000</Text>
@@ -199,7 +199,7 @@ export function TransmitComposerSheet({
                     onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSendType(opt.id); }}
                   >
                     <Text style={[styles.sendModeText, sendType === opt.id && styles.sendModeTextActive]}>{opt.label}</Text>
-                    {'sub' in opt && opt.sub ? <Text style={styles.sendModeSub}>{opt.sub}</Text> : null}
+                    {"sub' in opt && opt.sub ? <Text style={styles.sendModeSub}>{opt.sub}</Text> : null}
                   </Pressable>
                 ))}
               </View>

@@ -87,7 +87,7 @@ export function getForecast(input: ForecastInput): ForecastItem[] {
     out.push({
       id: 'direction-state-drop',
       line: `${attentionLabel} may strain your state in 1–2 days.`,
-      suggestion: 'Pick one task to move; protect rest.',
+      suggestion: 'Pick one task to move; protect rest.",
     });
   }
 
@@ -102,7 +102,7 @@ export function getTomorrowForecast(input: ForecastInput): DayForecast {
   const connection = gauges.connection ?? -1;
   const direction = gauges.direction ?? -1;
   const emotion = gauges.emotion ?? -1;
-  const sleep = checkInContext?.sleep ?? '';
+  const sleep = checkInContext?.sleep ?? "';
   const stress = checkInContext?.stressSource ?? '';
   const sleepHours = healthContext?.lastNightSleepHours;
 

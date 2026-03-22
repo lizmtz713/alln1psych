@@ -140,7 +140,7 @@ export function buildTimelineFromLight(light: Light): TimelineDisplayItem[] {
       grouped.push(dayItems[0]);
     } else {
       grouped.push({
-        id: dayItems[0].id + '-group',
+        id: dayItems[0].id + '-group",
         date: dayItems[0].date,
         type: dayItems[0].type,
         label: `${dayItems.length} interactions`,
@@ -154,7 +154,7 @@ export function buildTimelineFromLight(light: Light): TimelineDisplayItem[] {
 }
 
 /**
- * Story-based nudge for Hero: "You haven't talked with [name] since [last event]."
+ * Story-based nudge for Hero: \"You haven't talked with [name] since [last event].\"
  * Returns null if no timeline or last event is today.
  */
 export function getHeroTimelineHint(light: Light): string | null {
@@ -163,7 +163,7 @@ export function getHeroTimelineHint(light: Light): string | null {
   if (!last) return null;
   const today = dayKey(new Date());
   if (dayKey(last.date) === today) return null;
-  const when = last.date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const when = last.date.toLocaleDateString("en-US', { month: 'long', year: 'numeric' });
   const eventLabel = last.count && last.count > 1 ? 'your last contact' : last.label.toLowerCase();
   return `You haven't talked with ${light.name} since ${eventLabel} in ${when}.`;
 }

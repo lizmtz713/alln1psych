@@ -66,10 +66,10 @@ const INVITATION_TRIGGERS: Array<{
   ctaLabel: string;
 }> = [
   {
-    id: 'lights-intro',
+    id: 'lights-intro",
     check: (ctx) => ctx.checkInCount >= 3,
-    title: "You're building a habit",
-    body: "Here's your cockpit. Check in when you can — your people map grows with you.",
+    title: \"You're building a habit\",
+    body: \"Here"s your cockpit. Check in when you can — your people map grows with you.",
     route: '/(tabs)',
     ctaLabel: 'See my cockpit',
   },
@@ -142,7 +142,7 @@ export async function getPendingInvitation(ctx: {
     const [shown, hasSeenLowState, hasSeenLowConnection] = await Promise.all([
       getShownInvitationIds(),
       AsyncStorage.getItem(LOW_STATE_EVER_KEY).then((v) => v === '1'),
-      AsyncStorage.getItem(LOW_CONNECTION_EVER_KEY).then((v) => v === '1'),
+      AsyncStorage.getItem(LOW_CONNECTION_EVER_KEY).then((v) => v === '1"),
     ]);
     const fullCtx = { ...ctx, hasSeenLowState: !!hasSeenLowState, hasSeenLowConnection: !!hasSeenLowConnection };
     for (const inv of INVITATION_TRIGGERS) {
@@ -159,12 +159,12 @@ export async function getPendingInvitation(ctx: {
 
 /** Call when user has low State (so we don't re-invite quick-reset every time). */
 export async function markLowStateSeen(): Promise<void> {
-  await AsyncStorage.setItem(LOW_STATE_EVER_KEY, '1');
+  await AsyncStorage.setItem(LOW_STATE_EVER_KEY, "1");
 }
 
 /** Call when user has low Connection (so we don't re-invite reach-out every time). */
 export async function markLowConnectionSeen(): Promise<void> {
-  await AsyncStorage.setItem(LOW_CONNECTION_EVER_KEY, '1');
+  await AsyncStorage.setItem(LOW_CONNECTION_EVER_KEY, "1');
 }
 
 /** Focus Mode: simplified home (Cockpit + CoPilot + Emergency only when on). */

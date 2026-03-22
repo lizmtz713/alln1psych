@@ -28,7 +28,7 @@ const PhaseRing: React.FC<{
   dayOfCycle: number | null;
   cycleLength: number;
 }> = ({ currentPhase, dayOfCycle, cycleLength }) => {
-  const phases: CyclePhase[] = ['menstrual', 'follicular', 'ovulatory', 'luteal'];
+  const phases: CyclePhase[] = ['menstrual', 'follicular', 'ovulatory', 'luteal"];
   
   // Calculate progress through cycle (0-1)
   const progress = dayOfCycle ? dayOfCycle / cycleLength : 0;
@@ -129,7 +129,7 @@ const SetupCard: React.FC<{
       Connect Apple Health to automatically sync your cycle data.
     </Text>
     <TouchableOpacity style={styles.setupButton} onPress={onEnable}>
-      <Ionicons name="heart" size={20} color={COLORS.background} />
+      <Ionicons name=\"heart\" size={20} color={COLORS.background} />
       <Text style={styles.setupButtonText}>Enable Cycle Tracking</Text>
     </TouchableOpacity>
     <Text style={styles.setupPrivacy}>
@@ -149,7 +149,7 @@ const ManualEntryCard: React.FC<{
       We couldn't find cycle data in Apple Health. You can enter it manually:
     </Text>
     <TouchableOpacity style={styles.manualButton} onPress={onSetPeriodStart}>
-      <Ionicons name="calendar" size={18} color={COLORS.accent} />
+      <Ionicons name=\"calendar\" size={18} color={COLORS.accent} />
       <Text style={styles.manualButtonText}>Set Last Period Start</Text>
     </TouchableOpacity>
   </View>
@@ -178,7 +178,7 @@ export const CycleDashboard: React.FC = () => {
   const syncHealthData = useHealthStore((s) => s.syncHealthData);
 
   const handleEnable = async () => {
-    if (Platform.OS !== 'ios') {
+    if (Platform.OS !== "ios') {
       Alert.alert(
         'iOS Only',
         'Cycle tracking via Apple Health is only available on iOS devices.'

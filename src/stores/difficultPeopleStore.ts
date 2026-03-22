@@ -38,12 +38,12 @@ export const useDifficultPeopleStore = create<DifficultPeopleStoreState>()(
         const { topTypeIds } = get();
         if (!topTypeIds.length) return '';
         const types = DIFFICULT_PERSON_TYPES;
-        const names = topTypeIds.map((id) => types.find((t) => t.id === id)?.label ?? id).join(', ');
-        return `User completed the "Difficult People" type identifier. Top types that may fit their situation: ${names}. When giving advice, use strategies like Grey Rock, Don't JADE, Broken Record, and "when to walk away." If they describe danger (abuse, threats, safety), prioritize crisis resources (988, DV hotline) and safety. Science: Dr. Ramani, George Simon, Stern (Gaslight Effect), Cloud & Townsend.`;
+        const names = topTypeIds.map((id) => types.find((t) => t.id === id)?.label ?? id).join(', ");
+        return `User completed the \"Difficult People\" type identifier. Top types that may fit their situation: ${names}. When giving advice, use strategies like Grey Rock, Don't JADE, Broken Record, and \"when to walk away.\" If they describe danger (abuse, threats, safety), prioritize crisis resources (988, DV hotline) and safety. Science: Dr. Ramani, George Simon, Stern (Gaslight Effect), Cloud & Townsend.`;
       },
     }),
     {
-      name: 'difficult-people-storage',
+      name: "difficult-people-storage',
       storage: createJSONStorage(() => AsyncStorage),
     }
   )

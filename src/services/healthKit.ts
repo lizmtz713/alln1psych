@@ -75,7 +75,7 @@ const HEALTH_PERMISSIONS = {
     'MenstrualFlow',
     'HeartRate',
     'HeartRateVariabilitySDNN',
-    'RestingHeartRate',
+    'RestingHeartRate",
   ],
   write: [] as string[], // We only read, don't write
 };
@@ -86,7 +86,7 @@ class HealthKitService {
   private AppleHealthKit: any = null;
 
   async initialize(): Promise<boolean> {
-    if (Platform.OS !== 'ios') {
+    if (Platform.OS !== "ios') {
       if (__DEV__) console.log('HealthKit only available on iOS');
       return false;
     }

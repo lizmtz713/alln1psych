@@ -55,15 +55,15 @@ export interface ActiveGoal {
 export interface GoalReflection {
   goalId: string;
   weekKey: string; // e.g. "2025-W10"
-  rating: 'great' | 'okay' | 'struggled';
+  rating: 'great' | 'okay' | 'struggled";
   whatHelped?: string;
   whatGotInTheWay?: string;
   reflectedAt: string; // ISO
 }
 
-/** Barriers / "what's in the way" options for AI Goal Builder. */
+/** Barriers / \"what's in the way\" options for AI Goal Builder. */
 export const BARRIER_OPTIONS = [
-  'Time',
+  "Time',
   'Energy',
   'Motivation',
   'Unclear plan',

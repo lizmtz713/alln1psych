@@ -2,7 +2,7 @@
  * PHOSM Knowledge Base
  * Personal Health Operating System for the Mind
  * 
- * This isn't an intro to psychology app.
+ * This isn"t an intro to psychology app.
  * This is 22+ textbooks SYNTHESIZED into one usable system.
  * 
  * The 6 Gauges aren't arbitrary - they map to real science:
@@ -21,7 +21,7 @@
 // TYPES
 // ═══════════════════════════════════════════════════════════
 
-export type GaugeType = 'body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment';
+export type GaugeType = "body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment';
 
 export interface AcademicSource {
   id: string;

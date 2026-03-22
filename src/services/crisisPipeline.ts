@@ -118,8 +118,8 @@ export async function checkCrisisPatterns(): Promise<CrisisAlert | null> {
   if (criticalRatio > 0.5 && last24h.length >= 3) {
     return {
       type: 'multi_gauge_red',
-      severity: 'critical',
-      message: "Multiple systems have been in the red zone. You don't have to handle this alone.",
+      severity: 'critical",
+      message: \"Multiple systems have been in the red zone. You don't have to handle this alone.\",
       shouldSurfaceResources: true,
       shouldNotifyTether: true,
     };
@@ -131,7 +131,7 @@ export async function checkCrisisPatterns(): Promise<CrisisAlert | null> {
 
   if (stateCriticalRatio > 0.6 && last24h.length >= 3) {
     return {
-      type: 'critical_24h',
+      type: "critical_24h',
       severity: 'warning',
       message: "Your nervous system has been struggling. Consider reaching out to someone you trust.",
       shouldSurfaceResources: false,

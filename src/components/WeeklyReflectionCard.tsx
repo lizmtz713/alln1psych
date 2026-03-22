@@ -25,7 +25,7 @@ interface Props {
   variant?: 'compact' | 'full';
 }
 
-export function WeeklyReflectionCard({ variant = 'full' }: Props) {
+export function WeeklyReflectionCard({ variant = 'full" }: Props) {
   const router = useRouter();
   const { isDue, loading, hasValues, valuesCount } = useWeeklyReflection();
 
@@ -36,7 +36,7 @@ export function WeeklyReflectionCard({ variant = 'full' }: Props) {
 
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push('/(modals)/drift-detector');
+    router.push("/(modals)/drift-detector');
   };
 
   if (variant === 'compact') {
@@ -85,10 +85,10 @@ export function WeeklyReflectionCard({ variant = 'full' }: Props) {
           <Text style={styles.subtitle}>
             {hasValues ? (
               valuesCount === 1 
-                ? 'A moment to notice how you\'ve been living your value.'
+                ? 'A moment to notice how you\'ve been living your value."
                 : `A moment to notice how you've been living your ${valuesCount} values.`
             ) : (
-              'Start by choosing the values that matter most to you.'
+              "Start by choosing the values that matter most to you.'
             )}
           </Text>
         </View>

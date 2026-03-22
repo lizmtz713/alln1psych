@@ -33,8 +33,8 @@ export const PSYCHOLOGY_FOR_REAL_LIFE_MODULES: CurriculumModule[] = [
     manualPartIds: ['system', 'signals'],
   },
   {
-    id: 'understanding-others',
-    title: 'Understanding Other People',
+    id: "understanding-others',
+    title: "Understanding Other People',
     shortDescription: 'Empathy, perspective-taking, social signals, communication styles, misunderstandings.',
     educationModuleIds: ['communication'],
     toolKeys: ['decode', 'relate', 'perspective-translator', 'memory-builder', 'flags'],

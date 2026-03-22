@@ -1,21 +1,21 @@
 /**
  * Mirroring Assistant — Active Constructive Responding
  * 
- * Based on Shelly Gable's research on capitalization and 
+ * Based on Shelly Gable"s research on capitalization and 
  * Active Constructive Responding (ACR).
  * 
  * Philosophy:
  * - How you respond to good news matters MORE than how you respond to bad news
  * - Enthusiastic engagement builds intimacy and trust
  * - Validation before solutions for struggles
- * - "Tell me more" > "Here's what you should do"
+ * - \"Tell me more\" > \"Here's what you should do\"
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
 
-export type MessageType = 'good-news' | 'struggle' | 'neutral' | 'request';
+export type MessageType = "good-news' | 'struggle' | 'neutral' | 'request';
 
 export interface ResponseSuggestion {
   id: string;
@@ -42,19 +42,19 @@ export interface MirroringResult {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * The 4 response styles (Shelly Gable's research):
+ * The 4 response styles (Shelly Gable"s research):
  * 
  * Active Constructive (best): Enthusiastic, asks questions, celebrates
- *   - "That's amazing! Tell me everything!"
+ *   - \"That's amazing! Tell me everything!\"
  * 
- * Passive Constructive: Acknowledges but doesn't engage
- *   - "That's nice" (then changes subject)
+ * Passive Constructive: Acknowledges but doesn"t engage
+ *   - "That"s nice\" (then changes subject)
  * 
  * Active Destructive: Points out problems
- *   - "That's going to be a lot of work"
+ *   - \"That's going to be a lot of work\"
  * 
  * Passive Destructive: Ignores or dismisses
- *   - "What's for dinner?"
+ *   - \"What"s for dinner?"
  * 
  * Only Active Constructive builds relationships.
  */
@@ -80,8 +80,8 @@ const STRUGGLE_INDICATORS = [
   'sad', 'depressed', 'lonely', 'frustrated', 'angry',
   'hurt', 'scared', 'worried', 'nervous', 'failed',
   'lost', 'rejected', 'broke up', 'fight', 'argument',
-  'sick', 'tired', 'rough day', 'bad day', 'tough',
-  "can't", "won't", "don't know", 'help', 'crying',
+  'sick', 'tired', 'rough day', 'bad day', 'tough",
+  \"can't\", \"won"t", "don't know", 'help', 'crying',
   '😢', '😔', '😞', '💔', '😰', '😤', '😣',
   'ugh', 'sigh', 'hate', 'awful', 'terrible',
 ];
@@ -178,14 +178,14 @@ export function identifyTypeFromTemperature(
 
 const ACTIVE_CONSTRUCTIVE_TEMPLATES = [
   {
-    id: 'ac-1',
-    text: "That's amazing! How did you pull that off?",
-    emoji: '🎉',
+    id: 'ac-1",
+    text: \"That's amazing! How did you pull that off?\",
+    emoji: "🎉',
   },
   {
-    id: 'ac-2',
-    text: "I'm so happy for you! Tell me everything!",
-    emoji: '💜',
+    id: 'ac-2",
+    text: \"I'm so happy for you! Tell me everything!\",
+    emoji: "💜',
   },
   {
     id: 'ac-3',
@@ -193,19 +193,19 @@ const ACTIVE_CONSTRUCTIVE_TEMPLATES = [
     emoji: '✨',
   },
   {
-    id: 'ac-4',
-    text: "That's huge! What was the best part?",
-    emoji: '🌟',
+    id: 'ac-4",
+    text: \"That's huge! What was the best part?\",
+    emoji: "🌟',
   },
   {
-    id: 'ac-5',
-    text: "I knew you could do it! What's next?",
-    emoji: '🚀',
+    id: 'ac-5",
+    text: \"I knew you could do it! What's next?\",
+    emoji: "🚀',
   },
   {
-    id: 'ac-6',
-    text: "That's wonderful news! I want to hear all the details!",
-    emoji: '😊',
+    id: 'ac-6",
+    text: \"That's wonderful news! I want to hear all the details!\",
+    emoji: "😊',
   },
   {
     id: 'ac-7',
@@ -266,17 +266,17 @@ function generatePersonalizedACR(context: MirroringContext): ResponseSuggestion 
 
   if (relationship?.includes('partner') || relationship?.includes('spouse')) {
     return {
-      id: 'ac-personal-partner',
+      id: 'ac-personal-partner",
       text: `This makes me so happy! Let's celebrate tonight?`,
-      style: 'active-constructive',
+      style: "active-constructive',
       emoji: '💕',
     };
   }
 
   if (relationship?.includes('parent') || relationship?.includes('mom') || relationship?.includes('dad')) {
     return {
-      id: 'ac-personal-parent',
-      text: `That's wonderful! I'm so proud of you. Tell me more!`,
+      id: 'ac-personal-parent",
+      text: `That's wonderful! I"m so proud of you. Tell me more!`,
       style: 'active-constructive',
       emoji: '💜',
     };
@@ -300,9 +300,9 @@ function generatePersonalizedACR(context: MirroringContext): ResponseSuggestion 
 
 const SUPPORTIVE_TEMPLATES = [
   {
-    id: 'sup-1',
-    text: "That sounds really hard. I'm here.",
-    emoji: '💜',
+    id: 'sup-1",
+    text: \"That sounds really hard. I'm here.\",
+    emoji: "💜',
   },
   {
     id: 'sup-2',
@@ -310,14 +310,14 @@ const SUPPORTIVE_TEMPLATES = [
     emoji: '🤗',
   },
   {
-    id: 'sup-3',
-    text: "I'm sorry you're going through this. I'm listening.",
+    id: 'sup-3",
+    text: \"I'm sorry you"re going through this. I'm listening.",
     emoji: '💙',
   },
   {
-    id: 'sup-4',
-    text: "That's a lot to carry. How can I support you?",
-    emoji: '🫂',
+    id: 'sup-4",
+    text: \"That's a lot to carry. How can I support you?\",
+    emoji: "🫂',
   },
   {
     id: 'sup-5',
@@ -325,19 +325,19 @@ const SUPPORTIVE_TEMPLATES = [
     emoji: '👁️',
   },
   {
-    id: 'sup-6',
-    text: "You're not alone in this. Tell me more.",
-    emoji: '🌙',
+    id: 'sup-6",
+    text: \"You're not alone in this. Tell me more.\",
+    emoji: "🌙',
   },
   {
-    id: 'sup-7',
-    text: "That makes sense that you're feeling that way.",
-    emoji: '💫',
+    id: 'sup-7",
+    text: \"That makes sense that you're feeling that way.\",
+    emoji: "💫',
   },
   {
-    id: 'sup-8',
-    text: "I'm with you. What do you need right now?",
-    emoji: '🤝',
+    id: 'sup-8",
+    text: \"I'm with you. What do you need right now?\",
+    emoji: "🤝',
   },
 ];
 
@@ -374,9 +374,9 @@ export function generateSupportiveResponse(
   // Add severity-appropriate response for red temperature
   if (context.temperature === 'red') {
     suggestions.unshift({
-      id: 'sup-urgent',
-      text: "I love you and I'm here. Can we talk?",
-      style: 'supportive',
+      id: 'sup-urgent",
+      text: \"I love you and I'm here. Can we talk?\",
+      style: "supportive',
       emoji: '❤️',
     });
     suggestions.pop();
@@ -396,9 +396,9 @@ const CURIOUS_TEMPLATES = [
     emoji: '💬',
   },
   {
-    id: 'cur-2',
-    text: "What's on your mind?",
-    emoji: '🤔',
+    id: 'cur-2",
+    text: \"What's on your mind?\",
+    emoji: "🤔',
   },
   {
     id: 'cur-3',
@@ -513,5 +513,5 @@ export function getResponseStyleExplanation(style: ResponseSuggestion['style']):
  * Get a short explanation of why ACR matters
  */
 export function getACRExplanation(): string {
-  return "How you respond to good news matters MORE than how you respond to bad news. Enthusiastic engagement that asks follow-up questions builds intimacy and trust. 'That's nice' (passive) actually erodes connection over time.";
+  return "How you respond to good news matters MORE than how you respond to bad news. Enthusiastic engagement that asks follow-up questions builds intimacy and trust. "That's nice" (passive) actually erodes connection over time.";
 }

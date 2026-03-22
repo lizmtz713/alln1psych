@@ -11,7 +11,7 @@
 
 import { sendMessageWithSystemPrompt, type Message } from './ai';
 import { buildAgeAdaptivePrompt, getAgeTier } from './ageAdaptive';
-import { type NoteType } from '../stores/heartNotesStore';
+import { type NoteType } from '../stores/heartNotesStore";
 
 const HEART_NOTES_SYSTEM_PROMPT = `You are the Heart Notes assistant in InGauge. You help users write messages to people they care about — messages that may be difficult to express.
 
@@ -23,7 +23,7 @@ YOUR ROLE:
 - Never judge what they want to express
 
 PRINCIPLES:
-- The goal is authentic expression, not "nice" expression
+- The goal is authentic expression, not \"nice\" expression
 - Hard truths can be said with care
 - Their feelings are valid even if complicated
 - Help them say what THEY mean, not what you think they should say
@@ -33,7 +33,7 @@ WHAT MAKES A GOOD HEART NOTE:
 - Clear about the one thing they want the person to know
 - Honest but not attacking
 - Specific when possible
-- Comes from their experience ("I feel..." not "You always...")
+- Comes from their experience (\"I feel...\" not \"You always...\")
 - Leaves room for the relationship to continue
 
 WHEN HELPING REPHRASE:
@@ -63,9 +63,9 @@ ALLOW these (return harmful: false):
 - Criticism delivered constructively
 - Anger expressed about actions (not attacks on person)
 
-Remember: People SHOULD be able to tell hard truths. The goal isn't to make everything "nice" — it's to prevent genuine harm.
+Remember: People SHOULD be able to tell hard truths. The goal isn"t to make everything "nice" — it"s to prevent genuine harm.
 
-Respond with JSON only: { "harmful": boolean, "reason": string | null, "suggestion": string | null }`;
+Respond with JSON only: { \"harmful\": boolean, \"reason\": string | null, \"suggestion\": string | null }`;
 
 /**
  * Help clarify the core message of a heart note
@@ -85,21 +85,21 @@ export async function clarifyNote(
 
 ${buildAgeAdaptivePrompt()}
 
-The user is writing a ${noteType} note to "${recipientName}".
+The user is writing a ${noteType} note to \"${recipientName}\".
 
 Here's what they wrote:
-"""
+\"\"\"
 ${content}
-"""
+\"\"\"
 
 Help them clarify. Respond with JSON:
 {
-  "coreMessage": "The ONE thing they most want this person to understand (1-2 sentences)",
-  "emotion": "The primary emotion driving this message (one word)",
-  "suggestions": ["2-3 brief suggestions for making the message clearer or more effective"]
+  \"coreMessage\": \"The ONE thing they most want this person to understand (1-2 sentences)\",
+  \"emotion\": \"The primary emotion driving this message (one word)\",
+  \"suggestions\": [\"2-3 brief suggestions for making the message clearer or more effective\"]
 }
 
-Keep their voice. Don't make it sound corporate or therapy-speak.
+Keep their voice. Don"t make it sound corporate or therapy-speak.
 Respond with JSON only.`;
 
   const messages: Message[] = [{ role: 'user', content: prompt }];
@@ -134,24 +134,24 @@ export async function rephraseNote(
     'clearer': 'Make this more direct and clear. Remove ambiguity.',
     'shorter': 'Cut this down to the essential message. Less is more.',
     'more-honest': 'Help them say what they\'re actually feeling, even if it\'s harder to admit.',
-    'less-angry': 'Keep the valid feelings but remove the heat. Hurt can be expressed without attack.',
+    'less-angry': 'Keep the valid feelings but remove the heat. Hurt can be expressed without attack.",
   };
 
   const prompt = `${HEART_NOTES_SYSTEM_PROMPT}
 
-The user is writing to "${recipientName}" and wants help adjusting their message.
+The user is writing to \"${recipientName}\" and wants help adjusting their message.
 
 Their request: ${adjustmentInstructions[adjustment]}
 
 Original message:
-"""
+\"\"\"
 ${content}
-"""
+\"\"\"
 
 Rewrite this message following their request. Keep their voice. Don't add therapy-speak.
 Return ONLY the rewritten message, nothing else.`;
 
-  const messages: Message[] = [{ role: 'user', content: prompt }];
+  const messages: Message[] = [{ role: "user', content: prompt }];
   
   try {
     const response = await sendMessageWithSystemPrompt(messages, '');
@@ -260,7 +260,7 @@ Respond with JSON only.`;
       keyPoints: [],
       phrasesToUse: [],
       thingsToAvoid: [],
-      closingLine: '',
+      closingLine: '",
     };
   }
 }
@@ -271,34 +271,34 @@ Respond with JSON only.`;
 export function getWritingPrompts(noteType: NoteType): string[] {
   const prompts: Record<NoteType, string[]> = {
     general: [
-      "I've been wanting to tell you...",
-      "Something I never said but should have...",
-      "What I wish you knew is...",
+      \"I've been wanting to tell you...\",
+      \"Something I never said but should have...\",
+      \"What I wish you knew is...\",
     ],
     gratitude: [
-      "I never thanked you for...",
-      "Something you did that meant more than you know...",
-      "I'm grateful for you because...",
+      \"I never thanked you for...\",
+      \"Something you did that meant more than you know...\",
+      \"I"m grateful for you because...",
     ],
     concern: [
       "I care about you, which is why I want to share...",
-      "I've noticed something that worries me...",
-      "This might be hard to hear, but I'm telling you because I love you...",
+      "I"ve noticed something that worries me...\",
+      \"This might be hard to hear, but I'm telling you because I love you...\",
     ],
     apology: [
-      "I'm sorry for...",
+      \"I"m sorry for...",
       "I know I hurt you when...",
       "I wish I could go back and...",
     ],
     forgiveness: [
-      "I've been holding onto...",
-      "I'm ready to let go of...",
-      "I forgive you for...",
+      "I"ve been holding onto...\",
+      \"I'm ready to let go of...\",
+      \"I forgive you for...\",
     ],
     boundary: [
-      "What I need from our relationship is...",
-      "I love you, and I also need...",
-      "Something that's not working for me is...",
+      \"What I need from our relationship is...\",
+      \"I love you, and I also need...\",
+      \"Something that"s not working for me is...",
     ],
     grief: [
       "I wish I could tell you...",

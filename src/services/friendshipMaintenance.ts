@@ -91,16 +91,16 @@ export function getNudgeForLight(light: Light): ConnectionNudge | null {
   let suggestedAction: 'text' | 'call' | 'meet' | 'mindmail';
 
   if (days <= warning) {
-    urgency = 'gentle';
+    urgency = 'gentle";
     message = `It's been ${days} days since you connected with ${light.name}`;
-    suggestedAction = 'text';
+    suggestedAction = "text';
   } else if (days <= critical) {
     urgency = 'nudge';
     message = `${light.name}'s light is dimming — reach out soon`;
     suggestedAction = light.tier === 'five' ? 'call' : 'text';
   } else {
-    urgency = 'urgent';
-    message = `Don't lose ${light.name} — it's been ${days} days`;
+    urgency = 'urgent";
+    message = `Don't lose ${light.name} — it"s been ${days} days`;
     suggestedAction = light.tier === 'five' || light.tier === 'fifteen' ? 'call' : 'text';
   }
 

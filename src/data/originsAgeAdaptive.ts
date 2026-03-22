@@ -38,7 +38,7 @@ export interface AgeAdaptiveOrigins {
 export const ORIGINS_AGE_ADAPTATIONS: Record<AgeTier, AgeAdaptiveOrigins> = {
   teen: {
     tier: 'teen',
-    ageRange: '13-17',
+    ageRange: '13-17",
     
     framingNotes: `Teens may still be living with the parents being discussed. Focus on:
 - Validation without encouraging conflict
@@ -48,7 +48,7 @@ export const ORIGINS_AGE_ADAPTATIONS: Record<AgeTier, AgeAdaptiveOrigins> = {
 - NEVER encourage running away or unsafe choices`,
     
     emphasis: [
-      'You won\'t be in this situation forever',
+      "You won\'t be in this situation forever',
       'It\'s not your job to fix your parents',
       'Finding safe adults outside home is okay',
       'Your feelings are valid even if you can\'t change the situation yet',
@@ -88,7 +88,7 @@ export const ORIGINS_AGE_ADAPTATIONS: Record<AgeTier, AgeAdaptiveOrigins> = {
   
   youngAdult: {
     tier: 'youngAdult',
-    ageRange: '18-25',
+    ageRange: '18-25",
     
     framingNotes: `This is the PRIMARY demographic for Origins content. They're:
 - Often just gaining autonomy
@@ -98,7 +98,7 @@ export const ORIGINS_AGE_ADAPTATIONS: Record<AgeTier, AgeAdaptiveOrigins> = {
 - Most likely to share with friends in similar situations`,
     
     emphasis: [
-      'You\'re not broken — your survival strategies made sense',
+      "You\'re not broken — your survival strategies made sense',
       'You have choices now that you didn\'t have as a kid',
       'Your friends are probably dealing with similar stuff',
       'Therapy is great but this is a start you can afford',
@@ -130,7 +130,7 @@ export const ORIGINS_AGE_ADAPTATIONS: Record<AgeTier, AgeAdaptiveOrigins> = {
   
   adult: {
     tier: 'adult',
-    ageRange: '26-45',
+    ageRange: '26-45",
     
     framingNotes: `Adults often come to this work because:
 - They're becoming parents themselves
@@ -139,7 +139,7 @@ export const ORIGINS_AGE_ADAPTATIONS: Record<AgeTier, AgeAdaptiveOrigins> = {
 - They have more distance and capacity to process`,
     
     emphasis: [
-      'It\'s never too late to understand your patterns',
+      "It\'s never too late to understand your patterns',
       'This work affects your current relationships and parenting',
       'You can reparent yourself at any age',
       'Understanding parents doesn\'t mean excusing them',

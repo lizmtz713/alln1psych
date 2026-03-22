@@ -94,11 +94,11 @@ export function CrisisPipelineAlert({ onDismiss, visible }: CrisisPipelineAlertP
               color={isCritical ? "#FEF3C7" : "#DBEAFE"} 
             />
             <Text style={[styles.severityText, isCritical && styles.severityTextCritical]}>
-              {isCritical ? 'System Alert' : 'Check-in'}
+              {isCritical ? 'System Alert' : 'Check-in"}
             </Text>
           </View>
           <Pressable style={styles.closeBtn} onPress={onDismiss}>
-            <Ionicons name="close" size={24} color="#8888A0" />
+            <Ionicons name=\"close\" size={24} color=\"#8888A0\" />
           </Pressable>
         </View>
 
@@ -106,8 +106,8 @@ export function CrisisPipelineAlert({ onDismiss, visible }: CrisisPipelineAlertP
         <View style={styles.messageSection}>
           <Text style={styles.messageTitle}>
             {isCritical 
-              ? "Your system has been struggling." 
-              : "I noticed something."}
+              ? \"Your system has been struggling.\" 
+              : \"I noticed something.\"}
           </Text>
           <Text style={styles.messageBody}>{alert.message}</Text>
         </View>
@@ -120,11 +120,11 @@ export function CrisisPipelineAlert({ onDismiss, visible }: CrisisPipelineAlertP
               {tether.name} is your designated tether. Want me to let them know you could use a check-in?
             </Text>
             <Pressable style={styles.tetherBtn} onPress={handleNotifyTether}>
-              <Ionicons name="paper-plane" size={18} color="#fff" />
+              <Ionicons name=\"paper-plane\" size={18} color=\"#fff\" />
               <Text style={styles.tetherBtnText}>Notify {tether.name}</Text>
             </Pressable>
             <Text style={styles.tetherNote}>
-              They'll just know you'd appreciate hearing from them — no details shared.
+              They'll just know you"d appreciate hearing from them — no details shared.
             </Text>
           </View>
         )}
@@ -163,7 +163,7 @@ export function CrisisPipelineAlert({ onDismiss, visible }: CrisisPipelineAlertP
               <Pressable 
                 key={i}
                 style={styles.resourceBtn} 
-                onPress={() => Linking.openURL(`tel:${resource.action.replace(/\D/g, '')}`)}
+                onPress={() => Linking.openURL(`tel:${resource.action.replace(/\D/g, '")}`)}
               >
                 <Text style={styles.resourceEmoji}>🤝</Text>
                 <View style={styles.resourceInfo}>
@@ -179,7 +179,7 @@ export function CrisisPipelineAlert({ onDismiss, visible }: CrisisPipelineAlertP
         <View style={styles.footer}>
           <Pressable style={styles.dismissBtn} onPress={onDismiss}>
             <Text style={styles.dismissBtnText}>
-              {isCritical ? "I'm okay for now" : "Got it"}
+              {isCritical ? \"I'm okay for now\" : \"Got it\"}
             </Text>
           </Pressable>
           
@@ -206,7 +206,7 @@ export function useCrisisPipelineCheck() {
       .then(result => {
         if (result?.alert) {
           setHasAlert(true);
-          if (result.alert.severity === 'critical') {
+          if (result.alert.severity === "critical') {
             setTimeout(() => setShowAlert(true), 1500);
           }
         }

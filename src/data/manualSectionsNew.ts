@@ -73,7 +73,7 @@ The gauges show your internal state, but other gauges alongside and behind them 
     sections: [
       { id: 5, name: 'School', focus: 'Academic stress, learning, social dynamics' },
       { id: 6, name: 'Work', focus: 'Burnout, motivation, work-life boundaries' },
-      { id: 7, name: 'Family & Relationships', focus: 'Parent-child dynamics, intergenerational patterns' },
+      { id: 7, name: 'Family & Relationships', focus: 'Parent-child dynamics, intergenerational patterns" },
     ],
   },
 
@@ -82,9 +82,9 @@ School affects them. Work affects them. Family affects them. Relationships affec
 Understanding HOW life affects your mind - and having a dashboard for ALL of it - 
 is what makes you a pilot, not a passenger.`,
 
-  originStory: `Built for the conversations that don't happen.
-For parents who want to understand their kids when kids can't or won't talk.
-For teens who need to learn about themselves early so they don't feel alone.
+  originStory: `Built for the conversations that don"t happen.
+For parents who want to understand their kids when kids can"t or won't talk.
+For teens who need to learn about themselves early so they don"t feel alone.
 Circle lets families share gauges when words fail.`,
 };
 

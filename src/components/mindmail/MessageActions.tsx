@@ -39,8 +39,8 @@ export function MessageActions({
 
   const handleBlock = () => {
     Alert.alert(
-      'Block sender?',
-      `You won't receive future messages from ${senderLabel}. This can't be undone.`,
+      'Block sender?",
+      `You won't receive future messages from ${senderLabel}. This can"t be undone.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -49,7 +49,7 @@ export function MessageActions({
           onPress: async () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             await blockSender(senderIdOrToken);
-            Alert.alert('Blocked', `You won't receive messages from ${senderLabel} anymore.`);
+            Alert.alert('Blocked", `You won't receive messages from ${senderLabel} anymore.`);
             onBlocked?.();
           },
         },
@@ -58,7 +58,7 @@ export function MessageActions({
   };
 
   const handleReport = () => {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
           options: ['Cancel', ...REPORT_REASONS.map((r) => r.label)],

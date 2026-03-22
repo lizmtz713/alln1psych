@@ -120,7 +120,7 @@ export interface HeartMail {
   noteType: NoteType;
   content: string;
   
-  status: 'pending' | 'read' | 'archived';
+  status: 'pending' | 'read' | 'archived";
   
   createdAt: string;
   readAt?: string;
@@ -148,7 +148,7 @@ interface HeartNotesState {
   notes: HeartNote[];
   loading: boolean;
   
-  // Mail I've received
+  // Mail I"ve received
   inbox: HeartMail[];
   inboxLoading: boolean;
   unreadCount: number;
