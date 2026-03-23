@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friend Survey | InGauge</title>
+  <style>
+    :root {
+      --bg: #09090F;
+      --surface: #111118;
+      --border: rgba(255,255,255,0.08);
+      --text: #F0F0F5;
+      --text-secondary: #A0A0B8;
+      --text-muted: #6B6B80;
+      --accent: #7C4DFF;
+      --accent-bg: rgba(124,77,255,0.15);
+      --success: #4ADE80;
+      --error: #EF4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .question {
+      margin-bottom: 24px;
+    }
+
+    .question label {
+      display: block;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option:hover {
+      border-color: var(--accent);
+    }
+
+    .option.selected {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+
+    .option input {
+      display: none;
+    }
+
+    .option .radio {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .option.selected .radio {
+      border-color: var(--accent);
+    }
+
+    .option.selected .radio::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .option-content {
+      flex: 1;
+    }
+
+    .option-title {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .option-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    textarea, input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    textarea:focus, input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    textarea {
+      min-height: 100px;
+    }
+
+    .optional {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .submit-btn:hover {
+      opacity: 0.9;
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .privacy-note {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 16px;
+    }
+
+    .error-message {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--error);
+      color: var(--error);
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .success-screen {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .success-screen .emoji {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .success-screen h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .success-screen p {
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+    }
+
+    .download-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      transition: border-color 0.2s;
+    }
+
+    .download-cta:hover {
+      border-color: var(--accent);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 12px;
+      }
+      .card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="app">
+    <div class="loading">Loading survey...</div>
+  </div>
+
+  <script>
+    // Get token from URL
+    const pathParts = window.location.pathname.split('/');
+    const token = pathParts[pathParts.length - 1] || new URLSearchParams(window.location.search).get('token');
+    
+    // Supabase config (replace with actual values)
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+    let surveyData = null;
+
+    // Fetch survey info
+    async function loadSurvey() {
+      if (!token) {
+        showError('Invalid survey link');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/get-friend-survey?token=${token}`);
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          showError(data.error || 'Survey not found');
+          return;
+        }
+
+        surveyData = data.survey;
+        renderSurvey();
+      } catch (err) {
+        showError('Failed to load survey');
+      }
+    }
+
+    function showError(message) {
+      document.getElementById('app').innerHTML = `
+        <div class="header">
+          <h1>😕 Oops</h1>
+          <p>${message}</p>
+        </div>
+      `;
+    }
+
+    function renderSurvey() {
+      const { friendName, senderName } = surveyData;
+      
+      document.getElementById('app').innerHTML = `
+        <div class="header">
+          <h1>Hey ${friendName}! 👋</h1>
+          <p>${senderName} wants to be a better friend to you. This quick survey helps them understand how you like to connect.</p>
+        </div>
+
+        <form id="survey-form">
+          <div class="card">
+            <div class="section-title">How You Connect</div>
+            
+            <div class="question">
+              <label>When someone wants to show they care, what feels most meaningful?</label>
+              <div class="options" data-name="loveLanguage">
+                <div class="option" data-value="words">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">💬 Words</div>
+                    <div class="option-desc">Compliments, encouragement, "I appreciate you" texts</div>
+                  </div>
+                </div>
+                <div class="option" data-value="time">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">⏰ Quality Time</div>
+                    <div class="option-desc">Undivided attention, meaningful hangouts, being fully present</div>
+                  </div>
+                </div>
+                <div class="option" data-value="help">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">🤝 Acts of Service</div>
+                    <div class="option-desc">Actions that make your life easier, helping with tasks</div>
+                  </div>
+                </div>
+                <div class="option" data-value="gifts">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">🎁 Thoughtful Gifts</div>
+                    <div class="option-desc">Remembering what you mentioned wanting, surprise presents</div>
+                  </div>
+                </div>
+                <div class="option" data-value="touch">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">🫂 Physical Presence</div>
+                    <div class="option-desc">Hugs, high fives, being physically there</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="question">
+              <label>How do you prefer to communicate?</label>
+              <div class="options" data-name="commPreference">
+                <div class="option" data-value="texts">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">📱 Texts & Messages</div>
+                    <div class="option-desc">Async, low pressure</div>
+                  </div>
+                </div>
+                <div class="option" data-value="calls">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">📞 Calls</div>
+                    <div class="option-desc">Phone or video calls</div>
+                  </div>
+                </div>
+                <div class="option" data-value="in_person">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">☕ In Person</div>
+                    <div class="option-desc">Face to face hangouts</div>
+                  </div>
+                </div>
+                <div class="option" data-value="mix">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">🔀 Mix of Everything</div>
+                    <div class="option-desc">Depends on the situation</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="question">
+              <label>How often do you like to hear from close friends?</label>
+              <div class="options" data-name="contactFrequency">
+                <div class="option" data-value="daily">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">Daily check-ins</div>
+                  </div>
+                </div>
+                <div class="option" data-value="few_times_week">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">A few times a week</div>
+                  </div>
+                </div>
+                <div class="option" data-value="weekly">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">Weekly</div>
+                  </div>
+                </div>
+                <div class="option" data-value="when_needed">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">When something's up</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">When You Need Support</div>
+            
+            <div class="question">
+              <label>When you're going through a hard time, what helps most?</label>
+              <div class="options" data-name="supportStyle">
+                <div class="option" data-value="listen">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">👂 Just listen</div>
+                    <div class="option-desc">Don't try to fix it</div>
+                  </div>
+                </div>
+                <div class="option" data-value="distract">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">🎮 Distract me</div>
+                    <div class="option-desc">Let's do something fun</div>
+                  </div>
+                </div>
+                <div class="option" data-value="problem_solve">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">🧠 Problem-solve with me</div>
+                    <div class="option-desc">Help me think through it</div>
+                  </div>
+                </div>
+                <div class="option" data-value="check_in">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">💬 Check in regularly</div>
+                    <div class="option-desc">Don't let me isolate</div>
+                  </div>
+                </div>
+                <div class="option" data-value="give_space">
+                  <div class="radio"></div>
+                  <div class="option-content">
+                    <div class="option-title">🌿 Give me space</div>
+                    <div class="option-desc">I'll come to you when ready</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">Optional Extras</div>
+            
+            <div class="question">
+              <label>Your birthday (so they don't forget!)</label>
+              <input type="date" name="birthday">
+            </div>
+
+            <div class="question">
+              <label>Anything you're saving up for or wishing for?</label>
+              <textarea name="wishList" placeholder="Trip to Austin, new running shoes, that book I mentioned..."></textarea>
+              <div class="optional">Helps them know how to celebrate you!</div>
+            </div>
+
+            <div class="question">
+              <label>Anything else ${senderName} should know?</label>
+              <textarea name="additionalNotes" placeholder="Any preferences, pet peeves, or things that help you feel seen..."></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Send to ${senderName}</button>
+          <p class="privacy-note">🔒 Only ${senderName} will see your answers</p>
+        </form>
+      `;
+
+      // Add click handlers for options
+      document.querySelectorAll('.options').forEach(group => {
+        group.querySelectorAll('.option').forEach(option => {
+          option.addEventListener('click', () => {
+            group.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+          });
+        });
+      });
+
+      // Handle form submission
+      document.getElementById('survey-form').addEventListener('submit', handleSubmit);
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      
+      const btn = document.querySelector('.submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      // Collect responses
+      const formData = {
+        token,
+        loveLanguage: getSelectedValue('loveLanguage'),
+        commPreference: getSelectedValue('commPreference'),
+        contactFrequency: getSelectedValue('contactFrequency'),
+        supportStyle: getSelectedValue('supportStyle'),
+        birthday: document.querySelector('input[name="birthday"]').value || null,
+        wishList: document.querySelector('textarea[name="wishList"]').value || null,
+        additionalNotes: document.querySelector('textarea[name="additionalNotes"]').value || null,
+      };
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/submit-friend-survey`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'Failed to submit');
+        }
+
+        showSuccess();
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = `Send to ${surveyData.senderName}`;
+        alert('Failed to submit survey. Please try again.');
+      }
+    }
+
+    function getSelectedValue(name) {
+      const selected = document.querySelector(`.options[data-name="${name}"] .option.selected`);
+      return selected ? selected.dataset.value : null;
+    }
+
+    function showSuccess() {
+      document.getElementById('app').innerHTML = `
+        <div class="success-screen">
+          <div class="emoji">✨</div>
+          <h2>Thank you!</h2>
+          <p>Your responses have been sent to ${surveyData.senderName}. They're lucky to have a friend like you!</p>
+          <a href="https://getingauge.com" class="download-cta">
+            <span>Want to do this for your friends?</span>
+            <span>→</span>
+          </a>
+        </div>
+      `;
+    }
+
+    // Initialize
+    loadSurvey();
+  </script>
+</body>
+</html>
