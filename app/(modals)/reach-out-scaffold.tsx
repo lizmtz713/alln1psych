@@ -4,7 +4,7 @@
  * Helps you actually craft a message or repair conversation,
  * not just read about it.
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../src/lib/constants';
 import { callAI, hasOpenAIKey } from '../../src/services/ai';
+import { useAuth } from '../../src/providers/AuthProvider';
+import { fetchLatestSummaryForPerson, buildShowUpToneHint } from '../../src/services/showUpService';
 
 const BG = COLORS.background;
 const SURFACE = COLORS.surface;
@@ -87,12 +89,18 @@ const CHECK_IN_TONES = [
 export default function ReachOutScaffoldScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const params = useLocalSearchParams<{ days?: string }>();
+  const params = useLocalSearchParams<{
+    days?: string;
+    showUpPersonId?: string;
+    showUpPersonName?: string;
+  }>();
   const days = parseInt(params.days || '2', 10);
+  const { user } = useAuth();
 
   const [step, setStep] = useState<Step>('who');
+  const [showUpPreferencesLine, setShowUpPreferencesLine] = useState<string | null>(null);
   const [data, setData] = useState<UserData>({
-    personName: '',
+    personName: params.showUpPersonName?.trim() || '',
     context: null,
     action: null,
     checkInTone: null,
@@ -105,6 +113,16 @@ export default function ReachOutScaffoldScreen() {
   });
   const [aiLoading, setAiLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const pid = params.showUpPersonId;
+    if (!pid || !user?.id) return;
+    (async () => {
+      const pair = await fetchLatestSummaryForPerson(user.id, pid);
+      const line = pair?.summary ? buildShowUpToneHint(pair.summary) : null;
+      setShowUpPreferencesLine(line);
+    })();
+  }, [params.showUpPersonId, user?.id]);
 
   const handleClose = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -156,12 +174,16 @@ export default function ReachOutScaffoldScreen() {
       const name = data.personName || 'them';
       const contextLabel = CONTEXTS.find((c) => c.id === data.context)?.label || 'we drifted apart';
 
+      const pref =
+        showUpPreferencesLine?.trim() &&
+        `\nTheir preferences (honor these): ${showUpPreferencesLine.trim()}`;
+
       if (type === 'check-in') {
         const toneLabel = data.checkInTone || 'warm';
         prompt = `Write a short, ${toneLabel} check-in message to ${name}. Context: ${contextLabel}. 
-Keep it 1-2 sentences. Natural, not formal. Just the message text, no quotes or explanation.`;
+Keep it 1-2 sentences. Natural, not formal. Just the message text, no quotes or explanation.${pref || ''}`;
       } else if (type === 'repair') {
-        prompt = `Help me write a repair conversation opener to ${name}. Context: ${contextLabel}.
+        prompt = `Help me write a repair conversation opener to ${name}. Context: ${contextLabel}.${pref || ''}
 I need 4 short phrases:
 1. OPEN: Signal I want to connect, not fight (1 sentence)
 2. ACKNOWLEDGE: What I might have contributed (1 sentence)  
@@ -175,7 +197,7 @@ ASK: [text]
 CLOSE: [text]`;
       } else {
         prompt = `Suggest a specific, low-pressure way to spend time with ${name}. Context: ${contextLabel}.
-Keep it casual and concrete. Just 1-2 sentences with a specific activity idea.`;
+Keep it casual and concrete. Just 1-2 sentences with a specific activity idea.${pref || ''}`;
       }
 
       const response = await callAI([{ role: 'user', content: prompt }], {
@@ -201,7 +223,7 @@ Keep it casual and concrete. Just 1-2 sentences with a specific activity idea.`;
     } finally {
       setAiLoading(false);
     }
-  }, [data]);
+  }, [data, showUpPreferencesLine]);
 
   const getFinalMessage = () => {
     if (data.action === 'check-in') {
@@ -273,6 +295,13 @@ Keep it casual and concrete. Just 1-2 sentences with a specific activity idea.`;
               <Text style={styles.heroTitle}>Connection has been low for {days} days</Text>
               <Text style={styles.heroSubtitle}>Let's help you reconnect</Text>
             </View>
+
+            {showUpPreferencesLine ? (
+              <View style={styles.showUpBanner}>
+                <Text style={styles.showUpBannerTitle}>What helps them</Text>
+                <Text style={styles.showUpBannerText}>{showUpPreferencesLine}</Text>
+              </View>
+            ) : null}
 
             <Text style={styles.inputLabel}>Who do you want to reach out to?</Text>
             <TextInput
@@ -827,6 +856,17 @@ const styles = StyleSheet.create({
     borderColor: BORDER,
   },
   actionBtnText: { fontSize: 15, fontWeight: '600', color: ACCENT },
+
+  showUpBanner: {
+    backgroundColor: ACCENT + '12',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: ACCENT + '35',
+  },
+  showUpBannerTitle: { fontSize: 12, fontWeight: '700', color: ACCENT, marginBottom: 6, letterSpacing: 0.3 },
+  showUpBannerText: { fontSize: 14, color: TEXT_COLOR, lineHeight: 20 },
 
   // Footer
   footer: {

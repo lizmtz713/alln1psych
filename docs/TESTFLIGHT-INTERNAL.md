@@ -122,11 +122,19 @@ Your `eas.json` has `submit.production.ios` with `appleId` and `appleTeamId`; EA
 
 In TestFlight, use **Provide test information** to add notes for yourself and future testers (what’s in this build, what to try, known issues).
 
+**Suggested test info snippet (copy/paste or adapt):**
+
+- **How to Show Up for Me:** People → open a person → “How to show up for them” → create link (signed in). Open link on phone browser (or Safari) → complete questionnaire → confirm summary appears in app. Try completion flow: “Copy invite message” vs “Copy my private update link.”
+- **Relational Bridge:** Tools → Relational Bridge → pick someone who completed How to Show Up → confirm teal “What they shared” card and that openers / phrases / repair reflect their preferences. Use “Tone Check with their preferences” from that card.
+- **Needs:** Supabase migration `20260316_show_up_preferences.sql` applied; `EXPO_PUBLIC_APP_URL` set for web invite links; OpenAI key for summaries.
+
 ---
 
 ## 8. Install and test
 
 Install the build from the TestFlight app on a real device and run through the main flows (tabs, Tone Check, temperature visibility, etc.).
+
+**Include in this internal pass:** **How to Show Up for Me** (invite → web → summary → inviter “Did this help?”) and **Relational Bridge** with a person who has a show-up summary (card + augmented bridge + Tone Check shortcut).
 
 ---
 

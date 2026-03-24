@@ -58,6 +58,7 @@ npx expo-doctor        # Expo/native config
 - [ ] Lights opens
 - [ ] Invite Circle works
 - [ ] No broken navigation
+- [ ] **How to Show Up for Me:** person → show-up screen → create link → (web) complete form → summary + highlight + Reach Out / Tone Check / Relational Bridge shortcuts; guest completion distinguishes **invite message** vs **private update link**
 
 **Tools** (at least)
 
@@ -66,7 +67,7 @@ npx expo-doctor        # Expo/native config
 - [ ] Role Play
 - [ ] Reach Out
 - [ ] Help Someone
-- [ ] Relational Bridge
+- [ ] Relational Bridge (with person who has **How to show up** summary: card + blended openers/phrases/repair)
 - [ ] Quick Reset
 - [ ] Decision
 

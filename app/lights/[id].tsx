@@ -142,6 +142,21 @@ export default function PersonProfileScreen() {
 
       <ReachOutSheet visible={showReachOut} onClose={() => setShowReachOut(false)} light={light} />
 
+      <Section title="🤝 How to show up for them">
+        <Text style={styles.showUpTeaser}>
+          Send a 2-minute questionnaire (no app for them). Get a clear summary: what helps, what to avoid, repair style.
+        </Text>
+        <Pressable
+          style={styles.showUpBtn}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push(`/lights/${light.id}/show-up` as any);
+          }}
+        >
+          <Text style={styles.showUpBtnText}>How to show up for {light.name} →</Text>
+        </Pressable>
+      </Section>
+
       {/* You two together */}
       <Section title="📊 You two together">
         <View style={styles.lightStats}>
@@ -278,4 +293,7 @@ const styles = StyleSheet.create({
   settingText: { fontSize: 15, color: COLORS.text },
   dangerRow: { borderBottomWidth: 0 },
   dangerText: { fontSize: 15, color: '#EF4444' },
+  showUpTeaser: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 20, marginBottom: 12 },
+  showUpBtn: { paddingVertical: 12, paddingHorizontal: 14, backgroundColor: COLORS.accentBg, borderRadius: BORDER_RADIUS.md, borderWidth: 1, borderColor: COLORS.accent },
+  showUpBtnText: { fontSize: 15, fontWeight: '600', color: COLORS.accent },
 });

@@ -54,7 +54,7 @@ const REWRITE_STYLES: { value: ToneRewriteStyle; label: string }[] = [
 export default function ToneCheckScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const params = useLocalSearchParams<{ message?: string }>();
+  const params = useLocalSearchParams<{ message?: string; showUpContext?: string }>();
   const scrollRef = useRef<ScrollView>(null);
   const cardScrollRef = useRef<ScrollView>(null);
   const [message, setMessage] = useState(params.message ?? '');
@@ -87,7 +87,14 @@ export default function ToneCheckScreen() {
       setAnalyzing(true);
       setShowRewriteStyles(false);
       try {
-        const analysis = await analyzeToneForMessage(text, rewriteStyle ? { rewriteStyle } : undefined);
+        const recipientPreferenceContext =
+          typeof params.showUpContext === 'string' && params.showUpContext.trim()
+            ? decodeURIComponent(params.showUpContext.trim())
+            : undefined;
+        const analysis = await analyzeToneForMessage(text, {
+          ...(rewriteStyle ? { rewriteStyle } : {}),
+          ...(recipientPreferenceContext ? { recipientPreferenceContext } : {}),
+        });
         if (analysis) {
           setResult(analysis);
         } else {
@@ -107,7 +114,7 @@ export default function ToneCheckScreen() {
         setAnalyzing(false);
       }
     },
-    [message]
+    [message, params.showUpContext]
   );
 
   const handleAnalyze = useCallback(() => {

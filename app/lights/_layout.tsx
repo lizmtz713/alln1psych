@@ -15,6 +15,7 @@ export default function LightsLayout() {
       }}
     >
       <Stack.Screen name="[id]" options={{ title: 'Person' }} />
+      <Stack.Screen name="[id]/show-up" options={{ title: 'How to show up' }} />
       <Stack.Screen name="log-entry" options={{ title: 'Log connection' }} />
       <Stack.Screen name="add" options={{ title: 'Add someone' }} />
       <Stack.Screen name="world" options={{ title: 'World Temperature' }} />

@@ -16,22 +16,29 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useCircleStore, type CircleMember } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
-import { 
-  generateBridge, 
+import {
+  generateBridge,
   getRelationshipSpecificAdvice,
+  augmentBridgeWithShowUpPreferences,
+  getShowUpBridgeCardLines,
   type CommunicationBridge,
   type RelationalBridgeResult,
 } from '../../src/services/relationalBridge';
+import { useAuth } from '../../src/providers/AuthProvider';
+import { fetchLatestSummaryForPerson, buildShowUpToneHint } from '../../src/services/showUpService';
+import type { ShowUpSummaryRow } from '../../src/types/showUp';
 import * as Haptics from 'expo-haptics';
 
 export default function RelationalBridgeModal() {
   const router = useRouter();
   const { memberId } = useLocalSearchParams<{ memberId?: string }>();
   const { members } = useCircleStore();
-  const { birthday: myBirthday, name: myName } = useUserStore();
-  
+  const { birthday: myBirthday } = useUserStore();
+  const { user } = useAuth();
+
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(memberId || null);
   const [bridgeResult, setBridgeResult] = useState<RelationalBridgeResult | null>(null);
+  const [showUpSummary, setShowUpSummary] = useState<ShowUpSummaryRow | null>(null);
 
   const selectedMember = useMemo(() => 
     members.find(m => m.id === selectedMemberId),
@@ -56,12 +63,37 @@ export default function RelationalBridgeModal() {
     }
   }, [selectedMember, myBirthday]);
 
+  useEffect(() => {
+    if (!selectedMember?.id || !user?.id) {
+      setShowUpSummary(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const pair = await fetchLatestSummaryForPerson(user.id, selectedMember.id);
+      if (!cancelled) setShowUpSummary(pair?.summary ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedMember?.id, user?.id]);
+
+  const displayBridge: CommunicationBridge | null = useMemo(() => {
+    if (!bridgeResult?.bridge) return null;
+    return augmentBridgeWithShowUpPreferences(bridgeResult.bridge, showUpSummary);
+  }, [bridgeResult?.bridge, showUpSummary]);
+
   const relationshipAdvice = useMemo(() => {
-    if (selectedMember && bridgeResult?.bridge) {
-      return getRelationshipSpecificAdvice(selectedMember.relationship, bridgeResult.bridge);
+    if (selectedMember && displayBridge) {
+      return getRelationshipSpecificAdvice(selectedMember.relationship, displayBridge);
     }
     return [];
-  }, [selectedMember, bridgeResult]);
+  }, [selectedMember, displayBridge]);
+
+  const showUpCardLines = useMemo(
+    () => (showUpSummary ? getShowUpBridgeCardLines(showUpSummary) : []),
+    [showUpSummary]
+  );
 
   const handleSelectMember = (member: CircleMember) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -106,6 +138,9 @@ export default function RelationalBridgeModal() {
           <Text style={styles.toneCheckLabel}>Check tone before you send</Text>
           <Ionicons name="chevron-forward" size={20} color="#9E9E9E" />
         </TouchableOpacity>
+        <Text style={styles.toneCheckHint}>
+          After you pick someone, if they&apos;ve filled out &quot;How to show up,&quot; Tone Check can use their preferences.
+        </Text>
 
         {/* Member Selection */}
         {!selectedMember && (
@@ -168,6 +203,34 @@ export default function RelationalBridgeModal() {
               </TouchableOpacity>
             </View>
 
+            {showUpCardLines.length > 0 && (
+              <View style={styles.showUpCard}>
+                <Text style={styles.showUpCardTitle}>What they shared (How to show up)</Text>
+                <Text style={styles.showUpCardSub}>
+                  Repair and communication preferences below are blended into your bridge.
+                </Text>
+                {showUpCardLines.map((line, i) => (
+                  <Text key={i} style={styles.showUpCardLine}>
+                    • {line}
+                  </Text>
+                ))}
+                <TouchableOpacity
+                  style={styles.showUpToneRow}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    const ctx = showUpSummary ? buildShowUpToneHint(showUpSummary)?.trim() : '';
+                    router.push({
+                      pathname: '/tools/tone-check',
+                      params: ctx ? { showUpContext: encodeURIComponent(ctx) } : {},
+                    } as any);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.showUpToneLabel}>Tone Check with their preferences →</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
             {/* No birthday data */}
             {!bridgeResult.hasData && bridgeResult.generalTips && (
               <View style={styles.tipsBox}>
@@ -178,22 +241,22 @@ export default function RelationalBridgeModal() {
             )}
 
             {/* Full bridge data */}
-            {bridgeResult.hasData && bridgeResult.bridge && (
+            {bridgeResult.hasData && displayBridge && (
               <>
                 {/* Style mismatch alert */}
-                {bridgeResult.bridge.styleMismatch && (
+                {displayBridge.styleMismatch && (
                   <View style={styles.alertBox}>
                     <Ionicons name="swap-horizontal" size={20} color="#FF9800" />
-                    <Text style={styles.alertText}>{bridgeResult.bridge.styleMismatch}</Text>
+                    <Text style={styles.alertText}>{displayBridge.styleMismatch}</Text>
                   </View>
                 )}
 
                 {/* De-escalation warning */}
-                {bridgeResult.bridge.deescalationNote && (
+                {displayBridge.deescalationNote && (
                   <View style={[styles.alertBox, { borderColor: '#F44336', backgroundColor: '#F4433611' }]}>
                     <Ionicons name="alert-circle" size={20} color="#F44336" />
                     <Text style={[styles.alertText, { color: '#F44336' }]}>
-                      {bridgeResult.bridge.deescalationNote}
+                      {displayBridge.deescalationNote}
                     </Text>
                   </View>
                 )}
@@ -201,7 +264,7 @@ export default function RelationalBridgeModal() {
                 {/* Opening strategies */}
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>🎯 How to Open</Text>
-                  {bridgeResult.bridge.openingStrategies.map((strategy, i) => (
+                  {displayBridge.openingStrategies.map((strategy, i) => (
                     <View key={i} style={styles.bulletItem}>
                       <Text style={styles.bullet}>•</Text>
                       <Text style={styles.bulletText}>{strategy}</Text>
@@ -212,7 +275,7 @@ export default function RelationalBridgeModal() {
                 {/* Phrases to try */}
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>💬 Phrases to Try</Text>
-                  {bridgeResult.bridge.phrasesToTry.map((phrase, i) => (
+                  {displayBridge.phrasesToTry.map((phrase, i) => (
                     <View key={i} style={styles.phraseCard}>
                       <Text style={styles.phraseText}>{phrase}</Text>
                     </View>
@@ -223,9 +286,9 @@ export default function RelationalBridgeModal() {
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>❤️ What They Need to Hear</Text>
                   <View style={styles.needsGrid}>
-                    {bridgeResult.bridge.whatTheyNeedToHear.map((need, i) => (
+                    {displayBridge.whatTheyNeedToHear.map((need, i) => (
                       <View key={i} style={styles.needChip}>
-                        <Text style={styles.needText}>"{need}"</Text>
+                        <Text style={styles.needText}>&ldquo;{need}&rdquo;</Text>
                       </View>
                     ))}
                   </View>
@@ -234,7 +297,7 @@ export default function RelationalBridgeModal() {
                 {/* Phrases to avoid */}
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>🚫 Avoid These</Text>
-                  {bridgeResult.bridge.phrasesToAvoid.map((phrase, i) => (
+                  {displayBridge.phrasesToAvoid.map((phrase, i) => (
                     <View key={i} style={styles.avoidItem}>
                       <Ionicons name="close-circle" size={16} color="#F44336" />
                       <Text style={styles.avoidText}>{phrase}</Text>
@@ -246,7 +309,7 @@ export default function RelationalBridgeModal() {
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>🔄 Your Conflict Pattern</Text>
                   <View style={styles.patternBox}>
-                    <Text style={styles.patternText}>{bridgeResult.bridge.conflictTip}</Text>
+                    <Text style={styles.patternText}>{displayBridge.conflictTip}</Text>
                   </View>
                 </View>
 
@@ -254,7 +317,7 @@ export default function RelationalBridgeModal() {
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>🩹 After the Conflict</Text>
                   <View style={styles.repairBox}>
-                    <Text style={styles.repairText}>{bridgeResult.bridge.repairStrategy}</Text>
+                    <Text style={styles.repairText}>{displayBridge.repairStrategy}</Text>
                   </View>
                 </View>
 
@@ -361,6 +424,52 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#FFF',
+  },
+  toneCheckHint: {
+    fontSize: 12,
+    color: '#888',
+    marginHorizontal: 20,
+    marginTop: 6,
+    marginBottom: 4,
+    lineHeight: 17,
+  },
+  showUpCard: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: '#0D948822',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#0D948855',
+  },
+  showUpCardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#2DD4BF',
+    marginBottom: 6,
+  },
+  showUpCardSub: {
+    fontSize: 12,
+    color: '#AAA',
+    marginBottom: 10,
+    lineHeight: 17,
+  },
+  showUpCardLine: {
+    fontSize: 14,
+    color: '#E0E0E0',
+    lineHeight: 21,
+    marginBottom: 6,
+  },
+  showUpToneRow: {
+    marginTop: 12,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#333',
+  },
+  showUpToneLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2DD4BF',
   },
   section: {
     paddingHorizontal: 16,

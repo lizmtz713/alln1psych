@@ -69,6 +69,7 @@ export default function RootLayout() {
           <Stack.Screen name="flight-log" />
           <Stack.Screen name="timeline" />
           <Stack.Screen name="wrapped" />
+          <Stack.Screen name="show-up" options={{ headerShown: false }} />
           </Stack>
             </NotificationsSetup>
           </AuthSync>

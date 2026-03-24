@@ -694,7 +694,7 @@ const REWRITE_STYLE_HINT: Record<ToneRewriteStyle, string> = {
 
 export async function analyzeToneForMessage(
   messageText: string,
-  options?: { rewriteStyle?: ToneRewriteStyle }
+  options?: { rewriteStyle?: ToneRewriteStyle; recipientPreferenceContext?: string }
 ): Promise<ToneCheckResult | null> {
   const text = messageText?.trim();
   if (!text) return null;
@@ -702,10 +702,14 @@ export async function analyzeToneForMessage(
   const userContent = styleHint
     ? `${text}\n\n[For alternativePhrasing only: ${styleHint}]`
     : text.slice(0, 2000);
+  const recipientBlock =
+    options?.recipientPreferenceContext?.trim() &&
+    `\n\nRECIPIENT CONTEXT (use when suggesting alternativePhrasing — match their preferences; stay practical):\n${options.recipientPreferenceContext.trim().slice(0, 1200)}`;
+  const systemPrompt = recipientBlock ? `${TONE_CHECK_SYSTEM}${recipientBlock}` : TONE_CHECK_SYSTEM;
   try {
     const content = await sendMessageDirectly(
       [{ role: 'user', content: userContent }],
-      TONE_CHECK_SYSTEM,
+      systemPrompt,
       400,
       0.3
     );
