@@ -7,6 +7,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { healthKitService, type HealthSnapshot } from '../services/healthKit';
+import type { NormalizedHealthSnapshot } from '../types/normalizedHealthSnapshot';
 import { isOuraConnected, syncOuraData, type OuraSnapshot } from '../services/ouraIntegration';
 import { getAggregatedBodyState } from '../services/healthData';
 
@@ -17,6 +18,8 @@ interface HealthState {
   
   // Cached data
   snapshot: HealthSnapshot | null;
+  /** Flat model for UI — sleep, steps, HR, HRV, workouts; prefer this for new screens. */
+  normalizedSnapshot: NormalizedHealthSnapshot | null;
   lastSyncAttempt: string | null;
   syncError: string | null;
   
@@ -37,6 +40,7 @@ export const useHealthStore = create<HealthState>()(
       isAvailable: false,
       isAuthorized: false,
       snapshot: null,
+      normalizedSnapshot: null,
       lastSyncAttempt: null,
       syncError: null,
       bodyScoreFromHealth: null,
@@ -74,6 +78,7 @@ export const useHealthStore = create<HealthState>()(
 
         try {
           const snapshot = await healthKitService.getFullSnapshot();
+          let normalizedSnapshot = await healthKitService.buildNormalizedSnapshot(snapshot);
           let bodyScore = healthKitService.calculateBodyScore(snapshot);
           let stateContribution = healthKitService.calculateStateContribution(snapshot);
           let ouraSnapshot: OuraSnapshot | null = null;
@@ -84,6 +89,11 @@ export const useHealthStore = create<HealthState>()(
               const aggregated = getAggregatedBodyState(snapshot, ouraSnapshot);
               if (aggregated.bodyScore != null) bodyScore = aggregated.bodyScore;
               if (aggregated.stateScore != null) stateContribution = aggregated.stateScore;
+              normalizedSnapshot = {
+                ...normalizedSnapshot,
+                source: 'mixed',
+                syncedAt: new Date().toISOString(),
+              };
             } catch (e) {
               // Oura sync failed; keep HealthKit-only scores
             }
@@ -91,6 +101,7 @@ export const useHealthStore = create<HealthState>()(
 
           set({
             snapshot,
+            normalizedSnapshot,
             bodyScoreFromHealth: bodyScore,
             stateContributionFromHealth: stateContribution,
             syncError: null,
@@ -110,6 +121,7 @@ export const useHealthStore = create<HealthState>()(
       clearHealthData: () => {
         set({
           snapshot: null,
+          normalizedSnapshot: null,
           bodyScoreFromHealth: null,
           stateContributionFromHealth: null,
           lastSyncAttempt: null,
@@ -123,6 +135,7 @@ export const useHealthStore = create<HealthState>()(
       partialize: (state) => ({
         isAuthorized: state.isAuthorized,
         snapshot: state.snapshot,
+        normalizedSnapshot: state.normalizedSnapshot,
         lastSyncAttempt: state.lastSyncAttempt,
         bodyScoreFromHealth: state.bodyScoreFromHealth,
         stateContributionFromHealth: state.stateContributionFromHealth,
@@ -134,6 +147,7 @@ export const useHealthStore = create<HealthState>()(
 // Helper hook for components
 export function useHealthData() {
   const snapshot = useHealthStore((s) => s.snapshot);
+  const normalizedSnapshot = useHealthStore((s) => s.normalizedSnapshot);
   const bodyScore = useHealthStore((s) => s.bodyScoreFromHealth);
   const stateContribution = useHealthStore((s) => s.stateContributionFromHealth);
   const isAuthorized = useHealthStore((s) => s.isAuthorized);
@@ -141,6 +155,7 @@ export function useHealthData() {
 
   return {
     snapshot,
+    normalizedSnapshot,
     bodyScore,
     stateContribution,
     isAuthorized,

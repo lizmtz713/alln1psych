@@ -22,10 +22,12 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { sendMessageWithSystemPrompt, analyzeImageWithVision } from '../../src/services/ai';
-import { 
-  calculateTrajectory,
+import {
+  scoreInteraction,
+  toResponseIntent,
+  getTrajectoryExplanation,
   type ResponseIntent,
-  type PartnerState 
+  type InteractionContext,
 } from '../../src/services/socialPhysics';
 import { useCockpitStore } from '../../src/stores/cockpitStore';
 import { ToolCautionModal, StabilizationFooter } from '../../src/components/StabilizationBanner';
@@ -64,6 +66,8 @@ RED FLAGS — Anything manipulative, guilt-trippy, passive-aggressive, or bounda
 
 SENDER STATE — Based on their message, assess: Are they ACTIVATED (anxious, defensive, urgent), SHUTDOWN (withdrawn, brief, avoidant), or REGULATED (calm, open)? One word + brief reason.
 
+SUGGESTED_INTENT — Exactly one token from this list, lowercase, underscores: set_boundary, reconnect, apologize, confront, validate, withdraw, clarify, defer. Pick the best fit for what the user might do next. If unclear, write: none
+
 RESPONSE OPTIONS — Give 3 brief response options with different tones:
 • Option A (Warm/Open): [response that prioritizes connection]
 • Option B (Boundaried): [response that protects their needs while staying respectful]  
@@ -87,6 +91,8 @@ RED FLAGS — Anything manipulative or boundary-crossing? If not, say "Nothing o
 
 SENDER STATE — Based on their message: ACTIVATED, SHUTDOWN, or REGULATED? One word + brief reason.
 
+SUGGESTED_INTENT — Exactly one token: set_boundary, reconnect, apologize, confront, validate, withdraw, clarify, defer, or none
+
 RESPONSE OPTIONS — Give 3 brief response options:
 • Option A (Warm/Open): [prioritizes connection]
 • Option B (Boundaried): [protects your needs]  
@@ -107,16 +113,30 @@ RED FLAGS — If something felt off (guilt-tripping, pressure, dismissal), trust
 
 SENDER STATE — Hard to say without AI. They might be REGULATED (calm), ACTIVATED (anxious/urgent), or SHUTDOWN (brief/withdrawn). Your reply can stay warm and clear either way.
 
+SUGGESTED_INTENT — none
+
 RESPONSE OPTIONS — You can: (A) Respond with warmth and connection, (B) Respond with a gentle boundary, or (C) Take time: "I need a moment to think — I'll get back to you."`;
 }
+
+/** Pulls the model's single-token intent line for social physics scoring. */
+function extractSuggestedIntentFromDecode(text: string): string | null {
+  const m = text.match(/SUGGESTED_INTENT\s*[—\-:]\s*([^\n]+)/i);
+  if (!m?.[1]) return null;
+  return m[1].trim();
+}
+
+/** Local sender read from Decode AI output (maps into InteractionContext). */
+type SenderSignals = { isActivated?: boolean; isShutdown?: boolean };
 
 // Intent options for trajectory calculator
 const INTENT_OPTIONS: Array<{ intent: ResponseIntent; label: string; emoji: string }> = [
   { intent: 'reconnect', label: 'Reconnect', emoji: '💚' },
   { intent: 'set_boundary', label: 'Set Boundary', emoji: '🛡️' },
   { intent: 'validate', label: 'Validate', emoji: '💜' },
+  { intent: 'apologize', label: 'Apologize', emoji: '🙏' },
   { intent: 'clarify', label: 'Clarify', emoji: '🔍' },
   { intent: 'defer', label: 'Buy Time', emoji: '⏰' },
+  { intent: 'withdraw', label: 'Withdraw', emoji: '🚪' },
   { intent: 'confront', label: 'Confront', emoji: '⚡' },
 ];
 
@@ -131,7 +151,7 @@ export default function DecodeScreen() {
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedIntent, setSelectedIntent] = useState<ResponseIntent | null>(null);
-  const [partnerState, setPartnerState] = useState<PartnerState>({});
+  const [senderSignals, setSenderSignals] = useState<SenderSignals>({});
   const [error, setError] = useState<string | null>(null);
   const [imagePickerAvailable, setImagePickerAvailable] = useState(true);
   
@@ -164,6 +184,44 @@ export default function DecodeScreen() {
     !biasFilterDismissed && 
     !showBiasFilter &&
     (currentState < 0 || currentState < 50);
+
+  const interactionContext = useMemo((): InteractionContext | undefined => {
+    const ctx: InteractionContext = {};
+    if (senderSignals.isActivated) ctx.urgency = 'high';
+    if (isStabilization || (typeof currentState === 'number' && currentState < 50)) {
+      ctx.userCapacity = 'low';
+    }
+    if (
+      response &&
+      /recent conflict|since we fought|after (our|the) (fight|argument)/i.test(response)
+    ) {
+      ctx.recentConflict = true;
+    }
+    return Object.keys(ctx).length ? ctx : undefined;
+  }, [senderSignals.isActivated, isStabilization, currentState, response]);
+
+  const parsedIntent = useMemo(() => {
+    const raw = extractSuggestedIntentFromDecode(response);
+    if (!raw) return null;
+    return toResponseIntent(raw);
+  }, [response]);
+
+  const effectiveIntent: ResponseIntent | null = selectedIntent ?? parsedIntent;
+
+  const scored = useMemo(() => {
+    if (!effectiveIntent) return null;
+    try {
+      return scoreInteraction(effectiveIntent, interactionContext);
+    } catch (e) {
+      console.warn('Trajectory calculation error:', e);
+      return null;
+    }
+  }, [effectiveIntent, interactionContext]);
+
+  const explanation = useMemo(() => {
+    if (!effectiveIntent) return null;
+    return getTrajectoryExplanation(effectiveIntent, interactionContext);
+  }, [effectiveIntent, interactionContext]);
 
   // Check if ImagePicker is available on mount
   useEffect(() => {
@@ -253,7 +311,7 @@ export default function DecodeScreen() {
       try {
         const activatedMatch = fullResponse.match(/SENDER STATE[:\s]*ACTIVATED/i);
         const shutdownMatch = fullResponse.match(/SENDER STATE[:\s]*SHUTDOWN/i);
-        setPartnerState({
+        setSenderSignals({
           isActivated: !!activatedMatch,
           isShutdown: !!shutdownMatch,
         });
@@ -284,21 +342,13 @@ export default function DecodeScreen() {
     setImageBase64(null);
     setResponse('');
     setSelectedIntent(null);
-    setPartnerState({});
+    setSenderSignals({});
     setError(null);
     setShowBiasFilter(false);
     setBiasFilterDismissed(false);
   }, []);
 
   const canDecode = imageBase64 || message.trim().length >= 3;
-
-  // Calculate trajectory for selected intent (wrapped for safety)
-  let trajectory = null;
-  try {
-    trajectory = selectedIntent ? calculateTrajectory(selectedIntent, partnerState) : null;
-  } catch (e) {
-    console.warn('Trajectory calculation error:', e);
-  }
 
   // Safe navigation to quick-reset
   const handleQuickReset = useCallback(() => {
@@ -467,75 +517,104 @@ export default function DecodeScreen() {
                 📊 Response Trajectory Calculator
               </Text>
               <Text style={styles.trajectorySectionSub}>
-                Tap an intent to see predicted gauge impact
+                {parsedIntent && !selectedIntent
+                  ? 'Suggested intent below — tap any chip to override'
+                  : 'Tap an intent to see predicted gauge impact'}
               </Text>
 
               {/* Partner state indicator */}
-              {(partnerState.isActivated || partnerState.isShutdown) && (
+              {(senderSignals.isActivated || senderSignals.isShutdown) && (
                 <View style={styles.partnerStateTag}>
                   <Text style={styles.partnerStateText}>
-                    {partnerState.isActivated ? '⚡ Sender is ACTIVATED' : '🔇 Sender is SHUTDOWN'}
+                    {senderSignals.isActivated ? '⚡ Sender is ACTIVATED' : '🔇 Sender is SHUTDOWN'}
                   </Text>
                 </View>
               )}
 
               {/* Intent buttons */}
               <View style={styles.intentGrid}>
-                {INTENT_OPTIONS.map((opt) => (
-                  <Pressable
-                    key={opt.intent}
-                    style={[
-                      styles.intentBtn,
-                      selectedIntent === opt.intent && styles.intentBtnSelected,
-                    ]}
-                    onPress={() => setSelectedIntent(
-                      selectedIntent === opt.intent ? null : opt.intent
-                    )}
-                  >
-                    <Text style={styles.intentEmoji}>{opt.emoji}</Text>
-                    <Text style={[
-                      styles.intentLabel,
-                      selectedIntent === opt.intent && styles.intentLabelSelected,
-                    ]}>
-                      {opt.label}
-                    </Text>
-                  </Pressable>
-                ))}
+                {INTENT_OPTIONS.map((opt) => {
+                  const isSelected = selectedIntent === opt.intent;
+                  const isSuggestedChip =
+                    !selectedIntent && parsedIntent === opt.intent;
+                  return (
+                    <Pressable
+                      key={opt.intent}
+                      style={[
+                        styles.intentBtn,
+                        isSuggestedChip && styles.intentBtnSuggested,
+                        isSelected && styles.intentBtnSelected,
+                      ]}
+                      onPress={() =>
+                        setSelectedIntent(selectedIntent === opt.intent ? null : opt.intent)
+                      }
+                    >
+                      <Text style={styles.intentEmoji}>{opt.emoji}</Text>
+                      <Text
+                        style={[
+                          styles.intentLabel,
+                          (isSelected || isSuggestedChip) && styles.intentLabelSelected,
+                        ]}
+                      >
+                        {opt.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
 
-              {/* Trajectory result */}
-              {trajectory && (
+              {/* Trajectory result — AI suggestion or user-selected intent */}
+              {!effectiveIntent && (
+                <Text style={styles.trajectoryFallbackHint}>
+                  When the analysis includes a suggested intent, or after you tap a chip, you will
+                  see predicted gauge impact here.
+                </Text>
+              )}
+              {scored && (
                 <View style={styles.trajectoryResult}>
+                  {parsedIntent && !selectedIntent && (
+                    <Text style={styles.suggestedIntentLabel}>Suggested trajectory</Text>
+                  )}
+                  <Text style={styles.riskBadge}>Risk: {scored.risk}</Text>
                   <View style={styles.trajectoryGauges}>
-                    <View style={styles.trajectoryGauge}>
-                      <Text style={styles.trajectoryGaugeLabel}>Alignment</Text>
-                      <Text style={[
-                        styles.trajectoryGaugeValue,
-                        trajectory.alignment >= 0 ? styles.gaugePositive : styles.gaugeNegative,
-                      ]}>
-                        {trajectory.alignment >= 0 ? '+' : ''}{trajectory.alignment}
-                      </Text>
-                    </View>
-                    <View style={styles.trajectoryGauge}>
-                      <Text style={styles.trajectoryGaugeLabel}>Connection</Text>
-                      <Text style={[
-                        styles.trajectoryGaugeValue,
-                        trajectory.connection >= 0 ? styles.gaugePositive : styles.gaugeNegative,
-                      ]}>
-                        {trajectory.connection >= 0 ? '+' : ''}{trajectory.connection}
-                      </Text>
-                    </View>
-                    <View style={styles.trajectoryGauge}>
-                      <Text style={styles.trajectoryGaugeLabel}>State</Text>
-                      <Text style={[
-                        styles.trajectoryGaugeValue,
-                        trajectory.state >= 0 ? styles.gaugePositive : styles.gaugeNegative,
-                      ]}>
-                        {trajectory.state >= 0 ? '+' : ''}{trajectory.state}
-                      </Text>
-                    </View>
+                    {(
+                      [
+                        ['Connection', scored.impact.connection] as const,
+                        ['State', scored.impact.state ?? 0] as const,
+                        ['Emotion', scored.impact.emotion ?? 0] as const,
+                        ['Alignment', scored.impact.alignment ?? 0] as const,
+                        ['Direction', scored.impact.direction ?? 0] as const,
+                      ] as const
+                    ).map(([label, value]) => (
+                      <View key={label} style={styles.trajectoryGauge}>
+                        <Text style={styles.trajectoryGaugeLabel}>{label}</Text>
+                        <Text
+                          style={[
+                            styles.trajectoryGaugeValue,
+                            value >= 0 ? styles.gaugePositive : styles.gaugeNegative,
+                          ]}
+                        >
+                          {value >= 0 ? '+' : ''}
+                          {value}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
-                  <Text style={styles.trajectoryExplanation}>{trajectory.explanation}</Text>
+                  <Text style={styles.trajectoryExplanation}>{scored.recommendedFollowUp}</Text>
+
+                  {explanation ? (
+                    <View style={styles.trajectoryExplainCard}>
+                      <Text style={styles.trajectoryExplainTitle}>Why this trajectory</Text>
+
+                      <Text style={styles.trajectoryExplainBody}>{explanation.why}</Text>
+
+                      <Text style={styles.trajectoryExplainLabel}>When to use</Text>
+                      <Text style={styles.trajectoryExplainBody}>{explanation.whenToUse}</Text>
+
+                      <Text style={styles.trajectoryExplainLabel}>Watch out</Text>
+                      <Text style={styles.trajectoryExplainBody}>{explanation.watchOut}</Text>
+                    </View>
+                  ) : null}
                 </View>
               )}
             </View>
@@ -688,6 +767,12 @@ const styles = StyleSheet.create({
     color: '#8888A0',
     marginBottom: 12,
   },
+  trajectoryFallbackHint: {
+    fontSize: 12,
+    color: '#6B6B80',
+    marginBottom: 12,
+    lineHeight: 18,
+  },
   partnerStateTag: {
     backgroundColor: 'rgba(245, 158, 11, 0.15)',
     paddingVertical: 6,
@@ -717,6 +802,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
   },
+  intentBtnSuggested: {
+    borderColor: 'rgba(124, 77, 255, 0.45)',
+    borderWidth: 1,
+  },
   intentBtnSelected: {
     backgroundColor: 'rgba(124, 77, 255, 0.2)',
     borderColor: '#7C4DFF',
@@ -733,18 +822,38 @@ const styles = StyleSheet.create({
   intentLabelSelected: {
     color: '#F0F0F5',
   },
+  suggestedIntentLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#A78BFA',
+    textAlign: 'center',
+    marginBottom: 6,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
   trajectoryResult: {
     backgroundColor: 'rgba(124, 77, 255, 0.1)',
     borderRadius: 10,
     padding: 12,
   },
+  riskBadge: {
+    fontSize: 12,
+    color: '#A78BFA',
+    fontWeight: '600',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
   trajectoryGauges: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 12,
     marginBottom: 10,
   },
   trajectoryGauge: {
     alignItems: 'center',
+    width: '31%',
+    minWidth: 72,
   },
   trajectoryGaugeLabel: {
     fontSize: 11,
@@ -768,5 +877,33 @@ const styles = StyleSheet.create({
     color: '#E0E0E0',
     lineHeight: 18,
     textAlign: 'center',
+  },
+  trajectoryExplainCard: {
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  trajectoryExplainTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  trajectoryExplainLabel: {
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginTop: 10,
+    marginBottom: 4,
+  },
+  trajectoryExplainBody: {
+    color: 'rgba(255,255,255,0.92)',
+    fontSize: 14,
+    lineHeight: 20,
   },
 });

@@ -10,6 +10,7 @@
  */
 
 import { Platform } from 'react-native';
+import type { NormalizedHealthSnapshot } from '../types/normalizedHealthSnapshot';
 
 // Types for health data
 export interface SleepData {
@@ -75,7 +76,9 @@ const HEALTH_PERMISSIONS = {
     'MenstrualFlow',
     'HeartRate',
     'HeartRateVariabilitySDNN',
-    'RestingHeartRate",
+    'RestingHeartRate',
+    // Workouts (rolling count for NormalizedHealthSnapshot.workoutsThisWeek)
+    'Workout',
   ],
   write: [] as string[], // We only read, don't write
 };
@@ -86,7 +89,7 @@ class HealthKitService {
   private AppleHealthKit: any = null;
 
   async initialize(): Promise<boolean> {
-    if (Platform.OS !== "ios') {
+    if (Platform.OS !== 'ios') {
       if (__DEV__) console.log('HealthKit only available on iOS');
       return false;
     }
@@ -413,11 +416,61 @@ class HealthKitService {
       this.getHRV(),
     ]);
 
+    const latestHR = await this.getLatestHeartRateSample();
     return {
       restingHR,
-      currentHR: null, // Would need real-time monitoring
+      currentHR: latestHR,
       hrv,
     };
+  }
+
+  /** Most recent heart rate sample (resting window / recent activity). */
+  private getLatestHeartRateSample(): Promise<number | null> {
+    return new Promise((resolve) => {
+      if (!this.AppleHealthKit) {
+        resolve(null);
+        return;
+      }
+      this.AppleHealthKit.getHeartRateSamples(
+        {
+          startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          endDate: new Date().toISOString(),
+          ascending: false,
+          limit: 1,
+        },
+        (err: any, results: Array<{ value: number }>) => {
+          if (err || !results?.length) {
+            resolve(null);
+            return;
+          }
+          resolve(Math.round(results[0].value));
+        }
+      );
+    });
+  }
+
+  /** Workout sessions in the rolling last 7 days (inclusive). */
+  private getWorkoutsThisWeekCount(): Promise<number> {
+    return new Promise((resolve) => {
+      if (!this.AppleHealthKit) {
+        resolve(0);
+        return;
+      }
+      const start = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      this.AppleHealthKit.getAnchoredWorkouts(
+        {
+          startDate: start.toISOString(),
+          endDate: new Date().toISOString(),
+        },
+        (err: any, results: { data?: Array<unknown> }) => {
+          if (err || !results?.data?.length) {
+            resolve(0);
+            return;
+          }
+          resolve(results.data.length);
+        }
+      );
+    });
   }
 
   private getRestingHeartRate(): Promise<number | null> {
@@ -474,6 +527,33 @@ class HealthKitService {
       menstruation,
       heart,
       lastSynced: new Date(),
+    };
+  }
+
+  /**
+   * Flat snapshot for UI / gauges — one source of truth (Apple Health first; Oura merges later in healthStore).
+   * Pass an existing `getFullSnapshot()` result to avoid duplicate HealthKit queries.
+   */
+  async buildNormalizedSnapshot(snap: HealthSnapshot): Promise<NormalizedHealthSnapshot> {
+    const workoutCount = await this.getWorkoutsThisWeekCount();
+
+    const sleepHours =
+      snap.sleep.lastNight.duration > 0 ? snap.sleep.lastNight.duration : undefined;
+    const steps = snap.activity.steps > 0 ? snap.activity.steps : undefined;
+    const restingHeartRate = snap.heart.restingHR ?? undefined;
+    const heartRateVariability = snap.heart.hrv ?? undefined;
+    const latestHeartRate = snap.heart.currentHR ?? undefined;
+    const workoutsThisWeek = workoutCount > 0 ? workoutCount : undefined;
+
+    return {
+      sleepHours,
+      steps,
+      restingHeartRate,
+      heartRateVariability,
+      latestHeartRate,
+      workoutsThisWeek,
+      source: 'apple_health',
+      syncedAt: new Date().toISOString(),
     };
   }
 

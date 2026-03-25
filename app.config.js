@@ -59,6 +59,17 @@ module.exports = {
       'expo-secure-store',
       'expo-font',
       'expo-apple-authentication',
+      // HealthKit entitlements + merges NSHealth* usage strings (see ios.infoPlist for copy).
+      // TODO: After adding or changing this plugin, run `npx expo prebuild --clean` (or EAS Build) so the native project picks up com.apple.developer.healthkit.
+      [
+        'react-native-health/app.plugin.js',
+        {
+          healthSharePermission:
+            'InGauge reads sleep, activity, heart rate, and HRV as supporting signals for your Body and State gauges. This is not medical advice.',
+          healthUpdatePermission:
+            'InGauge may write mindfulness or wellness data you choose to save to Apple Health.',
+        },
+      ],
       [
         'expo-notifications',
         {
