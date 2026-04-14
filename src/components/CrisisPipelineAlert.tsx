@@ -94,7 +94,7 @@ export function CrisisPipelineAlert({ onDismiss, visible }: CrisisPipelineAlertP
               color={isCritical ? "#FEF3C7" : "#DBEAFE"} 
             />
             <Text style={[styles.severityText, isCritical && styles.severityTextCritical]}>
-              {isCritical ? 'System Alert' : 'Check-in"}
+              {isCritical ? 'System Alert' : 'Check-in'}
             </Text>
           </View>
           <Pressable style={styles.closeBtn} onPress={onDismiss}>
@@ -124,7 +124,7 @@ export function CrisisPipelineAlert({ onDismiss, visible }: CrisisPipelineAlertP
               <Text style={styles.tetherBtnText}>Notify {tether.name}</Text>
             </Pressable>
             <Text style={styles.tetherNote}>
-              They'll just know you"d appreciate hearing from them — no details shared.
+              They'll just know you'd appreciate hearing from them — no details shared.
             </Text>
           </View>
         )}
@@ -163,7 +163,7 @@ export function CrisisPipelineAlert({ onDismiss, visible }: CrisisPipelineAlertP
               <Pressable 
                 key={i}
                 style={styles.resourceBtn} 
-                onPress={() => Linking.openURL(`tel:${resource.action.replace(/\D/g, '")}`)}
+                onPress={() => Linking.openURL(`tel:${resource.action.replace(/\D/g, '')}`)}
               >
                 <Text style={styles.resourceEmoji}>🤝</Text>
                 <View style={styles.resourceInfo}>

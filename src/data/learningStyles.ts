@@ -3,7 +3,7 @@
  * How You Learn Best
  * 
  * Everyone processes information differently.
- * Understanding your learning style helps you actually absorb what you"re learning -
+ * Understanding your learning style helps you actually absorb what you're learning -
  * not just read it and forget it.
  */
 
@@ -27,13 +27,13 @@ export const LEARNING_STYLES_INTRO = {
   headline: \"How Do You Learn Best?\",
   subhead: \"Understanding your style helps you actually absorb this - not just read it.\",
   
-  philosophy: `Ever read something, understood it in the moment, and completely forgot it by the next day? That's not a memory problem. That"s a learning style mismatch.
+  philosophy: `Ever read something, understood it in the moment, and completely forgot it by the next day? That's not a memory problem. That's a learning style mismatch.
 
 Your brain has preferred pathways for taking in and retaining information. Some people need to see it visually. Some need to hear it explained. Some need to read and write about it. Some need to physically do it.
 
-There"s no \"best\" style - just the one that works for YOUR brain. Most people are a blend of styles, with one or two that are stronger.
+There's no \"best\" style - just the one that works for YOUR brain. Most people are a blend of styles, with one or two that are stronger.
 
-Understanding your learning style isn't just for school. It"s for life. It's how you actually retain the emotional intelligence concepts in this app instead of just scrolling through them.`,
+Understanding your learning style isn't just for school. It's for life. It's how you actually retain the emotional intelligence concepts in this app instead of just scrolling through them.`,
 
   theoryNote: "Learning styles are debated in academic research, but the practical insight remains useful: different approaches work better for different people at different times. Use what works for you.",
 };
@@ -69,7 +69,7 @@ Your brain builds understanding by seeing how things connect spatially. A wall o
     challenges: [
       \"Long lectures without visuals are draining\",
       \"Verbal instructions can be hard to follow\",
-      \"May miss information that"s only spoken",
+      \"May miss information that's only spoken",
       "Can get overwhelmed by cluttered visual environments",
     ],
 
@@ -79,7 +79,7 @@ Your brain builds understanding by seeing how things connect spatially. A wall o
       "You prefer maps over written directions",
       "You notice visual details others miss",
       "You think in pictures - when someone describes something, you see it",
-      "You"re drawn to well-designed apps, websites, and spaces\",
+      "You're drawn to well-designed apps, websites, and spaces\",
     ],
 
     howToUseThisApp: [
@@ -221,7 +221,7 @@ Lists, written instructions, and detailed text explanations work for you. You pr
     howToUseThisApp: [
       \"Read through the full gauge content - the depth is there for you\",
       \"Use the journal regularly - writing processes emotions for you\",
-      \"Take notes on what you"re learning about yourself",
+      \"Take notes on what you're learning about yourself",
       "Write summaries of each gauge in your own words",
       "Read the Human Manual lessons thoroughly - they're written for readers",
       "Create your own 'personal manual' with your patterns and insights",
@@ -287,12 +287,12 @@ You probably hate long lectures. You want to try things, not just hear about the
     ],
 
     howToUseThisApp: [
-      \"DO the activities, don"t just read about them",
+      \"DO the activities, don't just read about them",
       "Body Scan - actually feel where tension is in your body",
       "Breathing exercises - actually do them, feel the difference",
       "Role Play - practice conversations, not just read scripts",
       "Move while learning - walk while listening to explanations",
-      "Apply concepts immediately - check your gauges right now, not 'later"\",
+      "Apply concepts immediately - check your gauges right now, not 'later'\",
     ],
 
     studyTips: [
@@ -300,7 +300,7 @@ You probably hate long lectures. You want to try things, not just hear about the
       \"Do a gauge check-in after physical activity - notice the difference\",
       \"Practice the breathing techniques until they're automatic\",
       \"Role-play difficult conversations out loud, with movement\",
-      \"Notice your body"s response to different emotions - hands-on discovery",
+      \"Notice your body's response to different emotions - hands-on discovery",
     ],
 
     bestActivities: [
@@ -321,7 +321,7 @@ export const LEARNING_STYLE_QUIZ = {
         { text: "Watch a video tutorial", style: 'visual' },
         { text: "Have someone explain it to you", style: 'auditory' },
         { text: "Read the documentation", style: 'reading-writing' },
-        { text: "Just start clicking around and figure it out", style: 'kinesthetic" },
+        { text: "Just start clicking around and figure it out", style: 'kinesthetic' },
       ]
     },
     {
@@ -384,7 +384,7 @@ export const LEARNING_STYLE_QUIZ = {
         { text: "Diagrams, charts, and color-coded notes", style: 'visual' },
         { text: "Recording notes and listening, or study groups", style: 'auditory' },
         { text: "Reading and re-reading, writing summaries", style: 'reading-writing' },
-        { text: "Practice tests, flashcards, or moving while reviewing", style: 'kinesthetic" },
+        { text: "Practice tests, flashcards, or moving while reviewing", style: 'kinesthetic' },
       ]
     },
   ]
@@ -396,13 +396,13 @@ export const MULTI_STYLE_TIPS = {
 
 Use your primary style for initial learning. Use secondary styles to reinforce.
 
-When something isn't sticking, try a different style"s approach. The concept might make sense when you hear it instead of read it, or when you do it instead of watch it.
+When something isn't sticking, try a different style's approach. The concept might make sense when you hear it instead of read it, or when you do it instead of watch it.
 
-The goal isn"t to label yourself - it's to have more tools for actually learning and retaining what matters.`,
+The goal isn't to label yourself - it's to have more tools for actually learning and retaining what matters.`,
   
   combiningStyles: [
     \"Visual + Kinesthetic: Draw while moving, watch demonstrations then practice immediately\",
-    \"Auditory + Reading: Read aloud, discuss what you"ve read, write after listening",
+    \"Auditory + Reading: Read aloud, discuss what you've read, write after listening",
     "Visual + Auditory: Watch videos with commentary, explain your visualizations out loud",
     "Reading + Kinesthetic: Write notes by hand, read while walking, immediately apply what you read",
   ]

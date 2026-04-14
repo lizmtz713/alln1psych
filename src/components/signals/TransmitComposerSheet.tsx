@@ -150,7 +150,7 @@ export function TransmitComposerSheet({
       >
         <KeyboardAvoidingView
           style={[styles.container, { paddingBottom: insets.bottom }]}
-          behavior={Platform.OS === 'ios' ? 'padding" : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={styles.handle} />
           <View style={styles.header}>

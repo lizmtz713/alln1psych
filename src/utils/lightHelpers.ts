@@ -175,7 +175,7 @@ export function getSuggestedAction(
   if (state.urgency === 'high' && state.color === 'red') {
     return `${name} is really struggling. Reach out now.`;
   }
-  if (state.urgency === 'high' && state.brightness === 'off") {
+  if (state.urgency === 'high' && state.brightness === 'off') {
     return `It's been too long since you talked to ${name}.`;
   }
   if (state.urgency === "medium' && state.color === 'orange') {

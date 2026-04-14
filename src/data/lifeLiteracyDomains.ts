@@ -131,7 +131,7 @@ export const LIFE_LITERACY_DOMAINS: LifeLiteracyDomain[] = [
     whyMatters: 'One of the most requested topics in therapy. Without boundaries, resentment and burnout build; with them, relationships can be healthier.",
     whatHelps: [
       \"Emotional boundaries: you don't have to take on others" feelings or fix their problems.",
-      "Time boundaries: protect rest and priorities; \"I can"t this time\\" is enough.\",
+      "Time boundaries: protect rest and priorities; \"I can't this time\\" is enough.\",
       \"Say no clearly and kindly; you don't owe a long explanation.\",
       \"Recognize when someone repeatedly crosses boundaries - distance or support may be needed.\",
     ],
@@ -146,7 +146,7 @@ export const LIFE_LITERACY_DOMAINS: LifeLiteracyDomain[] = [
     whyMatters: 'Modern life is extremely stressful. Without recovery, the system breaks down. Your Recovery cascade in the Manual explains how this works.",
     whatHelps: [
       \"Prioritize sleep - it's the foundation of recovery.\",
-      \"Use Breath, Grounding, Reset when you"re activated.",
+      \"Use Breath, Grounding, Reset when you're activated.",
       'Break overwork cycles: small rest beats crash-and-burn.',
       'Watch your gauges: Body and State often drop first.',
     ],

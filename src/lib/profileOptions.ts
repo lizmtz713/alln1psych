@@ -121,7 +121,7 @@ export const RELATIONSHIP_STATUS_OPTIONS = [
   'In a relationship',
   'Married/Partnered',
   'Divorced',
-  'Widowed",
+  'Widowed',
   \"It's complicated\",
 ];
 

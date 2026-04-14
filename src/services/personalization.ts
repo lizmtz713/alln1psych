@@ -35,20 +35,20 @@ function getStaticDefaults(name: string): DailyContent {
   
   // Rotating affirmations — changes daily
   const AFFIRMATIONS = [
-    \"You"re doing better than you think.",
+    \"You're doing better than you think.",
     "Showing up is the hardest part. You did it.",
-    "Progress isn"t always visible. Trust the process.\",
+    "Progress isn't always visible. Trust the process.\",
     \"You don't have to be perfect to be growing.\",
-    \"The fact that you"re here means you care. That matters.",
+    \"The fact that you're here means you care. That matters.",
     "Small steps still move you forward.",
     "You survived 100% of your worst days.",
-    "Awareness is the first step. You"re already ahead.\",
+    "Awareness is the first step. You're already ahead.\",
     \"Be patient with yourself. You're learning.\",
     \"Your effort counts, even when results are slow.\",
-    \"It"s okay to not be okay. But you won"t stay here.\",
+    \"It's okay to not be okay. But you won't stay here.\",
     \"You're allowed to take up space.\",
     \"Your feelings are valid, even the messy ones.\",
-    \"Rest is productive. You"ve earned it.",
+    \"Rest is productive. You've earned it.",
   ];
   
   return {
@@ -75,7 +75,7 @@ LESSONS COMPLETED: ${(userContext.lessonsCompleted ?? []).join(', ') || 'None ye
 LAST CONVERSATION: ${userContext.lastConversationSummary || 'No conversations yet'}
 KNOWN TRIGGERS: ${userContext.triggers?.join(', ') || 'None shared yet'}
 RECENT EMOTIONS (from conversations): ${userContext.recentEmotions?.join(', ') || 'None yet'}
-EMOTIONAL TREND: ${userContext.emotionalTrend ?? 'unknown"}
+EMOTIONAL TREND: ${userContext.emotionalTrend ?? 'unknown'}
 
 Generate a JSON response with:
 1. \"greeting\" - A warm, time-appropriate greeting that references something specific from their recent activity (1 sentence)
@@ -83,7 +83,7 @@ Generate a JSON response with:
 3. \"insight\" - One insight about their emotional patterns based on their mood history (2 sentences max)
 4. \"challengeSuggestion\" - A personalized micro-challenge for today based on what they need (1 sentence)
 
-Be warm, specific, and personal. Don"t be generic. Reference their actual data.
+Be warm, specific, and personal. Don't be generic. Reference their actual data.
 Respond ONLY with valid JSON, no markdown.
 
 ${buildAgeAdaptivePrompt()}`;

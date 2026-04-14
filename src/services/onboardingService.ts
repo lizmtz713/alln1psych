@@ -66,10 +66,10 @@ const INVITATION_TRIGGERS: Array<{
   ctaLabel: string;
 }> = [
   {
-    id: 'lights-intro",
+    id: 'lights-intro',
     check: (ctx) => ctx.checkInCount >= 3,
     title: \"You're building a habit\",
-    body: \"Here"s your cockpit. Check in when you can — your people map grows with you.",
+    body: \"Here's your cockpit. Check in when you can — your people map grows with you.",
     route: '/(tabs)',
     ctaLabel: 'See my cockpit',
   },

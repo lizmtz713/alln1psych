@@ -4,7 +4,7 @@
  * Orientation, not grading. Each stage: what develops, what's normal, what helps, gauge signals.
  */
 
-export type GaugeId = 'body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment";
+export type GaugeId = 'body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment';
 
 export interface LifeStage {
   id: string;

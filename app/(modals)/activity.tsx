@@ -574,7 +574,7 @@ export default function ActivityScreen() {
           <Text style={styles.sub}>What thought is bothering you?</Text>
           <TextInput
             style={styles.thoughtInput}
-            placeholder="e.g., 'Nobody actually cares about me' or 'I'm going to fail'"
+            placeholder="e.g., 'Nobody actually cares about me' or 'I'm going to fail''
             placeholderTextColor={COLORS.textMuted}
             value={thought}
             onChangeText={setThought}
@@ -1289,7 +1289,7 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
             <>
               <Text style={styles.detailLabel}>When...</Text>
               <Text style={styles.sub}>Describe the situation. What happened?</Text>
-              <TextInput style={styles.thoughtInput} placeholder="e.g., 'When you cancel our plans last minute...'" placeholderTextColor={COLORS.textMuted} value={cbWhen} onChangeText={setCbWhen} />
+              <TextInput style={styles.thoughtInput} placeholder="e.g., 'When you cancel our plans last minute...'' placeholderTextColor={COLORS.textMuted} value={cbWhen} onChangeText={setCbWhen} />
             </>
           )}
           {cbStep === 2 && (
@@ -1310,14 +1310,14 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
             <>
               <Text style={styles.detailLabel}>Because...</Text>
               <Text style={styles.sub}>Why does it affect you? What does it mean to you?</Text>
-              <TextInput style={styles.thoughtInput} placeholder="e.g., '...because it makes me feel like I'm not a priority'" placeholderTextColor={COLORS.textMuted} value={cbBecause} onChangeText={setCbBecause} />
+              <TextInput style={styles.thoughtInput} placeholder="e.g., '...because it makes me feel like I'm not a priority'' placeholderTextColor={COLORS.textMuted} value={cbBecause} onChangeText={setCbBecause} />
             </>
           )}
           {cbStep === 4 && (
             <>
               <Text style={styles.detailLabel}>What I need is...</Text>
               <Text style={styles.sub}>What would help? What are you asking for?</Text>
-              <TextInput style={styles.thoughtInput} placeholder="e.g., '...for you to let me know earlier so I can make other plans'" placeholderTextColor={COLORS.textMuted} value={cbNeed} onChangeText={setCbNeed} />
+              <TextInput style={styles.thoughtInput} placeholder="e.g., '...for you to let me know earlier so I can make other plans'' placeholderTextColor={COLORS.textMuted} value={cbNeed} onChangeText={setCbNeed} />
             </>
           )}
           <Pressable

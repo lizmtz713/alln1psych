@@ -22,7 +22,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from '../lib/constants';
 
-type GaugeName = 'body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment";
+type GaugeName = 'body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment';
 
 interface SwipeCheckInV2Props {
   onComplete: (values: Record<GaugeName, number>) => void;
@@ -99,7 +99,7 @@ const EMOTION_OPTIONS = [
   { label: 'Angry', emoji: '😠', valence: 'negative' },
   { label: 'Overwhelmed', emoji: '🤯', valence: 'negative' },
   { label: 'Numb', emoji: '😶', valence: 'neutral' },
-  { label: 'Confused', emoji: '😕', valence: 'neutral" },
+  { label: 'Confused', emoji: '😕', valence: 'neutral' },
 ];
 
 const EMOTION_QUESTIONS = [

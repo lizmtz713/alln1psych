@@ -49,11 +49,11 @@ export type NudgeTrigger =
 export type NudgeCategory = 
   | 'greeting'        // GM/GN
   | 'check_in'        // "How are you?"
-  | 'encouragement"   // \"You're doing great\"
-  | "validation"      // \"That's hard, and it"s okay"
+  | 'encouragement'   // \"You're doing great\"
+  | "validation"      // \"That's hard, and it's okay"
   | 'gentle_push'     // "Have you..."
   | 'celebration'     // Milestones, wins
-  | 'presence"        // \"I'm here\"
+  | 'presence'        // \"I'm here\"
   | "insight'         // Pattern observations
   | 'inspiration';    // Quotes, wisdom
 
@@ -101,7 +101,7 @@ export const MORNING_NUDGES: NudgeTemplate = {
   trigger: 'time_morning',
   category: 'greeting',
   tone: 'warm',
-  frequency: 'daily",
+  frequency: 'daily',
   messages: [
     {
       text: \"Good morning, {name}. No agenda - just wanted to say I'm here if you need me today. ☀️\",
@@ -117,18 +117,18 @@ export const MORNING_NUDGES: NudgeTemplate = {
       personalized: true,
     },
     {
-      text: "Good morning. Before the day takes over - how"s your body feeling right now?\",
+      text: "Good morning. Before the day takes over - how's your body feeling right now?\",
       action: { label: \"Body scan\", route: \"/(modals)/activity?id=body-scan\" },
     },
     {
       text: \"Rise and shine isn't mandatory. Rise and exist is enough. How are you?\",
     },
     {
-      text: \"Morning, {name}. Quick thought: what"s one thing you want to protect today? Your energy? Your peace? Your time?",
+      text: \"Morning, {name}. Quick thought: what's one thing you want to protect today? Your energy? Your peace? Your time?",
       personalized: true,
     },
     {
-      text: "GM ☀️ You don"t have to be productive to be worthy. Just checking in.\",
+      text: "GM ☀️ You don't have to be productive to be worthy. Just checking in.\",
     },
     {
       text: \"Good morning. Friendly reminder: you're a whole person, not just a list of tasks.\",
@@ -148,7 +148,7 @@ export const EVENING_NUDGES: NudgeTemplate = {
   frequency: 'daily',
   messages: [
     {
-      text: "Day"s winding down. How did it go? Not the tasks - you. How are YOU?\",
+      text: "Day's winding down. How did it go? Not the tasks - you. How are YOU?\",
       action: { label: \"Evening check-in\", route: \"/(modals)/cockpit-checkin\" },
     },
     {
@@ -188,15 +188,15 @@ export const LATE_NIGHT_NUDGES: NudgeTemplate = {
   tone: 'gentle',
   frequency: 'as_needed',
   conditions: [
-    { type: 'time_of_day', value: 23, operator: 'gte" }, // 11pm or later
+    { type: 'time_of_day', value: 23, operator: 'gte' }, // 11pm or later
   ],
   messages: [
     {
-      text: \"It's late and you"re still up. Everything okay? Sometimes nights are heavy.",
+      text: \"It's late and you're still up. Everything okay? Sometimes nights are heavy.",
       action: { label: "Talk to Psych", route: "/talk" },
     },
     {
-      text: "Hey. Can"t sleep, or don't want to? Either way, I"m here.",
+      text: "Hey. Can't sleep, or don't want to? Either way, I'm here.",
     },
     {
       text: "Late night thoughts hit different. If you need to process something, I'm awake.",
@@ -222,7 +222,7 @@ export const STATE_DROP_NUDGES: NudgeTemplate = {
   tone: 'gentle',
   frequency: 'smart',
   conditions: [
-    { type: 'gauge_below', gauge: 'state", value: 4 },
+    { type: 'gauge_below', gauge: 'state', value: 4 },
   ],
   messages: [
     {
@@ -230,14 +230,14 @@ export const STATE_DROP_NUDGES: NudgeTemplate = {
       action: { label: \"Talk to Psych\", route: \"/talk\" },
     },
     {
-      text: \"Your nervous system seems activated lately. That"s exhausting. What would help right now?",
+      text: \"Your nervous system seems activated lately. That's exhausting. What would help right now?",
       action: { label: "Breathing exercise", route: "/(modals)/activity?id=breathing" },
     },
     {
-      text: "Low State isn"t weakness - it's data. Your system is telling you something. Want to explore what?\",
+      text: "Low State isn't weakness - it's data. Your system is telling you something. Want to explore what?\",
     },
     {
-      text: \"Stress is high, huh? You don"t have to fix it right now. But I see it.",
+      text: \"Stress is high, huh? You don't have to fix it right now. But I see it.",
     },
     {
       text: "When State is low for a while, basics matter more. Sleep? Food? Water? A break?",
@@ -252,7 +252,7 @@ export const BODY_DROP_NUDGES: NudgeTemplate = {
   tone: 'grounding',
   frequency: 'smart',
   conditions: [
-    { type: 'gauge_below', gauge: 'body", value: 4 },
+    { type: 'gauge_below', gauge: 'body', value: 4 },
   ],
   messages: [
     {
@@ -265,7 +265,7 @@ export const BODY_DROP_NUDGES: NudgeTemplate = {
       text: \"When did you last eat something real? Drink water? Your body runs your brain. Fuel matters.\",
     },
     {
-      text: \"Low Body gauge for a few days. This isn't judgment - it"s a gentle poke. What does your body need?",
+      text: \"Low Body gauge for a few days. This isn't judgment - it's a gentle poke. What does your body need?",
     },
     {
       text: "Physical state affects everything else. Even one small thing - a glass of water, a stretch - counts.",
@@ -281,11 +281,11 @@ export const CONNECTION_DROP_NUDGES: NudgeTemplate = {
   tone: 'warm',
   frequency: 'smart',
   conditions: [
-    { type: 'gauge_below', gauge: 'connection", value: 4 },
+    { type: 'gauge_below', gauge: 'connection', value: 4 },
   ],
   messages: [
     {
-      text: \"Connection gauge is low. Feeling alone? I'm here. And that"s not nothing.",
+      text: \"Connection gauge is low. Feeling alone? I'm here. And that's not nothing.",
       action: { label: "Talk to Psych", route: "/talk" },
     },
     {
@@ -295,10 +295,10 @@ export const CONNECTION_DROP_NUDGES: NudgeTemplate = {
       text: "Low Connection for a few days. Have you reached out to anyone? Or do you need someone to reach out to you first?",
     },
     {
-      text: "When"s the last time you felt really seen by someone? If it's been a while, that"s worth noticing.",
+      text: "When's the last time you felt really seen by someone? If it's been a while, that's worth noticing.",
     },
     {
-      text: "Humans need connection like they need food. This isn"t needy - it's biology. Who could you reach out to today?\",
+      text: "Humans need connection like they need food. This isn't needy - it's biology. Who could you reach out to today?\",
     },
   ],
 };
@@ -310,11 +310,11 @@ export const EMOTION_DROP_NUDGES: NudgeTemplate = {
   tone: 'gentle',
   frequency: 'smart',
   conditions: [
-    { type: 'gauge_below', gauge: 'emotion", value: 4 },
+    { type: 'gauge_below', gauge: 'emotion', value: 4 },
   ],
   messages: [
     {
-      text: \"Emotions have been heavy, huh? You don't have to fix anything. But I"m here if you want to name what"s going on.\",
+      text: \"Emotions have been heavy, huh? You don't have to fix anything. But I'm here if you want to name what's going on.\",
       action: { label: \"Emotion wheel\", route: \"/(modals)/activity?id=emotion-wheel\" },
     },
     {
@@ -325,7 +325,7 @@ export const EMOTION_DROP_NUDGES: NudgeTemplate = {
       action: { label: \"Journal\", route: \"/(modals)/new-journal\" },
     },
     {
-      text: \"Whatever you"re feeling - or not feeling - it's okay. Numbness is a feeling too. I see you.",
+      text: \"Whatever you're feeling - or not feeling - it's okay. Numbness is a feeling too. I see you.",
     },
     {
       text: "Emotional weight is real weight. What would make today even 5% lighter?",
@@ -340,7 +340,7 @@ export const DIRECTION_DROP_NUDGES: NudgeTemplate = {
   tone: 'reflective',
   frequency: 'smart',
   conditions: [
-    { type: 'gauge_below', gauge: 'direction", value: 4 },
+    { type: 'gauge_below', gauge: 'direction', value: 4 },
   ],
   messages: [
     {
@@ -373,19 +373,19 @@ export const ALIGNMENT_DROP_NUDGES: NudgeTemplate = {
   ],
   messages: [
     {
-      text: "Alignment is low. Something feels 'off" - like you're not living as yourself. That"s worth exploring.",
+      text: "Alignment is low. Something feels 'off' - like you're not living as yourself. That's worth exploring.",
     },
     {
-      text: "When Alignment drops, it often means you"re doing something that violates your values. What's the friction?\",
+      text: "When Alignment drops, it often means you're doing something that violates your values. What's the friction?\",
     },
     {
       text: \"Low Alignment is your system saying: "This isn't me." What part of your life feels most fake right now?\",
     },
     {
-      text: \"Feeling out of sync with yourself? That's hard. You"re allowed to want your life to match who you are.",
+      text: \"Feeling out of sync with yourself? That's hard. You're allowed to want your life to match who you are.",
     },
     {
-      text: "Alignment isn"t about being perfect. It's about moving toward yourself, not away. What"s one small step toward 'you'?",
+      text: "Alignment isn't about being perfect. It's about moving toward yourself, not away. What's one small step toward 'you'?",
     },
   ],
 };
@@ -402,7 +402,7 @@ export const SUNDAY_EVENING_NUDGES: NudgeTemplate = {
   frequency: 'weekly',
   conditions: [
     { type: 'day_of_week', value: 0 }, // Sunday
-    { type: 'time_of_day', value: 18, operator: 'gte" }, // 6pm or later
+    { type: 'time_of_day', value: 18, operator: 'gte' }, // 6pm or later
   ],
   messages: [
     {
@@ -413,13 +413,13 @@ export const SUNDAY_EVENING_NUDGES: NudgeTemplate = {
       text: \"Sunday night check-in. How are you feeling about the week ahead? No judgment - just noticing.\",
     },
     {
-      text: \"The Sunday scaries hit different. If you"re dreading Monday, that's data. What is it about?",
+      text: \"The Sunday scaries hit different. If you're dreading Monday, that's data. What is it about?",
     },
     {
-      text: "Week"s about to start. Before it does - what do you need? Rest? Prep? Just a moment of peace?\",
+      text: "Week's about to start. Before it does - what do you need? Rest? Prep? Just a moment of peace?\",
     },
     {
-      text: \"Sunday night dread is common. It doesn't mean you"re weak. It means something in your week needs attention.",
+      text: \"Sunday night dread is common. It doesn't mean you're weak. It means something in your week needs attention.",
     },
   ],
 };
@@ -429,7 +429,7 @@ export const AFTER_HARD_WEEK_NUDGES: NudgeTemplate = {
   trigger: 'pattern_after_hard_week',
   category: 'celebration',
   tone: 'warm',
-  frequency: 'weekly",
+  frequency: 'weekly',
   messages: [
     {
       text: \"You made it through a hard week. That's not nothing. Take a moment to acknowledge that.\",
@@ -438,13 +438,13 @@ export const AFTER_HARD_WEEK_NUDGES: NudgeTemplate = {
       text: \"This week was rough - I saw it in your gauges. You got through it. That counts.\",
     },
     {
-      text: \"Survived another one. Rest isn"t a reward you have to earn - but you"ve definitely earned it.\",
+      text: \"Survived another one. Rest isn't a reward you have to earn - but you've definitely earned it.\",
     },
     {
       text: \"Hard week behind you. Before you think about next week: what do you need right now?\",
     },
     {
-      text: \"You're still here. After a week like that, that"s an accomplishment. I see you.",
+      text: \"You're still here. After a week like that, that's an accomplishment. I see you.",
     },
   ],
 };
@@ -460,11 +460,11 @@ export const NO_CHECKIN_NUDGES: NudgeTemplate = {
   tone: 'gentle',
   frequency: 'as_needed',
   conditions: [
-    { type: 'days_since', value: 2, operator: 'gte" }, // 2+ days since check-in
+    { type: 'days_since', value: 2, operator: 'gte' }, // 2+ days since check-in
   ],
   messages: [
     {
-      text: \"Hey {name}. Haven't heard from you in a bit. No pressure - but I"m here when you"re ready.\",
+      text: \"Hey {name}. Haven't heard from you in a bit. No pressure - but I'm here when you're ready.\",
       personalized: true,
     },
     {
@@ -472,10 +472,10 @@ export const NO_CHECKIN_NUDGES: NudgeTemplate = {
       action: { label: \"Quick check-in\", route: \"/(modals)/cockpit-checkin\" },
     },
     {
-      text: \"Missing you over here. Whenever you want to check in, I"m around.",
+      text: \"Missing you over here. Whenever you want to check in, I'm around.",
     },
     {
-      text: "No judgment on the silence. Just wanted you to know I"m still here.\",
+      text: "No judgment on the silence. Just wanted you to know I'm still here.\",
     },
     {
       text: \"Hey. Radio silence is okay. But if you're struggling and pulling away, I see that too. Here when you need me.\",
@@ -490,18 +490,18 @@ export const APP_INACTIVE_NUDGES: NudgeTemplate = {
   tone: 'warm',
   frequency: 'as_needed',
   conditions: [
-    { type: 'days_since', value: 5, operator: 'gte" }, // 5+ days since app open
+    { type: 'days_since', value: 5, operator: 'gte' }, // 5+ days since app open
   ],
   messages: [
     {
-      text: \"It's been a minute. Just wanted to say: I"m still here whenever you need me. No expectations.",
+      text: \"It's been a minute. Just wanted to say: I'm still here whenever you need me. No expectations.",
     },
     {
-      text: "Hey {name}. Haven"t seen you in a while. Life got busy, or something else going on?\",
+      text: "Hey {name}. Haven't seen you in a while. Life got busy, or something else going on?\",
       personalized: true,
     },
     {
-      text: \"Checking in after some quiet. You don't have to use me every day. But I"m here when you need me.",
+      text: \"Checking in after some quiet. You don't have to use me every day. But I'm here when you need me.",
     },
     {
       text: "Sometimes people pull away when things get hard. If that's you - no judgment. Door's always open.",
@@ -520,20 +520,20 @@ export const CIRCLE_EMPTY_NUDGES: NudgeTemplate = {
   tone: 'warm',
   frequency: 'smart',
   conditions: [
-    { type: 'circle_status", value: 0 }, // No Circle members
+    { type: 'circle_status', value: 0 }, // No Circle members
   ],
   messages: [
     {
-      text: \"I notice you don't have anyone in your Circle yet. That"s okay. I"m here. And when you're ready, you can add people.\",
+      text: \"I notice you don't have anyone in your Circle yet. That's okay. I'm here. And when you're ready, you can add people.\",
     },
     {
-      text: \"Flying solo for now? That"s valid. I"ll be your Circle until you're ready to add others.\",
+      text: \"Flying solo for now? That's valid. I'll be your Circle until you're ready to add others.\",
     },
     {
-      text: \"No Circle yet - that"s okay. Some people aren"t ready to share gauges with others. I'm not going anywhere.\",
+      text: \"No Circle yet - that's okay. Some people aren't ready to share gauges with others. I'm not going anywhere.\",
     },
     {
-      text: \"You don"t need a Circle to use InGauge. But if there's someone you trust, sharing your temperature can help. No pressure.",
+      text: \"You don't need a Circle to use InGauge. But if there's someone you trust, sharing your temperature can help. No pressure.",
     },
   ],
 };
@@ -546,20 +546,20 @@ export const CIRCLE_NO_RESPONSE_NUDGES: NudgeTemplate = {
   frequency: 'smart',
   conditions: [
     { type: 'circle_status', value: 1 }, // Has Circle but no recent activity
-    { type: 'gauge_below', gauge: 'connection", value: 5 },
+    { type: 'gauge_below', gauge: 'connection', value: 5 },
   ],
   messages: [
     {
-      text: \"Your Circle has been quiet. That can feel lonely. I'm here even when others aren"t.",
+      text: \"Your Circle has been quiet. That can feel lonely. I'm here even when others aren't.",
     },
     {
-      text: "No response from Circle lately? People get busy. It"s not always about you. But the silence is still hard.\",
+      text: "No response from Circle lately? People get busy. It's not always about you. But the silence is still hard.\",
     },
     {
-      text: \"When the people you care about don't respond, it stings. I see you. I"m responding.",
+      text: \"When the people you care about don't respond, it stings. I see you. I'm responding.",
     },
     {
-      text: "Circle quiet? Sometimes people need a nudge. And sometimes you need support that doesn"t depend on anyone else. I'm that backup.\",
+      text: "Circle quiet? Sometimes people need a nudge. And sometimes you need support that doesn't depend on anyone else. I'm that backup.\",
     },
   ],
 };
@@ -573,18 +573,18 @@ export const STREAK_NUDGES: NudgeTemplate = {
   trigger: 'milestone_streak',
   category: 'celebration',
   tone: 'celebratory',
-  frequency: 'as_needed",
+  frequency: 'as_needed',
   messages: [
     {
-      text: \"{streak} days of checking in. That's not obsession - that"s self-awareness. Nice work, {name}.",
+      text: \"{streak} days of checking in. That's not obsession - that's self-awareness. Nice work, {name}.",
       personalized: true,
     },
     {
-      text: "You"ve checked in {streak} days in a row. Consistency is a form of self-care. Keep going.\",
+      text: "You've checked in {streak} days in a row. Consistency is a form of self-care. Keep going.\",
       personalized: true,
     },
     {
-      text: \"{streak} day streak! The point isn't the number - it"s that you keep showing up for yourself.",
+      text: \"{streak} day streak! The point isn't the number - it's that you keep showing up for yourself.",
       personalized: true,
     },
     {
@@ -599,19 +599,19 @@ export const FIRST_WEEK_NUDGES: NudgeTemplate = {
   trigger: 'milestone_first_week',
   category: 'encouragement',
   tone: 'warm',
-  frequency: 'once",
+  frequency: 'once',
   messages: [
     {
-      text: \"One week in. You're learning your own patterns. That"s the whole point. Keep going.",
+      text: \"One week in. You're learning your own patterns. That's the whole point. Keep going.",
     },
     {
-      text: "Week one down. The first week is about building the habit. You"re doing it.\",
+      text: "Week one down. The first week is about building the habit. You're doing it.\",
     },
     {
       text: \"You've been checking in for a week. Notice anything about your patterns yet? The data is starting to mean something.\",
     },
     {
-      text: \"One week of showing up for yourself. That"s not small. That's the foundation.",
+      text: \"One week of showing up for yourself. That's not small. That's the foundation.",
     },
   ],
 };
@@ -625,37 +625,37 @@ export const INSPIRATION_NUDGES: NudgeTemplate = {
   trigger: 'gauge_low_multiple_days',
   category: 'inspiration',
   tone: 'grounding',
-  frequency: 'smart",
+  frequency: 'smart',
   messages: [
     {
-      text: \"You're not broken. You"re a system under pressure. Systems can be recalibrated.",
+      text: \"You're not broken. You're a system under pressure. Systems can be recalibrated.",
     },
     {
-      text: "The fact that you"re still checking in means something. You haven't given up on yourself.\",
+      text: "The fact that you're still checking in means something. You haven't given up on yourself.\",
     },
     {
-      text: \"Hard times don"t last. They feel permanent, but they"re not. You've survived hard before.\",
+      text: \"Hard times don't last. They feel permanent, but they're not. You've survived hard before.\",
     },
     {
-      text: \"You don"t have to feel better right now. Just feeling is enough. I"m here.\",
+      text: \"You don't have to feel better right now. Just feeling is enough. I'm here.\",
     },
     {
       text: \"Some days the win is just getting through. Today can be one of those days. No shame.\",
     },
     {
-      text: \"Your gauges are low. That's information, not identity. You"re not your worst day.",
+      text: \"Your gauges are low. That's information, not identity. You're not your worst day.",
     },
     {
-      text: "If everything feels heavy: one thing at a time. One breath. One moment. That"s enough.\",
+      text: "If everything feels heavy: one thing at a time. One breath. One moment. That's enough.\",
     },
     {
       text: \"You are not your anxiety, your depression, or your worst thoughts. You're the one noticing them.\",
     },
     {
-      text: \"The darkness isn"t the truth. It"s weather. Weather passes.\",
+      text: \"The darkness isn't the truth. It's weather. Weather passes.\",
     },
     {
-      text: \"Showing up when it's hard is harder than showing up when it"s easy. You"re doing the harder thing.\",
+      text: \"Showing up when it's hard is harder than showing up when it's easy. You're doing the harder thing.\",
     },
   ],
 };
@@ -722,7 +722,7 @@ export const DEFAULT_NUDGE_PREFERENCES: NudgePreferences = {
   inspirationEnabled: true,
   quietHoursStart: \"23:00\",
   quietHoursEnd: \"07:00\",
-  maxPerDay: 3, // Don"t spam
+  maxPerDay: 3, // Don't spam
 };
 
 // ============================================================

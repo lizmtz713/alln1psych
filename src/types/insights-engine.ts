@@ -73,7 +73,7 @@ export interface CauseInsight extends BaseGeneratedInsight {
 
 /** Timing — "When it tends to happen" (e.g. dips in the afternoon, better on weekends) */
 export interface TimingInsight extends BaseGeneratedInsight {
-  kind: 'timing";
+  kind: 'timing';
   /** e.g. \"weekday evenings\", \"Monday morning\" */
   timeLabel?: string;
 }
@@ -87,7 +87,7 @@ export interface GrowthInsight extends BaseGeneratedInsight {
 
 /** Meaning — "What it might mean for you" (gentle reframe, not diagnosis) */
 export interface MeaningInsight extends BaseGeneratedInsight {
-  kind: 'meaning";
+  kind: 'meaning';
   /** Optional reframe or \"what this could mean\" line */
   reframe?: string;
 }
@@ -124,7 +124,7 @@ export interface InsightEngineInput {
   gaugeValues: Partial<Record<GaugeKey, number>>;
   /** Gauge trends from cockpit */
   gaugeTrends?: Partial<Record<GaugeKey, 'improving' | 'stable' | 'declining' | null>>;
-  /** When context is 'gauge", which gauge we're focusing on */
+  /** When context is 'gauge', which gauge we're focusing on */
   gauge?: GaugeKey;
   /** Recent per-day gauge snapshots for pattern/timing (date → values) */
   recentGaugeByDay?: Array<{ date: string; values: Partial<Record<GaugeKey, number>> }>;
@@ -145,7 +145,7 @@ export interface InsightEngineInput {
   healthContext?: InsightHealthContext;
   /** Current life chapter (e.g. \"New parent\", \"Career transition\") for meaning-layer insights */
   lifeChapter?: string;
-  /** User"s chosen values (for values-layer insights: goals ↔ values) */
+  /** User's chosen values (for values-layer insights: goals ↔ values) */
   userValues?: string[];
   /** Energy context: check-ins today, hour — for energy-regulation insights */
   energyContext?: { checkInsToday?: number; hour?: number };

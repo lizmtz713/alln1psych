@@ -36,12 +36,12 @@ const PAGES = [
     body: null,
     bullets: [
       { label: 'Open', sub: 'They see who sent it' },
-      { label: 'Anonymous", sub: \"They know it's from their Circle, but not who\" },
+      { label: 'Anonymous', sub: \"They know it's from their Circle, but not who\" },
       { label: "Soft Share", sub: \"They choose when to read it; you're revealed when they accept\" },
     ],
   },
   {
-    title: \"It"s Not About Being Perfect",
+    title: \"It's Not About Being Perfect",
     body: "Stuck on what to say? Our AI can help you find the words—or just hold space while you get it off your chest.",
   },
   {

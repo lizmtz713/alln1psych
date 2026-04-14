@@ -11,7 +11,7 @@ import { COLORS, BORDER_RADIUS, SPACING } from '../../lib/constants';
 import type { InsightContext } from '../../types/insights-engine';
 
 export interface WeeklyInsightCardProps {
-  /** 'home' = 1–2 daily insights; 'weekly" = 3–5 deeper weekly insights */
+  /** 'home' = 1–2 daily insights; 'weekly' = 3–5 deeper weekly insights */
   context?: InsightContext;
 }
 
@@ -20,7 +20,7 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   weekly: { title: "This week's patterns", subtitle: 'Patterns, causes & growth from your data' },
 };
 
-export function WeeklyInsightCard({ context = 'home" }: WeeklyInsightCardProps) {
+export function WeeklyInsightCard({ context = 'home' }: WeeklyInsightCardProps) {
   const { insights, isLoading, error } = useGeneratedInsights({
     context,
     withHistory: true,

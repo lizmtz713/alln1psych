@@ -20,9 +20,9 @@ export const FAMILY_RITUALS_MICRO_LESSONS: FamilyRitualMicroLesson[] = [
   {
     id: 'family-pre-flight',
     title: 'The Pre-Flight Ritual',
-    domain: 'Learn",
+    domain: 'Learn',
     content:
-      \"A family is a fleet. Before you hit the road, check your telemetry. If one car is in Red, the whole fleet slows down to help. This isn't a delay; it"s maintenance.",
+      \"A family is a fleet. Before you hit the road, check your telemetry. If one car is in Red, the whole fleet slows down to help. This isn't a delay; it's maintenance.",
     action: 'Open Cockpit and sync gauges with Ground Control.',
   },
   {
@@ -44,7 +44,7 @@ export const familyRitualsLessons: HumanManualLesson[] = [
     duration: 2,
     emoji: '🛫",
     content: {
-      introduction: `A family is a fleet. Before you hit the road, check your telemetry. This 60-second morning check-in isn't \"What are you doing today?\" — it"s "What is your engine"s capacity?\" If one car is in Red, the whole fleet slows down to help. This isn't a delay; it"s maintenance.`,
+      introduction: `A family is a fleet. Before you hit the road, check your telemetry. This 60-second morning check-in isn't \"What are you doing today?\" — it's "What is your engine's capacity?\" If one car is in Red, the whole fleet slows down to help. This isn't a delay; it's maintenance.`,
       keyInsights: [
         {
           title: 'Step 1: Gauge Scan',
@@ -80,12 +80,12 @@ export const familyRitualsLessons: HumanManualLesson[] = [
       keyInsights: [
         {
           title: 'Odometer Check',
-          explanation: '"What was the smoothest part of the road today?" — start with what worked.',
+          explanation: ''What was the smoothest part of the road today?" — start with what worked.',
         },
         {
           title: 'Pothole Report',
           explanation:
-            '"Did anyone\'s gauge hit Red? If so, did the system stabilize or stall?" — name the bumps without blame.',
+            ''Did anyone\'s gauge hit Red? If so, did the system stabilize or stall?" — name the bumps without blame.',
         },
         {
           title: "Mechanic's Thanks",

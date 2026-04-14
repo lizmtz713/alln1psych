@@ -202,7 +202,7 @@ export function ShareInsight({ content, trigger }: ShareInsightProps) {
               <View style={{ width: 50 }} />
             </View>
 
-            {step === 'context" && (
+            {step === 'context' && (
               <View style={styles.content}>
                 {/* What you're sharing */}
                 <View style={styles.previewCard}>
@@ -217,7 +217,7 @@ export function ShareInsight({ content, trigger }: ShareInsightProps) {
                 <Text style={styles.sectionLabel}>Why are you sharing this?</Text>
                 <TextInput
                   style={styles.contextInput}
-                  placeholder=\"I read this and thought of you... or I"m working on this and wanted you to understand..."
+                  placeholder=\"I read this and thought of you... or I'm working on this and wanted you to understand..."
                   placeholderTextColor={COLORS.textMuted}
                   value={senderContext}
                   onChangeText={setSenderContext}

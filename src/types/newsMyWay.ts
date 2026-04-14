@@ -40,7 +40,7 @@ export interface StoryImpact {
 /** Doomscroll check-in after ~15 min. */
 export interface DoomscrollCheckIn {
   at: string;
-  feeling: 'better' | 'same' | 'worse";
+  feeling: 'better' | 'same' | 'worse';
   sessionDurationMinutes: number;
 }
 

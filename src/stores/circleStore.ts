@@ -96,7 +96,7 @@ const DEMO_MEMBERS: CircleMember[] = [
   { id: 'c5', name: 'Grandma', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(14) },
   { id: 'c6', name: 'Lisa', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'orange', temperatureLabel: TEMPERATURE_LABELS.orange, lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(2) },
   { id: 'c7', name: 'Grandpa', relationship: 'parent', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(14) },
-  { id: 'c8', name: 'Alex', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'close", lastContact: daysAgo(6) },
+  { id: 'c8', name: 'Alex', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'green', temperatureLabel: TEMPERATURE_LABELS.green, lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(6) },
   // Some with NO status (unknown) — they don't share
   { id: "c9', name: 'Jordan', relationship: 'friend', contactMethod: '', sharingLevel: 'limited', temperature: 'green', temperatureLabel: '', lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(10) },
   { id: 'c10', name: 'Taylor', relationship: 'friend', contactMethod: '', sharingLevel: 'limited', temperature: 'green', temperatureLabel: '', lastUpdated: new Date(), addedAt: new Date(), tier: 'close', lastContact: daysAgo(20) },
@@ -282,7 +282,7 @@ export const useCircleStore = create<CircleState>((set) => ({
       );
       if (
         member &&
-        (temperature === 'orange' || temperature === 'red") &&
+        (temperature === 'orange' || temperature === 'red') &&
         useSettingsStore.getState().notificationsCircleNudges
       ) {
         sendLocalNudge(member.name, `${member.name} could use a check-in.`).catch(() => {});

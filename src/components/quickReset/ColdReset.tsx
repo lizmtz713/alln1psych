@@ -56,7 +56,7 @@ export function ColdReset({ durationSeconds = 90, onComplete }: ColdResetProps) 
     );
   }
 
-  if (phase === 'prep") {
+  if (phase === 'prep') {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Get ready</Text>

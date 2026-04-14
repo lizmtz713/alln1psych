@@ -12,7 +12,7 @@ import { usePremiumStore, TESTING_MODE } from '../stores/premiumStore';
 interface PremiumGateProps {
   visible: boolean;
   onClose: () => void;
-  feature?: 'ai' | 'voice' | 'circle' | 'replay";
+  feature?: 'ai' | 'voice' | 'circle' | 'replay';
 }
 
 const FEATURE_COPY = {

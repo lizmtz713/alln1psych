@@ -62,7 +62,7 @@ function SuggestedLessonCard({ lesson, onPress }: SuggestedLessonCardProps) {
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Ionicons 
-            name={showWhy ? 'help-circle' : 'help-circle-outline"} 
+            name={showWhy ? 'help-circle' : 'help-circle-outline'} 
             size={20} 
             color={COLORS.accent} 
           />

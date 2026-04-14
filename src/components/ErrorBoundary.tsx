@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   retry = (): void => {
-    this.setState({ hasError: false, errorMessage: '" });
+    this.setState({ hasError: false, errorMessage: '' });
   };
 
   render(): ReactNode {

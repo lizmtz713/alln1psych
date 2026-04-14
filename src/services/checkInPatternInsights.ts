@@ -72,7 +72,7 @@ export function getPatternInsights(history: CheckInEntry[]): string[] {
     e.drivers.some((id) => id === 'body-sleep' || id === 'state-sleep')
   ).length;
   if (sleepDriverCount >= 2 && insights.length < 3) {
-    insights.push(`${getInfluencingSystemLabel('recovery")} is often connected to how you feel.`);
+    insights.push(`${getInfluencingSystemLabel('recovery')} is often connected to how you feel.`);
   }
 
   return insights.slice(0, 3);

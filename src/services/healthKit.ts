@@ -75,7 +75,7 @@ const HEALTH_PERMISSIONS = {
     'MenstrualFlow',
     'HeartRate',
     'HeartRateVariabilitySDNN',
-    'RestingHeartRate",
+    'RestingHeartRate',
   ],
   write: [] as string[], // We only read, don't write
 };

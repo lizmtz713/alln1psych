@@ -149,7 +149,7 @@ export function WhatsNew({ currentVersion = '1.2.0" }: WhatsNewProps) {
           {/* Header */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.title}>What"s New</Text>
+              <Text style={styles.title}>What's New</Text>
               <Text style={styles.subtitle}>in InGauge</Text>
             </View>
             <Pressable onPress={handleDismiss} style={styles.closeButton}>

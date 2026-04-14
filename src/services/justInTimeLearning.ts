@@ -2,7 +2,7 @@
  * Just-in-Time Learning — Contextual lesson delivery
  * 
  * Philosophy:
- * - Don"t give users a textbook; give them the right lesson at the right moment
+ * - Don't give users a textbook; give them the right lesson at the right moment
  * - Lessons surface when gauge states indicate they're relevant
  * - \"Observe → Orient → Operate\" framework
  */
@@ -27,7 +27,7 @@ export interface JustInTimeLesson {
   title: string;
   emoji: string;
   reason: string; // Why this lesson is being suggested now
-  urgency: 'gentle' | 'timely' | 'important";
+  urgency: 'gentle' | 'timely' | 'important';
   observeNote: string; // What's happening in your system
   orientNote: string; // Why this matters (evolutionary/biological reason)
   operateTool?: string; // Which AI tool might help
@@ -297,7 +297,7 @@ export async function shouldShowLessonNudge(
   const lessons = await getJustInTimeLessons(gauges, systemMode);
   
   // Only nudge for important or timely lessons
-  const urgent = lessons.find(l => l.urgency === 'important' || l.urgency === 'timely");
+  const urgent = lessons.find(l => l.urgency === 'important' || l.urgency === 'timely');
   return urgent || null;
 }
 
