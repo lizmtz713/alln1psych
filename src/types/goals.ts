@@ -61,9 +61,9 @@ export interface GoalReflection {
   reflectedAt: string; // ISO
 }
 
-/** Barriers / \"what's in the way\" options for AI Goal Builder. */
+/** Barriers / "what's in the way" options for AI Goal Builder. */
 export const BARRIER_OPTIONS = [
-  "Time',
+  'Time',
   'Energy',
   'Motivation',
   'Unclear plan',

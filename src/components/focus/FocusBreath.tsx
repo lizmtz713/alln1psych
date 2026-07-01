@@ -53,7 +53,7 @@ export function FocusBreath({ onComplete }: FocusBreathProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.emoji}>🌬️</Text>
-      <Text style={styles.timer}>{mins}:{secs.toString().padStart(2, '0")}</Text>
+      <Text style={styles.timer}>{mins}:{secs.toString().padStart(2, '0')}</Text>
       <Text style={styles.sub}>Keep your attention on the breath.</Text>
       <Pressable style={styles.doneBtn} onPress={handleComplete}>
         <Text style={styles.doneBtnText}>I'm done</Text>
@@ -63,7 +63,7 @@ export function FocusBreath({ onComplete }: FocusBreathProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center', justifyContent: 'center', padding: SPACING.xl },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACING.xl },
   emoji: { fontSize: 48, marginBottom: SPACING.md },
   title: { fontSize: 22, fontWeight: '700', color: COLORS.text, marginBottom: SPACING.sm },
   instruction: { fontSize: 16, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 24, marginBottom: SPACING.lg },

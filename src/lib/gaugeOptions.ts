@@ -66,8 +66,8 @@ export const CONNECTION_NEEDS = [
   'Feeling understood',
   'Shared activities',
   'Someone checking on me',
-  "Being needed by others',
-  "Community belonging',
+  'Being needed by others',
+  'Community belonging',
   'Romantic intimacy',
   'Family closeness',
 ];

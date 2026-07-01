@@ -134,7 +134,7 @@ export function GoalBuilderModal({ visible, onClose }: GoalBuilderModalProps) {
               </View>
             </>
           )}
-          {step === "suggestions' && (
+          {step === 'suggestions' && (
             <>
               <Text style={styles.prompt}>Here are some goals that might fit. Choose one.</Text>
               {suggestions.map((s, i) => (
