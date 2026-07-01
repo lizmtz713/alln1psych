@@ -19,7 +19,7 @@ function todayStr(): string {
 }
 
 function parseDate(d: string): Date {
-  const [y, m, day] = d.split('-").map(Number);
+  const [y, m, day] = d.split('-').map(Number);
   return new Date(y, m - 1, day);
 }
 
@@ -29,7 +29,7 @@ function dateKey(d: Date): string {
 
 /** Check if completion meets the habit's target for that day */
 function meetsTarget(habit: Habit, value: number): boolean {
-  if (habit.type === "boolean') return value >= 1;
+  if (habit.type === 'boolean') return value >= 1;
   const target = habit.target ?? 1;
   return value >= target;
 }

@@ -16,7 +16,7 @@ export interface WeeklyInsightCardProps {
 }
 
 const TITLES: Record<string, { title: string; subtitle: string }> = {
-  home: { title: \"What we're seeing\", subtitle: "From your gauges & check-ins' },
+  home: { title: 'What we\'re seeing', subtitle: 'From your gauges & check-ins' },
   weekly: { title: "This week's patterns", subtitle: 'Patterns, causes & growth from your data' },
 };
 
@@ -32,7 +32,7 @@ export function WeeklyInsightCard({ context = 'home' }: WeeklyInsightCardProps) 
     return (
       <View style={styles.wrapper}>
         <View style={styles.card}>
-          <ActivityIndicator size=\"small\" color={COLORS.accent} />
+          <ActivityIndicator size="small" color={COLORS.accent} />
           <Text style={styles.loadingText}>Building your insights…</Text>
         </View>
       </View>
@@ -54,7 +54,7 @@ export function WeeklyInsightCard({ context = 'home' }: WeeklyInsightCardProps) 
         <Text style={styles.sectionSubtitle}>{subtitle}</Text>
       </View>
       {insights.map((insight) => (
-        <GeneratedInsightCard key={insight.id} insight={insight} variant=\"full\" />
+        <GeneratedInsightCard key={insight.id} insight={insight} variant="full" />
       ))}
     </View>
   );
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
-    flexDirection: "row',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
   },

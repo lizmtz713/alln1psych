@@ -109,7 +109,7 @@ export function weeklyLineAddsNewInfo(
   // If pattern already mentions \"this week\" / same theme, don't repeat
   const patternLower = primaryPatternLine.toLowerCase();
   const weeklyLower = weeklyLine.toLowerCase();
-  if (patternLower.includes("this week') && weeklyLower.includes('this week')) return false;
+  if (patternLower.includes('this week') && weeklyLower.includes('this week')) return false;
   const patternDriver = primaryPatternLine.split(' ')[0];
   const weeklyDriver = weeklyLine.split(' ')[0];
   return patternDriver !== weeklyDriver;

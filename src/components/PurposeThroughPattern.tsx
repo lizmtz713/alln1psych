@@ -140,7 +140,7 @@ export default function PurposeThroughPattern({ insights, compact, onExploreMore
               {topCorrelation.narrative}
             </Text>
           </View>
-          <Ionicons name=\"chevron-forward\" size={18} color={TEXT_DIM} />
+          <Ionicons name="chevron-forward" size={18} color={TEXT_DIM} />
         </View>
       </TouchableOpacity>
     );
@@ -178,7 +178,7 @@ export default function PurposeThroughPattern({ insights, compact, onExploreMore
       {onExploreMore && (
         <TouchableOpacity style={styles.exploreButton} onPress={handleExploreMore}>
           <Text style={styles.exploreButtonText}>Explore all patterns</Text>
-          <Ionicons name=\"arrow-forward\" size={16} color={ACCENT} />
+          <Ionicons name="arrow-forward" size={16} color={ACCENT} />
         </TouchableOpacity>
       )}
     </View>
