@@ -297,16 +297,17 @@ export default function TalkScreen() {
     setConversationId(Date.now());
   }
 
-  function handleSaveAndClose() {
+  async function handleSaveAndClose() {
+    await runSaveConversation(true);
     router.push('/(tabs)');
   }
 
-  const runSaveConversation = (showToast: boolean) => {
+  const runSaveConversation = (showToast: boolean): Promise<void> => {
     const state = useConversationStore.getState();
-    if (state.messages.length < 3) return;
+    if (state.messages.length < 3) return Promise.resolve();
     const snapshot = state.messages.map((m) => ({ role: m.role, content: m.content }));
     clearMessages();
-    generateConversationSummary(snapshot)
+    return generateConversationSummary(snapshot)
       .then((payload) => {
         addSummary({
           title: payload.title,
@@ -322,7 +323,9 @@ export default function TalkScreen() {
           setTimeout(() => setConvToast(false), 2500);
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        if (__DEV__) console.warn('[Talk] Failed to save conversation summary', err);
+      });
   };
 
   useEffect(() => {
