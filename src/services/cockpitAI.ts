@@ -195,7 +195,7 @@ The 6 gauges (0-100 scale, -1 means not checked):
 
 Rules:
 - Read the PATTERN across gauges, not individual numbers
-- If USER-REPORTED INFLUENCES are present, weave them in naturally: e.g. \"Work and sleep are influencing you today\" or \"You noted Connection and Direction feel affected — that's a common pair when stress is up.\"
+- If USER-REPORTED INFLUENCES are present, weave them in naturally: e.g. "Work and sleep are influencing you today" or "You noted Connection and Direction feel affected — that's a common pair when stress is up."
 - Tell them what's CONNECTED: "Your anxiety might be coming from your body, not your emotions"
 - Be direct but warm
 - Never use clinical jargon
@@ -218,7 +218,7 @@ Rules:
     const response = await sendMessageWithSystemPrompt(
       [
         {
-          role: "user',
+          role: 'user',
           content:
             'Read my gauges and give me one insight about how my systems are interacting right now.',
         },
@@ -239,17 +239,17 @@ function getHardcodedInsight(gauges: CockpitGauges, driverContext?: DriverContex
   const insights: string[] = [];
   const driverPrefix =
     driverContext && driverContext.driverLabels.length > 0
-      ? `${driverContext.driverLabels.slice(0, 3).join(' and ')} ${driverContext.driverLabels.length > 3 ? "and others' : "'} are influencing you. `
+      ? `${driverContext.driverLabels.slice(0, 3).join(' and ')} ${driverContext.driverLabels.length > 3 ? 'and others' : ''} are influencing you. `
       : '';
 
   if (gauges.body >= 0 && gauges.body < 40 && gauges.emotion >= 0 && gauges.emotion < 50) {
     insights.push(
-      driverPrefix + \"Your emotional state may be tied to your body. Low sleep and nutrition amplify anxiety by up to 30%. Address your Body gauge first.\"
+      driverPrefix + "Your emotional state may be tied to your body. Low sleep and nutrition amplify anxiety by up to 30%. Address your Body gauge first."
     );
   }
   if (gauges.state >= 0 && gauges.state < 40 && gauges.connection >= 0 && gauges.connection < 40) {
     insights.push(
-      driverPrefix + \"You're in a stressed state AND feeling disconnected. That's the hardest combination for your brain. Even a short conversation with someone safe can shift both gauges."
+      driverPrefix + "You're in a stressed state AND feeling disconnected. That's the hardest combination for your brain. Even a short conversation with someone safe can shift both gauges."
     );
   }
   if (

@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { COLORS, SPACING } from '../../lib/constants";
+import { COLORS, SPACING } from '../../lib/constants';
 
 export interface FocusThoughtNotingProps {
   onComplete: (durationSeconds: number) => void;
@@ -36,9 +36,9 @@ export function FocusThoughtNoting({ onComplete }: FocusThoughtNotingProps) {
         <Text style={styles.emoji}>💭</Text>
         <Text style={styles.title}>Thought noting</Text>
         <Text style={styles.instruction}>
-          Rest attention on your breath. When a thought appears, silently say \"thinking\" and return to the breath. You're not stopping thoughts — just noticing and coming back.
+          Rest attention on your breath. When a thought appears, silently say "thinking" and return to the breath. You're not stopping thoughts — just noticing and coming back.
         </Text>
-        <Text style={styles.hint}>~2 minutes. Tap \"Noted\" whenever you catch a thought.</Text>
+        <Text style={styles.hint}>~2 minutes. Tap "Noted" whenever you catch a thought.</Text>
         <Pressable style={styles.startBtn} onPress={() => setStarted(true)}>
           <Text style={styles.startBtnText}>Start</Text>
         </Pressable>
@@ -52,7 +52,7 @@ export function FocusThoughtNoting({ onComplete }: FocusThoughtNotingProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.emoji}>💭</Text>
-      <Text style={styles.timer}>{mins}:{secs.toString().padStart(2, "0")}</Text>
+      <Text style={styles.timer}>{mins}:{secs.toString().padStart(2, '0')}</Text>
       <Text style={styles.sub}>When you notice a thought, tap below and return to the breath.</Text>
       <Pressable style={styles.noteBtn} onPress={handleNote}>
         <Text style={styles.noteBtnText}>Noted ({noteCount})</Text>
@@ -65,7 +65,7 @@ export function FocusThoughtNoting({ onComplete }: FocusThoughtNotingProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center', justifyContent: 'center', padding: SPACING.xl },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACING.xl },
   emoji: { fontSize: 48, marginBottom: SPACING.md },
   title: { fontSize: 22, fontWeight: '700', color: COLORS.text, marginBottom: SPACING.sm },
   instruction: { fontSize: 16, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 24, marginBottom: SPACING.lg },
