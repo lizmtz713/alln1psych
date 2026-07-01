@@ -93,7 +93,7 @@ export function getNudgeForLight(light: Light): ConnectionNudge | null {
   if (days <= warning) {
     urgency = 'gentle';
     message = `It's been ${days} days since you connected with ${light.name}`;
-    suggestedAction = "text';
+    suggestedAction = 'text';
   } else if (days <= critical) {
     urgency = 'nudge';
     message = `${light.name}'s light is dimming — reach out soon`;

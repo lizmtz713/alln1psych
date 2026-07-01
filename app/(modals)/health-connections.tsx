@@ -123,7 +123,7 @@ const GAUGE_ENHANCEMENTS = {
     emoji: '🧬',
     examples: [
       'Auto-suggest Body score based on sleep + activity',
-      ''You only got 5 hours of sleep — your Body might feel it"',
+      'You only got 5 hours of sleep — your Body might feel it',
       'Track how movement affects your physical state',
     ],
   },
@@ -131,7 +131,7 @@ const GAUGE_ENHANCEMENTS = {
     emoji: '⚡',
     examples: [
       'HRV shows your nervous system capacity',
-      ''Your HRV is low — less buffer for stress today"',
+      'Your HRV is low — less buffer for stress today',
       'Connect sleep quality to energy levels',
     ],
   },

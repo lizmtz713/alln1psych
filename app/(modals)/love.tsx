@@ -124,7 +124,7 @@ const LOVE_LANGUAGES_CONTENT = {
     signs: [
       "They notice when you do tasks without being asked",
       "They show love by doing things for others (cooking, fixing, helping)",
-      "Broken promises hit hard — you said you'd do it and didn't',
+      "Broken promises hit hard — you said you'd do it and didn't",
       "They feel overwhelmed when tasks pile up",
       "They might struggle to ask for help directly",
     ],
