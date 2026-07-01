@@ -42,7 +42,7 @@ export const DRIVER_TO_SYSTEM: Record<string, InfluencingSystemId> = {
   // Reciprocity — connection drivers are relationship context; reciprocity is care given/received (handled by reciprocityService)
   // No driver ID → reciprocity; it's from connectionLogByMemberId.initiatedBy
   // Meaning — purpose, values, identity
-  "align-values': 'meaning',
+  'align-values': 'meaning',
   'align-identity': 'meaning',
   'align-purpose': 'meaning',
   'align-spirituality': 'meaning',

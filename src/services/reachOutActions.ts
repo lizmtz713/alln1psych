@@ -66,7 +66,7 @@ export const REACH_OUT_ACTIONS: ReachOutAction[] = [
     loveLanguages: ['Quality Time', 'Words of Affirmation'], description: 'Share something funny',
     deepLink: (l) => l.phone ? `sms:${l.phone.replace(/\D/g, '')}` : null },
   { id: 'share-song', label: 'Share Song', emoji: '🎵', category: 'share', effort: 'low',
-    loveLanguages: ['Quality Time', 'Gifts'], description: ''This made me think of you"',
+    loveLanguages: ['Quality Time', 'Gifts'], description: '"This made me think of you"',
     deepLink: (l) => l.phone ? `sms:${l.phone.replace(/\D/g, '')}` : null },
   { id: 'send-photo', label: 'Send Photo', emoji: '📸', category: 'share', effort: 'low',
     loveLanguages: ['Quality Time'], description: 'Share a memory or moment',
@@ -93,35 +93,35 @@ const CONTEXT_TO_TONE: Record<MessageContext, MessageTone> = {
 
 export const EXAMPLE_MESSAGES: { context: MessageContext; messages: string[] }[] = [
   { context: 'just-checking-in', messages: [
-    "Hey! Just thinking about you. How's everything going?\",
-    \"Hi! Hope you're having a good week 💛\",
-    \"Hey you! What's new in your world?",
+    "Hey! Just thinking about you. How's everything going?",
+    "Hi! Hope you're having a good week 💛",
+    "Hey you! What's new in your world?",
   ]},
   { context: 'been-a-while', messages: [
-    \"It's been way too long! Miss your face. Coffee soon?\",
-    \"Hey stranger! We need to catch up. When are you free?\",
-    \"Life got crazy but I miss you! Let's not let so much time pass again.",
+    "It's been way too long! Miss your face. Coffee soon?",
+    "Hey stranger! We need to catch up. When are you free?",
+    "Life got crazy but I miss you! Let's not let so much time pass again.",
   ]},
   { context: 'they-struggling', messages: [
-    \"Hey, just wanted you to know I'm here if you need anything. 💛\",
-    \"Thinking of you. No pressure to respond, just sending love.\",
-    \"You don't have to go through this alone. I'm here.",
+    "Hey, just wanted you to know I'm here if you need anything. 💛",
+    "Thinking of you. No pressure to respond, just sending love.",
+    "You don't have to go through this alone. I'm here.",
   ]},
   { context: 'celebration', messages: [
     "CONGRATS!! So proud of you! 🎉",
     "You did it! I knew you would. Celebrating you today!",
   ]},
   { context: 'random-love', messages: [
-    \"No reason, just wanted to say you're awesome.\",
-    \"Random appreciation post: you're one of my favorite humans.",
-    "Just grateful you're in my life. That's all. 💛\",
+    "No reason, just wanted to say you're awesome.",
+    "Random appreciation post: you're one of my favorite humans.",
+    "Just grateful you're in my life. That's all. 💛",
   ]},
-  { context: "thinking-of-you', messages: [
+  { context: 'thinking-of-you', messages: [
     "Just saw something and it reminded me of you!",
     "You popped into my head so I had to reach out 💭",
   ]},
   { context: 'funny', messages: [
-    \"I just thought of the dumbest thing and you're the only one who'd get it.",
+    "I just thought of the dumbest thing and you're the only one who'd get it.",
     "Sending you this so we can laugh about it later 😂",
     "No context. Just vibes. And you.",
   ]},

@@ -92,10 +92,10 @@ function detectConnectionGaps(daysSinceConnection: number | undefined): Detected
   if (daysSinceConnection == null || daysSinceConnection < 3) return null;
   return {
     type: 'connection_gaps',
-    label: 'Long gaps without connection → Emotion can drop",
+    label: 'Long gaps without connection → Emotion can drop',
     description: `It's been ${daysSinceConnection} days since you logged a connection. Reaching out often helps.`,
     confidence: 0.7,
-    factorLabel: "Emotion',
+    factorLabel: 'Emotion',
   };
 }
 
