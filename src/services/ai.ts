@@ -928,17 +928,15 @@ export interface MessageForSummary {
   content: string;
 }
 
-export async function generateConversationSummary(
-  messages: MessageForSummary[]
-): Promise<ConversationSummaryPayload> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) throw new Error('OpenAI API key not configured');
+const CONVERSATION_SUMMARY_SYSTEM_PROMPT =
+  'You summarize conversations for a wellness companion app. Respond ONLY with valid JSON matching the requested schema.';
 
+function buildConversationSummaryPrompt(messages: MessageForSummary[]): string {
   const conversationText = messages
     .map((m) => `${m.role === 'user' ? 'User' : 'Gauge'}: ${m.content}`)
     .join('\n');
 
-  const prompt = `Summarize this conversation between a user and their AI companion Gauge.
+  return `Summarize this conversation between a user and their AI companion Gauge.
 
 CONVERSATION:
 ${conversationText}
@@ -955,42 +953,80 @@ Provide a JSON response with:
 
 Be warm and specific. This is for the user to look back on.
 Respond ONLY with valid JSON.`;
+}
 
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user' as const, content: prompt }],
-      max_tokens: 300,
-      temperature: 0.7,
-    }),
-  });
+function buildFallbackConversationSummary(messages: MessageForSummary[]): ConversationSummaryPayload {
+  const userLines = messages
+    .filter((m) => m.role === 'user')
+    .map((m) => m.content.trim())
+    .filter(Boolean);
+  const excerpt = userLines.slice(-2).join(' ') || 'A conversation with Gauge';
+  return {
+    title: 'Saved conversation',
+    summary: excerpt.length > 280 ? `${excerpt.slice(0, 277)}...` : excerpt,
+    emotions: [],
+    triggers: [],
+    insights: '',
+    followUp: '',
+  };
+}
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(body || `OpenAI API error: ${res.status}`);
+function parseConversationSummaryPayload(raw: string): ConversationSummaryPayload {
+  const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  if (!jsonStr) throw new Error('Empty summary response');
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonStr);
+  } catch (e) {
+    if (__DEV__) console.warn('[AI] generateConversationSummary: invalid JSON', e);
+    throw new Error('Invalid JSON in summary response');
   }
 
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const raw = data.choices?.[0]?.message?.content?.trim();
-  if (!raw) throw new Error('Empty response from OpenAI');
-
-  // Strip possible markdown code block
-  const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  const parsed = JSON.parse(jsonStr) as ConversationSummaryPayload;
-  if (!parsed.title || !parsed.summary || !Array.isArray(parsed.emotions) || !Array.isArray(parsed.triggers)) {
+  if (!parsed || typeof parsed !== 'object') {
+    if (__DEV__) console.warn('[AI] generateConversationSummary: response was not an object');
     throw new Error('Invalid summary shape from OpenAI');
   }
-  useUsageStore.getState().incrementGPT();
+
+  const p = parsed as Partial<ConversationSummaryPayload>;
+  if (!p.title || !p.summary || !Array.isArray(p.emotions) || !Array.isArray(p.triggers)) {
+    if (__DEV__) console.warn('[AI] generateConversationSummary: malformed summary fields', p);
+    throw new Error('Invalid summary shape from OpenAI');
+  }
+
   return {
-    title: parsed.title,
-    summary: parsed.summary,
-    emotions: parsed.emotions ?? [],
-    triggers: parsed.triggers ?? [],
-    insights: parsed.insights ?? '',
-    followUp: parsed.followUp ?? '',
+    title: String(p.title),
+    summary: String(p.summary),
+    emotions: p.emotions.map(String),
+    triggers: p.triggers.map(String),
+    insights: p.insights != null ? String(p.insights) : '',
+    followUp: p.followUp != null ? String(p.followUp) : '',
   };
+}
+
+export async function generateConversationSummary(
+  messages: MessageForSummary[]
+): Promise<ConversationSummaryPayload> {
+  const prompt = buildConversationSummaryPrompt(messages);
+
+  let raw: string;
+  try {
+    raw = await sendMessageWithSystemPromptOnly(
+      [{ role: 'user', content: prompt }],
+      CONVERSATION_SUMMARY_SYSTEM_PROMPT,
+      300
+    );
+  } catch (e) {
+    if (__DEV__) console.warn('[AI] generateConversationSummary: edge/client path failed', e);
+    throw e instanceof Error ? e : new Error(String(e));
+  }
+
+  try {
+    return parseConversationSummaryPayload(raw);
+  } catch (e) {
+    if (__DEV__) console.warn('[AI] generateConversationSummary: using fallback summary', e);
+    return buildFallbackConversationSummary(messages);
+  }
 }
 
 /**
