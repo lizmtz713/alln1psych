@@ -151,7 +151,7 @@ export const useBodyMaintenanceStore = create<BodyMaintenancePersist & {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const byMonth = new Map<string, { itemId: string; label: string }[]>();
-        const months = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+        const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
         for (const cat of BODY_MAINTENANCE_CATEGORIES) {
           for (const item of cat.items) {
             const next = get().getNextDue(item.id);

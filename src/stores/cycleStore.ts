@@ -459,12 +459,12 @@ CYCLE CONTEXT:
 - Current day: ${dayOfCycle} of ${cycleLength}
 - Phase: ${phaseInfo.name} (${phaseInfo.description})
 - Energy level: ${phaseInfo.energyLevel}
-- Typical traits: ${phaseInfo.typicalTraits.join(', ")}
+- Typical traits: ${phaseInfo.typicalTraits.join(', ')}
 
 IMPORTANT: Factor cycle phase into your interpretation of readings.
 - Don't pathologize normal cycle-related fluctuations
 - Use normalizing language when appropriate (\"This is typical for ${phaseInfo.name} phase\")
-- Suggest phase-appropriate self-care: ${phaseInfo.selfCare.join(", ')}
+- Suggest phase-appropriate self-care: ${phaseInfo.selfCare.join(', ')}
 `;
 
         // Add pattern data if available

@@ -41,7 +41,7 @@ Provide a warm, constructive debrief:
 Keep it concise — 3-4 short paragraphs max. Be warm, be specific, be helpful.`;
 
 function buildRolePlayPrompt(scenario: string, character: string, difficulty: string): string {
-  const base = ROLEPLAY_SYSTEM_TEMPLATE.replace("{scenario}', scenario)
+  const base = ROLEPLAY_SYSTEM_TEMPLATE.replace('{scenario}', scenario)
     .replace(/{character}/g, character)
     .replace('{difficulty}', difficulty);
   // Add age-adaptive language rules

@@ -99,7 +99,7 @@ export default function PurposeThroughPattern({ insights, compact, onExploreMore
     if (onExploreMore) {
       onExploreMore();
     } else {
-      router.push('/(modals)/patterns");
+      router.push('/(modals)/patterns');
     }
   };
 
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.lg,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   
   // Header

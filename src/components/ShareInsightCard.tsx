@@ -107,7 +107,7 @@ function GaugeStatusCard({ insight, compact }: { insight: GaugeStatusInsight; co
       {/* Mode Badge */}
       <View style={[
         styles.modeBadge,
-        insight.systemMode === "stabilization' && styles.modeBadgeStabilization
+        insight.systemMode === 'stabilization' && styles.modeBadgeStabilization
       ]}>
         <Ionicons
           name={insight.systemMode === 'capacity' ? 'checkmark-circle' : 'alert-circle'}

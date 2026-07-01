@@ -165,7 +165,7 @@ export const useInsightsStore = create<InsightsState>(() => ({
     const greenCount = trend.filter((t: { mood: string }) => t.mood === 'green').length;
     const lastMood = trend.length > 0 ? trend[0].mood : null;
     if (greenCount >= 3 && lastMood === 'green')
-      return \"You've been feeling good this week. What's contributing to that?";
+      return "You've been feeling good this week. What's contributing to that?";
     if (engagementStreak >= 2)
       return `${engagementStreak} days in a row! Consistency builds self-awareness.`;
     if (trend.length === 0)

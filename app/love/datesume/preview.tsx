@@ -130,7 +130,7 @@ export default function PreviewScreen() {
         <Section title="Testimonials">
           {d.testimonials.map((t) => (
             <View key={t.id} style={styles.testimonial}>
-              <Text style={styles.quote}>{''' + t.quote + '''}</Text>
+              <Text style={styles.quote}>{`"${t.quote}"`}</Text>
               <Text style={styles.source}>— {t.source}</Text>
             </View>
           ))}

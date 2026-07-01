@@ -125,7 +125,7 @@ export async function getWeekData(): Promise<WeekData> {
     return date >= weekStart && date <= weekEnd;
   });
 
-  const gauges: GaugeKey[] = ["body', 'state', 'emotion', 'connection', 'direction', 'alignment'];
+  const gauges: GaugeKey[] = ['body', 'state', 'emotion', 'connection', 'direction', 'alignment'];
   const averages = {} as Record<GaugeKey, number>;
 
   for (const gauge of gauges) {
@@ -179,7 +179,7 @@ function generateValuePrompt(value: string, weekData: WeekData): string {
     'integrity': 'Did your actions align with your word?',
     'curiosity': 'Did you stay curious and open?',
     'gratitude': 'Did you notice what you\'re grateful for?',
-    'patience': 'Did you practice patience when tested?",
+    'patience': 'Did you practice patience when tested?',
   };
 
   return prompts[value.toLowerCase()] || 
@@ -191,7 +191,7 @@ function generateValuePrompt(value: string, weekData: WeekData): string {
  */
 export function getWeeklyReflectionPrompt(values: string[]): string {
   if (values.length === 0) {
-    return \"Let's check in on how you've been living this week.";
+    return "Let's check in on how you've been living this week.";
   }
   
   if (values.length === 1) {
@@ -403,7 +403,7 @@ export function getAlignmentResponse(response: AlignmentResponse): string {
     case 'mostly':
       return 'Progress, not perfection. Noticing the gap is half the work.';
     case 'not_really':
-      return 'No judgment. Just noticing. What got in the way?";
+      return 'No judgment. Just noticing. What got in the way?';
   }
 }
 
@@ -411,7 +411,7 @@ export function getAlignmentResponse(response: AlignmentResponse): string {
  * Default values to suggest if user hasn't set any
  */
 export const SUGGESTED_VALUES = [
-  { value: "Honesty', emoji: '💎' },
+  { value: 'Honesty', emoji: '💎' },
   { value: 'Kindness', emoji: '💝' },
   { value: 'Growth', emoji: '🌱' },
   { value: 'Connection', emoji: '🤝' },

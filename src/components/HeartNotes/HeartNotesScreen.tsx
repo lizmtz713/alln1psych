@@ -131,7 +131,7 @@ export default function HeartNotesScreen() {
         )}
         contentContainerStyle={styles.list}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor=\"#fff\" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />
         }
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -146,7 +146,7 @@ export default function HeartNotesScreen() {
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate("HeartNoteComposer')}
+        onPress={() => navigation.navigate('HeartNoteComposer')}
         activeOpacity={0.8}
       >
         <Ionicons name="add" size={28} color="#fff" />
