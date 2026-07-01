@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface ConversationSummary {
   id: string;
@@ -44,7 +46,9 @@ const POSITIVE_EMOTIONS = new Set([
   'motivated', 'confident', 'loved', 'connected',
 ]);
 
-export const useConversationSummaryStore = create<ConversationSummaryStore>((set, get) => ({
+export const useConversationSummaryStore = create<ConversationSummaryStore>()(
+  persist(
+    (set, get) => ({
   summaries: [],
 
   addSummary: (input) => {
@@ -152,4 +156,11 @@ export const useConversationSummaryStore = create<ConversationSummaryStore>((set
   },
 
   getLastSummary: () => (get().summaries ?? [])[0] ?? undefined,
-}));
+    }),
+    {
+      name: 'conversation-summaries',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({ summaries: state.summaries }),
+    }
+  )
+);
