@@ -406,10 +406,12 @@ export default function HomeScreen() {
   const { getTodayChallenge, isTodayChallengeDone, completeTodayChallenge } = useEngagementStore();
   const { content: dailyContent, isLoading: dailyContentLoading, setContent: setDailyContent, setLoading: setDailyContentLoading, isStale } = useDailyContentStore();
   const getWeeklyMoodTrend = useInsightsStore((s) => s.getWeeklyMoodTrend);
-  const getSummaries = useConversationSummaryStore((s) => s.getSummaries);
+  const conversationSummaries = useConversationSummaryStore((s) => s.summaries ?? []);
+  const lastSummaryId = conversationSummaries[0]?.id ?? null;
   const getLastSummary = useConversationSummaryStore((s) => s.getLastSummary);
   const getRecentTriggers = useConversationSummaryStore((s) => s.getRecentTriggers);
   const getEmotionalPatterns = useConversationSummaryStore((s) => s.getEmotionalPatterns);
+  const lastGeneratedForSummaryIdRef = useRef<string | null>(null);
 
   const bodyVal = useCockpitStore((s) => s.body.value);
   const stateVal = useCockpitStore((s) => s.state.value);
@@ -723,8 +725,7 @@ export default function HomeScreen() {
     const ageGroupForLesson = typeof userAgeToContentAge === 'function' ? userAgeToContentAge(user?.ageGroup ?? null) : 'adult';
     nextLesson = typeof getNextLesson === 'function' ? getNextLesson(ageGroupForLesson) ?? null : null;
     moodTrend = typeof getWeeklyMoodTrend === 'function' ? (getWeeklyMoodTrend() ?? []) : [];
-    const summaries = typeof getSummaries === 'function' ? getSummaries() : [];
-    summaryCount = Array.isArray(summaries) ? summaries.length : 0;
+    summaryCount = conversationSummaries.length;
     greetingLine = dailyContent?.greeting ?? getDynamicGreeting(user?.name ?? 'you');
     affirmation = dailyContent?.affirmation ?? getTodayAffirmation();
     psychSays = dailyContent?.insight ?? (typeof getPsychSays === 'function' ? getPsychSays(streak) : "You're doing better than you think.");
@@ -755,7 +756,9 @@ export default function HomeScreen() {
   useEffect(() => {
     try {
       const isStaleResult = typeof isStale === 'function' ? isStale() : false;
-      if (!dailyContent || isStaleResult) {
+      const needsSummaryRefresh =
+        lastSummaryId != null && lastGeneratedForSummaryIdRef.current !== lastSummaryId;
+      if (!dailyContent || isStaleResult || needsSummaryRefresh) {
         if (typeof setDailyContentLoading === 'function') setDailyContentLoading(true);
         const lastSummary = typeof getLastSummary === 'function' ? getLastSummary() ?? null : null;
         const recentTriggers = (typeof getRecentTriggers === 'function' ? getRecentTriggers(14) : []) as string[];
@@ -763,6 +766,15 @@ export default function HomeScreen() {
         const lastConversationSummary = lastSummary && typeof lastSummary === 'object'
           ? `${lastSummary.title ?? ''}: ${lastSummary.summary ?? ''}${lastSummary.insights ? ` Insight: ${lastSummary.insights}` : ''}`
           : undefined;
+        if (__DEV__) {
+          console.log('[Cockpit] conversationSummaryStore', {
+            summaryCount: conversationSummaries.length,
+            lastTitle: lastSummary?.title ?? null,
+            recentTriggers: recentTriggers.slice(0, 3),
+            emotionalTrend: patterns?.trend,
+            feedingDailyContent: Boolean(lastConversationSummary),
+          });
+        }
         const educationState = typeof useEducationStore?.getState === 'function' ? useEducationStore.getState() : null;
         const lessonsCompleted = (educationState?.completedLessons ?? []) as string[];
         const moodTrendSnapshot = typeof getWeeklyMoodTrend === 'function' ? (getWeeklyMoodTrend() ?? []) : [];
@@ -783,7 +795,10 @@ export default function HomeScreen() {
           recentEmotions: Array.isArray(patterns?.topEmotions) ? patterns.topEmotions.slice(0, 6).map((e) => e?.emotion ?? '') : undefined,
           emotionalTrend: patterns?.trend,
         })
-          .then((c) => { if (typeof setDailyContent === 'function' && c) setDailyContent(c); })
+          .then((c) => {
+            if (typeof setDailyContent === 'function' && c) setDailyContent(c);
+            if (lastSummaryId) lastGeneratedForSummaryIdRef.current = lastSummaryId;
+          })
           .catch(() => {
             const hour = new Date().getHours();
             const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 21 ? 'Good evening' : "It's late";
@@ -802,7 +817,7 @@ export default function HomeScreen() {
       if (__DEV__) console.error('[Home] daily content effect', err);
       if (typeof setDailyContentLoading === 'function') setDailyContentLoading(false);
     }
-  }, [todayDateKey, summaryCount, userName, userAgeGroup, streak]);
+  }, [todayDateKey, summaryCount, lastSummaryId, userName, userAgeGroup, streak]);
 
   const card0 = useRef(new Animated.Value(0)).current;
   const card1 = useRef(new Animated.Value(0)).current;
