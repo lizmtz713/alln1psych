@@ -10,7 +10,7 @@ const BUCKET = 'voice';
 const MIME = 'audio/m4a';
 
 function isLocalUri(uri: string): boolean {
-  return uri.startsWith('file://') || uri.startsWith('content://");
+  return uri.startsWith('file://') || uri.startsWith('content://');
 }
 
 /** Decode base64 to ArrayBuffer for Supabase upload */
@@ -36,7 +36,7 @@ export async function uploadVoiceToStorage(
   }
 
   const base64 = await FileSystem.readAsStringAsync(localUri, {
-    encoding: "base64',
+    encoding: 'base64',
   });
   const arrayBuffer = base64ToArrayBuffer(base64);
   const path = `${userId}/${noteId}_${Date.now()}.m4a`;

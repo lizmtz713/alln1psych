@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 
 const DAILY_CHALLENGES = [
-  { text: 'Tell someone you appreciate them today', emoji: '💌" },
-  { text: \"Name 3 things you're grateful for\", emoji: "🙏' },
+  { text: 'Tell someone you appreciate them today', emoji: '💌' },
+  { text: "Name 3 things you're grateful for", emoji: '🙏' },
   { text: 'Take 5 deep breaths right now', emoji: '🌬️' },
   { text: 'Write one sentence about how you feel', emoji: '✍️' },
   { text: 'Send a check-in to someone in your circle', emoji: '💛' },
@@ -13,8 +13,8 @@ const DAILY_CHALLENGES = [
   { text: "Tell Gauge about the best part of your day", emoji: '⭐' },
   { text: 'Drink a glass of water right now', emoji: '💧' },
   { text: 'Stretch for 30 seconds', emoji: '🧘' },
-  { text: 'Forgive yourself for one thing today', emoji: '🕊️" },
-  { text: \"Text a friend you haven't talked to in a while\", emoji: "📱' },
+  { text: 'Forgive yourself for one thing today', emoji: '🕊️' },
+  { text: "Text a friend you haven't talked to in a while", emoji: '📱' },
 ] as const;
 
 function dayOfYear(): number {

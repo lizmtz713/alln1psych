@@ -65,7 +65,7 @@ export interface NewsMyWaySettings {
 }
 
 export const NEWS_CATEGORY_LABELS: Record<NewsCategory, string> = {
-  awe: "Awe',
+  awe: 'Awe',
   connection: 'Connection',
   solutions: 'Solutions',
   need_to_know: 'Need to Know',

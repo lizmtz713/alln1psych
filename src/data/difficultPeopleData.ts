@@ -22,7 +22,7 @@ export const DIFFICULT_PERSON_TYPES: DifficultPersonType[] = [
       friend: ['Lower expectations. Don\'t compete for their attention. Protect your energy.'],
     },
     whenToWalkAway: 'When you\'re constantly depleted, your reality is denied, or you\'re being used with no reciprocity. When your safety or mental health is at risk.',
-    resources: ['Dr. Ramani (YouTube, books)', ''Should I Stay or Should I Go?" — Ramani'],
+    resources: ['Dr. Ramani (YouTube, books)', '"Should I Stay or Should I Go?" - Ramani'],
   },
   {
     id: 'manipulator',
@@ -40,7 +40,7 @@ export const DIFFICULT_PERSON_TYPES: DifficultPersonType[] = [
       friend: ['Break the transaction: "I appreciate you, and my answer is still no."'],
     },
     whenToWalkAway: 'When they escalate after you hold a boundary, or when every interaction leaves you feeling used.',
-    resources: [''In Sheep\'s Clothing" — George Simon', 'Boundaries (Cloud & Townsend)'],
+    resources: ['"In Sheep\'s Clothing" - George Simon', 'Boundaries (Cloud & Townsend)'],
   },
   {
     id: 'gaslighter',
@@ -58,7 +58,7 @@ export const DIFFICULT_PERSON_TYPES: DifficultPersonType[] = [
       friend: ['Limit one-on-one. Stay in group settings. Trust your perception.'],
     },
     whenToWalkAway: 'When you no longer trust your own judgment or when your mental health is deteriorating. Gaslighting is abuse.',
-    resources: [''The Gaslight Effect" — Dr. Robin Stern', 'Therapy/support for recovery'],
+    resources: ['"The Gaslight Effect" - Dr. Robin Stern', 'Therapy/support for recovery'],
   },
   {
     id: 'passive-aggressive',
@@ -75,7 +75,7 @@ export const DIFFICULT_PERSON_TYPES: DifficultPersonType[] = [
       friend: ['Call it out calmly. "That felt like a dig. Can we talk about what\'s going on?"'],
     },
     whenToWalkAway: 'When they refuse to communicate directly and the pattern is damaging your wellbeing.',
-    resources: [''Living with the Passive-Aggressive Man" — Scott Wetzler', 'Boundaries'],
+    resources: ['"Living with the Passive-Aggressive Man" - Scott Wetzler', 'Boundaries'],
   },
   {
     id: 'toxic-coworker',
@@ -84,13 +84,13 @@ export const DIFFICULT_PERSON_TYPES: DifficultPersonType[] = [
     tagline: 'Credit stealers, underminers.',
     redFlags: ['Takes credit for your work', 'Undermines you in meetings or to the boss', 'Gossips or spreads rumors', 'Competes instead of collaborates', 'Makes you look bad to get ahead'],
     commonPhrases: ['I thought we agreed I\'d lead that.', 'I was just sharing feedback.', 'I didn\'t mean for it to come out that way.', 'Everyone has been saying...'],
-    howTheyMakeYouFeel: ['Undermined', 'Unsafe to share ideas', "Pitted against others', "Exhausted'],
+    howTheyMakeYouFeel: ['Undermined', 'Unsafe to share ideas', 'Pitted against others', 'Exhausted'],
     psychology: 'Workplace toxicity is often driven by insecurity, competition for resources, or a culture that rewards politics over collaboration.',
     tipsByContext: {
       work: ['Document everything. BCC/paper trail. Build alliances with others. Don\'t badmouth — stay professional. Escalate to HR if needed.'],
     },
     whenToWalkAway: 'When your reputation or mental health is at risk, or when the organization protects the toxic person. Consider a new role or exit.',
-    resources: ['HR policies', 'Documentation', ''Crucial Conversations"'],
+    resources: ['HR policies', 'Documentation', '"Crucial Conversations"'],
   },
   {
     id: 'emotional-vampire',
@@ -107,7 +107,7 @@ export const DIFFICULT_PERSON_TYPES: DifficultPersonType[] = [
       work: ['Limit availability. "I can talk at 3 for 10 minutes." Don\'t become their default.'],
     },
     whenToWalkAway: 'When you\'re chronically depleted and they won\'t respect limits. When the relationship is one-sided and you\'re not getting support.',
-    resources: [''Emotional Vampires" — Albert Bernstein', 'Boundaries'],
+    resources: ['"Emotional Vampires" - Albert Bernstein', 'Boundaries'],
   },
   {
     id: 'boundary-violator',
@@ -124,7 +124,7 @@ export const DIFFICULT_PERSON_TYPES: DifficultPersonType[] = [
       work: ['Put it in writing. "As I said, I can\'t take that on." Escalate if they keep pushing.'],
     },
     whenToWalkAway: 'When they refuse to respect your no after repeated attempts. When your safety or wellbeing is compromised.',
-    resources: [''Set Boundaries, Find Peace" — Nedra Tawwab', 'Boundaries — Cloud & Townsend'],
+    resources: ['"Set Boundaries, Find Peace" - Nedra Tawwab', 'Boundaries - Cloud & Townsend'],
   },
   {
     id: 'controller',
@@ -141,7 +141,7 @@ export const DIFFICULT_PERSON_TYPES: DifficultPersonType[] = [
       work: ['Clarify roles. "That decision is mine to make." Document if they override you inappropriately.'],
     },
     whenToWalkAway: 'When they won\'t respect your autonomy and you feel you\'re losing yourself. When it crosses into abuse (isolation, coercion).',
-    resources: [''Controlling People" — Patricia Evans', 'Boundaries', 'Safety planning if abuse is present'],
+    resources: ['"Controlling People" - Patricia Evans', 'Boundaries', 'Safety planning if abuse is present'],
   },
 ];
 
@@ -167,7 +167,7 @@ export const DIFFICULT_PERSON_STRATEGIES: DifficultPersonStrategy[] = [
     label: 'Don\'t JADE',
     emoji: '🚫',
     description: 'Don\'t Justify, Argue, Defend, or Explain. Your no is enough.',
-    steps: ['Say your no or boundary once.', 'When they ask why, don\'t give a reason they can argue with.', ''I\'m not comfortable with that" is enough.', 'If you give a reason, they\'ll try to dismantle it.'],
+    steps: ['Say your no or boundary once.', 'When they ask why, don\'t give a reason they can argue with.', '"I\'m not comfortable with that" is enough.', 'If you give a reason, they\'ll try to dismantle it.'],
     whenToUse: 'With manipulators and anyone who uses your explanations as leverage.',
   },
   {

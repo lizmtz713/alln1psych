@@ -334,7 +334,7 @@ export async function getCachedDriftInsights(): Promise<DriftPattern[]> {
  * Format a pattern for display in AI context
  */
 export function formatPatternForAI(patterns: DriftPattern[]): string {
-  if (patterns.length === 0) return "';
+  if (patterns.length === 0) return '';
   
   let context = '\n\nSYSTEMIC DRIFT PATTERNS (patterns detected in this user\'s gauge history):\n';
   

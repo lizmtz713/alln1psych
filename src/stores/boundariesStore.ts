@@ -58,14 +58,14 @@ export const useBoundariesStore = create<BoundariesStoreState>()(
         const strong = assessmentScores.filter((c) => c.average >= 4).map((c) => c.label);
         let ctx = `User did a boundaries self-assessment. `;
         if (strong.length) ctx += `They feel stronger in: ${strong.join(', ')}. `;
-        if (weak.length) ctx += `They want to grow in: ${weak.join(', ")}. `;
+        if (weak.length) ctx += `They want to grow in: ${weak.join(', ')}. `;
         if (log.length > 0) ctx += `They've been practicing boundary-setting (${log.length} log entries). `;
         ctx += `When discussing limits, guilt, or people-pleasing, tailor support to boundaries (Tawwab, Cloud & Townsend).`;
         return ctx;
       },
     }),
     {
-      name: "boundaries-storage',
+      name: 'boundaries-storage',
       storage: createJSONStorage(() => AsyncStorage),
     }
   )

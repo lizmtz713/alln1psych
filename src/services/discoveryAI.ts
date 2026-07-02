@@ -28,10 +28,10 @@ function fallbackDirectionSynthesis(answers: Record<string, string>): DirectionS
   const combined = texts.slice(0, 3).join(' ').slice(0, 300);
   return {
     themes: ['Purpose', 'Meaning', 'Impact'],
-    coreDesire: 'Living in alignment with what matters to you",
+    coreDesire: 'Living in alignment with what matters to you',
     directionStatement: combined
       ? `Your answers point toward: ${combined}... Reflect and refine this in your own words.`
-      : \"Take a moment to write what direction you want your life to move in. There's no wrong answer.\",
+      : "Take a moment to write what direction you want your life to move in. There's no wrong answer.",
   };
 }
 
@@ -91,7 +91,7 @@ Respond in JSON only, no markdown:
 }`;
 
   try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions', {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({

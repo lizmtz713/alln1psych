@@ -63,7 +63,7 @@ export interface GoalReflection {
 
 /** Barriers / \"what's in the way\" options for AI Goal Builder. */
 export const BARRIER_OPTIONS = [
-  "Time',
+  'Time',
   'Energy',
   'Motivation',
   'Unclear plan',

@@ -208,8 +208,7 @@ export const RELATIONSHIP_TITLES = [
   'Other',
 ];
 
-export const RELATIONSHIP_TYPES = ['casual', 'serious', 'engaged', 'married'] as const;
-export type RelationshipTypeOption = (typeof RELATIONSHIP_TYPES)[number];
+export const RELATIONSHIP_TYPES = ['casual', 'serious', 'engaged', 'married'];
 
 export const RELATIONSHIP_STATUS_LABELS: Record<RelationshipStatus, string> = {
   single: 'Single',
@@ -218,11 +217,11 @@ export const RELATIONSHIP_STATUS_LABELS: Record<RelationshipStatus, string> = {
   engaged: 'Engaged',
   married: 'Married',
   divorced: 'Divorced',
-  its_complicated: \"It's complicated\",
+  its_complicated: "It's complicated",
 };
 
 export const SKILL_SUGGESTIONS = [
-  "Active listening',
+  'Active listening',
   'Communication',
   'Emotional support',
   'Loyalty',

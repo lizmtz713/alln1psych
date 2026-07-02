@@ -35,7 +35,7 @@ export const BODY_ZONES: BodyZoneDef[] = [
     suggestion: `Place a hand on your chest and breathe slowly. Name one thing you're carrying.`,
   },
   {
-    id: "stomach',
+    id: 'stomach',
     label: 'Stomach',
     meaning: `Butterflies or knots usually mean nervousness, fear, or gut instinct.`,
     suggestion: `Breathe into your belly — 4 counts in, 4 out. Notice what your gut might be telling you.`,
@@ -47,7 +47,7 @@ export const BODY_ZONES: BodyZoneDef[] = [
     suggestion: `Roll your shoulders back 5 times and take a deep breath. Imagine setting down one load.`,
   },
   {
-    id: "arms',
+    id: 'arms',
     label: 'Arms',
     meaning: `Heaviness can mean exhaustion or wanting to reach out to someone.`,
     suggestion: `Stretch your arms up, then out. If you need connection, who could you text or call?`,

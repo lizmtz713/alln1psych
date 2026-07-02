@@ -38,12 +38,12 @@ export function getRelationshipStatusLabel(light: Light, needsAttention: boolean
 export function getRelationalPhrase(light: Light, needsAttention: boolean): string {
   const brightness = getLightBrightness(light.tier, light.daysSinceContact);
   if (needsAttention) {
-    if (light.daysSinceContact >= 30) return \"Haven't talked in a while\";
-    if (light.daysSinceContact >= 14) return "Could use a moment';
+    if (light.daysSinceContact >= 30) return "Haven't talked in a while";
+    if (light.daysSinceContact >= 14) return 'Could use a moment';
     return 'Needs a moment';
   }
-  if (brightness === 'dark' || brightness === 'dim') return \"Haven't talked in a while\";
-  if (brightness === "dimming') return 'Cooling off';
+  if (brightness === 'dark' || brightness === 'dim') return "Haven't talked in a while";
+  if (brightness === 'dimming') return 'Cooling off';
   if (brightness === 'steady') return 'Warm';
   return 'Doing well';
 }

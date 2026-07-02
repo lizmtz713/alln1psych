@@ -39,7 +39,7 @@ export function MessageActions({
 
   const handleBlock = () => {
     Alert.alert(
-      'Block sender?",
+      'Block sender?',
       `You won't receive future messages from ${senderLabel}. This can't be undone.`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -58,7 +58,7 @@ export function MessageActions({
   };
 
   const handleReport = () => {
-    if (Platform.OS === "ios') {
+    if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
           options: ['Cancel', ...REPORT_REASONS.map((r) => r.label)],

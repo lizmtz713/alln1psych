@@ -59,21 +59,21 @@ export async function isWrappedReady(): Promise<boolean> {
 function scoreBar(value: number, max: number): string {
   const pct = max <= 0 ? 0 : Math.min(1, value / max);
   const filled = Math.round(pct * 10);
-  return '█'.repeat(filled) + '░".repeat(10 - filled);
+  return '█'.repeat(filled) + '░'.repeat(10 - filled);
 }
 
 /** Commitment-level message from total check-ins */
 function commitmentMessage(checkIns: number): string {
-  if (checkIns >= 300) return \"That's devotion.\";
-  if (checkIns >= 100) return \"You're building something real.";
+  if (checkIns >= 300) return "That's devotion.";
+  if (checkIns >= 100) return "You're building something real.";
   if (checkIns >= 50) return "You're building a habit.";
-  return 'Every moment counts.";
+  return 'Every moment counts.';
 }
 
 /** Subtitle for check-ins card based on count */
 function checkInsSubtitle(checkIns: number): string {
-  if (checkIns >= 365) return \"That's a full year of showing up.\";
-  if (checkIns >= 100) return "times you showed up';
+  if (checkIns >= 365) return "That's a full year of showing up.";
+  if (checkIns >= 100) return 'times you showed up';
   if (checkIns >= 1) return 'times you showed up';
   return 'Show up when you can.';
 }
@@ -138,7 +138,7 @@ function buildStoryCards(
   hardestDay: { date: string; label: string } | null
 ): WrappedStoryCard[] {
   const defaultInsights = [
-    { title: \"Growth isn't linear\", subtitle: "You kept going anyway', emoji: '🌱' as const },
+    { title: "Growth isn't linear", subtitle: 'You kept going anyway', emoji: '🌱' as const },
     { title: 'Small steps', subtitle: 'Still move you forward', emoji: '👣' as const },
     { title: 'You Are Not Alone.', subtitle: 'We see you', emoji: '🤝' as const },
   ];
@@ -200,10 +200,10 @@ function buildStoryCards(
     },
     {
       id: 'total',
-      title: 'Total moments",
+      title: 'Total moments',
       stat: total,
-      subtitle: \"that's your year\",
-      emoji: "❤️',
+      subtitle: "that's your year",
+      emoji: '❤️',
     },
     ...defaultInsights.map((d, i) => ({
       id: `insight${i + 1}`,

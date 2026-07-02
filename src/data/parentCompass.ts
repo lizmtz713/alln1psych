@@ -265,7 +265,7 @@ export const PARENT_COMPASS_SCENARIOS: ParentCompassEntry[] = [
     ],
     whatHelps: [
       'Listen to both without taking sides immediately.',
-      ''What do you need?" for each child.',
+      '"What do you need?" for each child.',
       'Set boundaries: "We don’t hit. Use words or ask for help."',
       'Schedule individual time with each child.',
     ],
@@ -297,7 +297,7 @@ export const PARENT_COMPASS_SCENARIOS: ParentCompassEntry[] = [
     scienceSays:
       'Adolescents are wired to seek independence and peer connection. Rigid control often leads to rebellion or secrecy. Firm boundaries on safety (e.g. substances, driving) with flexibility on preferences (e.g. clothes, room) can reduce conflict.',
     whatItLooksLike: [
-      ''You can’t make me." / "Everyone else gets to."',
+      '"You can’t make me." / "Everyone else gets to."',
       'Secrecy or lying about where they are.',
     ],
     whatHelps: [

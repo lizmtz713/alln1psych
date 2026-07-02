@@ -1,6 +1,6 @@
 /**
- * Unified Insight Engine — Home card showing 1–2 (daily) or 3–5 (weekly) generated insights.
- * Uses useGeneratedInsights; context 'home' = 2 max, 'weekly' = 5 max.
+ * Unified Insight Engine — Home card showing 1–3 generated insights
+ * (Pattern, Cause, Timing, Growth, Meaning). Uses useGeneratedInsights for home context.
  */
 
 import React from 'react';
@@ -8,31 +8,18 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useGeneratedInsights } from '../../hooks/useGeneratedInsights';
 import { GeneratedInsightCard } from './GeneratedInsightCard';
 import { COLORS, BORDER_RADIUS, SPACING } from '../../lib/constants';
-import type { InsightContext } from '../../types/insights-engine';
 
-export interface WeeklyInsightCardProps {
-  /** 'home' = 1–2 daily insights; 'weekly' = 3–5 deeper weekly insights */
-  context?: InsightContext;
-}
-
-const TITLES: Record<string, { title: string; subtitle: string }> = {
-  home: { title: \"What we're seeing\", subtitle: "From your gauges & check-ins' },
-  weekly: { title: "This week's patterns", subtitle: 'Patterns, causes & growth from your data' },
-};
-
-export function WeeklyInsightCard({ context = 'home' }: WeeklyInsightCardProps) {
+export function WeeklyInsightCard() {
   const { insights, isLoading, error } = useGeneratedInsights({
-    context,
+    context: 'home',
     withHistory: true,
   });
-
-  const { title, subtitle } = TITLES[context] ?? TITLES.home;
 
   if (isLoading && insights.length === 0) {
     return (
       <View style={styles.wrapper}>
         <View style={styles.card}>
-          <ActivityIndicator size=\"small\" color={COLORS.accent} />
+          <ActivityIndicator size="small" color={COLORS.accent} />
           <Text style={styles.loadingText}>Building your insights…</Text>
         </View>
       </View>
@@ -50,11 +37,11 @@ export function WeeklyInsightCard({ context = 'home' }: WeeklyInsightCardProps) 
   return (
     <View style={styles.wrapper}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{title}</Text>
-        <Text style={styles.sectionSubtitle}>{subtitle}</Text>
+        <Text style={styles.sectionTitle}>What we're seeing</Text>
+        <Text style={styles.sectionSubtitle}>From your gauges & check-ins</Text>
       </View>
       {insights.map((insight) => (
-        <GeneratedInsightCard key={insight.id} insight={insight} variant=\"full\" />
+        <GeneratedInsightCard key={insight.id} insight={insight} variant="full" />
       ))}
     </View>
   );
@@ -70,7 +57,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     borderWidth: 1,
     borderColor: COLORS.border,
-    flexDirection: "row',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
   },

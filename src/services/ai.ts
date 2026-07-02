@@ -323,7 +323,7 @@ export interface UserContext {
 function buildSystemPrompt(ctx: UserContext): string {
   const sensitiveTopics =
     ctx.sensitiveTopics?.length && ctx.sensitiveTopics.length > 0
-      ? ctx.sensitiveTopics.join(", ')
+      ? ctx.sensitiveTopics.join(', ')
       : 'None shared';
   const pronouns = ctx.pronouns ?? 'not specified';
   const culturalBg = ctx.culturalBackground?.length
@@ -511,15 +511,15 @@ ${spanishAIPrompts.crisisDetection}
   }
 
   const copilotGaugeBlock = getCoPilotGaugeContext();
-  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + lifeSkillsPrompt + '\n\n" + copilotGaugeBlock + LIFE_PROBLEMS_CONTEXT + languagePrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
+  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + lifeSkillsPrompt + '\n\n' + copilotGaugeBlock + LIFE_PROBLEMS_CONTEXT + languagePrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
   return fullPrompt;
 }
 
 const NO_KEY_MESSAGE =
-  \"I'm having trouble connecting right now. Check that your API key is configured.\";
+  "I'm having trouble connecting right now. Check that your API key is configured.";
 
 const SUPABASE_URL =
-  process.env.EXPO_PUBLIC_SUPABASE_URL || (Constants.expoConfig?.extra as Record<string, string> | undefined)?.supabaseUrl || "';
+  process.env.EXPO_PUBLIC_SUPABASE_URL || (Constants.expoConfig?.extra as Record<string, string> | undefined)?.supabaseUrl || '';
 const SUPABASE_ANON_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || (Constants.expoConfig?.extra as Record<string, string> | undefined)?.supabaseAnonKey || '';
 
@@ -721,7 +721,7 @@ export async function analyzeToneForMessage(
       alternativePhrasing: String(parsed.alternativePhrasing ?? '').trim(),
     };
   } catch (e) {
-    if (__DEV__) console.warn('[AI] analyzeToneForMessage failed", e);
+    if (__DEV__) console.warn('[AI] analyzeToneForMessage failed', e);
     return null;
   }
 }
@@ -746,7 +746,7 @@ export async function getRepairBuilderAdvice(
   const text = `What happened: ${whatHappened}. Who with: ${whoWith}. Intensity: ${intensity}.`;
   try {
     const content = await sendMessageDirectly(
-      [{ role: "user', content: text }],
+      [{ role: 'user', content: text }],
       REPAIR_BUILDER_SYSTEM,
       350,
       0.3
@@ -763,7 +763,7 @@ export async function getRepairBuilderAdvice(
       suggestedScript: String(parsed.suggestedScript ?? '').trim(),
     };
   } catch (e) {
-    if (__DEV__) console.warn('[AI] getRepairBuilderAdvice failed", e);
+    if (__DEV__) console.warn('[AI] getRepairBuilderAdvice failed', e);
     return null;
   }
 }
@@ -788,7 +788,7 @@ export async function getAfterFightAdvice(
   const text = `What hurt me most: ${whatHurtYou}. What I think hurt them: ${whatHurtThem}. What I want now: ${whatYouWant}.`;
   try {
     const content = await sendMessageDirectly(
-      [{ role: "user', content: text.slice(0, 800) }],
+      [{ role: 'user', content: text.slice(0, 800) }],
       AFTER_FIGHT_SYSTEM,
       300,
       0.3

@@ -6,14 +6,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { COLORS, BORDER_RADIUS, SPACING } from '../../lib/constants";
+import { COLORS, BORDER_RADIUS, SPACING } from '../../lib/constants';
 
 export interface PostSendReinforcementProps {
   visible: boolean;
   onDismiss: () => void;
   /** When true, show that this connection is glowing in Constellation */
   showConstellationHint?: boolean;
-  /** Recipient name — when set with showConstellationHint, shows \"[Name] is glowing in your Constellation.\" */
+  /** Recipient name — when set with showConstellationHint, shows "[Name] is glowing in your Constellation." */
   recipientName?: string;
 }
 
@@ -26,11 +26,11 @@ export function PostSendReinforcement({ visible, onDismiss, showConstellationHin
   const constellationLine = showConstellationHint
     ? recipientName?.trim()
       ? `${recipientName} is glowing in your Constellation.`
-      : \"You'll see this connection in Constellation.\"
+      : "You'll see this connection in Constellation."
     : null;
 
   return (
-    <Modal visible={visible} transparent animationType=\"fade\">
+    <Modal visible={visible} transparent animationType="fade">
       <Pressable style={styles.overlay} onPress={handleDismiss}>
         <View style={styles.card}>
           <Text style={styles.emoji}>💜</Text>
@@ -54,7 +54,7 @@ export function PostSendReinforcement({ visible, onDismiss, showConstellationHin
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.lg,

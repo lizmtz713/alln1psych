@@ -60,8 +60,8 @@ export const ENERGY_PATTERN_OPTIONS = [
 
 export const INTROVERT_EXTROVERT_OPTIONS = [
   'Recharge alone',
-  "Recharge with others',
-  "Depends',
+  'Recharge with others',
+  'Depends',
   'Ambivert',
 ];
 
@@ -91,8 +91,8 @@ export const WHAT_BRINGS_MEANING_OPTIONS = [
   'Family',
   'Career',
   'Creativity',
-  "Service/Helping others',
-  "Learning',
+  'Service/Helping others',
+  'Learning',
   'Nature',
   'Faith/Spirituality',
   'Relationships',
@@ -122,11 +122,11 @@ export const RELATIONSHIP_STATUS_OPTIONS = [
   'Married/Partnered',
   'Divorced',
   'Widowed',
-  \"It's complicated\",
+  "It's complicated",
 ];
 
 export const PARENTING_STATUS_OPTIONS = [
-  "No kids',
+  'No kids',
   'Trying/Want kids',
   'Pregnant/Expecting',
   'Parent of young kids',

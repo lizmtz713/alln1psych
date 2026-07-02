@@ -32,13 +32,13 @@ export interface GaugeStatusInsight {
   gauges: GaugeReading[];
   systemMode: SystemMode;
   centerScore: number;
-  context: string; // \"I'm feeling X because...\"
+  context: string; // "I'm feeling X because..."
   personalNote?: string;
   timestamp: string;
 }
 
 export interface LessonInsight {
-  type: "lesson';
+  type: 'lesson';
   senderName: string;
   lessonId: string;
   lessonTitle: string;
@@ -82,18 +82,18 @@ export interface PersonologyInsight {
 
 /**
  * Operating Snapshot — A relational translation of how someone works
- * \"Here's my manual so you can understand me better\"
+ * "Here's my manual so you can understand me better"
  */
 export interface OperatingSnapshotInsight {
-  type: "operating-snapshot";
+  type: 'operating-snapshot';
   senderName: string;
   systemMode: SystemMode;
   currentState: {
-    summary: string; // \"I'm in stabilization mode right now\"
+    summary: string; // "I'm in stabilization mode right now"
     primaryNeeds: string[]; // What I need most right now
   };
   patterns: {
-    sensitivities: string[]; // \"When I'm low on sleep, I tend to withdraw"
+    sensitivities: string[]; // "When I'm low on sleep, I tend to withdraw"
     warningSignsFor: string[]; // "If I seem distant, check my State"
     whatHelps: string[]; // "I need quiet time to recharge"
   };
@@ -188,7 +188,7 @@ function getOverallStatusMessage(mode: SystemMode, centerScore: number): string 
   }
   if (centerScore < 50) return 'I\'m managing, but could use some support';
   if (centerScore < 70) return 'I\'m doing okay overall';
-  return 'I\'m feeling pretty good right now";
+  return 'I\'m feeling pretty good right now';
 }
 
 // ============================================
@@ -197,13 +197,13 @@ function getOverallStatusMessage(mode: SystemMode, centerScore: number): string 
 
 /**
  * Generate sensitivities based on gauge patterns
- * \"When I'm low on X, I tend to Y\"
+ * "When I'm low on X, I tend to Y"
  */
 function generateSensitivities(gauges: GaugeReading[], patterns: DriftPattern[]): string[] {
   const sensitivities: string[] = [];
   
   // Low body -> behavioral impacts
-  const bodyGauge = gauges.find(g => g.key === "body');
+  const bodyGauge = gauges.find(g => g.key === 'body');
   if (bodyGauge && bodyGauge.value < 50) {
     sensitivities.push('When I\'m low on sleep or physically depleted, I tend to be less patient');
   }
@@ -365,7 +365,7 @@ function generateSupportGuide(gauges: GaugeReading[], mode: SystemMode): {
   // Check-in guidance
   let checkIn = 'A simple "How are you really doing?" goes a long way';
   if (mode === 'stabilization') {
-    checkIn = 'Check in gently — "Is there anything you need right now?"";
+    checkIn = 'Check in gently — "Is there anything you need right now?"';
   }
   
   return {
@@ -403,7 +403,7 @@ function generatePrimaryNeeds(gauges: GaugeReading[], mode: SystemMode): string[
   
   for (const gauge of lowGauges.slice(0, 3)) {
     switch (gauge.key) {
-      case "body':
+      case 'body':
         needs.push('Physical recovery (sleep, rest, nourishment)');
         break;
       case 'state':
@@ -723,7 +723,7 @@ export function getInsightShareText(insight: ShareableInsight): string {
     case 'gauge-status': {
       const lines = [
         `${insight.senderName} shared how they're feeling:`,
-        "',
+        '',
         insight.context,
         '',
       ];

@@ -343,7 +343,7 @@ export function CockpitCluster({
     if (onGaugePress) {
       onGaugePress(gauge);
     } else {
-      router.push({ pathname: '/(modals)/gauge-detail", params: { gauge } });
+      router.push({ pathname: '/(modals)/gauge-detail', params: { gauge } });
     }
   };
 
@@ -383,10 +383,10 @@ export function CockpitCluster({
                 opacity: FIELD_GLOW_OPACITY,
               },
             ]}
-            pointerEvents=\"none\"
+            pointerEvents="none"
           />
           {/* Scientific connection lines: Alignment→YOU→Connection/Direction→Emotion→State→Body (animated, center-to-center) */}
-          <View style={styles.svgWrap} pointerEvents=\"none\">
+          <View style={styles.svgWrap} pointerEvents="none">
             <Svg width={CLUSTER_WIDTH} height={WHEEL_HEIGHT} style={styles.svg}>
               <Line x1={centers.alignment.x} y1={centers.alignment.y} x2={centers.you.x} y2={centers.you.y} stroke={LINE_COLOR} strokeWidth={LINE_STROKE} opacity={LINE_OPACITY_STRONG} />
               <Line x1={centers.you.x} y1={centers.you.y} x2={centers.connection.x} y2={centers.connection.y} stroke={LINE_COLOR} strokeWidth={LINE_STROKE} opacity={LINE_OPACITY_MEDIUM} />
@@ -399,7 +399,7 @@ export function CockpitCluster({
             <LineFlowParticles centers={centers} />
           </View>
 
-          {/* Center \"YOU\" glow — anchors cockpit */}
+          {/* Center "YOU" glow — anchors cockpit */}
       <Animated.View
           style={[
           styles.centerGlow,
@@ -409,7 +409,7 @@ export function CockpitCluster({
             width: CENTER_SIZE + 32,
             height: CENTER_SIZE + 32,
             borderRadius: (CENTER_SIZE + 32) / 2,
-            backgroundColor: overall >= 0 ? ringColor : "transparent',
+            backgroundColor: overall >= 0 ? ringColor : 'transparent',
             opacity: overall >= 75 ? 0.12 : overall >= 50 ? 0.08 : overall >= 0 ? 0.06 : 0,
             transform: [{ scale: centerPulse }],
           },

@@ -30,7 +30,7 @@ export interface LifeStage {
 
 export const LIFE_STAGES: LifeStage[] = [
   {
-    id: "childhood',
+    id: 'childhood',
     title: 'Childhood',
     ageRange: '0–12',
     color: '#6B9B7A',
@@ -95,7 +95,7 @@ export const LIFE_STAGES: LifeStage[] = [
     whatDevelops: ['Meaning', 'Legacy', 'Self-reflection', 'Integrating the past'],
     whatsNormal: ['Questioning life choices', 'Identity evolution', 'Caring for parents or kids leaving', 'Body and energy changes', '“What now?”'],
     commonChallenges: ['Regret or restlessness', 'Sandwich generation stress', 'Health concerns', 'Purpose shift'],
-    whatHelps: ['Reflection and meaning-making', "Mentoring others', "Accepting imperfection', 'Connection and contribution'],
+    whatHelps: ['Reflection and meaning-making', 'Mentoring others', 'Accepting imperfection', 'Connection and contribution'],
     gaugesEmphasized: ['alignment', 'direction', 'connection'],
     learnMoreTopics: ['Midlife development', 'Generativity', 'Meaning and mortality'],
   },
@@ -106,7 +106,7 @@ export const LIFE_STAGES: LifeStage[] = [
     color: '#8B9BA8',
     colorBg: 'rgba(139, 155, 168, 0.15)',
     order: 6,
-    whatDevelops: ['Wisdom', 'Generativity', "Mentoring others', "Integration'],
+    whatDevelops: ['Wisdom', 'Generativity', 'Mentoring others', 'Integration'],
     whatsNormal: ['Retirement or work transition', 'Changing roles', 'Health and energy shifts', 'More time for relationships and reflection'],
     commonChallenges: ['Loss and grief', 'Identity after career', 'Loneliness or isolation', 'Physical limits'],
     whatHelps: ['Staying connected', 'Contributing (mentoring, community)', 'Adapting goals', 'Storytelling and legacy'],

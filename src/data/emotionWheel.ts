@@ -40,13 +40,13 @@ export const EMOTION_WHEEL_PRIMARY: PrimaryEmotion[] = [
         tryThis: `Name what's in your control vs. what isn't. One small step you can take right now.`,
       },
       irritated: {
-        name: "Irritated",
+        name: 'Irritated',
         feelsLike: `A low-grade annoyance - little things rub you the wrong way.`,
         showsUpWhen: `You're tired, overstimulated, or your boundaries are being nudged.`,
         tryThis: `Take a short break. Sometimes 5 minutes of quiet or a walk helps.`,
       },
       furious: {
-        name: "Furious',
+        name: 'Furious',
         feelsLike: `Intense heat and energy - you might feel like you could explode.`,
         showsUpWhen: `Something unfair happened, or a core value was violated.`,
         tryThis: `Let the wave move through. Splash cold water on your face or squeeze ice. Then decide what you need.`,
@@ -58,8 +58,8 @@ export const EMOTION_WHEEL_PRIMARY: PrimaryEmotion[] = [
         tryThis: `Your feelings are valid. When you're ready, you can decide what you need from the relationship.`,
       },
       resentful: {
-        name: "Resentful",
-        feelsLike: `Holding onto old anger - \"they had it easy\" or \"I always give more.\"`,
+        name: 'Resentful',
+        feelsLike: `Holding onto old anger - "they had it easy" or "I always give more."`,
         showsUpWhen: `Unfair division of labor, past hurts that weren't acknowledged, or unmet needs.`,
         tryThis: `Name what you're still needing (apology, change, or to let go). One small conversation or boundary at a time.`,
       },
@@ -72,7 +72,7 @@ export const EMOTION_WHEEL_PRIMARY: PrimaryEmotion[] = [
     },
   },
   {
-    id: "sad',
+    id: 'sad',
     emoji: '😢',
     label: 'Sad',
     color: '#42A5F5',
@@ -116,7 +116,7 @@ export const EMOTION_WHEEL_PRIMARY: PrimaryEmotion[] = [
         tryThis: `Guilt can be useful - it points to repair. Apologize or make amends if you can. Then work on forgiving yourself.`,
       },
       empty: {
-        name: "Empty',
+        name: 'Empty',
         feelsLike: `Numb or hollow - nothing matters much.`,
         showsUpWhen: `Burnout, depression, or disconnection from what used to give meaning.`,
         tryThis: `Emptiness is a signal. Rest, one small thing that used to bring joy, or talking to someone can help.`,
@@ -144,19 +144,19 @@ export const EMOTION_WHEEL_PRIMARY: PrimaryEmotion[] = [
         tryThis: `Ground yourself: 5-4-3-2-1 - name 5 things you see, 4 you hear, 3 you touch, 2 you smell, 1 you taste.`,
       },
       insecure: {
-        name: "Insecure",
+        name: 'Insecure',
         feelsLike: `Not good enough - others will find out or reject you.`,
         showsUpWhen: `Comparison, criticism, or past experiences of being judged.`,
         tryThis: `Notice the thought. Would you say that to a friend? One thing you're actually good at or have survived.`,
       },
       overwhelmed: {
-        name: "Overwhelmed",
+        name: 'Overwhelmed',
         feelsLike: `Too much - you can't keep up or think straight.`,
         showsUpWhen: `Too many demands, no clear priority, or no break.`,
         tryThis: `Pick one small thing. Do only that. Delegate or drop one thing if you can.`,
       },
       panicked: {
-        name: "Panicked",
+        name: 'Panicked',
         feelsLike: `Heart racing, can't breathe - something is very wrong.`,
         showsUpWhen: `Panic attacks, trauma triggers, or feeling trapped.`,
         tryThis: `You're safe. Slow your breath: 4 in, 4 hold, 4 out. This will pass.`,
@@ -196,7 +196,7 @@ export const EMOTION_WHEEL_PRIMARY: PrimaryEmotion[] = [
         tryThis: `Name three small things you're grateful for today. Write or say them out loud.`,
       },
       proud: {
-        name: "Proud",
+        name: 'Proud',
         feelsLike: `You did something that matters - you're standing taller.`,
         showsUpWhen: `You tried, grew, or met a goal that was important to you.`,
         tryThis: `Let yourself feel it. Share it with someone who'll celebrate with you.`,
@@ -306,7 +306,7 @@ export const EMOTION_WHEEL_PRIMARY: PrimaryEmotion[] = [
         tryThis: `Your reaction is valid. Remove yourself if you need to. You don't have to engage.`,
       },
       judgmental: {
-        name: "Judgmental",
+        name: 'Judgmental',
         feelsLike: `They're wrong or less than - you're above it.`,
         showsUpWhen: `Someone did something you disagree with, or you're protecting yourself by criticizing.`,
         tryThis: `Notice the judgment. What are you really feeling underneath - hurt, fear, or something else?`,

@@ -76,7 +76,7 @@ export function getAgeTier(): AgeTierInfo {
   }
 
   // Default to adult if no age info
-  return { tier: 'adult', age: null, label: 'Adult', readingLevel: '11th-12th grade" };
+  return { tier: 'adult', age: null, label: 'Adult', readingLevel: '11th-12th grade' };
 }
 
 /**
@@ -91,7 +91,7 @@ LANGUAGE RULES (CRITICAL — FOLLOW EXACTLY):
 • Use 6th-8th grade reading level
 • Short sentences, simple words
 • Explain ANY psychology terms immediately in plain language
-• Use \"you\" language — direct and personal
+• Use "you" language — direct and personal
 • Be warm and encouraging, like a supportive older friend or mentor
 • NEVER be preachy, lecture-y, or talk down to them
 • Their feelings are REAL and VALID — don't minimize
@@ -112,24 +112,24 @@ METAPHORS THAT WORK:
 • Energy bars, battery life
 
 LANGUAGE EXAMPLES:
-Instead of \"Your amygdala triggers fight-or-flight\" →
-Say: \"Your brain's alarm system is going off — that's why your heart pounds and you want to run or fight\"
+Instead of "Your amygdala triggers fight-or-flight" →
+Say: "Your brain's alarm system is going off — that's why your heart pounds and you want to run or fight"
 
-Instead of \"Practice cognitive reframing\" →
-Say: \"Try looking at it from a different angle, like switching camera views\"
+Instead of "Practice cognitive reframing" →
+Say: "Try looking at it from a different angle, like switching camera views"
 
-Instead of \"You're experiencing emotional dysregulation\" →
-Say: \"Your emotions are hitting harder than usual right now — that's normal, your brain is literally still under construction"
+Instead of "You're experiencing emotional dysregulation" →
+Say: "Your emotions are hitting harder than usual right now — that's normal, your brain is literally still under construction"
 
 NEVER SAY:
-• "When you're older you'll understand\"
-• \"It's just high school drama"
-• "You're too young to worry about that\"
-• \"Back in my day...\"
+• "When you're older you'll understand"
+• "It's just high school drama"
+• "You're too young to worry about that"
+• "Back in my day..."
 • Anything that sounds like a lecture
 
 SENSITIVE TOPICS (age-appropriate but honest):
-• Mental health: Normalize, don't pathologize. \"Lots of people your age deal with this.\"
+• Mental health: Normalize, don't pathologize. "Lots of people your age deal with this."
 • Relationships: Dating, crushes, rejection — all valid experiences.
 • Identity: Questioning is normal. Don't push labels, let them explore.
 • Body: Puberty, changes, insecurities — validate without being awkward.
@@ -151,7 +151,7 @@ CONTEXTS TO USE (their world):
 • Dating, relationships, situationships, breakups, hookup culture
 • Roommates, first apartment, adulting struggles
 • Money stress, student loans, side hustles, gig economy
-• Career uncertainty, imposter syndrome, \"what am I doing with my life\"
+• Career uncertainty, imposter syndrome, "what am I doing with my life"
 • Friendships evolving as people change and move
 • Finding identity separate from family, becoming their own person
 
@@ -163,14 +163,14 @@ METAPHORS THAT WORK:
 • Beta testing your life
 
 LANGUAGE EXAMPLES:
-Instead of \"Establish a consistent sleep schedule\" →
-Say: \"Your sleep schedule is chaos? That's wrecking your mood more than you realize. Even 30 minutes earlier hits different.\"
+Instead of "Establish a consistent sleep schedule" →
+Say: "Your sleep schedule is chaos? That's wrecking your mood more than you realize. Even 30 minutes earlier hits different."
 
-Instead of \"Interpersonal conflict resolution\" →
-Say: \"Navigating drama with roommates or friends\"
+Instead of "Interpersonal conflict resolution" →
+Say: "Navigating drama with roommates or friends"
 
-Instead of \"You may be experiencing anxiety\" →
-Say: \"That constant low-key dread? Yeah, that's anxiety. It's incredibly common at your age and there's stuff that helps.\"
+Instead of "You may be experiencing anxiety" →
+Say: "That constant low-key dread? Yeah, that's anxiety. It's incredibly common at your age and there's stuff that helps."
 
 NEVER SOUND LIKE:
 • Their parents giving a lecture
@@ -214,14 +214,14 @@ METAPHORS THAT WORK:
 • Sustainable energy vs. burnout
 
 LANGUAGE EXAMPLES:
-Instead of \"Make sure to take care of yourself\" →
-Say: \"Running on empty makes you worse at everything — including the things you're sacrificing rest for. Self-care isn't selfish, it's strategic.\"
+Instead of "Make sure to take care of yourself" →
+Say: "Running on empty makes you worse at everything — including the things you're sacrificing rest for. Self-care isn't selfish, it's strategic."
 
-Instead of \"Your stress response is activated\" →
-Say: \"You're in chronic stress mode — cortisol up, recovery down. Your system is running hot and that's not sustainable."
+Instead of "Your stress response is activated" →
+Say: "You're in chronic stress mode — cortisol up, recovery down. Your system is running hot and that's not sustainable."
 
 Instead of "Consider your feelings" →
-Say: "What's the actual feeling under the frustration? Sometimes anger is just hurt with armor on.\"
+Say: "What's the actual feeling under the frustration? Sometimes anger is just hurt with armor on."
 
 AVOID:
 • Over-explaining basics they already know
@@ -267,14 +267,14 @@ METAPHORS THAT WORK:
 • The long game, sustainable pace
 
 LANGUAGE EXAMPLES:
-Instead of \"You might be experiencing some changes\" →
-Say: \"This stage brings genuine transitions — physical, relational, existential. Noticing these shifts is wisdom, not complaint.\"
+Instead of "You might be experiencing some changes" →
+Say: "This stage brings genuine transitions — physical, relational, existential. Noticing these shifts is wisdom, not complaint."
 
-Instead of \"Try to stay positive\" →
-Say: \"Acknowledging difficulty isn't pessimism — it's honesty. From honest ground, you can make real choices about what matters now."
+Instead of "Try to stay positive" →
+Say: "Acknowledging difficulty isn't pessimism — it's honesty. From honest ground, you can make real choices about what matters now."
 
 Instead of "Have you considered therapy?" →
-Say: "Sometimes talking to someone outside our regular circle helps us see patterns we're too close to see ourselves. What kind of support would actually be useful for you?\"
+Say: "Sometimes talking to someone outside our regular circle helps us see patterns we're too close to see ourselves. What kind of support would actually be useful for you?"
 
 AVOID:
 • Being condescending about tech or modern life — they're not dinosaurs
@@ -319,11 +319,11 @@ METAPHORS THAT WORK:
 • Light to pass on to those who come after
 
 LANGUAGE EXAMPLES:
-Instead of \"At your age, it's normal to...\" →
-Say: \"Many people in this chapter experience... How does this land for you?\"
+Instead of "At your age, it's normal to..." →
+Say: "Many people in this chapter experience... How does this land for you?"
 
-Instead of \"Try this simple exercise\" →
-Say: \"Here's something you might explore, drawing on all you already know about yourself..."
+Instead of "Try this simple exercise" →
+Say: "Here's something you might explore, drawing on all you already know about yourself..."
 
 Instead of "You need to stay active" →
 Say: "What activities have always brought you energy? Sometimes returning to those — or finding new versions — makes a real difference."
@@ -340,7 +340,7 @@ SENSITIVE TOPICS (dignified honesty):
 • Death: They're thinking about it. Don't avoid the topic if they bring it up.
 • Health: Real concerns deserve real acknowledgment. Don't minimize.
 • Loneliness: Isolation is deadly. Connection matters more than ever.
-• Purpose: \"What's the point?" is a real question. Help them find meaning.
+• Purpose: "What's the point?" is a real question. Help them find meaning.
 • Grief: They've lost so many. Let them talk about the people they've loved.
 • Legacy: What they want to leave matters. Take their wishes seriously.
 `
@@ -422,25 +422,25 @@ export function getGaugeLanguage(gauge: string): { label: string; question: stri
   const gaugeLanguage: Record<AgeTier, Record<string, { label: string; question: string }>> = {
     teen: {
       body: { label: 'Body', question: "How does your body feel right now? Energy level, any aches, tired or wired?" },
-      state: { label: 'State', question: \"What's your vibe right now? Chill, stressed, anxious, somewhere in between?\" },
-      emotion: { label: "Emotion", question: \"What emotions are you feeling? There's no wrong answer here.\" },
-      connection: { label: "Connection', question: "How connected do you feel to people right now? Supported or more alone?" },
-      direction: { label: 'Direction', question: \"Do you feel like you know where you're going? Motivated or kinda stuck?\" },
-      alignment: { label: "Alignment", question: \"Are you being true to yourself lately? Or playing a role that doesn't fit?\" },
+      state: { label: 'State', question: "What's your vibe right now? Chill, stressed, anxious, somewhere in between?" },
+      emotion: { label: 'Emotion', question: "What emotions are you feeling? There's no wrong answer here." },
+      connection: { label: 'Connection', question: "How connected do you feel to people right now? Supported or more alone?" },
+      direction: { label: 'Direction', question: "Do you feel like you know where you're going? Motivated or kinda stuck?" },
+      alignment: { label: 'Alignment', question: "Are you being true to yourself lately? Or playing a role that doesn't fit?" },
     },
-    "young-adult': {
+    'young-adult': {
       body: { label: 'Body', question: "Physical state — energy, tension, how's your body running today?" },
       state: { label: 'State', question: "Mental state — calm, wired, scattered, locked in? No judgment." },
-      emotion: { label: 'Emotion', question: \"Emotional temp — what's actually going on under the surface?\" },
-      connection: { label: "Connection', question: "Social battery — feeling connected, isolated, needing space or people?" },
+      emotion: { label: 'Emotion', question: "Emotional temp — what's actually going on under the surface?" },
+      connection: { label: 'Connection', question: "Social battery — feeling connected, isolated, needing space or people?" },
       direction: { label: 'Direction', question: "Purpose check — sense of direction, motivation, clarity on the why?" },
       alignment: { label: 'Alignment', question: "Authenticity check — living aligned with your values or just performing?" },
     },
     adult: {
       body: { label: 'Body', question: "Body status — energy levels, physical tension, overall physical state" },
       state: { label: 'State', question: "Nervous system state — regulated, activated, or somewhere between" },
-      emotion: { label: 'Emotion', question: \"Emotional state — what's the primary feeling present right now?\" },
-      connection: { label: "Connection', question: "Relational state — your sense of connection, support, and belonging" },
+      emotion: { label: 'Emotion', question: "Emotional state — what's the primary feeling present right now?" },
+      connection: { label: 'Connection', question: "Relational state — your sense of connection, support, and belonging" },
       direction: { label: 'Direction', question: "Direction clarity — sense of purpose, momentum, and trajectory" },
       alignment: { label: 'Alignment', question: "Value alignment — congruence between your actions and what matters to you" },
     },
@@ -449,8 +449,8 @@ export function getGaugeLanguage(gauge: string): { label: string; question: stri
       state: { label: 'State', question: "Inner climate — settled, stirred, your baseline state in this moment" },
       emotion: { label: 'Emotion', question: "Emotional landscape — what feelings are present and moving through you" },
       connection: { label: 'Connection', question: "Connection quality — your sense of meaningful bonds and belonging" },
-      direction: { label: 'Direction', question: \"Purposeful direction — clarity about what matters and where you're headed\" },
-      alignment: { label: "Alignment', question: "Integrity sense — how aligned your life feels with your deepest values" },
+      direction: { label: 'Direction', question: "Purposeful direction — clarity about what matters and where you're headed" },
+      alignment: { label: 'Alignment', question: "Integrity sense — how aligned your life feels with your deepest values" },
     },
     senior: {
       body: { label: 'Body', question: "How is your body feeling today? Energy, comfort, any concerns?" },

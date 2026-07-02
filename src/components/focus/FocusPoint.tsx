@@ -49,7 +49,7 @@ export function FocusPoint({ onComplete }: FocusPointProps) {
   return (
     <View style={styles.container}>
       <View style={styles.dot} />
-      <Text style={styles.timer}>{mins}:{secs.toString().padStart(2, '0")}</Text>
+      <Text style={styles.timer}>{mins}:{secs.toString().padStart(2, '0')}</Text>
       <Text style={styles.sub}>Keep a soft gaze on the point.</Text>
       <Pressable style={styles.doneBtn} onPress={handleComplete}>
         <Text style={styles.doneBtnText}>I'm done</Text>
@@ -59,7 +59,7 @@ export function FocusPoint({ onComplete }: FocusPointProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: "center', justifyContent: 'center', padding: SPACING.xl },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACING.xl },
   emoji: { fontSize: 48, marginBottom: SPACING.md },
   dot: { width: 12, height: 12, borderRadius: 6, backgroundColor: COLORS.accent, marginBottom: SPACING.lg },
   title: { fontSize: 22, fontWeight: '700', color: COLORS.text, marginBottom: SPACING.sm },

@@ -147,7 +147,7 @@ export async function scheduleDriftReminder(
       body: `You usually talk every ${normalRhythmDays} days. It's been ${daysSinceContact} days. Want to reconnect?`,
       data: { type: DRIFT_NOTIFICATION_TYPE, personName, normalRhythmDays, daysSinceContact },
     },
-    trigger: { date: d, type: "date' } as Notifications.NotificationTriggerInput,
+    trigger: { date: d, type: 'date' } as Notifications.NotificationTriggerInput,
   });
   return id;
 }

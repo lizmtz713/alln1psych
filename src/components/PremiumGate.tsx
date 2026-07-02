@@ -17,8 +17,8 @@ interface PremiumGateProps {
 
 const FEATURE_COPY = {
   ai: {
-    title: \"You've used your 3 free chats today\",
-    subtitle: "Gauge is here whenever you need — upgrade for unlimited conversations.',
+    title: "You've used your 3 free chats today",
+    subtitle: 'Gauge is here whenever you need — upgrade for unlimited conversations.',
     icon: 'chatbubbles',
   },
   voice: {

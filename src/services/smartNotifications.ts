@@ -220,7 +220,7 @@ export async function scheduleSmartNotification(
       },
       badge: 1,
     },
-    trigger: { date: triggerDate, type: "date' } as Notifications.NotificationTriggerInput,
+    trigger: { date: triggerDate, type: 'date' } as Notifications.NotificationTriggerInput,
   });
   await incrementSentToday();
   return id;
@@ -280,8 +280,8 @@ export async function cancelAllSmartNotifications(): Promise<void> {
 export function buildCheckinReminderPayload(daysSince: number): NotificationPayload {
   return {
     type: 'checkin_reminder',
-    screen: '/(modals)/cockpit-checkin",
-    title: \"It's been a while 💛\",
+    screen: '/(modals)/cockpit-checkin',
+    title: "It's been a while 💛",
     body: daysSince >= 2 ? `It's been ${daysSince} days since you checked in. How are you doing?` : 'Quick check-in?',
     data: { daysSince },
   };
@@ -310,26 +310,26 @@ export function buildCircleAlertPayload(memberName: string): NotificationPayload
 export function buildStreakCelebrationPayload(streakDays: number): NotificationPayload {
   return {
     type: 'streak_celebration',
-    screen: '/(tabs)/index",
+    screen: '/(tabs)/index',
     title: `${streakDays}-day streak! 🔥`,
-    body: \"You're showing up for yourself. Keep it going!\",
+    body: "You're showing up for yourself. Keep it going!",
     data: { streakDays },
   };
 }
 
 export function buildTrendPositivePayload(): NotificationPayload {
   return {
-    type: "trend_positive',
-    screen: '/(tabs)/index",
-    title: \"You're trending up this week! 📈\",
-    body: \"Your gauges are looking better. Psych has noticed.\",
+    type: 'trend_positive',
+    screen: '/(tabs)/index',
+    title: "You're trending up this week! 📈",
+    body: "Your gauges are looking better. Psych has noticed.",
     data: {},
   };
 }
 
 export function buildPatternInsightPayload(insight: string): NotificationPayload {
   return {
-    type: "pattern_insight',
+    type: 'pattern_insight',
     screen: '/(tabs)/index',
     title: 'A little insight 💡',
     body: insight,
@@ -345,19 +345,19 @@ export function buildDriftWarningPayload(
 ): NotificationPayload {
   return {
     type: 'drift_warning',
-    screen: personId ? `/(tabs)/people?hero=${encodeURIComponent(personId)}` : '/(tabs)/people",
+    screen: personId ? `/(tabs)/people?hero=${encodeURIComponent(personId)}` : '/(tabs)/people',
     title: `${personName} is drifting`,
     body: `You usually talk every ${normalRhythmDays} days. It's been ${daysSinceContact} days. Want to reconnect?`,
-    data: { personName, personId: personId ?? "', normalRhythmDays, daysSinceContact },
+    data: { personName, personId: personId ?? '', normalRhythmDays, daysSinceContact },
   };
 }
 
 export function buildGentleReconnectPayload(daysAway: number): NotificationPayload {
   return {
     type: 'gentle_reconnect',
-    screen: '/(tabs)/index",
-    title: \"Hey, we miss you 💜\",
-    body: daysAway >= 5 ? `It's been ${daysAway} days. No pressure — we're here when you're ready.` : \"We're here when you need us.\",
+    screen: '/(tabs)/index',
+    title: "Hey, we miss you 💜",
+    body: daysAway >= 5 ? `It's been ${daysAway} days. No pressure — we're here when you're ready.` : "We're here when you need us.",
     data: { daysAway },
   };
 }
@@ -384,7 +384,7 @@ async function getNextTriggerTime(settings: SmartNotificationSettings): Promise<
 export async function evaluateAndScheduleSmartNotifications(): Promise<void> {
   let settings: SmartNotificationSettings;
   try {
-    const { useNotificationSettingsStore } = require("../stores/notificationSettingsStore');
+    const { useNotificationSettingsStore } = require('../stores/notificationSettingsStore');
     settings = useNotificationSettingsStore.getState();
   } catch {
     return;

@@ -21,7 +21,7 @@
 // TYPES
 // ═══════════════════════════════════════════════════════════
 
-export type GaugeType = "body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment';
+export type GaugeType = 'body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment';
 
 export interface AcademicSource {
   id: string;

@@ -13,7 +13,7 @@ import { useLightsStore, computeLights } from '../../stores/lightsStore';
 import { getDailyReachOuts } from '../../services/friendshipMaintenance';
 import { useDailyAnchorsStore } from '../../stores/dailyAnchorsStore';
 import { COLORS, SPACING } from '../../lib/constants';
-import type { Light } from '../../types/lights";
+import type { Light } from '../../types/lights';
 
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
@@ -75,7 +75,7 @@ export function DailyConnectionPrompt({
         onPressWithRecipient(priority.id, priority.name);
       } else {
         router.push({
-          pathname: "/mind-mail/compose',
+          pathname: '/mind-mail/compose',
           params: { recipientId: priority.id, recipientName: priority.name, from: 'connections' },
         });
       }
