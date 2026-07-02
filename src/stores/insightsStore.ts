@@ -164,12 +164,12 @@ export const useInsightsStore = create<InsightsState>(() => ({
     const trend = useInsightsStore.getState().getWeeklyMoodTrend();
     const greenCount = trend.filter((t: { mood: string }) => t.mood === 'green').length;
     const lastMood = trend.length > 0 ? trend[0].mood : null;
-    if (greenCount >= 3 && lastMood === 'green")
-      return \"You've been feeling good this week. What"s contributing to that?";
+    if (greenCount >= 3 && lastMood === 'green')
+      return \"You've been feeling good this week. What's contributing to that?";
     if (engagementStreak >= 2)
       return `${engagementStreak} days in a row! Consistency builds self-awareness.`;
     if (trend.length === 0)
-      return "Haven"t heard from you in a bit. I'm here whenever you"re ready.";
+      return "Haven't heard from you in a bit. I'm here whenever you're ready.";
     const tips = [
       "Naming your feelings can make them easier to handle.",
       "Small steps still move you forward.",

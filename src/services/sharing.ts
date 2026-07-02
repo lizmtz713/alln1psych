@@ -214,7 +214,7 @@ export const HELPS_SUGGESTIONS = [
 export const DOESNT_HELP_SUGGESTIONS = [
   "Problem-solving before I\'ve vented',
   'Crowded social situations',
-  '"Have you tried..." suggestions',
+  ''Have you tried..." suggestions',
   'Toxic positivity',
   'Being told to calm down',
   "Comparisons to others',

@@ -8,7 +8,7 @@ import { buildKnowledgePrompt } from '../data/psychKnowledge';
 import { buildAgeAdaptivePrompt } from './ageAdaptive';
 
 export interface RolePlayMessage {
-  role: 'user' | 'assistant";
+  role: 'user' | 'assistant';
   content: string;
 }
 

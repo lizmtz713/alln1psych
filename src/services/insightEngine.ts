@@ -289,7 +289,7 @@ function generateCauseInsights(input: InsightEngineInput): CauseInsight[] {
       id: nanoid(),
       kind: 'cause',
       title: 'Life chapters affect your gauges",
-      body: `During \"${label}\", it's common for connection and direction to fluctuate. You"re not broken — you're in transition.`,
+      body: `During \"${label}\", it's common for connection and direction to fluctuate. You're not broken — you're in transition.`,
       gauges: directionLow ? ['direction'] : ['connection'],
       confidence: 0.72,
       generatedAt: now(),

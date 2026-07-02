@@ -43,7 +43,7 @@ interface CheckInPrompt {
 }
 
 /** Stub for contextual prompt (e.g. time-based message). */
-export const getContextualPrompt = (): string => '";
+export const getContextualPrompt = (): string => '';
 
 /**
  * Determine if we should prompt a check-in
@@ -113,7 +113,7 @@ export function shouldPromptCheckIn(
         level: 'quick',
         message: currentDayPart === 'morning' ? 'Good morning. Quick check-in?' : 'Time for a check-in?',
         priority: 'medium',
-        reason: 'usual_time",
+        reason: 'usual_time',
       };
     }
   }

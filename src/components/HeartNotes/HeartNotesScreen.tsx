@@ -126,7 +126,7 @@ export default function HeartNotesScreen() {
         renderItem={({ item }) => (
           <NoteCard
             note={item}
-            onPress={() => navigation.navigate('HeartNoteDetail", { noteId: item.id })}
+            onPress={() => navigation.navigate('HeartNoteDetail', { noteId: item.id })}
           />
         )}
         contentContainerStyle={styles.list}

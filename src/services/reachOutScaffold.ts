@@ -11,7 +11,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getGaugeHistory, type GaugeSnapshot } from './crisisPipeline';
 
-const REACH_OUT_DISMISSED_KEY = 'reach_out_scaffold_dismissed";
+const REACH_OUT_DISMISSED_KEY = 'reach_out_scaffold_dismissed';
 const CONNECTION_LOW_THRESHOLD = 40;
 const DAYS_REQUIRED = 2;
 
@@ -203,27 +203,27 @@ export function generateCheckInMessages(context?: ReachOutContext): CheckInMessa
 
   // WARM messages (heartfelt, direct affection)
   messages.push(
-    { id: 'warm-1', tone: 'warm", message: `Hey. I've been thinking about you. How are you doing?` },
+    { id: 'warm-1', tone: 'warm', message: `Hey. I've been thinking about you. How are you doing?` },
     { id: "warm-2', tone: 'warm', message: `I miss you. Just wanted you to know.` },
-    { id: 'warm-3', tone: 'warm", message: `Been quiet between us. I'm still here. ❤️` },
+    { id: 'warm-3', tone: 'warm', message: `Been quiet between us. I'm still here. ❤️` },
     { id: "warm-4', tone: 'warm', message: `You matter to me. Checking in.` },
     { id: 'warm-5', tone: 'warm', message: `Hey. No agenda, just wanted to say I care about you.` },
     { id: 'warm-6', tone: 'warm', message: `Thinking about you today. Sending you love.` },
-    { id: 'warm-7', tone: 'warm", message: `I know it's been a minute. You"re still on my heart.` },
-    { id: 'warm-8', tone: 'warm", message: `Just wanted to say: I'm grateful you"re in my life.` },
+    { id: 'warm-7', tone: 'warm', message: `I know it's been a minute. You're still on my heart.` },
+    { id: 'warm-8', tone: 'warm', message: `Just wanted to say: I'm grateful you're in my life.` },
     { id: 'warm-9', tone: 'warm', message: `Hey you. How's your heart doing?` },
-    { id: 'warm-10', tone: 'warm", message: `Distance doesn't change how much I care. ❤️` },
+    { id: 'warm-10', tone: 'warm', message: `Distance doesn't change how much I care. ❤️` },
   );
 
   // LIGHT messages (casual, easy, low pressure)
   messages.push(
-    { id: "light-1', tone: 'light", message: `Hey stranger 👋 What's one good thing from your day?` },
+    { id: "light-1', tone: 'light', message: `Hey stranger 👋 What's one good thing from your day?` },
     { id: "light-2', tone: 'light', message: `Random thought: you popped into my head. So here I am.` },
-    { id: 'light-3', tone: 'light", message: `Saw something that reminded me of you today. Hope you're doing okay.` },
+    { id: 'light-3', tone: 'light', message: `Saw something that reminded me of you today. Hope you're doing okay.` },
     { id: "light-4', tone: 'light', message: `Hey! Life update? I want the highlights.` },
-    { id: 'light-5', tone: 'light", message: `This is your reminder that I exist and I'm rooting for you 😊` },
+    { id: 'light-5', tone: 'light', message: `This is your reminder that I exist and I'm rooting for you 😊` },
     { id: "light-6', tone: 'light', message: `Quick check: you alive? Send proof of life.` },
-    { id: 'light-7', tone: 'light", message: `Hi. That's it. That"s the text.` },
+    { id: 'light-7', tone: 'light', message: `Hi. That's it. That's the text.` },
     { id: 'light-8', tone: 'light', message: `Poking my head in to say hey 👀` },
     { id: 'light-9', tone: 'light', message: `When's the last time we actually talked? Too long.` },
     { id: 'light-10', tone: 'light', message: `Thought about texting you like 3 times this week. Finally doing it.` },
@@ -232,31 +232,31 @@ export function generateCheckInMessages(context?: ReachOutContext): CheckInMessa
   // CURIOUS messages (interested, inviting conversation)
   messages.push(
     { id: 'curious-1', tone: 'curious', message: `How's your week been going? I want to hear about it.` },
-    { id: 'curious-2', tone: 'curious", message: `What's been on your mind lately? I"m curious.` },
-    { id: 'curious-3', tone: 'curious", message: `What's something good happening in your world right now?` },
-    { id: "curious-4', tone: 'curious", message: `Tell me something you're excited about. Anything.` },
+    { id: 'curious-2', tone: 'curious', message: `What's been on your mind lately? I'm curious.` },
+    { id: 'curious-3', tone: 'curious', message: `What's something good happening in your world right now?` },
+    { id: "curious-4', tone: 'curious', message: `Tell me something you're excited about. Anything.` },
     { id: "curious-5', tone: 'curious', message: `What are you into these days? I want to know.` },
-    { id: 'curious-6', tone: 'curious", message: `What's your brain chewing on lately?` },
-    { id: "curious-7', tone: 'curious", message: `Catch me up — what's new in your universe?` },
-    { id: "curious-8', tone: 'curious", message: `What's bringing you joy right now? I need to know.` },
+    { id: 'curious-6', tone: 'curious', message: `What's your brain chewing on lately?` },
+    { id: "curious-7', tone: 'curious', message: `Catch me up — what's new in your universe?` },
+    { id: "curious-8', tone: 'curious', message: `What's bringing you joy right now? I need to know.` },
     { id: "curious-9', tone: 'curious', message: `If you had to describe your week in one word, what would it be?` },
-    { id: 'curious-10', tone: 'curious", message: `What would you do if you had zero obligations this weekend?` },
+    { id: 'curious-10', tone: 'curious', message: `What would you do if you had zero obligations this weekend?` },
   );
 
   // SUPPORTIVE messages (for when you know they're going through something)
   messages.push(
-    { id: "support-1', tone: 'warm", message: `Hey. No need to respond. Just wanted you to know I'm here if you need anything.` },
-    { id: "support-2', tone: 'warm", message: `Thinking about you. Whatever you're going through, you don"t have to do it alone.` },
-    { id: 'support-3', tone: 'warm", message: `I know things have been hard. I'm in your corner.` },
+    { id: "support-1', tone: 'warm', message: `Hey. No need to respond. Just wanted you to know I'm here if you need anything.` },
+    { id: "support-2', tone: 'warm', message: `Thinking about you. Whatever you're going through, you don't have to do it alone.` },
+    { id: 'support-3', tone: 'warm', message: `I know things have been hard. I'm in your corner.` },
     { id: "support-4', tone: 'warm', message: `Just checking in. No pressure to talk — just wanted you to know I care.` },
-    { id: 'support-5', tone: 'warm", message: `You've been on my mind. Here if you want to talk, or just want company.` },
+    { id: 'support-5', tone: 'warm', message: `You've been on my mind. Here if you want to talk, or just want company.` },
   );
 
   // RECONNECTION messages (after time apart)
   messages.push(
-    { id: "reconnect-1', tone: 'light", message: `It's been way too long. When can we catch up?` },
+    { id: "reconnect-1', tone: 'light', message: `It's been way too long. When can we catch up?` },
     { id: "reconnect-2', tone: 'warm', message: `I let too much time pass. Can we fix that?` },
-    { id: 'reconnect-3', tone: 'light", message: `Life got in the way but I'm here now. Miss you.` },
+    { id: 'reconnect-3', tone: 'light', message: `Life got in the way but I'm here now. Miss you.` },
     { id: "reconnect-4', tone: 'curious', message: `Tell me everything I missed. I have time.` },
     { id: 'reconnect-5', tone: 'warm', message: `I should have reached out sooner. Here now. ❤️` },
   );
@@ -273,7 +273,7 @@ export function generateRepairScript(context?: ReachOutContext): RepairStep[] {
 
   // Opening - create safety
   steps.push({
-    phase: 'open",
+    phase: 'open',
     prompt: \"Start by signaling you want to connect, not fight\",
     example: \"Hey, I've been wanting to talk. Not to relitigate anything — just to reconnect. Is now okay?\",
     tip: \"Asking permission shows respect. It also gives them a chance to say "not yet' which is valid.",
@@ -281,15 +281,15 @@ export function generateRepairScript(context?: ReachOutContext): RepairStep[] {
 
   // Acknowledge - own your part
   steps.push({
-    phase: 'acknowledge",
+    phase: 'acknowledge',
     prompt: \"Name what you might have contributed — even if it's small\",
-    example: \"I know I"ve been distant / short / distracted lately, and I don"t think that's helped.\",
-    tip: \"You don"t have to take full blame. Just acknowledging something opens the door.",
+    example: \"I know I've been distant / short / distracted lately, and I don't think that's helped.\",
+    tip: \"You don't have to take full blame. Just acknowledging something opens the door.",
   });
 
   // Ask - create space for them
   steps.push({
-    phase: 'ask",
+    phase: 'ask',
     prompt: \"Invite their perspective without defending yourself yet\",
     example: \"How have you been feeling about things between us? I want to understand where you're at.\",
     tip: \"Listen without interrupting. Their answer might surprise you.\",
@@ -299,8 +299,8 @@ export function generateRepairScript(context?: ReachOutContext): RepairStep[] {
   steps.push({
     phase: "close",
     prompt: \"End with what matters: the relationship itself\",
-    example: \"I care about us. That's why I wanted to talk. Whatever"s going on, I want to work through it together.",
-    tip: "The goal isn"t to solve everything in one conversation. It's to reopen the channel.\",
+    example: \"I care about us. That's why I wanted to talk. Whatever's going on, I want to work through it together.",
+    tip: "The goal isn't to solve everything in one conversation. It's to reopen the channel.\",
   });
 
   return steps;

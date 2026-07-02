@@ -56,7 +56,7 @@ const GAUGE_LABELS: Record<GaugeKey, string> = {
   emotion: 'Emotion',
   connection: 'Connection',
   direction: 'Direction',
-  alignment: 'Alignment",
+  alignment: 'Alignment',
 };
 
 /**
@@ -191,7 +191,7 @@ function generateValuePrompt(value: string, weekData: WeekData): string {
  */
 export function getWeeklyReflectionPrompt(values: string[]): string {
   if (values.length === 0) {
-    return \"Let's check in on how you"ve been living this week.";
+    return \"Let's check in on how you've been living this week.";
   }
   
   if (values.length === 1) {

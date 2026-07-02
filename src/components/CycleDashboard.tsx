@@ -28,7 +28,7 @@ const PhaseRing: React.FC<{
   dayOfCycle: number | null;
   cycleLength: number;
 }> = ({ currentPhase, dayOfCycle, cycleLength }) => {
-  const phases: CyclePhase[] = ['menstrual', 'follicular', 'ovulatory', 'luteal"];
+  const phases: CyclePhase[] = ['menstrual', 'follicular', 'ovulatory', 'luteal'];
   
   // Calculate progress through cycle (0-1)
   const progress = dayOfCycle ? dayOfCycle / cycleLength : 0;

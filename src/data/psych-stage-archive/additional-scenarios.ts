@@ -22,7 +22,7 @@ export const ADDITIONAL_CHILDHOOD: RoleplayScenario[] = [
     personaTraits: ['curious', 'friendly', 'might already have friends"],
     
     context: \"It's your first day. A kid sits next to you and starts talking.\",
-    firstMessage: \"Hey, you"re new, right? Where did you move from?",
+    firstMessage: \"Hey, you're new, right? Where did you move from?",
     
     responseStyle: 'supportive',
     escalationTriggers: [],
@@ -36,12 +36,12 @@ export const ADDITIONAL_CHILDHOOD: RoleplayScenario[] = [
       \"It's okay to feel nervous\",
     ],
     goodResponses: [
-      \"Yeah, I just moved from [place]. What"s your name?",
-      "I"m [name]. Is this school cool? What's your favorite thing to do here?\",
-      \"I"m a little nervous. Is everyone pretty nice here?",
+      \"Yeah, I just moved from [place]. What's your name?",
+      "I'm [name]. Is this school cool? What's your favorite thing to do here?\",
+      \"I'm a little nervous. Is everyone pretty nice here?",
     ],
     commonMistakes: [
-      "One-word answers that don"t continue the conversation\",
+      "One-word answers that don't continue the conversation\",
       \"Pretending you're not nervous when you are\",
       \"Not asking questions back\",
     ],
@@ -67,7 +67,7 @@ export const ADDITIONAL_CHILDHOOD: RoleplayScenario[] = [
     personaTraits: ['caring', 'patient', 'wants to help"],
     
     context: \"Something happened that scared you or made you uncomfortable. You're telling an adult.\",
-    firstMessage: \"Sweetie, you seem upset. What"s going on? You can tell me anything.",
+    firstMessage: \"Sweetie, you seem upset. What's going on? You can tell me anything.",
     
     responseStyle: 'supportive',
     escalationTriggers: [],
@@ -78,12 +78,12 @@ export const ADDITIONAL_CHILDHOOD: RoleplayScenario[] = [
     hints: [
       \"You won't get in trouble for telling\",
       \"Start with "Something happened..."\",
-      \"It's okay if you don"t have all the words",
+      \"It's okay if you don't have all the words",
     ],
     goodResponses: [
-      "Something happened and I"m scared. Can I tell you?\",
+      "Something happened and I'm scared. Can I tell you?\",
       \"Someone did something that made me feel bad. I don't know if I should tell.\",
-      \"I saw/heard something scary and I don"t know what to do.",
+      \"I saw/heard something scary and I don't know what to do.",
     ],
     commonMistakes: [
       "Keeping it a secret",
@@ -99,7 +99,7 @@ export const ADDITIONAL_CHILDHOOD: RoleplayScenario[] = [
     followUpScenarios: ['mc-adult-asks-questions'],
   },
   {
-    id: 'mc-losing-game",
+    id: 'mc-losing-game',
     title: \"Losing a Game Without Getting Upset\",
     description: \"You lost a game and you're frustrated. Practice good sportsmanship.\",
     category: "friends',
@@ -128,7 +128,7 @@ export const ADDITIONAL_CHILDHOOD: RoleplayScenario[] = [
     goodResponses: [
       \"Good game. Yeah, let's play again!\",
       \"Aw man, I really wanted to win. Okay, one more time.\",
-      \"You"re really good at this. Teach me that move you did?",
+      \"You're really good at this. Teach me that move you did?",
     ],
     commonMistakes: [
       "Saying they cheated",
@@ -151,7 +151,7 @@ export const ADDITIONAL_CHILDHOOD: RoleplayScenario[] = [
 
 export const ADDITIONAL_TEEN: RoleplayScenario[] = [
   {
-    id: 'teen-sexting-pressure",
+    id: 'teen-sexting-pressure',
     title: \"When Someone Asks for Inappropriate Pictures\",
     description: \"Someone is asking you to send pictures you're not comfortable with.\",
     category: "safety',
@@ -164,7 +164,7 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     personaTraits: ['pushy', 'guilt-tripping', 'may threaten"],
     
     context: \"Someone (online or IRL) is asking you to send intimate pictures.\",
-    firstMessage: \"Come on, just send me one pic. I won't show anyone. Don"t you trust me?",
+    firstMessage: \"Come on, just send me one pic. I won't show anyone. Don't you trust me?",
     
     responseStyle: 'realistic',
     escalationTriggers: [],
@@ -178,9 +178,9 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
       \"Anyone who pressures you doesn't respect you\",
     ],
     goodResponses: [
-      \"No. I"m not sending pics. That"s my boundary.\",
+      \"No. I'm not sending pics. That's my boundary.\",
       \"If you respected me, you wouldn't keep asking.\",
-      \"I said no. If you can"t accept that, we're done talking.",
+      \"I said no. If you can't accept that, we're done talking.",
     ],
     commonMistakes: [
       "Giving in to pressure",
@@ -197,8 +197,8 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
   },
   {
     id: 'teen-friend-bad-relationship',
-    title: "Your Friend"s Partner Seems Controlling\",
-    description: \"You're worried about your friend"s relationship but they don't see it.",
+    title: "Your Friend's Partner Seems Controlling\",
+    description: \"You're worried about your friend's relationship but they don't see it.",
     category: 'friends',
     lifeStage: 'middle-adolescence',
     ageRange: [14, 19],
@@ -208,13 +208,13 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     personaDescription: "Defensive about their partner. Makes excuses. Might get upset with you.",
     personaTraits: ['defensive', 'in love', 'makes excuses'],
     
-    context: "Your friend"s partner seems controlling. You want to say something.\",
-    firstMessage: \"Why does everyone keep asking about my relationship? We're fine. They"re just protective.",
+    context: "Your friend's partner seems controlling. You want to say something.\",
+    firstMessage: \"Why does everyone keep asking about my relationship? We're fine. They're just protective.",
     
-    responseStyle: 'realistic",
-    escalationTriggers: [`you're jealous`, `you don"t understand`],
+    responseStyle: 'realistic',
+    escalationTriggers: [`you're jealous`, `you don't understand`],
     deescalationResponses: ["I... I know you're just worried about me."],
-    safetyTriggers: ['they would hurt me if", `I can't leave`, `I"m scared`],
+    safetyTriggers: ['they would hurt me if", `I can't leave`, `I'm scared`],
     
     skillsTargeted: ['expressing concern', 'not pushing too hard', 'staying their friend"],
     hints: [
@@ -223,9 +223,9 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
       \"Stay their friend no matter what\",
     ],
     goodResponses: [
-      \"I"m not saying they"re bad. I'm saying I miss you and I"m worried because you seem different.",
+      \"I'm not saying they're bad. I'm saying I miss you and I'm worried because you seem different.",
       "I just want to make sure you can still be yourself. Can you still see friends? Talk to family?",
-      "I"ll always be your friend. If you ever need anything, I'm here. No judgment.\",
+      "I'll always be your friend. If you ever need anything, I'm here. No judgment.\",
     ],
     commonMistakes: [
       \"Attacking the partner\",
@@ -235,7 +235,7 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     
     successCriteria: [
       \"Expressed concern gently\",
-      \"Didn"t attack partner",
+      \"Didn't attack partner",
       "Kept friendship open",
     ],
     followUpScenarios: ['teen-friend-admits-problem'],
@@ -258,7 +258,7 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     
     responseStyle: 'realistic',
     escalationTriggers: ['I did my best", `you don't understand`],
-    deescalationResponses: [\"I know. I just want what"s best for you.", "Okay, how can I support you?"],
+    deescalationResponses: [\"I know. I just want what's best for you.", "Okay, how can I support you?"],
     safetyTriggers: [`I can't take this pressure`, 'I want to disappear'],
     
     skillsTargeted: ['advocating for yourself', 'expressing overwhelm', 'setting expectations"],
@@ -270,7 +270,7 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     goodResponses: [
       \"I did try. A B+ is good. I feel like nothing is ever good enough for you.\",
       \"I want to do well too, but the pressure makes it worse. Can we talk about this differently?\",
-      \"I"m doing my best. What I need is support, not disappointment.",
+      \"I'm doing my best. What I need is support, not disappointment.",
     ],
     commonMistakes: [
       "Shutting down and saying nothing",
@@ -299,23 +299,23 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     personaTraits: ["concerned', 'wants to help', 'might not fully understand online stuff"],
     
     context: \"Someone has been posting mean things about you online. You're telling an adult.\",
-    firstMessage: \"You said someone"s been bothering you online? Tell me what's happening.",
+    firstMessage: \"You said someone's been bothering you online? Tell me what's happening.",
     
-    responseStyle: 'supportive",
+    responseStyle: 'supportive',
     escalationTriggers: [],
-    deescalationResponses: [\"That's not okay. We"ll figure this out together."],
-    safetyTriggers: ['I want to die", `I can't face them`, `I don"t want to go to school`],
+    deescalationResponses: [\"That's not okay. We'll figure this out together."],
+    safetyTriggers: ['I want to die", `I can't face them`, `I don't want to go to school`],
     
-    skillsTargeted: ['asking for help', 'explaining online situations', 'documenting"],
+    skillsTargeted: ['asking for help', 'explaining online situations', 'documenting'],
     hints: [
       \"Screenshot everything before it's deleted\",
-      \"Don"t respond to the bully",
-      "It"s not your fault, and you deserve help\",
+      \"Don't respond to the bully",
+      "It's not your fault, and you deserve help\",
     ],
     goodResponses: [
       \"Someone from school has been posting mean things about me. I have screenshots. I don't know what to do.\",
       \"It started with comments and now they made a post. Other people are commenting too. I feel sick about going to school.\",
-      \"I haven"t responded because I didn"t want to make it worse. But it's affecting me a lot.\",
+      \"I haven't responded because I didn't want to make it worse. But it's affecting me a lot.\",
     ],
     commonMistakes: [
       \"Not telling anyone\",
@@ -344,9 +344,9 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
     personaTraits: ["interested', 'should be respectful', 'might need clarity"],
     
     context: \"You're in a dating situation where physical stuff might happen. Practice consent communication.\",
-    firstMessage: \"I"m having a really good time with you. [moves closer]",
+    firstMessage: \"I'm having a really good time with you. [moves closer]",
     
-    responseStyle: 'supportive",
+    responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: [\"Totally, let's just hang out.\", \"No pressure at all.\"],
     safetyTriggers: [],
@@ -358,9 +358,9 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
       \"It's okay to change your mind at any time\",
     ],
     goodResponses: [
-      \"I like you too. Before anything happens, I want to make sure we"re on the same page about boundaries.",
-      "Is this okay? I want to make sure you"re comfortable.\",
-      \"I'm not ready for [that], but I"m okay with [this]. Is that cool?",
+      \"I like you too. Before anything happens, I want to make sure we're on the same page about boundaries.",
+      "Is this okay? I want to make sure you're comfortable.\",
+      \"I'm not ready for [that], but I'm okay with [this]. Is that cool?",
     ],
     commonMistakes: [
       "Not communicating at all",
@@ -383,7 +383,7 @@ export const ADDITIONAL_TEEN: RoleplayScenario[] = [
 
 export const ADDITIONAL_ADULT: RoleplayScenario[] = [
   {
-    id: 'adult-saying-no-work",
+    id: 'adult-saying-no-work',
     title: \"Saying No to Extra Work\",
     description: \"You're asked to take on more than you can handle at work.\",
     category: "work',
@@ -410,9 +410,9 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
       \"Offer alternatives if possible\",
     ],
     goodResponses: [
-      \"I want to help, but I"m already at capacity with [current projects]. If this is priority, what should I deprioritize?",
+      \"I want to help, but I'm already at capacity with [current projects]. If this is priority, what should I deprioritize?",
       "I can't take that on right now without dropping something else. Can we look at my current workload together?",
-      "I"d be setting us both up for failure if I say yes. I'm fully committed through [date]. Can we revisit then?\",
+      "I'd be setting us both up for failure if I say yes. I'm fully committed through [date]. Can we revisit then?\",
     ],
     commonMistakes: [
       \"Always saying yes until burnout\",
@@ -441,11 +441,11 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
     personaTraits: ['well-meaning', 'overbearing', 'might get defensive"],
     
     context: \"Your in-law keeps overstepping (parenting advice, showing up unannounced, criticizing).\",
-    firstMessage: \"I'm just trying to help! I don"t know why you're so sensitive about everything.",
+    firstMessage: \"I'm just trying to help! I don't know why you're so sensitive about everything.",
     
     responseStyle: 'realistic',
     escalationTriggers: ['my son/daughter never complained", `you're keeping me from my grandchildren`],
-    deescalationResponses: [\"I didn"t realize. I'll try to be better about that."],
+    deescalationResponses: [\"I didn't realize. I'll try to be better about that."],
     safetyTriggers: [],
     
     skillsTargeted: ['boundary setting', 'staying calm', 'maintaining relationship"],
@@ -456,7 +456,7 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
     ],
     goodResponses: [
       \"I appreciate that you want to help. And I need you to call before coming over. That's not negotiable for us.\",
-      \"We"re not asking you to stop being involved. We"re asking you to respect our decisions as parents.\",
+      \"We're not asking you to stop being involved. We're asking you to respect our decisions as parents.\",
       \"I know this is hard to hear. We love you and we need this boundary respected.\",
     ],
     commonMistakes: [
@@ -485,12 +485,12 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
     personaDescription: "Used to be close but has been distant. Might be busy, might be pulling away.",
     personaTraits: ['distant lately', 'has history with you', 'unclear intentions"],
     
-    context: \"A long friendship feels like it's fading. You"re reaching out.",
+    context: \"A long friendship feels like it's fading. You're reaching out.",
     firstMessage: "Hey! Sorry I've been MIA. Things have been crazy. How are you?",
     
-    responseStyle: 'realistic",
+    responseStyle: 'realistic',
     escalationTriggers: [],
-    deescalationResponses: [\"You're right. I"ve been a bad friend. I'm sorry."],
+    deescalationResponses: [\"You're right. I've been a bad friend. I'm sorry."],
     safetyTriggers: [],
     
     skillsTargeted: ['honest communication', 'accepting change', 'expressing needs"],
@@ -500,9 +500,9 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
       \"Be prepared for any answer\",
     ],
     goodResponses: [
-      \"I"ve missed you. It feels like we"ve been disconnected. Is everything okay with us?\",
+      \"I've missed you. It feels like we've been disconnected. Is everything okay with us?\",
       \"No worries about being busy, but I wanted to check in. Our friendship matters to me and I've been feeling the distance.\",
-      \"I"m good. I"ve been wanting to reach out too. Can we actually catch up? Like for real, not just texting.\",
+      \"I'm good. I've been wanting to reach out too. Can we actually catch up? Like for real, not just texting.\",
     ],
     commonMistakes: [
       \"Pretending you haven't noticed\",
@@ -535,19 +535,19 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
     
     responseStyle: "realistic",
     escalationTriggers: [`you're always judging my spending`],
-    deescalationResponses: [\"You"re right, we should talk about this."],
+    deescalationResponses: [\"You're right, we should talk about this."],
     safetyTriggers: [],
     
     skillsTargeted: ['financial communication', 'non-blaming language', 'shared planning'],
     hints: [
-      "Use 'we" language — you're a team\",
+      "Use 'we' language — you're a team\",
       \"Focus on goals, not blame\",
       \"Share your own money stuff too, not just theirs\",
     ],
     goodResponses: [
       \"Nothing is wrong, I just think we should get on the same page about our money. I want us to have shared goals.\",
-      \"I"m not accusing you of anything. I"m saying I think we need to talk about [specific topic] so we're a team.\",
-      \"Can we look at our finances together? I want to make sure we"re building what we both want.",
+      \"I'm not accusing you of anything. I'm saying I think we need to talk about [specific topic] so we're a team.\",
+      \"Can we look at our finances together? I want to make sure we're building what we both want.",
     ],
     commonMistakes: [
       "Blaming and accusing",
@@ -576,9 +576,9 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
     personaTraits: ['loving', 'scared', 'might overreact"],
     
     context: \"You have health news to share with family (diagnosis, scare, test results).\",
-    firstMessage: \"You said you had something to tell me. You're scaring me. What"s going on?",
+    firstMessage: \"You said you had something to tell me. You're scaring me. What's going on?",
     
-    responseStyle: 'supportive",
+    responseStyle: 'supportive',
     escalationTriggers: [],
     deescalationResponses: [\"Thank you for telling me. We'll face this together.\"],
     safetyTriggers: [],
@@ -591,8 +591,8 @@ export const ADDITIONAL_ADULT: RoleplayScenario[] = [
     ],
     goodResponses: [
       \"Before I tell you, I need you to stay calm so we can talk about it. Can you do that?\",
-      \"I found out [health news]. Here"s what we know and here"s the plan. I wanted you to hear it from me.\",
-      \"I'm okay right now. I"m telling you because I need support, not panic. Can you be that for me?",
+      \"I found out [health news]. Here's what we know and here's the plan. I wanted you to hear it from me.\",
+      \"I'm okay right now. I'm telling you because I need support, not panic. Can you be that for me?",
     ],
     commonMistakes: [
       "Not telling anyone",

@@ -55,7 +55,7 @@ export interface ActiveGoal {
 export interface GoalReflection {
   goalId: string;
   weekKey: string; // e.g. "2025-W10"
-  rating: 'great' | 'okay' | 'struggled";
+  rating: 'great' | 'okay' | 'struggled';
   whatHelped?: string;
   whatGotInTheWay?: string;
   reflectedAt: string; // ISO

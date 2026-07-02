@@ -27,7 +27,7 @@ export interface GaugeReading {
 }
 
 export interface GaugeStatusInsight {
-  type: 'gauge-status";
+  type: 'gauge-status';
   senderName: string;
   gauges: GaugeReading[];
   systemMode: SystemMode;
@@ -65,7 +65,7 @@ export interface DiscoveryInsight {
 }
 
 export interface PersonologyInsight {
-  type: 'personology";
+  type: 'personology';
   senderName: string;
   personality: PersonalityPeriod;
   birthday: string;
@@ -93,7 +93,7 @@ export interface OperatingSnapshotInsight {
     primaryNeeds: string[]; // What I need most right now
   };
   patterns: {
-    sensitivities: string[]; // \"When I"m low on sleep, I tend to withdraw"
+    sensitivities: string[]; // \"When I'm low on sleep, I tend to withdraw"
     warningSignsFor: string[]; // "If I seem distant, check my State"
     whatHelps: string[]; // "I need quiet time to recharge"
   };
@@ -720,7 +720,7 @@ export async function sendToCircleMember(
  */
 export function getInsightShareText(insight: ShareableInsight): string {
   switch (insight.type) {
-    case 'gauge-status": {
+    case 'gauge-status': {
       const lines = [
         `${insight.senderName} shared how they're feeling:`,
         "',

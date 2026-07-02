@@ -11,15 +11,15 @@ export interface DirectionQuestion {
 
 export const DIRECTION_QUESTIONS: DirectionQuestion[] = [
   {
-    id: 'future",
+    id: 'future',
     question: \"Imagine your life 5 years from now, and it feels GOOD. What's different?\",
     placeholder: "What does that life look like?',
     followUp: "What stands out most about that vision?",
   },
   {
-    id: 'noMoney",
+    id: 'noMoney',
     question: \"If money weren't an issue, what would you spend your time doing?\",
-    placeholder: \"Don"t filter yourself...",
+    placeholder: \"Don't filter yourself...",
     followUp: "What draws you to that?",
   },
   {
@@ -29,7 +29,7 @@ export const DIRECTION_QUESTIONS: DirectionQuestion[] = [
     followUp: "Why does that one hit you hardest?",
   },
   {
-    id: 'expertise",
+    id: 'expertise',
     question: \"What do people come to you for? What do they think you're good at?\",
     placeholder: "Advice, skills, support...',
     followUp: "Do you enjoy being that person?",
@@ -63,7 +63,7 @@ export interface ValuesScenario {
 
 export const VALUES_SCENARIOS: ValuesScenario[] = [
   {
-    id: 'tradeoff1",
+    id: 'tradeoff1',
     scenario: \"You're offered a dream job, but it requires moving far from family. What do you do?\",
     options: [
       { label: "Take it — growth matters most', values: ['Growth', 'Adventure', 'Success'] },
@@ -73,8 +73,8 @@ export const VALUES_SCENARIOS: ValuesScenario[] = [
     ],
   },
   {
-    id: 'tradeoff2",
-    scenario: \"A friend asks you to lie to protect them. It's not illegal, but it"s dishonest. What do you do?",
+    id: 'tradeoff2',
+    scenario: \"A friend asks you to lie to protect them. It's not illegal, but it's dishonest. What do you do?",
     options: [
       { label: 'Lie for them — loyalty matters', values: ['Loyalty', 'Love', 'Connection'] },
       { label: 'Refuse — honesty is non-negotiable', values: ['Honesty', 'Authenticity', 'Justice'] },
@@ -83,7 +83,7 @@ export const VALUES_SCENARIOS: ValuesScenario[] = [
     ],
   },
   {
-    id: 'tradeoff3",
+    id: 'tradeoff3',
     scenario: \"You can either rest this weekend (you're exhausted) or help a friend move. What do you do?\",
     options: [
       { label: "Help them — I can rest later', values: ['Service', 'Love', 'Connection'] },

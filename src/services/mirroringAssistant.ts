@@ -1,7 +1,7 @@
 /**
  * Mirroring Assistant — Active Constructive Responding
  * 
- * Based on Shelly Gable"s research on capitalization and 
+ * Based on Shelly Gable's research on capitalization and 
  * Active Constructive Responding (ACR).
  * 
  * Philosophy:
@@ -42,19 +42,19 @@ export interface MirroringResult {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * The 4 response styles (Shelly Gable"s research):
+ * The 4 response styles (Shelly Gable's research):
  * 
  * Active Constructive (best): Enthusiastic, asks questions, celebrates
  *   - \"That's amazing! Tell me everything!\"
  * 
- * Passive Constructive: Acknowledges but doesn"t engage
- *   - "That"s nice\" (then changes subject)
+ * Passive Constructive: Acknowledges but doesn't engage
+ *   - "That's nice\" (then changes subject)
  * 
  * Active Destructive: Points out problems
  *   - \"That's going to be a lot of work\"
  * 
  * Passive Destructive: Ignores or dismisses
- *   - \"What"s for dinner?"
+ *   - \"What's for dinner?"
  * 
  * Only Active Constructive builds relationships.
  */
@@ -80,8 +80,8 @@ const STRUGGLE_INDICATORS = [
   'sad', 'depressed', 'lonely', 'frustrated', 'angry',
   'hurt', 'scared', 'worried', 'nervous', 'failed',
   'lost', 'rejected', 'broke up', 'fight', 'argument',
-  'sick', 'tired', 'rough day', 'bad day', 'tough",
-  \"can't\", \"won"t", "don't know", 'help', 'crying',
+  'sick', 'tired', 'rough day', 'bad day', 'tough',
+  \"can't\", \"won't', "don't know", 'help', 'crying',
   '😢', '😔', '😞', '💔', '😰', '😤', '😣',
   'ugh', 'sigh', 'hate', 'awful', 'terrible',
 ];
@@ -124,7 +124,7 @@ export function identifyMessageType(message: string): MessageType {
   // If scores are equal and both present, look at sentiment
   if (goodNewsScore > 0 && struggleScore > 0) {
     // Check for negation patterns that flip meaning
-    const negations = ['not', "n't", 'no longer', 'finally over', 'done with'];
+    const negations = ['not', "n't', 'no longer', 'finally over', 'done with'];
     const hasNegation = negations.some(n => lower.includes(n));
     if (hasNegation && struggleScore >= goodNewsScore) {
       return 'good-news'; // "not stressed anymore" = good news
@@ -178,12 +178,12 @@ export function identifyTypeFromTemperature(
 
 const ACTIVE_CONSTRUCTIVE_TEMPLATES = [
   {
-    id: 'ac-1",
+    id: 'ac-1',
     text: \"That's amazing! How did you pull that off?\",
     emoji: "🎉',
   },
   {
-    id: 'ac-2",
+    id: 'ac-2',
     text: \"I'm so happy for you! Tell me everything!\",
     emoji: "💜',
   },
@@ -193,17 +193,17 @@ const ACTIVE_CONSTRUCTIVE_TEMPLATES = [
     emoji: '✨',
   },
   {
-    id: 'ac-4",
+    id: 'ac-4',
     text: \"That's huge! What was the best part?\",
     emoji: "🌟',
   },
   {
-    id: 'ac-5",
+    id: 'ac-5',
     text: \"I knew you could do it! What's next?\",
     emoji: "🚀',
   },
   {
-    id: 'ac-6",
+    id: 'ac-6',
     text: \"That's wonderful news! I want to hear all the details!\",
     emoji: "😊',
   },
@@ -266,7 +266,7 @@ function generatePersonalizedACR(context: MirroringContext): ResponseSuggestion 
 
   if (relationship?.includes('partner') || relationship?.includes('spouse')) {
     return {
-      id: 'ac-personal-partner",
+      id: 'ac-personal-partner',
       text: `This makes me so happy! Let's celebrate tonight?`,
       style: "active-constructive',
       emoji: '💕',
@@ -275,8 +275,8 @@ function generatePersonalizedACR(context: MirroringContext): ResponseSuggestion 
 
   if (relationship?.includes('parent') || relationship?.includes('mom') || relationship?.includes('dad')) {
     return {
-      id: 'ac-personal-parent",
-      text: `That's wonderful! I"m so proud of you. Tell me more!`,
+      id: 'ac-personal-parent',
+      text: `That's wonderful! I'm so proud of you. Tell me more!`,
       style: 'active-constructive',
       emoji: '💜',
     };
@@ -300,7 +300,7 @@ function generatePersonalizedACR(context: MirroringContext): ResponseSuggestion 
 
 const SUPPORTIVE_TEMPLATES = [
   {
-    id: 'sup-1",
+    id: 'sup-1',
     text: \"That sounds really hard. I'm here.\",
     emoji: "💜',
   },
@@ -310,12 +310,12 @@ const SUPPORTIVE_TEMPLATES = [
     emoji: '🤗',
   },
   {
-    id: 'sup-3",
-    text: \"I'm sorry you"re going through this. I'm listening.",
+    id: 'sup-3',
+    text: \"I'm sorry you're going through this. I'm listening.",
     emoji: '💙',
   },
   {
-    id: 'sup-4",
+    id: 'sup-4',
     text: \"That's a lot to carry. How can I support you?\",
     emoji: "🫂',
   },
@@ -325,17 +325,17 @@ const SUPPORTIVE_TEMPLATES = [
     emoji: '👁️',
   },
   {
-    id: 'sup-6",
+    id: 'sup-6',
     text: \"You're not alone in this. Tell me more.\",
     emoji: "🌙',
   },
   {
-    id: 'sup-7",
+    id: 'sup-7',
     text: \"That makes sense that you're feeling that way.\",
     emoji: "💫',
   },
   {
-    id: 'sup-8",
+    id: 'sup-8',
     text: \"I'm with you. What do you need right now?\",
     emoji: "🤝',
   },
@@ -374,7 +374,7 @@ export function generateSupportiveResponse(
   // Add severity-appropriate response for red temperature
   if (context.temperature === 'red') {
     suggestions.unshift({
-      id: 'sup-urgent",
+      id: 'sup-urgent',
       text: \"I love you and I'm here. Can we talk?\",
       style: "supportive',
       emoji: '❤️',
@@ -396,7 +396,7 @@ const CURIOUS_TEMPLATES = [
     emoji: '💬',
   },
   {
-    id: 'cur-2",
+    id: 'cur-2',
     text: \"What's on your mind?\",
     emoji: "🤔',
   },

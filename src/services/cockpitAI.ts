@@ -183,7 +183,7 @@ export async function generateCrossSystemInsight(
     driverContextBlock = `\n\nUSER-REPORTED INFLUENCES (from quick log or check-in):\n${parts.join(' ')}`;
   }
 
-  const systemPrompt = `You are the AI brain of a Human Cockpit — a 6-gauge emotional regulation system. You read all gauges AND health data together and provide ONE brief insight (2-3 sentences max) about how the user"s systems are interacting.
+  const systemPrompt = `You are the AI brain of a Human Cockpit — a 6-gauge emotional regulation system. You read all gauges AND health data together and provide ONE brief insight (2-3 sentences max) about how the user's systems are interacting.
 
 The 6 gauges (0-100 scale, -1 means not checked):
 - Body (sleep, nutrition, hydration, movement): ${gauges.body}
@@ -196,17 +196,17 @@ The 6 gauges (0-100 scale, -1 means not checked):
 Rules:
 - Read the PATTERN across gauges, not individual numbers
 - If USER-REPORTED INFLUENCES are present, weave them in naturally: e.g. \"Work and sleep are influencing you today\" or \"You noted Connection and Direction feel affected — that's a common pair when stress is up.\"
-- Tell them what"s CONNECTED: "Your anxiety might be coming from your body, not your emotions"
+- Tell them what's CONNECTED: "Your anxiety might be coming from your body, not your emotions"
 - Be direct but warm
 - Never use clinical jargon
-- If everything is high, acknowledge what they"re doing right
+- If everything is high, acknowledge what they're doing right
 - If something is low, name it without judgment and suggest which gauge to address first
 - Always ground it in how the systems affect each other
 - Sound like a wise friend who happens to understand neuroscience, not a therapist
 - If music data is present, note patterns: low-energy music + low State = seeking calm; high-energy music + low Body = pushing through fatigue; melancholic music + low Emotion = processing something
 - Music choices often reveal what the body/mind is seeking before we're conscious of it
 - If weather data is present: overcast/dark days affect State and Emotion; low pressure causes headaches and irritability; gray days make Connection feel harder
-- Weather isn"t an excuse but it IS a factor — name it so they don"t blame themselves
+- Weather isn't an excuse but it IS a factor — name it so they don't blame themselves
 - Time context matters: Sunday evening anxiety is real; Monday transitions are hard; late-night check-ins suggest sleep issues; weekend patterns differ from weekday
 - Moon phases: some people are affected, others aren't — mention only if relevant to the pattern
 - Winter/low daylight periods: acknowledge SAD patterns without diagnosing`;
@@ -240,7 +240,7 @@ function getHardcodedInsight(gauges: CockpitGauges, driverContext?: DriverContex
   const driverPrefix =
     driverContext && driverContext.driverLabels.length > 0
       ? `${driverContext.driverLabels.slice(0, 3).join(' and ')} ${driverContext.driverLabels.length > 3 ? "and others' : "'} are influencing you. `
-      : '";
+      : '';
 
   if (gauges.body >= 0 && gauges.body < 40 && gauges.emotion >= 0 && gauges.emotion < 50) {
     insights.push(
@@ -249,7 +249,7 @@ function getHardcodedInsight(gauges: CockpitGauges, driverContext?: DriverContex
   }
   if (gauges.state >= 0 && gauges.state < 40 && gauges.connection >= 0 && gauges.connection < 40) {
     insights.push(
-      driverPrefix + \"You're in a stressed state AND feeling disconnected. That"s the hardest combination for your brain. Even a short conversation with someone safe can shift both gauges."
+      driverPrefix + \"You're in a stressed state AND feeling disconnected. That's the hardest combination for your brain. Even a short conversation with someone safe can shift both gauges."
     );
   }
   if (
@@ -259,7 +259,7 @@ function getHardcodedInsight(gauges: CockpitGauges, driverContext?: DriverContex
     gauges.alignment < 40
   ) {
     insights.push(
-      driverPrefix + "Low direction and low alignment together can feel like depression. It"s often not — it's a navigation problem. Let"s revisit what matters to you."
+      driverPrefix + "Low direction and low alignment together can feel like depression. It's often not — it's a navigation problem. Let's revisit what matters to you."
     );
   }
   const active = Object.values(gauges).filter((v) => v >= 0);

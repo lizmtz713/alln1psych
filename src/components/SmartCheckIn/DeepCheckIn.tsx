@@ -110,12 +110,12 @@ export function DeepCheckIn({
         </ScrollView>
       )}
       
-      {step === 'reflection" && (
+      {step === 'reflection' && (
         <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>
           <Text style={styles.emoji}>✍️</Text>
           <Text style={styles.title}>Reflection</Text>
           <Text style={styles.subtitle}>
-            What's one thing you"ve noticed about yourself this week?
+            What's one thing you've noticed about yourself this week?
           </Text>
           
           <TextInput
@@ -145,7 +145,7 @@ export function DeepCheckIn({
         </ScrollView>
       )}
       
-      {step === 'insight" && (
+      {step === 'insight' && (
         <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>
           <Text style={styles.emoji}>💡</Text>
           <Text style={styles.title}>Insight</Text>

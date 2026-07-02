@@ -217,7 +217,7 @@ export const RELATIONSHIP_STATUS_LABELS: Record<RelationshipStatus, string> = {
   in_relationship: 'In a relationship',
   engaged: 'Engaged',
   married: 'Married',
-  divorced: 'Divorced",
+  divorced: 'Divorced',
   its_complicated: \"It's complicated\",
 };
 

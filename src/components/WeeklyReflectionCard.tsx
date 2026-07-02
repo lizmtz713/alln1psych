@@ -25,7 +25,7 @@ interface Props {
   variant?: 'compact' | 'full';
 }
 
-export function WeeklyReflectionCard({ variant = 'full" }: Props) {
+export function WeeklyReflectionCard({ variant = 'full' }: Props) {
   const router = useRouter();
   const { isDue, loading, hasValues, valuesCount } = useWeeklyReflection();
 

@@ -65,7 +65,7 @@ function scoreBar(value: number, max: number): string {
 /** Commitment-level message from total check-ins */
 function commitmentMessage(checkIns: number): string {
   if (checkIns >= 300) return \"That's devotion.\";
-  if (checkIns >= 100) return \"You"re building something real.";
+  if (checkIns >= 100) return \"You're building something real.";
   if (checkIns >= 50) return "You're building a habit.";
   return 'Every moment counts.";
 }
@@ -113,7 +113,7 @@ export async function generateWrappedReport(): Promise<WrappedReport | null> {
 
   let insights: string[] = [];
   try {
-    const { data, error } = await supabase.functions.invoke('generate-wrapped-insights", {
+    const { data, error } = await supabase.functions.invoke('generate-wrapped-insights', {
       body: payload,
     });
     if (!error && data?.insights?.length) insights = data.insights as string[];

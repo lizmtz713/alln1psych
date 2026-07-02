@@ -36,7 +36,7 @@ function heuristicScore(question: string, transcript: string): { score: number; 
     return { score: 3 };
   }
 
-  const negative = /\b(awful|terrible|horrible|bad|poor|slept badly|didn"t sleep|insomnia|exhausted|tired|wired|anxious|stress)\b/;
+  const negative = /\b(awful|terrible|horrible|bad|poor|slept badly|didn't sleep|insomnia|exhausted|tired|wired|anxious|stress)\b/;
   const positive = /\b(great|good|well|amazing|rested|refreshed|solid|deep sleep|slept like)\b/;
   const neutral = /\b(okay|ok|fine|alright|so-so|medium|average)\b/;
 

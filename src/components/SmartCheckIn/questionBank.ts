@@ -21,8 +21,8 @@ export const BODY_QUESTIONS = {
   variants: [
     // Variant 0: Basic needs checklist
     {
-      id: 'needs",
-      question: \"Let's check your body"s basics",
+      id: 'needs',
+      question: \"Let's check your body's basics",
       type: 'checklist' as const,
       items: [
         { id: 'sleep', label: 'Slept okay', emoji: '😴' },
@@ -34,7 +34,7 @@ export const BODY_QUESTIONS = {
     },
     // Variant 1: Physical sensations
     {
-      id: 'sensations",
+      id: 'sensations',
       question: \"What's your body telling you?\",
       type: "multi' as const,
       options: [
@@ -112,7 +112,7 @@ export const STATE_QUESTIONS = {
     },
     // Variant 1: Nervous system frame
     {
-      id: 'nervous",
+      id: 'nervous',
       question: \"Where's your nervous system?\",
       type: "single' as const,
       options: [

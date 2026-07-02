@@ -195,9 +195,9 @@ export const useFamilyStore = create<FamilyState>()(
             type: 'alert',
             title: `${member.name} needs support`,
             description:
-              member.temperature === 'cool"
+              member.temperature === 'cool'
                 ? \"They've been having a hard time\"
-                : \"Haven"t connected in a while",
+                : \"Haven't connected in a while",
             memberIds: [member.id],
             actionable: true,
             action: {
@@ -216,7 +216,7 @@ export const useFamilyStore = create<FamilyState>()(
             type: daysUntil <= 1 ? 'alert' : 'celebration',
             title:
               daysUntil === 0 ? `Today: ${event.title}` : `${event.title} in ${daysUntil} days`,
-            description: event.type === 'birthday" ? \"🎂 Don't forget!\" : "',
+            description: event.type === 'birthday' ? \"🎂 Don't forget!\" : "',
             memberIds: event.memberIds,
           });
         });

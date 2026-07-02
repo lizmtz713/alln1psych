@@ -63,7 +63,7 @@ ALLOW these (return harmful: false):
 - Criticism delivered constructively
 - Anger expressed about actions (not attacks on person)
 
-Remember: People SHOULD be able to tell hard truths. The goal isn"t to make everything "nice" — it"s to prevent genuine harm.
+Remember: People SHOULD be able to tell hard truths. The goal isn't to make everything "nice" — it's to prevent genuine harm.
 
 Respond with JSON only: { \"harmful\": boolean, \"reason\": string | null, \"suggestion\": string | null }`;
 
@@ -99,7 +99,7 @@ Help them clarify. Respond with JSON:
   \"suggestions\": [\"2-3 brief suggestions for making the message clearer or more effective\"]
 }
 
-Keep their voice. Don"t make it sound corporate or therapy-speak.
+Keep their voice. Don't make it sound corporate or therapy-speak.
 Respond with JSON only.`;
 
   const messages: Message[] = [{ role: 'user', content: prompt }];
@@ -278,27 +278,27 @@ export function getWritingPrompts(noteType: NoteType): string[] {
     gratitude: [
       \"I never thanked you for...\",
       \"Something you did that meant more than you know...\",
-      \"I"m grateful for you because...",
+      \"I'm grateful for you because...",
     ],
     concern: [
       "I care about you, which is why I want to share...",
-      "I"ve noticed something that worries me...\",
+      "I've noticed something that worries me...\",
       \"This might be hard to hear, but I'm telling you because I love you...\",
     ],
     apology: [
-      \"I"m sorry for...",
+      \"I'm sorry for...",
       "I know I hurt you when...",
       "I wish I could go back and...",
     ],
     forgiveness: [
-      "I"ve been holding onto...\",
+      "I've been holding onto...\",
       \"I'm ready to let go of...\",
       \"I forgive you for...\",
     ],
     boundary: [
       \"What I need from our relationship is...\",
       \"I love you, and I also need...\",
-      \"Something that"s not working for me is...",
+      \"Something that's not working for me is...",
     ],
     grief: [
       "I wish I could tell you...",

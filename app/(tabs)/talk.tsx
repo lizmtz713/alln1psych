@@ -506,7 +506,7 @@ export default function TalkScreen() {
         .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
       const response = await sendMessage(apiMessages, buildUserContext());
       // Check for error responses
-      if (response?.startsWith('[AI Error') || response?.includes('"error"')) {
+      if (response?.startsWith('[AI Error') || response?.includes(''error'')) {
         addMessage({ role: 'assistant', content: "I'm having trouble connecting right now. Try again in a moment.", isVoice: false });
         return;
       }
@@ -567,7 +567,7 @@ export default function TalkScreen() {
           .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
         const response = await sendMessage(apiMessages, buildUserContext());
         // Check for error responses
-        if (response?.startsWith('[AI Error') || response?.includes('"error"')) {
+        if (response?.startsWith('[AI Error') || response?.includes(''error'')) {
           addMessage({ role: 'assistant', content: "I'm having trouble connecting right now. Try again in a moment.", isVoice: false });
         } else {
           addMessage({ role: 'assistant', content: response, isVoice: false });
@@ -796,7 +796,7 @@ export default function TalkScreen() {
                     .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
                   const response = await sendMessage(apiMessages, buildUserContext());
                   // Check for error responses
-                  if (response?.startsWith('[AI Error') || response?.includes('"error"')) {
+                  if (response?.startsWith('[AI Error') || response?.includes(''error'')) {
                     addMessage({ role: 'assistant', content: "I'm having trouble connecting right now. Try again in a moment.", isVoice: false });
                   } else {
                     addMessage({ role: 'assistant', content: response, isVoice: false });

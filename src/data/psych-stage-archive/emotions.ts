@@ -49,18 +49,18 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     emoji: '😰',
     color: '#8B5CF6',
     gradient: ['#8B5CF6', '#A78BFA"],
-    tagline: \"i'm your brain"s alarm system — just a little too sensitive sometimes",
+    tagline: \"i'm your brain's alarm system — just a little too sensitive sometimes",
     
-    whatItIs: "Anxiety is your brain"s way of preparing you for something it thinks might be dangerous or important. It's like having a smoke detector that goes off when you"re just making toast.",
+    whatItIs: "Anxiety is your brain's way of preparing you for something it thinks might be dangerous or important. It's like having a smoke detector that goes off when you're just making toast.",
     
     whyItExists: "Back when humans lived in the wild, anxiety kept us alive. Hear a rustle in the bushes? Anxiety said 'RUN!" Today we don't have many lions, but our brain still treats a math test like a predator.\",
     
     brainScience: {
-      whatsHappening: \"Your amygdala (the brain"s alarm center) sends out danger signals, flooding your body with adrenaline and cortisol. Your heart races, breathing speeds up, and muscles tense — all to help you fight or flee.",
-      funFact: "Your brain can"t tell the difference between a real threat (lion) and an imagined one (embarrassment). That's why you can feel terrified about a presentation even though nothing is actually dangerous.\"
+      whatsHappening: \"Your amygdala (the brain's alarm center) sends out danger signals, flooding your body with adrenaline and cortisol. Your heart races, breathing speeds up, and muscles tense — all to help you fight or flee.",
+      funFact: "Your brain can't tell the difference between a real threat (lion) and an imagined one (embarrassment). That's why you can feel terrified about a presentation even though nothing is actually dangerous.\"
     },
     
-    superpower: \"Anxiety helps you prepare, stay alert, and perform well under pressure. A little anxiety before a test actually helps you focus! It"s your brain saying 'this matters, pay attention."\",
+    superpower: \"Anxiety helps you prepare, stay alert, and perform well under pressure. A little anxiety before a test actually helps you focus! It's your brain saying 'this matters, pay attention."\",
     
     bodySignals: [
       \"Racing or pounding heart\",
@@ -73,7 +73,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     
     warningSignals: [
       \"Avoiding things you used to do\",
-      \"Can"t stop worst-case-scenario thinking",
+      \"Can't stop worst-case-scenario thinking",
       "Trouble sleeping because your mind won't shut off",
       "Physical symptoms happening a lot",
       "Feeling on edge most of the time"
@@ -84,7 +84,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
       "Ground yourself with 5-4-3-2-1 (5 things you see, 4 hear, etc.)",
       "Slow exhales — breathe out longer than you breathe in",
       "Move your body to burn off the adrenaline",
-      "Challenge the thought: "What's the evidence? What"s most likely?"\"
+      "Challenge the thought: "What's the evidence? What's most likely?"\"
     ],
     
     insideOutMoment: \"Remember when Riley had to introduce herself at her new school? That tight feeling, racing thoughts, wanting to escape? That's anxiety trying to protect her from potential embarrassment. It meant well, but it made things harder.\",
@@ -109,13 +109,13 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     gradient: ['#3B82F6', '#60A5FA'],
     tagline: "i help you slow down, process, and connect with others",
     
-    whatItIs: "Sadness is your heart's way of saying 'something matters to me, and it hurts." It's not weakness — it"s proof that you care deeply about things.",
+    whatItIs: "Sadness is your heart's way of saying 'something matters to me, and it hurts." It's not weakness — it's proof that you care deeply about things.",
     
-    whyItExists: "Sadness tells others we need support. It helps us process loss and change. Without sadness, we couldn"t truly appreciate happiness. It's the pause button that lets us reflect and heal.\",
+    whyItExists: "Sadness tells others we need support. It helps us process loss and change. Without sadness, we couldn't truly appreciate happiness. It's the pause button that lets us reflect and heal.\",
     
     brainScience: {
-      whatsHappening: \"When you"re sad, your brain actually slows down certain functions to help you conserve energy and process what happened. Tears contain stress hormones — crying literally releases them from your body.",
-      funFact: "Emotional tears have a different chemical makeup than onion tears. They contain more protein and natural painkillers. Crying is your body"s way of self-medicating!\"
+      whatsHappening: \"When you're sad, your brain actually slows down certain functions to help you conserve energy and process what happened. Tears contain stress hormones — crying literally releases them from your body.",
+      funFact: "Emotional tears have a different chemical makeup than onion tears. They contain more protein and natural painkillers. Crying is your body's way of self-medicating!\"
     },
     
     superpower: \"Sadness builds empathy, deepens connections, and helps you process difficult experiences so you can move forward. It's also a signal to others that you need support.\",
@@ -133,13 +133,13 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
       \"Feeling hopeless for weeks at a time\",
       \"Losing interest in everything, even stuff you loved\",
       \"Thoughts of hurting yourself or not wanting to exist\",
-      \"Can"t get out of bed most days",
+      \"Can't get out of bed most days",
       "Isolating from everyone"
     ],
     
     copingTips: [
-      "Let yourself feel it — don"t stuff it down\",
-      \"Talk to someone you trust (it's not complaining, it"s processing)",
+      "Let yourself feel it — don't stuff it down\",
+      \"Talk to someone you trust (it's not complaining, it's processing)",
       "Write it out — journal without filtering",
       "Move gently — even a short walk helps",
       "Do something kind for yourself (comfort without self-destruction)"
@@ -167,7 +167,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     gradient: ['#EF4444', '#F87171"],
     tagline: \"i'm your protector — i show up when your boundaries are crossed\",
     
-    whatItIs: \"Anger is energy that rises when something feels unfair, when your boundaries are crossed, or when something you care about is threatened. It"s not bad — it"s information.\",
+    whatItIs: \"Anger is energy that rises when something feels unfair, when your boundaries are crossed, or when something you care about is threatened. It's not bad — it's information.\",
     
     whyItExists: \"Anger gives you the energy to stand up for yourself and others. It helped our ancestors protect their families and fight injustice. It's the emotion that says "this isn't okay."\",
     
@@ -176,7 +176,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
       funFact: \"It takes about 20 minutes for your body to return to baseline after getting really angry. That's why "counting to 10" isn't enough for big anger — you need more time.\"
     },
     
-    superpower: \"Anger fuels courage, sets boundaries, and motivates change. Every social justice movement was powered by righteous anger. It"s the energy that says 'I deserve better.'",
+    superpower: \"Anger fuels courage, sets boundaries, and motivates change. Every social justice movement was powered by righteous anger. It's the energy that says 'I deserve better.'",
     
     bodySignals: [
       "Heat rising (face, chest, hands)",
@@ -208,9 +208,9 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     quickTechnique: {
       name: \"STOP Technique\",
       steps: [
-        \"S - Stop what you"re doing",
+        \"S - Stop what you're doing",
         "T - Take a breath (or 5)",
-        "O - Observe what you"re feeling and thinking\",
+        "O - Observe what you're feeling and thinking\",
         \"P - Proceed with awareness (respond, don't react)\"
       ],
       duration: \"1 minute\"
@@ -225,12 +225,12 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     gradient: ['#A855F7', '#C084FC"],
     tagline: \"i keep you safe — but sometimes i see danger where there isn't any\",
     
-    whatItIs: \"Fear is your brain"s protection system. It"s trying to keep you alive and away from threats. Sometimes those threats are real (a speeding car), sometimes they're perceived (judgment from others).\",
+    whatItIs: \"Fear is your brain's protection system. It's trying to keep you alive and away from threats. Sometimes those threats are real (a speeding car), sometimes they're perceived (judgment from others).\",
     
-    whyItExists: \"Fear kept our ancestors from being eaten by predators. Today, it still protects you from real dangers. The problem is our ancient brain hasn"t updated for modern life.",
+    whyItExists: \"Fear kept our ancestors from being eaten by predators. Today, it still protects you from real dangers. The problem is our ancient brain hasn't updated for modern life.",
     
     brainScience: {
-      whatsHappening: "Your amygdala detects a potential threat and hits the panic button before your thinking brain can evaluate if it"s real. This is why you jump at loud noises before you know what they are.\",
+      whatsHappening: "Your amygdala detects a potential threat and hits the panic button before your thinking brain can evaluate if it's real. This is why you jump at loud noises before you know what they are.\",
       funFact: \"Your brain processes fear faster than any other emotion — about 12 milliseconds. That's 40x faster than it takes to blink. Fear is designed to act first, think later.\"
     },
     
@@ -249,7 +249,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
       \"Avoiding more and more things\",
       \"Panic attacks\",
       \"Fear controlling your decisions\",
-      \"Can"t do normal activities because of 'what ifs'",
+      \"Can't do normal activities because of 'what ifs'",
       "Nightmares or flashbacks"
     ],
     
@@ -261,14 +261,14 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
       "Remember times you were scared but it turned out okay"
     ],
     
-    insideOutMoment: "Fear was always imagining worst-case scenarios and trying to keep Riley away from anything risky. But remember — some risks are worth taking. Fear means well, but he"s not always right about what's dangerous.\",
+    insideOutMoment: "Fear was always imagining worst-case scenarios and trying to keep Riley away from anything risky. But remember — some risks are worth taking. Fear means well, but he's not always right about what's dangerous.\",
     
     quickTechnique: {
       name: \"Reality Check\",
       steps: [
         \"Name the fear out loud\",
         \"Ask: Is this happening RIGHT NOW or am I imagining the future?\",
-        \"What"s the MOST LIKELY outcome (not worst case)?",
+        \"What's the MOST LIKELY outcome (not worst case)?",
         "What would I tell a friend who had this fear?"
       ],
       duration: "2 minutes"
@@ -281,11 +281,11 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     emoji: '😄',
     color: '#FBBF24',
     gradient: ['#FBBF24', '#FCD34D"],
-    tagline: \"i'm not just happiness — i"m connection, meaning, and savoring the good",
+    tagline: \"i'm not just happiness — i'm connection, meaning, and savoring the good",
     
-    whatItIs: "Joy is more than just feeling good. It"s the warmth of connection, the satisfaction of accomplishment, the peace of gratitude. It comes in quiet moments and loud celebrations.\",
+    whatItIs: "Joy is more than just feeling good. It's the warmth of connection, the satisfaction of accomplishment, the peace of gratitude. It comes in quiet moments and loud celebrations.\",
     
-    whyItExists: \"Joy motivates us to seek positive experiences, build relationships, and do things that help us thrive. It's your brain"s reward system saying 'more of this, please!"\",
+    whyItExists: \"Joy motivates us to seek positive experiences, build relationships, and do things that help us thrive. It's your brain's reward system saying 'more of this, please!"\",
     
     brainScience: {
       whatsHappening: \"Joy releases dopamine (motivation), serotonin (well-being), and oxytocin (bonding). These chemicals don't just make you feel good — they boost your immune system, help you learn, and improve your relationships.\",
@@ -304,8 +304,8 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     ],
     
     warningSignals: [
-      \"Can"t remember the last time you felt joy",
-      "Good things happen but you can"t feel them\",
+      \"Can't remember the last time you felt joy",
+      "Good things happen but you can't feel them\",
       \"Feeling numb or empty\",
       \"Guilt when you feel happy\",
       \"Joy only comes from unhealthy sources\"
@@ -319,7 +319,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
       \"Connect with people who lift you up\"
     ],
     
-    insideOutMoment: \"Joy tried to keep Riley happy all the time and push away sadness. But she learned that joy isn"t about being happy 24/7 — it's about embracing ALL emotions and finding meaning even in hard times. Joy and Sadness work together.",
+    insideOutMoment: \"Joy tried to keep Riley happy all the time and push away sadness. But she learned that joy isn't about being happy 24/7 — it's about embracing ALL emotions and finding meaning even in hard times. Joy and Sadness work together.",
     
     quickTechnique: {
       name: "Joy Snapshot",
@@ -341,16 +341,16 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     gradient: ['#6B7280', '#9CA3AF"],
     tagline: \"i make you feel like something is wrong with YOU — but that's a lie\",
     
-    whatItIs: \"Shame is the painful feeling that there"s something fundamentally wrong with you as a person. It's different from guilt (I did something bad) — shame says 'I AM bad.'",
+    whatItIs: \"Shame is the painful feeling that there's something fundamentally wrong with you as a person. It's different from guilt (I did something bad) — shame says 'I AM bad.'",
     
-    whyItExists: "Shame evolved to help us stay in our social group — if you felt bad about being rejected, you"d try harder to fit in. But in modern life, shame often does more harm than good.\",
+    whyItExists: "Shame evolved to help us stay in our social group — if you felt bad about being rejected, you'd try harder to fit in. But in modern life, shame often does more harm than good.\",
     
     brainScience: {
       whatsHappening: \"Shame activates the same brain regions as physical pain. That's why it hurts so much. It also triggers a "shut down" response — you want to hide, disappear, or become invisible.\",
       funFact: \"Everyone feels shame. It's universal. But shame HATES being talked about — which is exactly why talking about it makes it lose its power.\"
     },
     
-    superpower: \"Healthy shame (not toxic shame) can help us recognize when we"ve genuinely hurt someone and motivate us to make amends. The key is separating 'I did something wrong' from 'I am wrong."\",
+    superpower: \"Healthy shame (not toxic shame) can help us recognize when we've genuinely hurt someone and motivate us to make amends. The key is separating 'I did something wrong' from 'I am wrong."\",
     
     bodySignals: [
       \"Wanting to disappear or hide\",
@@ -364,7 +364,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     warningSignals: [
       \"Constant feeling of not being good enough\",
       \"Hiding parts of yourself from everyone\",
-      \"Perfectionism (if I'm perfect, I won"t feel shame)",
+      \"Perfectionism (if I'm perfect, I won't feel shame)",
       "Attacking yourself with harsh inner criticism",
       "Feeling fundamentally different/broken"
     ],
@@ -372,12 +372,12 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     copingTips: [
       "Talk to someone safe about it — shame dies in the light",
       "Separate behavior from identity ('I made a mistake' not 'I am a mistake")\",
-      \"Ask: Whose voice is this? (Often it's someone else"s criticism we internalized)",
+      \"Ask: Whose voice is this? (Often it's someone else's criticism we internalized)",
       "Practice self-compassion: What would you say to a friend?",
-      "Remember: Everyone has stuff they"re ashamed of. You're human.\"
+      "Remember: Everyone has stuff they're ashamed of. You're human.\"
     ],
     
-    insideOutMoment: \"Shame wasn"t in Inside Out, but imagine if there was a character who made Riley want to hide under her bed and never come out, whispering "everyone thinks you're weird." That's shame. The antidote? Connection and being seen anyway.",
+    insideOutMoment: \"Shame wasn't in Inside Out, but imagine if there was a character who made Riley want to hide under her bed and never come out, whispering "everyone thinks you're weird." That's shame. The antidote? Connection and being seen anyway.",
     
     quickTechnique: {
       name: "Self-Compassion Break",
@@ -385,7 +385,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
         "Put your hand on your heart",
         "Say: 'This is a moment of suffering'",
         "Say: 'Suffering is part of being human'",
-        "Say: 'May I be kind to myself right now'"
+        "Say: 'May I be kind to myself right now''
       ],
       duration: "1 minute"
     }
@@ -399,21 +399,21 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     gradient: ['#EC4899', '#F472B6"],
     tagline: \"i show up when there's too much — too many tasks, feelings, or expectations\",
     
-    whatItIs: \"Overwhelm is your brain"s way of saying 'system overload." It's not weakness — it"s a signal that you've hit your capacity and need to offload something.",
+    whatItIs: \"Overwhelm is your brain's way of saying 'system overload." It's not weakness — it's a signal that you've hit your capacity and need to offload something.",
     
     whyItExists: "Your brain has limited processing power. When too much comes at once — deadlines, emotions, social stuff — overwhelm is the alarm saying 'slow down before you crash."\",
     
     brainScience: {
-      whatsHappening: \"Your prefrontal cortex (the planning/organizing part) gets flooded and starts to shut down. That's why you can"t think straight or make decisions when overwhelmed. It"s not laziness — it's overload.\",
-      funFact: \"Your working memory can only hold about 4-7 things at once. When you"re trying to juggle more, everything starts to fall."
+      whatsHappening: \"Your prefrontal cortex (the planning/organizing part) gets flooded and starts to shut down. That's why you can't think straight or make decisions when overwhelmed. It's not laziness — it's overload.\",
+      funFact: \"Your working memory can only hold about 4-7 things at once. When you're trying to juggle more, everything starts to fall."
     },
     
-    superpower: "Overwhelm forces you to prioritize. It"s your brain demanding that you figure out what actually matters and let go of the rest.\",
+    superpower: "Overwhelm forces you to prioritize. It's your brain demanding that you figure out what actually matters and let go of the rest.\",
     
     bodySignals: [
       \"Can't think straight or make decisions\",
       \"Wanting to cry or shut down\",
-      \"Paralysis — can"t start anything",
+      \"Paralysis — can't start anything",
       "Tight chest, shallow breathing",
       "Snapping at people",
       "Wanting to escape or hide"
@@ -424,7 +424,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
       "Avoiding everything instead of tackling anything",
       "Breaking down regularly",
       "Physical symptoms (headaches, stomach issues)",
-      "Feeling like you"re drowning daily\"
+      "Feeling like you're drowning daily\"
     ],
     
     copingTips: [
@@ -435,7 +435,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
       \"Take 5 minutes to just breathe before deciding anything\"
     ],
     
-    insideOutMoment: \"Remember when ALL of Riley"s emotions were pressing buttons at once during the move? That chaos, that inability to function — that"s overwhelm. The fix wasn't doing more; it was letting things settle.\",
+    insideOutMoment: \"Remember when ALL of Riley's emotions were pressing buttons at once during the move? That chaos, that inability to function — that's overwhelm. The fix wasn't doing more; it was letting things settle.\",
     
     quickTechnique: {
       name: \"Brain Dump + Pick One\",
@@ -455,9 +455,9 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     emoji: '🥺',
     color: '#6366F1',
     gradient: ['#6366F1', '#818CF8"],
-    tagline: \"i'm not about being alone — i"m about feeling unseen and disconnected",
+    tagline: \"i'm not about being alone — i'm about feeling unseen and disconnected",
     
-    whatItIs: "Loneliness isn"t about how many people are around you — it's about feeling truly seen and connected. You can be lonely in a crowd and content alone. It"s about the quality of connection.",
+    whatItIs: "Loneliness isn't about how many people are around you — it's about feeling truly seen and connected. You can be lonely in a crowd and content alone. It's about the quality of connection.",
     
     whyItExists: "Humans are social creatures. We literally need connection to survive and thrive. Loneliness is your brain's signal that you need more meaningful interaction.",
     
@@ -490,10 +490,10 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
       \"Quality > quantity — one real friend beats 100 followers\",
       \"Be the initiator — don't wait to be invited\",
       \"Join something (club, team, group) around an interest\",
-      \"Talk to a counselor — they"re literally trained for this"
+      \"Talk to a counselor — they're literally trained for this"
     ],
     
-    insideOutMoment: "Think of Riley when she first moved — surrounded by family but completely alone inside. Her parents were there but didn"t really see what she was going through. That's loneliness.\",
+    insideOutMoment: "Think of Riley when she first moved — surrounded by family but completely alone inside. Her parents were there but didn't really see what she was going through. That's loneliness.\",
     
     quickTechnique: {
       name: \"Reach Out Right Now\",
@@ -520,7 +520,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     whyItExists: \"Jealousy helped our ancestors compete for resources and mates. Today, it can highlight what you truly value and want for yourself.\",
     
     brainScience: {
-      whatsHappening: \"Jealousy activates your brain"s threat detection system and reward centers simultaneously. You perceive a threat to something you value while also wanting what someone else has.",
+      whatsHappening: \"Jealousy activates your brain's threat detection system and reward centers simultaneously. You perceive a threat to something you value while also wanting what someone else has.",
       funFact: "Social media has supercharged jealousy because you're constantly comparing your real life to everyone's highlight reels."
     },
     
@@ -556,7 +556,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     quickTechnique: {
       name: \"Jealousy to Clarity\",
       steps: [
-        \"Name exactly what you"re jealous of",
+        \"Name exactly what you're jealous of",
         "Ask: Do I actually want this, or just think I should?",
         "If yes: What's ONE step toward getting it myself?",
         "If no: Why am I comparing myself here?"
@@ -573,9 +573,9 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     gradient: ['#F97316', '#FB923C"],
     tagline: \"i'm the spotlight feeling — when you think everyone is watching and judging\",
     
-    whatItIs: \"Embarrassment is that hot, wanting-to-disappear feeling when you think you"ve done something socially awkward or exposed something about yourself. It"s different from shame — it's usually about a moment, not your whole identity.\",
+    whatItIs: \"Embarrassment is that hot, wanting-to-disappear feeling when you think you've done something socially awkward or exposed something about yourself. It's different from shame — it's usually about a moment, not your whole identity.\",
     
-    whyItExists: \"Embarrassment helps us fit into social groups. It teaches us social norms and motivates us to repair social mistakes. It"s evolution's way of saying "let's not do that again."",
+    whyItExists: \"Embarrassment helps us fit into social groups. It teaches us social norms and motivates us to repair social mistakes. It's evolution's way of saying "let's not do that again."",
     
     brainScience: {
       whatsHappening: "Blood rushes to your face (blushing), your body heats up, and your brain goes into 'everyone is watching' mode. The spotlight effect makes you think people notice way more than they actually do.",
@@ -609,7 +609,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
       "Embarrassment is temporary; avoiding life is permanent"
     ],
     
-    insideOutMoment: "Remember Riley"s first day at school when she started crying in front of everyone? That burning need to disappear? Classic embarrassment. But here's the thing — her classmates weren"t judging; they felt for her.",
+    insideOutMoment: "Remember Riley's first day at school when she started crying in front of everyone? That burning need to disappear? Classic embarrassment. But here's the thing — her classmates weren't judging; they felt for her.",
     
     quickTechnique: {
       name: "Embarrassment Reset",
@@ -617,7 +617,7 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
         "Take 3 deep breaths (seriously, do it)",
         "Ask: Will this matter in 5 years? (probably not)",
         "Remember: Everyone is too worried about themselves to focus on you",
-        "Laugh if you can — 'well that happened 😅'"
+        "Laugh if you can — 'well that happened 😅''
       ],
       duration: "1 minute"
     }
@@ -631,16 +631,16 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     gradient: ['#EF4444', '#F87171"],
     tagline: \"i show up when things aren't working — and i want them fixed NOW\",
     
-    whatItIs: \"Frustration is the feeling of being blocked from a goal. Something isn"t working, someone isn"t understanding, progress isn't happening — and you"re stuck. It's anger"s annoying little sibling.\",
+    whatItIs: \"Frustration is the feeling of being blocked from a goal. Something isn't working, someone isn't understanding, progress isn't happening — and you're stuck. It's anger's annoying little sibling.\",
     
     whyItExists: \"Frustration motivates problem-solving. It pushes you to find new approaches, ask for help, or persist through obstacles. It's energy for change.\",
     
     brainScience: {
-      whatsHappening: \"Your brain expects a certain outcome, and when reality doesn"t match, it creates tension. This releases cortisol and adrenaline — giving you energy but also making you tense.",
+      whatsHappening: \"Your brain expects a certain outcome, and when reality doesn't match, it creates tension. This releases cortisol and adrenaline — giving you energy but also making you tense.",
       funFact: "Frustration tolerance is like a muscle — the more you work through frustrations, the better you get at handling them."
     },
     
-    superpower: "Frustration is persistence fuel. People who achieve big things aren"t frustration-free — they're good at channeling it. It means you care about the outcome.\",
+    superpower: "Frustration is persistence fuel. People who achieve big things aren't frustration-free — they're good at channeling it. It means you care about the outcome.\",
     
     bodySignals: [
       \"Tense muscles, especially jaw and shoulders\",
@@ -662,12 +662,12 @@ export const EMOTION_GUIDES: EmotionGuide[] = [
     copingTips: [
       \"Step away for 5-10 minutes — fresh eyes help\",
       \"Ask: Is this approach working, or do I need a new one?\",
-      \"Break it down smaller — what"s the NEXT tiny step?",
+      \"Break it down smaller — what's the NEXT tiny step?",
       "Ask for help — someone else might see the solution",
       "Physical release — squeeze something, do push-ups"
     ],
     
-    insideOutMoment: "In Inside Out 2, Anxiety keeps trying to control everything and getting more and more frustrated when it doesn"t work. The lesson? Sometimes you have to let go of controlling the outcome.\",
+    insideOutMoment: "In Inside Out 2, Anxiety keeps trying to control everything and getting more and more frustrated when it doesn't work. The lesson? Sometimes you have to let go of controlling the outcome.\",
     
     quickTechnique: {
       name: \"Frustration Pause\",

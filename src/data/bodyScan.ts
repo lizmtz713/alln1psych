@@ -24,13 +24,13 @@ export const BODY_ZONES: BodyZoneDef[] = [
   },
   {
     id: 'throat',
-    label: 'Throat",
+    label: 'Throat',
     meaning: `Tightness here can mean you're holding back words — something unsaid.`,
-    suggestion: `Take a sip of water. When you"re ready, try writing or saying one thing you've been holding in.`,
+    suggestion: `Take a sip of water. When you're ready, try writing or saying one thing you've been holding in.`,
   },
   {
     id: 'chest',
-    label: 'Chest",
+    label: 'Chest',
     meaning: `Heaviness or tightness often connects to grief, anxiety, or heartache.`,
     suggestion: `Place a hand on your chest and breathe slowly. Name one thing you're carrying.`,
   },
@@ -42,7 +42,7 @@ export const BODY_ZONES: BodyZoneDef[] = [
   },
   {
     id: 'shoulders',
-    label: 'Shoulders",
+    label: 'Shoulders',
     meaning: `Tension here often means you're carrying too much — responsibility, stress, or burden.`,
     suggestion: `Roll your shoulders back 5 times and take a deep breath. Imagine setting down one load.`,
   },

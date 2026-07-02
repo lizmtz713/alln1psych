@@ -252,7 +252,7 @@ function analyzeDayOfWeekPatterns(history: GaugeSnapshot[]): ExternalTrigger[] {
         const diff = dayAverages[day] - overallAvg;
         if (Math.abs(diff) > 10) {
           triggers.push({
-            type: 'weekly_pattern",
+            type: 'weekly_pattern',
             description: diff < 0 
               ? `${GAUGE_LABELS[gauge]} tends to dip on ${DAY_NAMES[day]}s`
               : `${GAUGE_LABELS[gauge]} tends to peak on ${DAY_NAMES[day]}s`,

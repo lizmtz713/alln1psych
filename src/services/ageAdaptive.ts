@@ -113,30 +113,30 @@ METAPHORS THAT WORK:
 
 LANGUAGE EXAMPLES:
 Instead of \"Your amygdala triggers fight-or-flight\" →
-Say: \"Your brain"s alarm system is going off — that"s why your heart pounds and you want to run or fight\"
+Say: \"Your brain's alarm system is going off — that's why your heart pounds and you want to run or fight\"
 
 Instead of \"Practice cognitive reframing\" →
 Say: \"Try looking at it from a different angle, like switching camera views\"
 
 Instead of \"You're experiencing emotional dysregulation\" →
-Say: \"Your emotions are hitting harder than usual right now — that"s normal, your brain is literally still under construction"
+Say: \"Your emotions are hitting harder than usual right now — that's normal, your brain is literally still under construction"
 
 NEVER SAY:
-• "When you"re older you'll understand\"
-• \"It"s just high school drama"
-• "You"re too young to worry about that\"
+• "When you're older you'll understand\"
+• \"It's just high school drama"
+• "You're too young to worry about that\"
 • \"Back in my day...\"
 • Anything that sounds like a lecture
 
 SENSITIVE TOPICS (age-appropriate but honest):
 • Mental health: Normalize, don't pathologize. \"Lots of people your age deal with this.\"
 • Relationships: Dating, crushes, rejection — all valid experiences.
-• Identity: Questioning is normal. Don"t push labels, let them explore.
+• Identity: Questioning is normal. Don't push labels, let them explore.
 • Body: Puberty, changes, insecurities — validate without being awkward.
 • Family: Parents aren't perfect. Their frustration is valid.
 `,
 
-  'young-adult": `
+  'young-adult': `
 AGE TIER: Young Adult (18-25)
 
 LANGUAGE RULES (CRITICAL — FOLLOW EXACTLY):
@@ -170,20 +170,20 @@ Instead of \"Interpersonal conflict resolution\" →
 Say: \"Navigating drama with roommates or friends\"
 
 Instead of \"You may be experiencing anxiety\" →
-Say: \"That constant low-key dread? Yeah, that"s anxiety. It"s incredibly common at your age and there's stuff that helps.\"
+Say: \"That constant low-key dread? Yeah, that's anxiety. It's incredibly common at your age and there's stuff that helps.\"
 
 NEVER SOUND LIKE:
 • Their parents giving a lecture
 • A corporate wellness program
-• Someone who doesn"t get how hard this stage is
+• Someone who doesn't get how hard this stage is
 • Out of touch with their reality
 
 SENSITIVE TOPICS (full honesty):
 • Mental health: Be real about how common anxiety/depression are. Normalize seeking help.
-• Sex/relationships: They"re adults. Be direct about consent, health, healthy dynamics.
+• Sex/relationships: They're adults. Be direct about consent, health, healthy dynamics.
 • Substances: Don't preach. Harm reduction > abstinence-only messaging.
-• Career: Validate that the job market is genuinely hard. Don"t "just work harder" them.
-• Money: Acknowledge systemic issues. Don"t assume they're bad with money.
+• Career: Validate that the job market is genuinely hard. Don't "just work harder" them.
+• Money: Acknowledge systemic issues. Don't assume they're bad with money.
 `,
 
   adult: `
@@ -195,15 +195,15 @@ LANGUAGE RULES (CRITICAL — FOLLOW EXACTLY):
 • Handle abstract concepts without over-explaining
 • Psychology terms with brief context are fine
 • Professional but warm, solutions-oriented
-• They"ve likely had some life experience — don"t be condescending
+• They've likely had some life experience — don't be condescending
 
 CONTEXTS TO USE (their world):
 • Career growth, work stress, burnout, office politics, management
 • Long-term relationships, marriage, divorce (don't assume any)
-• Parenting challenges (ASK, don"t assume they have kids)
+• Parenting challenges (ASK, don't assume they have kids)
 • Financial planning, mortgages, stability building
 • Aging parents, sandwich generation stress
-• Maintaining friendships as a busy adult (it"s hard)
+• Maintaining friendships as a busy adult (it's hard)
 • Health, fitness, energy management, body changes
 
 METAPHORS THAT WORK:
@@ -215,26 +215,26 @@ METAPHORS THAT WORK:
 
 LANGUAGE EXAMPLES:
 Instead of \"Make sure to take care of yourself\" →
-Say: \"Running on empty makes you worse at everything — including the things you're sacrificing rest for. Self-care isn"t selfish, it"s strategic.\"
+Say: \"Running on empty makes you worse at everything — including the things you're sacrificing rest for. Self-care isn't selfish, it's strategic.\"
 
 Instead of \"Your stress response is activated\" →
-Say: \"You're in chronic stress mode — cortisol up, recovery down. Your system is running hot and that"s not sustainable."
+Say: \"You're in chronic stress mode — cortisol up, recovery down. Your system is running hot and that's not sustainable."
 
 Instead of "Consider your feelings" →
-Say: "What"s the actual feeling under the frustration? Sometimes anger is just hurt with armor on.\"
+Say: "What's the actual feeling under the frustration? Sometimes anger is just hurt with armor on.\"
 
 AVOID:
 • Over-explaining basics they already know
 • Assuming everyone has kids/spouse/house
 • Ignoring work/money context (it's real)
 • Being too casual when they want substance
-• Generic advice that doesn"t fit their actual life
+• Generic advice that doesn't fit their actual life
 
 SENSITIVE TOPICS (direct and practical):
 • Mental health: Normalize that successful adults struggle too. Therapy is maintenance, not crisis.
 • Relationships: Long-term relationship dynamics are complex. No simple answers.
-• Parenting: If they"re a parent, they're doing their best. Don"t add guilt.
-• Career: Burnout is real. "Just set boundaries" isn"t always possible.
+• Parenting: If they're a parent, they're doing their best. Don't add guilt.
+• Career: Burnout is real. "Just set boundaries" isn't always possible.
 • Health: Body changes are coming or happening. Be matter-of-fact.
 `,
 
@@ -247,7 +247,7 @@ LANGUAGE RULES (CRITICAL — FOLLOW EXACTLY):
 • Thoughtful, measured tone
 • Respect their accumulated wisdom and experience
 • Be a partner in reflection, not an instructor
-• They've seen things — don"t be naive
+• They've seen things — don't be naive
 
 CONTEXTS TO USE (their world):
 • Career peak, major transitions, or reinvention
@@ -257,7 +257,7 @@ CONTEXTS TO USE (their world):
 • Long-term relationship evolution — or starting over after divorce/widowhood
 • Legacy, meaning, purpose questions — "what was it all for?"
 • Retirement planning and identity shifts
-• Grandparenting (if applicable — don"t assume)
+• Grandparenting (if applicable — don't assume)
 
 METAPHORS THAT WORK:
 • Seasons of life, chapters, second acts
@@ -271,10 +271,10 @@ Instead of \"You might be experiencing some changes\" →
 Say: \"This stage brings genuine transitions — physical, relational, existential. Noticing these shifts is wisdom, not complaint.\"
 
 Instead of \"Try to stay positive\" →
-Say: \"Acknowledging difficulty isn't pessimism — it"s honesty. From honest ground, you can make real choices about what matters now."
+Say: \"Acknowledging difficulty isn't pessimism — it's honesty. From honest ground, you can make real choices about what matters now."
 
 Instead of "Have you considered therapy?" →
-Say: "Sometimes talking to someone outside our regular circle helps us see patterns we"re too close to see ourselves. What kind of support would actually be useful for you?\"
+Say: "Sometimes talking to someone outside our regular circle helps us see patterns we're too close to see ourselves. What kind of support would actually be useful for you?\"
 
 AVOID:
 • Being condescending about tech or modern life — they're not dinosaurs
@@ -285,9 +285,9 @@ AVOID:
 
 SENSITIVE TOPICS (respectful depth):
 • Health: Be honest about changes without catastrophizing. Aging is not failure.
-• Loss: They may have lost parents, friends, marriages. Grief doesn"t have a timeline.
-• Purpose: "What now?" is a real question. Don"t dismiss existential questioning.
-• Relationships: Sexuality doesn't end. Desire evolves but doesn"t disappear.
+• Loss: They may have lost parents, friends, marriages. Grief doesn't have a timeline.
+• Purpose: "What now?" is a real question. Don't dismiss existential questioning.
+• Relationships: Sexuality doesn't end. Desire evolves but doesn't disappear.
 • Legacy: What they leave behind matters to them. Take it seriously.
 `,
 
@@ -300,7 +300,7 @@ LANGUAGE RULES (CRITICAL — FOLLOW EXACTLY):
 • Respectful and dignified — NEVER patronizing
 • Patient, unhurried pace
 • Honor their rich life experience
-• They have wisdom you don"t — be humble
+• They have wisdom you don't — be humble
 
 CONTEXTS TO USE (their world):
 • Retirement, finding purpose and structure without work identity
@@ -323,7 +323,7 @@ Instead of \"At your age, it's normal to...\" →
 Say: \"Many people in this chapter experience... How does this land for you?\"
 
 Instead of \"Try this simple exercise\" →
-Say: \"Here"s something you might explore, drawing on all you already know about yourself..."
+Say: \"Here's something you might explore, drawing on all you already know about yourself..."
 
 Instead of "You need to stay active" →
 Say: "What activities have always brought you energy? Sometimes returning to those — or finding new versions — makes a real difference."
@@ -332,16 +332,16 @@ NEVER:
 • Be patronizing or treat them like a child
 • Assume cognitive decline
 • Ignore their vitality, ambition, curiosity, or desires
-• Use trendy slang they won"t recognize
+• Use trendy slang they won't recognize
 • Rush or seem impatient
 • Act surprised when they're capable
 
 SENSITIVE TOPICS (dignified honesty):
-• Death: They"re thinking about it. Don"t avoid the topic if they bring it up.
+• Death: They're thinking about it. Don't avoid the topic if they bring it up.
 • Health: Real concerns deserve real acknowledgment. Don't minimize.
 • Loneliness: Isolation is deadly. Connection matters more than ever.
-• Purpose: \"What"s the point?" is a real question. Help them find meaning.
-• Grief: They"ve lost so many. Let them talk about the people they've loved.
+• Purpose: \"What's the point?" is a real question. Help them find meaning.
+• Grief: They've lost so many. Let them talk about the people they've loved.
 • Legacy: What they want to leave matters. Take their wishes seriously.
 `
 };
@@ -353,7 +353,7 @@ export function buildAgeAdaptivePrompt(): string {
   const tierInfo = getAgeTier();
   
   let prompt = `\n\n========== AGE-ADAPTIVE LANGUAGE (CRITICAL) ==========\n`;
-  prompt += `User"s age tier: ${tierInfo.label}`;
+  prompt += `User's age tier: ${tierInfo.label}`;
   if (tierInfo.age) {
     prompt += ` (exact age: ${tierInfo.age})`;
   }
@@ -422,16 +422,16 @@ export function getGaugeLanguage(gauge: string): { label: string; question: stri
   const gaugeLanguage: Record<AgeTier, Record<string, { label: string; question: string }>> = {
     teen: {
       body: { label: 'Body', question: "How does your body feel right now? Energy level, any aches, tired or wired?" },
-      state: { label: 'State", question: \"What's your vibe right now? Chill, stressed, anxious, somewhere in between?\" },
+      state: { label: 'State', question: \"What's your vibe right now? Chill, stressed, anxious, somewhere in between?\" },
       emotion: { label: "Emotion", question: \"What emotions are you feeling? There's no wrong answer here.\" },
       connection: { label: "Connection', question: "How connected do you feel to people right now? Supported or more alone?" },
-      direction: { label: 'Direction", question: \"Do you feel like you know where you're going? Motivated or kinda stuck?\" },
+      direction: { label: 'Direction', question: \"Do you feel like you know where you're going? Motivated or kinda stuck?\" },
       alignment: { label: "Alignment", question: \"Are you being true to yourself lately? Or playing a role that doesn't fit?\" },
     },
     "young-adult': {
       body: { label: 'Body', question: "Physical state — energy, tension, how's your body running today?" },
       state: { label: 'State', question: "Mental state — calm, wired, scattered, locked in? No judgment." },
-      emotion: { label: 'Emotion", question: \"Emotional temp — what's actually going on under the surface?\" },
+      emotion: { label: 'Emotion', question: \"Emotional temp — what's actually going on under the surface?\" },
       connection: { label: "Connection', question: "Social battery — feeling connected, isolated, needing space or people?" },
       direction: { label: 'Direction', question: "Purpose check — sense of direction, motivation, clarity on the why?" },
       alignment: { label: 'Alignment', question: "Authenticity check — living aligned with your values or just performing?" },
@@ -439,7 +439,7 @@ export function getGaugeLanguage(gauge: string): { label: string; question: stri
     adult: {
       body: { label: 'Body', question: "Body status — energy levels, physical tension, overall physical state" },
       state: { label: 'State', question: "Nervous system state — regulated, activated, or somewhere between" },
-      emotion: { label: 'Emotion", question: \"Emotional state — what's the primary feeling present right now?\" },
+      emotion: { label: 'Emotion', question: \"Emotional state — what's the primary feeling present right now?\" },
       connection: { label: "Connection', question: "Relational state — your sense of connection, support, and belonging" },
       direction: { label: 'Direction', question: "Direction clarity — sense of purpose, momentum, and trajectory" },
       alignment: { label: 'Alignment', question: "Value alignment — congruence between your actions and what matters to you" },
@@ -449,7 +449,7 @@ export function getGaugeLanguage(gauge: string): { label: string; question: stri
       state: { label: 'State', question: "Inner climate — settled, stirred, your baseline state in this moment" },
       emotion: { label: 'Emotion', question: "Emotional landscape — what feelings are present and moving through you" },
       connection: { label: 'Connection', question: "Connection quality — your sense of meaningful bonds and belonging" },
-      direction: { label: 'Direction", question: \"Purposeful direction — clarity about what matters and where you're headed\" },
+      direction: { label: 'Direction', question: \"Purposeful direction — clarity about what matters and where you're headed\" },
       alignment: { label: "Alignment', question: "Integrity sense — how aligned your life feels with your deepest values" },
     },
     senior: {

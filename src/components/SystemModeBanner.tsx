@@ -77,7 +77,7 @@ export function SystemModeBanner({
   // Mode transition animation
   useEffect(() => {
     Animated.timing(colorAnim, {
-      toValue: mode === 'stabilization" ? 1 : 0,
+      toValue: mode === 'stabilization' ? 1 : 0,
       duration: 400,
       useNativeDriver: false, // Can't use native driver for color interpolation
     }).start();

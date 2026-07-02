@@ -94,7 +94,7 @@ function GaugeStatusCard({ insight, compact }: { insight: GaugeStatusInsight; co
   return (
     <View style={[styles.card, compact && styles.cardCompact]}>
       <LinearGradient
-        colors={[COLORS.accentBg, 'transparent"]}
+        colors={[COLORS.accentBg, 'transparent']}
         style={styles.cardGradient}
       />
       

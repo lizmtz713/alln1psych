@@ -125,7 +125,7 @@ export async function scheduleCheckInReminder(
 
 // === DRIFT WARNING (relationship radar) ===
 
-const DRIFT_NOTIFICATION_TYPE = 'drift-warning";
+const DRIFT_NOTIFICATION_TYPE = 'drift-warning';
 
 /** Schedule a single \"X is drifting\" notification (e.g. tomorrow at 10am). */
 export async function scheduleDriftReminder(

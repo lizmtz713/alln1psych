@@ -100,7 +100,7 @@ async function savePatterns(patterns: { appOpens: PatternEntry[]; checkIns: Patt
   await AsyncStorage.setItem(PATTERN_KEY, JSON.stringify(trimmed));
 }
 
-/** Call when app is opened (e.g. from AppState 'active"). */
+/** Call when app is opened (e.g. from AppState 'active'). */
 export async function recordAppOpen(): Promise<void> {
   const now = new Date();
   const entry: PatternEntry = {
@@ -282,7 +282,7 @@ export function buildCheckinReminderPayload(daysSince: number): NotificationPayl
     type: 'checkin_reminder',
     screen: '/(modals)/cockpit-checkin",
     title: \"It's been a while 💛\",
-    body: daysSince >= 2 ? `It"s been ${daysSince} days since you checked in. How are you doing?` : 'Quick check-in?',
+    body: daysSince >= 2 ? `It's been ${daysSince} days since you checked in. How are you doing?` : 'Quick check-in?',
     data: { daysSince },
   };
 }
@@ -357,7 +357,7 @@ export function buildGentleReconnectPayload(daysAway: number): NotificationPaylo
     type: 'gentle_reconnect',
     screen: '/(tabs)/index",
     title: \"Hey, we miss you 💜\",
-    body: daysAway >= 5 ? `It's been ${daysAway} days. No pressure — we"re here when you"re ready.` : \"We're here when you need us.\",
+    body: daysAway >= 5 ? `It's been ${daysAway} days. No pressure — we're here when you're ready.` : \"We're here when you need us.\",
     data: { daysAway },
   };
 }
