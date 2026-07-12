@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
+import { router } from 'expo-router';
 import { supabase } from '../lib/supabase';
+import { destroyLocalSessionState } from '../services/sessionReset';
 
 type AuthContextType = {
   session: Session | null;
@@ -14,6 +16,42 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+/** Auth screen for unauthenticated users — Expo Router file group `(auth)/sign-in`. */
+const UNAUTHENTICATED_ROUTE = '/(auth)/sign-in' as const;
+
+/**
+ * Fail-safe sign-out.
+ * 1) try: fire local Supabase sign-out (do not hang on network)
+ * 2) finally: wipe React Query + Zustand + AsyncStorage (best-effort)
+ * 3) always: force navigate to auth, even if everything above failed
+ */
+export async function performSignOut(): Promise<void> {
+  try {
+    // Clear React session immediately so UI unmounts protected trees without waiting on I/O.
+    // Local scope avoids a blocking remote revoke that freezes physical devices offline.
+    void supabase.auth.signOut({ scope: 'local' }).catch(() => {
+      /* network / storage — ignore */
+    });
+  } catch {
+    /* never block logout */
+  } finally {
+    try {
+      destroyLocalSessionState();
+    } catch {
+      /* never block logout */
+    }
+    try {
+      router.replace(UNAUTHENTICATED_ROUTE);
+    } catch {
+      try {
+        router.push(UNAUTHENTICATED_ROUTE);
+      } catch {
+        /* navigation unavailable — AuthSync / index Redirect will still gate */
+      }
+    }
+  }
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -67,9 +105,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    const { clearSessionLocalState } = await import('../services/sessionReset');
-    await clearSessionLocalState();
-    await supabase.auth.signOut();
+    // Optimistic UI: drop session state so tabs unmount even if SecureStore lags.
+    setSession(null);
+    setUser(null);
+    await performSignOut();
   };
 
   const resetPassword = async (email: string): Promise<{ error: Error | null }> => {

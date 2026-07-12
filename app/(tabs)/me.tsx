@@ -439,7 +439,20 @@ export default function MeScreen() {
           <Pressable style={styles.footerLearnMore} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); navigateTo('/(modals)/disclaimer'); }}>
             <Text style={styles.footerLink}>{GLOBAL_DISCLAIMER.learnMoreLabel}</Text>
           </Pressable>
-          <Pressable style={styles.signOutBtn} onPress={async () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); await signOut(); }}>
+          <Pressable
+            style={styles.signOutBtn}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              // Never await in a way that can freeze the button — performSignOut is fail-safe
+              void signOut().catch(() => {
+                try {
+                  router.replace('/(auth)/sign-in');
+                } catch {
+                  /* ignore */
+                }
+              });
+            }}
+          >
             <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
             <Text style={styles.signOutText}>Sign Out</Text>
           </Pressable>

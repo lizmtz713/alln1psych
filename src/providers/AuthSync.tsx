@@ -16,6 +16,7 @@ import {
 import type { AgeGroup, LearningStyle } from '../stores/userStore';
 import { TEMPERATURE_LABELS } from '../stores/circleStore';
 import type { Temperature } from '../stores/circleStore';
+import { resetUserScopedStoresInMemory } from '../services/sessionReset';
 
 /**
  * Syncs auth userId to authStore and hydrates all stores from Supabase when user is present.
@@ -30,11 +31,11 @@ export function AuthSync({ children }: { children: React.ReactNode }) {
     if (loading) return;
 
     if (!user) {
+      // Memory-only reset. Do NOT await AsyncStorage here — that double-purge
+      // after performSignOut() was freezing logout on physical devices.
       setUserId(null);
       useUserStore.setState({ profileHydrated: false });
-      void import('../services/sessionReset').then(({ clearSessionLocalState }) =>
-        clearSessionLocalState()
-      );
+      resetUserScopedStoresInMemory();
       return;
     }
     const id = user.id;
