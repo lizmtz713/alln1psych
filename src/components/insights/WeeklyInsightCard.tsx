@@ -8,10 +8,15 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useGeneratedInsights } from '../../hooks/useGeneratedInsights';
 import { GeneratedInsightCard } from './GeneratedInsightCard';
 import { COLORS, BORDER_RADIUS, SPACING } from '../../lib/constants';
+import type { InsightContext } from '../../types/insights-engine';
 
-export function WeeklyInsightCard() {
+export function WeeklyInsightCard({
+  context = 'home',
+}: {
+  context?: InsightContext;
+}) {
   const { insights, isLoading, error } = useGeneratedInsights({
-    context: 'home',
+    context,
     withHistory: true,
   });
 

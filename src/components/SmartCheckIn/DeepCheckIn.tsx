@@ -157,7 +157,7 @@ export function DeepCheckIn({
             style={styles.textInput}
             value={insight}
             onChangeText={setInsight}
-            placeholder=\"One small change...\"
+            placeholder="One small change..."
             placeholderTextColor={COLORS.textMuted}
             multiline
             numberOfLines={3}
@@ -183,7 +183,7 @@ export function DeepCheckIn({
   );
 }
 
-function getDayPart(): "morning' | 'afternoon' | 'evening' | 'night' {
+function getDayPart(): 'morning' | 'afternoon' | 'evening' | 'night' {
   const hour = new Date().getHours();
   if (hour >= 5 && hour < 12) return 'morning';
   if (hour >= 12 && hour < 17) return 'afternoon';

@@ -88,7 +88,7 @@ interface WhatsNewProps {
   currentVersion?: string;
 }
 
-export function WhatsNew({ currentVersion = '1.2.0" }: WhatsNewProps) {
+export function WhatsNew({ currentVersion = '1.2.0' }: WhatsNewProps) {
   const [visible, setVisible] = useState(false);
   const [lastSeenVersion, setLastSeenVersion] = useState<string | null>(null);
   
@@ -134,15 +134,15 @@ export function WhatsNew({ currentVersion = '1.2.0" }: WhatsNewProps) {
         }}
         style={styles.trigger}
       >
-        <Ionicons name=\"sparkles\" size={20} color={COLORS.accent} />
+        <Ionicons name="sparkles" size={20} color={COLORS.accent} />
         {hasNewUpdates && <View style={styles.dot} />}
       </Pressable>
       
       {/* Modal */}
       <Modal
         visible={visible}
-        animationType=\"slide\"
-        presentationStyle=\"pageSheet\"
+        animationType="slide"
+        presentationStyle="pageSheet"
         onRequestClose={handleDismiss}
       >
         <View style={styles.container}>

@@ -74,13 +74,13 @@ export interface CauseInsight extends BaseGeneratedInsight {
 /** Timing — "When it tends to happen" (e.g. dips in the afternoon, better on weekends) */
 export interface TimingInsight extends BaseGeneratedInsight {
   kind: 'timing';
-  /** e.g. \"weekday evenings\", \"Monday morning\" */
+  /** e.g. "weekday evenings", "Monday morning" */
   timeLabel?: string;
 }
 
-/** Growth — \"How you're changing\" (e.g. state up 15% this month, more check-ins) */
+/** Growth — "How you're changing" (e.g. state up 15% this month, more check-ins) */
 export interface GrowthInsight extends BaseGeneratedInsight {
-  kind: "growth';
+  kind: 'growth';
   /** Optional metric (e.g. "+12%", "3 more check-ins") */
   metric?: string;
 }
@@ -88,7 +88,7 @@ export interface GrowthInsight extends BaseGeneratedInsight {
 /** Meaning — "What it might mean for you" (gentle reframe, not diagnosis) */
 export interface MeaningInsight extends BaseGeneratedInsight {
   kind: 'meaning';
-  /** Optional reframe or \"what this could mean\" line */
+  /** Optional reframe or "what this could mean" line */
   reframe?: string;
 }
 
@@ -100,7 +100,7 @@ export type GeneratedInsight =
   | MeaningInsight;
 
 /** Input context for the engine: where and for what we're generating insights */
-export type InsightContext = "home' | 'gauge' | 'postCheckIn' | 'weekly';
+export type InsightContext = 'home' | 'gauge' | 'postCheckIn' | 'weekly';
 
 /** Optional health/wearable context for cause insights (Body/State). */
 export interface InsightHealthContext {
@@ -143,7 +143,7 @@ export interface InsightEngineInput {
   recentGoalReflections?: RecentGoalReflections;
   /** Health/wearable context for Body/State cause (sleep, recovery, HRV) */
   healthContext?: InsightHealthContext;
-  /** Current life chapter (e.g. \"New parent\", \"Career transition\") for meaning-layer insights */
+  /** Current life chapter (e.g. "New parent", "Career transition") for meaning-layer insights */
   lifeChapter?: string;
   /** User's chosen values (for values-layer insights: goals ↔ values) */
   userValues?: string[];

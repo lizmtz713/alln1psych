@@ -16,11 +16,14 @@ import { supabase } from '../lib/supabase';
 
 const API_KEY_STORAGE = 'openai_api_key';
 
-/** Prefer SecureStore (user-configured), then env from .env (never commit .env). */
+/**
+ * Client must not embed provider secrets via EXPO_PUBLIC_*.
+ * Prefer Edge Functions; optional SecureStore key is user-supplied at runtime only.
+ * OPENAI_API_KEY in process.env is allowed for local Node tooling, not mobile binaries.
+ */
 function getOpenAIKeyFromEnv(): string | null {
-  const key =
-    (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_OPENAI_API_KEY) ||
-    (typeof process !== 'undefined' && process.env?.OPENAI_API_KEY);
+  // Intentionally ignore EXPO_PUBLIC_OPENAI_API_KEY — it ships in every TestFlight binary.
+  const key = typeof process !== 'undefined' ? process.env?.OPENAI_API_KEY : undefined;
   return key && key.trim() ? key.trim() : null;
 }
 
@@ -888,6 +891,26 @@ export async function sendMessageWithSystemPromptOnly(
     if (!apiKey) throw new Error('OpenAI API key not configured');
     return sendMessageDirectly(msgList, systemPrompt, maxTokens);
   }
+}
+
+export interface CallAIOptions {
+  temperature?: number;
+  max_tokens?: number;
+  system?: string;
+}
+
+/**
+ * Lightweight tool helper for one-shot prompts (reach-out, family scripts, etc.).
+ * Wraps sendMessageWithSystemPromptOnly with a default tool system prompt.
+ */
+export async function callAI(
+  messages: Message[],
+  options: CallAIOptions = {}
+): Promise<string> {
+  const system =
+    options.system ??
+    'You are a warm, practical companion inside InGauge. Be concise, specific, and human. No clinical jargon.';
+  return sendMessageWithSystemPromptOnly(messages, system, options.max_tokens ?? 500);
 }
 
 /** Suggest a memory hook (association) for remembering someone's name. Used by Memory Builder. */

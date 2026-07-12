@@ -15,6 +15,11 @@
  * people where they actually are - not where we wish they were.
  */
 
+export interface LessonPerspective {
+  discipline: string;
+  insight: string;
+}
+
 export interface HumanManualLesson {
   id: string;
   title: string;
@@ -30,6 +35,8 @@ export interface HumanManualLesson {
   };
   reflectionQuestions: string[];
   relatedLessons?: string[];
+  /** Interdisciplinary angles that enrich the lesson */
+  perspectives?: LessonPerspective[];
   /** Gauges that can trigger this lesson as contextual suggestion */
   triggerGauges?: ('body' | 'state' | 'emotion' | 'connection' | 'direction' | 'alignment')[];
   /** Threshold below which the lesson is suggested (default 40) */
