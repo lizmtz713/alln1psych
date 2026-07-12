@@ -22,13 +22,19 @@ import type { Temperature } from '../stores/circleStore';
  * Clears userId on sign out.
  */
 export function AuthSync({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const setUserId = useAuthStore((s) => s.setUserId);
 
   useEffect(() => {
+    // Wait for initial session resolve — do NOT wipe local state during auth bootstrap
+    if (loading) return;
+
     if (!user) {
       setUserId(null);
       useUserStore.setState({ profileHydrated: false });
+      void import('../services/sessionReset').then(({ clearSessionLocalState }) =>
+        clearSessionLocalState()
+      );
       return;
     }
     const id = user.id;
@@ -129,7 +135,7 @@ export function AuthSync({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, setUserId]);
+  }, [loading, user?.id, setUserId]);
 
   return <>{children}</>;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, ScrollView, Animated, RefreshControl, SafeAreaView, Modal } from 'react-native';
+import { StyleSheet, Text, View, Pressable, ScrollView, Animated, RefreshControl, SafeAreaView, Modal, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -394,7 +394,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   // Server reopen: mood_checkins + body maintenance momentum_state (not AsyncStorage)
-  useCockpitMoodHydration();
+  const cockpitHydration = useCockpitMoodHydration();
   useBodyMaintenanceHydration();
   useSyncCockpitToFleet();
   const circle = useCircleStore();
@@ -876,6 +876,14 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={ACCENT} />}
     >
+      {/* Server hydration — cold boot Resolve useCockpitMoodHydration before trusting gauges */}
+      {cockpitHydration.isLoading && (
+        <View style={styles.hydrationBanner}>
+          <ActivityIndicator size="small" color={ACCENT} />
+          <Text style={styles.hydrationBannerText}>Syncing your cockpit…</Text>
+        </View>
+      )}
+
       {/* 1. Greeting + system status + top-right utilities */}
       <View style={styles.cockpitTopRow}>
         <View style={styles.cockpitHeaderWrap}>
@@ -1416,6 +1424,24 @@ const styles = StyleSheet.create({
   gaugeGridRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 },
   gaugeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, flex: 1 },
   cockpitTopRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', paddingRight: 12 },
+  hydrationBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: 'rgba(124, 77, 255, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(124, 77, 255, 0.25)',
+  },
+  hydrationBannerText: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+  },
   cockpitHeaderWrap: { flex: 1, minWidth: 0 },
   cockpitMoreBtn: { padding: 8, marginTop: 4 },
   forecastStripWrap: { marginHorizontal: 20, marginBottom: 8, gap: 6 },

@@ -126,5 +126,10 @@ export function useCreateCheckin(userId: string | undefined) {
       void queryClient.invalidateQueries({ queryKey: ['momentum_state'] });
       invalidateCheckinCaches(userId);
     },
+    onError: (err) => {
+      if (__DEV__) {
+        console.error('[useCreateCheckin] failed', err);
+      }
+    },
   });
 }

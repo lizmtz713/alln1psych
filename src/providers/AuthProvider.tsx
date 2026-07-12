@@ -67,6 +67,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    const { clearSessionLocalState } = await import('../services/sessionReset');
+    await clearSessionLocalState();
     await supabase.auth.signOut();
   };
 
