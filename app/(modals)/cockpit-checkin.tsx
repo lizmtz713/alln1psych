@@ -14,6 +14,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -201,12 +202,22 @@ export default function CockpitCheckinScreen() {
           cur.socialContext ? `Social: ${cur.socialContext}` : null,
           cur.stressSourceContext ? `Stress: ${cur.stressSourceContext}` : null,
         ].filter(Boolean);
-        createCheckin.mutate({
-          mood,
-          moodLabel: TEMPERATURE_LABELS[mood],
-          note: noteParts.length > 0 ? noteParts.join(' · ') : null,
-          gauges: Object.keys(gauges).length > 0 ? gauges : undefined,
-        });
+        createCheckin.mutate(
+          {
+            mood,
+            moodLabel: TEMPERATURE_LABELS[mood],
+            note: noteParts.length > 0 ? noteParts.join(' · ') : null,
+            gauges: Object.keys(gauges).length > 0 ? gauges : undefined,
+          },
+          {
+            onError: (err) => {
+              Alert.alert(
+                'Check-in not saved',
+                err instanceof Error ? err.message : 'Could not reach the server. Try again.'
+              );
+            },
+          }
+        );
 
         setTimeout(() => {
           const s = useCockpitStore.getState();

@@ -70,14 +70,24 @@ async function upsertGaugeMomentum(
 }
 
 export async function createCheckinOnServer(
-  userId: string,
+  userId: string | undefined,
   input: CreateCheckinInput
 ): Promise<MoodCheckinRow> {
+  // Prefer live session over React closure — avoids silent "Not signed in" from stale hooks.
+  let resolvedUserId = userId;
+  if (!resolvedUserId) {
+    const { data } = await supabase.auth.getUser();
+    resolvedUserId = data.user?.id;
+  }
+  if (!resolvedUserId) {
+    throw new Error('Not signed in — cannot persist check-in');
+  }
+
   const moodLabel = input.moodLabel ?? TEMPERATURE_LABELS[input.mood];
   const { data, error } = await supabase
     .from('mood_checkins')
     .insert({
-      user_id: userId,
+      user_id: resolvedUserId,
       mood: input.mood,
       mood_label: moodLabel,
       note: input.note ?? null,
@@ -90,19 +100,28 @@ export async function createCheckinOnServer(
   if (!data) throw new Error('mood_checkins insert returned no row');
 
   if (input.gauges && Object.keys(input.gauges).length > 0) {
-    await upsertGaugeMomentum(userId, input.gauges);
+    try {
+      await upsertGaugeMomentum(resolvedUserId, input.gauges);
+    } catch (momentumErr) {
+      // Mood row is already saved — do not fail the whole check-in on momentum upsert.
+      if (__DEV__) console.warn('[createCheckin] momentum upsert failed', momentumErr);
+    }
   }
 
-  // Keep temperature row in sync when present (legacy companion table).
-  await supabase
-    .from('temperature')
-    .update({
-      current_temp: input.mood,
-      temp_label: moodLabel,
-      note: input.note ?? null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('user_id', userId);
+  // Best-effort legacy temperature sync — never fail the check-in.
+  try {
+    await supabase
+      .from('temperature')
+      .update({
+        current_temp: input.mood,
+        temp_label: moodLabel,
+        note: input.note ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', resolvedUserId);
+  } catch {
+    /* ignore */
+  }
 
   return data as MoodCheckinRow;
 }
@@ -115,21 +134,16 @@ export function useCreateCheckin(userId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: CreateCheckinInput) => {
-      if (!userId) throw new Error('Not signed in — cannot persist check-in');
-      return createCheckinOnServer(userId, input);
-    },
-    onSuccess: () => {
-      if (!userId) return;
-      // CRUCIAL: destroy stale cache so useCockpitMoodHydration refetches server truth
-      void queryClient.invalidateQueries({ queryKey: moodCheckinsQueryKey(userId) });
+    mutationFn: async (input: CreateCheckinInput) => createCheckinOnServer(userId, input),
+    onSuccess: (row) => {
+      const id = row.user_id || userId;
+      if (!id) return;
+      void queryClient.invalidateQueries({ queryKey: moodCheckinsQueryKey(id) });
       void queryClient.invalidateQueries({ queryKey: ['momentum_state'] });
-      invalidateCheckinCaches(userId);
+      invalidateCheckinCaches(id);
     },
     onError: (err) => {
-      if (__DEV__) {
-        console.error('[useCreateCheckin] failed', err);
-      }
+      console.error('[useCreateCheckin] failed', err);
     },
   });
 }
