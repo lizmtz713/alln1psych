@@ -19,12 +19,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
-import { useCircleStore, type Temperature } from '../../src/stores/circleStore';
+import { useCircleStore, TEMPERATURE_LABELS, type Temperature } from '../../src/stores/circleStore';
 import { trackCheckIn } from '../../src/hooks/useWrappedTracking';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useHumanSkillsStore, CHECKIN_SKILL_IDS, SKILL_POINTS } from '../../src/stores/humanSkillsStore';
 import { runAchievementChecks } from '../../src/services/achievementChecker';
 import { VoiceTextInput } from '../../src/components/VoiceTextInput';
+import { useCreateCheckin } from '../../src/hooks/useCreateCheckin';
+import { useAuth } from '../../src/providers/AuthProvider';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_SIZE = (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.md) / 2;
@@ -64,6 +66,8 @@ function AnimatedSection({ children, delay = 0 }: { children: React.ReactNode; d
 export default function MoodCheckinScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { user } = useAuth();
+  const createCheckin = useCreateCheckin(user?.id);
   const addMoodCheckin = useCircleStore((s) => s.addMoodCheckin);
   const addSkillPoints = useHumanSkillsStore((s) => s.addPoints);
   const [selected, setSelected] = useState<Temperature | null>(null);
@@ -85,7 +89,14 @@ export default function MoodCheckinScreen() {
   const handleSave = () => {
     if (!selected) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Local circle UI immediately
     addMoodCheckin(selected, note.trim() || undefined);
+    // Server + React Query invalidation (authoritative Save → Reopen path)
+    createCheckin.mutate({
+      mood: selected,
+      moodLabel: TEMPERATURE_LABELS[selected],
+      note: note.trim() || null,
+    });
     trackCheckIn();
     addSkillPoints(CHECKIN_SKILL_IDS, SKILL_POINTS.checkIn, 'check-in');
     runAchievementChecks();

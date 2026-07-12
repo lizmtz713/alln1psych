@@ -30,11 +30,12 @@ import { useJournalStore } from '../../src/stores/journalStore';
 import { useGratitudeStore } from '../../src/stores/gratitudeStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { sendMessageWithSystemPromptOnly } from '../../src/services/ai';
-import { useCircleStore } from '../../src/stores/circleStore';
-import type { Temperature } from '../../src/stores/circleStore';
+import { useCircleStore, TEMPERATURE_LABELS, type Temperature } from '../../src/stores/circleStore';
 import { trackCheckIn } from '../../src/hooks/useWrappedTracking';
 import { useConversationStore } from '../../src/stores/conversationStore';
 import { useEducationStore } from '../../src/stores/educationStore';
+import { useCreateCheckin } from '../../src/hooks/useCreateCheckin';
+import { useAuth } from '../../src/providers/AuthProvider';
 
 type BreathPhase = 'inhale' | 'hold' | 'exhale';
 const BOX_BREATH = { inhale: 4, hold: 4, exhale: 4, holdAfter: 4 };
@@ -200,6 +201,8 @@ export default function ActivityScreen() {
   const [stressLevel, setStressLevel] = useState<number>(5);
   const [stressNote, setStressNote] = useState('');
   const [stressSubmitted, setStressSubmitted] = useState(false);
+  const { user } = useAuth();
+  const createCheckin = useCreateCheckin(user?.id);
   const addMoodCheckin = useCircleStore((s) => s.addMoodCheckin);
   const emergencyContacts = useUserStore((s) => s.emergencyContacts);
 
@@ -1108,7 +1111,13 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
       else Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     };
     const onSaveCheckin = () => {
-      addMoodCheckin(stressToTemp(stressLevel), stressNote.trim() || undefined);
+      const mood = stressToTemp(stressLevel);
+      addMoodCheckin(mood, stressNote.trim() || undefined);
+      createCheckin.mutate({
+        mood,
+        moodLabel: TEMPERATURE_LABELS[mood],
+        note: stressNote.trim() || null,
+      });
       trackCheckIn();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert('Saved', 'Check-in saved to your mood history.');

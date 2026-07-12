@@ -14,12 +14,17 @@ import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
 import { GAUGE_CONFIG } from '../../src/utils/gaugeHelpers';
 import { DRIVERS_BY_GAUGE } from '../../src/data/driversByGauge';
 import { CircumplexEmotionPicker, type CircumplexOption } from '../../src/components/checkin/CircumplexEmotionPicker';
+import { useCreateCheckin, emotionScoreToMood } from '../../src/hooks/useCreateCheckin';
+import { useAuth } from '../../src/providers/AuthProvider';
+import { TEMPERATURE_LABELS } from '../../src/stores/circleStore';
 
 const GAUGE_KEYS: GaugeKey[] = ['body', 'state', 'emotion', 'connection', 'direction', 'alignment'];
 
 export default function QuickLogScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { user } = useAuth();
+  const createCheckin = useCreateCheckin(user?.id);
   const updateState = useCockpitStore((s) => s.updateState);
   const updateEmotion = useCockpitStore((s) => s.updateEmotion);
   const setCheckInSystemImpact = useCockpitStore((s) => s.setCheckInSystemImpact);
@@ -77,6 +82,15 @@ export default function QuickLogScreen() {
     });
     setLastCheckInDate(new Date().toISOString().slice(0, 10));
     recordGaugesForDrift().catch(() => {});
+
+    const mood = emotionScoreToMood(statePick.emotion);
+    createCheckin.mutate({
+      mood,
+      moodLabel: TEMPERATURE_LABELS[mood],
+      note: statePick.label ? `Quick log: ${statePick.label}` : null,
+      gauges: Object.keys(gauges).length > 0 ? gauges : undefined,
+    });
+
     router.back();
   };
 

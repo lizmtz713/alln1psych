@@ -26,6 +26,9 @@ import { DRIVERS_BY_GAUGE } from '../../src/data/driversByGauge';
 import { PostCheckInSuggestions } from '../../src/components/checkin/PostCheckInSuggestions';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 import { useGeneratedInsights } from '../../src/hooks/useGeneratedInsights';
+import { useCreateCheckin, emotionScoreToMood } from '../../src/hooks/useCreateCheckin';
+import { useAuth } from '../../src/providers/AuthProvider';
+import { TEMPERATURE_LABELS } from '../../src/stores/circleStore';
 import { runAchievementChecks } from '../../src/services/achievementChecker';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 
@@ -119,6 +122,8 @@ const STRESS_OPTIONS = ['Work', 'Relationships', 'Health', 'Money', 'Nothing maj
 export default function CockpitCheckinScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { user } = useAuth();
+  const createCheckin = useCreateCheckin(user?.id);
   const [step, setStep] = useState(0);
   const [formVersion, setFormVersion] = useState(0);
   const [showPostCheckInSuggestions, setShowPostCheckInSuggestions] = useState(false);
@@ -186,6 +191,23 @@ export default function CockpitCheckinScreen() {
         });
         setLastCheckInDate(new Date().toISOString().slice(0, 10));
         recordGaugesForDrift().catch(() => {});
+
+        // Server write + React Query invalidation (Save → Reopen)
+        const emotionScore = snap.emotion.value >= 0 ? snap.emotion.value : 50;
+        const mood = emotionScoreToMood(emotionScore);
+        const noteParts = [
+          cur.emotionSelected?.length ? `Feeling: ${cur.emotionSelected.join(', ')}` : null,
+          cur.sleepContext ? `Sleep: ${cur.sleepContext}` : null,
+          cur.socialContext ? `Social: ${cur.socialContext}` : null,
+          cur.stressSourceContext ? `Stress: ${cur.stressSourceContext}` : null,
+        ].filter(Boolean);
+        createCheckin.mutate({
+          mood,
+          moodLabel: TEMPERATURE_LABELS[mood],
+          note: noteParts.length > 0 ? noteParts.join(' · ') : null,
+          gauges: Object.keys(gauges).length > 0 ? gauges : undefined,
+        });
+
         setTimeout(() => {
           const s = useCockpitStore.getState();
           const gauges: Partial<Record<GaugeKey, { value: number; trend?: 'improving' | 'stable' | 'declining' | null }>> = {};
@@ -203,7 +225,7 @@ export default function CockpitCheckinScreen() {
       }
       return prev + 1;
     });
-  }, [setLastCheckInDate, setCheckInContext, setCheckInSystemImpact, setCheckInDrivers, setLastCheckInSnapshot, recordGaugesForDrift]);
+  }, [setLastCheckInDate, setCheckInContext, setCheckInSystemImpact, setCheckInDrivers, setLastCheckInSnapshot, recordGaugesForDrift, createCheckin]);
 
   const handleNext = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

@@ -366,7 +366,8 @@ export const useCircleStore = create<CircleState>((set) => ({
     }),
 
   addMoodCheckin: (mood, note) => {
-    const userId = useAuthStore.getState().userId;
+    // Local UI only. Server persistence + React Query invalidation must go through
+    // useCreateCheckin / createCheckinOnServer so Cockpit reopen stays consistent.
     const label = TEMPERATURE_LABELS[mood];
     const entry = {
       id: genId(),
@@ -382,9 +383,6 @@ export const useCircleStore = create<CircleState>((set) => ({
       myTemperatureNote: note ?? '',
       myTemperatureUpdatedAt: new Date(),
     }));
-    if (userId) {
-      database.addMoodCheckin(userId, mood, label, note).catch(() => {});
-    }
   },
 
   addNudge: (memberName, message) =>
