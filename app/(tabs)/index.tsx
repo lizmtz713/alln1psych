@@ -9,6 +9,8 @@ import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCircleStore } from '../../src/stores/circleStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { useCockpitStore, type GaugeKey, computeSystemMode } from '../../src/stores/cockpitStore';
+import { useCockpitMoodHydration } from '../../src/hooks/useCockpitMoodHydration';
+import { useBodyMaintenanceHydration } from '../../src/hooks/useBodyMaintenanceHydration';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import {
   GAUGE_CONFIG,
@@ -391,6 +393,9 @@ function GaugeTile({ gaugeId, onPress }: { gaugeId: GaugeKey; onPress: () => voi
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  // Server reopen: mood_checkins + body maintenance momentum_state (not AsyncStorage)
+  useCockpitMoodHydration();
+  useBodyMaintenanceHydration();
   useSyncCockpitToFleet();
   const circle = useCircleStore();
   const members = circle.members ?? [];

@@ -613,19 +613,14 @@ export const useCockpitStore = create<CockpitState>()(
       name: 'cockpit-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
+        // Check-in fields are server-owned via mood_checkins + useCockpitMoodHydration.
+        // Do not rehydrate them from AsyncStorage on reopen (avoids cross-account bleed).
         body: state.body,
         state: state.state,
         emotion: state.emotion,
         connection: state.connection,
         direction: state.direction,
         alignment: state.alignment,
-        lastCheckInDate: state.lastCheckInDate,
-        checkInDates: state.checkInDates,
-        checkInContext: state.checkInContext,
-        checkInSystemImpact: state.checkInSystemImpact,
-        checkInDrivers: state.checkInDrivers,
-        lastCheckInSnapshot: state.lastCheckInSnapshot,
-        checkInHistory: state.checkInHistory,
         suggestedActionsTaken: state.suggestedActionsTaken,
         systemMode: state.systemMode,
         stabilizationTriggers: state.stabilizationTriggers,
