@@ -29,12 +29,13 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { APP_CONFIG } from '../../src/lib/constants';
-import { useAuth } from '../../src/providers/AuthProvider';
+import { supabase } from '../../src/lib/supabase';
+import { destroyLocalSessionState } from '../../src/services/sessionReset';
 import { useUserStore } from '../../src/stores/userStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { useCircleStore, type TemperatureVisibility } from '../../src/stores/circleStore';
@@ -202,8 +203,6 @@ function TemperatureVisibilityRow() {
 
 export default function MeScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
-  const { signOut } = useAuth();
   const user = useUserStore();
   const myTemperature = useCircleStore((s) => s.myTemperature);
   const members = useCircleStore((s) => s.members);
@@ -245,7 +244,21 @@ export default function MeScreen() {
   const navigateTo = useCallback((route: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(route as any);
-  }, [router]);
+  }, []);
+
+  const handleSignOut = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      // Fire the Supabase sign-out event immediately
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch (err) {
+      console.log('Signout network warning:', err);
+    } finally {
+      // Force local state destruction and navigation fallback no matter what
+      destroyLocalSessionState();
+      router.replace('/(auth)/sign-in');
+    }
+  }, []);
 
   const toggleSection = useCallback((key: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -441,17 +454,10 @@ export default function MeScreen() {
           </Pressable>
           <Pressable
             style={styles.signOutBtn}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              // Never await in a way that can freeze the button — performSignOut is fail-safe
-              void signOut().catch(() => {
-                try {
-                  router.replace('/(auth)/sign-in');
-                } catch {
-                  /* ignore */
-                }
-              });
-            }}
+            onPress={handleSignOut}
+            hitSlop={16}
+            accessibilityRole="button"
+            accessibilityLabel="Sign Out"
           >
             <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
             <Text style={styles.signOutText}>Sign Out</Text>
@@ -803,13 +809,15 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 
-  // Sign Out
+  // Sign Out — keep above scroll padding; no overlays on Me footer
   signOutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
     gap: 8,
+    zIndex: 2,
+    elevation: 2,
   },
   signOutText: {
     fontSize: 16,
