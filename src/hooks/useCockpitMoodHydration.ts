@@ -79,13 +79,15 @@ async function fetchCockpitServerState(userId: string): Promise<CockpitServerPay
  * Clears session cockpit state when logged out.
  */
 export function useCockpitMoodHydration() {
-  const { user } = useAuth();
+  const { user, isPasswordRecovery } = useAuth();
   const queryClient = useQueryClient();
   const userId = user?.id;
+  // Never fire Cockpit queries on a half-baked recovery session.
+  const enabled = Boolean(userId) && !isPasswordRecovery;
 
   const query = useQuery({
     queryKey: moodCheckinsQueryKey(userId),
-    enabled: Boolean(userId),
+    enabled,
     staleTime: 30_000,
     queryFn: async () => {
       if (!userId) {
@@ -96,6 +98,9 @@ export function useCockpitMoodHydration() {
   });
 
   useEffect(() => {
+    // Recovery sessions must not touch Cockpit state or fire query teardown loops.
+    if (isPasswordRecovery) return;
+
     if (!userId) {
       clearCockpitSessionState();
       queryClient.removeQueries({ queryKey: ['mood_checkins'] });
@@ -176,7 +181,7 @@ export function useCockpitMoodHydration() {
         timestamp: new Date(m.created_at),
       })),
     });
-  }, [userId, query.data, query.isSuccess, queryClient]);
+  }, [userId, query.data, query.isSuccess, queryClient, isPasswordRecovery]);
 
   return query;
 }

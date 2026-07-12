@@ -90,13 +90,14 @@ function clearBodyMaintenanceLocal(): void {
  * Clears local state when logged out.
  */
 export function useBodyMaintenanceHydration() {
-  const { user } = useAuth();
+  const { user, isPasswordRecovery } = useAuth();
   const queryClient = useQueryClient();
   const userId = user?.id;
+  const enabled = Boolean(userId) && !isPasswordRecovery;
 
   const query = useQuery({
     queryKey: bodyMaintenanceQueryKey(userId),
-    enabled: Boolean(userId),
+    enabled,
     staleTime: 60_000,
     queryFn: async () => {
       if (!userId) return emptyPayload();
@@ -105,6 +106,7 @@ export function useBodyMaintenanceHydration() {
   });
 
   useEffect(() => {
+    if (isPasswordRecovery) return;
     if (!userId) {
       clearBodyMaintenanceLocal();
       queryClient.removeQueries({ queryKey: ['momentum_state', BODY_MAINTENANCE_GAUGE_KEY] });
@@ -118,7 +120,7 @@ export function useBodyMaintenanceHydration() {
       routines: query.data.routines,
       providers: query.data.providers,
     });
-  }, [userId, query.data, query.isSuccess, queryClient]);
+  }, [userId, query.data, query.isSuccess, queryClient, isPasswordRecovery]);
 
   return query;
 }

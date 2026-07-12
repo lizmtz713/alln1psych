@@ -23,12 +23,19 @@ import { resetUserScopedStoresInMemory } from '../services/sessionReset';
  * Clears userId on sign out.
  */
 export function AuthSync({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isPasswordRecovery } = useAuth();
   const setUserId = useAuthStore((s) => s.setUserId);
 
   useEffect(() => {
     // Wait for initial session resolve — do NOT wipe local state during auth bootstrap
     if (loading) return;
+
+    // Recovery token is not a dashboard session — freeze hydration entirely.
+    if (isPasswordRecovery) {
+      setUserId(null);
+      useUserStore.setState({ profileHydrated: false });
+      return;
+    }
 
     if (!user) {
       // Memory-only reset. Do NOT await AsyncStorage here — that double-purge
@@ -136,7 +143,7 @@ export function AuthSync({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [loading, user?.id, setUserId]);
+  }, [loading, user?.id, setUserId, isPasswordRecovery]);
 
   return <>{children}</>;
 }
