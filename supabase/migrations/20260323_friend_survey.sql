@@ -3,7 +3,7 @@
 
 -- Survey links table
 CREATE TABLE IF NOT EXISTS friend_survey_links (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   light_id TEXT NOT NULL, -- local Light ID (stored in app)
   token VARCHAR(12) UNIQUE NOT NULL, -- short URL token (e.g., "abc123def456")
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS friend_survey_links (
 
 -- Survey responses table
 CREATE TABLE IF NOT EXISTS friend_survey_responses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_link_id UUID REFERENCES friend_survey_links(id) ON DELETE CASCADE,
   
   -- Love language

@@ -9,8 +9,6 @@
 --   - Explicit SELECT / INSERT / UPDATE / DELETE (no FOR ALL)
 -- =============================================================================
 
-create extension if not exists "uuid-ossp";
-
 -- ---------------------------------------------------------------------------
 -- Ensure core tables exist (idempotent with docs/supabase-schema.sql)
 -- ---------------------------------------------------------------------------
@@ -29,7 +27,7 @@ create table if not exists public.profiles (
 );
 
 create table if not exists public.conversations (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
   started_at timestamptz default now(),
   ended_at timestamptz,
@@ -40,7 +38,7 @@ create table if not exists public.conversations (
 );
 
 create table if not exists public.messages (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   conversation_id uuid references public.conversations(id) on delete cascade not null,
   user_id uuid references public.profiles(id) on delete cascade not null,
   role text check (role in ('user', 'assistant')) not null,
@@ -51,7 +49,7 @@ create table if not exists public.messages (
 );
 
 create table if not exists public.mood_checkins (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
   mood text check (mood in ('green', 'yellow', 'orange', 'red')) not null,
   mood_label text not null,
@@ -61,7 +59,7 @@ create table if not exists public.mood_checkins (
 
 -- Relationship intelligence events (Signals / People subsystem)
 create table if not exists public.relationship_events (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
   light_id text not null,
   event_type text not null,
@@ -72,7 +70,7 @@ create table if not exists public.relationship_events (
 
 -- Momentum / gauge trajectory state (Cockpit reopen persistence)
 create table if not exists public.momentum_state (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
   gauge_key text not null,
   score numeric(5,2) not null default 50,

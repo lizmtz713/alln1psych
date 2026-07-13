@@ -2,7 +2,7 @@
 -- Prompts and responses are deliberately not stored here.
 
 create table if not exists public.ai_usage_events (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
   request_id uuid not null unique,
   feature text not null default 'chat',

@@ -15,7 +15,7 @@ create unique index if not exists idx_mood_checkins_user_client_event
   where client_event_id is not null;
 
 create table if not exists public.checkin_gauge_values (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default gen_random_uuid() primary key,
   checkin_id uuid references public.mood_checkins(id) on delete cascade not null,
   user_id uuid references public.profiles(id) on delete cascade not null,
   gauge_key text not null check (
