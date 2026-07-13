@@ -9,12 +9,9 @@ const files = fs
     const match = /^(\d{8}(?:\d{6})?)_[a-z0-9_]+\.sql$/.exec(file);
     return { file, version: match ? match[1] : null };
   })
-  .sort((left, right) => {
-    if (!left.version || !right.version) return left.file.localeCompare(right.file);
-    const leftVersion = BigInt(left.version);
-    const rightVersion = BigInt(right.version);
-    return leftVersion < rightVersion ? -1 : leftVersion > rightVersion ? 1 : 0;
-  })
+  // Supabase applies migration files in filename order. Comparing the complete
+  // filename also handles legacy 8-digit versions that prefix newer timestamps.
+  .sort((left, right) => (left.file < right.file ? -1 : left.file > right.file ? 1 : 0))
   .map(({ file }) => file);
 const failures = [];
 const versions = new Map();
