@@ -181,7 +181,7 @@ export default function IdentitySetupScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#09090F' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
-        <Pressable onPress={handleBack} hitSlop={12} style={{ width: 40, padding: 8 }}>
+        <Pressable onPress={handleBack} hitSlop={12} style={{ width: 44, padding: 8 }}>
           <Ionicons name="arrow-back" size={24} color="#7C4DFF" />
         </Pressable>
         <View style={{ flex: 1, alignItems: 'center' }}>
@@ -189,7 +189,7 @@ export default function IdentitySetupScreen() {
             <StepProgressIndicator currentStep={step + 1} totalSteps={totalVisibleSteps} accentColor="#7C4DFF" />
           )}
         </View>
-        <Pressable onPress={handleSkip} hitSlop={12} style={{ width: 40, alignItems: 'flex-end', padding: 8 }}>
+        <Pressable onPress={handleSkip} hitSlop={12} style={{ width: 44, alignItems: 'flex-end', paddingVertical: 8 }}>
           <Text style={{ color: '#7C4DFF', fontSize: 15, fontWeight: '600' }}>Skip</Text>
         </Pressable>
       </View>

@@ -246,7 +246,7 @@ function LanguageSelector() {
   ];
 
   return (
-    <View>
+    <View style={styles.languageSelector}>
       {languages.map((lang, index) => (
         <View key={lang.code}>
           <Pressable
@@ -626,6 +626,8 @@ const weatherStyles = StyleSheet.create({
   weatherSection: {
     marginTop: 16,
     paddingTop: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255,255,255,0.06)',
   },
@@ -1344,10 +1346,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
+    gap: 12,
   },
   rowLabel: {
     fontSize: 16,
     color: TEXT,
+    flexShrink: 1,
   },
   rowHint: {
     fontSize: 13,
@@ -1367,6 +1371,10 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.06)',
     marginLeft: 16,
+  },
+  languageSelector: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
   },
   apiInput: {
     backgroundColor: COLORS.background,

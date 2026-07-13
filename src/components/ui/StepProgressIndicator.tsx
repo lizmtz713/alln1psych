@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../lib/constants';
@@ -14,6 +14,8 @@ export function StepProgressIndicator({
   totalSteps, 
   accentColor = COLORS.accent 
 }: StepProgressIndicatorProps) {
+  const compact = totalSteps > 6;
+
   return (
     <View style={styles.progressRow}>
       {Array.from({ length: totalSteps }).map((_, i) => {
@@ -22,17 +24,18 @@ export function StepProgressIndicator({
         const isCurrent = stepNum === currentStep;
         
         return (
-          <View key={i} style={styles.stepContainer}>
+          <Fragment key={i}>
             <View 
               style={[
                 styles.progressStep,
+                compact && styles.progressStepCompact,
                 isCompleted && [styles.progressStepCompleted, { backgroundColor: accentColor, borderColor: accentColor }],
                 isCurrent && [styles.progressStepCurrent, { borderColor: accentColor }],
                 !isCompleted && !isCurrent && styles.progressStepUpcoming,
               ]}
             >
               {isCompleted ? (
-                <Ionicons name="checkmark" size={18} color="#fff" />
+                <Ionicons name="checkmark" size={compact ? 15 : 18} color="#fff" />
               ) : (
                 <Text 
                   style={[
@@ -49,13 +52,14 @@ export function StepProgressIndicator({
               <View 
                 style={[
                   styles.progressLine,
+                  compact && styles.progressLineCompact,
                   stepNum < currentStep 
                     ? [styles.progressLineCompleted, { backgroundColor: accentColor }] 
                     : styles.progressLineUpcoming,
                 ]} 
               />
             )}
-          </View>
+          </Fragment>
         );
       })}
     </View>
@@ -66,11 +70,7 @@ const styles = StyleSheet.create({
   progressRow: { 
     flexDirection: 'row', 
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: '100%',
   },
   progressStep: {
     width: 32,
@@ -83,6 +83,11 @@ const styles = StyleSheet.create({
   progressStepCompleted: {
     backgroundColor: COLORS.accent,
     borderColor: COLORS.accent,
+  },
+  progressStepCompact: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
   },
   progressStepCurrent: {
     backgroundColor: 'transparent',
@@ -103,12 +108,17 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
   progressLine: {
-    width: 32,
+    flex: 1,
+    minWidth: 4,
     height: 2,
-    marginHorizontal: 4,
+    marginHorizontal: 3,
   },
   progressLineCompleted: {
     backgroundColor: COLORS.accent,
+  },
+  progressLineCompact: {
+    minWidth: 2,
+    marginHorizontal: 1,
   },
   progressLineUpcoming: {
     backgroundColor: COLORS.textMuted + '40',
