@@ -10,6 +10,7 @@ import {
   Linking,
   Platform,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,7 +34,6 @@ import {
   shareExportFile,
   buildTherapistSummary,
 } from '../../src/services/exportData';
-import { getOpenAIKey, setOpenAIKey } from '../../src/services/ai';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY, APP_CONFIG } from '../../src/lib/constants';
@@ -41,6 +41,8 @@ import { SENSITIVE_TOPIC_OPTIONS } from '../../src/lib/sensitiveTopics';
 import { useFocusMode } from '../../src/hooks/useOnboarding';
 import { useLegalConsentStore } from '../../src/stores/legalConsentStore';
 import { PRIVACY_DASHBOARD } from '../../src/data/legalDisclaimers';
+import { useAuth } from '../../src/providers/AuthProvider';
+import { callEdgeFunction } from '../../src/services/ai';
 
 // Use design system colors
 const ACCENT = COLORS.accent;
@@ -791,72 +793,33 @@ const premiumStyles = StyleSheet.create({
 });
 
 export default function SettingsScreen() {
+  const { user: authUser, signOut } = useAuth();
   const allowAiLearning = useLegalConsentStore((s) => s.allowAiLearning);
-  const voiceStorageEnabled = useLegalConsentStore((s) => s.voiceStorageEnabled);
   const setAllowAiLearning = useLegalConsentStore((s) => s.setAllowAiLearning);
-  const setVoiceStorageEnabled = useLegalConsentStore((s) => s.setVoiceStorageEnabled);
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const settings = useSettingsStore();
   const user = useUserStore();
   const { focusMode, setFocusMode } = useFocusMode();
-
-  // API Key state
-  const [apiKey, setApiKey] = useState('');
-  const [apiKeyMasked, setApiKeyMasked] = useState('');
-  const [showApiInput, setShowApiInput] = useState(false);
-  
-  // Load existing API key on mount
-  useEffect(() => {
-    getOpenAIKey().then((key) => {
-      if (key) {
-        setApiKeyMasked('sk-••••••••' + key.slice(-4));
-      }
-    });
-  }, []);
-  
-  const handleSaveApiKey = async () => {
-    if (!apiKey.trim()) return;
-    if (!apiKey.startsWith('sk-')) {
-      Alert.alert('Invalid Key', 'OpenAI API keys start with "sk-"');
-      return;
-    }
-    await setOpenAIKey(apiKey.trim());
-    setApiKeyMasked('sk-••••••••' + apiKey.slice(-4));
-    setApiKey('');
-    setShowApiInput(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    Alert.alert('Saved', 'Your API key is securely stored.');
-  };
-  
-  const handleRemoveApiKey = () => {
-    Alert.alert('Remove API Key?', 'You\'ll use the default service instead.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Remove',
-        style: 'destructive',
-        onPress: async () => {
-          await setOpenAIKey(null);
-          setApiKeyMasked('');
-          setShowApiInput(false);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        },
-      },
-    ]);
-  };
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isExportingData, setIsExportingData] = useState(false);
 
   const handleExportData = async () => {
+    if (isExportingData) return;
+    setIsExportingData(true);
     try {
-      const data = buildExportData('all');
-      await shareExportFile(data, `alln1-psych-export.json`);
+      const data = await buildExportData('all');
+      await shareExportFile(data, `ingauge-account-export.json`);
     } catch (e) {
       Alert.alert('Export failed', 'Could not export. Try again.');
+    } finally {
+      setIsExportingData(false);
     }
   };
 
   const handleShareWithTherapist = async () => {
     try {
-      const data = buildExportData('all');
+      const data = await buildExportData('all');
       const text = buildTherapistSummary(data);
       const path = `${(FileSystem as any).documentDirectory ?? ''}therapist-summary.txt`;
       await FileSystem.writeAsStringAsync(path, text);
@@ -866,22 +829,31 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleClearData = () => {
+  const handleDeleteAccount = () => {
+    if (!authUser?.id || isDeletingAccount) return;
     Alert.alert(
-      'Clear all data?',
-      'This will delete your journal, conversations, and progress. Cannot be undone.',
+      'Delete your account?',
+      'This permanently deletes your InGauge account, check-ins, conversations, journal entries, relationship data, and AI history. This cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Clear',
+          text: 'Delete Account',
           style: 'destructive',
-          onPress: () => {
-            useJournalStore.setState({ entries: [] });
-            useConversationStore.getState().clearMessages();
-            useConversationSummaryStore.getState().clearSummaries();
-            useCircleStore.setState({ moodHistory: [] });
-            useEducationStore.setState({ completedLessons: [], streakDays: 0 });
-            Alert.alert('Done', 'All data cleared.');
+          onPress: async () => {
+            setIsDeletingAccount(true);
+            try {
+              await callEdgeFunction<{ deleted: boolean }>('delete-account', {});
+              await signOut();
+            } catch (error) {
+              Alert.alert(
+                'Account not deleted',
+                error instanceof Error
+                  ? error.message
+                  : 'We could not delete your account. Nothing was changed; please try again.'
+              );
+            } finally {
+              setIsDeletingAccount(false);
+            }
           },
         },
       ]
@@ -1027,57 +999,6 @@ export default function SettingsScreen() {
           </View>
         </>
 
-        <Text style={styles.sectionTitle}>Advanced</Text>
-        <View style={styles.card}>
-          <Pressable
-            style={styles.row}
-            onPress={() => setShowApiInput(!showApiInput)}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={styles.rowLabel}>Your OpenAI API Key</Text>
-              <Text style={styles.rowHint}>
-                {apiKeyMasked ? apiKeyMasked : 'Use your own key for unlimited AI'}
-              </Text>
-            </View>
-            <Ionicons name={showApiInput ? 'chevron-up' : 'chevron-down'} size={20} color={TEXT_DIM} />
-          </Pressable>
-          
-          {showApiInput && (
-            <View style={{ padding: 16, borderTopWidth: 1, borderTopColor: COLORS.border }}>
-              <TextInput
-                style={styles.apiInput}
-                placeholder="sk-..."
-                placeholderTextColor={TEXT_DIM}
-                value={apiKey}
-                onChangeText={setApiKey}
-                autoCapitalize="none"
-                autoCorrect={false}
-                secureTextEntry
-              />
-              <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
-                <Pressable
-                  style={[styles.apiButton, { backgroundColor: ACCENT }]}
-                  onPress={handleSaveApiKey}
-                >
-                  <Text style={styles.apiButtonText}>Save Key</Text>
-                </Pressable>
-                {apiKeyMasked ? (
-                  <Pressable
-                    style={[styles.apiButton, { backgroundColor: '#F87171' }]}
-                    onPress={handleRemoveApiKey}
-                  >
-                    <Text style={styles.apiButtonText}>Remove</Text>
-                  </Pressable>
-                ) : null}
-              </View>
-              <Text style={{ fontSize: 12, color: TEXT_DIM, marginTop: 12, lineHeight: 18 }}>
-                Your key is stored securely on-device and never sent to our servers.
-                Get one at platform.openai.com
-              </Text>
-            </View>
-          )}
-        </View>
-
         {/* Privacy */}
         <Text style={styles.sectionTitle}>Privacy</Text>
         <View style={styles.card}>
@@ -1130,21 +1051,18 @@ export default function SettingsScreen() {
         {/* Health Integrations */}
         <Text style={styles.sectionTitle}>Health Integrations</Text>
         <View style={styles.card}>
-          <Pressable 
-            style={styles.row} 
-            onPress={() => router.push('/(modals)/oura-connect')}
-          >
+          <View style={styles.row}>
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
               <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#7C4DFF22', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
                 <Text style={{ fontSize: 18 }}>💍</Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.rowLabel}>Oura Ring</Text>
-                <Text style={styles.rowHint}>Connect for auto Body gauge</Text>
+                <Text style={styles.rowLabel}>Oura Ring · Coming soon</Text>
+                <Text style={styles.rowHint}>Use Apple Health in this release</Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={TEXT_DIM} />
-          </Pressable>
+            <Ionicons name="time-outline" size={20} color={TEXT_DIM} />
+          </View>
         </View>
         
         <HealthConnectionCard />
@@ -1269,25 +1187,24 @@ export default function SettingsScreen() {
               <Text style={styles.rowLabel}>{PRIVACY_DASHBOARD.voiceStorage}</Text>
               <Text style={styles.rowHint}>{PRIVACY_DASHBOARD.voiceStorageHint}</Text>
             </View>
-            <Switch
-              value={voiceStorageEnabled}
-              onValueChange={(v) => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setVoiceStorageEnabled(v); }}
-              trackColor={{ false: '#2A2A3A', true: ACCENT + '60' }}
-              thumbColor={voiceStorageEnabled ? ACCENT : TEXT_DIM}
-            />
+            <Ionicons name="shield-checkmark-outline" size={22} color={TEXT_MUTED} />
           </View>
           <View style={styles.divider} />
-          <Pressable style={styles.row} onPress={handleExportData}>
+          <Pressable style={styles.row} onPress={handleExportData} disabled={isExportingData}>
             <View>
-              <Text style={styles.rowLabel}>{PRIVACY_DASHBOARD.downloadData}</Text>
+              <Text style={styles.rowLabel}>{isExportingData ? 'Preparing export…' : PRIVACY_DASHBOARD.downloadData}</Text>
               <Text style={styles.rowHint}>{PRIVACY_DASHBOARD.downloadDataHint}</Text>
             </View>
-            <Ionicons name="download-outline" size={22} color={TEXT_MUTED} />
+            {isExportingData
+              ? <ActivityIndicator size="small" color={TEXT_MUTED} />
+              : <Ionicons name="download-outline" size={22} color={TEXT_MUTED} />}
           </Pressable>
           <View style={styles.divider} />
-          <Pressable style={styles.row} onPress={handleClearData}>
+          <Pressable style={styles.row} onPress={handleDeleteAccount} disabled={isDeletingAccount}>
             <View>
-              <Text style={[styles.rowLabel, { color: '#F87171' }]}>{PRIVACY_DASHBOARD.deleteData}</Text>
+              <Text style={[styles.rowLabel, { color: '#F87171' }]}>
+                {isDeletingAccount ? 'Deleting account…' : PRIVACY_DASHBOARD.deleteData}
+              </Text>
               <Text style={styles.rowHint}>{PRIVACY_DASHBOARD.deleteDataHint}</Text>
             </View>
             <Ionicons name="trash-outline" size={22} color="#F87171" />

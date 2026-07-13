@@ -29,12 +29,12 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { APP_CONFIG } from '../../src/lib/constants';
-import { useAuth } from '../../src/providers/AuthProvider';
+import { performSignOut } from '../../src/providers/AuthProvider';
 import { useUserStore } from '../../src/stores/userStore';
 import { useInsightsStore } from '../../src/stores/insightsStore';
 import { useCircleStore, type TemperatureVisibility } from '../../src/stores/circleStore';
@@ -202,8 +202,6 @@ function TemperatureVisibilityRow() {
 
 export default function MeScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
-  const { signOut } = useAuth();
   const user = useUserStore();
   const myTemperature = useCircleStore((s) => s.myTemperature);
   const members = useCircleStore((s) => s.members);
@@ -245,7 +243,12 @@ export default function MeScreen() {
   const navigateTo = useCallback((route: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push(route as any);
-  }, [router]);
+  }, []);
+
+  const handleSignOut = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await performSignOut();
+  }, []);
 
   const toggleSection = useCallback((key: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -405,8 +408,7 @@ export default function MeScreen() {
               <Text style={styles.subgroupLabel}>Data & Integrations</Text>
               <View style={styles.subgroupLine} />
               <MenuItem icon="fitness-outline" label="Apple Health" subtitle="Sleep, activity, heart, cycle" accentColor={COLORS.success} onPress={() => navigateTo('/(modals)/health-connections')} />
-              <MenuItem icon="ellipse-outline" label="Oura Ring" subtitle="Sleep score, readiness, HRV" onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push('/(modals)/oura-connect'); }} />
-              <MenuItem icon="key-outline" label="Bring Your Own Key" subtitle="Use your OpenAI API key" onPress={() => navigateTo('/(modals)/settings')} />
+              <MenuItem icon="ellipse-outline" label="Oura Ring · Coming soon" subtitle="Use Apple Health in this release" />
               <MenuItem icon="shield-checkmark-outline" label="Privacy" onPress={() => navigateTo('/(modals)/settings')} />
               <MenuItem icon="diamond-outline" label="Upgrade to Pro" subtitle="Unlimited AI, voice, more" accentColor={COLORS.warning} onPress={() => navigateTo('/(modals)/settings')} />
               <MenuItem icon="person-outline" label="Account Settings" onPress={() => navigateTo('/(modals)/settings')} isLast />
@@ -439,7 +441,13 @@ export default function MeScreen() {
           <Pressable style={styles.footerLearnMore} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); navigateTo('/(modals)/disclaimer'); }}>
             <Text style={styles.footerLink}>{GLOBAL_DISCLAIMER.learnMoreLabel}</Text>
           </Pressable>
-          <Pressable style={styles.signOutBtn} onPress={async () => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); await signOut(); }}>
+          <Pressable
+            style={styles.signOutBtn}
+            onPress={handleSignOut}
+            hitSlop={16}
+            accessibilityRole="button"
+            accessibilityLabel="Sign Out"
+          >
             <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
             <Text style={styles.signOutText}>Sign Out</Text>
           </Pressable>
@@ -466,7 +474,7 @@ function MenuItem({
   subtitle?: string;
   badge?: string;
   accentColor?: string;
-  onPress: () => void;
+  onPress?: () => void;
   isLast?: boolean;
   showCall?: boolean;
 }) {
@@ -474,6 +482,7 @@ function MenuItem({
     <Pressable
       style={[styles.menuItemRow, !isLast && styles.menuItemBorder]}
       onPress={onPress}
+      disabled={!onPress}
     >
       <View style={styles.menuItemLeft}>
         <View style={[styles.menuIconWrap, accentColor && { backgroundColor: accentColor + '15' }]}>
@@ -490,11 +499,13 @@ function MenuItem({
             <Text style={styles.badgeText}>{badge}</Text>
           </View>
         )}
-        <Ionicons 
-          name={showCall ? 'call-outline' : 'chevron-forward'} 
-          size={18} 
-          color={COLORS.textMuted} 
-        />
+        {onPress && (
+          <Ionicons
+            name={showCall ? 'call-outline' : 'chevron-forward'}
+            size={18}
+            color={COLORS.textMuted}
+          />
+        )}
       </View>
     </Pressable>
   );
@@ -790,13 +801,15 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 
-  // Sign Out
+  // Sign Out — keep above scroll padding; no overlays on Me footer
   signOutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
     gap: 8,
+    zIndex: 2,
+    elevation: 2,
   },
   signOutText: {
     fontSize: 16,

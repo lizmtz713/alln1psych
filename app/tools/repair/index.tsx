@@ -69,7 +69,7 @@ export default function RepairBuilderScreen() {
     if (!what || !who || !intensity) return;
     const hasKey = await hasOpenAIKey();
     if (!hasKey) {
-      Alert.alert('API key needed', 'Add your OpenAI API key in Me → Bring Your Own Key to get personalized repair guidance.');
+      Alert.alert('AI unavailable', 'Your secure AI session is unavailable. Sign in again or try later.');
       return;
     }
     setLoading(true);

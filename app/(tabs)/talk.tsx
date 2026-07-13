@@ -270,13 +270,12 @@ export default function TalkScreen() {
     setInputMode,
     setInitialGreetingAdded,
   } = useConversationStore();
-  const apiKeySavedAt = useSettingsStore((s) => s.apiKeySavedAt);
 
   const [textInput, setTextInput] = useState('');
   const [liveTranscript, setLiveTranscript] = useState('');
   const [useWhisperFallback, setUseWhisperFallback] = useState(false);
   const lastOnDeviceResultRef = useRef('');
-  const [hasApiKey, setHasApiKey] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(true);
   const [showVoiceDisclosure, setShowVoiceDisclosure] = useState(false);
   const hasAcceptedVoiceDisclosure = useLegalConsentStore((s) => s.hasAcceptedVoiceDisclosure());
   const setVoiceDisclosureAccepted = useLegalConsentStore((s) => s.setVoiceDisclosureAccepted);
@@ -330,7 +329,7 @@ export default function TalkScreen() {
 
   useEffect(() => {
     hasOpenAIKey().then(setHasApiKey);
-  }, [apiKeySavedAt]);
+  }, []);
 
   // Show follow-up banner when opening Talk if last summary had a followUp
   useEffect(() => {
@@ -496,7 +495,7 @@ export default function TalkScreen() {
     if (!hasApiKey) {
       addMessage({
         role: 'assistant',
-        content: "I've saved what you wrote. Add your OpenAI API key in settings when you're ready to chat.",
+        content: "I've saved what you wrote, but the secure AI connection is unavailable. Please sign in again or try later.",
         isVoice: false,
       });
       return;
@@ -845,11 +844,11 @@ export default function TalkScreen() {
         </View>
       )}
 
-      {/* No API key banner */}
+      {/* Secure AI session unavailable */}
       {!hasApiKey && (
         <View style={styles.banner}>
           <Text style={styles.bannerText}>
-            To start talking, add your OpenAI API key in settings. For now, you can journal here — I'll save everything you write.
+            The secure AI connection is unavailable. You can keep journaling here while you sign in again or try later.
           </Text>
         </View>
       )}
@@ -1083,7 +1082,7 @@ export default function TalkScreen() {
               <Text style={styles.hint}>Tap to start, tap again to stop.</Text>
             )}
             {!hasApiKey && (
-              <Text style={styles.voiceFallback}>Voice requires an API key. Type instead for now.</Text>
+              <Text style={styles.voiceFallback}>Voice is unavailable until the secure AI session reconnects. Type instead for now.</Text>
             )}
             <Pressable style={styles.keyboardToggle} onPress={() => { setInputMode('text'); textInputRef.current?.focus(); }}>
               <Ionicons name="keypad-outline" size={22} color={COLORS.textMuted} />

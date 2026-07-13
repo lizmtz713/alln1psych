@@ -164,7 +164,7 @@ export function getDriftWarning(lights: Light[]): DriftWarning | null {
   const active = lights.filter((l): l is Light & { tier: Exclude<LightTier, 'archived'> } => l.tier !== 'archived');
   let best: DriftWarning | null = null;
   for (const light of active) {
-    const normalRhythm = light.averageContactDays ?? (light.tier === 'archived' ? 999 : IDEAL_CONTACT_DAYS[light.tier]);
+    const normalRhythm = light.averageContactDays ?? IDEAL_CONTACT_DAYS[light.tier];
     if (light.daysSinceContact <= normalRhythm) continue;
     const drift = light.daysSinceContact - normalRhythm;
     if (!best || drift > best.daysSinceContact - best.normalRhythmDays) {
@@ -307,7 +307,7 @@ export function getSocialHealthScore(lights: Light[]): SocialHealthResult {
     suggestions.push(`Reach out to ${priority[0].name}`);
   }
   const drifting = activeLights.filter((l) => {
-    const ideal = l.averageContactDays ?? (l.tier === 'archived' ? 999 : IDEAL_CONTACT_DAYS[l.tier]);
+    const ideal = l.averageContactDays ?? IDEAL_CONTACT_DAYS[l.tier];
     return l.daysSinceContact > ideal;
   });
   if (drifting.length >= 2) {

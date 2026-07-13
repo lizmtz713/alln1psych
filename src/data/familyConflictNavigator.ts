@@ -56,9 +56,9 @@ export const PATHS = [
 
 export const CONVERSATION_STRUCTURE = [
   { step: 1, label: 'Describe what happened', prompt: 'Stick to facts, not accusations.' },
-  { step: 2, label: 'Share how you felt', prompt: ''I felt..." keeps it about your experience.' },
+  { step: 2, label: 'Share how you felt', prompt: '"I felt..." keeps it about your experience.' },
   { step: 3, label: 'State what you need', prompt: 'One clear request.' },
-  { step: 4, label: 'Invite their perspective', prompt: ''I’d like to hear how you see it."' },
+  { step: 4, label: 'Invite their perspective', prompt: '"I’d like to hear how you see it."' },
 ] as const;
 
 export interface FamilyConflictResource {

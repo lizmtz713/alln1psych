@@ -2,7 +2,7 @@
  * AI summary for How to Show Up questionnaire responses.
  */
 import type { ShowUpAnswers, ShowUpPreferenceSummaryResult } from '../types/showUp';
-import { getOpenAIKey } from './ai';
+import { sendMessageWithSystemPromptOnly } from './ai';
 
 const SYSTEM = `You are summarizing one person's support and communication preferences so someone close to them can show up better.
 
@@ -28,9 +28,6 @@ export async function generateShowUpPreferenceSummary(
   answers: ShowUpAnswers,
   responderName?: string
 ): Promise<ShowUpPreferenceSummaryResult | null> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) return null;
-
   const userContent = JSON.stringify(
     {
       responderPreferredName: responderName ?? null,
@@ -41,26 +38,12 @@ export async function generateShowUpPreferenceSummary(
   );
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: SYSTEM },
-          { role: 'user', content: userContent },
-        ],
-        max_tokens: 700,
-        temperature: 0.35,
-      }),
-    });
-
-    if (!res.ok) return null;
-    const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    const content = json?.choices?.[0]?.message?.content?.trim();
+    const content = await sendMessageWithSystemPromptOnly(
+      [{ role: 'user', content: userContent }],
+      SYSTEM,
+      700,
+      0.35
+    );
     if (!content) return null;
 
     const cleaned = content.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}');

@@ -3,23 +3,29 @@
  * "What caused this?" then "What part of my life does this affect?"
  */
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import * as Crypto from 'expo-crypto';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../src/lib/constants';
 import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
 import { GAUGE_CONFIG } from '../../src/utils/gaugeHelpers';
 import { DRIVERS_BY_GAUGE } from '../../src/data/driversByGauge';
 import { CircumplexEmotionPicker, type CircumplexOption } from '../../src/components/checkin/CircumplexEmotionPicker';
+import { useCreateCheckin, emotionScoreToMood } from '../../src/hooks/useCreateCheckin';
+import { useAuth } from '../../src/providers/AuthProvider';
+import { TEMPERATURE_LABELS } from '../../src/stores/circleStore';
 
 const GAUGE_KEYS: GaugeKey[] = ['body', 'state', 'emotion', 'connection', 'direction', 'alignment'];
 
 export default function QuickLogScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { user } = useAuth();
+  const createCheckin = useCreateCheckin(user?.id);
   const updateState = useCockpitStore((s) => s.updateState);
   const updateEmotion = useCockpitStore((s) => s.updateEmotion);
   const setCheckInSystemImpact = useCockpitStore((s) => s.setCheckInSystemImpact);
@@ -32,6 +38,7 @@ export default function QuickLogScreen() {
   const [statePick, setStatePick] = useState<CircumplexOption | null>(null);
   const [systemImpact, setSystemImpact] = useState<GaugeKey[]>([]);
   const [driverIds, setDriverIds] = useState<string[]>([]);
+  const submissionIdRef = useRef<string | null>(null);
 
   const handleStatePick = (opt: CircumplexOption) => {
     setStatePick(opt);
@@ -50,34 +57,56 @@ export default function QuickLogScreen() {
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (step < 2) setStep((s) => s + 1);
-    else handleSubmit();
+    else void handleSubmit();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!statePick) return;
-    updateState(statePick.state);
-    updateEmotion(statePick.emotion);
-    setCheckInSystemImpact(systemImpact.length > 0 ? systemImpact : null);
-    setCheckInDrivers(driverIds.length > 0 ? driverIds : null);
-    const snap = useCockpitStore.getState();
+    const current = useCockpitStore.getState();
     const gauges: Partial<Record<import('../../src/stores/cockpitStore').GaugeKey, number>> = {};
-    if (snap.body.value >= 0) gauges.body = snap.body.value;
-    if (snap.state.value >= 0) gauges.state = snap.state.value;
-    if (snap.emotion.value >= 0) gauges.emotion = snap.emotion.value;
-    if (snap.connection.value >= 0) gauges.connection = snap.connection.value;
-    if (snap.direction.value >= 0) gauges.direction = snap.direction.value;
-    if (snap.alignment.value >= 0) gauges.alignment = snap.alignment.value;
-    setLastCheckInSnapshot({
-      state: statePick.state,
-      emotion: statePick.emotion,
-      systemImpact,
-      drivers: driverIds,
-      timestamp: new Date().toISOString(),
-      gauges: Object.keys(gauges).length > 0 ? gauges : undefined,
-    });
-    setLastCheckInDate(new Date().toISOString().slice(0, 10));
-    recordGaugesForDrift().catch(() => {});
-    router.back();
+    if (current.body.value >= 0) gauges.body = current.body.value;
+    gauges.state = statePick.state;
+    gauges.emotion = statePick.emotion;
+    if (current.connection.value >= 0) gauges.connection = current.connection.value;
+    if (current.direction.value >= 0) gauges.direction = current.direction.value;
+    if (current.alignment.value >= 0) gauges.alignment = current.alignment.value;
+
+    const mood = emotionScoreToMood(statePick.emotion);
+    submissionIdRef.current ??= Crypto.randomUUID();
+
+    try {
+      const saved = await createCheckin.mutateAsync({
+        clientEventId: submissionIdRef.current,
+        mood,
+        moodLabel: TEMPERATURE_LABELS[mood],
+        note: statePick.label ? `Quick log: ${statePick.label}` : null,
+        systemImpact,
+        drivers: driverIds,
+        gauges,
+      });
+
+      updateState(statePick.state);
+      updateEmotion(statePick.emotion);
+      setCheckInSystemImpact(systemImpact.length > 0 ? systemImpact : null);
+      setCheckInDrivers(driverIds.length > 0 ? driverIds : null);
+      setLastCheckInSnapshot({
+        state: statePick.state,
+        emotion: statePick.emotion,
+        systemImpact,
+        drivers: driverIds,
+        timestamp: saved.created_at,
+        gauges,
+      });
+      setLastCheckInDate(saved.created_at.slice(0, 10));
+      void recordGaugesForDrift().catch(() => {});
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      router.back();
+    } catch (error) {
+      Alert.alert(
+        'Quick log not saved',
+        error instanceof Error ? error.message : 'Could not reach the server. Tap Done to retry.'
+      );
+    }
   };
 
   const canNext = step === 0 ? statePick !== null : true;
@@ -85,7 +114,7 @@ export default function QuickLogScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn} disabled={createCheckin.isPending}>
           <Ionicons name="close" size={24} color={COLORS.text} />
         </Pressable>
         <Text style={styles.title}>Quick log</Text>
@@ -166,11 +195,15 @@ export default function QuickLogScreen() {
 
       <View style={styles.footer}>
         <Pressable
-          style={[styles.nextBtn, !canNext && step === 0 && styles.nextBtnDisabled]}
+          style={[styles.nextBtn, ((!canNext && step === 0) || createCheckin.isPending) && styles.nextBtnDisabled]}
           onPress={handleNext}
-          disabled={step === 0 && !canNext}
+          disabled={(step === 0 && !canNext) || createCheckin.isPending}
         >
-          <Text style={styles.nextBtnText}>{step === 2 ? 'Done' : 'Next'}</Text>
+          {createCheckin.isPending ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.nextBtnText}>{step === 2 ? 'Done' : 'Next'}</Text>
+          )}
         </Pressable>
       </View>
     </View>

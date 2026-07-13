@@ -162,7 +162,7 @@ export default function ReachOutScaffoldScreen() {
   const getAIHelp = useCallback(async (type: 'check-in' | 'repair' | 'plan') => {
     const hasKey = await hasOpenAIKey();
     if (!hasKey) {
-      Alert.alert('API Key Needed', 'Add your OpenAI key in Settings for AI assistance.');
+      Alert.alert('AI unavailable', 'Your secure AI session is unavailable. Sign in again or try later.');
       return;
     }
 

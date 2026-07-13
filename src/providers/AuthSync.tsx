@@ -16,19 +16,33 @@ import {
 import type { AgeGroup, LearningStyle } from '../stores/userStore';
 import { TEMPERATURE_LABELS } from '../stores/circleStore';
 import type { Temperature } from '../stores/circleStore';
+import { destroyLocalSessionState } from '../services/sessionReset';
 
 /**
  * Syncs auth userId to authStore and hydrates all stores from Supabase when user is present.
  * Clears userId on sign out.
  */
 export function AuthSync({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading, isPasswordRecovery } = useAuth();
   const setUserId = useAuthStore((s) => s.setUserId);
 
   useEffect(() => {
-    if (!user) {
+    // Wait for initial session resolve — do NOT wipe local state during auth bootstrap
+    if (loading) return;
+
+    // Recovery token is not a dashboard session — freeze hydration entirely.
+    if (isPasswordRecovery) {
       setUserId(null);
       useUserStore.setState({ profileHydrated: false });
+      return;
+    }
+
+    if (!user) {
+      // Memory-only reset. Do NOT await AsyncStorage here — that double-purge
+      // after performSignOut() was freezing logout on physical devices.
+      setUserId(null);
+      useUserStore.setState({ profileHydrated: false });
+      destroyLocalSessionState();
       return;
     }
     const id = user.id;
@@ -49,6 +63,7 @@ export function AuthSync({ children }: { children: React.ReactNode }) {
           (profile.communication_preference as 'voice' | 'text') ?? null,
         loveLanguage:
           (profile.love_language as 'words' | 'quality-time' | 'acts-of-service' | 'physical-touch' | 'gifts' | 'unknown') ?? null,
+        birthday: profile.birthday ?? null,
         learningStyle: (profile.learning_style as LearningStyle) ?? null,
         onboardingCompleted: profile.onboarding_completed ?? false,
         profileHydrated: true,
@@ -129,7 +144,7 @@ export function AuthSync({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, setUserId]);
+  }, [loading, user?.id, setUserId, isPasswordRecovery]);
 
   return <>{children}</>;
 }

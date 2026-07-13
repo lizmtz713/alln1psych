@@ -14,9 +14,9 @@ export interface LegalConsentState {
   aiDisclaimerAcceptedAt: string | null;
   /** When user accepted the voice interaction notice */
   voiceDisclosureAcceptedAt: string | null;
-  /** Allow conversations to be used to improve AI (default true; user can disable) */
+  /** Allow saved context to personalize AI (privacy-safe default: false) */
   allowAiLearning: boolean;
-  /** Store voice transcripts (default true; user can disable) */
+  /** Reserved for a future explicit transcript-storage opt-in; currently false */
   voiceStorageEnabled: boolean;
 
   setAiDisclaimerAccepted: () => void;
@@ -32,8 +32,8 @@ export const useLegalConsentStore = create<LegalConsentState>()(
     (set, get) => ({
       aiDisclaimerAcceptedAt: null,
       voiceDisclosureAcceptedAt: null,
-      allowAiLearning: true,
-      voiceStorageEnabled: true,
+      allowAiLearning: false,
+      voiceStorageEnabled: false,
 
       setAiDisclaimerAccepted: () => set({ aiDisclaimerAcceptedAt: new Date().toISOString() }),
       setVoiceDisclosureAccepted: () => set({ voiceDisclosureAcceptedAt: new Date().toISOString() }),
@@ -45,6 +45,18 @@ export const useLegalConsentStore = create<LegalConsentState>()(
     }),
     {
       name: STORAGE_KEY,
+      version: 2,
+      migrate: (persisted, version) => {
+        const state = (persisted ?? {}) as Partial<LegalConsentState>;
+        if (version < 2) {
+          return {
+            ...state,
+            allowAiLearning: false,
+            voiceStorageEnabled: false,
+          } as LegalConsentState;
+        }
+        return state as LegalConsentState;
+      },
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (s) => ({
         aiDisclaimerAcceptedAt: s.aiDisclaimerAcceptedAt,

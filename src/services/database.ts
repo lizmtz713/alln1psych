@@ -13,6 +13,7 @@ export interface DbProfile {
   age_group: string | null;
   communication_preference: string | null;
   love_language: string | null;
+  birthday: string | null;
   learning_style: string | null;
   onboarding_completed: boolean;
   push_token: string | null;
@@ -45,6 +46,7 @@ export interface OnboardingData {
   age_group: string | null;
   communication_preference: string | null;
   love_language: string | null;
+  birthday: string | null;
 }
 
 export async function completeOnboarding(
@@ -52,15 +54,38 @@ export async function completeOnboarding(
   data: OnboardingData
 ): Promise<{ error: Error | null }> {
   const row = {
+    id: userId,
     name: data.name,
     pronouns: data.pronouns ?? null,
     age_group: data.age_group,
     communication_preference: data.communication_preference,
     love_language: data.love_language,
+    birthday: data.birthday,
     onboarding_completed: true,
     updated_at: new Date().toISOString(),
   };
-  const { error } = await supabase.from('profiles').update(row).eq('id', userId);
+  const { error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' });
+  return { error: error ? new Error(error.message) : null };
+}
+
+export async function recordLegalConsents(
+  userId: string,
+  acceptedAt: string,
+  versions: { terms: string; privacy: string }
+): Promise<{ error: Error | null }> {
+  const { error } = await supabase.from('user_consents').upsert(
+    {
+      user_id: userId,
+      terms_version: versions.terms,
+      privacy_version: versions.privacy,
+      terms_accepted_at: acceptedAt,
+      privacy_accepted_at: acceptedAt,
+      ai_processing_consent_at: acceptedAt,
+      age_confirmed_at: acceptedAt,
+      updated_at: acceptedAt,
+    },
+    { onConflict: 'user_id' }
+  );
   return { error: error ? new Error(error.message) : null };
 }
 

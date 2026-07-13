@@ -23,6 +23,7 @@ import * as Haptics from 'expo-haptics';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { APP_CONFIG } from '../../src/lib/constants';
 import { useHealthStore } from '../../src/stores/healthStore';
+import type { NormalizedHealthSnapshot } from '../../src/types/normalizedHealthSnapshot';
 
 // Design System
 const COLORS = {
@@ -166,13 +167,42 @@ const GAUGE_ENHANCEMENTS = {
   },
 };
 
+function formatSyncedAt(iso?: string | null): string {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  } catch {
+    return iso;
+  }
+}
+
+function countNormalizedMetrics(n: NormalizedHealthSnapshot | null): number {
+  if (!n) return 0;
+  let c = 0;
+  if (n.sleepHours != null) c++;
+  if (n.steps != null) c++;
+  if (n.restingHeartRate != null) c++;
+  if (n.heartRateVariability != null) c++;
+  if (n.latestHeartRate != null) c++;
+  if (n.workoutsThisWeek != null) c++;
+  return c;
+}
+
 export default function HealthConnectionsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const healthStore = useHealthStore();
-  
-  const [isConnected, setIsConnected] = useState(false);
+
+  const isAvailable = useHealthStore((s) => s.isAvailable);
+  const isAuthorized = useHealthStore((s) => s.isAuthorized);
+  const normalizedSnapshot = useHealthStore((s) => s.normalizedSnapshot);
+  const lastSyncAttempt = useHealthStore((s) => s.lastSyncAttempt);
+  const syncError = useHealthStore((s) => s.syncError);
+  const initialize = useHealthStore((s) => s.initialize);
+  const requestPermissions = useHealthStore((s) => s.requestPermissions);
+  const syncHealthData = useHealthStore((s) => s.syncHealthData);
+
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [enabledTypes, setEnabledTypes] = useState<Record<string, boolean>>({
     sleep: true,
@@ -182,55 +212,68 @@ export default function HealthConnectionsScreen() {
     mindfulness: true,
     environment: false,
   });
-  
+
   useEffect(() => {
-    checkConnection();
-  }, []);
-  
-  const checkConnection = async () => {
-    // Check if already connected via healthStore
-    const snapshot = healthStore.snapshot;
-    setIsConnected(!!snapshot);
-  };
-  
+    initialize();
+  }, [initialize]);
+
   const handleConnect = async () => {
     if (Platform.OS !== 'ios') {
       Alert.alert('iOS Only', 'Apple Health is only available on iOS devices. Android support via Google Fit is coming soon!');
       return;
     }
-    
+
     setIsConnecting(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    
+
     try {
-      // Request HealthKit permissions
-      const granted = await healthStore.requestPermissions();
-      
-      if (granted) {
-        await healthStore.syncHealthData();
-        setIsConnected(true);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        
+      const kitReady = await initialize();
+      if (!kitReady) {
         Alert.alert(
-          'Connected! 🎉',
-          'Your health data is now enhancing your PHOSM. Check your gauges to see personalized insights.',
-          [{ text: 'Got it' }]
+          'Apple Health unavailable',
+          'Health data could not be opened on this device. Use a physical iPhone with Health, or rebuild the dev client with HealthKit enabled.'
+        );
+        setIsConnecting(false);
+        return;
+      }
+
+      const granted = await requestPermissions();
+
+      if (granted) {
+        await syncHealthData();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+        Alert.alert(
+          'Connected',
+          'InGauge can read supporting signals from Apple Health. Oura and other apps that sync into Health can contribute automatically.',
+          [{ text: 'OK' }]
         );
       } else {
         Alert.alert(
-          'Permission Required',
-          `To use health data for gauge intelligence, please enable access in:\n\nSettings → Privacy & Security → Health → ${APP_CONFIG.name}`,
+          'Permission needed',
+          `To use health data as supporting signals, enable access in:\n\nSettings → Privacy & Security → Health → ${APP_CONFIG.name}`,
           [
             { text: 'Cancel', style: 'cancel' },
             { text: 'Open Settings', onPress: () => Linking.openSettings() },
           ]
         );
       }
-    } catch (error) {
-      Alert.alert('Connection Error', 'Could not connect to Apple Health. Please try again.');
+    } catch {
+      Alert.alert('Connection error', 'Could not connect to Apple Health. Please try again.');
     }
-    
+
     setIsConnecting(false);
+  };
+
+  const handleRefresh = async () => {
+    if (!isAuthorized) return;
+    setIsRefreshing(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await syncHealthData();
+    } finally {
+      setIsRefreshing(false);
+    }
   };
   
   const toggleCategory = (id: string) => {
@@ -273,18 +316,35 @@ export default function HealthConnectionsScreen() {
             </View>
             <Text style={styles.heroTitle}>Body Data → Mind Intelligence</Text>
             <Text style={styles.heroText}>
-              Connect Apple Health to give {APP_CONFIG.name} access to your sleep, heart rate, activity, and cycle data. We transform raw numbers into personalized insights about your mental state.
+              Connect Apple Health so sleep, activity, and heart signals can gently inform your Body and State gauges. Oura can sync into Health on iPhone — one permission flow for you.
             </Text>
+
+            {Platform.OS === 'ios' && !isAuthorized && (
+              <View style={styles.explainerBox}>
+                <Text style={styles.explainerTitle}>What we’ll ask for</Text>
+                <Text style={styles.explainerBody}>
+                  Read-only access to a small first set: sleep, steps, workouts, heart rate, HRV, and resting heart rate. You can change this anytime in the Health app.
+                </Text>
+              </View>
+            )}
             
             {/* Connection Status */}
-            <View style={[styles.statusBar, isConnected && styles.statusBarConnected]}>
-              <View style={[styles.statusDot, { backgroundColor: isConnected ? COLORS.success : COLORS.textMuted }]} />
-              <Text style={[styles.statusText, isConnected && { color: COLORS.success }]}>
-                {isConnected ? 'Connected & Syncing' : 'Not Connected'}
+            <View style={[styles.statusBar, isAuthorized && styles.statusBarConnected]}>
+              <View style={[styles.statusDot, { backgroundColor: isAuthorized ? COLORS.success : COLORS.textMuted }]} />
+              <Text style={[styles.statusText, isAuthorized && { color: COLORS.success }]}>
+                {!isAvailable && Platform.OS === 'ios'
+                  ? 'HealthKit not available on this build'
+                  : isAuthorized
+                    ? 'Connected'
+                    : 'Not connected'}
               </Text>
             </View>
+
+            {syncError ? (
+              <Text style={styles.syncErrorText}>{syncError}</Text>
+            ) : null}
             
-            {!isConnected && (
+            {!isAuthorized && (
               <Pressable 
                 style={styles.connectButton}
                 onPress={handleConnect}
@@ -300,7 +360,79 @@ export default function HealthConnectionsScreen() {
                 )}
               </Pressable>
             )}
+
+            {isAuthorized && (
+              <Pressable
+                style={styles.refreshButton}
+                onPress={handleRefresh}
+                disabled={isRefreshing}
+              >
+                {isRefreshing ? (
+                  <ActivityIndicator color={COLORS.accent} />
+                ) : (
+                  <>
+                    <Ionicons name="refresh" size={18} color={COLORS.accent} />
+                    <Text style={styles.refreshButtonText}>Refresh from Health</Text>
+                  </>
+                )}
+              </Pressable>
+            )}
           </View>
+
+          {/* Normalized snapshot — UI reads this model, not raw HealthKit */}
+          {(isAuthorized || normalizedSnapshot) && (
+            <View style={styles.metricsCard}>
+              <Text style={styles.metricsTitle}>Supporting signals</Text>
+              <Text style={styles.metricsSub}>
+                Last synced: {formatSyncedAt(normalizedSnapshot?.syncedAt ?? lastSyncAttempt)}
+                {normalizedSnapshot?.source === 'mixed' ? ' · Sources: mixed (Health + Oura)' : ''}
+              </Text>
+              {countNormalizedMetrics(normalizedSnapshot) === 0 && isAuthorized ? (
+                <Text style={styles.metricsEmpty}>
+                  No samples yet for the metrics we read. Add data in Apple Health (Watch, iPhone, or apps like Oura), then tap Refresh.
+                </Text>
+              ) : (
+                <View style={styles.metricsRows}>
+                  {normalizedSnapshot?.sleepHours != null && (
+                    <View style={styles.metricRow}>
+                      <Text style={styles.metricLabel}>Sleep (last night)</Text>
+                      <Text style={styles.metricValue}>{normalizedSnapshot.sleepHours.toFixed(1)} h</Text>
+                    </View>
+                  )}
+                  {normalizedSnapshot?.steps != null && (
+                    <View style={styles.metricRow}>
+                      <Text style={styles.metricLabel}>Steps (today)</Text>
+                      <Text style={styles.metricValue}>{Math.round(normalizedSnapshot.steps)}</Text>
+                    </View>
+                  )}
+                  {normalizedSnapshot?.restingHeartRate != null && (
+                    <View style={styles.metricRow}>
+                      <Text style={styles.metricLabel}>Resting heart rate</Text>
+                      <Text style={styles.metricValue}>{normalizedSnapshot.restingHeartRate} bpm</Text>
+                    </View>
+                  )}
+                  {normalizedSnapshot?.heartRateVariability != null && (
+                    <View style={styles.metricRow}>
+                      <Text style={styles.metricLabel}>HRV (SDNN)</Text>
+                      <Text style={styles.metricValue}>{normalizedSnapshot.heartRateVariability} ms</Text>
+                    </View>
+                  )}
+                  {normalizedSnapshot?.latestHeartRate != null && (
+                    <View style={styles.metricRow}>
+                      <Text style={styles.metricLabel}>Latest heart rate</Text>
+                      <Text style={styles.metricValue}>{normalizedSnapshot.latestHeartRate} bpm</Text>
+                    </View>
+                  )}
+                  {normalizedSnapshot?.workoutsThisWeek != null && (
+                    <View style={styles.metricRow}>
+                      <Text style={styles.metricLabel}>Workouts (7 days)</Text>
+                      <Text style={styles.metricValue}>{normalizedSnapshot.workoutsThisWeek}</Text>
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
+          )}
           
           {/* What We Read Section */}
           <View style={styles.section}>
@@ -426,7 +558,7 @@ export default function HealthConnectionsScreen() {
           </View>
           
           {/* Manage in Settings Link */}
-          {isConnected && (
+          {isAuthorized && (
             <Pressable 
               style={styles.settingsLink}
               onPress={() => Linking.openSettings()}
@@ -547,6 +679,90 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFF',
+  },
+  explainerBox: {
+    width: '100%',
+    backgroundColor: COLORS.cardElevated,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  explainerTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 6,
+  },
+  explainerBody: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  syncErrorText: {
+    fontSize: 13,
+    color: COLORS.error,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  refreshButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    marginTop: 4,
+  },
+  refreshButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.accent,
+  },
+  metricsCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  metricsTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  metricsSub: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    marginBottom: 12,
+  },
+  metricsEmpty: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
+  },
+  metricsRows: {
+    gap: 10,
+  },
+  metricRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  metricLabel: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    flex: 1,
+  },
+  metricValue: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
   },
   
   // Sections

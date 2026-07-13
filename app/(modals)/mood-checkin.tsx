@@ -13,18 +13,23 @@ import {
   Linking,
   Animated,
   Dimensions,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import * as Crypto from 'expo-crypto';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
-import { useCircleStore, type Temperature } from '../../src/stores/circleStore';
+import { useCircleStore, TEMPERATURE_LABELS, type Temperature } from '../../src/stores/circleStore';
 import { trackCheckIn } from '../../src/hooks/useWrappedTracking';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useHumanSkillsStore, CHECKIN_SKILL_IDS, SKILL_POINTS } from '../../src/stores/humanSkillsStore';
 import { runAchievementChecks } from '../../src/services/achievementChecker';
 import { VoiceTextInput } from '../../src/components/VoiceTextInput';
+import { useCreateCheckin } from '../../src/hooks/useCreateCheckin';
+import { useAuth } from '../../src/providers/AuthProvider';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_SIZE = (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.md) / 2;
@@ -64,6 +69,8 @@ function AnimatedSection({ children, delay = 0 }: { children: React.ReactNode; d
 export default function MoodCheckinScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { user } = useAuth();
+  const createCheckin = useCreateCheckin(user?.id);
   const addMoodCheckin = useCircleStore((s) => s.addMoodCheckin);
   const addSkillPoints = useHumanSkillsStore((s) => s.addPoints);
   const [selected, setSelected] = useState<Temperature | null>(null);
@@ -72,6 +79,7 @@ export default function MoodCheckinScreen() {
   const [saved, setSaved] = useState(false);
   const affirmationOpacity = useRef(new Animated.Value(0)).current;
   const affirmationScale = useRef(new Animated.Value(0.8)).current;
+  const submissionIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (saved) {
@@ -82,14 +90,28 @@ export default function MoodCheckinScreen() {
     }
   }, [saved]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selected) return;
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    addMoodCheckin(selected, note.trim() || undefined);
-    trackCheckIn();
-    addSkillPoints(CHECKIN_SKILL_IDS, SKILL_POINTS.checkIn, 'check-in');
-    runAchievementChecks();
-    setSaved(true);
+    submissionIdRef.current ??= Crypto.randomUUID();
+    try {
+      await createCheckin.mutateAsync({
+        clientEventId: submissionIdRef.current,
+        mood: selected,
+        moodLabel: TEMPERATURE_LABELS[selected],
+        note: note.trim() || null,
+      });
+      addMoodCheckin(selected, note.trim() || undefined);
+      trackCheckIn();
+      addSkillPoints(CHECKIN_SKILL_IDS, SKILL_POINTS.checkIn, 'check-in');
+      runAchievementChecks();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setSaved(true);
+    } catch (error) {
+      Alert.alert(
+        'Mood check-in not saved',
+        error instanceof Error ? error.message : 'Could not reach the server. Tap Save to retry.'
+      );
+    }
   };
 
   const handleCardPress = (temp: Temperature) => {
@@ -233,15 +255,19 @@ export default function MoodCheckinScreen() {
           <Pressable
             style={({ pressed }) => [
               styles.saveButton,
-              !selected && styles.saveButtonDisabled,
-              pressed && selected && styles.saveButtonPressed,
+              (!selected || createCheckin.isPending) && styles.saveButtonDisabled,
+              pressed && selected && !createCheckin.isPending && styles.saveButtonPressed,
             ]}
-            onPress={handleSave}
-            disabled={!selected}
+            onPress={() => void handleSave()}
+            disabled={!selected || createCheckin.isPending}
           >
-            <Text style={[styles.saveButtonText, !selected && styles.saveButtonTextDisabled]}>
-              Save
-            </Text>
+            {createCheckin.isPending ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={[styles.saveButtonText, !selected && styles.saveButtonTextDisabled]}>
+                Save
+              </Text>
+            )}
           </Pressable>
         </AnimatedSection>
       </ScrollView>

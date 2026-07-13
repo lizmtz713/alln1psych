@@ -51,7 +51,7 @@ export default function MemoryBuilderAddScreen() {
   const handleSuggestWithAI = async () => {
     const hasKey = await hasOpenAIKey();
     if (!hasKey) {
-      Alert.alert('API key needed', 'Add your OpenAI API key in Settings to use AI suggestions.');
+      Alert.alert('AI unavailable', 'Your secure AI session is unavailable. Sign in again or try later.');
       return;
     }
     setAiHookLoading(true);

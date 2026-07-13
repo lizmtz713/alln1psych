@@ -7,32 +7,37 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "environment": "development",
       "ios": {
         "simulator": true
       }
     },
     "preview": {
       "distribution": "internal",
+      "environment": "preview",
       "ios": {
         "simulator": false
       }
     },
     "testflight": {
       "distribution": "store",
+      "environment": "production",
+      "autoIncrement": true,
       "ios": {
         "simulator": false
       }
     },
     "production": {
+      "environment": "production",
       "autoIncrement": true
     }
   },
   "submit": {
+    "testflight": {
+      "ios": {}
+    },
     "production": {
-      "ios": {
-        "appleId": "limtz713@gmail.com",
-        "appleTeamId": "R77U48L9QW"
-      }
+      "ios": {}
     }
   }
 }

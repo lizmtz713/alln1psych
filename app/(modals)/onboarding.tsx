@@ -1,11 +1,11 @@
 /**
  * InGauge Onboarding — Simple version (~1 min)
  *
- * 1. Hook — Life is complicated... Get Started
+ * 1. Hook — Clear daily value proposition
  * 2. Why you're here — Fix message / Feeling / Relationships / Practice / Just explore
  * 3. Immediate value — Inline taste (tone check, check-in, repair, or explore)
  * 4. Show the system — Signals, Tools, Learning
- * 5. Permissions (optional) — Health/Oura, skip
+ * 5. Permissions (optional) — Apple Health, skip
  * 6. Legal & Consent
  * 7. Quick Setup (name, optional age)
  * 8. Cockpit — Your Cockpit is ready + highlight (first check-in or Tone Check)
@@ -34,8 +34,10 @@ import * as Haptics from 'expo-haptics';
 import { useUserStore } from '../../src/stores/userStore';
 import { APP_CONFIG } from '../../src/lib/constants';
 import { useAuth } from '../../src/providers/AuthProvider';
-import { completeOnboarding as completeOnboardingDb } from '../../src/services/database';
-import { useCockpitStore } from '../../src/stores/cockpitStore';
+import {
+  completeOnboarding as completeOnboardingDb,
+  recordLegalConsents,
+} from '../../src/services/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AGE_REQUIREMENT } from '../../src/data/legalDisclaimers';
 import { analyzeToneForMessage } from '../../src/services/ai';
@@ -47,11 +49,48 @@ const ACCENT_LIGHT = '#B388FF';
 const TEXT = '#F5F5F7';
 const TEXT_MUTED = '#9E9E9E';
 
-const TERMS_URL = 'https://alln1network.com/terms';
-const PRIVACY_URL = 'https://alln1network.com/privacy';
+const TERMS_URL = 'https://getingauge.com/terms';
+const PRIVACY_URL = 'https://getingauge.com/privacy';
 const CONSENT_STORAGE_KEY = 'onboarding_legal_consent_at';
+const LEGAL_VERSION = '2026-07-13';
 
 const TOTAL_STEPS = 8;
+
+function formatBirthdayInput(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+function parseBirthday(value: string): { iso: string; age: number } | null {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (!match) return null;
+  const month = Number(match[1]);
+  const day = Number(match[2]);
+  const year = Number(match[3]);
+  const today = new Date();
+  const birth = new Date(Date.UTC(year, month - 1, day));
+  if (
+    year < 1900 ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    birth.getUTCFullYear() !== year ||
+    birth.getUTCMonth() !== month - 1 ||
+    birth.getUTCDate() !== day
+  ) return null;
+  let age = today.getUTCFullYear() - year;
+  const birthdayPassed =
+    today.getUTCMonth() + 1 > month ||
+    (today.getUTCMonth() + 1 === month && today.getUTCDate() >= day);
+  if (!birthdayPassed) age -= 1;
+  if (age < AGE_REQUIREMENT.minimumAge || age > 125) return null;
+  return {
+    iso: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+    age,
+  };
+}
 
 type WhyChoice = 'fix_message' | 'feeling' | 'relationships' | 'practice' | 'explore' | null;
 const WHY_OPTIONS: { id: WhyChoice; label: string }[] = [
@@ -124,14 +163,7 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const fade = useRef(new Animated.Value(1)).current;
   const { user } = useAuth();
-  const { completeOnboarding, setName, setAgeGroup } = useUserStore();
-  const updateBody = useCockpitStore((s) => s.updateBody);
-  const updateState = useCockpitStore((s) => s.updateState);
-  const updateEmotion = useCockpitStore((s) => s.updateEmotion);
-  const updateConnection = useCockpitStore((s) => s.updateConnection);
-  const updateDirection = useCockpitStore((s) => s.updateDirection);
-  const updateAlignment = useCockpitStore((s) => s.updateAlignment);
-  const setLastCheckInDate = useCockpitStore((s) => s.setLastCheckInDate);
+  const { completeOnboarding, setName, setAgeGroup, setBirthday } = useUserStore();
 
   const [whyChoice, setWhyChoice] = useState<WhyChoice>(null);
   const [toneMessage, setToneMessage] = useState('');
@@ -144,11 +176,12 @@ export default function OnboardingScreen() {
   const [agreeAI, setAgreeAI] = useState(false);
   const [agreeAge, setAgreeAge] = useState(false);
   const [quickName, setQuickName] = useState(() => useUserStore.getState().name ?? '');
-  const [quickBirthYear, setQuickBirthYear] = useState('');
+  const [quickBirthday, setQuickBirthday] = useState('');
+  const [isFinishing, setIsFinishing] = useState(false);
 
   const goNext = () => {
     if (step === TOTAL_STEPS - 1) {
-      finishOnboarding();
+      void finishOnboarding();
       return;
     }
     Animated.timing(fade, { toValue: 0, duration: 150, useNativeDriver: true }).start(() => {
@@ -167,45 +200,55 @@ export default function OnboardingScreen() {
   };
 
   const finishOnboarding = async () => {
+    if (isFinishing) return;
     const nameVal = (quickName ?? '').trim();
-    const nameToSave = nameVal || (useUserStore.getState().name ?? null);
-    if (nameVal) setName(nameVal);
-    const birthVal = (quickBirthYear ?? '').trim();
-    const birthYear = birthVal ? parseInt(birthVal, 10) : null;
-    if (birthYear != null && !Number.isNaN(birthYear)) {
-      const age = new Date().getFullYear() - birthYear;
-      if (age >= 60) setAgeGroup('60+');
-      else if (age >= 41) setAgeGroup('41-60');
-      else if (age >= 26) setAgeGroup('26-40');
-      else if (age >= 18) setAgeGroup('18-25');
-      else if (age >= 13) setAgeGroup('13-17');
-      else setAgeGroup('under13');
+    const nameToSave = nameVal || useUserStore.getState().name || 'Friend';
+    const birthday = parseBirthday(quickBirthday.trim());
+    if (!birthday) {
+      Alert.alert('Age confirmation required', AGE_REQUIREMENT.statement);
+      return;
     }
-    if (user?.id) {
-      try {
-        await completeOnboardingDb(user.id, {
+    if (!user?.id) {
+      Alert.alert('Sign-in required', 'Your session expired. Sign in again to finish setup.');
+      return;
+    }
+
+    const ageGroup = birthday.age >= 60 ? '60+' : birthday.age >= 41 ? '41-60' : birthday.age >= 26 ? '26-40' : '18-25';
+    const acceptedAt = new Date().toISOString();
+    setIsFinishing(true);
+    try {
+      const [profileResult, consentResult] = await Promise.all([
+        completeOnboardingDb(user.id, {
           name: nameToSave,
-          age_group: useUserStore.getState().ageGroup ?? null,
+          age_group: ageGroup,
           communication_preference: null,
           love_language: null,
-        });
-      } catch (e) {
-        if (__DEV__) console.warn('Onboarding DB complete failed:', e);
-      }
+          birthday: birthday.iso,
+        }),
+        recordLegalConsents(user.id, acceptedAt, {
+          terms: LEGAL_VERSION,
+          privacy: LEGAL_VERSION,
+        }),
+      ]);
+      if (profileResult.error) throw profileResult.error;
+      if (consentResult.error) throw consentResult.error;
+
+      await AsyncStorage.setItem(CONSENT_STORAGE_KEY, acceptedAt);
+      setName(nameToSave);
+      setAgeGroup(ageGroup);
+      setBirthday(birthday.iso);
+      completeOnboarding();
+      router.replace('/(tabs)');
+      requestAnimationFrame(() => router.push('/(modals)/cockpit-checkin'));
+    } catch (error) {
+      if (__DEV__) console.warn('Onboarding persistence failed:', error);
+      Alert.alert(
+        'Setup not saved',
+        'Your account setup could not be saved. Check your connection and try again.'
+      );
+    } finally {
+      setIsFinishing(false);
     }
-    if (agreeTerms && agreePrivacy && agreeHealth && agreeAI && agreeAge) {
-      await AsyncStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
-    }
-    if (feelingQuick == null) {
-      updateBody(50);
-      updateState(50);
-      updateEmotion(50);
-      updateConnection(50);
-      updateDirection(50);
-      updateAlignment(50);
-    }
-    completeOnboarding();
-    requestAnimationFrame(() => router.replace('/(tabs)'));
   };
 
   const runToneCheck = useCallback(async () => {
@@ -216,7 +259,7 @@ export default function OnboardingScreen() {
     try {
       const res = await analyzeToneForMessage(text);
       if (res) setToneResult(res);
-      else Alert.alert('Need API key', 'Add your OpenAI key in Me → Bring Your Own Key to use Tone Check.');
+      else Alert.alert('Could not connect', 'Tone feedback is temporarily unavailable. Try again or skip.');
     } catch (e) {
       Alert.alert('Something went wrong', 'Try again or skip for now.');
     } finally {
@@ -224,20 +267,8 @@ export default function OnboardingScreen() {
     }
   }, [toneMessage]);
 
-  const applyFeelingToGauges = useCallback(() => {
-    if (feelingQuick == null) return;
-    const s = feelingQuick === 'good' ? 70 : feelingQuick === 'okay' ? 50 : 30;
-    updateState(s);
-    updateEmotion(s);
-    updateBody(50);
-    updateConnection(50);
-    updateDirection(50);
-    updateAlignment(50);
-    setLastCheckInDate(new Date().toISOString().slice(0, 10));
-  }, [feelingQuick, updateState, updateEmotion, updateBody, updateConnection, updateDirection, updateAlignment, setLastCheckInDate]);
-
   const canProceedLegal = agreeTerms && agreePrivacy && agreeHealth && agreeAI && agreeAge;
-  const canProceedSetup = true;
+  const canProceedSetup = parseBirthday(quickBirthday) !== null;
 
   return (
     <KeyboardAvoidingView
@@ -262,9 +293,9 @@ export default function OnboardingScreen() {
           {step === 0 && (
             <StepLayout onNext={goNext} ctaLabel="Get Started">
               <View style={s.visualWrap}>
-                <Text style={s.title}>Life is complicated.</Text>
-                <Text style={s.subtitle}>Most people were never taught how to navigate it.</Text>
-                <Text style={s.muted}>InGauge helps you understand yourself, handle difficult conversations, and improve relationships.</Text>
+                <Text style={s.title}>Know what’s draining you.</Text>
+                <Text style={s.subtitle}>A 60-second calibration shows whether today calls for growth or stabilization.</Text>
+                <Text style={s.muted}>Track how Body, State, Emotion, Connection, Direction, and Alignment respond over time.</Text>
               </View>
             </StepLayout>
           )}
@@ -294,7 +325,7 @@ export default function OnboardingScreen() {
           {/* 3. Immediate value */}
           {step === 2 && (
             <StepLayout
-              onNext={() => { if (whyChoice === 'feeling' && feelingQuick != null) applyFeelingToGauges(); goNext(); }}
+              onNext={goNext}
               ctaLabel="Next"
               ctaDisabled={toneAnalyzing}
               showBack
@@ -334,7 +365,7 @@ export default function OnboardingScreen() {
                       </Pressable>
                     ))}
                   </View>
-                  <Text style={s.muted}>We'll use this to set your gauges. You can check in anytime from the Cockpit.</Text>
+                  <Text style={s.muted}>This helps tailor your first calibration. Your gauges are not set until you complete and save it.</Text>
                 </>
               )}
               {whyChoice === 'relationships' && (
@@ -378,8 +409,8 @@ export default function OnboardingScreen() {
           {/* 5. Permissions (optional) */}
           {step === 4 && (
             <StepLayout onNext={goNext} ctaLabel="Skip for now" showBack onBack={goBack}>
-              <Text style={s.title}>Connect Apple Health or Oura?</Text>
-              <Text style={s.subtitle}>Your signals help us suggest the right tools. You can connect later in Me → Preferences.</Text>
+              <Text style={s.title}>Connect Apple Health?</Text>
+              <Text style={s.subtitle}>Sleep, activity, and heart signals can support your Body and State gauges. This is optional and can be connected later.</Text>
             </StepLayout>
           )}
 
@@ -422,7 +453,7 @@ export default function OnboardingScreen() {
                   <Pressable style={s.checkbox} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setAgreeAI((v: boolean) => !v); }}>
                     <Text style={s.checkboxText}>{agreeAI ? '✓' : ' '}</Text>
                   </Pressable>
-                  <Text style={s.checkboxLabel}>I understand AI responses may not always be accurate and are not professional advice.</Text>
+                  <Text style={s.checkboxLabel}>I agree that my check-ins and messages may be securely sent to OpenAI to generate responses. AI output may be inaccurate and is not professional advice.</Text>
                 </View>
                 <View style={s.checkboxRow}>
                   <Pressable style={s.checkbox} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setAgreeAge((v: boolean) => !v); }}>
@@ -436,7 +467,7 @@ export default function OnboardingScreen() {
 
           {/* 7. Quick Setup */}
           {step === 6 && (
-            <StepLayout onNext={goNext} ctaLabel="Next" showBack onBack={goBack}>
+            <StepLayout onNext={goNext} ctaLabel="Next" ctaDisabled={!canProceedSetup} showBack onBack={goBack}>
               <Text style={s.title}>Quick setup</Text>
               <Text style={s.subtitle}>Only what we need to get started.</Text>
               <TextInput
@@ -449,24 +480,34 @@ export default function OnboardingScreen() {
                 maxLength={80}
               />
               <TextInput
-                style={[s.input, s.inputOptional]}
-                placeholder="Birth year (optional)"
+                style={s.input}
+                placeholder="Birthday (MM/DD/YYYY)"
                 placeholderTextColor={TEXT_MUTED}
-                value={quickBirthYear}
-                onChangeText={setQuickBirthYear}
+                value={quickBirthday}
+                onChangeText={(value) => setQuickBirthday(formatBirthdayInput(value))}
                 keyboardType="number-pad"
-                maxLength={4}
+                maxLength={10}
               />
+              <Text style={s.muted}>Used for age-appropriate guidance and an optional Personology reflection profile—not a clinical assessment.</Text>
+              {quickBirthday.length > 0 && !canProceedSetup ? (
+                <Text style={s.muted}>{AGE_REQUIREMENT.statement}</Text>
+              ) : null}
             </StepLayout>
           )}
 
           {/* 8. Cockpit */}
           {step === 7 && (
-            <StepLayout onNext={finishOnboarding} ctaLabel="Open Cockpit" showBack onBack={goBack}>
+            <StepLayout
+              onNext={() => void finishOnboarding()}
+              ctaLabel={isFinishing ? 'Saving…' : 'Start my calibration'}
+              ctaDisabled={isFinishing}
+              showBack
+              onBack={goBack}
+            >
               <View style={s.visualWrap}>
                 <Text style={s.welcomeEmoji}>🌡️</Text>
-                <Text style={s.title}>Your Cockpit is ready.</Text>
-                <Text style={s.subtitle}>Try your first check-in, or need help with a message? You'll find both from the dashboard.</Text>
+                <Text style={s.title}>Your Cockpit is one minute away.</Text>
+                <Text style={s.subtitle}>Calibrate the six gauges next. Then InGauge can show your current capacity and the clearest place to start.</Text>
               </View>
             </StepLayout>
           )}

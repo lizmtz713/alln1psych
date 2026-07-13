@@ -2,8 +2,7 @@
  * Role play AI — character conversation and debrief.
  */
 
-import { getOpenAIKey } from './ai';
-import { useUsageStore } from '../stores/usageStore';
+import { sendMessageWithSystemPromptOnly } from './ai';
 import { buildKnowledgePrompt } from '../data/psychKnowledge';
 import { buildAgeAdaptivePrompt } from './ageAdaptive';
 
@@ -68,38 +67,9 @@ export async function sendRolePlayMessage(
   character: string,
   difficulty: 'supportive' | 'neutral' | 'challenging'
 ): Promise<string> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) throw new Error('OpenAI API key not configured');
-
   const systemPrompt = buildRolePlayPrompt(scenario, character, difficulty);
-  const apiMessages: Array<{ role: string; content: string }> = [
-    { role: 'system', content: systemPrompt },
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
-  ];
-
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: apiMessages,
-      max_tokens: 300,
-      temperature: 0.8,
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(body || `OpenAI error: ${res.status}`);
-  }
-
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const content = data.choices?.[0]?.message?.content?.trim();
+  const content = await sendMessageWithSystemPromptOnly(messages, systemPrompt, 300, 0.8);
   if (!content) throw new Error('Empty response from OpenAI');
-  useUsageStore.getState().incrementGPT();
   return content;
 }
 
@@ -109,37 +79,18 @@ export async function getDebrief(
   character: string,
   difficulty: string
 ): Promise<string> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) throw new Error('OpenAI API key not configured');
-
   const transcript = messages
     .map((m) => `${m.role === 'user' ? 'User' : character}: ${m.content}`)
     .join('\n\n');
   let systemPrompt = buildDebriefPrompt(scenario, character, difficulty, transcript);
   systemPrompt += buildKnowledgePrompt();
 
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: 'Please provide the debrief.' }],
-      max_tokens: 500,
-      temperature: 0.7,
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(body || `OpenAI error: ${res.status}`);
-  }
-
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const content = data.choices?.[0]?.message?.content?.trim();
+  const content = await sendMessageWithSystemPromptOnly(
+    [{ role: 'user', content: 'Please provide the debrief.' }],
+    systemPrompt,
+    500,
+    0.7
+  );
   if (!content) throw new Error('Empty debrief from OpenAI');
-  useUsageStore.getState().incrementGPT();
   return content;
 }

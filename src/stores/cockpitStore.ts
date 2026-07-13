@@ -322,15 +322,13 @@ export const useCockpitStore = create<CockpitState>()(
       alignment: s.alignment.value,
     };
     
-    // Get health data: merged HealthKit + Oura when both available (see docs/WEARABLE-DATA-AUDIT.md)
+    // Get health data from the supported Apple Health path.
     let healthData;
     try {
       const healthStore = require('./healthStore').useHealthStore.getState();
       const snapshot = healthStore.snapshot;
-      const { getCachedOuraData } = require('../services/ouraIntegration');
       const { buildAggregatedHealthContext } = require('../services/healthData');
-      const ouraSnapshot = await getCachedOuraData();
-      healthData = buildAggregatedHealthContext(snapshot ?? null, ouraSnapshot ?? null);
+      healthData = buildAggregatedHealthContext(snapshot ?? null, null);
       if (!healthData && snapshot) {
         healthData = {
           sleepHours: snapshot.sleep?.lastNight?.duration,
@@ -344,7 +342,7 @@ export const useCockpitStore = create<CockpitState>()(
         };
       }
     } catch (e) {
-      // Health store or Oura not available
+      // Health store not available
     }
 
     // Get Spotify listening data if available
@@ -613,23 +611,9 @@ export const useCockpitStore = create<CockpitState>()(
       name: 'cockpit-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
-        body: state.body,
-        state: state.state,
-        emotion: state.emotion,
-        connection: state.connection,
-        direction: state.direction,
-        alignment: state.alignment,
-        lastCheckInDate: state.lastCheckInDate,
-        checkInDates: state.checkInDates,
-        checkInContext: state.checkInContext,
-        checkInSystemImpact: state.checkInSystemImpact,
-        checkInDrivers: state.checkInDrivers,
-        lastCheckInSnapshot: state.lastCheckInSnapshot,
-        checkInHistory: state.checkInHistory,
-        suggestedActionsTaken: state.suggestedActionsTaken,
-        systemMode: state.systemMode,
-        stabilizationTriggers: state.stabilizationTriggers,
-        centerScore: state.centerScore,
+        // Check-ins and derived modes are server-owned. Persisting them here can show
+        // stale or cross-account wellness data before authenticated hydration finishes.
+        // Device integration preferences are the only safe Cockpit cache entries.
         bodyDataSource: state.bodyDataSource,
         stateDataSource: state.stateDataSource,
       }),

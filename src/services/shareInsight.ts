@@ -32,7 +32,7 @@ export interface GaugeStatusInsight {
   gauges: GaugeReading[];
   systemMode: SystemMode;
   centerScore: number;
-  context: string; // \"I'm feeling X because...\"
+  context: string; // "I'm feeling X because..."
   personalNote?: string;
   timestamp: string;
 }
@@ -82,18 +82,18 @@ export interface PersonologyInsight {
 
 /**
  * Operating Snapshot — A relational translation of how someone works
- * \"Here's my manual so you can understand me better\"
+ * "Here's my manual so you can understand me better"
  */
 export interface OperatingSnapshotInsight {
-  type: "operating-snapshot";
+  type: 'operating-snapshot';
   senderName: string;
   systemMode: SystemMode;
   currentState: {
-    summary: string; // \"I'm in stabilization mode right now\"
+    summary: string; // "I'm in stabilization mode right now"
     primaryNeeds: string[]; // What I need most right now
   };
   patterns: {
-    sensitivities: string[]; // \"When I'm low on sleep, I tend to withdraw"
+    sensitivities: string[]; // "When I'm low on sleep, I tend to withdraw"
     warningSignsFor: string[]; // "If I seem distant, check my State"
     whatHelps: string[]; // "I need quiet time to recharge"
   };
@@ -197,7 +197,7 @@ function getOverallStatusMessage(mode: SystemMode, centerScore: number): string 
 
 /**
  * Generate sensitivities based on gauge patterns
- * \"When I'm low on X, I tend to Y\"
+ * "When I'm low on X, I tend to Y"
  */
 function generateSensitivities(gauges: GaugeReading[], patterns: DriftPattern[]): string[] {
   const sensitivities: string[] = [];

@@ -399,7 +399,7 @@ export function CockpitCluster({
             <LineFlowParticles centers={centers} />
           </View>
 
-          {/* Center \"YOU\" glow — anchors cockpit */}
+          {/* Center "YOU" glow — anchors cockpit */}
       <Animated.View
           style={[
           styles.centerGlow,

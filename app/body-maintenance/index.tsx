@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { useBodyMaintenanceStore } from '../../src/stores/bodyMaintenanceStore';
+import { useBodyMaintenanceHydration } from '../../src/hooks/useBodyMaintenanceHydration';
 import type { RoutineItem } from '../../src/types/bodyMaintenance';
 
 function RoutineRow({ item, onPress, onCheck }: { item: RoutineItem; onPress: () => void; onCheck: () => void }) {
@@ -27,6 +28,7 @@ function RoutineRow({ item, onPress, onCheck }: { item: RoutineItem; onPress: ()
 export default function BodyMaintenanceIndex() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  useBodyMaintenanceHydration();
   const routines = useBodyMaintenanceStore((s) => s.routines);
   const providers = useBodyMaintenanceStore((s) => s.providers);
   const getRoutinesByFrequency = useBodyMaintenanceStore((s) => s.getRoutinesByFrequency);

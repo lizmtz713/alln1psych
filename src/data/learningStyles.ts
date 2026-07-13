@@ -24,14 +24,14 @@ export interface LearningStyle {
 }
 
 export const LEARNING_STYLES_INTRO = {
-  headline: \"How Do You Learn Best?\",
-  subhead: \"Understanding your style helps you actually absorb this - not just read it.\",
+  headline: "How Do You Learn Best?",
+  subhead: "Understanding your style helps you actually absorb this - not just read it.",
   
   philosophy: `Ever read something, understood it in the moment, and completely forgot it by the next day? That's not a memory problem. That's a learning style mismatch.
 
 Your brain has preferred pathways for taking in and retaining information. Some people need to see it visually. Some need to hear it explained. Some need to read and write about it. Some need to physically do it.
 
-There's no \"best\" style - just the one that works for YOUR brain. Most people are a blend of styles, with one or two that are stronger.
+There's no "best" style - just the one that works for YOUR brain. Most people are a blend of styles, with one or two that are stronger.
 
 Understanding your learning style isn't just for school. It's for life. It's how you actually retain the emotional intelligence concepts in this app instead of just scrolling through them.`,
 
@@ -44,32 +44,32 @@ export const LEARNING_STYLES: LearningStyle[] = [
     emoji: '👁️',
     name: 'Visual',
     color: '#38BDF8',
-    tagline: 'You learn by seeing",
+    tagline: 'You learn by seeing',
     
     description: `Visual learners process information best through images, diagrams, charts, maps, and visual representations. You think in pictures. When someone explains something, you might automatically create a mental image. You remember faces better than names. You're drawn to color-coding and visual organization.
 
 Your brain builds understanding by seeing how things connect spatially. A wall of text is your enemy. A well-designed infographic is your friend.`,
 
     howYouLearn: [
-      \"Seeing information displayed visually (charts, diagrams, mind maps)\",
-      \"Color-coding and highlighting\",
-      \"Watching demonstrations rather than hearing instructions\",
-      \"Visualizing concepts as mental images\",
-      \"Spatial organization - where things are placed matters\",
+      "Seeing information displayed visually (charts, diagrams, mind maps)",
+      "Color-coding and highlighting",
+      "Watching demonstrations rather than hearing instructions",
+      "Visualizing concepts as mental images",
+      "Spatial organization - where things are placed matters",
     ],
 
     strengths: [
-      \"Quick at seeing patterns and connections\",
-      \"Good at remembering visual details\",
-      \"Strong spatial reasoning\",
-      \"Can picture abstract concepts\",
-      \"Often good at design and aesthetics\",
+      "Quick at seeing patterns and connections",
+      "Good at remembering visual details",
+      "Strong spatial reasoning",
+      "Can picture abstract concepts",
+      "Often good at design and aesthetics",
     ],
 
     challenges: [
-      \"Long lectures without visuals are draining\",
-      \"Verbal instructions can be hard to follow\",
-      \"May miss information that's only spoken",
+      "Long lectures without visuals are draining",
+      "Verbal instructions can be hard to follow",
+      "May miss information that's only spoken",
       "Can get overwhelmed by cluttered visual environments",
     ],
 
@@ -79,36 +79,36 @@ Your brain builds understanding by seeing how things connect spatially. A wall o
       "You prefer maps over written directions",
       "You notice visual details others miss",
       "You think in pictures - when someone describes something, you see it",
-      "You're drawn to well-designed apps, websites, and spaces\",
+      "You're drawn to well-designed apps, websites, and spaces",
     ],
 
     howToUseThisApp: [
-      \"Look at the gauge visualizations - the colors and shapes carry meaning\",
-      \"Pay attention to the emojis and icons - they're memory anchors\",
-      \"Draw your own diagrams of how the 6 gauges connect\",
-      \"Take screenshots of key concepts and review them\",
-      \"Use the Body Scan with its body map visualization\",
-      \"Notice the color patterns: red = Body, yellow = State, purple = Emotion, etc.\",
+      "Look at the gauge visualizations - the colors and shapes carry meaning",
+      "Pay attention to the emojis and icons - they're memory anchors",
+      "Draw your own diagrams of how the 6 gauges connect",
+      "Take screenshots of key concepts and review them",
+      "Use the Body Scan with its body map visualization",
+      "Notice the color patterns: red = Body, yellow = State, purple = Emotion, etc.",
     ],
 
     studyTips: [
-      \"Create mind maps of the gauge system\",
-      \"Draw what emotions feel like in your body\",
-      \"Use colored highlighters when journaling\",
-      \"Visualize scenarios before trying the tools\",
-      \"Sketch the 3 nervous system states\",
+      "Create mind maps of the gauge system",
+      "Draw what emotions feel like in your body",
+      "Use colored highlighters when journaling",
+      "Visualize scenarios before trying the tools",
+      "Sketch the 3 nervous system states",
     ],
 
     bestActivities: [
-      \"Body Scan (visual body map)\",
-      \"Emotion Wheel (visual organization of feelings)\",
-      \"Mood Patterns (visual charts)\",
-      \"Trigger Map (visual connections)\",
+      "Body Scan (visual body map)",
+      "Emotion Wheel (visual organization of feelings)",
+      "Mood Patterns (visual charts)",
+      "Trigger Map (visual connections)",
     ],
   },
   
   {
-    id: "auditory',
+    id: 'auditory',
     emoji: '👂',
     name: 'Auditory',
     color: '#A78BFA',
@@ -146,22 +146,22 @@ Podcasts are your friend. Lectures work for you. Reading silently might be less 
       "You talk to yourself when figuring things out",
       "You can recall what someone said, word for word",
       "You prefer listening to podcasts over reading articles",
-      "You often say 'let me talk this through"\",
-      \"Background music or sounds can help you focus (or specific sounds distract you)\",
+      "You often say 'let me talk this through'",
+      "Background music or sounds can help you focus (or specific sounds distract you)",
     ],
 
     howToUseThisApp: [
-      \"Use voice input when talking to Gauge - speak instead of type\",
-      \"Ask Gauge to explain concepts out loud (use voice response)\",
-      \"Read the gauge descriptions aloud to yourself\",
-      \"Discuss what you're learning with someone else\",
-      \"Explain a gauge to a friend - teaching reinforces learning\",
-      \"Use the guided breathing exercises with audio cues\",
+      "Use voice input when talking to Gauge - speak instead of type",
+      "Ask Gauge to explain concepts out loud (use voice response)",
+      "Read the gauge descriptions aloud to yourself",
+      "Discuss what you're learning with someone else",
+      "Explain a gauge to a friend - teaching reinforces learning",
+      "Use the guided breathing exercises with audio cues",
     ],
 
     studyTips: [
-      \"Record yourself explaining each gauge, then listen back\",
-      \"Talk through the "When It's Low' descriptions out loud",
+      "Record yourself explaining each gauge, then listen back",
+      "Talk through the 'When It's Low' descriptions out loud",
       "Discuss your insights with someone daily",
       "Create verbal mnemonics: 'Body, State, Emotion, Connection, Direction, Alignment'",
       "Use Gauge as a conversation partner to process your understanding",
@@ -214,14 +214,14 @@ Lists, written instructions, and detailed text explanations work for you. You pr
       "You prefer reading instructions over watching videos",
       "You write to think - journaling, lists, notes to self",
       "You remember what you read better than what you heard or saw",
-      "You often say 'let me write this down"\",
-      \"You're the one who reads the entire manual\",
+      "You often say 'let me write this down'",
+      "You're the one who reads the entire manual",
     ],
 
     howToUseThisApp: [
-      \"Read through the full gauge content - the depth is there for you\",
-      \"Use the journal regularly - writing processes emotions for you\",
-      \"Take notes on what you're learning about yourself",
+      "Read through the full gauge content - the depth is there for you",
+      "Use the journal regularly - writing processes emotions for you",
+      "Take notes on what you're learning about yourself",
       "Write summaries of each gauge in your own words",
       "Read the Human Manual lessons thoroughly - they're written for readers",
       "Create your own 'personal manual' with your patterns and insights",
@@ -248,59 +248,59 @@ Lists, written instructions, and detailed text explanations work for you. You pr
     emoji: '🤲',
     name: 'Kinesthetic',
     color: '#F87171',
-    tagline: 'You learn by doing",
+    tagline: 'You learn by doing',
     
     description: `Kinesthetic learners process information best through physical experience, practice, and hands-on engagement. You learn by doing, not just reading or hearing. Your body is part of your thinking process. You might need to move while learning - pacing, fidgeting, or gesturing.
 
 You probably hate long lectures. You want to try things, not just hear about them. Real-world application is how concepts become real for you. Simulation and practice trump theory every time.`,
 
     howYouLearn: [
-      \"Hands-on practice and experimentation\",
-      \"Physical movement while learning\",
-      \"Real-world application and experience\",
-      \"Role-playing and simulation\",
-      \"Learning by doing, trial and error\",
+      "Hands-on practice and experimentation",
+      "Physical movement while learning",
+      "Real-world application and experience",
+      "Role-playing and simulation",
+      "Learning by doing, trial and error",
     ],
 
     strengths: [
-      \"Strong physical/body awareness\",
-      \"Good at learning practical skills quickly\",
-      \"Remember what they've done and experienced\",
-      \"Often athletic or skilled with their hands\",
-      \"Good at figuring things out through trial and error\",
+      "Strong physical/body awareness",
+      "Good at learning practical skills quickly",
+      "Remember what they've done and experienced",
+      "Often athletic or skilled with their hands",
+      "Good at figuring things out through trial and error",
     ],
 
     challenges: [
-      \"Sitting still for long periods is hard\",
-      \"Abstract concepts without practical application can feel pointless\",
-      \"May be labeled "fidgety' or 'restless' in traditional settings",
+      "Sitting still for long periods is hard",
+      "Abstract concepts without practical application can feel pointless",
+      "May be labeled 'fidgety' or 'restless' in traditional settings",
       "Need opportunities to practice, not just observe",
     ],
 
     signsThisIsYou: [
       "You learn better when you can move or use your hands",
       "You remember experiences better than explanations",
-      "You prefer to 'just try it" rather than read instructions\",
-      \"You often gesture when explaining things\",
-      \"You feel restless sitting through lectures or long readings\",
-      \"You're aware of physical sensations - body tells you things\",
+      "You prefer to 'just try it' rather than read instructions",
+      "You often gesture when explaining things",
+      "You feel restless sitting through lectures or long readings",
+      "You're aware of physical sensations - body tells you things",
     ],
 
     howToUseThisApp: [
-      \"DO the activities, don't just read about them",
+      "DO the activities, don't just read about them",
       "Body Scan - actually feel where tension is in your body",
       "Breathing exercises - actually do them, feel the difference",
       "Role Play - practice conversations, not just read scripts",
       "Move while learning - walk while listening to explanations",
-      "Apply concepts immediately - check your gauges right now, not 'later'\",
+      "Apply concepts immediately - check your gauges right now, not 'later'",
     ],
 
     studyTips: [
-      \"Walk while listening to Gauge explain things\",
-      \"Do a gauge check-in after physical activity - notice the difference\",
-      \"Practice the breathing techniques until they're automatic\",
-      \"Role-play difficult conversations out loud, with movement\",
-      \"Notice your body's response to different emotions - hands-on discovery",
+      "Walk while listening to Gauge explain things",
+      "Do a gauge check-in after physical activity - notice the difference",
+      "Practice the breathing techniques until they're automatic",
+      "Role-play difficult conversations out loud, with movement",
+      "Notice your body's response to different emotions - hands-on discovery",
     ],
 
     bestActivities: [
@@ -325,9 +325,9 @@ export const LEARNING_STYLE_QUIZ = {
       ]
     },
     {
-      question: \"When you're upset, what helps most?\",
+      question: "When you're upset, what helps most?",
       options: [
-        { text: \"Looking at pictures or nature\", style: "visual' },
+        { text: "Looking at pictures or nature", style: 'visual' },
         { text: "Talking to someone or listening to music", style: 'auditory' },
         { text: "Writing in a journal", style: 'reading-writing' },
         { text: "Going for a walk or doing something physical", style: 'kinesthetic' },
@@ -391,7 +391,7 @@ export const LEARNING_STYLE_QUIZ = {
 };
 
 export const MULTI_STYLE_TIPS = {
-  headline: \"Most People Are a Blend\",
+  headline: "Most People Are a Blend",
   content: `Pure learning styles are rare. Most people are primarily one style with secondary preferences. You might be Visual-Kinesthetic, or Auditory-Reading, or some other combination.
 
 Use your primary style for initial learning. Use secondary styles to reinforce.
@@ -401,8 +401,8 @@ When something isn't sticking, try a different style's approach. The concept mig
 The goal isn't to label yourself - it's to have more tools for actually learning and retaining what matters.`,
   
   combiningStyles: [
-    \"Visual + Kinesthetic: Draw while moving, watch demonstrations then practice immediately\",
-    \"Auditory + Reading: Read aloud, discuss what you've read, write after listening",
+    "Visual + Kinesthetic: Draw while moving, watch demonstrations then practice immediately",
+    "Auditory + Reading: Read aloud, discuss what you've read, write after listening",
     "Visual + Auditory: Watch videos with commentary, explain your visualizations out loud",
     "Reading + Kinesthetic: Write notes by hand, read while walking, immediately apply what you read",
   ]

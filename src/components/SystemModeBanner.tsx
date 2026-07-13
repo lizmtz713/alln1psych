@@ -28,7 +28,7 @@ const AMBER_DOT = COLORS.amber;
 const STABLE_BG = 'rgba(124, 77, 255, 0.06)';
 const STABLE_BORDER = 'rgba(124, 77, 255, 0.15)';
 const STABLE_DOT = '#4ADE80';
-const STABLE_TEXT = '#A78BFA";
+const STABLE_TEXT = '#A78BFA';
 
 interface SystemModeBannerProps {
   mode: SystemMode;
@@ -39,7 +39,7 @@ interface SystemModeBannerProps {
 }
 
 const GAUGE_LABELS: Record<GaugeKey, string> = {
-  body: "Body',
+  body: 'Body',
   state: 'State',
   emotion: 'Emotion',
   connection: 'Connection',
@@ -85,7 +85,7 @@ export function SystemModeBanner({
 
   // Pulse animation for stabilization mode
   useEffect(() => {
-    if (mode === "stabilization') {
+    if (mode === 'stabilization') {
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, { toValue: 1.05, duration: 1500, useNativeDriver: true }),

@@ -150,6 +150,7 @@ export default function OnboardingScreen() {
         age_group: ageGroup,
         love_language: loveLanguage,
         communication_preference: null,
+        birthday,
       });
     }
     completeOnboarding();

@@ -14,10 +14,13 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import * as Crypto from 'expo-crypto';
 import { Ionicons } from '@expo/vector-icons';
 import { ErrorBoundary } from '../../src/components/ErrorBoundary';
 import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
@@ -26,6 +29,9 @@ import { DRIVERS_BY_GAUGE } from '../../src/data/driversByGauge';
 import { PostCheckInSuggestions } from '../../src/components/checkin/PostCheckInSuggestions';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 import { useGeneratedInsights } from '../../src/hooks/useGeneratedInsights';
+import { useCreateCheckin, emotionScoreToMood } from '../../src/hooks/useCreateCheckin';
+import { useAuth } from '../../src/providers/AuthProvider';
+import { TEMPERATURE_LABELS } from '../../src/stores/circleStore';
 import { runAchievementChecks } from '../../src/services/achievementChecker';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
 
@@ -119,11 +125,15 @@ const STRESS_OPTIONS = ['Work', 'Relationships', 'Health', 'Money', 'Nothing maj
 export default function CockpitCheckinScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { user } = useAuth();
+  const createCheckin = useCreateCheckin(user?.id);
   const [step, setStep] = useState(0);
   const [formVersion, setFormVersion] = useState(0);
   const [showPostCheckInSuggestions, setShowPostCheckInSuggestions] = useState(false);
   const [postCheckInGauges, setPostCheckInGauges] = useState<Partial<Record<GaugeKey, { value: number; trend?: 'improving' | 'stable' | 'declining' | null }>>>({});
   const answersRef = useRef<AnswersRef>({ ...initialAnswers, body: { ...initialAnswers.body } });
+  const submissionIdRef = useRef<string | null>(null);
+  const submittingRef = useRef(false);
 
   const { insights: postCheckInInsights } = useGeneratedInsights({
     context: 'postCheckIn',
@@ -148,62 +158,115 @@ export default function CockpitCheckinScreen() {
 
   const bodyYesCount = BODY_KEYS.filter((k) => a.body[k]).length;
   const bodyScore = bodyYesCount * 25;
-  const connectionScore =
-    a.listenedToMe === true && a.iListened === true ? 100 : a.listenedToMe === true || a.iListened === true ? 60 : 20;
+
+  const finishCheckIn = useCallback(async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    const cur = answersRef.current;
+    const gauges: Partial<Record<GaugeKey, number>> = {
+      body: BODY_KEYS.filter((key) => cur.body[key]).length * 25,
+      emotion: emotionToScore(cur.emotionSelected ?? []),
+      connection:
+        cur.listenedToMe === true && cur.iListened === true
+          ? 100
+          : cur.listenedToMe === true || cur.iListened === true
+            ? 60
+            : 20,
+      ...(cur.stateValue !== null ? { state: cur.stateValue } : {}),
+      ...(cur.directionValue !== null ? { direction: cur.directionValue } : {}),
+      ...(cur.alignmentValue !== null ? { alignment: cur.alignmentValue } : {}),
+    };
+    const context =
+      cur.sleepContext || cur.socialContext || cur.stressSourceContext
+        ? {
+            sleep: cur.sleepContext ?? undefined,
+            social: cur.socialContext ?? undefined,
+            stressSource: cur.stressSourceContext ?? undefined,
+          }
+        : null;
+    const noteParts = [
+      cur.emotionSelected?.length ? `Feeling: ${cur.emotionSelected.join(', ')}` : null,
+      cur.sleepContext ? `Sleep: ${cur.sleepContext}` : null,
+      cur.socialContext ? `Social: ${cur.socialContext}` : null,
+      cur.stressSourceContext ? `Stress: ${cur.stressSourceContext}` : null,
+    ].filter(Boolean);
+    const emotionScore = gauges.emotion ?? 50;
+    const mood = emotionScoreToMood(emotionScore);
+    submissionIdRef.current ??= Crypto.randomUUID();
+
+    try {
+      const saved = await createCheckin.mutateAsync({
+        clientEventId: submissionIdRef.current,
+        mood,
+        moodLabel: TEMPERATURE_LABELS[mood],
+        note: noteParts.length > 0 ? noteParts.join(' · ') : null,
+        context,
+        systemImpact: cur.checkInSystemImpact,
+        drivers: cur.checkInDriverIds,
+        gauges,
+      });
+
+      // Server confirmation is the commit point. Only now publish the calibration locally.
+      setBodyCheckIn(cur.body.sleep, cur.body.food, cur.body.water, cur.body.movement);
+      if (gauges.state !== undefined) updateState(gauges.state);
+      updateEmotion(emotionScore);
+      updateConnection(gauges.connection ?? 20);
+      if (gauges.direction !== undefined) updateDirection(gauges.direction);
+      if (gauges.alignment !== undefined) updateAlignment(gauges.alignment);
+      setCheckInContext(context);
+      setCheckInSystemImpact(cur.checkInSystemImpact.length > 0 ? cur.checkInSystemImpact : null);
+      setCheckInDrivers(cur.checkInDriverIds.length > 0 ? cur.checkInDriverIds : null);
+      setLastCheckInSnapshot({
+        state: gauges.state ?? 50,
+        emotion: emotionScore,
+        systemImpact: cur.checkInSystemImpact,
+        drivers: cur.checkInDriverIds,
+        timestamp: saved.created_at,
+        gauges,
+      });
+      setLastCheckInDate(saved.created_at.slice(0, 10));
+      void recordGaugesForDrift().catch(() => {});
+
+      const state = useCockpitStore.getState();
+      const committed: Partial<Record<GaugeKey, { value: number; trend?: 'improving' | 'stable' | 'declining' | null }>> = {};
+      for (const key of GAUGE_KEYS) {
+        if (state[key].value >= 0) committed[key] = { value: state[key].value, trend: state[key].trend };
+      }
+      setPostCheckInGauges(committed);
+      setShowPostCheckInSuggestions(true);
+      runAchievementChecks();
+    } catch (error) {
+      Alert.alert(
+        'Check-in not saved',
+        error instanceof Error ? error.message : 'Could not reach the server. Your answers are still here—tap Done to retry.'
+      );
+    } finally {
+      submittingRef.current = false;
+    }
+  }, [
+    createCheckin,
+    recordGaugesForDrift,
+    setBodyCheckIn,
+    setCheckInContext,
+    setCheckInDrivers,
+    setCheckInSystemImpact,
+    setLastCheckInDate,
+    setLastCheckInSnapshot,
+    updateAlignment,
+    updateConnection,
+    updateDirection,
+    updateEmotion,
+    updateState,
+  ]);
 
   const flushAndNext = useCallback(() => {
+    if (step === TOTAL_STEPS - 1) {
+      void finishCheckIn();
+      return;
+    }
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const cur = answersRef.current;
-    setStep((prev) => {
-      if (prev === TOTAL_STEPS - 1) {
-        // Last step: save context + drivers + system impact, then finish
-        setCheckInContext(
-          cur.sleepContext || cur.socialContext || cur.stressSourceContext
-            ? {
-                sleep: cur.sleepContext ?? undefined,
-                social: cur.socialContext ?? undefined,
-                stressSource: cur.stressSourceContext ?? undefined,
-              }
-            : null
-        );
-        setCheckInSystemImpact(cur.checkInSystemImpact?.length ? cur.checkInSystemImpact : null);
-        setCheckInDrivers(cur.checkInDriverIds?.length ? cur.checkInDriverIds : null);
-        const snap = useCockpitStore.getState();
-        const gauges: Partial<Record<GaugeKey, number>> = {};
-        if (snap.body.value >= 0) gauges.body = snap.body.value;
-        if (snap.state.value >= 0) gauges.state = snap.state.value;
-        if (snap.emotion.value >= 0) gauges.emotion = snap.emotion.value;
-        if (snap.connection.value >= 0) gauges.connection = snap.connection.value;
-        if (snap.direction.value >= 0) gauges.direction = snap.direction.value;
-        if (snap.alignment.value >= 0) gauges.alignment = snap.alignment.value;
-        setLastCheckInSnapshot({
-          state: snap.state.value >= 0 ? snap.state.value : 50,
-          emotion: snap.emotion.value >= 0 ? snap.emotion.value : 50,
-          systemImpact: cur.checkInSystemImpact ?? [],
-          drivers: cur.checkInDriverIds ?? [],
-          timestamp: new Date().toISOString(),
-          gauges: Object.keys(gauges).length > 0 ? gauges : undefined,
-        });
-        setLastCheckInDate(new Date().toISOString().slice(0, 10));
-        recordGaugesForDrift().catch(() => {});
-        setTimeout(() => {
-          const s = useCockpitStore.getState();
-          const gauges: Partial<Record<GaugeKey, { value: number; trend?: 'improving' | 'stable' | 'declining' | null }>> = {};
-          if (s.body.value >= 0) gauges.body = { value: s.body.value, trend: s.body.trend };
-          if (s.state.value >= 0) gauges.state = { value: s.state.value, trend: s.state.trend };
-          if (s.emotion.value >= 0) gauges.emotion = { value: s.emotion.value, trend: s.emotion.trend };
-          if (s.connection.value >= 0) gauges.connection = { value: s.connection.value, trend: s.connection.trend };
-          if (s.direction.value >= 0) gauges.direction = { value: s.direction.value, trend: s.direction.trend };
-          if (s.alignment.value >= 0) gauges.alignment = { value: s.alignment.value, trend: s.alignment.trend };
-          setPostCheckInGauges(gauges);
-          setShowPostCheckInSuggestions(true);
-          runAchievementChecks();
-        }, 0);
-        return prev;
-      }
-      return prev + 1;
-    });
-  }, [setLastCheckInDate, setCheckInContext, setCheckInSystemImpact, setCheckInDrivers, setLastCheckInSnapshot, recordGaugesForDrift]);
+    setStep((previous) => previous + 1);
+  }, [finishCheckIn, step]);
 
   const handleNext = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -216,22 +279,8 @@ export default function CockpitCheckinScreen() {
   }, [flushAndNext]);
 
   const applyStepAndNext = useCallback(() => {
-    const cur = answersRef.current;
-    if (step === 0) {
-      setBodyCheckIn(cur.body.sleep, cur.body.food, cur.body.water, cur.body.movement);
-    } else if (step === 1 && cur.stateValue !== null) {
-      updateState(cur.stateValue);
-    } else if (step === 2) {
-      updateEmotion(emotionToScore(cur.emotionSelected ?? []));
-    } else if (step === 3) {
-      updateConnection(connectionScore);
-    } else if (step === 4 && cur.directionValue !== null) {
-      updateDirection(cur.directionValue);
-    } else if (step === 5 && cur.alignmentValue !== null) {
-      updateAlignment(cur.alignmentValue);
-    }
     handleNext();
-  }, [step, connectionScore, setBodyCheckIn, updateState, updateEmotion, updateConnection, updateDirection, updateAlignment, handleNext]);
+  }, [handleNext]);
 
   const toggleCheckInSystemImpact = useCallback((g: GaugeKey) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -341,6 +390,7 @@ export default function CockpitCheckinScreen() {
       <View style={styles.header}>
         <Pressable
           style={styles.backBtn}
+          disabled={createCheckin.isPending}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             if (step > 0) {
@@ -354,7 +404,7 @@ export default function CockpitCheckinScreen() {
         <View style={styles.progressContainer}>
           <StepProgressIndicator currentStep={step + 1} totalSteps={TOTAL_STEPS} accentColor={ACCENT} />
         </View>
-        <Pressable style={styles.skipBtn} onPress={handleSkip}>
+        <Pressable style={styles.skipBtn} onPress={handleSkip} disabled={createCheckin.isPending}>
           <Text style={styles.skipText}>{step === TOTAL_STEPS - 1 ? 'Done' : 'Skip'}</Text>
         </Pressable>
       </View>
@@ -634,11 +684,21 @@ export default function CockpitCheckinScreen() {
         )}
 
         <Pressable
-          style={[styles.primaryBtn, (step !== 0 && !canProceed()) && styles.primaryBtnDisabled]}
+          style={[
+            styles.primaryBtn,
+            ((step !== 0 && !canProceed()) || createCheckin.isPending) && styles.primaryBtnDisabled,
+          ]}
           onPress={applyStepAndNext}
-          disabled={step !== 0 && !canProceed()}
+          disabled={(step !== 0 && !canProceed()) || createCheckin.isPending}
         >
-          <Text style={styles.primaryBtnText}>{step === TOTAL_STEPS - 1 ? 'Done' : 'Next'}</Text>
+          {createCheckin.isPending ? (
+            <View style={styles.savingRow}>
+              <ActivityIndicator size="small" color="#fff" />
+              <Text style={styles.primaryBtnText}>Saving…</Text>
+            </View>
+          ) : (
+            <Text style={styles.primaryBtnText}>{step === TOTAL_STEPS - 1 ? 'Done' : 'Next'}</Text>
+          )}
         </Pressable>
       </ScrollView>
     </View>
@@ -753,5 +813,6 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   primaryBtnDisabled: { opacity: 0.5 },
+  savingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   primaryBtnText: { fontSize: 17, fontWeight: '600', color: '#fff' },
 });

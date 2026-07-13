@@ -1,0 +1,52 @@
+name: release-baseline
+
+on:
+  pull_request:
+  push:
+    branches: [main, "release/**"]
+
+concurrency:
+  group: release-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Pin repository npm version
+        run: npm install --global npm@10.9.4
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Dependency security gate
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Expo SDK compatibility
+        run: npx --yes expo-doctor@1.20.0
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Route ownership audit
+        run: npm run audit:routes
+
+      - name: Data ownership audit
+        run: npm run audit:ownership
+
+      - name: Edge security audit
+        run: npm run audit:edge
+
+      - name: Export iOS production bundle
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: release-validation-placeholder
+        run: npx expo export --platform ios --output-dir dist-ci
