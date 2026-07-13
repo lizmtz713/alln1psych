@@ -55,6 +55,11 @@ CREATE INDEX IF NOT EXISTS idx_survey_responses_link ON friend_survey_responses(
 ALTER TABLE friend_survey_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE friend_survey_responses ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can create own survey links" ON friend_survey_links;
+DROP POLICY IF EXISTS "Users can read own survey links" ON friend_survey_links;
+DROP POLICY IF EXISTS "Users can update own survey links" ON friend_survey_links;
+DROP POLICY IF EXISTS "Users can read their survey responses" ON friend_survey_responses;
+
 -- Users can create their own survey links
 CREATE POLICY "Users can create own survey links"
   ON friend_survey_links FOR INSERT
@@ -84,3 +89,8 @@ CREATE POLICY "Users can read their survey responses"
 
 -- Public insert for survey responses (via edge function with service role)
 -- Direct inserts blocked; must go through edge function
+
+REVOKE ALL ON TABLE public.friend_survey_links FROM anon, public;
+REVOKE ALL ON TABLE public.friend_survey_responses FROM anon, public;
+GRANT SELECT, INSERT, UPDATE ON TABLE public.friend_survey_links TO authenticated;
+GRANT SELECT ON TABLE public.friend_survey_responses TO authenticated;

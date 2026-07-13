@@ -27,6 +27,14 @@ CREATE INDEX IF NOT EXISTS idx_flight_plan_steps_request ON public.flight_plan_s
 ALTER TABLE public.flight_plan_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.flight_plan_steps ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can insert own flight plan request" ON public.flight_plan_requests;
+DROP POLICY IF EXISTS "Users can view fleet flight plan requests" ON public.flight_plan_requests;
+DROP POLICY IF EXISTS "Fleet can update flight plan requests" ON public.flight_plan_requests;
+DROP POLICY IF EXISTS "Fleet can insert flight plan steps" ON public.flight_plan_steps;
+DROP POLICY IF EXISTS "Fleet can view flight plan steps" ON public.flight_plan_steps;
+DROP POLICY IF EXISTS "Pilot can update own request steps completed" ON public.flight_plan_steps;
+DROP POLICY IF EXISTS "Fleet can update flight plan steps" ON public.flight_plan_steps;
+
 -- Pilot can insert own request
 CREATE POLICY "Users can insert own flight plan request"
   ON public.flight_plan_requests FOR INSERT
@@ -35,26 +43,13 @@ CREATE POLICY "Users can insert own flight plan request"
 -- Fleet can view requests (pilots in same fleet)
 CREATE POLICY "Users can view fleet flight plan requests"
   ON public.flight_plan_requests FOR SELECT
-  USING (
-    pilot_id IN (
-      SELECT user_id FROM public.fleet_members fm
-      WHERE fm.fleet_id IN (
-        SELECT fleet_id FROM public.fleet_members WHERE user_id = auth.uid()
-      )
-    )
-  );
+  USING (auth.uid() = pilot_id OR public.shares_fleet_with(pilot_id));
 
 -- Fleet members can update request status (e.g. when steps added)
 CREATE POLICY "Fleet can update flight plan requests"
   ON public.flight_plan_requests FOR UPDATE
-  USING (
-    pilot_id IN (
-      SELECT user_id FROM public.fleet_members fm
-      WHERE fm.fleet_id IN (
-        SELECT fleet_id FROM public.fleet_members WHERE user_id = auth.uid()
-      )
-    )
-  );
+  USING (auth.uid() = pilot_id OR public.shares_fleet_with(pilot_id))
+  WITH CHECK (auth.uid() = pilot_id OR public.shares_fleet_with(pilot_id));
 
 -- Fleet can insert steps for requests in their fleet
 CREATE POLICY "Fleet can insert flight plan steps"
@@ -62,12 +57,7 @@ CREATE POLICY "Fleet can insert flight plan steps"
   WITH CHECK (
     request_id IN (
       SELECT id FROM public.flight_plan_requests
-      WHERE pilot_id IN (
-        SELECT user_id FROM public.fleet_members fm
-        WHERE fm.fleet_id IN (
-          SELECT fleet_id FROM public.fleet_members WHERE user_id = auth.uid()
-        )
-      )
+      WHERE public.shares_fleet_with(pilot_id)
     )
   );
 
@@ -77,12 +67,7 @@ CREATE POLICY "Fleet can view flight plan steps"
   USING (
     request_id IN (
       SELECT id FROM public.flight_plan_requests
-      WHERE pilot_id IN (
-        SELECT user_id FROM public.fleet_members fm
-        WHERE fm.fleet_id IN (
-          SELECT fleet_id FROM public.fleet_members WHERE user_id = auth.uid()
-        )
-      )
+      WHERE public.shares_fleet_with(pilot_id)
     )
   );
 
@@ -90,6 +75,11 @@ CREATE POLICY "Fleet can view flight plan steps"
 CREATE POLICY "Pilot can update own request steps completed"
   ON public.flight_plan_steps FOR UPDATE
   USING (
+    request_id IN (
+      SELECT id FROM public.flight_plan_requests WHERE pilot_id = auth.uid()
+    )
+  )
+  WITH CHECK (
     request_id IN (
       SELECT id FROM public.flight_plan_requests WHERE pilot_id = auth.uid()
     )
@@ -101,11 +91,17 @@ CREATE POLICY "Fleet can update flight plan steps"
   USING (
     request_id IN (
       SELECT id FROM public.flight_plan_requests
-      WHERE pilot_id IN (
-        SELECT user_id FROM public.fleet_members fm
-        WHERE fm.fleet_id IN (
-          SELECT fleet_id FROM public.fleet_members WHERE user_id = auth.uid()
-        )
-      )
+      WHERE public.shares_fleet_with(pilot_id)
+    )
+  )
+  WITH CHECK (
+    request_id IN (
+      SELECT id FROM public.flight_plan_requests
+      WHERE public.shares_fleet_with(pilot_id)
     )
   );
+
+REVOKE ALL ON TABLE public.flight_plan_requests FROM anon, public;
+REVOKE ALL ON TABLE public.flight_plan_steps FROM anon, public;
+GRANT SELECT, INSERT, UPDATE ON TABLE public.flight_plan_requests TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON TABLE public.flight_plan_steps TO authenticated;

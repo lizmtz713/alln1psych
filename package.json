@@ -8,11 +8,12 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "audit": "npm run typecheck && npm run audit:routes && npm run audit:ownership && npm run audit:edge",
+    "audit": "npm run typecheck && npm run audit:routes && npm run audit:ownership && npm run audit:migrations && npm run audit:edge",
     "test": "npm run audit",
     "typecheck": "tsc --noEmit",
     "lint": "echo \"ESLint is not configured yet — run npm run typecheck for the static baseline\" && exit 1",
     "audit:edge": "node scripts/audit-edge-functions.mjs",
+    "audit:migrations": "node scripts/audit-migrations.mjs",
     "audit:routes": "node scripts/audit-routes.mjs",
     "audit:ownership": "node scripts/audit-ownership.mjs"
   },

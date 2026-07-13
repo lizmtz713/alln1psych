@@ -17,17 +17,16 @@ CREATE INDEX IF NOT EXISTS idx_post_flight_logs_created ON public.post_flight_lo
 
 ALTER TABLE public.post_flight_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can insert own logs" ON public.post_flight_logs;
+DROP POLICY IF EXISTS "Users can view fleet logs" ON public.post_flight_logs;
+
 CREATE POLICY "Users can insert own logs"
   ON public.post_flight_logs FOR INSERT
   WITH CHECK (auth.uid() = pilot_id);
 
 CREATE POLICY "Users can view fleet logs"
   ON public.post_flight_logs FOR SELECT
-  USING (
-    pilot_id IN (
-      SELECT user_id FROM public.fleet_members fm
-      WHERE fm.fleet_id IN (
-        SELECT fleet_id FROM public.fleet_members WHERE user_id = auth.uid()
-      )
-    )
-  );
+  USING (auth.uid() = pilot_id OR public.shares_fleet_with(pilot_id));
+
+REVOKE ALL ON TABLE public.post_flight_logs FROM anon, public;
+GRANT SELECT, INSERT ON TABLE public.post_flight_logs TO authenticated;

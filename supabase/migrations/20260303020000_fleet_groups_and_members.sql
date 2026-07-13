@@ -28,12 +28,53 @@ CREATE INDEX IF NOT EXISTS idx_fleet_groups_invite ON public.fleet_groups(invite
 ALTER TABLE public.fleet_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.fleet_members ENABLE ROW LEVEL SECURITY;
 
+-- Security-definer membership helpers prevent recursive RLS evaluation when a
+-- fleet_members policy needs to check another row in fleet_members.
+CREATE OR REPLACE FUNCTION public.is_fleet_member(p_fleet_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.fleet_members
+    WHERE fleet_id = p_fleet_id
+      AND user_id = auth.uid()
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.shares_fleet_with(p_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.fleet_members mine
+    JOIN public.fleet_members theirs ON theirs.fleet_id = mine.fleet_id
+    WHERE mine.user_id = auth.uid()
+      AND theirs.user_id = p_user_id
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.is_fleet_member(UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.shares_fleet_with(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_fleet_member(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.shares_fleet_with(UUID) TO authenticated;
+
+DROP POLICY IF EXISTS "Members can view fleet" ON public.fleet_groups;
+DROP POLICY IF EXISTS "Users can create fleet" ON public.fleet_groups;
+DROP POLICY IF EXISTS "Members can view fleet members" ON public.fleet_members;
+DROP POLICY IF EXISTS "Users can join as pilot or be added as ground_control" ON public.fleet_members;
+
 -- Fleet groups: members can read their fleets
 CREATE POLICY "Members can view fleet"
   ON public.fleet_groups FOR SELECT
-  USING (
-    id IN (SELECT fleet_id FROM public.fleet_members WHERE user_id = auth.uid())
-  );
+  USING (public.is_fleet_member(id));
 
 -- Fleet groups: any authenticated user can create (becomes ground_control via fleet_members)
 CREATE POLICY "Users can create fleet"
@@ -43,9 +84,7 @@ CREATE POLICY "Users can create fleet"
 -- Fleet members: members can view others in same fleet
 CREATE POLICY "Members can view fleet members"
   ON public.fleet_members FOR SELECT
-  USING (
-    fleet_id IN (SELECT fleet_id FROM public.fleet_members WHERE user_id = auth.uid())
-  );
+  USING (public.is_fleet_member(fleet_id));
 
 CREATE POLICY "Users can join as pilot or be added as ground_control"
   ON public.fleet_members FOR INSERT
@@ -54,14 +93,13 @@ CREATE POLICY "Users can join as pilot or be added as ground_control"
 -- 4. Replace permissive telemetry policy with fleet-scoped read
 DROP POLICY IF EXISTS "Users can view telemetry" ON public.shared_telemetry;
 DROP POLICY IF EXISTS "Users can view own telemetry" ON public.shared_telemetry;
+DROP POLICY IF EXISTS "Users can view fleet telemetry" ON public.shared_telemetry;
 
 CREATE POLICY "Users can view fleet telemetry"
   ON public.shared_telemetry FOR SELECT
-  USING (
-    pilot_id IN (
-      SELECT fm.user_id FROM public.fleet_members fm
-      WHERE fm.fleet_id IN (
-        SELECT fleet_id FROM public.fleet_members WHERE user_id = auth.uid()
-      )
-    )
-  );
+  USING (auth.uid() = pilot_id OR public.shares_fleet_with(pilot_id));
+
+REVOKE ALL ON TABLE public.fleet_groups FROM anon, public;
+REVOKE ALL ON TABLE public.fleet_members FROM anon, public;
+GRANT SELECT, INSERT ON TABLE public.fleet_groups TO authenticated;
+GRANT SELECT, INSERT ON TABLE public.fleet_members TO authenticated;
