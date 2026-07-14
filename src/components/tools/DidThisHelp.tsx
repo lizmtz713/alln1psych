@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../lib/constants';
+import { recordInterventionOutcome, type OutcomeValue } from '../../services/learningLoop';
 
 export interface DidThisHelpProps {
   /** Tool id for analytics (e.g. 'quick-decision', 'tone-check'). */
@@ -26,12 +27,13 @@ export function DidThisHelp({
   onAfterFeedback,
   prompt = 'Did this help?',
 }: DidThisHelpProps) {
-  const [answered, setAnswered] = useState<boolean | null>(null);
+  const [answered, setAnswered] = useState<OutcomeValue | null>(null);
 
-  const handlePress = (helpful: boolean) => {
+  const handlePress = (outcome: OutcomeValue) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setAnswered(helpful);
-    onFeedback?.(helpful, toolId);
+    setAnswered(outcome);
+    void recordInterventionOutcome({ toolId, outcome });
+    onFeedback?.(outcome === 'better', toolId);
     onAfterFeedback?.();
   };
 
@@ -48,18 +50,22 @@ export function DidThisHelp({
       <Text style={styles.prompt}>{prompt}</Text>
       <View style={styles.row}>
         <Pressable
-          style={({ pressed }) => [styles.btn, styles.yesBtn, pressed && styles.pressed]}
-          onPress={() => handlePress(true)}
+          style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
+          onPress={() => handlePress('better')}
         >
-          <Text style={styles.btnEmoji}>👍</Text>
-          <Text style={styles.btnText}>Yes</Text>
+          <Text style={styles.btnText}>Better</Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [styles.btn, styles.noBtn, pressed && styles.pressed]}
-          onPress={() => handlePress(false)}
+          style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
+          onPress={() => handlePress('same')}
         >
-          <Text style={styles.btnEmoji}>👎</Text>
-          <Text style={styles.btnText}>No</Text>
+          <Text style={styles.btnText}>Same</Text>
+        </Pressable>
+        <Pressable style={({ pressed }) => [styles.btn, pressed && styles.pressed]} onPress={() => handlePress('worse')}>
+          <Text style={styles.btnText}>Worse</Text>
+        </Pressable>
+        <Pressable style={({ pressed }) => [styles.btn, pressed && styles.pressed]} onPress={() => handlePress('unsure')}>
+          <Text style={styles.btnText}>Not sure</Text>
         </Pressable>
       </View>
     </View>
@@ -79,7 +85,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: 'row', flexWrap: 'wrap',
     gap: 12,
   },
   btn: {
@@ -93,10 +99,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     backgroundColor: COLORS.surface,
   },
-  yesBtn: {},
-  noBtn: {},
   pressed: { opacity: 0.85 },
-  btnEmoji: { fontSize: 18 },
   btnText: { fontSize: 15, color: COLORS.text, fontWeight: '500' },
   thanks: {
     fontSize: 14,

@@ -1,6 +1,6 @@
 /**
- * Personology Engine — Relationship Intelligence
- * Uses the 48 week-born archetypes (Winter Seekers, Spring Builders, Summer Expressers, Fall Integrators).
+ * Personology Engine — optional reflective entertainment.
+ * Birthday archetypes are never evidence, diagnosis, or a factual profile of a person.
  */
 
 import { getArchetypeForBirthday, type Archetype } from '../data/archetypes';
@@ -84,5 +84,8 @@ export function buildRelationshipContext(myBirthday: string, theirBirthday: stri
   const me = getPersonality(myBirthday);
   const them = getPersonality(theirBirthday);
   if (!dynamic || !me || !them) return '';
-  return '\n\nRELATIONSHIP CONTEXT for ' + theirName + ':\nYour personality style: ' + me.name + ' — ' + me.communicationStyle + '\nTheir personality style: ' + them.name + ' — ' + them.communicationStyle + '\nStrengths: ' + dynamic.strengths.join('; ') + '\nFriction: ' + dynamic.frictionPoints.join('; ') + '\nCommunication tip: ' + dynamic.communicationTip + '\nConflict pattern: ' + dynamic.conflictPattern + '\nWhat they need: ' + dynamic.whatTheyNeed + '\nWhat you need: ' + dynamic.whatYouNeed + '\nUse this context when the user discusses this person. Weave in what is relevant.\n';
+  return '\n\nOPTIONAL PERSONOLOGY REFLECTION for ' + theirName + ':\n' +
+    'This birthday-based material is entertainment/reflection only. It is not scientific evidence and must never be used to claim what either person feels, needs, intends, or will do. Ask the user whether a prompt resonates and prefer directly shared preferences and observed behavior.\n' +
+    'Your reflection lens: ' + me.name + '. Their reflection lens: ' + them.name + '.\n' +
+    'Possible conversation prompt: ' + dynamic.communicationTip + '\n';
 }

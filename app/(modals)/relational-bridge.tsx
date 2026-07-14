@@ -28,6 +28,7 @@ import { useAuth } from '../../src/providers/AuthProvider';
 import { fetchLatestSummaryForPerson, buildShowUpToneHint } from '../../src/services/showUpService';
 import type { ShowUpSummaryRow } from '../../src/types/showUp';
 import * as Haptics from 'expo-haptics';
+import { EvidenceBadge } from '../../src/components/EvidenceBadge';
 
 export default function RelationalBridgeModal() {
   const router = useRouter();
@@ -52,9 +53,10 @@ export default function RelationalBridgeModal() {
     } else if (selectedMember && !selectedMember.birthday) {
       setBridgeResult({
         hasData: false,
+        evidenceLevel: 'established',
         generalTips: [
-          `Add ${selectedMember.name}'s birthday in Circle for personalized insights.`,
-          "Without birthday info, here are universal tips:",
+          `Invite ${selectedMember.name} to share what actually helps them for truly personalized guidance.`,
+          "Meanwhile, here are evidence-informed communication basics:",
           "• Start with 'I feel...' not 'You always...'",
           "• Ask 'Help me understand' before assuming",
           "• Take a break if either person is flooded",
@@ -123,6 +125,7 @@ export default function RelationalBridgeModal() {
           <Text style={styles.introText}>
             Select someone from your Circle to get personalized communication strategies for navigating conflict.
           </Text>
+          <EvidenceBadge level={bridgeResult?.evidenceLevel ?? 'established'} showDescription />
         </View>
 
         {/* Check tone entry */}

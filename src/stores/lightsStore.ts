@@ -65,6 +65,12 @@ export interface LightExtras {
   howTheyOperate?: string;
   howTheyShowLove?: string;
   conflictStyle?: string;
+  stressSigns?: string;
+  copingStrategies?: string;
+  knownTriggers?: string;
+  repairStyle?: string;
+  whatToAvoid?: string;
+  preferenceSource?: 'shared_by_them' | 'observed_by_me' | 'unspecified';
   relateInsights?: string[];
   job?: string;
   skills?: string;
@@ -185,6 +191,12 @@ export function computeLights(
       howTheyOperate: extras.howTheyOperate,
       howTheyShowLove: extras.howTheyShowLove,
       conflictStyle: extras.conflictStyle,
+      stressSigns: extras.stressSigns,
+      copingStrategies: extras.copingStrategies,
+      knownTriggers: extras.knownTriggers,
+      repairStyle: extras.repairStyle,
+      whatToAvoid: extras.whatToAvoid,
+      preferenceSource: extras.preferenceSource,
       notes: extras.notes,
       relateInsights: extras.relateInsights,
       anniversary: extras.anniversary,
@@ -524,4 +536,3 @@ export const useLightsStore = create<LightsState>()(
     }
   )
 );
-

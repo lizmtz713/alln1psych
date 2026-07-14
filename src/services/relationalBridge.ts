@@ -38,6 +38,7 @@ export interface CommunicationBridge {
 
 export interface RelationalBridgeResult {
   hasData: boolean;
+  evidenceLevel?: 'established' | 'emerging' | 'reflective';
   yourPersonality?: PersonalityPeriod;
   theirPersonality?: PersonalityPeriod;
   bridge?: CommunicationBridge;
@@ -174,6 +175,7 @@ export function generateBridge(
   if (!myPersonality || !theirPersonality) {
     return {
       hasData: false,
+      evidenceLevel: 'established',
       generalTips: [
         "Without birthday info, here are universal tips:",
         "• Start with 'I feel...' not 'You always...'",
@@ -320,6 +322,7 @@ export function generateBridge(
 
   return {
     hasData: true,
+    evidenceLevel: 'reflective',
     yourPersonality: myPersonality,
     theirPersonality: theirPersonality,
     bridge: {

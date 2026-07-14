@@ -33,12 +33,26 @@ export default function EditLightScreen() {
   const lights = useMemo(() => computeLights(Array.isArray(members) ? members : [], persistState), [members, persistState]);
   const light = lights.find((l) => l.id === id);
   const updateMemberBirthday = useCircleStore((s) => s.updateMemberBirthday);
+  const updateLightExtras = useLightsStore((s) => s.updateLightExtras);
 
   const [birthday, setBirthday] = useState('');
+  const [stressSigns, setStressSigns] = useState('');
+  const [copingStrategies, setCopingStrategies] = useState('');
+  const [knownTriggers, setKnownTriggers] = useState('');
+  const [repairStyle, setRepairStyle] = useState('');
+  const [whatToAvoid, setWhatToAvoid] = useState('');
+  const [preferenceSource, setPreferenceSource] = useState<'shared_by_them' | 'observed_by_me'>('shared_by_them');
 
   useEffect(() => {
-    if (light?.birthday) setBirthday(light.birthday);
-  }, [light?.id, light?.birthday]);
+    if (!light) return;
+    if (light.birthday) setBirthday(light.birthday);
+    setStressSigns(light.stressSigns ?? '');
+    setCopingStrategies(light.copingStrategies ?? '');
+    setKnownTriggers(light.knownTriggers ?? '');
+    setRepairStyle(light.repairStyle ?? '');
+    setWhatToAvoid(light.whatToAvoid ?? '');
+    setPreferenceSource(light.preferenceSource === 'observed_by_me' ? 'observed_by_me' : 'shared_by_them');
+  }, [light?.id]);
 
   const normalizeBirthday = (raw: string): string | undefined => {
     const t = raw.trim();
@@ -60,6 +74,14 @@ export default function EditLightScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const value = normalizeBirthday(birthday);
     updateMemberBirthday(id, value);
+    updateLightExtras(id, {
+      stressSigns: stressSigns.trim() || undefined,
+      copingStrategies: copingStrategies.trim() || undefined,
+      knownTriggers: knownTriggers.trim() || undefined,
+      repairStyle: repairStyle.trim() || undefined,
+      whatToAvoid: whatToAvoid.trim() || undefined,
+      preferenceSource,
+    });
     router.back();
   };
 
@@ -103,10 +125,31 @@ export default function EditLightScreen() {
         />
         <Text style={styles.hint}>Used for birthday reminders and Memory Engine.</Text>
 
+        {light.tier === 'five' ? (
+          <>
+            <Text style={styles.sectionTitle}>How to show up for them</Text>
+            <Text style={styles.hint}>Keep facts separate from interpretation. These notes never diagnose or define this person.</Text>
+            <Text style={styles.label}>Where did this information come from?</Text>
+            <View style={styles.sourceRow}>
+              <Pressable style={[styles.sourceChip, preferenceSource === 'shared_by_them' && styles.sourceChipSelected]} onPress={() => setPreferenceSource('shared_by_them')}><Text style={styles.sourceText}>They told me</Text></Pressable>
+              <Pressable style={[styles.sourceChip, preferenceSource === 'observed_by_me' && styles.sourceChipSelected]} onPress={() => setPreferenceSource('observed_by_me')}><Text style={styles.sourceText}>I observed it</Text></Pressable>
+            </View>
+            <PreferenceField label="Signs they may be stressed" value={stressSigns} onChangeText={setStressSigns} placeholder="What they say or do—not a diagnosis" />
+            <PreferenceField label="What helps them cope" value={copingStrategies} onChangeText={setCopingStrategies} placeholder="Space, listening, a walk, practical help…" />
+            <PreferenceField label="Known triggers or sensitive situations" value={knownTriggers} onChangeText={setKnownTriggers} placeholder="Only what they shared or you directly observed" />
+            <PreferenceField label="How repair works best" value={repairStyle} onChangeText={setRepairStyle} placeholder="Time first, direct apology, reassurance…" />
+            <PreferenceField label="What usually does not help" value={whatToAvoid} onChangeText={setWhatToAvoid} placeholder="Advice too soon, raised voices, repeated texts…" />
+          </>
+        ) : null}
+
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
+}
+
+function PreferenceField({ label, value, onChangeText, placeholder }: { label: string; value: string; onChangeText: (value: string) => void; placeholder: string }) {
+  return <><Text style={styles.label}>{label}</Text><TextInput style={[styles.input, styles.multiline]} value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={COLORS.textMuted} multiline /></>;
 }
 
 const styles = StyleSheet.create({
@@ -141,4 +184,10 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   hint: { fontSize: 13, color: COLORS.textMuted, marginTop: 8 },
+  sectionTitle: { color: COLORS.text, fontSize: 20, fontWeight: '700', marginTop: 30, marginBottom: 4 },
+  sourceRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  sourceChip: { borderColor: COLORS.border, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 9 },
+  sourceChipSelected: { borderColor: COLORS.accent, backgroundColor: COLORS.accent + '22' },
+  sourceText: { color: COLORS.text, fontSize: 13 },
+  multiline: { minHeight: 76, textAlignVertical: 'top' },
 });
