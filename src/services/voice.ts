@@ -117,7 +117,15 @@ export async function stopRecording(): Promise<string> {
 /** Whisper API fallback when on-device recognition fails or for non-English. */
 export async function transcribeWithWhisper(audioUri: string): Promise<string> {
   if (__DEV__) console.log('[Voice] transcribeWithWhisper: before, uri:', audioUri);
-  throw new Error('Cloud transcription is unavailable in this release. Please type instead.');
+  const base64 = await FileSystem.readAsStringAsync(audioUri, {
+    encoding: (FileSystem as any).EncodingType?.Base64 ?? 'base64',
+  });
+  const { transcript } = await callEdgeFunction<{ transcript: string }>('transcribe', {
+    audio: base64,
+    mimeType: 'audio/m4a',
+  }, 45_000);
+  if (!transcript?.trim()) throw new Error('No speech was detected. Please try again or type instead.');
+  return transcript.trim();
 }
 
 export function hasVoiceSupport(): boolean {

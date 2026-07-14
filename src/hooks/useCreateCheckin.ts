@@ -17,7 +17,16 @@ export type CreateCheckinInput = {
   mood: Temperature;
   moodLabel?: string;
   note?: string | null;
-  context?: { sleep?: string; social?: string; stressSource?: string } | null;
+  context?: {
+    sleep?: string;
+    social?: string;
+    stressSource?: string;
+    checkInMode?: 'quick_pulse' | 'voice_debrief' | 'weekly_calibration';
+    inputSource?: 'explicit' | 'confirmed_unchanged' | 'voice_inferred' | 'wearable_prompted';
+    promptVersion?: string;
+    inferenceConfidence?: 'low' | 'medium' | 'high' | 'mixed';
+    wearableSignalKinds?: string[];
+  } | null;
   systemImpact?: GaugeKey[];
   drivers?: string[];
   /** 0–100 snapshots persisted both historically and as the latest state. */

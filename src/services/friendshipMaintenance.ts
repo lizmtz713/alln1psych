@@ -286,6 +286,20 @@ export function getSocialHealthScore(lights: Light[]): SocialHealthResult {
     };
   });
 
+  // An empty circle has no measurable social-health score. Treating missing data
+  // as 100% healthy produced a misleading 70% blended score for brand-new users.
+  if (activeLights.length === 0) {
+    return {
+      score: 0,
+      tierSummaries: tierSummaries.map((tier) => ({
+        ...tier,
+        status: 'stable',
+        statusLabel: 'Not set up',
+      })),
+      suggestions: ['Add one person who matters to you'],
+    };
+  }
+
   const totalWeight = tierSummaries.reduce((acc, t) => acc + (t.max > 0 ? 1 : 0), 0);
   const scorePerTier = tierSummaries.map((t) => {
     if (t.max === 0) return 100;

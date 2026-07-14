@@ -1,10 +1,10 @@
 /**
- * Cockpit check-in — 6-screen flow, one per gauge. Under 60 seconds.
- * Progress dots, Back, Skip on each screen. Writes to cockpitStore.
+ * Adaptive daily check-in with quick pulse, voice debrief, and a deeper weekly calibration.
+ * All inferred readings are reviewed by the user before they are persisted.
  * Step navigation is 0-based; gauge answers live in refs to avoid re-render cascades during animation.
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ import { useCockpitStore, type GaugeKey } from '../../src/stores/cockpitStore';
 import { getGaugeColor, GAUGE_CONFIG } from '../../src/utils/gaugeHelpers';
 import { DRIVERS_BY_GAUGE } from '../../src/data/driversByGauge';
 import { PostCheckInSuggestions } from '../../src/components/checkin/PostCheckInSuggestions';
+import { AdaptiveCheckInEntry, type AdaptiveSavePayload } from '../../src/components/checkin/AdaptiveCheckInEntry';
 import { StepProgressIndicator } from '../../src/components/ui/StepProgressIndicator';
 import { useGeneratedInsights } from '../../src/hooks/useGeneratedInsights';
 import { useCreateCheckin, emotionScoreToMood } from '../../src/hooks/useCreateCheckin';
@@ -34,6 +35,9 @@ import { useAuth } from '../../src/providers/AuthProvider';
 import { TEMPERATURE_LABELS } from '../../src/stores/circleStore';
 import { runAchievementChecks } from '../../src/services/achievementChecker';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../src/lib/constants';
+import { useHealthStore } from '../../src/stores/healthStore';
+import { useWearableBaselineStore } from '../../src/stores/wearableBaselineStore';
+import { buildAdaptiveCheckInPlan } from '../../src/services/adaptiveCheckIn';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -128,6 +132,7 @@ export default function CockpitCheckinScreen() {
   const { user } = useAuth();
   const createCheckin = useCreateCheckin(user?.id);
   const [step, setStep] = useState(0);
+  const [entryMode, setEntryMode] = useState<'adaptive' | 'weekly'>('adaptive');
   const [formVersion, setFormVersion] = useState(0);
   const [showPostCheckInSuggestions, setShowPostCheckInSuggestions] = useState(false);
   const [postCheckInGauges, setPostCheckInGauges] = useState<Partial<Record<GaugeKey, { value: number; trend?: 'improving' | 'stable' | 'declining' | null }>>>({});
@@ -141,6 +146,7 @@ export default function CockpitCheckinScreen() {
   });
 
   const setBodyCheckIn = useCockpitStore((s) => s.setBodyCheckIn);
+  const updateBody = useCockpitStore((s) => s.updateBody);
   const updateState = useCockpitStore((s) => s.updateState);
   const updateEmotion = useCockpitStore((s) => s.updateEmotion);
   const updateConnection = useCockpitStore((s) => s.updateConnection);
@@ -152,12 +158,125 @@ export default function CockpitCheckinScreen() {
   const setCheckInSystemImpact = useCockpitStore((s) => s.setCheckInSystemImpact);
   const setLastCheckInSnapshot = useCockpitStore((s) => s.setLastCheckInSnapshot);
   const recordGaugesForDrift = useCockpitStore((s) => s.recordGaugesForDrift);
+  const bodyGauge = useCockpitStore((s) => s.body.value);
+  const stateGauge = useCockpitStore((s) => s.state.value);
+  const emotionGauge = useCockpitStore((s) => s.emotion.value);
+  const connectionGauge = useCockpitStore((s) => s.connection.value);
+  const directionGauge = useCockpitStore((s) => s.direction.value);
+  const alignmentGauge = useCockpitStore((s) => s.alignment.value);
+  const canonicalDay = useHealthStore((s) => s.canonicalDay);
+  const syncHealthData = useHealthStore((s) => s.syncHealthData);
+  const wearableSamples = useWearableBaselineStore((s) => s.samples);
+
+  const currentGauges = useMemo<Partial<Record<GaugeKey, number>>>(() => ({
+    body: bodyGauge,
+    state: stateGauge,
+    emotion: emotionGauge,
+    connection: connectionGauge,
+    direction: directionGauge,
+    alignment: alignmentGauge,
+  }), [alignmentGauge, bodyGauge, connectionGauge, directionGauge, emotionGauge, stateGauge]);
+  const adaptivePlan = useMemo(
+    () => buildAdaptiveCheckInPlan(canonicalDay, wearableSamples),
+    [canonicalDay, wearableSamples]
+  );
+
+  useEffect(() => {
+    void syncHealthData();
+  }, [syncHealthData]);
 
   const a = answersRef.current;
   void formVersion;
 
   const bodyYesCount = BODY_KEYS.filter((k) => a.body[k]).length;
   const bodyScore = bodyYesCount * 25;
+
+  const commitAdaptiveCheckIn = useCallback(async (payload: AdaptiveSavePayload) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    submissionIdRef.current ??= Crypto.randomUUID();
+    const emotionScore = payload.gauges.emotion ?? emotionGauge ?? 50;
+    const mood = emotionScoreToMood(emotionScore >= 0 ? emotionScore : 50);
+    const changedGauges = GAUGE_KEYS.filter((key) => {
+      const before = currentGauges[key];
+      const after = payload.gauges[key];
+      return typeof after === 'number' && (typeof before !== 'number' || before < 0 || Math.abs(after - before) >= 5);
+    });
+
+    try {
+      const saved = await createCheckin.mutateAsync({
+        clientEventId: submissionIdRef.current,
+        mood,
+        moodLabel: TEMPERATURE_LABELS[mood],
+        note: payload.note,
+        gauges: payload.gauges,
+        systemImpact: changedGauges,
+        context: {
+          checkInMode: payload.mode,
+          inputSource: payload.source,
+          promptVersion: 'adaptive-daily-v1',
+          inferenceConfidence: payload.confidence,
+          wearableSignalKinds: adaptivePlan.signals.map((signal) => signal.kind),
+        },
+      });
+
+      const updaters: Record<GaugeKey, (value: number) => void> = {
+        body: updateBody,
+        state: updateState,
+        emotion: updateEmotion,
+        connection: updateConnection,
+        direction: updateDirection,
+        alignment: updateAlignment,
+      };
+      for (const key of GAUGE_KEYS) {
+        const value = payload.gauges[key];
+        if (typeof value === 'number' && value >= 0) updaters[key](value);
+      }
+      setCheckInSystemImpact(changedGauges.length ? changedGauges : null);
+      setLastCheckInSnapshot({
+        state: payload.gauges.state ?? stateGauge ?? 50,
+        emotion: emotionScore,
+        systemImpact: changedGauges,
+        drivers: [],
+        timestamp: saved.created_at,
+        gauges: payload.gauges,
+      });
+      setLastCheckInDate(saved.created_at.slice(0, 10));
+      void recordGaugesForDrift().catch(() => {});
+
+      const state = useCockpitStore.getState();
+      const committed: Partial<Record<GaugeKey, { value: number; trend?: 'improving' | 'stable' | 'declining' | null }>> = {};
+      for (const key of GAUGE_KEYS) {
+        if (state[key].value >= 0) committed[key] = { value: state[key].value, trend: state[key].trend };
+      }
+      setPostCheckInGauges(committed);
+      setShowPostCheckInSuggestions(true);
+      runAchievementChecks();
+    } catch (error) {
+      Alert.alert('Check-in not saved', error instanceof Error ? error.message : 'Could not save this check-in. Please try again.');
+    } finally {
+      submittingRef.current = false;
+    }
+  }, [
+    adaptivePlan.signals,
+    alignmentGauge,
+    connectionGauge,
+    createCheckin,
+    currentGauges,
+    directionGauge,
+    emotionGauge,
+    recordGaugesForDrift,
+    setCheckInSystemImpact,
+    setLastCheckInDate,
+    setLastCheckInSnapshot,
+    stateGauge,
+    updateAlignment,
+    updateBody,
+    updateConnection,
+    updateDirection,
+    updateEmotion,
+    updateState,
+  ]);
 
   const finishCheckIn = useCallback(async () => {
     if (submittingRef.current) return;
@@ -176,14 +295,15 @@ export default function CockpitCheckinScreen() {
       ...(cur.directionValue !== null ? { direction: cur.directionValue } : {}),
       ...(cur.alignmentValue !== null ? { alignment: cur.alignmentValue } : {}),
     };
-    const context =
-      cur.sleepContext || cur.socialContext || cur.stressSourceContext
-        ? {
-            sleep: cur.sleepContext ?? undefined,
-            social: cur.socialContext ?? undefined,
-            stressSource: cur.stressSourceContext ?? undefined,
-          }
-        : null;
+    const context = {
+      sleep: cur.sleepContext ?? undefined,
+      social: cur.socialContext ?? undefined,
+      stressSource: cur.stressSourceContext ?? undefined,
+      checkInMode: 'weekly_calibration' as const,
+      inputSource: 'explicit' as const,
+      promptVersion: 'weekly-calibration-v1',
+      inferenceConfidence: 'high' as const,
+    };
     const noteParts = [
       cur.emotionSelected?.length ? `Feeling: ${cur.emotionSelected.join(', ')}` : null,
       cur.sleepContext ? `Sleep: ${cur.sleepContext}` : null,
@@ -382,6 +502,33 @@ export default function CockpitCheckinScreen() {
     answersRef.current.stressSourceContext = v;
     tick();
   }, [tick]);
+
+  if (entryMode === 'adaptive') {
+    return (
+      <ErrorBoundary>
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+          <AdaptiveCheckInEntry
+            plan={adaptivePlan}
+            currentGauges={currentGauges}
+            pending={createCheckin.isPending}
+            onSave={commitAdaptiveCheckIn}
+            onWeeklyCalibration={() => setEntryMode('weekly')}
+            onClose={() => router.back()}
+          />
+        </View>
+        <PostCheckInSuggestions
+          gauges={postCheckInGauges}
+          visible={showPostCheckInSuggestions}
+          onDismiss={() => {
+            setShowPostCheckInSuggestions(false);
+            router.back();
+          }}
+          limit={3}
+          generatedInsights={postCheckInInsights}
+        />
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>

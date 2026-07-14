@@ -61,6 +61,7 @@ import { useSuccessStore } from './successStore';
 import { useTherapistShareStore } from './therapistShareStore';
 import { useUsageStore } from './usageStore';
 import { useUserStore } from './userStore';
+import { useWearableBaselineStore } from './wearableBaselineStore';
 import { useWeatherStore } from './weatherStore';
 import { useWeeklyInsightStore } from './weeklyInsightStore';
 import { useWinStore } from './winStore';
@@ -127,6 +128,7 @@ const USER_SCOPED_STORES: ZustandStore[] = [
   useTherapistShareStore,
   useUsageStore,
   useUserStore,
+  useWearableBaselineStore,
   useWeatherStore,
   useWeeklyInsightStore,
   useWinStore,
