@@ -4,11 +4,11 @@
  * Use at the bottom of tool result screens to measure usefulness.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../lib/constants';
-import { recordInterventionOutcome, type OutcomeValue } from '../../services/learningLoop';
+import { recordInterventionOutcome, recordInterventionStart, type OutcomeValue } from '../../services/learningLoop';
 
 export interface DidThisHelpProps {
   /** Tool id for analytics (e.g. 'quick-decision', 'tone-check'). */
@@ -28,11 +28,20 @@ export function DidThisHelp({
   prompt = 'Did this help?',
 }: DidThisHelpProps) {
   const [answered, setAnswered] = useState<OutcomeValue | null>(null);
+  const interventionId = useRef<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void recordInterventionStart({ toolId }).then((id) => {
+      if (active) interventionId.current = id;
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [toolId]);
 
   const handlePress = (outcome: OutcomeValue) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setAnswered(outcome);
-    void recordInterventionOutcome({ toolId, outcome });
+    void recordInterventionOutcome({ interventionId: interventionId.current ?? undefined, toolId, outcome });
     onFeedback?.(outcome === 'better', toolId);
     onAfterFeedback?.();
   };
