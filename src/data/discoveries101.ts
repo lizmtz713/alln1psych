@@ -560,14 +560,14 @@ export const DISCOVERIES_101: Discovery101[] = [
   {
     code: 'D074',
     title: 'Meaning Through Suffering',
-    insight: ''He who has a why to live can bear almost any how." Purpose doesn\'t eliminate suffering-it gives it structure and dignity.',
+    insight: '"He who has a why to live can bear almost any how." Purpose doesn\'t eliminate suffering-it gives it structure and dignity.',
     source: 'Frankl, V. (1946). Man\'s Search for Meaning',
     category: 'Direction',
   },
   {
     code: 'D075',
     title: 'Implementation Intentions',
-    insight: ''I will [behavior] at [time] in [location]" doubles follow-through compared to vague intentions. Specificity is the bridge from wanting to doing.',
+    insight: '"I will [behavior] at [time] in [location]" doubles follow-through compared to vague intentions. Specificity is the bridge from wanting to doing.',
     source: 'Gollwitzer, P. (1999). American Psychologist',
     category: 'Direction',
   },

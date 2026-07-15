@@ -155,7 +155,7 @@ export default function DecisionNewScreen() {
                 style={[styles.aiClarityBtn, aiClarityLoading && styles.aiClarityBtnDisabled]}
                 onPress={async () => {
                   const hasKey = await hasOpenAIKey();
-                  if (!hasKey) { Alert.alert('API key needed', 'Add your OpenAI API key in Settings to use AI clarity.'); return; }
+                  if (!hasKey) { Alert.alert('AI unavailable', 'Your secure AI session is unavailable. Sign in again or try later.'); return; }
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setAiClarityLoading(true);
                   setAiClarity(null);

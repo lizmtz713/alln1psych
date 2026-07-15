@@ -192,6 +192,17 @@ export default function PersonProfileScreen() {
         {!light.interests && !light.values && !light.howWeMet && <Pressable style={styles.addInfoBtn} onPress={() => router.push(`/lights/edit/${light.id}` as any)}><Ionicons name="add" size={18} color={COLORS.accent} /><Text style={styles.addInfoText}>Add more details</Text></Pressable>}
       </Section>
 
+      {light.tier === 'five' && (light.stressSigns || light.copingStrategies || light.knownTriggers || light.repairStyle || light.whatToAvoid) ? (
+        <Section title="🫶 How to Show Up">
+          <Text style={styles.sourceNote}>{light.preferenceSource === 'shared_by_them' ? 'Shared by them' : 'Your observation—check it with them when appropriate'}</Text>
+          {light.stressSigns && <InfoRow label="Signs they may be stressed" value={light.stressSigns} />}
+          {light.copingStrategies && <InfoRow label="What helps" value={light.copingStrategies} />}
+          {light.knownTriggers && <InfoRow label="Sensitive situations" value={light.knownTriggers} />}
+          {light.repairStyle && <InfoRow label="Repair style" value={light.repairStyle} />}
+          {light.whatToAvoid && <InfoRow label="Usually avoid" value={light.whatToAvoid} />}
+        </Section>
+      ) : null}
+
       {(light.notes || (light.relateInsights && light.relateInsights.length > 0)) && (
         <Section title="📝 Notes & Context">
           {light.notes && <Text style={styles.notesText}>{light.notes}</Text>}
@@ -285,6 +296,7 @@ const styles = StyleSheet.create({
   infoRow: { marginBottom: 12 },
   infoLabel: { fontSize: 12, color: COLORS.textMuted, marginBottom: 2 },
   infoValue: { fontSize: 15, color: COLORS.text },
+  sourceNote: { fontSize: 12, color: COLORS.textMuted, marginBottom: 12, fontStyle: 'italic' },
   notesText: { fontSize: 15, color: COLORS.text, lineHeight: 22, marginBottom: 8 },
   insightItem: { fontSize: 14, color: COLORS.text, marginBottom: 6 },
   addInfoBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 12, borderWidth: 1, borderColor: COLORS.border, borderRadius: BORDER_RADIUS.input, borderStyle: 'dashed' },

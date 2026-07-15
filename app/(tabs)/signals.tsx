@@ -150,7 +150,7 @@ export default function SignalsScreen() {
           <Text style={styles.sectionTitle}>Social health</Text>
           <Pressable style={({ pressed }) => [styles.card, pressed && styles.cardPressed]} onPress={() => openPeople()}>
             <View style={styles.healthRow}>
-              <Text style={styles.healthScore}>{socialHealth.score}%</Text>
+              <Text style={styles.healthScore}>{lights.length === 0 ? '—' : `${socialHealth.score}%`}</Text>
               <View style={styles.healthTiers}>
                 {socialHealth.tierSummaries.map((t) => (
                   <Text key={t.tier} style={styles.healthTier}>

@@ -3,7 +3,7 @@
 
 -- Survey links table
 CREATE TABLE IF NOT EXISTS friend_survey_links (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   light_id TEXT NOT NULL, -- local Light ID (stored in app)
   token VARCHAR(12) UNIQUE NOT NULL, -- short URL token (e.g., "abc123def456")
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS friend_survey_links (
 
 -- Survey responses table
 CREATE TABLE IF NOT EXISTS friend_survey_responses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_link_id UUID REFERENCES friend_survey_links(id) ON DELETE CASCADE,
   
   -- Love language
@@ -55,6 +55,11 @@ CREATE INDEX IF NOT EXISTS idx_survey_responses_link ON friend_survey_responses(
 ALTER TABLE friend_survey_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE friend_survey_responses ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can create own survey links" ON friend_survey_links;
+DROP POLICY IF EXISTS "Users can read own survey links" ON friend_survey_links;
+DROP POLICY IF EXISTS "Users can update own survey links" ON friend_survey_links;
+DROP POLICY IF EXISTS "Users can read their survey responses" ON friend_survey_responses;
+
 -- Users can create their own survey links
 CREATE POLICY "Users can create own survey links"
   ON friend_survey_links FOR INSERT
@@ -84,3 +89,8 @@ CREATE POLICY "Users can read their survey responses"
 
 -- Public insert for survey responses (via edge function with service role)
 -- Direct inserts blocked; must go through edge function
+
+REVOKE ALL ON TABLE public.friend_survey_links FROM anon, public;
+REVOKE ALL ON TABLE public.friend_survey_responses FROM anon, public;
+GRANT SELECT, INSERT, UPDATE ON TABLE public.friend_survey_links TO authenticated;
+GRANT SELECT ON TABLE public.friend_survey_responses TO authenticated;

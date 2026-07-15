@@ -7,8 +7,12 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { healthKitService, type HealthSnapshot } from '../services/healthKit';
-import { isOuraConnected, syncOuraData, type OuraSnapshot } from '../services/ouraIntegration';
-import { getAggregatedBodyState } from '../services/healthData';
+import type { NormalizedHealthSnapshot } from '../types/normalizedHealthSnapshot';
+import type { CanonicalHealthDay } from '../types/canonicalHealth';
+import type { OuraSnapshot } from '../services/ouraIntegration';
+import { isOuraConnected, syncOuraData } from '../services/ouraIntegration';
+import { healthKitToCanonical, ouraToCanonical, mergeIntoCanonicalDay, getAggregatedBodyState } from '../services/healthData';
+import { useWearableBaselineStore } from './wearableBaselineStore';
 
 interface HealthState {
   // Authorization
@@ -17,6 +21,10 @@ interface HealthState {
   
   // Cached data
   snapshot: HealthSnapshot | null;
+  /** Flat model for UI — sleep, steps, HR, HRV, workouts; prefer this for new screens. */
+  normalizedSnapshot: NormalizedHealthSnapshot | null;
+  canonicalDay: CanonicalHealthDay | null;
+  ouraSnapshot: OuraSnapshot | null;
   lastSyncAttempt: string | null;
   syncError: string | null;
   
@@ -37,6 +45,9 @@ export const useHealthStore = create<HealthState>()(
       isAvailable: false,
       isAuthorized: false,
       snapshot: null,
+      normalizedSnapshot: null,
+      canonicalDay: null,
+      ouraSnapshot: null,
       lastSyncAttempt: null,
       syncError: null,
       bodyScoreFromHealth: null,
@@ -65,7 +76,8 @@ export const useHealthStore = create<HealthState>()(
 
       syncHealthData: async () => {
         const { isAuthorized } = get();
-        if (!isAuthorized) {
+        const ouraConnected = await isOuraConnected();
+        if (!isAuthorized && !ouraConnected) {
           set({ syncError: 'Not authorized' });
           return;
         }
@@ -73,24 +85,28 @@ export const useHealthStore = create<HealthState>()(
         set({ lastSyncAttempt: new Date().toISOString(), syncError: null });
 
         try {
-          const snapshot = await healthKitService.getFullSnapshot();
-          let bodyScore = healthKitService.calculateBodyScore(snapshot);
-          let stateContribution = healthKitService.calculateStateContribution(snapshot);
-          let ouraSnapshot: OuraSnapshot | null = null;
+          const snapshot = isAuthorized ? await healthKitService.getFullSnapshot() : null;
+          const normalizedSnapshot = snapshot
+            ? await healthKitService.buildNormalizedSnapshot(snapshot)
+            : null;
+          const ouraSnapshot = ouraConnected ? await syncOuraData() : null;
+          const date = new Date().toISOString().slice(0, 10);
+          const canonicalDay = mergeIntoCanonicalDay({
+            date,
+            healthKit: snapshot ? healthKitToCanonical(snapshot) : null,
+            oura: ouraSnapshot?.connected ? ouraToCanonical(ouraSnapshot) : null,
+          });
+          const aggregated = getAggregatedBodyState(snapshot, ouraSnapshot, date);
+          const bodyScore = aggregated.bodyScore ?? (snapshot ? healthKitService.calculateBodyScore(snapshot) : null);
+          const stateContribution = aggregated.stateScore ?? (snapshot ? healthKitService.calculateStateContribution(snapshot) : null);
 
-          if (await isOuraConnected()) {
-            try {
-              ouraSnapshot = await syncOuraData();
-              const aggregated = getAggregatedBodyState(snapshot, ouraSnapshot);
-              if (aggregated.bodyScore != null) bodyScore = aggregated.bodyScore;
-              if (aggregated.stateScore != null) stateContribution = aggregated.stateScore;
-            } catch (e) {
-              // Oura sync failed; keep HealthKit-only scores
-            }
-          }
+          useWearableBaselineStore.getState().recordCanonicalDay(canonicalDay);
 
           set({
             snapshot,
+            normalizedSnapshot,
+            canonicalDay,
+            ouraSnapshot,
             bodyScoreFromHealth: bodyScore,
             stateContributionFromHealth: stateContribution,
             syncError: null,
@@ -110,6 +126,9 @@ export const useHealthStore = create<HealthState>()(
       clearHealthData: () => {
         set({
           snapshot: null,
+          normalizedSnapshot: null,
+          canonicalDay: null,
+          ouraSnapshot: null,
           bodyScoreFromHealth: null,
           stateContributionFromHealth: null,
           lastSyncAttempt: null,
@@ -119,13 +138,21 @@ export const useHealthStore = create<HealthState>()(
     }),
     {
       name: 'health-storage',
+      version: 2,
+      migrate: (persisted, version) => {
+        const state = (persisted ?? {}) as Partial<HealthState>;
+        if (version < 2) {
+          return {
+            isAuthorized: state.isAuthorized ?? false,
+            lastSyncAttempt: state.lastSyncAttempt ?? null,
+          } as HealthState;
+        }
+        return state as HealthState;
+      },
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         isAuthorized: state.isAuthorized,
-        snapshot: state.snapshot,
         lastSyncAttempt: state.lastSyncAttempt,
-        bodyScoreFromHealth: state.bodyScoreFromHealth,
-        stateContributionFromHealth: state.stateContributionFromHealth,
       }),
     }
   )
@@ -134,6 +161,9 @@ export const useHealthStore = create<HealthState>()(
 // Helper hook for components
 export function useHealthData() {
   const snapshot = useHealthStore((s) => s.snapshot);
+  const normalizedSnapshot = useHealthStore((s) => s.normalizedSnapshot);
+  const canonicalDay = useHealthStore((s) => s.canonicalDay);
+  const ouraSnapshot = useHealthStore((s) => s.ouraSnapshot);
   const bodyScore = useHealthStore((s) => s.bodyScoreFromHealth);
   const stateContribution = useHealthStore((s) => s.stateContributionFromHealth);
   const isAuthorized = useHealthStore((s) => s.isAuthorized);
@@ -141,6 +171,9 @@ export function useHealthData() {
 
   return {
     snapshot,
+    normalizedSnapshot,
+    canonicalDay,
+    ouraSnapshot,
     bodyScore,
     stateContribution,
     isAuthorized,

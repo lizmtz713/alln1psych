@@ -9,14 +9,16 @@ Use this list before shipping an internal TestFlight build.
 Run locally and **stop if any fail**:
 
 ```bash
-npm run audit          # typecheck + route audit + ownership audit
-npm run lint           # expo lint (may need network)
-npx expo-doctor        # Expo/native config
+npm ci
+npm run audit
+npx --yes expo-doctor@1.20.0
+npm audit --omit=dev --audit-level=high
 ```
 
-- [ ] `npm run audit` passes (no TS errors, no broken route refs)
-- [ ] `npm run lint` passes
-- [ ] `npx expo-doctor` — fix or document any failures
+- [ ] Exact dependency install passes
+- [ ] `npm run audit` passes (types, routes, account isolation, edge security)
+- [ ] Expo Doctor passes 18/18
+- [ ] Dependency audit has no high or critical findings
 
 ---
 
@@ -29,7 +31,8 @@ npx expo-doctor        # Expo/native config
 - [ ] Auth works (sign in / sign out)
 - [ ] Onboarding can complete
 - [ ] Cockpit loads
-- [ ] AI flows fail gracefully when no API key
+- [ ] AI flows fail gracefully on provider timeout or poor connectivity
+- [ ] A second store build receives a higher iOS build number
 
 ---
 
@@ -43,6 +46,9 @@ npx expo-doctor        # Expo/native config
 - [ ] Rituals button works
 - [ ] Support button works
 - [ ] Quick check-in works
+- [ ] A failed save stays visible and can be retried
+- [ ] Retrying the same save does not create duplicate rows or rewards
+- [ ] Capacity/Stabilization mode changes only after the server confirms the save
 
 **Signals**
 
@@ -84,13 +90,20 @@ npx expo-doctor        # Expo/native config
 - [ ] Foundations links work
 - [ ] Settings / privacy / legal links work
 - [ ] Sign out works
+- [ ] Export includes cloud records and device data
+- [ ] Delete Account requires confirmation and removes the account
 
 ---
 
 ## Pass 4: Critical flows
 
-- [ ] **Onboarding** — Finishes cleanly; no dead-end; tone-check and feeling branches work; skip paths work
-- [ ] **Auth** — Sign up, sign in, sign out; re-open app behaves correctly
+- [ ] **Onboarding** — 3-second promise is clear; valid 18+ birthday saves; consent persistence succeeds; first six-gauge calibration opens
+- [ ] **Auth** — Email and Apple sign-in; sign out; session restore; re-open app behaves correctly
+- [ ] **Account isolation** — Sign out of user A, sign into user B, and verify no A data appears before or after app restart
+- [ ] **Cockpit integrity** — Header, six gauges, and momentum state commit together; offline failure is visible; retry is idempotent
+- [ ] **AI privacy** — Personalization defaults off; opt-in changes context; raw prompt/response text is absent from telemetry
+- [ ] **HealthKit** — Grant and deny paths both work; raw HealthKit snapshots do not survive sign-out
+- [ ] **Privacy rights** — Export succeeds; account deletion signs out and leaves no local user data
 - [ ] **Emergency** — Support route opens; crisis resources visible; breathe works; trusted-contact/reach-out don’t break
 - [ ] **Foundation** — All 6 routes open; back nav works; no modal leftovers
 - [ ] **Moved routes** — All open from real entry points: `/foundation/*`, `/onboarding`, `/identity-setup`, `/invite-circle`, `/tools/help-someone`, `/tools/reach-out`, `/tools/relational-bridge`
@@ -99,10 +112,12 @@ npx expo-doctor        # Expo/native config
 
 ## Pass 5: Edge cases
 
-- [ ] No API key — app doesn’t crash; AI flows fail gracefully
-- [ ] No Health/Oura permissions — no crash
+- [ ] AI provider timeout — local/fallback behavior works and app doesn’t crash
+- [ ] No HealthKit permission — no crash
+- [ ] Oura is clearly unavailable/coming soon and no OAuth flow launches
 - [ ] First install, no data — empty states and onboarding work
-- [ ] User skips onboarding options — no dead-end
+- [ ] Invalid or under-18 birthday — blocked with clear copy
+- [ ] Consent persistence failure — visible retry; onboarding does not silently continue
 - [ ] Empty People/Circle state — no crash
 - [ ] No wearable data — no crash
 - [ ] No lessons completed — Learn still usable
@@ -122,6 +137,10 @@ npx expo-doctor        # Expo/native config
 - [ ] Emergency route broken
 - [ ] Broken navigation loop
 - [ ] Sign out broken
+- [ ] Any duplicate Cockpit submission
+- [ ] Any cross-account data leakage
+- [ ] Export or account deletion broken
+- [ ] Production mobile bundle contains a provider/service-role secret
 
 ---
 
@@ -153,15 +172,39 @@ Screenshot/video:
 
 ---
 
-## Before TestFlight: save state
+## Cloud deployment gate
+
+Authenticate the CLIs locally or provide CI tokens. Never paste credentials into the repo.
+
+```bash
+supabase login
+eas login
+supabase migration list --linked
+supabase db push --linked --dry-run
+supabase db push --linked
+supabase functions deploy chat
+supabase functions deploy tts
+supabase functions deploy vision
+supabase functions deploy analyze-checkin
+supabase functions deploy generate-wrapped-insights
+supabase functions deploy delete-account
+supabase functions deploy export-account
+```
+
+- [ ] Linked Supabase project is named **InGauge**
+- [ ] All local migrations are present remotely
+- [ ] `OPENAI_API_KEY` exists as an Edge Function secret
+- [ ] Only the seven authenticated release functions above are deployed
+- [ ] Public survey/share and Oura functions remain undeployed for this release
+- [ ] EAS production environment contains `EXPO_PUBLIC_SUPABASE_URL`
+- [ ] EAS production environment contains the anon/publishable key—not a service-role key
+
+## Before TestFlight: save and ship
 
 ```bash
 git status
-git add .
-git commit -m "Release candidate QA sweep"
-git checkout -b release/internal-test-1
-git tag v0.1.0-internal.1
-git push --follow-tags origin release/internal-test-1
+git push origin fix/ingauge-release-candidate
+eas build --platform ios --profile testflight --auto-submit
 ```
 
-Then create the TestFlight build from the release branch.
+Do not invite external testers until Passes 2–5 are complete on the uploaded build.

@@ -174,6 +174,13 @@ export default function ToolsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <Pressable style={styles.learningCard} onPress={() => handleToolPress('/patterns')}>
+          <View>
+            <Text style={styles.learningTitle}>What works for me</Text>
+            <Text style={styles.learningSubtitle}>See what has actually helped—not just what you completed.</Text>
+          </View>
+          <Text style={styles.learningArrow}>›</Text>
+        </Pressable>
         {/* Essential 7 — minimal tool set (see docs/CORE-HUMAN-TOOLS.md) */}
         <View style={styles.essentialSection}>
           <Text style={styles.essentialTitle}>Essential</Text>
@@ -319,6 +326,10 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 15, color: COLORS.textMuted },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 16, paddingBottom: SPACING.xl },
+  learningCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: COLORS.accentBg, borderWidth: 1, borderColor: COLORS.accentMuted, borderRadius: 16, padding: 16, marginBottom: 22 },
+  learningTitle: { fontSize: 17, fontWeight: '700', color: COLORS.text, marginBottom: 4 },
+  learningSubtitle: { fontSize: 13, color: COLORS.textSecondary, maxWidth: 280, lineHeight: 18 },
+  learningArrow: { fontSize: 30, color: COLORS.accentLight, marginLeft: 12 },
   essentialSection: { marginBottom: 24 },
   essentialTitle: {
     fontSize: 13,

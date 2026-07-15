@@ -48,7 +48,7 @@ export default function RelationshipRepairScreen() {
     const baseDraft = draft.trim() || EXAMPLE_REPAIR_PHRASE;
     const hasKey = await hasOpenAIKey();
     if (!hasKey) {
-      Alert.alert('API key needed', 'Add your OpenAI API key in Settings to personalize with AI.');
+      Alert.alert('AI unavailable', 'Your secure AI session is unavailable. Sign in again or try later.');
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

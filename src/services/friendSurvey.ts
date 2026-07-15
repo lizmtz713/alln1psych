@@ -7,8 +7,8 @@
  */
 
 import { supabase } from '../lib/supabase';
-import { useLightsStore } from '../stores/lightsStore';
-import type { Light } from '../types/lights';
+import { useLightsStore, type LightExtras } from '../stores/lightsStore';
+import { useCircleStore, type LoveLanguage } from '../stores/circleStore';
 
 // ============================================
 // Types
@@ -210,41 +210,44 @@ export async function syncSurveyToLight(lightId: string): Promise<boolean> {
     const response = await getSurveyResponseForLight(lightId);
     if (!response) return false;
 
-    const updateLight = useLightsStore.getState().updateLight;
+    const { updateLightExtras } = useLightsStore.getState();
+    const { updateMemberBirthday, updateMemberLoveLanguage } = useCircleStore.getState();
 
-    // Map survey responses to Light fields
-    const updates: Partial<Light> = {};
+    const extras: Partial<LightExtras> = {};
 
     if (response.loveLanguage) {
-      updates.loveLanguage = mapLoveLanguage(response.loveLanguage);
+      const code = toLoveLanguageCode(response.loveLanguage);
+      if (code) {
+        updateMemberLoveLanguage(lightId, code);
+      }
       if (response.loveLanguageNotes) {
-        updates.loveLanguageNotes = response.loveLanguageNotes;
+        extras.loveLanguageNotes = response.loveLanguageNotes;
       }
     }
 
     if (response.commPreference) {
-      updates.bestWayToConnect = mapCommPreference(response.commPreference);
+      extras.bestWayToConnect = mapCommPreference(response.commPreference);
     }
 
     if (response.supportStyle) {
-      updates.whatTheyNeed = mapSupportStyle(response.supportStyle);
+      extras.whatTheyNeed = mapSupportStyle(response.supportStyle);
     }
 
     if (response.birthday) {
-      updates.birthday = response.birthday;
+      updateMemberBirthday(lightId, response.birthday);
     }
 
     if (response.wishList) {
-      // Add to existing wish list or create new
-      updates.giftIdeas = [response.wishList];
+      extras.giftIdeas = [response.wishList];
     }
 
     if (response.additionalNotes) {
-      updates.notes = response.additionalNotes;
+      extras.notes = response.additionalNotes;
     }
 
-    // Update the light
-    updateLight(lightId, updates);
+    if (Object.keys(extras).length > 0) {
+      updateLightExtras(lightId, extras);
+    }
 
     return true;
   } catch (err) {
@@ -256,6 +259,14 @@ export async function syncSurveyToLight(lightId: string): Promise<boolean> {
 // ============================================
 // Helpers
 // ============================================
+
+function toLoveLanguageCode(value: string): LoveLanguage {
+  if (value === 'help' || value === 'acts') return 'acts';
+  if (value === 'words' || value === 'time' || value === 'gifts' || value === 'touch') {
+    return value;
+  }
+  return null;
+}
 
 function mapLoveLanguage(value: string): string {
   const map: Record<string, string> = {

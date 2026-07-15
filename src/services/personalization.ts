@@ -2,7 +2,7 @@
  * AI-generated daily content for Home tab (greeting, affirmation, insight, challenge).
  */
 
-import { getOpenAIKey } from './ai';
+import { sendMessageWithSystemPromptOnly } from './ai';
 import { buildAgeAdaptivePrompt } from './ageAdaptive';
 
 export interface DailyContentContext {
@@ -60,11 +60,6 @@ function getStaticDefaults(name: string): DailyContent {
 }
 
 export async function generateDailyContent(userContext: DailyContentContext): Promise<DailyContent> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) {
-    return getStaticDefaults(userContext.name);
-  }
-
   const prompt = `You are Gauge, an emotional intelligence companion. Based on this user's recent history, generate personalized daily content.
 
 USER: ${userContext.name}, age group: ${userContext.ageGroup}
@@ -89,21 +84,15 @@ Respond ONLY with valid JSON, no markdown.
 ${buildAgeAdaptivePrompt()}`;
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 300,
-        temperature: 0.8,
-      }),
-    });
-
-    const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const text = data.choices?.[0]?.message?.content?.trim();
+    const text = await sendMessageWithSystemPromptOnly(
+      [{ role: 'user', content: prompt }],
+      'Generate concise, supportive daily InGauge content. Return only valid JSON.',
+      300,
+      0.8
+    );
     if (text) {
-      const parsed = JSON.parse(text) as DailyContent;
+      const cleaned = text.replace(/^\`\`\`(?:json)?\s*/i, '').replace(/\s*\`\`\`$/i, '').trim();
+      const parsed = JSON.parse(cleaned) as DailyContent;
       if (parsed.greeting && parsed.affirmation && parsed.insight && parsed.challengeSuggestion) {
         return parsed;
       }

@@ -117,7 +117,7 @@ export default function HelpSomeoneScreen() {
   const [concerns, setConcerns] = useState<string[]>([]);
   const [textInput, setTextInput] = useState('');
   const [isAiTyping, setIsAiTyping] = useState(false);
-  const [hasApiKey, setHasApiKey] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
@@ -200,7 +200,7 @@ export default function HelpSomeoneScreen() {
     const seedContent = `I'm worried about ${displayName} (${displayRelationship}). Here's what's going on: ${added.situation}.${added.concerns.length ? ' Concerns: ' + added.concerns.join(', ') : ''}`;
     if (!hasApiKey) {
       addMessageToCurrent('user', seedContent);
-      addMessageToCurrent('assistant', "Add your OpenAI API key in Settings to get coaching. I'm here when you're ready.");
+      addMessageToCurrent('assistant', "The secure AI session is unavailable. Sign in again or try later—I'm here when you're ready.");
       return;
     }
     setIsAiTyping(true);

@@ -1,9 +1,9 @@
 /**
  * AI synthesis for Direction and Alignment discovery flows.
- * Uses OpenAI when key is available; fallback for offline/demo.
+ * Uses the authenticated AI gateway with deterministic fallbacks.
  */
 
-import { getOpenAIKey } from './ai';
+import { sendMessageWithSystemPromptOnly } from './ai';
 import { ALIGNMENT_VALUES } from '../lib/gaugeOptions';
 
 export interface DirectionSynthesis {
@@ -68,9 +68,6 @@ function fallbackValuesSynthesis(
 }
 
 export async function synthesizeDirection(answers: Record<string, string>): Promise<DirectionSynthesis> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) return fallbackDirectionSynthesis(answers);
-
   const prompt = `You are helping someone discover their life Direction (purpose/meaning).
 
 They answered these reflection questions:
@@ -91,19 +88,12 @@ Respond in JSON only, no markdown:
 }`;
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user' as const, content: prompt }],
-        max_tokens: 400,
-        temperature: 0.6,
-      }),
-    });
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const raw = data.choices?.[0]?.message?.content?.trim();
+    const raw = await sendMessageWithSystemPromptOnly(
+      [{ role: 'user', content: prompt }],
+      'Synthesize life-direction reflections. Return only valid JSON.',
+      400,
+      0.6
+    );
     if (!raw) throw new Error('Empty response');
     const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
     const parsed = JSON.parse(jsonStr) as DirectionSynthesis;
@@ -127,9 +117,6 @@ export async function synthesizeValues(
   scenarioChoices: Array<{ scenarioId: string; selectedOption?: { label: string; values: string[] }; freeText?: string }>,
   reflections: string[]
 ): Promise<ValuesSynthesis> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) return fallbackValuesSynthesis(scenarioChoices, reflections);
-
   const prompt = `You are helping someone discover their core Values.
 
 They made these choices in value-tradeoff scenarios:
@@ -155,19 +142,12 @@ Respond in JSON only, no markdown:
 }`;
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'user' as const, content: prompt }],
-        max_tokens: 500,
-        temperature: 0.5,
-      }),
-    });
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const raw = data.choices?.[0]?.message?.content?.trim();
+    const raw = await sendMessageWithSystemPromptOnly(
+      [{ role: 'user', content: prompt }],
+      'Synthesize personal values from reflections. Return only valid JSON.',
+      500,
+      0.5
+    );
     if (!raw) throw new Error('Empty response');
     const jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
     const parsed = JSON.parse(jsonStr) as ValuesSynthesis;

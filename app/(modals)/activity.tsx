@@ -22,6 +22,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import * as Crypto from 'expo-crypto';
 import { COLORS, BORDER_RADIUS } from '../../src/lib/constants';
 import { getActivityById } from '../../src/lib/activities';
 import { EMOTION_WHEEL_PRIMARY } from '../../src/data/emotionWheel';
@@ -30,11 +31,12 @@ import { useJournalStore } from '../../src/stores/journalStore';
 import { useGratitudeStore } from '../../src/stores/gratitudeStore';
 import { useUserStore } from '../../src/stores/userStore';
 import { sendMessageWithSystemPromptOnly } from '../../src/services/ai';
-import { useCircleStore } from '../../src/stores/circleStore';
-import type { Temperature } from '../../src/stores/circleStore';
+import { useCircleStore, TEMPERATURE_LABELS, type Temperature } from '../../src/stores/circleStore';
 import { trackCheckIn } from '../../src/hooks/useWrappedTracking';
 import { useConversationStore } from '../../src/stores/conversationStore';
 import { useEducationStore } from '../../src/stores/educationStore';
+import { useCreateCheckin } from '../../src/hooks/useCreateCheckin';
+import { useAuth } from '../../src/providers/AuthProvider';
 
 type BreathPhase = 'inhale' | 'hold' | 'exhale';
 const BOX_BREATH = { inhale: 4, hold: 4, exhale: 4, holdAfter: 4 };
@@ -200,6 +202,10 @@ export default function ActivityScreen() {
   const [stressLevel, setStressLevel] = useState<number>(5);
   const [stressNote, setStressNote] = useState('');
   const [stressSubmitted, setStressSubmitted] = useState(false);
+  const stressSubmissionIdRef = useRef<string | null>(null);
+  const stressSubmittingRef = useRef(false);
+  const { user } = useAuth();
+  const createCheckin = useCreateCheckin(user?.id);
   const addMoodCheckin = useCircleStore((s) => s.addMoodCheckin);
   const emergencyContacts = useUserStore((s) => s.emergencyContacts);
 
@@ -1107,12 +1113,31 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
       else if (n <= 8) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       else Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     };
-    const onSaveCheckin = () => {
-      addMoodCheckin(stressToTemp(stressLevel), stressNote.trim() || undefined);
-      trackCheckIn();
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Saved', 'Check-in saved to your mood history.');
-      setStressSubmitted(true);
+    const onSaveCheckin = async () => {
+      if (stressSubmittingRef.current) return;
+      stressSubmittingRef.current = true;
+      const mood = stressToTemp(stressLevel);
+      stressSubmissionIdRef.current ??= Crypto.randomUUID();
+      try {
+        await createCheckin.mutateAsync({
+          clientEventId: stressSubmissionIdRef.current,
+          mood,
+          moodLabel: TEMPERATURE_LABELS[mood],
+          note: stressNote.trim() || null,
+        });
+        addMoodCheckin(mood, stressNote.trim() || undefined);
+        trackCheckIn();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert('Saved', 'Check-in saved to your mood history.');
+        setStressSubmitted(true);
+      } catch (error) {
+        Alert.alert(
+          'Check-in not saved',
+          error instanceof Error ? error.message : 'Could not reach the server. Tap Save to retry.'
+        );
+      } finally {
+        stressSubmittingRef.current = false;
+      }
     };
     const zone = stressLevel <= 3 ? 'cool' : stressLevel <= 6 ? 'warm' : stressLevel <= 8 ? 'hot' : 'boiling';
     return (
@@ -1147,8 +1172,8 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
               <Text style={styles.detailLabel}>What's helping you stay balanced?</Text>
               <TextInput style={styles.thoughtInput} placeholder="Optional..." placeholderTextColor={COLORS.textMuted} value={stressNote} onChangeText={setStressNote} />
             </View>
-            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={onSaveCheckin}>
-              <Text style={styles.startBtnText}>Save check-in</Text>
+            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={() => void onSaveCheckin()} disabled={createCheckin.isPending}>
+              <Text style={styles.startBtnText}>{createCheckin.isPending ? 'Saving…' : 'Save check-in'}</Text>
             </Pressable>
           </>
         )}
@@ -1169,8 +1194,8 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
               <Text style={[styles.detailLabel, { marginTop: 12 }]}>What's raising your temperature?</Text>
               <TextInput style={styles.thoughtInput} placeholder="Optional..." placeholderTextColor={COLORS.textMuted} value={stressNote} onChangeText={setStressNote} />
             </View>
-            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={onSaveCheckin}>
-              <Text style={styles.startBtnText}>Save check-in</Text>
+            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={() => void onSaveCheckin()} disabled={createCheckin.isPending}>
+              <Text style={styles.startBtnText}>{createCheckin.isPending ? 'Saving…' : 'Save check-in'}</Text>
             </Pressable>
           </>
         )}
@@ -1191,8 +1216,8 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
               <Text style={[styles.detailLabel, { marginTop: 12 }]}>What's going on?</Text>
               <TextInput style={styles.thoughtInput} placeholder="Optional..." placeholderTextColor={COLORS.textMuted} value={stressNote} onChangeText={setStressNote} />
             </View>
-            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={onSaveCheckin}>
-              <Text style={styles.startBtnText}>Save check-in</Text>
+            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={() => void onSaveCheckin()} disabled={createCheckin.isPending}>
+              <Text style={styles.startBtnText}>{createCheckin.isPending ? 'Saving…' : 'Save check-in'}</Text>
             </Pressable>
           </>
         )}
@@ -1221,8 +1246,8 @@ Respond as JSON only, no markdown: { "validation": "...", "pattern": "...", "alt
               <Text style={[styles.detailLabel, { marginTop: 12 }]}>What's going on?</Text>
               <TextInput style={styles.thoughtInput} placeholder="Optional..." placeholderTextColor={COLORS.textMuted} value={stressNote} onChangeText={setStressNote} />
             </View>
-            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={onSaveCheckin}>
-              <Text style={styles.startBtnText}>Save check-in</Text>
+            <Pressable style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]} onPress={() => void onSaveCheckin()} disabled={createCheckin.isPending}>
+              <Text style={styles.startBtnText}>{createCheckin.isPending ? 'Saving…' : 'Save check-in'}</Text>
             </Pressable>
           </>
         )}

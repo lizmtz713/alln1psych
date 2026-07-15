@@ -57,6 +57,10 @@ ALTER TABLE show_up_invites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE show_up_responses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE show_up_summaries ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "show_up_invites_owner_all" ON show_up_invites;
+DROP POLICY IF EXISTS "show_up_responses_owner_select" ON show_up_responses;
+DROP POLICY IF EXISTS "show_up_summaries_owner_all" ON show_up_summaries;
+
 CREATE POLICY "show_up_invites_owner_all" ON show_up_invites
   FOR ALL USING (auth.uid() = owner_user_id) WITH CHECK (auth.uid() = owner_user_id);
 
@@ -164,5 +168,14 @@ BEGIN
 END;
 $$;
 
+REVOKE ALL ON TABLE public.show_up_invites FROM anon, public;
+REVOKE ALL ON TABLE public.show_up_responses FROM anon, public;
+REVOKE ALL ON TABLE public.show_up_summaries FROM anon, public;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.show_up_invites TO authenticated;
+GRANT SELECT ON TABLE public.show_up_responses TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.show_up_summaries TO authenticated;
+
+REVOKE ALL ON FUNCTION public.get_show_up_invite_preview(TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.submit_show_up_response(TEXT, JSONB, TEXT, BOOLEAN) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.get_show_up_invite_preview(TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.submit_show_up_response(TEXT, JSONB, TEXT, BOOLEAN) TO anon, authenticated;

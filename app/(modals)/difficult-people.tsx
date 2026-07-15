@@ -121,7 +121,7 @@ export default function DifficultPeopleScreen() {
     
     const hasKey = await hasOpenAIKey();
     if (!hasKey) {
-      Alert.alert('API key needed', 'Add your OpenAI API key in Settings for custom responses.');
+      Alert.alert('AI unavailable', 'Your secure AI session is unavailable. Sign in again or try later.');
       return;
     }
 

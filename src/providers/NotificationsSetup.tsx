@@ -64,7 +64,7 @@ export function NotificationsSetup({ children }: { children: React.ReactNode }) 
       const data = response.notification.request.content.data as { type?: string; personId?: string } & Record<string, unknown>;
       const type = data?.type;
       if (type === 'daily-checkin') {
-        router.push('/(modals)/mood-checkin');
+        router.push('/(modals)/cockpit-checkin');
       } else if (type === 'evening-reflection') {
         router.push('/(tabs)/talk');
       } else if (type === 'circle-nudge') {

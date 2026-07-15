@@ -73,7 +73,7 @@ The gauges show your internal state, but other gauges alongside and behind them 
     sections: [
       { id: 5, name: 'School', focus: 'Academic stress, learning, social dynamics' },
       { id: 6, name: 'Work', focus: 'Burnout, motivation, work-life boundaries' },
-      { id: 7, name: 'Family & Relationships', focus: 'Parent-child dynamics, intergenerational patterns" },
+      { id: 7, name: 'Family & Relationships', focus: 'Parent-child dynamics, intergenerational patterns' },
     ],
   },
 

@@ -142,7 +142,7 @@ export default function FamilyConflictScreen() {
   const getAIHelp = useCallback(async (type: 'boundary' | 'script') => {
     const hasKey = await hasOpenAIKey();
     if (!hasKey) {
-      Alert.alert('API Key Needed', 'Add your OpenAI key in Settings to use AI assistance.');
+      Alert.alert('AI unavailable', 'Your secure AI session is unavailable. Sign in again or try later.');
       return;
     }
 

@@ -58,7 +58,7 @@ export function shouldPromptCheckIn(
   if (lastCheckInTime) {
     const minutesSince = (Date.now() - lastCheckInTime.getTime()) / 1000 / 60;
     if (minutesSince < 30) {
-      return { shouldPrompt: false, level: "micro', message: '', priority: 'low', reason: 'too_soon' };
+      return { shouldPrompt: false, level: 'micro', message: '', priority: 'low', reason: 'too_soon' };
     }
   }
   
@@ -122,9 +122,9 @@ export function shouldPromptCheckIn(
   if (!lastCheckInTime || hoursSince(lastCheckInTime) > 12) {
     return {
       shouldPrompt: true,
-      level: "quick",
-      message: \"It's been a while. How are you doing?\",
-      priority: "low',
+      level: 'quick',
+      message: "It's been a while. How are you doing?",
+      priority: 'low',
       reason: 'time_elapsed',
     };
   }

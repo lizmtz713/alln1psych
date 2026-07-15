@@ -8,14 +8,14 @@
  * - How you respond to good news matters MORE than how you respond to bad news
  * - Enthusiastic engagement builds intimacy and trust
  * - Validation before solutions for struggles
- * - \"Tell me more\" > \"Here's what you should do\"
+ * - "Tell me more" > "Here's what you should do"
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
 
-export type MessageType = "good-news' | 'struggle' | 'neutral' | 'request';
+export type MessageType = 'good-news' | 'struggle' | 'neutral' | 'request';
 
 export interface ResponseSuggestion {
   id: string;
@@ -45,16 +45,16 @@ export interface MirroringResult {
  * The 4 response styles (Shelly Gable's research):
  * 
  * Active Constructive (best): Enthusiastic, asks questions, celebrates
- *   - \"That's amazing! Tell me everything!\"
+ *   - "That's amazing! Tell me everything!"
  * 
  * Passive Constructive: Acknowledges but doesn't engage
- *   - "That's nice\" (then changes subject)
+ *   - "That's nice" (then changes subject)
  * 
  * Active Destructive: Points out problems
- *   - \"That's going to be a lot of work\"
+ *   - "That's going to be a lot of work"
  * 
  * Passive Destructive: Ignores or dismisses
- *   - \"What's for dinner?"
+ *   - "What's for dinner?"
  * 
  * Only Active Constructive builds relationships.
  */
@@ -81,7 +81,7 @@ const STRUGGLE_INDICATORS = [
   'hurt', 'scared', 'worried', 'nervous', 'failed',
   'lost', 'rejected', 'broke up', 'fight', 'argument',
   'sick', 'tired', 'rough day', 'bad day', 'tough',
-  \"can't\", \"won't', "don't know", 'help', 'crying',
+  "can't", "won't", "don't know", 'help', 'crying',
   '😢', '😔', '😞', '💔', '😰', '😤', '😣',
   'ugh', 'sigh', 'hate', 'awful', 'terrible',
 ];
@@ -124,7 +124,7 @@ export function identifyMessageType(message: string): MessageType {
   // If scores are equal and both present, look at sentiment
   if (goodNewsScore > 0 && struggleScore > 0) {
     // Check for negation patterns that flip meaning
-    const negations = ['not', "n't', 'no longer', 'finally over', 'done with'];
+    const negations = ['not', "n't", 'no longer', 'finally over', 'done with'];
     const hasNegation = negations.some(n => lower.includes(n));
     if (hasNegation && struggleScore >= goodNewsScore) {
       return 'good-news'; // "not stressed anymore" = good news
@@ -179,13 +179,13 @@ export function identifyTypeFromTemperature(
 const ACTIVE_CONSTRUCTIVE_TEMPLATES = [
   {
     id: 'ac-1',
-    text: \"That's amazing! How did you pull that off?\",
-    emoji: "🎉',
+    text: "That's amazing! How did you pull that off?",
+    emoji: '🎉',
   },
   {
     id: 'ac-2',
-    text: \"I'm so happy for you! Tell me everything!\",
-    emoji: "💜',
+    text: "I'm so happy for you! Tell me everything!",
+    emoji: '💜',
   },
   {
     id: 'ac-3',
@@ -194,18 +194,18 @@ const ACTIVE_CONSTRUCTIVE_TEMPLATES = [
   },
   {
     id: 'ac-4',
-    text: \"That's huge! What was the best part?\",
-    emoji: "🌟',
+    text: "That's huge! What was the best part?",
+    emoji: '🌟',
   },
   {
     id: 'ac-5',
-    text: \"I knew you could do it! What's next?\",
-    emoji: "🚀',
+    text: "I knew you could do it! What's next?",
+    emoji: '🚀',
   },
   {
     id: 'ac-6',
-    text: \"That's wonderful news! I want to hear all the details!\",
-    emoji: "😊',
+    text: "That's wonderful news! I want to hear all the details!",
+    emoji: '😊',
   },
   {
     id: 'ac-7',
@@ -268,7 +268,7 @@ function generatePersonalizedACR(context: MirroringContext): ResponseSuggestion 
     return {
       id: 'ac-personal-partner',
       text: `This makes me so happy! Let's celebrate tonight?`,
-      style: "active-constructive',
+      style: 'active-constructive',
       emoji: '💕',
     };
   }
@@ -301,8 +301,8 @@ function generatePersonalizedACR(context: MirroringContext): ResponseSuggestion 
 const SUPPORTIVE_TEMPLATES = [
   {
     id: 'sup-1',
-    text: \"That sounds really hard. I'm here.\",
-    emoji: "💜',
+    text: "That sounds really hard. I'm here.",
+    emoji: '💜',
   },
   {
     id: 'sup-2',
@@ -311,13 +311,13 @@ const SUPPORTIVE_TEMPLATES = [
   },
   {
     id: 'sup-3',
-    text: \"I'm sorry you're going through this. I'm listening.",
+    text: "I'm sorry you're going through this. I'm listening.",
     emoji: '💙',
   },
   {
     id: 'sup-4',
-    text: \"That's a lot to carry. How can I support you?\",
-    emoji: "🫂',
+    text: "That's a lot to carry. How can I support you?",
+    emoji: '🫂',
   },
   {
     id: 'sup-5',
@@ -326,18 +326,18 @@ const SUPPORTIVE_TEMPLATES = [
   },
   {
     id: 'sup-6',
-    text: \"You're not alone in this. Tell me more.\",
-    emoji: "🌙',
+    text: "You're not alone in this. Tell me more.",
+    emoji: '🌙',
   },
   {
     id: 'sup-7',
-    text: \"That makes sense that you're feeling that way.\",
-    emoji: "💫',
+    text: "That makes sense that you're feeling that way.",
+    emoji: '💫',
   },
   {
     id: 'sup-8',
-    text: \"I'm with you. What do you need right now?\",
-    emoji: "🤝',
+    text: "I'm with you. What do you need right now?",
+    emoji: '🤝',
   },
 ];
 
@@ -375,8 +375,8 @@ export function generateSupportiveResponse(
   if (context.temperature === 'red') {
     suggestions.unshift({
       id: 'sup-urgent',
-      text: \"I love you and I'm here. Can we talk?\",
-      style: "supportive',
+      text: "I love you and I'm here. Can we talk?",
+      style: 'supportive',
       emoji: '❤️',
     });
     suggestions.pop();
@@ -397,8 +397,8 @@ const CURIOUS_TEMPLATES = [
   },
   {
     id: 'cur-2',
-    text: \"What's on your mind?\",
-    emoji: "🤔',
+    text: "What's on your mind?",
+    emoji: '🤔',
   },
   {
     id: 'cur-3',
@@ -513,5 +513,5 @@ export function getResponseStyleExplanation(style: ResponseSuggestion['style']):
  * Get a short explanation of why ACR matters
  */
 export function getACRExplanation(): string {
-  return "How you respond to good news matters MORE than how you respond to bad news. Enthusiastic engagement that asks follow-up questions builds intimacy and trust. "That's nice" (passive) actually erodes connection over time.";
+  return "How you respond to good news matters MORE than how you respond to bad news. Enthusiastic engagement that asks follow-up questions builds intimacy and trust. 'That's nice' (passive) actually erodes connection over time.";
 }

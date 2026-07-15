@@ -12,11 +12,17 @@ import { useCircleStore } from '../stores/circleStore';
 import { useEducationStore } from '../stores/educationStore';
 import { useGratitudeStore } from '../stores/gratitudeStore';
 import type { TriggerMapEntry } from '../stores/userStore';
+import { callEdgeFunction } from './ai';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type ExportRange = '7' | '30' | 'all';
 
 export interface DataExport {
+  schemaVersion: 2;
   exportDate: string;
+  source: 'cloud-and-device';
+  cloudData: Record<string, unknown[]>;
+  deviceData: Record<string, unknown>;
   profile: {
     name: string;
     pronouns: string;
@@ -70,7 +76,7 @@ function inRange(isoDate: string, range: ExportRange): boolean {
   return new Date(isoDate).getTime() >= sinceDate(range);
 }
 
-export function buildExportData(range: ExportRange): DataExport {
+function buildDeviceExportData(range: ExportRange): DataExport {
   const user = useUserStore.getState();
   const summaries = useConversationSummaryStore.getState().getSummaries();
   const journalEntries = useJournalStore.getState().entries;
@@ -126,7 +132,11 @@ export function buildExportData(range: ExportRange): DataExport {
   }));
 
   return {
+    schemaVersion: 2,
     exportDate: new Date().toISOString(),
+    source: 'cloud-and-device',
+    cloudData: {},
+    deviceData: {},
     profile: {
       name: user.name ?? '',
       pronouns: user.pronouns ?? user.customPronouns ?? '',
@@ -141,6 +151,46 @@ export function buildExportData(range: ExportRange): DataExport {
     educationProgress,
     gratitudeEntries,
     triggerMaps,
+  };
+}
+
+type AccountExportResponse = {
+  schemaVersion: number;
+  exportedAt: string;
+  data: Record<string, unknown[]>;
+};
+
+/**
+ * Build a complete portability export. Cloud records are fetched through an
+ * authenticated service endpoint; device-only records are included alongside
+ * them so a user receives everything this installation can access.
+ */
+export async function buildExportData(range: ExportRange): Promise<DataExport> {
+  const local = buildDeviceExportData(range);
+  const [cloud, deviceEntries] = await Promise.all([
+    callEdgeFunction<AccountExportResponse>('export-account', {}, 60_000),
+    AsyncStorage.getAllKeys().then(async (keys) => {
+      const exportableKeys = keys.filter((key) => !['oura_access_token', 'openai_api_key'].includes(key));
+      return AsyncStorage.multiGet(exportableKeys);
+    }),
+  ]);
+  if (!cloud?.data || typeof cloud.data !== 'object') {
+    throw new Error('The account export service returned invalid data');
+  }
+  const deviceData: Record<string, unknown> = {};
+  for (const [key, value] of deviceEntries) {
+    if (value == null) continue;
+    try {
+      deviceData[key] = JSON.parse(value) as unknown;
+    } catch {
+      deviceData[key] = value;
+    }
+  }
+  return {
+    ...local,
+    exportDate: cloud.exportedAt || local.exportDate,
+    cloudData: cloud.data,
+    deviceData,
   };
 }
 

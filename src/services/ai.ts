@@ -1,6 +1,6 @@
 /**
- * AI conversation service — OpenAI API.
- * Prefers Supabase Edge Functions (server-side, no key in app). Falls back to client-side key if edge fails.
+ * AI conversation service. Consumer text features use the authenticated Supabase
+ * gateway so provider secrets, quotas, and request controls stay server-side.
  */
 
 import { buildKnowledgePrompt } from '../data/psychKnowledge';
@@ -9,43 +9,18 @@ import { getCoPilotGaugeContext } from './copilotGaugeContext';
 import { LIFE_PROBLEMS_CONTEXT } from '../constants/copilotPrompts';
 import { getCurrentLanguage } from '../i18n';
 import { spanishAIPrompts, getSpanishAgePrompt } from '../i18n/aiPrompts';
-import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { useUsageStore } from '../stores/usageStore';
+import { useLegalConsentStore } from '../stores/legalConsentStore';
 import { supabase } from '../lib/supabase';
-
-const API_KEY_STORAGE = 'openai_api_key';
-
-/** Prefer SecureStore (user-configured), then env from .env (never commit .env). */
-function getOpenAIKeyFromEnv(): string | null {
-  const key =
-    (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_OPENAI_API_KEY) ||
-    (typeof process !== 'undefined' && process.env?.OPENAI_API_KEY);
-  return key && key.trim() ? key.trim() : null;
-}
-
-export async function getOpenAIKey(): Promise<string | null> {
-  try {
-    const stored = await SecureStore.getItemAsync(API_KEY_STORAGE);
-    if (stored && stored.trim()) return stored.trim();
-    return getOpenAIKeyFromEnv();
-  } catch {
-    return getOpenAIKeyFromEnv();
-  }
-}
-
-export async function setOpenAIKey(key: string | null): Promise<void> {
-  if (key === null || key === '') {
-    await SecureStore.deleteItemAsync(API_KEY_STORAGE);
-  } else {
-    await SecureStore.setItemAsync(API_KEY_STORAGE, key);
-  }
-}
-
 
 export interface Message {
   role: 'system' | 'user' | 'assistant';
   content: string;
+}
+
+function buildConsentedAdaptiveContext(): string {
+  return useLegalConsentStore.getState().allowAiLearning ? buildAdaptiveContext() : '';
 }
 
 const SYSTEM_PROMPT_TEMPLATE = `You are the AI companion inside InGauge, an emotional intelligence app.
@@ -81,7 +56,7 @@ CULTURAL COMMUNICATION RULES:
 - If religious/faith is central: integrate their faith as a resource, not a barrier. \"Your faith can be a source of strength here\" not \"maybe you're relying too much on faith."
 - If immigrant experience: understand that assimilation stress, language barriers, documentation anxiety, cultural identity conflicts, and generational trauma are real emotional experiences.
 - If first-generation: understand the pressure of being the family's hope, the guilt of succeeding when family struggles, the exhaustion of code-switching between cultures.
-- If \"we don't air our dirty laundry\": respect this while gently offering that talking to an AI isn't "airing" anything. "This stays between us. No one in your family will ever see this."
+- If \"we don't air our dirty laundry\": respect this without promising confidentiality. Explain that InGauge securely processes the conversation to respond and does not automatically share it with family; the user controls what they share outside the app.
 - If collectivist values: frame self-care as serving the community. "Taking care of yourself isn't selfish — you can't pour from an empty cup. Your family needs you whole.\"
 - If gender roles are important: be sensitive to how this affects emotional expression, especially for men who were taught not to cry, and women who were taught to put everyone else first.
 - If strict household: understand that the user may carry patterns of people-pleasing, fear of authority, or difficulty expressing needs. Don't pathologize survival strategies.
@@ -511,12 +486,12 @@ ${spanishAIPrompts.crisisDetection}
   }
 
   const copilotGaugeBlock = getCoPilotGaugeContext();
-  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + lifeSkillsPrompt + `\n\n${copilotGaugeBlock}${LIFE_PROBLEMS_CONTEXT}${languagePrompt}${buildKnowledgePrompt()}${READ_THE_ROOM}${buildAdaptiveContext()}`;
+  const fullPrompt = base + modePrompts + healthPrompt + gaugePrompt + lifeSkillsPrompt + '\n\n' + copilotGaugeBlock + LIFE_PROBLEMS_CONTEXT + languagePrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildConsentedAdaptiveContext();
   return fullPrompt;
 }
 
 const NO_KEY_MESSAGE =
-  "I'm having trouble connecting right now. Check that your API key is configured.";
+  "I'm having trouble connecting right now. Your data is safe—please try again in a moment.";
 
 const SUPABASE_URL =
   process.env.EXPO_PUBLIC_SUPABASE_URL || (Constants.expoConfig?.extra as Record<string, string> | undefined)?.supabaseUrl || '';
@@ -524,7 +499,11 @@ const SUPABASE_ANON_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || (Constants.expoConfig?.extra as Record<string, string> | undefined)?.supabaseAnonKey || '';
 
 /** Call a Supabase Edge Function. Used for server-side OpenAI (chat, TTS) so the API key never ships in the app. */
-export async function callEdgeFunction<T = unknown>(functionName: string, body: object): Promise<T> {
+export async function callEdgeFunction<T = unknown>(
+  functionName: string,
+  body: object,
+  timeoutMs: number = 20_000
+): Promise<T> {
   const url = `${SUPABASE_URL}/functions/v1/${functionName}`;
   if (__DEV__) console.log('[AI] callEdgeFunction URL:', url, 'SUPABASE_URL set:', !!SUPABASE_URL);
 
@@ -536,6 +515,8 @@ export async function callEdgeFunction<T = unknown>(functionName: string, body: 
     throw new Error('Not authenticated');
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   let response: Response;
   try {
     response = await fetch(url, {
@@ -546,16 +527,19 @@ export async function callEdgeFunction<T = unknown>(functionName: string, body: 
         apikey: SUPABASE_ANON_KEY,
       },
       body: JSON.stringify(body),
+      signal: controller.signal,
     });
   } catch (e) {
     if (__DEV__) console.warn('[AI] callEdgeFunction fetch failed:', e);
+    if (e instanceof Error && e.name === 'AbortError') throw new Error('AI request timed out');
     throw e;
+  } finally {
+    clearTimeout(timeout);
   }
 
   if (__DEV__) console.log('[AI] callEdgeFunction response status:', response.status);
 
   const rawText = await response.text();
-  if (__DEV__) console.log('[AI] callEdgeFunction raw response (first 500 chars):', rawText.slice(0, 500));
 
   if (!response.ok) {
     let errMessage = `Edge function error: ${response.status}`;
@@ -578,49 +562,6 @@ export async function callEdgeFunction<T = unknown>(functionName: string, body: 
   }
 }
 
-/** Direct OpenAI call (fallback when edge function is unavailable or not deployed). Requires client API key. */
-async function sendMessageDirectly(
-  messages: Array<{ role: string; content: string }>,
-  systemPrompt: string,
-  maxTokens: number = 500,
-  temperature: number = 0.8
-): Promise<string> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) throw new Error('OpenAI API key not configured');
-
-  const apiMessages: Array<{ role: string; content: string }> = [
-    { role: 'system', content: systemPrompt },
-    ...messages,
-  ];
-
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: apiMessages,
-      max_tokens: maxTokens,
-      temperature,
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    if (__DEV__) console.error('[AI] Direct API error:', res.status, body);
-    throw new Error(body || `OpenAI API error: ${res.status}`);
-  }
-
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }>; error?: { message?: string } };
-  if (data.error?.message) throw new Error(data.error.message);
-  const content = data.choices?.[0]?.message?.content?.trim();
-  if (!content) throw new Error('Empty response from OpenAI');
-  useUsageStore.getState().incrementGPT();
-  return content;
-}
-
 /** Structured interpretation of Life Direction reflection text. Returns null on failure (caller should use keyword fallback). */
 export interface DirectionInterpretation {
   themeIds: string[];
@@ -640,10 +581,11 @@ export async function interpretDirectionReflection(combinedText: string): Promis
 
 Return ONLY a single JSON object with keys: themeIds, thriveWhen, possibleFields. No markdown, no code fence, no explanation.`;
   try {
-    const content = await sendMessageDirectly(
+    const content = await sendMessageServerSide(
       [{ role: 'user', content: combinedText.slice(0, 6000) }],
       systemPrompt,
-      600
+      600,
+      0.3
     );
     const cleaned = content.replace(/^[\s\S]*?\{/, '{').replace(/\}[\s\S]*$/, '}');
     const parsed = JSON.parse(cleaned) as {
@@ -707,7 +649,7 @@ export async function analyzeToneForMessage(
     `\n\nRECIPIENT CONTEXT (use when suggesting alternativePhrasing — match their preferences; stay practical):\n${options.recipientPreferenceContext.trim().slice(0, 1200)}`;
   const systemPrompt = recipientBlock ? `${TONE_CHECK_SYSTEM}${recipientBlock}` : TONE_CHECK_SYSTEM;
   try {
-    const content = await sendMessageDirectly(
+    const content = await sendMessageServerSide(
       [{ role: 'user', content: userContent }],
       systemPrompt,
       400,
@@ -745,7 +687,7 @@ export async function getRepairBuilderAdvice(
 ): Promise<RepairBuilderResult | null> {
   const text = `What happened: ${whatHappened}. Who with: ${whoWith}. Intensity: ${intensity}.`;
   try {
-    const content = await sendMessageDirectly(
+    const content = await sendMessageServerSide(
       [{ role: 'user', content: text }],
       REPAIR_BUILDER_SYSTEM,
       350,
@@ -787,7 +729,7 @@ export async function getAfterFightAdvice(
 ): Promise<AfterFightResult | null> {
   const text = `What hurt me most: ${whatHurtYou}. What I think hurt them: ${whatHurtThem}. What I want now: ${whatYouWant}.`;
   try {
-    const content = await sendMessageDirectly(
+    const content = await sendMessageServerSide(
       [{ role: 'user', content: text.slice(0, 800) }],
       AFTER_FIGHT_SYSTEM,
       300,
@@ -810,31 +752,27 @@ export async function getAfterFightAdvice(
   }
 }
 
-/** Server-side chat via Supabase Edge Function. Falls back to direct API if edge fails. */
+/** Server-side chat via the authenticated, rate-limited Supabase Edge Function. */
 /** Edge function returns { content: string, usage?: object } — NOT OpenAI's choices format. */
 async function sendMessageServerSide(
   messages: Array<{ role: string; content: string }>,
-  systemPrompt: string
+  systemPrompt: string,
+  maxTokens: number = 600,
+  temperature: number = 0.7
 ): Promise<string> {
-  try {
-    if (__DEV__) console.log('[AI] sendMessageServerSide calling edge function chat');
-    const data = await callEdgeFunction<{ content?: string; usage?: unknown }>('chat', {
-      messages,
-      systemPrompt,
-      model: 'gpt-4o-mini',
-      max_tokens: 1000,
-    });
-    if (__DEV__) console.log('[AI] sendMessageServerSide edge returned, has content:', !!data?.content);
-    const content = typeof data?.content === 'string' ? data.content.trim() : '';
-    if (content) {
-      useUsageStore.getState().incrementGPT();
-      return content;
-    }
-    throw new Error('Empty content from edge');
-  } catch (e) {
-    if (__DEV__) console.warn('[AI] Server-side chat failed, trying client-side fallback:', e);
-    return sendMessageDirectly(messages, systemPrompt, 600);
+  if (__DEV__) console.log('[AI] sendMessageServerSide calling edge function chat');
+  const data = await callEdgeFunction<{ content?: string; usage?: unknown }>('chat', {
+    messages,
+    systemPrompt,
+    max_tokens: maxTokens,
+    temperature,
+  });
+  const content = typeof data?.content === 'string' ? data.content.trim() : '';
+  if (content) {
+    useUsageStore.getState().incrementGPT();
+    return content;
   }
+  throw new Error('Empty content from edge');
 }
 
 export async function sendMessage(
@@ -847,14 +785,9 @@ export async function sendMessage(
   try {
     return await sendMessageServerSide(msgList, systemPrompt);
   } catch (e) {
-    const apiKey = await getOpenAIKey();
-    if (!apiKey) {
-      if (__DEV__) console.warn('[AI] No API key — returning user-facing message');
-      return NO_KEY_MESSAGE;
-    }
     const err = e as Error | undefined;
     if (__DEV__) console.error('[AI] sendMessage error:', err?.message ?? e);
-    return `[AI Error: ${err?.message || String(e)}]`;
+    return NO_KEY_MESSAGE;
   }
 }
 
@@ -863,7 +796,7 @@ export async function sendMessageWithSystemPrompt(
   messages: Message[],
   systemPrompt: string
 ): Promise<string> {
-  const fullPrompt = systemPrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildAdaptiveContext();
+  const fullPrompt = systemPrompt + buildKnowledgePrompt() + READ_THE_ROOM + buildConsentedAdaptiveContext();
   const msgList = messages.map((m) => ({ role: m.role, content: m.content }));
   try {
     return await sendMessageServerSide(msgList, fullPrompt);
@@ -878,16 +811,36 @@ export async function sendMessageWithSystemPrompt(
 export async function sendMessageWithSystemPromptOnly(
   messages: Message[],
   systemPrompt: string,
-  maxTokens: number = 500
+  maxTokens: number = 500,
+  temperature: number = 0.7
 ): Promise<string> {
   const msgList = messages.map((m) => ({ role: m.role, content: m.content }));
-  try {
-    return await sendMessageServerSide(msgList, systemPrompt);
-  } catch (e) {
-    const apiKey = await getOpenAIKey();
-    if (!apiKey) throw new Error('OpenAI API key not configured');
-    return sendMessageDirectly(msgList, systemPrompt, maxTokens);
-  }
+  return sendMessageServerSide(msgList, systemPrompt, maxTokens, temperature);
+}
+
+export interface CallAIOptions {
+  temperature?: number;
+  max_tokens?: number;
+  system?: string;
+}
+
+/**
+ * Lightweight tool helper for one-shot prompts (reach-out, family scripts, etc.).
+ * Wraps sendMessageWithSystemPromptOnly with a default tool system prompt.
+ */
+export async function callAI(
+  messages: Message[],
+  options: CallAIOptions = {}
+): Promise<string> {
+  const system =
+    options.system ??
+    'You are a warm, practical companion inside InGauge. Be concise, specific, and human. No clinical jargon.';
+  return sendMessageWithSystemPromptOnly(
+    messages,
+    system,
+    options.max_tokens ?? 500,
+    options.temperature ?? 0.7
+  );
 }
 
 /** Suggest a memory hook (association) for remembering someone's name. Used by Memory Builder. */
@@ -909,8 +862,8 @@ export async function suggestMemoryHook(name: string, whereMet?: string, detail?
 }
 
 export async function hasOpenAIKey(): Promise<boolean> {
-  const key = await getOpenAIKey();
-  return Boolean(key);
+  const { data } = await supabase.auth.getSession();
+  return Boolean(data.session?.access_token);
 }
 
 /** Summary shape returned by OpenAI (before we add id, conversationId, createdAt). */
@@ -978,29 +931,28 @@ function parseConversationSummaryPayload(raw: string): ConversationSummaryPayloa
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonStr);
-  } catch (e) {
-    if (__DEV__) console.warn('[AI] generateConversationSummary: invalid JSON', e);
+  } catch (error) {
+    if (__DEV__) console.warn('[AI] generateConversationSummary: invalid JSON', error);
     throw new Error('Invalid JSON in summary response');
   }
 
   if (!parsed || typeof parsed !== 'object') {
-    if (__DEV__) console.warn('[AI] generateConversationSummary: response was not an object');
     throw new Error('Invalid summary shape from OpenAI');
   }
 
-  const p = parsed as Partial<ConversationSummaryPayload>;
-  if (!p.title || !p.summary || !Array.isArray(p.emotions) || !Array.isArray(p.triggers)) {
-    if (__DEV__) console.warn('[AI] generateConversationSummary: malformed summary fields', p);
+  const payload = parsed as Partial<ConversationSummaryPayload>;
+  if (!payload.title || !payload.summary || !Array.isArray(payload.emotions) || !Array.isArray(payload.triggers)) {
+    if (__DEV__) console.warn('[AI] generateConversationSummary: malformed summary fields');
     throw new Error('Invalid summary shape from OpenAI');
   }
 
   return {
-    title: String(p.title),
-    summary: String(p.summary),
-    emotions: p.emotions.map(String),
-    triggers: p.triggers.map(String),
-    insights: p.insights != null ? String(p.insights) : '',
-    followUp: p.followUp != null ? String(p.followUp) : '',
+    title: String(payload.title),
+    summary: String(payload.summary),
+    emotions: payload.emotions.map(String),
+    triggers: payload.triggers.map(String),
+    insights: payload.insights != null ? String(payload.insights) : '',
+    followUp: payload.followUp != null ? String(payload.followUp) : '',
   };
 }
 
@@ -1008,23 +960,16 @@ export async function generateConversationSummary(
   messages: MessageForSummary[]
 ): Promise<ConversationSummaryPayload> {
   const prompt = buildConversationSummaryPrompt(messages);
-
-  let raw: string;
-  try {
-    raw = await sendMessageWithSystemPromptOnly(
-      [{ role: 'user', content: prompt }],
-      CONVERSATION_SUMMARY_SYSTEM_PROMPT,
-      300
-    );
-  } catch (e) {
-    if (__DEV__) console.warn('[AI] generateConversationSummary: edge/client path failed', e);
-    throw e instanceof Error ? e : new Error(String(e));
-  }
+  const raw = await sendMessageWithSystemPromptOnly(
+    [{ role: 'user', content: prompt }],
+    CONVERSATION_SUMMARY_SYSTEM_PROMPT,
+    300
+  );
 
   try {
     return parseConversationSummaryPayload(raw);
-  } catch (e) {
-    if (__DEV__) console.warn('[AI] generateConversationSummary: using fallback summary', e);
+  } catch (error) {
+    if (__DEV__) console.warn('[AI] generateConversationSummary: using fallback summary', error);
     return buildFallbackConversationSummary(messages);
   }
 }
@@ -1040,54 +985,12 @@ export async function analyzeImageWithVision(
   prompt: string,
   systemPrompt?: string
 ): Promise<string> {
-  const apiKey = await getOpenAIKey();
-  if (!apiKey) {
-    if (__DEV__) console.warn('[AI] No API key for vision');
-    throw new Error('No API key configured');
-  }
-
-  // Ensure proper data URL format
-  const imageUrl = imageBase64.startsWith('data:')
-    ? imageBase64
-    : `data:image/jpeg;base64,${imageBase64}`;
-
-  const messages: Array<{ role: string; content: string | Array<{ type: string; text?: string; image_url?: { url: string } }> }> = [];
-
-  if (systemPrompt) {
-    messages.push({ role: 'system', content: systemPrompt });
-  }
-
-  messages.push({
-    role: 'user',
-    content: [
-      { type: 'text', text: prompt },
-      { type: 'image_url', image_url: { url: imageUrl } },
-    ],
-  });
-
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      messages,
-      max_tokens: 1000,
-      temperature: 0.7,
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    if (__DEV__) console.error('[AI] Vision API error:', res.status, body);
-    throw new Error(body || `OpenAI Vision API error: ${res.status}`);
-  }
-
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }>; error?: { message?: string } };
-  if (data.error?.message) throw new Error(data.error.message);
-  const content = data.choices?.[0]?.message?.content?.trim();
+  const data = await callEdgeFunction<{ content: string }>('vision', {
+    image: imageBase64,
+    prompt,
+    systemPrompt: systemPrompt ?? '',
+  }, 30_000);
+  const content = data.content?.trim();
   if (!content) throw new Error('Empty response from OpenAI Vision');
   useUsageStore.getState().incrementGPT();
   return content;

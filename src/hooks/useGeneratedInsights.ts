@@ -55,28 +55,13 @@ function getRecentGoalReflections(): RecentGoalReflections | undefined {
   return { whatHelped, whatGotInTheWay };
 }
 
-/** Health/wearable context for Body/State cause (sleep, readiness, HRV) */
+/** Supported Apple Health context for Body/State cause (sleep and HRV). */
 async function getInsightHealthContext(): Promise<InsightHealthContext | undefined> {
   const snapshot = useHealthStore.getState().snapshot;
-  let lastNightSleepHours: number | undefined = snapshot?.sleep?.lastNight?.duration ?? undefined;
-  let readinessScore: number | undefined;
-  let hrvMs: number | undefined = snapshot?.heart?.hrv ?? undefined;
-  try {
-    const { getCachedOuraData } = await import('../services/ouraIntegration');
-    const oura = await getCachedOuraData();
-    if (oura?.connected) {
-      if (lastNightSleepHours == null && oura.sleep?.duration != null) {
-        lastNightSleepHours = oura.sleep.duration / 3600;
-      }
-      const raw = oura.readiness?.score;
-      readinessScore = raw !== undefined && raw !== null ? raw : undefined;
-      if (hrvMs == null && oura.heart?.hrv != null) hrvMs = oura.heart.hrv;
-    }
-  } catch {
-    // Oura not available
-  }
-  if (lastNightSleepHours == null && readinessScore == null && hrvMs == null) return undefined;
-  return { lastNightSleepHours, readinessScore, hrvMs };
+  const lastNightSleepHours: number | undefined = snapshot?.sleep?.lastNight?.duration ?? undefined;
+  const hrvMs: number | undefined = snapshot?.heart?.hrv ?? undefined;
+  if (lastNightSleepHours == null && hrvMs == null) return undefined;
+  return { lastNightSleepHours, hrvMs };
 }
 
 /** Aggregate gauge history by day for pattern/timing */

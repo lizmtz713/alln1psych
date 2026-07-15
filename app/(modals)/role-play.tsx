@@ -89,7 +89,7 @@ export default function RolePlayScreen() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasApiKey, setHasApiKey] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(true);
   const [viewingPastId, setViewingPastId] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
@@ -174,7 +174,7 @@ export default function RolePlayScreen() {
     const text = input.trim();
     if (!text || !currentSession || currentSession.phase !== 'practice') return;
     if (!hasApiKey) {
-      setError('Add your OpenAI API key in Settings to use role play.');
+      setError('The secure AI session is unavailable. Sign in again or try later.');
       return;
     }
     setInput('');
@@ -320,7 +320,7 @@ export default function RolePlayScreen() {
       return;
     }
     if (!hasApiKey) {
-      setDebrief("Add your API key in Settings to get personalized debriefs. You did great practicing — that's what matters.");
+      setDebrief("The secure AI session is unavailable, so a personalized debrief could not be generated. You still did the work of practicing—and that matters.");
       setPhase('debrief');
       useHumanSkillsStore.getState().addPoints(ROLE_PLAY_SKILL_IDS, SKILL_POINTS.conversationSimulation, 'tool');
       return;
@@ -732,7 +732,7 @@ export default function RolePlayScreen() {
 
       {error ? <Text style={styles.errorLine}>{error}</Text> : null}
       {!hasApiKey && (
-        <Text style={styles.apiHint}>Add your OpenAI API key in Settings to use role play.</Text>
+        <Text style={styles.apiHint}>The secure AI session is unavailable. Sign in again or try later.</Text>
       )}
 
       <Pressable

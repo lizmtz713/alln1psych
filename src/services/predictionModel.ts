@@ -62,9 +62,9 @@ export function predictDay(
   if ((context.daysSinceConnection ?? 0) >= 3) {
     riskFactors.push({
       gauge: 'emotion',
-      label: 'Connection gap",
+      label: 'Connection gap',
       reason: `It's been ${context.daysSinceConnection} days since you logged a connection.`,
-      severity: "medium',
+      severity: 'medium',
     });
     suggestions.push({ text: 'Reach out to one person today', icon: '💬' });
   }

@@ -105,8 +105,8 @@ export default function ToneCheckScreen() {
         setError(msg);
         if (msg.includes('API key')) {
           Alert.alert(
-            'API key needed',
-            'Add your OpenAI API key in Me → Preferences → Bring Your Own Key to use Tone Check.',
+            'AI unavailable',
+            'Your secure AI session is unavailable. Sign in again or try later.',
             [{ text: 'OK' }]
           );
         }

@@ -74,6 +74,13 @@ export interface Light {
   howTheyShowLove?: string;
   /** Conflict / communication style (e.g. "Direct but calm") */
   conflictStyle?: string;
+  /** Directly shared or user-observed preferences. Never inferred as diagnosis. */
+  stressSigns?: string;
+  copingStrategies?: string;
+  knownTriggers?: string;
+  repairStyle?: string;
+  whatToAvoid?: string;
+  preferenceSource?: 'shared_by_them' | 'observed_by_me' | 'unspecified';
   notes?: string;
   /** Insights saved from Relate tool */
   relateInsights?: string[];

@@ -209,7 +209,6 @@ export const RELATIONSHIP_TITLES = [
 ];
 
 export const RELATIONSHIP_TYPES = ['casual', 'serious', 'engaged', 'married'] as const;
-export type RelationshipTypeOption = (typeof RELATIONSHIP_TYPES)[number];
 
 export const RELATIONSHIP_STATUS_LABELS: Record<RelationshipStatus, string> = {
   single: 'Single',

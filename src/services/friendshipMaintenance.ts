@@ -164,7 +164,7 @@ export function getDriftWarning(lights: Light[]): DriftWarning | null {
   const active = lights.filter((l): l is Light & { tier: Exclude<LightTier, 'archived'> } => l.tier !== 'archived');
   let best: DriftWarning | null = null;
   for (const light of active) {
-    const normalRhythm = light.averageContactDays ?? (light.tier === 'archived' ? 999 : IDEAL_CONTACT_DAYS[light.tier]);
+    const normalRhythm = light.averageContactDays ?? IDEAL_CONTACT_DAYS[light.tier];
     if (light.daysSinceContact <= normalRhythm) continue;
     const drift = light.daysSinceContact - normalRhythm;
     if (!best || drift > best.daysSinceContact - best.normalRhythmDays) {
@@ -286,6 +286,20 @@ export function getSocialHealthScore(lights: Light[]): SocialHealthResult {
     };
   });
 
+  // An empty circle has no measurable social-health score. Treating missing data
+  // as 100% healthy produced a misleading 70% blended score for brand-new users.
+  if (activeLights.length === 0) {
+    return {
+      score: 0,
+      tierSummaries: tierSummaries.map((tier) => ({
+        ...tier,
+        status: 'stable',
+        statusLabel: 'Not set up',
+      })),
+      suggestions: ['Add one person who matters to you'],
+    };
+  }
+
   const totalWeight = tierSummaries.reduce((acc, t) => acc + (t.max > 0 ? 1 : 0), 0);
   const scorePerTier = tierSummaries.map((t) => {
     if (t.max === 0) return 100;
@@ -307,7 +321,7 @@ export function getSocialHealthScore(lights: Light[]): SocialHealthResult {
     suggestions.push(`Reach out to ${priority[0].name}`);
   }
   const drifting = activeLights.filter((l) => {
-    const ideal = l.averageContactDays ?? (l.tier === 'archived' ? 999 : IDEAL_CONTACT_DAYS[l.tier]);
+    const ideal = l.averageContactDays ?? IDEAL_CONTACT_DAYS[l.tier];
     return l.daysSinceContact > ideal;
   });
   if (drifting.length >= 2) {

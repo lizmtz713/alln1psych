@@ -17,17 +17,16 @@ CREATE INDEX IF NOT EXISTS idx_collision_reports_created ON public.collision_rep
 
 ALTER TABLE public.collision_reports ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can insert own collision reports" ON public.collision_reports;
+DROP POLICY IF EXISTS "Users can view fleet collision reports" ON public.collision_reports;
+
 CREATE POLICY "Users can insert own collision reports"
   ON public.collision_reports FOR INSERT
   WITH CHECK (auth.uid() = pilot_id);
 
 CREATE POLICY "Users can view fleet collision reports"
   ON public.collision_reports FOR SELECT
-  USING (
-    pilot_id IN (
-      SELECT user_id FROM public.fleet_members fm
-      WHERE fm.fleet_id IN (
-        SELECT fleet_id FROM public.fleet_members WHERE user_id = auth.uid()
-      )
-    )
-  );
+  USING (auth.uid() = pilot_id OR public.shares_fleet_with(pilot_id));
+
+REVOKE ALL ON TABLE public.collision_reports FROM anon, public;
+GRANT SELECT, INSERT ON TABLE public.collision_reports TO authenticated;

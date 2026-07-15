@@ -37,9 +37,9 @@ interface SwipeCheckInV2Props {
 const BODY_QUESTIONS = [
   // Variant 0: Basic needs
   {
-    prompt: \"Let's check in on your body\",
+    prompt: "Let's check in on your body",
     items: [
-      { id: "sleep', label: 'Slept okay?', emoji: '😴' },
+      { id: 'sleep', label: 'Slept okay?', emoji: '😴' },
       { id: 'food', label: 'Eaten today?', emoji: '🍽️' },
       { id: 'water', label: 'Had water?', emoji: '💧' },
       { id: 'move', label: 'Moved your body?', emoji: '🚶' },
@@ -76,13 +76,13 @@ const STATE_OPTIONS = [
   { label: 'Alert', value: 75, emoji: '👀', desc: 'Focused. Ready for action.' },
   { label: 'Activated', value: 50, emoji: '😤', desc: 'Fight-or-flight starting.' },
   { label: 'Threatened', value: 25, emoji: '😰', desc: 'Reactions amplified.' },
-  { label: 'Shutdown', value: 10, emoji: '😶', desc: 'Frozen or numb." },
+  { label: 'Shutdown', value: 10, emoji: '😶', desc: 'Frozen or numb.' },
 ];
 
 const STATE_QUESTIONS = [
-  \"How regulated do you feel?\",
-  \"Where's your nervous system?\",
-  \"What state are you in right now?\",
+  "How regulated do you feel?",
+  "Where's your nervous system?",
+  "What state are you in right now?",
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -90,7 +90,7 @@ const STATE_QUESTIONS = [
 // ═══════════════════════════════════════════════════════════════
 
 const EMOTION_OPTIONS = [
-  { label: "Calm', emoji: '😌', valence: 'positive' },
+  { label: 'Calm', emoji: '😌', valence: 'positive' },
   { label: 'Happy', emoji: '😊', valence: 'positive' },
   { label: 'Grateful', emoji: '🙏', valence: 'positive' },
   { label: 'Excited', emoji: '🤩', valence: 'positive' },
@@ -103,9 +103,9 @@ const EMOTION_OPTIONS = [
 ];
 
 const EMOTION_QUESTIONS = [
-  \"What are you feeling? (pick all that apply)\",
-  \"Select the emotions present right now\",
-  \"What's showing up emotionally?\",
+  "What are you feeling? (pick all that apply)",
+  "Select the emotions present right now",
+  "What's showing up emotionally?",
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -113,7 +113,7 @@ const EMOTION_QUESTIONS = [
 // ═══════════════════════════════════════════════════════════════
 
 const CONNECTION_OPTIONS = [
-  { label: "Very connected', value: 100, emoji: '🤗', desc: 'Feel close to people who matter' },
+  { label: 'Very connected', value: 100, emoji: '🤗', desc: 'Feel close to people who matter' },
   { label: 'Somewhat connected', value: 75, emoji: '🙂', desc: 'Decent relationships, could be closer' },
   { label: 'A bit isolated', value: 50, emoji: '😐', desc: 'Missing connection' },
   { label: 'Lonely', value: 25, emoji: '😔', desc: 'Feeling alone' },

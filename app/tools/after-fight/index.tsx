@@ -53,7 +53,7 @@ export default function AfterFightScreen() {
     if (!a1 || !a2 || !a3) return;
     const hasKey = await hasOpenAIKey();
     if (!hasKey) {
-      Alert.alert('API key needed', 'Add your OpenAI API key in Me → Bring Your Own Key.');
+      Alert.alert('AI unavailable', 'Your secure AI session is unavailable. Sign in again or try later.');
       return;
     }
     setLoading(true);

@@ -77,6 +77,7 @@ const noStatus = undefined as unknown as Temperature;
 
 // Full Dunbar demo: 5 inner + 15 close + 30 friends + 25 community = 75 people
 const DEMO_MEMBERS: CircleMember[] = [
+  /* Archived prototype fixtures. Deliberately excluded from runtime state.
   // ═══════════════════════════════════════════════════════════════
   // INNER CIRCLE (5) — Your closest people
   // ═══════════════════════════════════════════════════════════════
@@ -168,6 +169,7 @@ const DEMO_MEMBERS: CircleMember[] = [
   { id: 'a23', name: 'Childhood Friend', relationship: 'friend', contactMethod: '', sharingLevel: 'full', temperature: 'yellow', temperatureLabel: TEMPERATURE_LABELS.yellow, lastUpdated: new Date(), addedAt: new Date(), tier: 'community', lastContact: daysAgo(90) },
   { id: 'a24', name: 'Conference Contact', relationship: 'other', contactMethod: '', sharingLevel: 'limited', temperature: 'green', temperatureLabel: '', lastUpdated: new Date(), addedAt: new Date(), tier: 'community', lastContact: daysAgo(150) },
   { id: 'a25', name: 'Twitter Mutual', relationship: 'other', contactMethod: '', sharingLevel: 'limited', temperature: 'green', temperatureLabel: '', lastUpdated: new Date(), addedAt: new Date(), tier: 'community', lastContact: daysAgo(30) },
+  */
 ];
 
 const DEMO_MEMBER_IDS = DEMO_MEMBERS.map(m => m.id);
@@ -207,7 +209,7 @@ interface CircleState {
 }
 
 export const useCircleStore = create<CircleState>((set) => ({
-  members: DEMO_MEMBERS,
+  members: [],
   myTemperature: 'green',
   myTemperatureLabel: TEMPERATURE_LABELS.green,
   myTemperatureNote: '',
@@ -215,16 +217,7 @@ export const useCircleStore = create<CircleState>((set) => ({
   temperatureVisibility: 'private',
   setTemperatureVisibility: (v) => set({ temperatureVisibility: v }),
   moodHistory: [],
-  nudges: [
-    {
-      id: 'nudge-dad',
-      memberName: 'Dad',
-      message: 'Dad could use a check-in',
-      timestamp: new Date(Date.now() - 3600000),
-      read: false,
-      actedOn: false,
-    },
-  ],
+  nudges: [],
 
   addMember: (member) => {
     const userId = useAuthStore.getState().userId;
@@ -237,12 +230,7 @@ export const useCircleStore = create<CircleState>((set) => ({
       lastUpdated: now,
       addedAt: now,
     };
-    // Clear demo data when adding first real member
-    set((state) => {
-      const isDemoOnly = state.members.every(m => DEMO_MEMBER_IDS.includes(m.id));
-      const newMembers = isDemoOnly ? [newMember] : [...state.members, newMember];
-      return { members: newMembers };
-    });
+    set((state) => ({ members: [...state.members, newMember] }));
     if (userId) {
       database
         .addCircleMember(userId, {
@@ -366,7 +354,8 @@ export const useCircleStore = create<CircleState>((set) => ({
     }),
 
   addMoodCheckin: (mood, note) => {
-    const userId = useAuthStore.getState().userId;
+    // Local UI only. Server persistence + React Query invalidation must go through
+    // useCreateCheckin / createCheckinOnServer so Cockpit reopen stays consistent.
     const label = TEMPERATURE_LABELS[mood];
     const entry = {
       id: genId(),
@@ -382,9 +371,6 @@ export const useCircleStore = create<CircleState>((set) => ({
       myTemperatureNote: note ?? '',
       myTemperatureUpdatedAt: new Date(),
     }));
-    if (userId) {
-      database.addMoodCheckin(userId, mood, label, note).catch(() => {});
-    }
   },
 
   addNudge: (memberName, message) =>

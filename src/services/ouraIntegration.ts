@@ -11,6 +11,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 const OURA_TOKEN_KEY = 'oura_access_token';
 const OURA_DATA_KEY = 'oura_cached_data';
@@ -82,7 +83,7 @@ export interface OuraSnapshot {
  * Check if Oura is connected
  */
 export async function isOuraConnected(): Promise<boolean> {
-  const token = await AsyncStorage.getItem(OURA_TOKEN_KEY);
+  const token = await SecureStore.getItemAsync(OURA_TOKEN_KEY);
   return !!token;
 }
 
@@ -90,13 +91,15 @@ export async function isOuraConnected(): Promise<boolean> {
  * Store Oura access token (after OAuth flow)
  */
 export async function setOuraToken(token: string): Promise<void> {
-  await AsyncStorage.setItem(OURA_TOKEN_KEY, token);
+  await SecureStore.setItemAsync(OURA_TOKEN_KEY, token);
+  await AsyncStorage.removeItem(OURA_TOKEN_KEY);
 }
 
 /**
  * Clear Oura connection
  */
 export async function disconnectOura(): Promise<void> {
+  await SecureStore.deleteItemAsync(OURA_TOKEN_KEY);
   await AsyncStorage.removeItem(OURA_TOKEN_KEY);
   await AsyncStorage.removeItem(OURA_DATA_KEY);
 }
@@ -105,7 +108,7 @@ export async function disconnectOura(): Promise<void> {
  * Get stored token
  */
 async function getToken(): Promise<string | null> {
-  return await AsyncStorage.getItem(OURA_TOKEN_KEY);
+  return await SecureStore.getItemAsync(OURA_TOKEN_KEY);
 }
 
 // ============ API Calls ============
